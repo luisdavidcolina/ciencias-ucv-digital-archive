@@ -51,7 +51,6 @@ a:hover {
     color: #0056b3 !important;
 }
 
-
 /* --- OVERRIDES BS4CARD (Quitar estetica Dashboard) --- */
 .card {
     box-shadow: none !important; /* DSpace no usa sombras de adminLTE */
@@ -117,10 +116,13 @@ a:hover {
     border-radius: 0 !important;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+    transition: all 0.3s ease;
 }
 .ds-btn-primary:hover {
     background-color: #004494 !important;
     border-color: #003d82 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(43, 78, 114, 0.3);
 }
 
 /* --- RESULTS HEADER --- */
@@ -148,9 +150,20 @@ a:hover {
 /* --- ITEM CARDS (ds-item-list-element) --- */
 .ds-item-card {
     display: flex;
-    padding: 1rem 0;
+    padding: 1rem;
     border-bottom: 1px solid #dee2e6;
     background-color: transparent;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid transparent;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.ds-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.06);
+    background-color: #ffffff;
+    border-left: 4px solid #0056b3;
 }
 
 .ds-item-thumbnail {
@@ -198,6 +211,7 @@ a:hover {
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -239,6 +253,7 @@ a:hover {
     }
     .ds-item-abstract {
         -webkit-line-clamp: 2; /* Reduce el resumen en pantallas pequeñas */
+        line-clamp: 2;
     }
 
     /* Romper cabeceras y centrar textos pequeños */
@@ -256,4 +271,53 @@ a:hover {
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
+}
+
+/* ========================================================
+   MODERN UI/UX UPGRADES (GLASSMORPHISM & AUTH)
+   ======================================================== */
+.ds-login-backdrop {
+    min-height: 100vh;
+    background-image: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.88)), url('bg_login.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ds-login-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    border-top: 5px solid #2b4e72 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ds-login-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.45) !important;
+}
+
+.ds-auth-input {
+    border-radius: 25px !important;
+    padding-left: 45px !important;
+    height: 48px !important;
+    font-size: 1.05rem !important;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.ds-auth-input:focus {
+    box-shadow: 0 0 10px rgba(43, 78, 114, 0.3) !important;
+    border-color: #2b4e72 !important;
+}
+
+/* Corrección form-group para los inline selects */
+.form-group {
+    margin-bottom: 0 !important;
 }

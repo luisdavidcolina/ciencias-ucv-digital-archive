@@ -216,16 +216,25 @@ server <- function(input, output, session) {
   # ==========================================
   output$page_content <- renderUI({
     if (!session_state$logged) {
-      div(class="d-flex justify-content-center align-items-center", style="min-height: 100vh; background-color: #f7f9fa;",
-          div(class="card p-5", style="width: 450px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-top: 5px solid #2b4e72; text-align: center;",
-              tags$i(class="fas fa-lock", style="font-size: 3rem; color: #dc3545; margin-bottom: 20px;"),
-              tags$h3(style="font-family: 'Nunito', sans-serif; color: #2b4e72; font-weight: bold;", "Directorio Restringido"),
-              tags$p(class="text-muted mb-4", "Sistema protegido para Extensión y RRHH"),
-              div(style="text-align: left;",
-                  textInput("login_user", "Credencial Institucional", placeholder="Ej: ext_admin"),
-                  passwordInput("login_pass", "Contraseña", placeholder="********")
+      div(class="ds-login-backdrop",
+          div(class="card p-5 ds-login-card",
+              tags$style(".auth-icon { position: absolute; left: 15px; top: 40px; color: #6c757d; z-index: 5; font-size: 1.1rem; }"),
+              tags$i(class="fas fa-fingerprint", style="font-size: 3.5rem; color: #2b4e72; margin-bottom: 15px;"),
+              tags$h3(style="font-family: 'Nunito', sans-serif; color: #2b4e72; font-weight: 800;", "Archivo Ciencias"),
+              tags$p(class="text-muted mb-4", "Intranet Cifrada de Acceso Restringido", style="font-size:0.95rem;"),
+              
+              div(style="text-align: left; position: relative; margin-bottom: 20px;",
+                  tags$i(class="fas fa-user auth-icon"),
+                  tags$label("Credencial Institucional", style="font-weight: bold; color: #495057; font-size:0.9rem; margin-bottom: 0.2rem;"),
+                  tags$input(id="login_user", type="text", class="form-control ds-auth-input", placeholder="ID de Usuario")
               ),
-              actionButton("login_btn", "Validar Acceso Seguro", icon=icon("shield-alt"), class="btn w-100", style="background-color: #2b4e72; color: white; margin-top: 15px; border-radius: 20px; padding: 10px; font-weight: bold;")
+              div(style="text-align: left; position: relative; margin-bottom: 30px;",
+                  tags$i(class="fas fa-key auth-icon"),
+                  tags$label("Contraseña", style="font-weight: bold; color: #495057; font-size:0.9rem; margin-bottom: 0.2rem;"),
+                  tags$input(id="login_pass", type="password", class="form-control ds-auth-input", placeholder="••••••••")
+              ),
+              
+              actionButton("login_btn", "Autorizar Ingreso", icon=icon("shield-alt"), class="btn w-100 ds-btn-primary", style="border-radius: 25px; padding: 12px; font-weight: bold; font-size:1.1rem;")
           )
       )
     } else {
@@ -280,11 +289,11 @@ server <- function(input, output, session) {
       
       # Armado del Dashboard Post-Login
       bs4DashPage(
-        title = "Archivo Digital UCV",
+        title = "Archivo Ciencias",
         dark = NULL,
         header = bs4DashNavbar(
           status = "white", skin = "light",
-          title = bs4DashBrand(title = "Archivo Digital UCV", color = "white", href = "#"),
+          title = bs4DashBrand(title = "Archivo Ciencias", color = "white", href = "#"),
           rightUi = tagList(
             tags$li(class="nav-item", tags$span(style="margin-top:10px; display:inline-block; margin-right:15px; font-weight:bold; color:#dc3545;", tags$i(class="fas fa-user-circle"), paste("ID:", session_state$username))),
             tags$li(class="nav-item", actionButton("logout_btn", "Cerrar", icon=icon("sign-out-alt"), class="btn btn-outline-secondary btn-sm", style="margin-top: 5px; margin-right: 15px;"))
