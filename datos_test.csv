@@ -1,6 +1,6 @@
-titulo,tipo_documento,autor,fecha,modulo
-Proyecto de Reforestación,Convenio,Prof. García,2026-01-15,Extensión
-Expediente Digital - Luis M.,Hoja de Vida,RRHH,2026-03-10,RRHH
-Tesis: Análisis Químico,Tesis,"Pérez, J.",2025-11-20,Extensión
-Informe de Gestión 2025,Informe,"Dirección, Fac. Ciencias",2025-12-05,Extensión
-Contrato Investigador Asociado,Contrato,RRHH,2026-02-01,RRHH
+titulo,tipo_documento,autor,fecha,modulo,editor,coleccion,resumen
+Proyecto de Reforestación y Manejo de Cuencas,Convenio,"García, Carlos; Martínez, Elena",2026-01-15,Extensión,Decanato de Ciencias,Convenios Comunitarios,Este convenio detalla la ejecución del plan estratégico para la reforestación de las áreas afectadas en la Serranía colindante al Instituto de Zoología Tropical. Incluye cronogramas y financiamiento.
+Expediente Digital - Mendoza Luis,Hoja de Vida,Dpto. Recursos Humanos,2026-03-10,RRHH,Coordinación Administrativa,Expedientes Activos,Expediente clasificado. Contiene currículum vitae actualizado, evaluación de desempeño anual y hojas de retenciones y beneficios sindicales del periodo correspondiente.
+Tesis: Análisis Químico Cuantitativo en Suelos,Tesis,"Pérez, José Luis",2025-11-20,Extensión,Escuela de Química,Trabajos Especiales de Grado,El presente trabajo analiza la composición geoquímica de los suelos llaneros para determinar la factibilidad del cultivo a gran escala de especies endémicas. Presenta la metodología de absorción atómica.
+Informe de Gestión Académica 2025,Informe,"Dirección de Escuela, Facultad de Ciencias",2025-12-05,Extensión,Decanato de Ciencias,Informes Institucionales,Balance general de las actividades docentes, proyectos de extensión e investigación ejecutados en el ciclo lectivo 2025. Se anexan indicadores de gestión y ratios de productividad.
+Contrato Investigador Asociado N-442,Contrato,Dpto. Recursos Humanos,2026-02-01,RRHH,Coordinación Administrativa,Contratos Temporales,Documento confidencial con los términos de contratación para el profesor investigador a dedicación exclusiva.

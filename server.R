@@ -1,40 +1,73 @@
 library(shiny)
-library(DT)
 
-# --- FASE DE PRUEBA: Carga desde archivo local ---
-datos <- read.csv("datos_test.csv", stringsAsFactors = FALSE)
-
-# --- FASE REAL: (Mañana solo activas esto) ---
-# datos <- dbGetQuery(con, "SELECT * FROM documentos")
+# --- FASE DE PRUEBA: Carga desde archivo local enriquecido ---
+datos_crudos <- read.csv("datos_test.csv", stringsAsFactors = FALSE)
 
 server <- function(input, output, session) {
   
-  # Dinamizar el título según el menú
-  output$titulo_caja <- renderText({
-    if(is.null(input$menu_lateral)) return("Repositorio Digital")
-    paste("Repositorio Digital -", input$menu_lateral)
+  # Reactive dataset para alimentar la vista
+  datos_reactivos <- reactive({
+    # Obligamos a que actialice el filtro con los inputs (en un flujo real seria un button-trigger, pero reaccionara en vivo para mejor UX)
+    datos <- datos_crudos
+    
+    # Texto
+    if (!is.null(input$search_text) && input$search_text != "") {
+      term <- tolower(input$search_text)
+      datos <- datos[grepl(term, tolower(datos$titulo)) | 
+                     grepl(term, tolower(datos$autor)) | 
+                     grepl(term, tolower(datos$resumen)), ]
+    }
+    
+    # Colección
+    if (input$modulo_filter != "Todos") {
+      datos <- datos[datos$modulo == input$modulo_filter, ]
+    }
+    
+    # Tipo Doc
+    if (length(input$doc_type_filter) > 0) {
+      datos <- datos[datos$tipo_documento %in% input$doc_type_filter, ]
+    }
+    
+    return(datos)
   })
   
-  output$tabla_dspace <- renderDT({
-    # Aquí filtramos los datos según el menú lateral que elija Susana
-    req(input$menu_lateral)
-    datos_filtrados <- datos[datos$modulo == input$menu_lateral, ]
+  output$dspace_item_list <- renderUI({
+    datos <- datos_reactivos()
     
-    # Agregar icono de PDF al título para mimetizar DSpace
-    datos_filtrados$titulo <- paste0('<i class="fas fa-file-pdf icon-file"></i> <span class="title-column">', datos_filtrados$titulo, '</span>')
+    if (nrow(datos) == 0) {
+      return(tags$div(class = "alert alert-secondary", "No results were found that meet your search criteria."))
+    }
     
-    # Remover columna modulo para la vista
-    datos_filtrados$modulo <- NULL
+    # Construcción de la lista de tarjetas HTML como DSpace
+    tarjetas <- lapply(1:nrow(datos), function(i) {
+      fila <- datos[i, ]
+      
+      tags$div(class = "ds-item-card",
+               
+        # Miniatura Izquierda
+        tags$div(class = "ds-item-thumbnail",
+           tags$i(class = "fas fa-file-pdf")
+        ),
+        
+        # Bloque de Metadatos Derecho
+        tags$div(class = "ds-item-metadata",
+           tags$div(class = "ds-item-title", fila$titulo),
+           tags$div(class = "ds-item-authors", fila$autor),
+           tags$div(class = "ds-item-publisher", paste("Publisher:", fila$editor)),
+           tags$div(class = "ds-item-date", paste("Date Issued:", fila$fecha)),
+           tags$div(class = "ds-item-abstract", fila$resumen),
+           tags$div(class = "ds-badge", fila$tipo_documento)
+        )
+      )
+    })
     
-    datatable(datos_filtrados, 
-              escape = FALSE, # Permitir HTML en las celdas (para el icono)
-              rownames = FALSE,
-              options = list(
-                pageLength = 10,
-                dom = 'Bfrtip',
-                language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
-              ),
-              colnames = c("Título", "Tipo de Documento", "Autor", "Fecha")
+    # Retornar todo el bloque al frontend
+    tagList(
+       tags$div(style="border-bottom: 2px solid #0056b3; padding-bottom: 5px; margin-bottom: 15px;",
+          tags$span(style="font-size: 18px; font-weight: 500; color: #495057;", "Results "),
+          tags$span(style="font-size: 14px; color: #6c757d;", paste("1-", nrow(datos), " of ", nrow(datos), sep=""))
+       ),
+       tarjetas
     )
   })
 }
