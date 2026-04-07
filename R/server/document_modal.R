@@ -6,10 +6,12 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       titulo <- doc$titulo
       resumen <- if (!is.null(doc$abstract) && nzchar(doc$abstract)) doc$abstract else "Sin resumen disponible."
       thumb_icon <- "fas fa-file-alt"
-      thumb_badge <- doc$doc_type
+      thumb_badge <- get_doc_primary_term(doc)
+      tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
       meta <- tagList(
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Responsable"), tags$span(class = "v", doc$autor)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
+        div(class = "ds-doc-meta-row", tags$span(class = "k", "Tesauro"), tags$span(class = "v", if (nzchar(tesauro)) tesauro else "Sin tesauro")),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de emisión"), tags$span(class = "v", doc$fecha)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion))
       )
@@ -17,11 +19,13 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       titulo <- paste("Expediente:", doc$empleado)
       resumen <- paste("Documento de RRHH en estado", doc$estatus, "adscrito a", doc$departamento)
       thumb_icon <- "fas fa-user-lock"
-      thumb_badge <- doc$estatus
+      thumb_badge <- get_doc_primary_term(doc)
+      tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
       meta <- tagList(
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Empleado"), tags$span(class = "v", doc$empleado)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Cédula"), tags$span(class = "v", doc$cedula)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
+        div(class = "ds-doc-meta-row", tags$span(class = "k", "Tesauro"), tags$span(class = "v", if (nzchar(tesauro)) tesauro else "Sin tesauro")),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de ingreso"), tags$span(class = "v", doc$fecha_ingreso))
       )

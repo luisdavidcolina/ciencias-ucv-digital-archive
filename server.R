@@ -106,6 +106,8 @@ server <- function(input, output, session) {
             sort_mode = input$sort_ext
         )
 
+        datos <- filter_by_tesauro(datos, input$ext_tesauro)
+
         if (!is.null(input$ext_date_range) && length(input$ext_date_range) == 2) {
             f_ini <- as.Date(input$ext_date_range[1])
             f_fin <- as.Date(input$ext_date_range[2])
@@ -198,8 +200,8 @@ server <- function(input, output, session) {
            div(class = "ds-item-authors", paste("Responsable:", fila$autor)),
            div(class = "ds-item-date", paste("Fecha Emisión:", fila$fecha)),
                      div(class = "ds-item-publisher", paste("Ubicación física:", fila$ubicacion)),
-           div(class = "ds-item-abstract", fila$abstract),
-                     tags$span(class = "ds-badge", fila$doc_type)),
+                     div(class = "ds-item-abstract", fila$abstract),
+                                         div(class = "ds-item-tags", render_tesauro_badges(fila))),
                 btn_actions)
     })
     tagList(tarjetas)
@@ -209,9 +211,8 @@ server <- function(input, output, session) {
   dat_rrhh_react <- reactive({
         datos <- filter_rrhh_data(db_rrhh, input$search_rrhh)
 
-        if (!is.null(input$rrhh_doc_type) && nzchar(input$rrhh_doc_type)) {
-            datos <- datos[datos$doc_type == input$rrhh_doc_type, , drop = FALSE]
-        }
+        datos <- filter_by_doc_types(datos, input$rrhh_doc_type)
+        datos <- filter_by_tesauro(datos, input$rrhh_tesauro)
 
         if (!is.null(input$rrhh_estatus) && nzchar(input$rrhh_estatus) && input$rrhh_estatus != "Todos") {
             datos <- datos[datos$estatus == input$rrhh_estatus, , drop = FALSE]
@@ -253,7 +254,7 @@ server <- function(input, output, session) {
            div(class = "ds-item-authors", tags$strong(paste("C.I.:", fila$cedula))),
            div(class = "ds-item-publisher", paste("Adscripción:", fila$departamento)),
                      div(class = "ds-item-date", paste("Ubicación física:", fila$ubicacion)),
-           tags$span(class = "ds-badge", style="background-color: #6c757d;", fila$doc_type)))
+                     div(class = "ds-item-tags", render_tesauro_badges(fila))))
     })
     tagList(tarjetas)
   })
@@ -386,8 +387,8 @@ server <- function(input, output, session) {
   
   output$admin_filter_type <- renderUI({
       df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
-      tipos <- unique(df$doc_type)
-      selectInput("admin_type_filter", NULL, choices=c("Todos los tipos" = "", tipos), width="100%")
+      tipos <- extract_doc_type_set(df$doc_type)
+      selectizeInput("admin_type_filter", NULL, choices = tipos, multiple = TRUE, width = "100%")
   })
   
   output$admin_control_table <- renderUI({
@@ -403,9 +404,7 @@ server <- function(input, output, session) {
           }
       }
       # Filtrar por tipo
-      if (!is.null(input$admin_type_filter) && input$admin_type_filter != "") {
-          df <- df[df$doc_type == input$admin_type_filter, ]
-      }
+      df <- filter_by_doc_types(df, input$admin_type_filter)
       
       if (nrow(df) == 0) return(tags$div(class="alert alert-secondary text-center", tags$i(class="fas fa-search"), " No se encontraron registros con estos filtros."))
       

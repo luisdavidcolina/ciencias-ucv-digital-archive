@@ -1,3 +1,38 @@
+split_doc_types <- function(x) {
+  if (length(x) == 0) return(character(0))
+
+  vals <- trimws(unlist(strsplit(as.character(x), ";", fixed = TRUE), use.names = FALSE))
+  vals <- vals[nzchar(vals)]
+  unique(vals)
+}
+
+extract_doc_type_set <- function(x) {
+  sort(split_doc_types(x))
+}
+
+row_has_any_doc_type <- function(row_value, selected_types) {
+  if (is.null(selected_types) || length(selected_types) == 0) return(TRUE)
+
+  row_types <- split_doc_types(row_value)
+  if (length(row_types) == 0) return(FALSE)
+
+  any(row_types %in% selected_types)
+}
+
+filter_by_doc_types <- function(datos, selected_types) {
+  if (is.null(selected_types) || length(selected_types) == 0) {
+    return(datos)
+  }
+
+  selected_types <- selected_types[nzchar(selected_types)]
+  if (length(selected_types) == 0) {
+    return(datos)
+  }
+
+  keep <- vapply(datos$doc_type, row_has_any_doc_type, logical(1), selected_types = selected_types)
+  datos[keep, , drop = FALSE]
+}
+
 filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
   out <- datos
 
@@ -6,9 +41,7 @@ filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
     out <- out[grepl(term, tolower(out$titulo)) | grepl(term, tolower(out$autor)), , drop = FALSE]
   }
 
-  if (!is.null(doc_types) && length(doc_types) > 0) {
-    out <- out[out$doc_type %in% doc_types, , drop = FALSE]
-  }
+  out <- filter_by_doc_types(out, doc_types)
 
   if (!is.null(sort_mode)) {
     if (sort_mode %in% c("Titulo A-Z", "Título A-Z")) {

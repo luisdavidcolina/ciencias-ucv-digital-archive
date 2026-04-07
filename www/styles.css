@@ -606,3 +606,26 @@ a:hover {
 .ds-login-backdrop ~ .content-wrapper {
     margin-left: 0 !important;
 }
+
+/* Evita que los listados de seleccion multiple se recorten en filtros. */
+#ext_filters_acc,
+#rrhh_filters_acc,
+#ext_filters_acc .card,
+#rrhh_filters_acc .card,
+#ext_filters_acc .card-body,
+#rrhh_filters_acc .card-body,
+#ext_filters_acc .collapse,
+#rrhh_filters_acc .collapse {
+    overflow: visible !important;
+}
+
+#ext_filters_acc .selectize-control,
+#rrhh_filters_acc .selectize-control {
+    position: relative;
+    z-index: 50;
+}
+
+#ext_filters_acc .selectize-dropdown,
+#rrhh_filters_acc .selectize-dropdown {
+    z-index: 9999 !important;
+}

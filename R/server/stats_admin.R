@@ -4,6 +4,7 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
     req(session_state$logged, session_state$rol == "Admin")
 
     df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    type_choices <- extract_doc_type_set(df$doc_type)
     fecha_col <- if (session_state$modulo == "Extensión") "fecha" else "fecha_ingreso"
     fechas <- suppressWarnings(as.Date(df[[fecha_col]], format = "%Y-%m-%d"))
     fechas_ok <- fechas[!is.na(fechas)]
@@ -29,7 +30,7 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
           dateRangeInput("stats_date_range", "Rango de fechas", start = min_fecha, end = max_fecha, language = "es", width = "100%")
         ),
         column(3,
-          selectInput("stats_type_filter", "Tipología", choices = c("Todas" = "", sort(unique(df$doc_type))), width = "100%")
+          selectizeInput("stats_type_filter", "Tipología", choices = type_choices, multiple = TRUE, width = "100%")
         ),
         column(3, third_filter_ui),
         column(3, fourth_filter_ui)
@@ -67,8 +68,8 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
       fechas <- fechas[keep]
     }
 
-    if (!is.null(input$stats_type_filter) && nzchar(input$stats_type_filter)) {
-      keep <- df$doc_type == input$stats_type_filter
+    if (!is.null(input$stats_type_filter) && length(input$stats_type_filter) > 0) {
+      keep <- vapply(df$doc_type, row_has_any_doc_type, logical(1), selected_types = input$stats_type_filter)
       df <- df[keep, , drop = FALSE]
       fechas <- fechas[keep]
     }

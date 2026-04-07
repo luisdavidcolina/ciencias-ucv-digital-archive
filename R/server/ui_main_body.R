@@ -2,6 +2,8 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
   lista_tabs <- list()
 
   if (session_state$modulo == "Extensión") {
+    ext_doc_types <- extract_doc_type_set(db_ext$doc_type)
+    ext_tesauro_choices <- extract_tesauro_choices(db_ext)
     ext_fechas <- suppressWarnings(as.Date(db_ext$fecha, format = "%Y-%m-%d"))
     ext_fechas <- ext_fechas[!is.na(ext_fechas)]
     ext_min_fecha <- if (length(ext_fechas) > 0) min(ext_fechas) else Sys.Date() - 365
@@ -22,7 +24,14 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 status = "lightblue",
                 solidHeader = FALSE,
                 collapsed = FALSE,
-                checkboxGroupInput("ext_doc_type", "Selecciona una o más", choices = c("Proyecto de Investigación", "Plano Arquitectónico", "Acta", "Convenio"))
+                selectizeInput(
+                  "ext_doc_type",
+                  "Selecciona una o más",
+                  choices = ext_doc_types,
+                  multiple = TRUE,
+                  width = "100%",
+                  options = list(plugins = list("remove_button"), dropdownParent = "body")
+                )
               ),
               bs4AccordionItem(
                 title = "Fecha",
@@ -33,6 +42,13 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                   dateRangeInput("ext_date_range", "Rango de fecha", start = ext_min_fecha, end = ext_max_fecha, language = "es", width = "100%"),
                   sliderInput("ext_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = "")
                 )
+              ),
+              bs4AccordionItem(
+                title = "Tesauro",
+                status = "indigo",
+                solidHeader = FALSE,
+                collapsed = TRUE,
+                selectizeInput("ext_tesauro", "Descriptores", choices = ext_tesauro_choices, multiple = TRUE, width = "100%")
               )
             ),
             actionButton("btn_update_ext", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
@@ -53,6 +69,8 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
   }
 
   if (session_state$modulo == "RRHH") {
+    rrhh_doc_types <- extract_doc_type_set(db_rrhh$doc_type)
+    rrhh_tesauro_choices <- extract_tesauro_choices(db_rrhh)
     rrhh_fechas <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
     rrhh_fechas <- rrhh_fechas[!is.na(rrhh_fechas)]
     rrhh_min_fecha <- if (length(rrhh_fechas) > 0) min(rrhh_fechas) else Sys.Date() - 365
@@ -73,7 +91,14 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 status = "lightblue",
                 solidHeader = FALSE,
                 collapsed = FALSE,
-                selectInput("rrhh_doc_type", "Tipo de expediente", choices = c("Todas" = "", sort(unique(db_rrhh$doc_type))), width = "100%")
+                selectizeInput(
+                  "rrhh_doc_type",
+                  "Tipo de expediente",
+                  choices = rrhh_doc_types,
+                  multiple = TRUE,
+                  width = "100%",
+                  options = list(plugins = list("remove_button"), dropdownParent = "body")
+                )
               ),
               bs4AccordionItem(
                 title = "Fecha",
@@ -91,6 +116,13 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 solidHeader = FALSE,
                 collapsed = TRUE,
                 radioButtons("rrhh_estatus", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
+              ),
+              bs4AccordionItem(
+                title = "Tesauro",
+                status = "indigo",
+                solidHeader = FALSE,
+                collapsed = TRUE,
+                selectizeInput("rrhh_tesauro", "Descriptores", choices = rrhh_tesauro_choices, multiple = TRUE, width = "100%")
               )
             ),
             actionButton("btn_update_rrhh", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
