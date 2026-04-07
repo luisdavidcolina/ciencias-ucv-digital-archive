@@ -10,7 +10,7 @@ ui <- bs4DashPage(
     title = bs4DashBrand(title = "DSpace UCV", color = "white", href = "#"),
     rightUi = tagList(
       tags$li(class = "nav-item dropdown", tags$a(href="#", class="nav-link", icon("search"))),
-      tags$li(class = "nav-item dropdown", tags$a(href="#", class="nav-link", icon("sign-in-alt"), " Log in"))
+      tags$li(class = "nav-item dropdown", tags$a(href="#", class="nav-link", icon("sign-in-alt"), " Iniciar sesión"))
     )
   ),
   

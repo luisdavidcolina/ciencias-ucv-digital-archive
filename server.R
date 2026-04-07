@@ -36,7 +36,7 @@ server <- function(input, output, session) {
         )
       )
     })
-    tagList(tags$div(class="ds-results-header", tags$h2(class="ds-results-title", "Archivo Extensión"), tags$span(class="ds-pagination-info", paste(nrow(datos), "Items"))), tarjetas)
+    tagList(tags$div(class="ds-results-header", tags$h2(class="ds-results-title", "Archivo Extensión"), tags$span(class="ds-pagination-info", paste(nrow(datos), "Resultados"))), tarjetas)
   })
   
   # --- LOGICA RRHH ---
@@ -79,7 +79,7 @@ server <- function(input, output, session) {
         )
       )
     })
-    tagList(tags$div(class="ds-results-header", tags$h2(class="ds-results-title", "Expedientes Privados (RRHH)"), tags$span(class="ds-pagination-info", paste(nrow(datos), "Items"))), tarjetas)
+    tagList(tags$div(class="ds-results-header", tags$h2(class="ds-results-title", "Expedientes Privados (RRHH)"), tags$span(class="ds-pagination-info", paste(nrow(datos), "Resultados"))), tarjetas)
   })
   
   # --- LOGICA MY DSPACE ---
