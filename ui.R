@@ -20,12 +20,12 @@ ui <- bs4DashPage(
     ),
     rightUi = tagList(
       # Estos se mostrarán solo via conditionalPanel más adelante
-      tags$li(class="nav-item dropdown", 
+      tags$li(class="nav-item dropdown ds-nav-user", 
           conditionalPanel("output.is_logged", 
               tags$span(style="padding-top:10px; display:inline-block; margin-right:15px; font-weight:bold; color:#dc3545;", tags$i(class="fas fa-user-circle"), textOutput("nav_username", inline=TRUE))
           )
       ),
-      tags$li(class="nav-item dropdown", 
+      tags$li(class="nav-item dropdown ds-nav-logout", 
           conditionalPanel("output.is_logged", 
               actionButton("logout_btn", "Cerrar", icon=icon("sign-out-alt"), class="btn btn-outline-secondary btn-sm", style="margin-top: 5px; margin-right: 10px;")
           )

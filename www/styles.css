@@ -47,6 +47,30 @@ a:hover {
     display: none !important;
 }
 
+/* Mantener limpia la derecha del header: solo usuario + boton Cerrar. */
+.main-header .navbar-nav.ml-auto > .nav-item:not(.ds-nav-user):not(.ds-nav-logout) {
+    display: none !important;
+}
+
+.main-header .navbar-nav.ml-auto > *:not(.ds-nav-user):not(.ds-nav-logout) {
+    display: none !important;
+}
+
+.main-header .navbar-nav.ml-auto .ds-nav-logout ~ * {
+    display: none !important;
+}
+
+.main-header .navbar-nav.ml-auto .dropdown-toggle::after {
+    display: none !important;
+}
+
+/* Oculta switch de ayuda inyectado (help_switch). */
+.main-header .custom-control.custom-switch.mx-2.mt-2,
+.main-header #help_switch,
+.main-header label[for="help_switch"] {
+    display: none !important;
+}
+
 .main-header .navbar-brand,
 .main-header .navbar-brand:hover {
     color: #2b4e72 !important;
