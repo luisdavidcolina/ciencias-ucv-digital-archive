@@ -38,6 +38,37 @@ a:hover {
     color: #0056b3 !important;
 }
 
+.main-header .navbar-brand,
+.main-header .navbar-brand:hover {
+    color: #2b4e72 !important;
+    font-weight: 800 !important;
+    font-size: 1.08rem !important;
+    letter-spacing: 0.2px;
+    text-decoration: none !important;
+}
+
+.ds-navbar-logo i {
+    color: #0056b3;
+    margin-right: 0.35rem;
+}
+
+.ds-page-header {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #2b4e72;
+    color: #2b4e72;
+    font-weight: 800;
+    font-size: 1.15rem;
+    padding: 0.8rem 1rem;
+    margin: 1rem 1rem 0.25rem 1rem;
+    border-radius: 6px;
+}
+
+.ds-page-header i {
+    color: #0056b3;
+    margin-right: 0.45rem;
+}
+
 .brand-link {
     background-color: #ffffff !important;
     color: #2b4e72 !important;
@@ -49,6 +80,11 @@ a:hover {
 
 .brand-link:hover {
     color: #0056b3 !important;
+}
+
+/* El logo institucional debe mostrarse solo en el header superior */
+.main-sidebar .brand-link {
+    display: none !important;
 }
 
 /* --- OVERRIDES BS4CARD (Quitar estetica Dashboard) --- */

@@ -2,9 +2,10 @@ library(shiny)
 library(bs4Dash)
 
 ui <- bs4DashPage(
-  title = "Departamento de Extensión",
+  title = "",
   dark = NULL,
   header = bs4DashNavbar(
+    title = NULL,
     status = "white", skin = "light",
     rightUi = tagList(
       # Estos se mostrarán solo via conditionalPanel más adelante
@@ -21,8 +22,13 @@ ui <- bs4DashPage(
     )
   ),
   sidebar = bs4DashSidebar(
+    collapsed = FALSE,
+    minified = FALSE,
     skin = "dark", status = "primary", elevation = 3,
-    conditionalPanel("output.is_logged", uiOutput("sidebar_items"))
+    bs4SidebarMenu(
+      id = "sidebar_tabs",
+      uiOutput("sidebar_items")
+    )
   ),
   body = bs4DashBody(
     tags$head(
@@ -69,6 +75,7 @@ ui <- bs4DashPage(
     
     # CONTENIDO DEL REPOSITORIO (Dashboard)
     conditionalPanel("output.is_logged",
+       div(class = "ds-page-header", tags$i(class = "fas fa-landmark"), " Departamento de Extension"),
        uiOutput("main_body")
     )
   ),
