@@ -75,7 +75,7 @@ server <- function(input, output, session) {
             lista_menu[[length(lista_menu) + 1]] <- bs4SidebarMenuItem(
                 "Archivo Extensión",
                 tabName = "tab_extension",
-                icon = icon("university"),
+                icon = icon("folder-open"),
                 selected = identical(tab_default, "tab_extension")
             )
     }
@@ -83,7 +83,7 @@ server <- function(input, output, session) {
             lista_menu[[length(lista_menu) + 1]] <- bs4SidebarMenuItem(
                 "Expedientes RRHH",
                 tabName = "tab_rrhh",
-                icon = icon("lock"),
+                icon = icon("id-card"),
                 selected = identical(tab_default, "tab_rrhh")
             )
     }
@@ -91,7 +91,7 @@ server <- function(input, output, session) {
             lista_menu[[length(lista_menu) + 1]] <- bs4SidebarMenuItem(
                 "Panel de Control",
                 tabName = "mydspace_tab",
-                icon = icon("rocket"),
+                icon = icon("sliders-h"),
                 badgeLabel = "!",
                 badgeColor = "success",
                 selected = identical(tab_default, "mydspace_tab")
@@ -127,6 +127,52 @@ server <- function(input, output, session) {
     rpp <- as.numeric(input$rpp_ext); tot_pags <- ceiling(nrow(dat_ext_react()) / rpp)
     p_ext(min(tot_pags, p_ext() + 1)) 
   })
+
+    output$ext_page_info <- renderText({
+        datos <- dat_ext_react()
+        if (nrow(datos) == 0) {
+            return("Pág. 0 de 0")
+        }
+
+        rpp <- as.numeric(input$rpp_ext)
+        tot_pags <- max(1, ceiling(nrow(datos) / rpp))
+        pag_actual <- min(p_ext(), tot_pags)
+        paste("Pág.", pag_actual, "de", tot_pags)
+    })
+
+    output$ext_pagination_controls <- renderUI({
+        datos <- dat_ext_react()
+        rpp <- as.numeric(input$rpp_ext)
+
+        if (is.na(rpp) || rpp <= 0) {
+            rpp <- 5
+        }
+
+        tot_pags <- if (nrow(datos) == 0) 0 else ceiling(nrow(datos) / rpp)
+        pag_actual <- if (tot_pags == 0) 0 else min(p_ext(), tot_pags)
+
+        prev_disabled <- pag_actual <= 1
+        next_disabled <- pag_actual >= tot_pags
+
+        div(
+            class = "d-flex justify-content-between align-items-center mt-3",
+            actionButton(
+                "ext_prev",
+                "Anterior",
+                icon = icon("chevron-left"),
+                class = "btn btn-outline-secondary btn-sm",
+                disabled = if (prev_disabled) "disabled" else NULL
+            ),
+            textOutput("ext_page_info", inline = TRUE),
+            actionButton(
+                "ext_next",
+                "Siguiente",
+                icon = icon("chevron-right"),
+                class = "btn btn-outline-secondary btn-sm",
+                disabled = if (next_disabled) "disabled" else NULL
+            )
+        )
+    })
   
   output$list_extension <- renderUI({
     datos <- dat_ext_react(); if (nrow(datos) == 0) return(div(class = "alert alert-secondary", "No se encontraron proyectos."))
@@ -135,13 +181,26 @@ server <- function(input, output, session) {
     datos_view <- datos[idx_inicio:idx_fin, ]
     tarjetas <- lapply(1:nrow(datos_view), function(i) {
       fila <- datos_view[i, ]
-      btn_desc <- if (session_state$rol == "Admin") tags$button(class="btn btn-sm btn-outline-primary mt-2", tags$i(class="fas fa-download"), " Extraer Acta") else NULL
-      div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-file-alt")),
-        div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", fila$titulo),
+      idx_real <- idx_inicio + i - 1
+            btn_actions <- if (session_state$rol == "Admin") {
+                div(
+                    class = "ds-item-actions",
+                    tags$button(type = "button", class = "btn btn-sm btn-outline-info ds-action-btn", title = "Visualizar", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'ext', idx: %s, nonce: Date.now()}, {priority: 'event'});", idx_real), tags$i(class = "fas fa-eye")),
+                    tags$button(type = "button", class = "btn btn-sm btn-outline-warning ds-action-btn", title = "Editar", tags$i(class = "fas fa-pen")),
+                    tags$button(type = "button", class = "btn btn-sm btn-outline-primary ds-action-btn", title = "Descargar", tags$i(class = "fas fa-download"))
+                )
+            } else {
+                NULL
+            }
+
+            div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-file-alt")),
+        div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'ext', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", idx_real), fila$titulo),
            div(class = "ds-item-authors", paste("Responsable:", fila$autor)),
            div(class = "ds-item-date", paste("Fecha Emisión:", fila$fecha)),
+                     div(class = "ds-item-publisher", paste("Ubicación física:", fila$ubicacion)),
            div(class = "ds-item-abstract", fila$abstract),
-           tags$span(class = "ds-badge", fila$doc_type), br(), btn_desc))
+                     tags$span(class = "ds-badge", fila$doc_type)),
+                btn_actions)
     })
     tagList(tarjetas)
   })
@@ -155,15 +214,82 @@ server <- function(input, output, session) {
     }
     return(datos)
   })
+
+    show_doc_modal <- function(doc, mod) {
+        is_admin <- identical(session_state$rol, "Admin")
+
+        if (identical(mod, "ext")) {
+            titulo <- doc$titulo
+            resumen <- if (!is.null(doc$abstract) && nzchar(doc$abstract)) doc$abstract else "Sin resumen disponible."
+            meta <- tagList(
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Responsable"), tags$span(class = "v", doc$autor)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de emisión"), tags$span(class = "v", doc$fecha)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion))
+            )
+        } else {
+            titulo <- paste("Expediente:", doc$empleado)
+            resumen <- paste("Documento de RRHH en estado", doc$estatus, "adscrito a", doc$departamento)
+            meta <- tagList(
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Empleado"), tags$span(class = "v", doc$empleado)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Cédula"), tags$span(class = "v", doc$cedula)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion)),
+                div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de ingreso"), tags$span(class = "v", doc$fecha_ingreso))
+            )
+        }
+
+        showModal(modalDialog(
+            title = NULL,
+            size = "l",
+            easyClose = TRUE,
+            class = "ds-doc-modal",
+            footer = tagList(
+                modalButton("Cerrar"),
+                if (is_admin) actionButton("doc_edit_btn", NULL, icon = icon("pen"), class = "btn btn-outline-warning", title = "Editar"),
+                if (is_admin) actionButton("doc_download_btn", NULL, icon = icon("download"), class = "btn btn-outline-primary", title = "Descargar")
+            ),
+            div(class = "ds-doc-modal-head", tags$i(class = "fas fa-file-alt"), tags$h4(titulo)),
+            div(class = "ds-doc-modal-grid",
+                    div(class = "ds-doc-panel", tags$h5("Metadata"), meta),
+                    div(class = "ds-doc-panel", tags$h5("Descripción"), tags$p(class = "ds-doc-abstract", resumen))
+            )
+        ))
+    }
+
+    observeEvent(input$open_doc, {
+        payload <- input$open_doc
+        req(!is.null(payload$mod), !is.null(payload$idx))
+
+        idx <- as.integer(payload$idx)
+        if (is.na(idx) || idx < 1) return()
+
+        if (identical(payload$mod, "ext")) {
+            datos <- dat_ext_react()
+            if (idx <= nrow(datos)) show_doc_modal(datos[idx, ], "ext")
+        } else if (identical(payload$mod, "rrhh")) {
+            datos <- dat_rrhh_react()
+            if (idx <= nrow(datos)) show_doc_modal(datos[idx, ], "rrhh")
+        }
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$doc_edit_btn, {
+        showNotification("Modo edición en construcción.", type = "message")
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$doc_download_btn, {
+        showNotification("Descarga en construcción.", type = "message")
+    }, ignoreInit = TRUE)
   
   output$list_rrhh <- renderUI({
     datos <- dat_rrhh_react(); if (nrow(datos) == 0) return(div(class = "alert alert-secondary", "No hay expedientes."))
     tarjetas <- lapply(1:nrow(datos), function(i) {
       fila <- datos[i, ]
       div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-user-lock", style="color:#dc3545;")),
-        div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", paste("Expediente:", fila$empleado)),
+                div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", i), paste("Expediente:", fila$empleado)),
            div(class = "ds-item-authors", tags$strong(paste("C.I.:", fila$cedula))),
            div(class = "ds-item-publisher", paste("Adscripción:", fila$departamento)),
+                     div(class = "ds-item-date", paste("Ubicación física:", fila$ubicacion)),
            tags$span(class = "ds-badge", style="background-color: #6c757d;", fila$doc_type)))
     })
     tagList(tarjetas)
@@ -186,7 +312,8 @@ server <- function(input, output, session) {
            ),
            column(width=9,
              div(class="ds-search-bar", div(class="input-group", tags$input(id="search_ext", type="text", class="form-control ds-search-input", placeholder="Buscar..."), div(class="input-group-append", actionButton("btn_s_ext", label=NULL, icon=icon("search"), class="btn ds-btn-primary")))),
-             uiOutput("list_extension")
+                         uiOutput("list_extension"),
+                         uiOutput("ext_pagination_controls")
            )
          )
       )

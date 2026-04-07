@@ -7,6 +7,7 @@ ui <- bs4DashPage(
   header = bs4DashNavbar(
     title = NULL,
     status = "white", skin = "light",
+    controlbarIcon = NULL,
     leftUi = tagList(
       tags$li(
         class = "nav-item dropdown",
