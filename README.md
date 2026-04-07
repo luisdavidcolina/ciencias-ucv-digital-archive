@@ -5,7 +5,7 @@
 [![Framework: R--Shiny](https://img.shields.io/badge/Framework-R--Shiny--bs4Dash-blue)]()
 
 ## 📌 Descripción del Proyecto
-Sistema de gestión documental y repositorio digital **no público** diseñado para el Decanato de la Facultad de Ciencias de la Universidad Central de Venezuela. 
+Sistema de gestión documental y repositorio digital **no público** diseñado para el Departamento de Extensión de la Facultad de Ciencias de la Universidad Central de Venezuela. 
 
 Este proyecto implementa una arquitectura optimizada basada en **R y Shiny**, mimetizando la interfaz de usuario de **DSpace 7** pero reduciendo el consumo de recursos de 8GB a menos de 1GB de RAM. Actualmente opera mediante **Arquitectura de Segregación**, bifurcando completamente los entornos y bases de datos para **Extensión** y **Recursos Humanos (RRHH)**.
 

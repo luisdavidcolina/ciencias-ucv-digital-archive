@@ -277,7 +277,12 @@ a:hover {
    MODERN UI/UX UPGRADES (GLASSMORPHISM & AUTH)
    ======================================================== */
 .ds-login-backdrop {
-    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
     background-image: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.88)), url('bg_login.png');
     background-size: cover;
     background-position: center;
@@ -288,6 +293,10 @@ a:hover {
 }
 
 .ds-login-card {
+    width: 450px;
+    max-width: 90%;
+    margin: 0 auto;
+    text-align: center;
     background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
@@ -296,6 +305,7 @@ a:hover {
     border-radius: 20px !important;
     box-shadow: 0 20px 40px rgba(0,0,0,0.35) !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 2.5rem !important;
 }
 
 .ds-login-card:hover {
@@ -303,21 +313,77 @@ a:hover {
     box-shadow: 0 25px 50px rgba(0,0,0,0.45) !important;
 }
 
-.ds-auth-input {
+/* Modificar los tags de div para inputs para que se adapten al flexbox */
+.ds-login-card .form-group, .ds-login-card .shiny-input-container {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+}
+
+.ds-login-card input {
     border-radius: 25px !important;
     padding-left: 45px !important;
-    height: 48px !important;
-    font-size: 1.05rem !important;
-    border: 1px solid #ced4da;
-    transition: all 0.3s ease;
+    height: 52px !important;
+    font-size: 1.1rem !important;
+    border: 1px solid #ced4da !important;
+    width: 100% !important;
+    display: block !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
-.ds-auth-input:focus {
-    box-shadow: 0 0 10px rgba(43, 78, 114, 0.3) !important;
-    border-color: #2b4e72 !important;
+.ds-login-card .auth-icon {
+    position: absolute;
+    left: 15px;
+    top: 42px; /* Alineado con el input debajo del label */
+    z-index: 10;
+    color: #2b4e72;
+    font-size: 1.2rem;
 }
 
-/* Corrección form-group para los inline selects */
-.form-group {
+.ds-password-wrap {
+    position: relative;
+}
+
+.ds-password-wrap .shiny-input-container {
     margin-bottom: 0 !important;
+}
+
+.ds-pass-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #5c6f82;
+    font-size: 1.1rem;
+    padding: 0.35rem;
+    line-height: 1;
+    z-index: 15;
+}
+
+.ds-pass-toggle:hover,
+.ds-pass-toggle:focus {
+    color: #2b4e72;
+    outline: none;
+}
+
+.ds-login-hint {
+    margin-top: 0.55rem;
+    font-size: 0.82rem;
+    color: #5f6c7a;
+    text-align: left;
+}
+
+.ds-login-hint i {
+    margin-right: 0.25rem;
+}
+
+/* Ocultar Sidebar/Navbar cuando el login está activo para que no se vean por detrás */
+.ds-login-backdrop ~ .main-header,
+.ds-login-backdrop ~ .main-sidebar {
+    display: none !important;
+}
+
+.ds-login-backdrop ~ .content-wrapper {
+    margin-left: 0 !important;
 }
