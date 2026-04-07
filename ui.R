@@ -1,91 +1,75 @@
 library(shiny)
-library(bs4Dash)
+library(bslib)
 
-ui <- bs4DashPage(
+ui <- fluidPage(
   title = "Ciencias UCV Digital Archive",
-  dark = NULL,
+  theme = bs_theme(version = 4), # Usamos raw Bootstrap 4 como DSpace
+  padding = 0,
   
-  # Cabecera simulando DSpace 7 TopNav
-  header = bs4DashNavbar(
-    status = "dark",  # Forzamos barra oscura
-    skin = "dark",
-    
-    title = bs4DashBrand(
-      title = "DSpace UCV",
-      color = "primary",  
-      href = "#"
-    ),
-    
-    # Controles derechos (Search / Login)
-    rightUi = tags$ul(
-      class = "navbar-nav",
-      tags$li(class = "nav-item", tags$a(href="#", class="nav-link", icon("search"))),
-      tags$li(class = "nav-item", tags$a(href="#", class="nav-link", icon("sign-in-alt"), " Log in"))
+  # Inyectar estilos CSS copiados del DSpace Angular CLI
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+    tags$link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css")
+  ),
+  
+  # ---------------------------------------------
+  # DSPACE NAVBAR OFICIAL (Sin envoltorios raros)
+  # ---------------------------------------------
+  tags$header(
+    tags$nav(class = "ds-header-nav",
+      tags$a(class = "ds-header-logo", href="#", "DSpace UCV"),
+      tags$ul(class = "navbar-nav",
+        tags$li(class = "nav-item", tags$a(href="#", class="nav-link", icon("search"))),
+        tags$li(class = "nav-item", tags$a(href="#", class="nav-link", icon("sign-in-alt"), " Log in"))
+      )
     )
   ),
   
-  # Deshabilitamos la barra lateral de dashboard para usar un layout fluido clásico
-  sidebar = bs4DashSidebar(disable = TRUE), 
-  
-  body = bs4DashBody(
-    # Inyectar estilos
-    tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-      tags$link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css") 
+  # ---------------------------------------------
+  # MAIN CONTAINER WEB (Idéntico a DSpace Grid)
+  # ---------------------------------------------
+  div(class = "container", style = "margin-top: 2rem; max-width: 1140px; padding-bottom: 50px;",
+    
+    # Falsa Breadcrumb de navegación
+    div(class = "ds-breadcrumb-wrapper",
+        div(class = "ds-breadcrumb", "Home  /  Search")
     ),
     
-    fluidPage(
-      # Breadcrumb pseudo
-      fluidRow(
-        column(12, 
-               tags$p(style="color: #6c757d; margin-top: 5px; font-size: 13px;", 
-                      "DSpace Home / Resultados de Búsqueda")
-        )
+    fluidRow(
+      # Columna Izquierda: Discover Facets (25%)
+      column(width = 3,
+             div(class = "ds-facet-accordion",
+                 div(class = "ds-facet-header", "Discover"),
+                 div(class = "ds-facet-body",
+                     radioButtons("modulo_filter", "Collection:", 
+                                  choices = c("Todos", "Extensión", "RRHH"), 
+                                  selected = "Todos"),
+                     tags$hr(),
+                     checkboxGroupInput("doc_type_filter", "Item Type:",
+                                        choices = c("Convenio", "Hoja de Vida", "Tesis", "Informe", "Contrato"),
+                                        selected = character(0)),
+                     div(style="margin-top:20px;",
+                         actionButton("btn_update", "Update", class="btn ds-btn-primary w-100")
+                     )
+                 )
+             )
       ),
       
-      fluidRow(
-        # ========================================
-        # COLUMNA IZQUIERDA: FACETAS / FILTROS (25%)
-        # ========================================
-        column(width = 3,
-               div(class = "filter-card",
-                   div(class = "filter-header", "Discover"),
-                   div(class = "filter-body",
-                       
-                       radioButtons("modulo_filter", "Colección Institucional:", 
-                                    choices = c("Todos", "Extensión", "RRHH"), 
-                                    selected = "Todos"),
-                       hr(),
-                       checkboxGroupInput("doc_type_filter", "Tipo de Documento:",
-                                          choices = c("Convenio", "Hoja de Vida", "Tesis", "Informe", "Contrato"),
-                                          selected = character(0)),
-                       div(
-                         style="margin-top:20px;",
-                         actionButton("btn_update", "UPDATE FILTERS", class="btn btn-sm btn-secondary w-100")
-                       )
-                   )
-               )
-        ),
-        
-        # ========================================
-        # COLUMNA DERECHA: RESULTADOS (75%)
-        # ========================================
-        column(width = 9,
-               # Barra de búsqueda
-               div(class = "search-header-box",
-                   fluidRow(
-                     column(10,
-                            textInput("search_text", label = NULL, placeholder = "Search DSpace...", width = "100%")
-                     ),
-                     column(2,
-                            actionButton("btn_search", "Go", icon = icon("search"), class="btn btn-primary w-100")
+      # Columna Derecha: Búsqueda y Resultados (75%)
+      column(width = 9,
+             
+             # Barra de búsqueda con Input Group real
+             div(class = "ds-search-bar",
+                 div(class = "input-group",
+                     tags$input(id="search_text", type="text", class="form-control ds-search-input", placeholder="Search DSpace..."),
+                     div(class="input-group-append",
+                         tags$button(id="btn_search", type="button", class="btn ds-btn-primary action-button", icon("search"))
                      )
-                   )
-               ),
-               
-               # Motor de tarjetas inyectadas desde el Server
-               uiOutput("dspace_item_list")
-        )
+                 )
+             ),
+             
+             # Div de inyección dinámica para las tarjetas
+             uiOutput("dspace_item_list")
       )
     )
   )

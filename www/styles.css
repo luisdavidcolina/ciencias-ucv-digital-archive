@@ -1,150 +1,230 @@
-/* DSpace 7 UI Reverse Engineering CSS */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+/* DSpace 7 Pixel-Perfect SCSS/CSS Extracted Emulation */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap');
 
 body {
-  background-color: #f8f9fa !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 14px;
-}
-
-/* -----------------------
-   NAVBAR (HEADER)
-------------------------*/
-/* Simula la barra oficial superior oscura */
-.main-header {
-    background-color: #0b1f2b !important; /* Azul muy oscuro/negro típico institucional */
-    border-bottom: none !important;
-}
-
-.brand-link {
-    background-color: #0b1f2b !important;
-    color: white !important;
-    font-weight: 500;
-}
-
-.navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-.navbar-nav .nav-link:hover {
-    color: white !important;
-}
-
-/* -----------------------
-   FACET SIDEBAR (Left)
-------------------------*/
-/* Para ocultar el sidebar de AdminLTE si lo pasamos a layout fluidPage u ocultar menus no deseados */
-.filter-card {
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    border: 1px solid #dee2e6 !important;
-    margin-bottom: 20px;
-}
-
-.filter-header {
     background-color: #f8f9fa;
-    padding: 10px 15px;
-    border-bottom: 1px solid #dee2e6;
+    font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #212529;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+a {
+    color: #0056b3;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:hover {
+    color: #003d82;
+    text-decoration: underline;
+}
+
+/* --- NAVBAR HEADER (DSpace ds-navbar) --- */
+.ds-header-nav {
+    background-color: #2b4e72 !important; /* DSpace Demo Oficial */
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 0.25rem 0.25rem rgba(0,0,0,.05);
+}
+
+.ds-header-logo {
+    color: #fff !important;
+    font-size: 1.25rem;
     font-weight: 500;
-    font-size: 14px;
-    color: #495057;
+    text-decoration: none;
+    white-space: nowrap;
 }
 
-.filter-body {
-    padding: 15px;
-    font-size: 13px;
-    background-color: white;
+.ds-header-logo:hover {
+    text-decoration: none;
+    color: #f8f9fa !important;
 }
 
-/* -----------------------
-   SEARCH HEADER & CONTROLS
-------------------------*/
-.search-header-box {
-    background-color: white;
-    padding: 20px;
-    border: 1px solid #dee2e6;
-    margin-bottom: 20px;
+.ds-header-nav .navbar-nav {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+}
+
+.ds-header-nav .nav-link {
+    color: rgba(255,255,255,.75) !important;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.ds-header-nav .nav-link:hover {
+    color: #fff !important;
+}
+
+/* --- BREADCRUMB --- */
+.ds-breadcrumb-wrapper {
+    background-color: #e9ecef;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
     border-radius: 0;
 }
 
-/* -----------------------
-   ITEM LIST CARDS (DSpace ds-item-list-element)
-------------------------*/
-.ds-item-card {
-    display: flex;
-    flex-direction: row;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    margin-bottom: 15px;
-    padding: 20px;
-    border-radius: 0 !important; /* DSpace is very flat */
+.ds-breadcrumb {
+    color: #6c757d;
+    font-size: 0.875rem;
 }
 
-.ds-item-card:hover {
-    background-color: #f1f3f5;
+/* --- DISCOVER FACETS (Sidebar) --- */
+.ds-facet-accordion {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.125);
+    margin-bottom: 1rem;
+}
+
+.ds-facet-header {
+    background-color: #f8f9fa;
+    color: #212529;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.ds-facet-body {
+    padding: 1.25rem;
+    font-size: 0.875rem;
+}
+
+.ds-facet-body hr {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border: 0;
+    border-top: 1px solid rgba(0,0,0,.1);
+}
+
+/* Checkbox and Radio styling for discovery */
+.form-check-label {
+    font-size: 0.875rem;
+    color: #495057;
+    cursor: pointer;
+}
+
+/* --- SEARCH MAIN BAR --- */
+.ds-search-bar {
+    margin-bottom: 2rem;
+}
+
+.ds-search-input {
+    border-radius: 0;
+    border-color: #ced4da;
+}
+
+.ds-search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
+    border-color: #80bdff;
+}
+
+.ds-btn-primary {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    color: white;
+    border-radius: 0;
+}
+.ds-btn-primary:hover {
+    background-color: #004494;
+    border-color: #003d82;
+    color: white;
+}
+
+/* --- RESULTS HEADER --- */
+.ds-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ced4da;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.ds-results-title {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #212529;
+    margin: 0;
+}
+
+.ds-pagination-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* --- ITEM CARDS (ds-item-list-element) --- */
+.ds-item-card {
+    display: flex;
+    padding: 1rem 0;
+    border-bottom: 1px solid #dee2e6;
+    background-color: transparent;
 }
 
 .ds-item-thumbnail {
-    width: 80px;
-    min-width: 80px;
+    width: 90px;
+    min-width: 90px;
     display: flex;
     justify-content: center;
-    padding-right: 20px;
+    align-items: flex-start;
+    padding-top: 0.5rem;
 }
 
 .ds-item-thumbnail i {
-    font-size: 40px;
-    color: #e24a33; /* PDF icon color */
+    font-size: 48px;
+    color: #495057; /* DSpace default thumb is gray, not red */
 }
 
 .ds-item-metadata {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    padding-left: 1rem;
 }
 
 .ds-item-title {
-    font-size: 18px;
+    font-size: 1.15rem;
     font-weight: 500;
-    color: #0056b3;
-    margin-bottom: 5px;
-}
-
-.ds-item-title:hover {
-    text-decoration: underline;
-    cursor: pointer;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
 }
 
 .ds-item-authors {
-    color: #495057;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 2px;
+    font-size: 0.9rem;
+    color: #212529;
+    margin-bottom: 0.25rem;
 }
 
 .ds-item-publisher, .ds-item-date {
+    font-size: 0.85rem;
     color: #6c757d;
-    font-size: 13px;
-    margin-bottom: 2px;
+    margin-bottom: 0.25rem;
 }
 
 .ds-item-abstract {
-    margin-top: 10px;
-    color: #212529;
-    font-size: 13px;
-    line-height: 1.5;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #495057;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-/* Badge (tipo de documento) */
 .ds-badge {
     display: inline-block;
-    padding: 3px 8px;
-    background-color: #e9ecef;
-    color: #495057;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    margin-top: 10px;
-    width: fit-content;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    background-color: #17a2b8;
+    color: #fff;
+    margin-top: 0.5rem;
 }

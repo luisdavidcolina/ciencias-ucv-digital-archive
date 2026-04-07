@@ -7,10 +7,9 @@ server <- function(input, output, session) {
   
   # Reactive dataset para alimentar la vista
   datos_reactivos <- reactive({
-    # Obligamos a que actialice el filtro con los inputs (en un flujo real seria un button-trigger, pero reaccionara en vivo para mejor UX)
     datos <- datos_crudos
     
-    # Texto
+    # Texto Search
     if (!is.null(input$search_text) && input$search_text != "") {
       term <- tolower(input$search_text)
       datos <- datos[grepl(term, tolower(datos$titulo)) | 
@@ -18,12 +17,12 @@ server <- function(input, output, session) {
                      grepl(term, tolower(datos$resumen)), ]
     }
     
-    # Colección
+    # Colección Facet
     if (input$modulo_filter != "Todos") {
       datos <- datos[datos$modulo == input$modulo_filter, ]
     }
     
-    # Tipo Doc
+    # Tipo Doc Facet
     if (length(input$doc_type_filter) > 0) {
       datos <- datos[datos$tipo_documento %in% input$doc_type_filter, ]
     }
@@ -42,30 +41,31 @@ server <- function(input, output, session) {
     tarjetas <- lapply(1:nrow(datos), function(i) {
       fila <- datos[i, ]
       
+      # `<ds-item-list-element>` mimetismo
       tags$div(class = "ds-item-card",
                
-        # Miniatura Izquierda
+        # Miniatura Izquierda Genérica
         tags$div(class = "ds-item-thumbnail",
            tags$i(class = "fas fa-file-pdf")
         ),
         
         # Bloque de Metadatos Derecho
         tags$div(class = "ds-item-metadata",
-           tags$div(class = "ds-item-title", fila$titulo),
+           tags$a(class = "ds-item-title", href="#", fila$titulo),
            tags$div(class = "ds-item-authors", fila$autor),
            tags$div(class = "ds-item-publisher", paste("Publisher:", fila$editor)),
            tags$div(class = "ds-item-date", paste("Date Issued:", fila$fecha)),
            tags$div(class = "ds-item-abstract", fila$resumen),
-           tags$div(class = "ds-badge", fila$tipo_documento)
+           tags$span(class = "ds-badge", fila$tipo_documento)
         )
       )
     })
     
-    # Retornar todo el bloque al frontend
+    # Retornamos el empaquetado de resultados total
     tagList(
-       tags$div(style="border-bottom: 2px solid #0056b3; padding-bottom: 5px; margin-bottom: 15px;",
-          tags$span(style="font-size: 18px; font-weight: 500; color: #495057;", "Results "),
-          tags$span(style="font-size: 14px; color: #6c757d;", paste("1-", nrow(datos), " of ", nrow(datos), sep=""))
+       tags$div(class="ds-results-header",
+          tags$h2(class="ds-results-title", "Search Results"),
+          tags$span(class="ds-pagination-info", paste("1-", nrow(datos), " of ", nrow(datos), sep=""))
        ),
        tarjetas
     )
