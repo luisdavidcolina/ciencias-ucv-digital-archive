@@ -1,91 +1,194 @@
-# Ciencias UCV Digital Archive (DSpace Light)
+# Ciencias UCV Digital Archive
 
-[![Project Status: Mockup Avanzado](https://img.shields.io/badge/Status-Mockup_Avanzado-orange)]()
-[![Privacy: Strict Segregation](https://img.shields.io/badge/Privacy-Strict_Segregation-red)]()
-[![Framework: R--Shiny](https://img.shields.io/badge/Framework-R--Shiny--bs4Dash-blue)]()
+Aplicacion web interna para gestion documental de la Facultad de Ciencias UCV, construida con R Shiny y bs4Dash, con separacion funcional entre Extension y RRHH.
 
-## 📌 Descripción del Proyecto
-Sistema de gestión documental y repositorio digital **no público** diseñado para el Departamento de Extensión de la Facultad de Ciencias de la Universidad Central de Venezuela. 
+## Autorias
 
-Este proyecto implementa una arquitectura optimizada basada en **R y Shiny**, mimetizando la interfaz de usuario de **DSpace 7** pero reduciendo el consumo de recursos de 8GB a menos de 1GB de RAM. Actualmente opera mediante **Arquitectura de Segregación**, bifurcando completamente los entornos y bases de datos para **Extensión** y **Recursos Humanos (RRHH)**.
+- Autor principal: Luisdavid Colina
+- Proyecto academico institucional: Facultad de Ciencias UCV
 
-## 🎯 Objetivos Estratégicos Logrados
-* **Segregación Institucional:** División absoluta entre los proyectos académicos de extensión y los expedientes laborales reservados de RRHH, manejados mediante bases de datos CSV independientes (`datos_extension.csv` y `datos_rrhh.csv`).
-* **Privacidad de Grado Administrativo:** Metadatos enmascarados para RRHH (Ej: ocultación de autores, énfasis en Cédulas y Estatus Laboral) frente a metadatos académicos abiertos para Extensión.
-* **Trazabilidad Física:** Mapeo de ubicación real en contenedores/gabinetes a través de la interfaz (Topografía Documental híbrida).
-* **Mimetismo Reactivo (Pixel-Perfect):** Clonación UI exacta usando `bs4Dash` como motor reactivo oculto bajo el CSS original de DSpace 7 Angular.
+## Resumen funcional
 
----
+El sistema implementa:
 
-## 🛠️ Stack Tecnológico
-* **Frontend/Backend:** R 4.x + Shiny Framework.
-* **UI Engine:** `bs4Dash` + overrides agresivos con `bslib` / CSS Puro.
-* **Estilos:** Font-family `Nunito` y paleta oficinal (#2b4e72).
-* **Bases de Simulacro:** CSV Dinámicos con paginación matemática reactiva R-Shiny.
+- Inicio de sesion con control de roles.
+- Segmentacion por modulo de trabajo (Extension y RRHH).
+- Vista administrativa con panel de control.
+- Buscador y filtros por metadatos.
+- Tarjetas de resultados con metadatos y ubicacion fisica.
+- Modal de detalle de documento estilo DSpace.
+- Estadisticas filtrables para usuarios Admin.
 
----
+## Stack y dependencias
 
-## 🚀 Hoja de Ruta (Roadmap Incremental)
+- Lenguaje: R
+- Framework: Shiny
+- UI dashboard: bs4Dash
+- Estilos: CSS personalizado en carpeta www
+- Iconografia: Font Awesome (CDN)
+- Persistencia actual: archivos CSV locales
 
-### Fase 1: Core Institucional (Completado)
-- [x] Configuración del entorno base R-Shiny.
-- [x] Implementación de la Interfaz Estilo DSpace (Layout institucional).
-- [x] Clonación de CSS (Inspección viva hacia demo.dspace.org).
+## Estructura del proyecto
 
-### Fase 2: Módulo de Extensión (Completado)
-- [x] Taxonomía de archivos de proyectos, actas de consejo, planos y convenios.
-- [x] Filtros reactivos y barra de búsqueda específica.
-- [ ] Módulo de Autenticación Local.
+- app.R: bootstrap explicito con validacion de archivos y errores de source detallados.
+- global.R: carga librerias, modulos y fuentes de datos CSV.
+- ui.R: layout general, login, sidebar, navbar, scripts JS de apoyo.
+- server.R: orquestacion reactiva principal y ensamblaje de modulos.
+- www/styles.css: estilo visual completo de la interfaz.
+- R/services_auth.R: autenticacion local contra usuarios.csv.
+- R/services_filters.R: filtros de busqueda para Extension y RRHH.
+- R/services_navigation.R: tab por defecto segun modulo y rol.
+- R/services_pagination.R: utilidades de paginacion.
+- R/server/ui_main_body.R: constructor del cuerpo principal (tabs Extension, RRHH y Admin).
+- R/server/stats_admin.R: salidas y reactivos del panel de estadisticas admin.
+- R/server/document_modal.R: modal de documento y handlers de acciones.
+- datos_extension.csv: dataset de documentos de Extension.
+- datos_rrhh.csv: dataset de expedientes RRHH.
+- usuarios.csv: credenciales y roles de acceso.
 
-### Fase 3: Módulo Personalizado de RRHH (Completado)
-- [x] Metadatos específicos para expedientes de personal (C.I., Estatus, Ingreso).
-- [x] Badges dinámicos de estado laboral (Activo, Inactivo, Jubilado).
-- [x] Tableros aislados e íconos de advertencia de seguridad confidencial.
+## Contrato de datos (CSV)
 
-### Fase 4: Backoffice / MyDSpace (Completado)
-- [x] Reactivación del Sidebar oscuro administrativo.
-- [x] Bandeja "Mi DSpace" para revisión de tareas pendientes de workflow.
-- [x] Paginación algorítmica real (5 ítems por hoja).
+datos_extension.csv
 
----
+- titulo
+- autor
+- doc_type
+- fecha
+- abstract
+- ubicacion
 
-## 🔒 Arquitectura de Datos Actual
-Actualmente, el mockups se alimenta de:
-1. `datos_extension.csv` : Colección pública (Plano Arquitectónico, Actas, Proyectos).
-2. `datos_rrhh.csv` : Colección estrictamente cifrada a la vista (Hojas de Vida, Nóminas).
-*Ambos archivos poseen rastreo de "Ubicación Física" vinculando el repositorio digital con estantes y gavetas tangibles en la UCV.*
+datos_rrhh.csv
 
----
+- empleado
+- cedula
+- departamento
+- doc_type
+- estatus
+- fecha_ingreso
+- ubicacion
 
-## 🧱 Estructura de Software Recomendada (Implementada)
+usuarios.csv
 
-Se adoptó una organización por capas para mejorar mantenibilidad y pruebas:
+- usuario
+- password
+- modulo
+- rol
 
-- `global.R`: bootstrap único (librerías, carga de servicios y datasets).
-- `ui.R`: composición de interfaz y layout visual.
-- `server.R`: orquestación reactiva de casos de uso.
-- `R/services_auth.R`: lógica de autenticación.
-- `R/services_filters.R`: filtros de búsqueda para Extensión y RRHH.
-- `R/services_navigation.R`: resolución de tabs/flujo de navegación.
-- `R/services_pagination.R`: utilidades de paginación reutilizables.
+## Credenciales de prueba actuales
 
-Beneficios directos:
+- ext_normal / 1234 / modulo Extension / rol Normal
+- ext_admin / 1234 / modulo Extension / rol Admin
+- rrhh_normal / 1234 / modulo RRHH / rol Normal
+- rrhh_admin / 1234 / modulo RRHH / rol Admin
 
-1. Menor acoplamiento entre UI y reglas de negocio.
-2. Reutilización de lógica crítica (filtros, paginación, login).
-3. Base preparada para pruebas unitarias futuras sobre funciones puras en `R/`.
+## Flujo de autenticacion y navegacion
 
----
+1. El usuario ingresa credenciales en pantalla de login.
+2. server valida con authenticate_user.
+3. Si credenciales son validas, se guarda estado de sesion:
+    - logged
+    - username
+    - modulo
+    - rol
+4. Se envia mensaje al cliente para navegar al tab de busqueda del modulo correspondiente.
+5. El sidebar se renderiza dinamicamente segun modulo y rol.
 
-## 🎨 Ingeniería Inversa de UI (Refactorización)
+## Modulo Extension
 
-Para asegurar la operatividad y reactividad a largo plazo sin sacrificar estética, hemos implementado el **"Pivote de Hibridación"**:
+- Filtro por tipologia multiple.
+- Filtro por rango de fechas.
+- Filtro por rango de anos.
+- Orden de resultados.
+- Paginacion reactiva.
+- Tarjetas con acciones visuales para Admin.
 
-1. **Estructura (bs4Dash)**: Todo componente central, desde la barra de Pestañas (`bs4TabItems`), la barra de navegación lateral (`bs4DashSidebar`), y los paneles rectangulares de descubrimiento (`bs4Card`) son funciones NATIVAS de Shiny que hablan perfectamente con `server.R`.
-2. **Pintura (styles.css)**: Usamos el archivo CSS inyectado para **ocultar a la fuerza** que estamos usando un dashboard de AdminLTE. 
-    * Ocultamos el borde redondeado de los cards (`border-radius: 0`).
-    * Anulamos las sombras de elevación y forzamos fondos grises pálidos.
-    * Actualizamos la fuente maestra a `Nunito`.
+## Modulo RRHH
 
-### Paginación Angular en R
-Se logró programar desde cero un motor matemático en `server.R` que imita `<ul class="pagination">` dividiendo los datasets de CSV bajo variables de estado reactivo (e.g. `p_ext <- reactiveVal(1)`), permitiendo deslizar las vistas sin recargar la sesión web.
+- Busqueda por empleado o cedula.
+- Filtro por tipologia.
+- Filtro por estatus.
+- Filtro por rango de fechas.
+- Filtro por rango de anos.
+- Tarjetas de expediente con metadatos de adscripcion y ubicacion.
+
+## Panel Admin
+
+Incluye areas:
+
+- Nuevo Ingreso
+- Monitor de Expedientes
+- Categorias
+- Usuarios
+- Estadisticas
+
+En estadisticas se dispone de filtros analiticos por fecha, tipologia y campos especificos por modulo.
+
+## Modal de documento
+
+El modal muestra:
+
+- Titulo y encabezado visual.
+- Miniatura iconica.
+- Metadata principal.
+- Descripcion/resumen.
+- Acciones (visualizar, editar, descargar).
+
+Estado actual de acciones:
+
+- Visualizar: placeholder en construccion.
+- Editar: placeholder en construccion.
+- Descargar: placeholder en construccion.
+
+## Seguridad y segregacion actual
+
+- Separacion logica por modulo y rol.
+- Distincion de metadatos entre Extension y RRHH.
+- Datos almacenados localmente en CSV para entorno prototipo.
+
+## Ejecucion local
+
+Requisitos minimos:
+
+- R 4.x
+- Paquetes: shiny, bs4Dash
+
+Ejecucion recomendada:
+
+1. Abrir el proyecto en su carpeta raiz.
+2. Ejecutar en R:
+
+    shiny::runApp()
+
+Nota: existe app.R para bootstrap robusto con mensajes de error de carga mas claros.
+
+## Despliegue
+
+- Existe configuracion de despliegue en la carpeta rsconnect.
+- Archivo de token auxiliar presente en deploy_token.R.
+- Para despliegues productivos, mover credenciales y tokens a variables de entorno seguras.
+
+## Problemas conocidos y diagnostico
+
+- Si aparece Error sourcing server.R, revisar primero sintaxis de bloques renderUI con multiples elementos.
+- El bootstrap de app.R incluye safe_source y detalla archivo y motivo de falla.
+- El proyecto usa codificacion UTF-8 para evitar errores por caracteres acentuados en Windows.
+
+## Historial reciente de arquitectura
+
+Cambios estructurales aplicados en esta etapa:
+
+- Extraccion de constructor de cuerpo principal a R/server/ui_main_body.R.
+- Extraccion de estadisticas admin a R/server/stats_admin.R.
+- Extraccion de modal y handlers de documento a R/server/document_modal.R.
+- Conexion de modulos desde global.R para mantener server.R mas compacto.
+
+## Proximos pasos recomendados
+
+- Completar acciones reales de visualizar, editar y descargar en modal.
+- Extraer modulo adicional para resultados/paginacion de listados.
+- Incorporar pruebas unitarias para servicios en carpeta R/services.
+- Migrar de CSV a base de datos transaccional cuando se pase a produccion.
+
+## Creditos
+
+Documentacion y desarrollo principal: Luisdavid Colina

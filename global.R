@@ -7,6 +7,8 @@ source("R/services_filters.R")
 source("R/services_navigation.R")
 source("R/services_pagination.R")
 source("R/server/ui_main_body.R")
+source("R/server/stats_admin.R")
+source("R/server/document_modal.R")
 
 # Data sources.
 db_ext <- read.csv("datos_extension.csv", stringsAsFactors = FALSE)
