@@ -52,25 +52,6 @@ server <- function(input, output, session) {
     session_state$rol <- NULL
   })
 
-    # Forzar tab inicial al autenticarse para aterrizar en buscadores.
-    observeEvent(session_state$logged, {
-        if (!isTRUE(session_state$logged)) return()
-
-        target_tab <- if (session_state$modulo == "Extensión") {
-            "tab_extension"
-        } else if (session_state$modulo == "RRHH") {
-            "tab_rrhh"
-        } else if (session_state$rol == "Admin") {
-            "mydspace_tab"
-        } else {
-            NULL
-        }
-
-        if (!is.null(target_tab)) {
-            updatebs4SidebarMenu(session, inputId = "sidebar_tabs", selected = target_tab)
-        }
-    }, ignoreInit = TRUE)
-  
   # ==========================================
   # RENDERIZADO DINÁMICO DE SIDEBAR
   # ==========================================
