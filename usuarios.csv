@@ -1,0 +1,5 @@
+usuario,password,modulo,rol
+ext_normal,1234,Extensión,Normal
+ext_admin,1234,Extensión,Admin
+rrhh_normal,1234,RRHH,Normal
+rrhh_admin,1234,RRHH,Admin
