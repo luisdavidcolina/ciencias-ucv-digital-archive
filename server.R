@@ -1,10 +1,6 @@
 library(shiny)
 library(bs4Dash)
 
-db_ext <- read.csv("datos_extension.csv", stringsAsFactors = FALSE)
-db_rrhh <- read.csv("datos_rrhh.csv", stringsAsFactors = FALSE)
-db_users <- read.csv("usuarios.csv", stringsAsFactors = FALSE)
-
 server <- function(input, output, session) {
   
   # ==========================================
@@ -34,13 +30,17 @@ server <- function(input, output, session) {
   # ==========================================
   observeEvent(input$login_btn, {
     req(input$login_user, input$login_pass)
-    match <- db_users[db_users$usuario == input$login_user & db_users$password == input$login_pass, ]
+        match <- authenticate_user(db_users, input$login_user, input$login_pass)
     
-    if (nrow(match) == 1) {
+        if (!is.null(match) && nrow(match) == 1) {
       session_state$logged <- TRUE
       session_state$username <- match$usuario[1]
       session_state$modulo <- match$modulo[1]
       session_state$rol <- match$rol[1]
+
+            session$onFlushed(function() {
+                session$sendCustomMessage("navigateToSearch", list(modulo = session_state$modulo))
+            }, once = TRUE)
     } else {
       showNotification("Credenciales inválidas. Acceso denegado.", type = "error")
     }
@@ -59,15 +59,7 @@ server <- function(input, output, session) {
         if (!isTRUE(session_state$logged)) {
             return(NULL)
         }
-        tab_default <- if (session_state$modulo == "Extensión") {
-            "tab_extension"
-        } else if (session_state$modulo == "RRHH") {
-            "tab_rrhh"
-        } else if (session_state$rol == "Admin") {
-            "mydspace_tab"
-        } else {
-            NULL
-        }
+        tab_default <- resolve_default_tab(session_state$modulo, session_state$rol)
 
     lista_menu <- list()
     
@@ -106,25 +98,37 @@ server <- function(input, output, session) {
   # ==========================================
   observeEvent(c(input$btn_s_ext, input$btn_update_ext), { p_ext(1) }, ignoreInit = TRUE)
   dat_ext_react <- reactive({
-    datos <- db_ext
     input$btn_s_ext
     input$btn_update_ext
-    if (!is.null(input$search_ext) && input$search_ext != "") {
-      term <- tolower(input$search_ext)
-      datos <- datos[grepl(term, tolower(datos$titulo)) | grepl(term, tolower(datos$autor)), ]
-    }
-    if (length(input$ext_doc_type) > 0) { datos <- datos[datos$doc_type %in% input$ext_doc_type, ] }
-    if (!is.null(input$sort_ext)) {
-      if (input$sort_ext == "Título A-Z") { datos <- datos[order(datos$titulo), ] } 
-      else if (input$sort_ext == "Fecha de Emisión (Asc)") { datos <- datos[order(datos$fecha), ] } 
-      else if (input$sort_ext == "Fecha de Emisión (Desc)") { datos <- datos[order(datos$fecha, decreasing = TRUE), ] }
-    }
-    return(datos)
+        datos <- filter_extension_data(
+            datos = db_ext,
+            search_term = input$search_ext,
+            doc_types = input$ext_doc_type,
+            sort_mode = input$sort_ext
+        )
+
+        if (!is.null(input$ext_date_range) && length(input$ext_date_range) == 2) {
+            f_ini <- as.Date(input$ext_date_range[1])
+            f_fin <- as.Date(input$ext_date_range[2])
+            fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
+            keep <- !is.na(fechas) & fechas >= f_ini & fechas <= f_fin
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        if (!is.null(input$ext_year_range) && length(input$ext_year_range) == 2) {
+            fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
+            anios <- as.integer(format(fechas, "%Y"))
+            keep <- !is.na(anios) & anios >= input$ext_year_range[1] & anios <= input$ext_year_range[2]
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        datos
   })
   
   observeEvent(input$ext_prev, { p_ext(max(1, p_ext() - 1)) })
   observeEvent(input$ext_next, { 
-    rpp <- as.numeric(input$rpp_ext); tot_pags <- ceiling(nrow(dat_ext_react()) / rpp)
+        rpp <- safe_as_numeric(input$rpp_ext)
+        tot_pags <- compute_total_pages(nrow(dat_ext_react()), rpp)
     p_ext(min(tot_pags, p_ext() + 1)) 
   })
 
@@ -134,22 +138,17 @@ server <- function(input, output, session) {
             return("Pág. 0 de 0")
         }
 
-        rpp <- as.numeric(input$rpp_ext)
-        tot_pags <- max(1, ceiling(nrow(datos) / rpp))
-        pag_actual <- min(p_ext(), tot_pags)
+        rpp <- safe_as_numeric(input$rpp_ext)
+        tot_pags <- max(1, compute_total_pages(nrow(datos), rpp))
+        pag_actual <- clamp_page(p_ext(), tot_pags)
         paste("Pág.", pag_actual, "de", tot_pags)
     })
 
     output$ext_pagination_controls <- renderUI({
         datos <- dat_ext_react()
-        rpp <- as.numeric(input$rpp_ext)
-
-        if (is.na(rpp) || rpp <= 0) {
-            rpp <- 5
-        }
-
-        tot_pags <- if (nrow(datos) == 0) 0 else ceiling(nrow(datos) / rpp)
-        pag_actual <- if (tot_pags == 0) 0 else min(p_ext(), tot_pags)
+        rpp <- safe_as_numeric(input$rpp_ext)
+        tot_pags <- compute_total_pages(nrow(datos), rpp)
+        pag_actual <- clamp_page(p_ext(), tot_pags)
 
         prev_disabled <- pag_actual <= 1
         next_disabled <- pag_actual >= tot_pags
@@ -207,12 +206,32 @@ server <- function(input, output, session) {
 
   observeEvent(c(input$btn_s_rrhh, input$btn_update_rrhh), { p_rrhh(1) }, ignoreInit = TRUE)
   dat_rrhh_react <- reactive({
-    datos <- db_rrhh
-    if (!is.null(input$search_rrhh) && input$search_rrhh != "") {
-      term <- tolower(input$search_rrhh)
-      datos <- datos[grepl(term, tolower(datos$empleado)) | grepl(term, tolower(datos$cedula)), ]
-    }
-    return(datos)
+        datos <- filter_rrhh_data(db_rrhh, input$search_rrhh)
+
+        if (!is.null(input$rrhh_doc_type) && nzchar(input$rrhh_doc_type)) {
+            datos <- datos[datos$doc_type == input$rrhh_doc_type, , drop = FALSE]
+        }
+
+        if (!is.null(input$rrhh_estatus) && nzchar(input$rrhh_estatus) && input$rrhh_estatus != "Todos") {
+            datos <- datos[datos$estatus == input$rrhh_estatus, , drop = FALSE]
+        }
+
+        if (!is.null(input$rrhh_date_range) && length(input$rrhh_date_range) == 2) {
+            f_ini <- as.Date(input$rrhh_date_range[1])
+            f_fin <- as.Date(input$rrhh_date_range[2])
+            fechas <- suppressWarnings(as.Date(datos$fecha_ingreso, format = "%Y-%m-%d"))
+            keep <- !is.na(fechas) & fechas >= f_ini & fechas <= f_fin
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        if (!is.null(input$rrhh_year_range) && length(input$rrhh_year_range) == 2) {
+            fechas <- suppressWarnings(as.Date(datos$fecha_ingreso, format = "%Y-%m-%d"))
+            anios <- as.integer(format(fechas, "%Y"))
+            keep <- !is.na(anios) & anios >= input$rrhh_year_range[1] & anios <= input$rrhh_year_range[2]
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        datos
   })
 
     show_doc_modal <- function(doc, mod) {
@@ -221,6 +240,8 @@ server <- function(input, output, session) {
         if (identical(mod, "ext")) {
             titulo <- doc$titulo
             resumen <- if (!is.null(doc$abstract) && nzchar(doc$abstract)) doc$abstract else "Sin resumen disponible."
+            thumb_icon <- "fas fa-file-alt"
+            thumb_badge <- doc$doc_type
             meta <- tagList(
                 div(class = "ds-doc-meta-row", tags$span(class = "k", "Responsable"), tags$span(class = "v", doc$autor)),
                 div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
@@ -230,6 +251,8 @@ server <- function(input, output, session) {
         } else {
             titulo <- paste("Expediente:", doc$empleado)
             resumen <- paste("Documento de RRHH en estado", doc$estatus, "adscrito a", doc$departamento)
+            thumb_icon <- "fas fa-user-lock"
+            thumb_badge <- doc$estatus
             meta <- tagList(
                 div(class = "ds-doc-meta-row", tags$span(class = "k", "Empleado"), tags$span(class = "v", doc$empleado)),
                 div(class = "ds-doc-meta-row", tags$span(class = "k", "Cédula"), tags$span(class = "v", doc$cedula)),
@@ -246,11 +269,13 @@ server <- function(input, output, session) {
             class = "ds-doc-modal",
             footer = tagList(
                 modalButton("Cerrar"),
+                actionButton("doc_view_btn", NULL, icon = icon("eye"), class = "btn btn-outline-info", title = "Visualizar"),
                 if (is_admin) actionButton("doc_edit_btn", NULL, icon = icon("pen"), class = "btn btn-outline-warning", title = "Editar"),
                 if (is_admin) actionButton("doc_download_btn", NULL, icon = icon("download"), class = "btn btn-outline-primary", title = "Descargar")
             ),
             div(class = "ds-doc-modal-head", tags$i(class = "fas fa-file-alt"), tags$h4(titulo)),
             div(class = "ds-doc-modal-grid",
+                    div(class = "ds-doc-panel ds-doc-thumb-panel", tags$h5("Miniatura"), div(class = "ds-doc-thumb", tags$i(class = thumb_icon), tags$span(class = "ds-doc-thumb-badge", thumb_badge))),
                     div(class = "ds-doc-panel", tags$h5("Metadata"), meta),
                     div(class = "ds-doc-panel", tags$h5("Descripción"), tags$p(class = "ds-doc-abstract", resumen))
             )
@@ -275,6 +300,10 @@ server <- function(input, output, session) {
 
     observeEvent(input$doc_edit_btn, {
         showNotification("Modo edición en construcción.", type = "message")
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$doc_view_btn, {
+        showNotification("Vista de documento en construcción.", type = "message")
     }, ignoreInit = TRUE)
 
     observeEvent(input$doc_download_btn, {
@@ -303,11 +332,41 @@ server <- function(input, output, session) {
     lista_tabs <- list()
     
     if (session_state$modulo == "Extensión") {
+            ext_fechas <- suppressWarnings(as.Date(db_ext$fecha, format = "%Y-%m-%d"))
+            ext_fechas <- ext_fechas[!is.na(ext_fechas)]
+            ext_min_fecha <- if (length(ext_fechas) > 0) min(ext_fechas) else Sys.Date() - 365
+            ext_max_fecha <- if (length(ext_fechas) > 0) max(ext_fechas) else Sys.Date()
+            ext_min_year <- as.integer(format(ext_min_fecha, "%Y"))
+            ext_max_year <- as.integer(format(ext_max_fecha, "%Y"))
+
       lista_tabs[[length(lista_tabs) + 1]] <- bs4TabItem(tabName = "tab_extension",
          fluidRow(column(12, div(class = "ds-breadcrumb-wrapper", div(class = "ds-breadcrumb", "Comunidades / Extensión / Búsqueda")))),
          fluidRow(
            column(width=3,
-             bs4Card(title="Filtros Académicos", status="secondary", width=12, checkboxGroupInput("ext_doc_type", "Tipología:", choices = c("Proyecto de Investigación", "Plano Arquitectónico", "Acta", "Convenio")), actionButton("btn_update_ext", "Aplicar", class="btn ds-btn-primary w-100 mt-2")),
+                         bs4Card(
+                             title="Filtros Académicos", status="secondary", width=12,
+                             bs4Accordion(
+                                 id = "ext_filters_acc",
+                                 bs4AccordionItem(
+                                     title = "Tipología",
+                                     status = "lightblue",
+                                     solidHeader = FALSE,
+                                     collapsed = FALSE,
+                                     checkboxGroupInput("ext_doc_type", "Selecciona una o más", choices = c("Proyecto de Investigación", "Plano Arquitectónico", "Acta", "Convenio"))
+                                 ),
+                                 bs4AccordionItem(
+                                     title = "Fecha",
+                                     status = "teal",
+                                     solidHeader = FALSE,
+                                     collapsed = TRUE,
+                                     tagList(
+                                         dateRangeInput("ext_date_range", "Rango de fecha", start = ext_min_fecha, end = ext_max_fecha, language = "es", width = "100%"),
+                                         sliderInput("ext_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = "")
+                                     )
+                                 )
+                             ),
+                             actionButton("btn_update_ext", "Aplicar", class="btn ds-btn-primary w-100 mt-2")
+                         ),
              bs4Card(title="Vista", status="secondary", width=12, class="mt-3", selectInput("sort_ext", "Recientes", choices=c("Lo más relevante", "Título A-Z")), selectInput("rpp_ext", "Pág:", choices=c("5", "10"), selected="5"))
            ),
            column(width=9,
@@ -320,10 +379,49 @@ server <- function(input, output, session) {
     }
     
     if (session_state$modulo == "RRHH") {
+            rrhh_fechas <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
+            rrhh_fechas <- rrhh_fechas[!is.na(rrhh_fechas)]
+            rrhh_min_fecha <- if (length(rrhh_fechas) > 0) min(rrhh_fechas) else Sys.Date() - 365
+            rrhh_max_fecha <- if (length(rrhh_fechas) > 0) max(rrhh_fechas) else Sys.Date()
+            rrhh_min_year <- as.integer(format(rrhh_min_fecha, "%Y"))
+            rrhh_max_year <- as.integer(format(rrhh_max_fecha, "%Y"))
+
       lista_tabs[[length(lista_tabs) + 1]] <- bs4TabItem(tabName = "tab_rrhh",
          fluidRow(column(12, div(class = "ds-breadcrumb-wrapper", div(class = "ds-breadcrumb", "Comunidades / RRHH / Privado")))),
          fluidRow(
-           column(width=3, bs4Card(title="Filtros", status="secondary", width=12, radioButtons("rrhh_estatus", "Condición:", choices = c("Todos", "Activo", "Jubilado")))),
+                     column(width=3,
+                         bs4Card(
+                             title="Filtros", status="secondary", width=12,
+                             bs4Accordion(
+                                 id = "rrhh_filters_acc",
+                                 bs4AccordionItem(
+                                     title = "Tipología",
+                                     status = "lightblue",
+                                     solidHeader = FALSE,
+                                     collapsed = FALSE,
+                                     selectInput("rrhh_doc_type", "Tipo de expediente", choices = c("Todas" = "", sort(unique(db_rrhh$doc_type))), width = "100%")
+                                 ),
+                                 bs4AccordionItem(
+                                     title = "Fecha",
+                                     status = "teal",
+                                     solidHeader = FALSE,
+                                     collapsed = TRUE,
+                                     tagList(
+                                         dateRangeInput("rrhh_date_range", "Fecha de ingreso", start = rrhh_min_fecha, end = rrhh_max_fecha, language = "es", width = "100%"),
+                                         sliderInput("rrhh_year_range", "Rango de años", min = rrhh_min_year, max = rrhh_max_year, value = c(rrhh_min_year, rrhh_max_year), sep = "")
+                                     )
+                                 ),
+                                 bs4AccordionItem(
+                                     title = "Estatus",
+                                     status = "secondary",
+                                     solidHeader = FALSE,
+                                     collapsed = TRUE,
+                                     radioButtons("rrhh_estatus", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
+                                 )
+                             ),
+                             actionButton("btn_update_rrhh", "Aplicar", class="btn ds-btn-primary w-100 mt-2")
+                         )
+                     ),
            column(width=9, uiOutput("list_rrhh"))
          )
       )
@@ -343,7 +441,7 @@ server <- function(input, output, session) {
          ),
          
          # --- TABS DE GESTIÓN ---
-         tabsetPanel(id = "admin_workspace_tabs", type = "pills",
+         tabsetPanel(id = "admin_workspace_tabs", type = "pills", selected = "Estadísticas",
             
             # TAB 1: NUEVO INGRESO (SUBMISSION WORKSPACE)
             tabPanel("Nuevo Ingreso", icon = icon("plus-circle"), tags$br(),
@@ -440,6 +538,9 @@ server <- function(input, output, session) {
             
             # TAB 5: ESTADÍSTICAS
             tabPanel("Estadísticas", icon = icon("chart-bar"), tags$br(),
+                    bs4Card(title=tags$span(tags$i(class="fas fa-filter"), " Filtros Analíticos"), status="info", solidHeader=FALSE, width=12, collapsible=FALSE,
+                         uiOutput("stats_filters_panel")
+                    ),
                fluidRow(
                   column(6, bs4Card(title=tags$span(tags$i(class="fas fa-chart-pie"), " Distribución por Tipo"), status="primary", solidHeader=FALSE, width=12, collapsible=FALSE, uiOutput("stats_by_type"))),
                   column(6, bs4Card(title=tags$span(tags$i(class="fas fa-calendar-alt"), " Cronología de Ingresos"), status="success", solidHeader=FALSE, width=12, collapsible=FALSE, uiOutput("stats_timeline")))
@@ -715,10 +816,116 @@ server <- function(input, output, session) {
           tags$tbody(filas)
       )
   })
+
+  # --- FILTROS DE ESTADÍSTICAS ---
+  output$stats_filters_panel <- renderUI({
+      req(session_state$logged, session_state$rol == "Admin")
+
+      df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+      fecha_col <- if (session_state$modulo == "Extensión") "fecha" else "fecha_ingreso"
+      fechas <- suppressWarnings(as.Date(df[[fecha_col]], format = "%Y-%m-%d"))
+      fechas_ok <- fechas[!is.na(fechas)]
+
+      min_fecha <- if (length(fechas_ok) > 0) min(fechas_ok) else Sys.Date() - 365
+      max_fecha <- if (length(fechas_ok) > 0) max(fechas_ok) else Sys.Date()
+
+      fluidRow(
+          column(3,
+              dateRangeInput("stats_date_range", "Rango de fechas", start = min_fecha, end = max_fecha, language = "es", width = "100%")
+          ),
+          column(3,
+              selectInput("stats_type_filter", "Tipología", choices = c("Todas" = "", sort(unique(df$doc_type))), width = "100%")
+          ),
+          column(3,
+              if (session_state$modulo == "RRHH") {
+                  selectInput("stats_status_filter", "Estatus", choices = c("Todos" = "", sort(unique(df$estatus))), width = "100%")
+              } else {
+                  selectInput("stats_author_filter", "Responsable", choices = c("Todos" = "", sort(unique(df$autor))), width = "100%")
+              }
+          ),
+          column(3,
+              if (session_state$modulo == "RRHH") {
+                  selectInput("stats_dept_filter", "Departamento", choices = c("Todos" = "", sort(unique(df$departamento))), width = "100%")
+              } else {
+                  checkboxInput("stats_only_recent", "Solo últimos 24 meses", value = FALSE)
+              }
+          )
+      ),
+      fluidRow(
+          column(12,
+              tags$div(style = "text-align:right; margin-top:6px;",
+                  actionButton("stats_reset_filters", "Limpiar filtros", icon = icon("eraser"), class = "btn btn-outline-secondary btn-sm")
+              )
+          )
+      )
+  })
+
+  observeEvent(input$stats_reset_filters, {
+      updateSelectInput(session, "stats_type_filter", selected = "")
+      updateSelectInput(session, "stats_status_filter", selected = "")
+      updateSelectInput(session, "stats_dept_filter", selected = "")
+      updateSelectInput(session, "stats_author_filter", selected = "")
+      updateCheckboxInput(session, "stats_only_recent", value = FALSE)
+  }, ignoreInit = TRUE)
+
+  stats_filtered_df <- reactive({
+      req(session_state$logged, session_state$rol == "Admin")
+
+      df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+      fecha_col <- if (session_state$modulo == "Extensión") "fecha" else "fecha_ingreso"
+      fechas <- suppressWarnings(as.Date(df[[fecha_col]], format = "%Y-%m-%d"))
+
+      # Rango de fechas
+      if (!is.null(input$stats_date_range) && length(input$stats_date_range) == 2) {
+          f_ini <- as.Date(input$stats_date_range[1])
+          f_fin <- as.Date(input$stats_date_range[2])
+          keep <- !is.na(fechas) & fechas >= f_ini & fechas <= f_fin
+          df <- df[keep, , drop = FALSE]
+          fechas <- fechas[keep]
+      }
+
+      # Tipología
+      if (!is.null(input$stats_type_filter) && nzchar(input$stats_type_filter)) {
+          keep <- df$doc_type == input$stats_type_filter
+          df <- df[keep, , drop = FALSE]
+          fechas <- fechas[keep]
+      }
+
+      if (session_state$modulo == "RRHH") {
+          if (!is.null(input$stats_status_filter) && nzchar(input$stats_status_filter)) {
+              keep <- df$estatus == input$stats_status_filter
+              df <- df[keep, , drop = FALSE]
+              fechas <- fechas[keep]
+          }
+          if (!is.null(input$stats_dept_filter) && nzchar(input$stats_dept_filter)) {
+              keep <- df$departamento == input$stats_dept_filter
+              df <- df[keep, , drop = FALSE]
+              fechas <- fechas[keep]
+          }
+      } else {
+          if (!is.null(input$stats_author_filter) && nzchar(input$stats_author_filter)) {
+              keep <- df$autor == input$stats_author_filter
+              df <- df[keep, , drop = FALSE]
+              fechas <- fechas[keep]
+          }
+          if (isTRUE(input$stats_only_recent)) {
+              cutoff <- Sys.Date() - 730
+              keep <- !is.na(fechas) & fechas >= cutoff
+              df <- df[keep, , drop = FALSE]
+              fechas <- fechas[keep]
+          }
+      }
+
+      list(df = df, fechas = fechas)
+  })
   
   # --- ESTADÍSTICAS ---
   output$stats_by_type <- renderUI({
-      df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+      payload <- stats_filtered_df()
+      df <- payload$df
+      if (nrow(df) == 0) {
+          return(tags$div(class="alert alert-secondary", "No hay datos para los filtros seleccionados."))
+      }
       conteos <- sort(table(df$doc_type), decreasing=TRUE)
       total <- sum(conteos)
       
@@ -741,9 +948,12 @@ server <- function(input, output, session) {
   })
   
   output$stats_timeline <- renderUI({
-      df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
-      fecha_col <- if (session_state$modulo == "Extensión") df$fecha else df$fecha_ingreso
-      fechas <- as.Date(fecha_col, format="%Y-%m-%d")
+      payload <- stats_filtered_df()
+      fechas <- payload$fechas
+      fechas <- fechas[!is.na(fechas)]
+      if (length(fechas) == 0) {
+          return(tags$div(class="alert alert-secondary", "No hay fechas para visualizar con los filtros actuales."))
+      }
       por_anio <- sort(table(format(fechas, "%Y")))
       
       items <- lapply(names(por_anio), function(anio) {
@@ -765,7 +975,8 @@ server <- function(input, output, session) {
   })
   
   output$stats_system <- renderUI({
-      df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+      payload <- stats_filtered_df()
+      df <- payload$df
       tags$div(class="row",
           tags$div(class="col-md-3 text-center p-3",
               tags$i(class="fas fa-database", style="font-size:2rem; color:#2b4e72; margin-bottom:8px;"),
@@ -775,7 +986,7 @@ server <- function(input, output, session) {
           tags$div(class="col-md-3 text-center p-3",
               tags$i(class="fas fa-hdd", style="font-size:2rem; color:#28a745; margin-bottom:8px;"),
               tags$h5(style="margin:0; font-weight:bold;", paste(nrow(df), "Registros")),
-              tags$span(class="text-muted", style="font-size:0.8rem;", "En Almacenamiento")
+              tags$span(class="text-muted", style="font-size:0.8rem;", "Filtrados")
           ),
           tags$div(class="col-md-3 text-center p-3",
               tags$i(class="fas fa-shield-alt", style="font-size:2rem; color:#ffc107; margin-bottom:8px;"),
@@ -784,7 +995,7 @@ server <- function(input, output, session) {
           ),
           tags$div(class="col-md-3 text-center p-3",
               tags$i(class="fas fa-check-circle", style="font-size:2rem; color:#28a745; margin-bottom:8px;"),
-              tags$h5(style="margin:0; font-weight:bold;", "Operativo"),
+              tags$h5(style="margin:0; font-weight:bold;", if (nrow(df) > 0) "Operativo" else "Sin Datos"),
               tags$span(class="text-muted", style="font-size:0.8rem;", "Estado del Sistema")
           )
       )

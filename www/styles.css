@@ -306,6 +306,42 @@ a:hover {
     padding: 0.85rem;
 }
 
+.ds-doc-thumb-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.ds-doc-thumb {
+    height: 165px;
+    border-radius: 10px;
+    border: 1px dashed #bfd2e7;
+    background: linear-gradient(160deg, #f4f9ff, #eef4fb);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+}
+
+.ds-doc-thumb i {
+    font-size: 2.6rem;
+    color: #2b4e72;
+}
+
+.ds-doc-thumb-badge {
+    display: inline-block;
+    background: #2b4e72;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    max-width: 90%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 .ds-doc-panel h5 {
     font-size: 0.95rem;
     font-weight: 800;
@@ -425,6 +461,10 @@ a:hover {
     .ds-doc-meta-row {
         grid-template-columns: 1fr;
         gap: 0.15rem;
+    }
+
+    .ds-doc-thumb {
+        height: 120px;
     }
     
     .ds-item-title {

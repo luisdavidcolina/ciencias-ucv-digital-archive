@@ -57,6 +57,26 @@ Actualmente, el mockups se alimenta de:
 
 ---
 
+## 🧱 Estructura de Software Recomendada (Implementada)
+
+Se adoptó una organización por capas para mejorar mantenibilidad y pruebas:
+
+- `global.R`: bootstrap único (librerías, carga de servicios y datasets).
+- `ui.R`: composición de interfaz y layout visual.
+- `server.R`: orquestación reactiva de casos de uso.
+- `R/services_auth.R`: lógica de autenticación.
+- `R/services_filters.R`: filtros de búsqueda para Extensión y RRHH.
+- `R/services_navigation.R`: resolución de tabs/flujo de navegación.
+- `R/services_pagination.R`: utilidades de paginación reutilizables.
+
+Beneficios directos:
+
+1. Menor acoplamiento entre UI y reglas de negocio.
+2. Reutilización de lógica crítica (filtros, paginación, login).
+3. Base preparada para pruebas unitarias futuras sobre funciones puras en `R/`.
+
+---
+
 ## 🎨 Ingeniería Inversa de UI (Refactorización)
 
 Para asegurar la operatividad y reactividad a largo plazo sin sacrificar estética, hemos implementado el **"Pivote de Hibridación"**:
