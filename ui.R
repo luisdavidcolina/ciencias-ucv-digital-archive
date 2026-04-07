@@ -54,7 +54,7 @@ ui <- bs4DashPage(
        div(class="ds-login-backdrop",
           div(class="card p-5 ds-login-card",
               div(style="text-align: center; width: 100%; margin-bottom: 20px;",
-                 tags$i(class="fas fa-fingerprint", style="font-size: 4.5rem; color: #2b4e72; margin-bottom: 15px;"),
+                  tags$i(class="fas fa-landmark", style="font-size: 4.5rem; color: #2b4e72; margin-bottom: 15px;"),
                  tags$h3(style="font-family: 'Nunito', sans-serif; color: #2b4e72; font-weight: 800; margin-bottom: 5px;", "Departamento de Extensión"),
                  tags$p(class="text-muted", "Intranet Cifrada de Acceso Restringido", style="font-size:0.95rem;")
               ),

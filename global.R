@@ -6,6 +6,7 @@ source("R/services_auth.R")
 source("R/services_filters.R")
 source("R/services_navigation.R")
 source("R/services_pagination.R")
+source("R/server/ui_main_body.R")
 
 # Data sources.
 db_ext <- read.csv("datos_extension.csv", stringsAsFactors = FALSE)
