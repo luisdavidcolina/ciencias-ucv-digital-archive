@@ -216,3 +216,44 @@ a:hover {
     color: #fff;
     margin-top: 0.5rem;
 }
+
+/* ========================================= */
+/* --- RESPONSIVE & MOBILE CSS OVERRIDES --- */
+/* ========================================= */
+@media (max-width: 768px) {
+    /* Ajustes flexbox para evitar amontonamiento en móviles */
+    .ds-item-card {
+        padding: 0.75rem 0;
+    }
+    
+    .ds-item-thumbnail {
+        width: 60px;
+        min-width: 60px;
+    }
+    .ds-item-thumbnail i {
+        font-size: 32px;
+    }
+    
+    .ds-item-title {
+        font-size: 1rem !important;
+    }
+    .ds-item-abstract {
+        -webkit-line-clamp: 2; /* Reduce el resumen en pantallas pequeñas */
+    }
+
+    /* Romper cabeceras y centrar textos pequeños */
+    .ds-results-header {
+        flex-direction: column;
+        align-items:flex-start;
+    }
+    .ds-results-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Botones de search full-width si llegan a encogerse */
+    .ds-btn-primary {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}

@@ -53,6 +53,18 @@ ui <- bs4DashPage(
                          div(class="input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class="btn ds-btn-primary"))
                      )
                  ),
+                 # Controles DSpace (Gear Ajustes)
+                 div(class = "d-flex justify-content-end align-items-center mb-3", style="background-color: #e9ecef; padding: 10px; border-radius: 4px;",
+                     tags$i(class = "fas fa-cog", style="margin-right:10px; color:#6c757d;"), tags$span(style="margin-right:15px; font-weight:bold; color:#495057;", "Ajustes:"),
+                     tags$span("Ordenar por:"), 
+                     div(style="width: 180px; margin-left: 10px; margin-right: 20px;", 
+                         selectInput("sort_ext", label=NULL, choices=c("Lo más relevante", "Título A-Z", "Fecha de Emisión (Asc)", "Fecha de Emisión (Desc)"), selectize=FALSE)
+                     ),
+                     tags$span("Resultados por página:"), 
+                     div(style="width: 80px; margin-left: 10px;", 
+                         selectInput("rpp_ext", label=NULL, choices=c("5", "10", "20"), selected="5", selectize=FALSE)
+                     )
+                 ),
                  uiOutput("list_extension")
           )
         )
@@ -77,6 +89,18 @@ ui <- bs4DashPage(
                      div(class = "input-group",
                          tags$input(id="search_rrhh", type="text", class="form-control ds-search-input", placeholder="Buscar por Cédula o Empleado..."),
                          div(class="input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class="btn ds-btn-primary"))
+                     )
+                 ),
+                 # Controles DSpace (Gear Ajustes)
+                 div(class = "d-flex justify-content-end align-items-center mb-3", style="background-color: #e9ecef; padding: 10px; border-radius: 4px;",
+                     tags$i(class = "fas fa-cog", style="margin-right:10px; color:#6c757d;"), tags$span(style="margin-right:15px; font-weight:bold; color:#495057;", "Ajustes:"),
+                     tags$span("Ordenar por:"), 
+                     div(style="width: 180px; margin-left: 10px; margin-right: 20px;", 
+                         selectInput("sort_rrhh", label=NULL, choices=c("Lo más relevante", "Empleado A-Z", "Fecha Ingreso (Asc)", "Fecha Ingreso (Desc)"), selectize=FALSE)
+                     ),
+                     tags$span("Resultados por página:"), 
+                     div(style="width: 80px; margin-left: 10px;", 
+                         selectInput("rpp_rrhh", label=NULL, choices=c("5", "10", "20"), selected="5", selectize=FALSE)
                      )
                  ),
                  uiOutput("list_rrhh")
