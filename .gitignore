@@ -1,0 +1,7 @@
+# Credenciales sensibles
+deploy_token.R
+rsconnect/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata

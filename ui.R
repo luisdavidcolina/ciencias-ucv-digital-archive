@@ -7,7 +7,7 @@ ui <- bs4DashPage(
   
   header = bs4DashNavbar(
     status = "white", skin = "light",
-    title = bs4DashBrand(title = "DSpace UCV", color = "white", href = "#"),
+    title = bs4DashBrand(title = "Archivo Digital UCV", color = "white", href = "#"),
     rightUi = tagList(
       tags$li(class = "nav-item dropdown", tags$a(href="#", class="nav-link", icon("search"))),
       tags$li(class = "nav-item dropdown", tags$a(href="#", class="nav-link", icon("sign-in-alt"), " Iniciar sesión"))
@@ -22,7 +22,7 @@ ui <- bs4DashPage(
       bs4SidebarMenuItem("Archivo Extensión", tabName = "tab_extension", icon = icon("university")),
       bs4SidebarMenuItem("Expedientes RRHH", tabName = "tab_rrhh", icon = icon("lock")),
       bs4SidebarHeader("Backoffice"),
-      bs4SidebarMenuItem("Mi DSpace (Admin)", tabName = "mydspace_tab", icon = icon("inbox"), badgeLabel = "2", badgeColor = "warning")
+      bs4SidebarMenuItem("Panel de Control", tabName = "mydspace_tab", icon = icon("inbox"), badgeLabel = "2", badgeColor = "warning")
     )
   ),
   
@@ -44,6 +44,10 @@ ui <- bs4DashPage(
               bs4Card(title = "Filtros Académicos", status = "secondary", solidHeader = F, collapsible = F, width = 12,
                 checkboxGroupInput("ext_doc_type", "Tipología Documental:", choices = c("Proyecto de Investigación", "Plano Arquitectónico", "Acta", "Convenio"), selected = character(0)),
                 div(style="margin-top:15px;", actionButton("btn_update_ext", "Aplicar", class="btn ds-btn-primary w-100"))
+              ),
+              bs4Card(title = "Ajustes de Vista", status = "secondary", solidHeader = F, collapsible = F, width = 12, class = "mt-3 ds-facet-accordion",
+                selectInput("sort_ext", "Ordenar por:", choices=c("Lo más relevante", "Título A-Z", "Fecha de Emisión (Asc)", "Fecha de Emisión (Desc)"), selectize=FALSE),
+                selectInput("rpp_ext", "Resultados por página:", choices=c("5", "10", "20"), selected="5", selectize=FALSE)
               )
           ),
           column(width = 9,
@@ -51,18 +55,6 @@ ui <- bs4DashPage(
                      div(class = "input-group",
                          tags$input(id="search_ext", type="text", class="form-control ds-search-input", placeholder="Buscar proyectos, actas..."),
                          div(class="input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class="btn ds-btn-primary"))
-                     )
-                 ),
-                 # Controles DSpace (Gear Ajustes)
-                 div(class = "d-flex justify-content-end align-items-center mb-3", style="background-color: #e9ecef; padding: 10px; border-radius: 4px;",
-                     tags$i(class = "fas fa-cog", style="margin-right:10px; color:#6c757d;"), tags$span(style="margin-right:15px; font-weight:bold; color:#495057;", "Ajustes:"),
-                     tags$span("Ordenar por:"), 
-                     div(style="width: 180px; margin-left: 10px; margin-right: 20px;", 
-                         selectInput("sort_ext", label=NULL, choices=c("Lo más relevante", "Título A-Z", "Fecha de Emisión (Asc)", "Fecha de Emisión (Desc)"), selectize=FALSE)
-                     ),
-                     tags$span("Resultados por página:"), 
-                     div(style="width: 80px; margin-left: 10px;", 
-                         selectInput("rpp_ext", label=NULL, choices=c("5", "10", "20"), selected="5", selectize=FALSE)
                      )
                  ),
                  uiOutput("list_extension")
@@ -82,6 +74,10 @@ ui <- bs4DashPage(
                 tags$hr(),
                 checkboxGroupInput("rrhh_doc_type", "Clase Documento:", choices = c("Hoja de Vida", "Contrato", "Evaluación Desempeño", "Nómina"), selected = character(0)),
                 div(style="margin-top:15px;", actionButton("btn_update_rrhh", "Aplicar", class="btn ds-btn-primary w-100"))
+              ),
+              bs4Card(title = "Ajustes de Vista", status = "secondary", solidHeader = F, collapsible = F, width = 12, class = "mt-3 ds-facet-accordion",
+                selectInput("sort_rrhh", "Ordenar por:", choices=c("Lo más relevante", "Empleado A-Z", "Fecha Ingreso (Asc)", "Fecha Ingreso (Desc)"), selectize=FALSE),
+                selectInput("rpp_rrhh", "Resultados por página:", choices=c("5", "10", "20"), selected="5", selectize=FALSE)
               )
           ),
           column(width = 9,
@@ -89,18 +85,6 @@ ui <- bs4DashPage(
                      div(class = "input-group",
                          tags$input(id="search_rrhh", type="text", class="form-control ds-search-input", placeholder="Buscar por Cédula o Empleado..."),
                          div(class="input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class="btn ds-btn-primary"))
-                     )
-                 ),
-                 # Controles DSpace (Gear Ajustes)
-                 div(class = "d-flex justify-content-end align-items-center mb-3", style="background-color: #e9ecef; padding: 10px; border-radius: 4px;",
-                     tags$i(class = "fas fa-cog", style="margin-right:10px; color:#6c757d;"), tags$span(style="margin-right:15px; font-weight:bold; color:#495057;", "Ajustes:"),
-                     tags$span("Ordenar por:"), 
-                     div(style="width: 180px; margin-left: 10px; margin-right: 20px;", 
-                         selectInput("sort_rrhh", label=NULL, choices=c("Lo más relevante", "Empleado A-Z", "Fecha Ingreso (Asc)", "Fecha Ingreso (Desc)"), selectize=FALSE)
-                     ),
-                     tags$span("Resultados por página:"), 
-                     div(style="width: 80px; margin-left: 10px;", 
-                         selectInput("rpp_rrhh", label=NULL, choices=c("5", "10", "20"), selected="5", selectize=FALSE)
                      )
                  ),
                  uiOutput("list_rrhh")
@@ -112,7 +96,7 @@ ui <- bs4DashPage(
       # TAB 3: ADMIN BACKOFFICE (MY DSPACE)
       # ========================================
       bs4TabItem(tabName = "mydspace_tab",
-        tags$div(style="margin-bottom: 20px;", tags$h3(style="font-family: 'Nunito', sans-serif; color: #212529;", "Mi DSpace")),
+        tags$div(style="margin-bottom: 20px;", tags$h3(style="font-family: 'Nunito', sans-serif; color: #212529;", "Bandeja Administrativa")),
         fluidRow(
           bs4ValueBox(value = "2", subtitle = "Flujo de Trabajo", icon = icon("clipboard-check"), color = "warning", width = 4),
           bs4ValueBox(value = "18", subtitle = "Envíos archivados", icon = icon("archive"), color = "success", width = 4),
