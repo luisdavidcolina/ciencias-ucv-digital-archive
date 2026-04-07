@@ -52,6 +52,15 @@ a:hover {
     margin-right: 0.35rem;
 }
 
+.main-header .ds-navbar-logo {
+    text-align: left !important;
+    font-weight: 800;
+    color: #2b4e72 !important;
+    white-space: nowrap;
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+}
+
 .ds-page-header {
     background: #ffffff;
     border: 1px solid #dee2e6;

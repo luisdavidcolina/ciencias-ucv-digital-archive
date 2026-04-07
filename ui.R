@@ -7,6 +7,16 @@ ui <- bs4DashPage(
   header = bs4DashNavbar(
     title = NULL,
     status = "white", skin = "light",
+    leftUi = tagList(
+      tags$li(
+        class = "nav-item dropdown",
+        tags$span(
+          class = "ds-navbar-logo nav-link",
+          tags$i(class = "fas fa-landmark"),
+          " Departamento de Extension"
+        )
+      )
+    ),
     rightUi = tagList(
       # Estos se mostrarán solo via conditionalPanel más adelante
       tags$li(class="nav-item dropdown", 
@@ -75,7 +85,6 @@ ui <- bs4DashPage(
     
     # CONTENIDO DEL REPOSITORIO (Dashboard)
     conditionalPanel("output.is_logged",
-       div(class = "ds-page-header", tags$i(class = "fas fa-landmark"), " Departamento de Extension"),
        uiOutput("main_body")
     )
   ),
