@@ -8,6 +8,7 @@ source("R/services_navigation.R")
 source("R/services_pagination.R")
 source("R/services_thesaurus.R")
 source("R/server/ui_main_body.R")
+source("R/server/admin_panel.R")
 source("R/server/stats_admin.R")
 source("R/server/document_modal.R")
 
