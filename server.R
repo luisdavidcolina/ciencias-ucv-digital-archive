@@ -44,6 +44,24 @@ server <- function(input, output, session) {
       showNotification("Credenciales inválidas. Acceso denegado.", type = "error")
     }
   })
+
+  observeEvent(session_state$logged, {
+    if (!isTRUE(session_state$logged)) return()
+
+    modulo_actual <- session_state$modulo
+    rol_actual <- session_state$rol
+
+    target_tab <- resolve_default_tab(modulo_actual, rol_actual)
+    if (is.null(target_tab) || !nzchar(target_tab)) {
+      target_tab <- if (identical(modulo_actual, "RRHH")) "tab_rrhh" else "tab_extension"
+    }
+
+    session$onFlushed(function() {
+      # Try server-side tab update first, then keep JS fallback for compatibility.
+      try(updateTabItems(session, "sidebar_tabs", selected = target_tab), silent = TRUE)
+      session$sendCustomMessage("navigateToSearch", list(modulo = modulo_actual))
+    }, once = TRUE)
+  }, ignoreInit = TRUE)
   
   observeEvent(input$logout_btn, {
     session_state$logged <- FALSE

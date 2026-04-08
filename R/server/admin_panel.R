@@ -298,7 +298,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     people <- sort(unique(c(rrhh_people_store(), new_name)))
     rrhh_people_store(people)
     updateSelectInput(session, "person_edit_target", choices = people)
-    updateSelectizeInput(session, "person_link_people", choices = people, selected = split_person_terms(input$person_link_people), server = TRUE)
+    updateSelectizeInput(session, "person_link_people", choices = people, selected = split_person_terms(input$person_link_people))
     showNotification("Persona agregada al catálogo de RRHH.", type = "message")
   }, ignoreInit = TRUE)
 
@@ -319,7 +319,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     people <- extract_people_choices(rrhh_df)
     rrhh_people_store(people)
     updateSelectInput(session, "person_edit_target", choices = people, selected = new_name)
-    updateSelectizeInput(session, "person_link_people", choices = people, server = TRUE)
+    updateSelectizeInput(session, "person_link_people", choices = people)
     showNotification("Persona renombrada y vínculos actualizados.", type = "message")
   }, ignoreInit = TRUE)
 
@@ -339,7 +339,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     people <- extract_people_choices(rrhh_df)
     rrhh_people_store(people)
     updateSelectInput(session, "person_edit_target", choices = people)
-    updateSelectizeInput(session, "person_link_people", choices = people, server = TRUE)
+    updateSelectizeInput(session, "person_link_people", choices = people)
     showNotification("Persona eliminada del catálogo y desvinculada de expedientes.", type = "warning")
   }, ignoreInit = TRUE)
 
@@ -352,7 +352,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     idx <- match(rec, rrhh_df$empleado)
     if (is.na(idx)) return()
     current_people <- split_person_terms(rrhh_df$personas_relacionadas[idx])
-    updateSelectizeInput(session, "person_link_people", selected = current_people, server = TRUE)
+    updateSelectizeInput(session, "person_link_people", selected = current_people)
   }, ignoreInit = TRUE)
 
   observeEvent(input$person_link_save_btn, {
