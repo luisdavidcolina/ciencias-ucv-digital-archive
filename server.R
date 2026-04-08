@@ -90,7 +90,7 @@ server <- function(input, output, session) {
     }
     if (session_state$modulo == "RRHH") {
             lista_menu[[length(lista_menu) + 1]] <- bs4SidebarMenuItem(
-                "Expedientes RRHH",
+          "Archivos RRHH",
                 tabName = "tab_rrhh",
                 icon = icon("id-card"),
                 selected = identical(tab_default, "tab_rrhh")
@@ -267,16 +267,30 @@ server <- function(input, output, session) {
     )
   
   output$list_rrhh <- renderUI({
-    datos <- dat_rrhh_react(); if (nrow(datos) == 0) return(div(class = "alert alert-secondary", "No hay expedientes."))
+    datos <- dat_rrhh_react(); if (nrow(datos) == 0) return(div(class = "alert alert-secondary", "No hay archivos de personal."))
     tarjetas <- lapply(1:nrow(datos), function(i) {
       fila <- datos[i, ]
+      idx_real <- i
+      btn_actions <- if (session_state$rol == "Admin") {
+        div(
+          class = "ds-item-actions",
+          tags$button(type = "button", class = "btn btn-sm btn-outline-info ds-action-btn", title = "Visualizar", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh', idx: %s, nonce: Date.now()}, {priority: 'event'});", idx_real), tags$i(class = "fas fa-eye")),
+          tags$button(type = "button", class = "btn btn-sm btn-outline-warning ds-action-btn", title = "Editar", tags$i(class = "fas fa-pen")),
+          tags$button(type = "button", class = "btn btn-sm btn-outline-primary ds-action-btn", title = "Descargar", tags$i(class = "fas fa-download"))
+        )
+      } else {
+        NULL
+      }
+
+      titulo_rrhh <- paste(fila$doc_type, "-", fila$empleado)
       div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-user-lock", style="color:#dc3545;")),
-                div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", i), paste("Expediente:", fila$empleado)),
+                div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", i), titulo_rrhh),
            div(class = "ds-item-authors", tags$strong(paste("C.I.:", fila$cedula))),
-         div(class = "ds-item-authors", paste("Personas asociadas:", fila$personas_relacionadas)),
+         div(class = "ds-item-authors", paste("Persona titular y vinculadas:", fila$personas_relacionadas)),
            div(class = "ds-item-publisher", paste("Adscripción:", fila$departamento)),
                      div(class = "ds-item-date", paste("Ubicación física:", fila$ubicacion)),
-                     div(class = "ds-item-tags", render_tesauro_badges(fila))))
+                     div(class = "ds-item-tags", render_tesauro_badges(fila))),
+                btn_actions)
     })
     tagList(tarjetas)
   })

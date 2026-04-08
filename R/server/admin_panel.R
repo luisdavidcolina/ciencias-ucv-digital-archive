@@ -209,7 +209,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     encabezados <- if (session_state$modulo == "Extensión") {
       tags$tr(tags$th("Título"), tags$th("Autor"), tags$th("Fecha"), tags$th("Tipo"), tags$th("Ubicación"), tags$th("Acciones"))
     } else {
-      tags$tr(tags$th("Empleado"), tags$th("C.I."), tags$th("Personas"), tags$th("Depto."), tags$th("Estatus"), tags$th("Tipo"), tags$th("Acciones"))
+      tags$tr(tags$th("Persona titular"), tags$th("C.I."), tags$th("Personas vinculadas"), tags$th("Depto."), tags$th("Estatus"), tags$th("Tipo de archivo"), tags$th("Acciones"))
     }
 
     tags$div(class = "table-responsive",
@@ -231,13 +231,21 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     paste("Pág", p_admin(), "de", tot)
   })
 
-  output$admin_people_admin <- renderUI({
+  output$admin_people_tab <- renderUI({
     if (!identical(session_state$modulo, "RRHH")) return(NULL)
 
     people <- rrhh_people_store()
     rrhh_df <- rrhh_admin_data()
-    if (length(people) == 0) {
-      return(tags$div(class = "alert alert-secondary mt-3", "No hay personas asociadas registradas."))
+    selected_person <- if (length(people) > 0) people[1] else NULL
+
+    total_files <- nrow(rrhh_df)
+    total_people <- length(people)
+    avg_files_per_person <- if (total_people > 0) {
+      round(mean(vapply(people, function(p) {
+        sum(vapply(seq_len(nrow(rrhh_df)), function(r) row_has_any_person(rrhh_df$empleado[r], rrhh_df$personas_relacionadas[r], p), logical(1)))
+      }, numeric(1))), 2)
+    } else {
+      0
     }
 
     rows <- lapply(people, function(p) {
@@ -249,13 +257,19 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     })
 
     bs4Card(
-      title = tags$span(tags$i(class = "fas fa-users"), " Personas Asociadas (RRHH)"),
+      title = tags$span(tags$i(class = "fas fa-users"), " Personas y Archivos de Personal (RRHH)"),
       status = "secondary",
       solidHeader = FALSE,
       width = 12,
       collapsible = TRUE,
-      collapsed = TRUE,
+      collapsed = FALSE,
       class = "mt-3",
+      fluidRow(
+        column(4, bs4ValueBox(value = total_people, subtitle = "Personas registradas", icon = icon("users"), color = "primary", width = 12)),
+        column(4, bs4ValueBox(value = total_files, subtitle = "Archivos RRHH", icon = icon("folder-open"), color = "info", width = 12)),
+        column(4, bs4ValueBox(value = avg_files_per_person, subtitle = "Promedio archivos/persona", icon = icon("chart-line"), color = "success", width = 12))
+      ),
+      tags$hr(),
       fluidRow(
         column(6,
           tags$label(class = "font-weight-bold", "Registrar Persona"),
@@ -264,7 +278,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
         ),
         column(6,
           tags$label(class = "font-weight-bold", "Renombrar / Eliminar"),
-          selectInput("person_edit_target", NULL, choices = people),
+          selectInput("person_edit_target", NULL, choices = people, selected = selected_person),
           textInput("person_edit_name", NULL, placeholder = "Nuevo nombre"),
           tags$div(
             actionButton("person_rename_btn", "Renombrar", icon = icon("edit"), class = "btn btn-sm btn-outline-secondary"),
@@ -275,18 +289,95 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
       tags$hr(),
       fluidRow(
         column(6,
-          tags$label(class = "font-weight-bold", "Vincular personas a expediente"),
-          selectInput("person_link_record", "Expediente", choices = rrhh_df$empleado),
-          selectizeInput("person_link_people", "Personas asociadas", choices = people, multiple = TRUE, options = list(plugins = list("remove_button"))),
+          tags$label(class = "font-weight-bold", "Vincular personas a archivo"),
+          selectInput("person_link_record", "Archivo (persona titular)", choices = rrhh_df$empleado),
+          selectizeInput("person_link_people", "Personas vinculadas", choices = people, multiple = TRUE, options = list(plugins = list("remove_button"))),
           actionButton("person_link_save_btn", "Guardar vinculación", icon = icon("link"), class = "btn btn-sm btn-outline-success")
         ),
         column(6,
+          tags$label(class = "font-weight-bold", "Perfil de persona"),
+          selectInput("person_profile_target", "Persona", choices = people, selected = selected_person),
+          uiOutput("admin_person_profile")
+        )
+      ),
+      tags$hr(),
+      fluidRow(
+        column(6,
+          tags$label(class = "font-weight-bold", "Ver archivos de la persona"),
+          selectInput("person_files_target", "Persona", choices = people),
+          uiOutput("admin_person_linked_files")
+        ),
+        column(6, tags$div())
+      ),
+      tags$hr(),
+      fluidRow(
+        column(12,
           tags$table(class = "table table-sm table-hover mb-0",
-            tags$thead(class = "thead-light", tags$tr(tags$th("Persona"), tags$th("Expedientes asociados"))),
+            tags$thead(class = "thead-light", tags$tr(tags$th("Persona"), tags$th("Archivos asociados"))),
             tags$tbody(rows)
           )
         )
       )
+    )
+  })
+
+  output$admin_person_profile <- renderUI({
+    req(identical(session_state$modulo, "RRHH"))
+    rrhh_df <- rrhh_admin_data()
+    person <- input$person_profile_target
+
+    if (is.null(person) || !nzchar(person)) {
+      return(tags$div(class = "alert alert-secondary", "Selecciona una persona para ver información."))
+    }
+
+    keep <- vapply(seq_len(nrow(rrhh_df)), function(i) row_has_any_person(rrhh_df$empleado[i], rrhh_df$personas_relacionadas[i], person), logical(1))
+    rows <- rrhh_df[keep, , drop = FALSE]
+
+    if (nrow(rows) == 0) {
+      return(tags$div(class = "alert alert-secondary", "Esta persona no tiene archivos vinculados actualmente."))
+    }
+
+    depto_top <- names(sort(table(rows$departamento), decreasing = TRUE))[1]
+    estatus_top <- names(sort(table(rows$estatus), decreasing = TRUE))[1]
+    tipos <- paste(sort(unique(rows$doc_type)), collapse = ", ")
+
+    tags$div(class = "p-2", style = "background:#f8f9fa; border:1px solid #e3e7ec; border-radius:8px;",
+      tags$p(tags$strong("Persona:"), " ", person, style = "margin-bottom:0.35rem;"),
+      tags$p(tags$strong("Total de archivos:"), " ", nrow(rows), style = "margin-bottom:0.35rem;"),
+      tags$p(tags$strong("Departamento predominante:"), " ", depto_top, style = "margin-bottom:0.35rem;"),
+      tags$p(tags$strong("Estatus predominante:"), " ", estatus_top, style = "margin-bottom:0.35rem;"),
+      tags$p(tags$strong("Tipos de archivo:"), " ", tipos, style = "margin-bottom:0;")
+    )
+  })
+
+  output$admin_person_linked_files <- renderUI({
+    req(identical(session_state$modulo, "RRHH"))
+
+    rrhh_df <- rrhh_admin_data()
+    person <- input$person_files_target
+    req(!is.null(person), nzchar(person))
+
+    keep <- vapply(seq_len(nrow(rrhh_df)), function(i) row_has_any_person(rrhh_df$empleado[i], rrhh_df$personas_relacionadas[i], person), logical(1))
+    rows <- rrhh_df[keep, , drop = FALSE]
+
+    if (nrow(rows) == 0) {
+      return(tags$div(class = "alert alert-secondary", "No hay archivos asociados a esta persona."))
+    }
+
+    body <- lapply(seq_len(nrow(rows)), function(i) {
+      r <- rows[i, ]
+      tags$tr(
+        tags$td(r$empleado),
+        tags$td(r$cedula),
+        tags$td(r$doc_type),
+        tags$td(r$departamento),
+        tags$td(r$estatus)
+      )
+    })
+
+    tags$table(class = "table table-sm table-striped mb-0",
+      tags$thead(class = "thead-light", tags$tr(tags$th("Archivo"), tags$th("C.I."), tags$th("Tipo"), tags$th("Depto."), tags$th("Estatus"))),
+      tags$tbody(body)
     )
   })
 
@@ -340,7 +431,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     rrhh_people_store(people)
     updateSelectInput(session, "person_edit_target", choices = people)
     updateSelectizeInput(session, "person_link_people", choices = people)
-    showNotification("Persona eliminada del catálogo y desvinculada de expedientes.", type = "warning")
+    showNotification("Persona eliminada del catálogo y desvinculada de archivos.", type = "warning")
   }, ignoreInit = TRUE)
 
   observeEvent(input$person_link_record, {
@@ -369,7 +460,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     rrhh_admin_data(rrhh_df)
 
     rrhh_people_store(extract_people_choices(rrhh_df))
-    showNotification("Personas vinculadas al expediente RRHH.", type = "message")
+    showNotification("Personas vinculadas al archivo RRHH.", type = "message")
   }, ignoreInit = TRUE)
 
   # --- TAXONOMÍAS ---

@@ -16,15 +16,15 @@ register_document_modal_handlers <- function(input, output, session, session_sta
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion))
       )
     } else {
-      titulo <- paste("Expediente:", doc$empleado)
+      titulo <- paste("Archivo de:", doc$empleado)
       resumen <- paste("Documento de RRHH en estado", doc$estatus, "adscrito a", doc$departamento)
       thumb_icon <- "fas fa-user-lock"
       thumb_badge <- get_doc_primary_term(doc)
       tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
       meta <- tagList(
-        div(class = "ds-doc-meta-row", tags$span(class = "k", "Empleado"), tags$span(class = "v", doc$empleado)),
+        div(class = "ds-doc-meta-row", tags$span(class = "k", "Persona titular"), tags$span(class = "v", doc$empleado)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Cédula"), tags$span(class = "v", doc$cedula)),
-        div(class = "ds-doc-meta-row", tags$span(class = "k", "Personas asociadas"), tags$span(class = "v", doc$personas_relacionadas)),
+        div(class = "ds-doc-meta-row", tags$span(class = "k", "Personas vinculadas"), tags$span(class = "v", doc$personas_relacionadas)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tesauro"), tags$span(class = "v", if (nzchar(tesauro)) tesauro else "Sin tesauro")),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion)),

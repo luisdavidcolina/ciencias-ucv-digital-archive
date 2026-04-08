@@ -60,15 +60,25 @@ filter_rrhh_data <- function(datos, search_term) {
   out <- datos
 
   if (!is.null(search_term) && nzchar(search_term)) {
-    term <- tolower(search_term)
-    people_col <- if ("personas_relacionadas" %in% names(out)) tolower(out$personas_relacionadas) else ""
-    out <- out[
-      grepl(term, tolower(out$empleado)) |
-        grepl(term, tolower(out$cedula)) |
-        grepl(term, people_col),
-      ,
-      drop = FALSE
-    ]
+    query <- tolower(trimws(search_term))
+    tokens <- strsplit(query, "\\s+")[[1]]
+    tokens <- tokens[nzchar(tokens)]
+
+    search_cols <- c(
+      "empleado", "cedula", "departamento", "doc_type", "estatus",
+      "personas_relacionadas", "tesauro_primario", "tesauro_secundario", "descriptores_libres"
+    )
+    search_cols <- search_cols[search_cols %in% names(out)]
+
+    haystack <- apply(out[, search_cols, drop = FALSE], 1, function(row) {
+      tolower(paste(row, collapse = " "))
+    })
+
+    keep <- vapply(haystack, function(text) {
+      all(vapply(tokens, function(tok) grepl(tok, text, fixed = TRUE), logical(1)))
+    }, logical(1))
+
+    out <- out[keep, , drop = FALSE]
   }
 
   out

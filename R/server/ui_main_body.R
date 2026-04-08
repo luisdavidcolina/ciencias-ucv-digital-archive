@@ -94,7 +94,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 collapsed = FALSE,
                 selectizeInput(
                   "rrhh_doc_type",
-                  "Tipo de expediente",
+                  "Tipo de archivo",
                   choices = rrhh_doc_types,
                   multiple = TRUE,
                   width = "100%",
@@ -193,7 +193,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             )
           )
         ),
-        tabPanel("Monitor de Expedientes", icon = icon("table"), tags$br(),
+        tabPanel("Monitor de Archivos", icon = icon("table"), tags$br(),
           bs4Card(title = tags$span(tags$i(class = "fas fa-database"), " Directorio Activo Local"), status = "info", solidHeader = FALSE, width = 12, collapsible = FALSE,
             fluidRow(
               column(3, textInput("admin_search", NULL, placeholder = "Buscar en tabla...", width = "100%")),
@@ -206,7 +206,6 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             ),
             tags$hr(style = "margin-top:0;"),
             uiOutput("admin_control_table"),
-            uiOutput("admin_people_admin"),
             tags$div(class = "d-flex justify-content-between align-items-center mt-3",
               tags$span(class = "text-muted", style = "font-size:0.85rem;", uiOutput("admin_table_summary", inline = TRUE)),
               tags$div(
@@ -216,6 +215,9 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
               )
             )
           )
+        ),
+        tabPanel("Personas", icon = icon("users"), tags$br(),
+          uiOutput("admin_people_tab")
         ),
         tabPanel("Categorías", icon = icon("sitemap"), tags$br(),
           fluidRow(
