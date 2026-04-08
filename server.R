@@ -209,9 +209,12 @@ server <- function(input, output, session) {
 
   observeEvent(c(input$btn_s_rrhh, input$btn_update_rrhh), { p_rrhh(1) }, ignoreInit = TRUE)
   dat_rrhh_react <- reactive({
+      input$btn_s_rrhh
+      input$btn_update_rrhh
         datos <- filter_rrhh_data(db_rrhh, input$search_rrhh)
 
         datos <- filter_by_doc_types(datos, input$rrhh_doc_type)
+      datos <- filter_by_persons(datos, input$rrhh_people)
         datos <- filter_by_tesauro(datos, input$rrhh_tesauro)
 
         if (!is.null(input$rrhh_estatus) && nzchar(input$rrhh_estatus) && input$rrhh_estatus != "Todos") {
@@ -252,6 +255,7 @@ server <- function(input, output, session) {
       div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-user-lock", style="color:#dc3545;")),
                 div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", i), paste("Expediente:", fila$empleado)),
            div(class = "ds-item-authors", tags$strong(paste("C.I.:", fila$cedula))),
+         div(class = "ds-item-authors", paste("Personas asociadas:", fila$personas_relacionadas)),
            div(class = "ds-item-publisher", paste("Adscripción:", fila$departamento)),
                      div(class = "ds-item-date", paste("Ubicación física:", fila$ubicacion)),
                      div(class = "ds-item-tags", render_tesauro_badges(fila))))

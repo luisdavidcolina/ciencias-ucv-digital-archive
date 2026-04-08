@@ -61,7 +61,14 @@ filter_rrhh_data <- function(datos, search_term) {
 
   if (!is.null(search_term) && nzchar(search_term)) {
     term <- tolower(search_term)
-    out <- out[grepl(term, tolower(out$empleado)) | grepl(term, tolower(out$cedula)), , drop = FALSE]
+    people_col <- if ("personas_relacionadas" %in% names(out)) tolower(out$personas_relacionadas) else ""
+    out <- out[
+      grepl(term, tolower(out$empleado)) |
+        grepl(term, tolower(out$cedula)) |
+        grepl(term, people_col),
+      ,
+      drop = FALSE
+    ]
   }
 
   out

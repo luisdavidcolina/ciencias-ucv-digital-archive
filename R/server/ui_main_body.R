@@ -71,6 +71,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
   if (session_state$modulo == "RRHH") {
     rrhh_doc_types <- extract_doc_type_set(db_rrhh$doc_type)
     rrhh_tesauro_choices <- extract_tesauro_choices(db_rrhh)
+    rrhh_people_choices <- extract_people_choices(db_rrhh)
     rrhh_fechas <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
     rrhh_fechas <- rrhh_fechas[!is.na(rrhh_fechas)]
     rrhh_min_fecha <- if (length(rrhh_fechas) > 0) min(rrhh_fechas) else Sys.Date() - 365
@@ -118,6 +119,20 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 radioButtons("rrhh_estatus", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
               ),
               bs4AccordionItem(
+                title = "Personas",
+                status = "secondary",
+                solidHeader = FALSE,
+                collapsed = TRUE,
+                selectizeInput(
+                  "rrhh_people",
+                  "Persona(s) asociada(s)",
+                  choices = rrhh_people_choices,
+                  multiple = TRUE,
+                  width = "100%",
+                  options = list(plugins = list("remove_button"), dropdownParent = "body")
+                )
+              ),
+              bs4AccordionItem(
                 title = "Tesauro",
                 status = "indigo",
                 solidHeader = FALSE,
@@ -128,7 +143,10 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             actionButton("btn_update_rrhh", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
           )
         ),
-        column(width = 9, uiOutput("list_rrhh"))
+        column(width = 9,
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar por persona, cédula o descriptor..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
+          uiOutput("list_rrhh")
+        )
       )
     )
   }
@@ -178,15 +196,17 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
         tabPanel("Monitor de Expedientes", icon = icon("table"), tags$br(),
           bs4Card(title = tags$span(tags$i(class = "fas fa-database"), " Directorio Activo Local"), status = "info", solidHeader = FALSE, width = 12, collapsible = FALSE,
             fluidRow(
-              column(4, textInput("admin_search", NULL, placeholder = "Buscar en tabla...", width = "100%")),
-              column(4, uiOutput("admin_filter_type")),
-              column(4, tags$div(style = "text-align:right; padding-top: 5px;",
+              column(3, textInput("admin_search", NULL, placeholder = "Buscar en tabla...", width = "100%")),
+              column(3, uiOutput("admin_filter_type")),
+              column(3, uiOutput("admin_filter_person")),
+              column(3, tags$div(style = "text-align:right; padding-top: 5px;",
                 actionButton("btn_export_csv", "Exportar CSV", icon = icon("file-csv"), class = "btn btn-outline-secondary btn-sm", style = "margin-right:5px;"),
                 actionButton("btn_refresh_table", "Refrescar", icon = icon("sync-alt"), class = "btn btn-outline-info btn-sm")
               ))
             ),
             tags$hr(style = "margin-top:0;"),
             uiOutput("admin_control_table"),
+            uiOutput("admin_people_admin"),
             tags$div(class = "d-flex justify-content-between align-items-center mt-3",
               tags$span(class = "text-muted", style = "font-size:0.85rem;", uiOutput("admin_table_summary", inline = TRUE)),
               tags$div(

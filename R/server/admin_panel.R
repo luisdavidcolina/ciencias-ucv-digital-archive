@@ -1,12 +1,23 @@
 register_admin_panel_outputs <- function(input, output, session, session_state, db_ext, db_rrhh, db_users) {
+  rrhh_admin_data <- reactiveVal(db_rrhh)
+  rrhh_people_store <- reactiveVal(extract_people_choices(db_rrhh))
+
+  get_mod_df <- function() {
+    if (identical(session_state$modulo, "Extensión")) {
+      db_ext
+    } else {
+      rrhh_admin_data()
+    }
+  }
+
   # --- KPIs ---
   output$kpi_total_docs <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     bs4ValueBox(value = nrow(df), subtitle = "Registros Totales", icon = icon("archive"), color = "primary", width = 12)
   })
 
   output$kpi_total_categorias <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     bs4ValueBox(value = length(unique(df$doc_type)), subtitle = "Categorías Activas", icon = icon("tags"), color = "warning", width = 12)
   })
 
@@ -16,7 +27,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
   })
 
   output$kpi_ultimo_ingreso <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     fecha_col <- if (session_state$modulo == "Extensión") df$fecha else df$fecha_ingreso
     ultima <- max(as.Date(fecha_col, format = "%Y-%m-%d"), na.rm = TRUE)
     bs4ValueBox(value = format(ultima, "%d/%m/%Y"), subtitle = "Última Entrada", icon = icon("clock"), color = "info", width = 12)
@@ -63,6 +74,8 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
             textInput("submit_cedula", NULL, placeholder = "Ej: V-12345678", width = "100%")
           )
         ),
+        tags$label(class = "font-weight-bold text-muted mt-2", "Personas Relacionadas"),
+        textInput("submit_personas", NULL, placeholder = "Ej: Susana Pérez; Dirección RRHH; Asesoría Legal", width = "100%"),
         fluidRow(
           column(4,
             tags$label(class = "font-weight-bold text-muted mt-2", "Clasificación *"),
@@ -93,7 +106,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
 
   # --- ÚLTIMOS INGRESOS ---
   output$recent_submissions <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     n <- min(3, nrow(df))
     items <- lapply(1:n, function(i) {
       f <- df[i, ]
@@ -117,13 +130,20 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
   observeEvent(input$btn_refresh_table, { p_admin(1) })
 
   output$admin_filter_type <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     tipos <- extract_doc_type_set(df$doc_type)
     selectizeInput("admin_type_filter", NULL, choices = tipos, multiple = TRUE, width = "100%")
   })
 
+  output$admin_filter_person <- renderUI({
+    if (!identical(session_state$modulo, "RRHH")) return(NULL)
+
+    people <- rrhh_people_store()
+    selectizeInput("admin_person_filter", NULL, choices = people, multiple = TRUE, width = "100%", options = list(placeholder = "Filtrar por persona"))
+  })
+
   output$admin_control_table <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
 
     if (!is.null(input$admin_search) && input$admin_search != "") {
       term <- tolower(input$admin_search)
@@ -135,6 +155,9 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     }
 
     df <- filter_by_doc_types(df, input$admin_type_filter)
+    if (identical(session_state$modulo, "RRHH")) {
+      df <- filter_by_persons(df, input$admin_person_filter)
+    }
 
     if (nrow(df) == 0) {
       return(tags$div(class = "alert alert-secondary text-center", tags$i(class = "fas fa-search"), " No se encontraron registros con estos filtros."))
@@ -170,6 +193,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
         tags$tr(
           tags$td(style = "vertical-align:middle; font-weight:600;", f$empleado),
           tags$td(style = "vertical-align:middle;", f$cedula),
+          tags$td(style = "vertical-align:middle; font-size:0.85em;", f$personas_relacionadas),
           tags$td(style = "vertical-align:middle;", f$departamento),
           tags$td(style = "vertical-align:middle;", tags$span(class = "ds-badge", style = sprintf("background-color:%s;", color_st), f$estatus)),
           tags$td(style = "vertical-align:middle;", tags$span(class = "ds-badge", style = "background-color:#6c757d;", f$doc_type)),
@@ -185,7 +209,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     encabezados <- if (session_state$modulo == "Extensión") {
       tags$tr(tags$th("Título"), tags$th("Autor"), tags$th("Fecha"), tags$th("Tipo"), tags$th("Ubicación"), tags$th("Acciones"))
     } else {
-      tags$tr(tags$th("Empleado"), tags$th("C.I."), tags$th("Depto."), tags$th("Estatus"), tags$th("Tipo"), tags$th("Acciones"))
+      tags$tr(tags$th("Empleado"), tags$th("C.I."), tags$th("Personas"), tags$th("Depto."), tags$th("Estatus"), tags$th("Tipo"), tags$th("Acciones"))
     }
 
     tags$div(class = "table-responsive",
@@ -197,19 +221,160 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
   })
 
   output$admin_table_summary <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     tags$span(paste("Total:", nrow(df), "registros en el módulo", session_state$modulo))
   })
 
   output$admin_page_info <- renderText({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     tot <- ceiling(nrow(df) / 8)
     paste("Pág", p_admin(), "de", tot)
   })
 
+  output$admin_people_admin <- renderUI({
+    if (!identical(session_state$modulo, "RRHH")) return(NULL)
+
+    people <- rrhh_people_store()
+    rrhh_df <- rrhh_admin_data()
+    if (length(people) == 0) {
+      return(tags$div(class = "alert alert-secondary mt-3", "No hay personas asociadas registradas."))
+    }
+
+    rows <- lapply(people, function(p) {
+      rel_count <- sum(vapply(seq_len(nrow(rrhh_df)), function(r) row_has_any_person(rrhh_df$empleado[r], rrhh_df$personas_relacionadas[r], p), logical(1)))
+      tags$tr(
+        tags$td(tags$strong(p)),
+        tags$td(rel_count)
+      )
+    })
+
+    bs4Card(
+      title = tags$span(tags$i(class = "fas fa-users"), " Personas Asociadas (RRHH)"),
+      status = "secondary",
+      solidHeader = FALSE,
+      width = 12,
+      collapsible = TRUE,
+      collapsed = TRUE,
+      class = "mt-3",
+      fluidRow(
+        column(6,
+          tags$label(class = "font-weight-bold", "Registrar Persona"),
+          textInput("person_new_name", NULL, placeholder = "Ej: Dirección de Personal"),
+          actionButton("person_add_btn", "Agregar persona", icon = icon("user-plus"), class = "btn btn-sm btn-outline-primary")
+        ),
+        column(6,
+          tags$label(class = "font-weight-bold", "Renombrar / Eliminar"),
+          selectInput("person_edit_target", NULL, choices = people),
+          textInput("person_edit_name", NULL, placeholder = "Nuevo nombre"),
+          tags$div(
+            actionButton("person_rename_btn", "Renombrar", icon = icon("edit"), class = "btn btn-sm btn-outline-secondary"),
+            actionButton("person_delete_btn", "Eliminar", icon = icon("trash"), class = "btn btn-sm btn-outline-danger ml-1")
+          )
+        )
+      ),
+      tags$hr(),
+      fluidRow(
+        column(6,
+          tags$label(class = "font-weight-bold", "Vincular personas a expediente"),
+          selectInput("person_link_record", "Expediente", choices = rrhh_df$empleado),
+          selectizeInput("person_link_people", "Personas asociadas", choices = people, multiple = TRUE, options = list(plugins = list("remove_button"))),
+          actionButton("person_link_save_btn", "Guardar vinculación", icon = icon("link"), class = "btn btn-sm btn-outline-success")
+        ),
+        column(6,
+          tags$table(class = "table table-sm table-hover mb-0",
+            tags$thead(class = "thead-light", tags$tr(tags$th("Persona"), tags$th("Expedientes asociados"))),
+            tags$tbody(rows)
+          )
+        )
+      )
+    )
+  })
+
+  observeEvent(input$person_add_btn, {
+    req(identical(session_state$modulo, "RRHH"))
+    new_name <- trimws(input$person_new_name)
+    if (!nzchar(new_name)) return()
+
+    people <- sort(unique(c(rrhh_people_store(), new_name)))
+    rrhh_people_store(people)
+    updateSelectInput(session, "person_edit_target", choices = people)
+    updateSelectizeInput(session, "person_link_people", choices = people, selected = split_person_terms(input$person_link_people), server = TRUE)
+    showNotification("Persona agregada al catálogo de RRHH.", type = "message")
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$person_rename_btn, {
+    req(identical(session_state$modulo, "RRHH"))
+    old_name <- input$person_edit_target
+    new_name <- trimws(input$person_edit_name)
+    if (!nzchar(old_name) || !nzchar(new_name)) return()
+
+    rrhh_df <- rrhh_admin_data()
+    rrhh_df$personas_relacionadas <- vapply(rrhh_df$personas_relacionadas, function(v) {
+      vals <- split_person_terms(v)
+      vals[vals == old_name] <- new_name
+      paste(unique(vals), collapse = ";")
+    }, character(1))
+    rrhh_admin_data(rrhh_df)
+
+    people <- extract_people_choices(rrhh_df)
+    rrhh_people_store(people)
+    updateSelectInput(session, "person_edit_target", choices = people, selected = new_name)
+    updateSelectizeInput(session, "person_link_people", choices = people, server = TRUE)
+    showNotification("Persona renombrada y vínculos actualizados.", type = "message")
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$person_delete_btn, {
+    req(identical(session_state$modulo, "RRHH"))
+    target <- input$person_edit_target
+    if (!nzchar(target)) return()
+
+    rrhh_df <- rrhh_admin_data()
+    rrhh_df$personas_relacionadas <- vapply(rrhh_df$personas_relacionadas, function(v) {
+      vals <- split_person_terms(v)
+      vals <- vals[vals != target]
+      paste(unique(vals), collapse = ";")
+    }, character(1))
+    rrhh_admin_data(rrhh_df)
+
+    people <- extract_people_choices(rrhh_df)
+    rrhh_people_store(people)
+    updateSelectInput(session, "person_edit_target", choices = people)
+    updateSelectizeInput(session, "person_link_people", choices = people, server = TRUE)
+    showNotification("Persona eliminada del catálogo y desvinculada de expedientes.", type = "warning")
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$person_link_record, {
+    req(identical(session_state$modulo, "RRHH"))
+    rrhh_df <- rrhh_admin_data()
+    rec <- input$person_link_record
+    if (!nzchar(rec)) return()
+
+    idx <- match(rec, rrhh_df$empleado)
+    if (is.na(idx)) return()
+    current_people <- split_person_terms(rrhh_df$personas_relacionadas[idx])
+    updateSelectizeInput(session, "person_link_people", selected = current_people, server = TRUE)
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$person_link_save_btn, {
+    req(identical(session_state$modulo, "RRHH"))
+    rrhh_df <- rrhh_admin_data()
+    rec <- input$person_link_record
+    if (!nzchar(rec)) return()
+
+    idx <- match(rec, rrhh_df$empleado)
+    if (is.na(idx)) return()
+
+    selected <- split_person_terms(input$person_link_people)
+    rrhh_df$personas_relacionadas[idx] <- paste(selected, collapse = ";")
+    rrhh_admin_data(rrhh_df)
+
+    rrhh_people_store(extract_people_choices(rrhh_df))
+    showNotification("Personas vinculadas al expediente RRHH.", type = "message")
+  }, ignoreInit = TRUE)
+
   # --- TAXONOMÍAS ---
   output$admin_tax_list <- renderUI({
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- get_mod_df()
     cats <- unique(df$doc_type)
     conteos <- table(df$doc_type)
 
