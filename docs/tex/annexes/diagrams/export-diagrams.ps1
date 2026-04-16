@@ -25,9 +25,15 @@ foreach ($file in $files) {
   try {
     Write-Host "Exportando $($file.Name) -> SVG"
     npx @mermaid-js/mermaid-cli -i $file.FullName -o $svgOut -b transparent -s 2
+    if ($LASTEXITCODE -ne 0) {
+      throw "Fallo al exportar SVG para $($file.Name) (exit code: $LASTEXITCODE)"
+    }
 
     Write-Host "Exportando $($file.Name) -> PDF"
     npx @mermaid-js/mermaid-cli -i $file.FullName -o $pdfOut -b white -s 2
+    if ($LASTEXITCODE -ne 0) {
+      throw "Fallo al exportar PDF para $($file.Name) (exit code: $LASTEXITCODE)"
+    }
   }
   catch {
     $hasErrors = $true

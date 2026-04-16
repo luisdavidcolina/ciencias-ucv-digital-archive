@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  16 APR 2026 14:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  16 APR 2026 14:43
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -637,6 +637,14 @@ File: pgflibraryarrows.meta.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfarrowwidth=\dimen299
 \pgfarrowlinewidth=\dimen300
 )
+(C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibra
+ryshapes.geometric.code.tex
+File: tikzlibraryshapes.geometric.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/libraries/shapes\pgflibraryshapes.geom
+etric.code.tex
+File: pgflibraryshapes.geometric.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+))
 Package hyperref Info: Option `colorlinks' set `true' on input line 37.
 )
 LaTeX Font Info:    Trying to load font information for T1+phv on input line 5.
@@ -768,9 +776,7 @@ LaTeX Font Info:    Font shape `T1/phv/b/n' will be
 Files/MiKTeX/fonts/enc/dvips/base/8r.enc}])
 (c:\ciencias-ucv-digital-archive\docs\tex\templates/frontmatter.tex
 LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 13.67995pt on input line 3.
-LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 19.70294pt on input line 3.
+(Font)              scaled to size 16.41594pt on input line 3.
 
 Overfull \hbox (8.67949pt too wide) in alignment at lines 6--12
  [] [] [] 
@@ -780,39 +786,46 @@ LaTeX Font Info:    Font shape `T1/phv/m/sc' will be
 (Font)              scaled to size 11.39996pt on input line 14.
 [1
 
-] (c:\ciencias-ucv-digital-archive\docs\tex\main.toc)
+] (c:\ciencias-ucv-digital-archive\docs\tex\main.toc
+LaTeX Info: Redefining \. on input line 1.
+LaTeX Info: Redefining \% on input line 1.
+LaTeX Font Info:    Font shape `T1/phv/b/sc' will be
+(Font)              scaled to size 11.39996pt on input line 2.
+ [2
+
+] [3] [4])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [2
-
-]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.lof)
+ [5]
+(c:\ciencias-ucv-digital-archive\docs\tex\main.lof
+LaTeX Info: Redefining \. on input line 1.
+LaTeX Info: Redefining \% on input line 1.
+)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [3
+ [6
 
 ]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.lot)
+(c:\ciencias-ucv-digital-archive\docs\tex\main.lot
+LaTeX Info: Redefining \. on input line 1.
+LaTeX Info: Redefining \% on input line 1.
+)
 \tf@lot=\write7
 \openout7 = `main.lot'.
 
- [4
+ [7
 
 ])
 Cap\'{\i }tulo 1.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/01_resumen_ejecutivo.tex
-LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 16.41594pt on input line 3.
-
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.20   \item E
-              standarizacion archivistica y fortalecimiento de control interno.
-[1
+l.28 \end{enumerate}
+                     [1
 
 
 ]) [2]
@@ -833,61 +846,61 @@ re-la-cio-na-les y nu-be pri-va-da/hibrida.
 ]) [6]
 Cap\'{\i }tulo 4.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_requerimientos.tex
-ignored error: Infinite glue shrinkage found in box being split [7
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 10.40245pt on input line 5.
 
-] [8]
-ignored error: Infinite glue shrinkage found in box being split [9] [10]
+[7
+
+]
+ignored error: Infinite glue shrinkage found in box being split [8] [9]
 Underfull \hbox (badness 10000) in paragraph at lines 138--138
 []|\T1/phv/m/n/12 Produccion (App + Post-
  []
 
-[11]) [12]
+ignored error: Infinite glue shrinkage found in box being split [10]) [11]
 Cap\'{\i }tulo 5.
 
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_arquitectura_objetivo.tex
-[13
+[12
 
-]) [14]
+]) [13]
 Cap\'{\i }tulo 6.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/05_diseno_funcional.tex
-[15
+[14
 
-]) [16]
+]) [15]
 Cap\'{\i }tulo 7.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/06_diseno_tecnico.tex
-[17
+[16
 
-]) [18]
+]) [17]
 Cap\'{\i }tulo 8.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/07_modelo_datos.tex [19
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/07_modelo_datos.tex [18
 
 ])
-[20]
+[19]
 Cap\'{\i }tulo 9.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/08_seguridad_auditoria.tex
-[21
-
-]) [22]
-Cap\'{\i }tulo 10.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex
-[23
-
-]) [24]
-Cap\'{\i }tulo 11.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/10_calidad_qa.tex [25
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/08_seguridad_auditoria.tex)
+[20
 
 ]
+Cap\'{\i }tulo 10.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex)
+[21
+
+]
+Cap\'{\i }tulo 11.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/10_calidad_qa.tex
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
 (Font)              Font shape `T1/phv/m/sl' tried instead on input line 22.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 11.39996pt on input line 22.
+ [22
 
-[26]) [27]
+])
+[23]
 Cap\'{\i }tulo 12.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/11_gobernanza_legal.tex
-[28
-
-]
 Underfull \hbox (badness 10000) in paragraph at lines 31--31
 []|\T1/phv/m/n/12 Coordinacion
  []
@@ -952,19 +965,21 @@ Overfull \hbox (23.58653pt too wide) in alignment at lines 27--36
  [] [] [] [] [] 
  []
 
-) [29]
+[24
+
+]) [25]
 Cap\'{\i }tulo 13.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [30
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [26
 
 ])
-[31]
+[27]
 Ap\'{e}ndice A.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/A_glosario.tex
 Overfull \hbox (1.23639pt too wide) in alignment at lines 1--13
  [] [] 
  []
 
-) [32
+) [28
 
 ]
 Ap\'{e}ndice B.
@@ -983,14 +998,14 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 14--28
  [] [] [] [] 
  []
 
-ignored error: Infinite glue shrinkage found in box being split [33
 
-]
 Overfull \hbox (11.5796pt too wide) in alignment at lines 31--46
  [] [] [] [] 
  []
 
+ignored error: Infinite glue shrinkage found in box being split [29
 
+]
 Overfull \hbox (17.69739pt too wide) in paragraph at lines 57--57
 []|\T1/phv/m/n/12 personas_relacionadas| 
  []
@@ -1005,7 +1020,7 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 49--59
  [] [] [] [] 
  []
 
-ignored error: Infinite glue shrinkage found in box being split [34]) [35]
+) [30]
 Ap\'{e}ndice C.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/C_matriz_trazabilidad.tex
 Underfull \hbox (badness 1852) in paragraph at lines 7--7
@@ -1062,53 +1077,110 @@ Overfull \hbox (11.57266pt too wide) in alignment at lines 2--17
  [] [] [] [] 
  []
 
-ignored error: Infinite glue shrinkage found in box being split [36
+[31
 
-]) [37]
+]) [32]
 Ap\'{e}ndice D.
-(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [38
+(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [33
 
 ]
 Ap\'{e}ndice E.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/E_diagramas.tex
-<figures/generated/01_arquitectura_objetivo.pdf, id=695, 614.295pt x 794.97pt>
+<figures/generated/01_arquitectura_objetivo.pdf, id=871, 614.295pt x 794.97pt>
 File: figures/generated/01_arquitectura_objetivo.pdf Graphic file (type pdf)
 <use figures/generated/01_arquitectura_objetivo.pdf>
 Package pdftex.def Info: figures/generated/01_arquitectura_objetivo.pdf  used o
 n input line 10.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/02_flujo_autenticacion.pdf, id=696, 614.295pt x 794.97pt>
+<figures/generated/02_flujo_autenticacion.pdf, id=872, 614.295pt x 794.97pt>
 File: figures/generated/02_flujo_autenticacion.pdf Graphic file (type pdf)
 <use figures/generated/02_flujo_autenticacion.pdf>
 Package pdftex.def Info: figures/generated/02_flujo_autenticacion.pdf  used on 
 input line 21.
 (pdftex.def)             Requested size: 432.48051pt x 559.68973pt.
-<figures/generated/03_modelo_datos.pdf, id=697, 614.295pt x 794.97pt>
+<figures/generated/03_modelo_datos.pdf, id=873, 614.295pt x 794.97pt>
 File: figures/generated/03_modelo_datos.pdf Graphic file (type pdf)
 <use figures/generated/03_modelo_datos.pdf>
 Package pdftex.def Info: figures/generated/03_modelo_datos.pdf  used on input l
 ine 32.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/04_roadmap_fases.pdf, id=874, 614.295pt x 794.97pt>
+File: figures/generated/04_roadmap_fases.pdf Graphic file (type pdf)
+<use figures/generated/04_roadmap_fases.pdf>
+Package pdftex.def Info: figures/generated/04_roadmap_fases.pdf  used on input 
+line 69.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/05_gobernanza_rbac.pdf, id=875, 614.295pt x 794.97pt>
+File: figures/generated/05_gobernanza_rbac.pdf Graphic file (type pdf)
+<use figures/generated/05_gobernanza_rbac.pdf>
+Package pdftex.def Info: figures/generated/05_gobernanza_rbac.pdf  used on inpu
+t line 120.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/06_despliegue_continuidad.pdf, id=876, 614.295pt x 794.97pt>
 
-! Argument of \language@active@arg> has an extra }.
-<inserted text> 
-                \par 
-l.96 }
-      
-I've run across a `}' that doesn't seem to match anything.
-For example, `\def\a#1{...}' and `\a}' would produce
-this error. If you simply proceed now, the `\par' that
-I've just inserted will cause me to report a runaway
-argument that might be the root of the problem. But if
-your `}' was spurious, just type `2' and it will go away.
+File: figures/generated/06_despliegue_continuidad.pdf Graphic file (type pdf)
+<use figures/generated/06_despliegue_continuidad.pdf>
+Package pdftex.def Info: figures/generated/06_despliegue_continuidad.pdf  used 
+on input line 161.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/07_paquetes_sistema.pdf, id=877, 614.295pt x 794.97pt>
+File: figures/generated/07_paquetes_sistema.pdf Graphic file (type pdf)
+<use figures/generated/07_paquetes_sistema.pdf>
+Package pdftex.def Info: figures/generated/07_paquetes_sistema.pdf  used on inp
+ut line 197.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/08_casos_uso_general.pdf, id=878, 614.295pt x 794.97pt>
+File: figures/generated/08_casos_uso_general.pdf Graphic file (type pdf)
+<use figures/generated/08_casos_uso_general.pdf>
+Package pdftex.def Info: figures/generated/08_casos_uso_general.pdf  used on in
+put line 241.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+<figures/generated/09_ciclo_vida_entrega.pdf, id=879, 614.295pt x 794.97pt>
+File: figures/generated/09_ciclo_vida_entrega.pdf Graphic file (type pdf)
+<use figures/generated/09_ciclo_vida_entrega.pdf>
+Package pdftex.def Info: figures/generated/09_ciclo_vida_entrega.pdf  used on i
+nput line 279.
+(pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
+) [34
 
- 
+]
+[35 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/01_arquitectura
+_objetivo.pdf>] [36 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated
+/02_flujo_autenticacion.pdf>] [37 <c:/ciencias-ucv-digital-archive/docs/tex/fig
+ures/generated/03_modelo_datos.pdf>] [38 <c:/ciencias-ucv-digital-archive/docs/
+tex/figures/generated/04_roadmap_fases.pdf>] [39 <c:/ciencias-ucv-digital-archi
+ve/docs/tex/figures/generated/05_gobernanza_rbac.pdf>] [40 <c:/ciencias-ucv-dig
+ital-archive/docs/tex/figures/generated/06_despliegue_continuidad.pdf>]
+[41 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/07_paquetes_sis
+tema.pdf>] [42 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/08_c
+asos_uso_general.pdf>] [43 <c:/ciencias-ucv-digital-archive/docs/tex/figures/ge
+nerated/09_ciclo_vida_entrega.pdf>]
+(c:\ciencias-ucv-digital-archive\docs\tex\main.aux
+LaTeX Info: Redefining \. on input line 11.
+LaTeX Info: Redefining \% on input line 11.
+)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2025-12-24>
+ ***********
+Package rerunfilecheck Info: File `main.out' has not changed.
+(rerunfilecheck)             Checksum: CD70A8E343A5819AAC691CA5EE515215;22719.
+ ) 
 Here is how much of TeX's memory you used:
- 23342 strings out of 467871
- 433875 string characters out of 5428438
- 849531 words of memory out of 5000000
- 51565 multiletter control sequences out of 15000+600000
- 666351 words of font info for 73 fonts, out of 8000000 for 9000
+ 23928 strings out of 467871
+ 448903 string characters out of 5428438
+ 873212 words of memory out of 5000000
+ 52112 multiletter control sequences out of 15000+600000
+ 668695 words of font info for 73 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,11n,97p,493b,600s stack positions out of 10000i,1000n,20000p,200000b,200000s
-!  ==> Fatal error occurred, no output PDF file produced!
+ 89i,12n,97p,510b,793s stack positions out of 10000i,1000n,20000p,200000b,200000s
+<C:/Program Files/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Program File
+s/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Program Files/MiKTeX/fonts/typ
+e1/urw/helvetic/uhvro8a.pfb>
+Output written on c:\ciencias-ucv-digital-archive\docs\tex\main.pdf (51 pages, 
+605194 bytes).
+PDF statistics:
+ 1085 PDF objects out of 1200 (max. 8388607)
+ 246 named destinations out of 1000 (max. 500000)
+ 1034 words of extra memory for PDF output out of 10000 (max. 10000000)
+

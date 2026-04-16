@@ -122,7 +122,7 @@ RNF-034 & Debe contemplar entrega continua controlada con compuertas de aprobaci
   \item Navegadores objetivo: Chrome, Firefox y Edge.
 \end{itemize}
 
-\subsection{Requisitos minimos (alineados al README)}
+\subsection{Requisitos minimos}
 \begin{itemize}
   \item R version 4.x o superior.
   \item RStudio Desktop.
@@ -143,10 +143,26 @@ Almacenamiento & Depende de la volumetria de PDFs; escalable mediante buckets. \
 \subsection{Requisitos del sistema (software recomendado)}
 \begin{itemize}
   \item Entorno de ejecucion: R 4.2.0 o superior.
+  \item Sistema operativo local soportado: Windows 10/11, Ubuntu 20.04+ o Debian 11+.
   \item Base de datos objetivo: PostgreSQL 13+ (opcional CSV/SQLite para prototipos).
   \item Contenedores: Docker opcional para despliegues consistentes.
   \item Navegadores soportados: Chrome, Firefox o Edge.
 \end{itemize}
+
+\subsection{Requisitos para VPS (produccion recomendada)}
+\begin{longtable}{p{0.35\textwidth} p{0.55\textwidth}}
+\toprule
+\textbf{Componente} & \textbf{Especificacion recomendada} \\
+\midrule
+Sistema operativo & Ubuntu Server 22.04 LTS o Debian 12 (64-bit). \\
+CPU & 2 vCPU dedicadas (minimo 1 vCPU para cargas bajas). \\
+Memoria RAM & 2 GB minimo; 4 GB recomendada para crecimiento y concurrencia. \\
+Disco & 30 GB SSD minimo (incrementar segun volumetria documental). \\
+Runtime & R 4.2+ y librerias del proyecto instaladas en entorno limpio. \\
+Base de datos & PostgreSQL 13+ en el mismo VPS o instancia separada. \\
+Red y seguridad & HTTPS con certificado TLS, acceso SSH restringido y respaldos programados. \\
+\bottomrule
+\end{longtable}
 
 \section{Restricciones y supuestos}
 \begin{itemize}

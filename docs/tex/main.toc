@@ -1,0 +1,123 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {chapter}{Resumen de Versiones}{\es@scroman {i}}{chapter*.1}%
+\contentsline {chapter}{\numberline {1}Resumen Ejecutivo}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Proposito del documento}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Alcance ejecutivo}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Propuesta de valor institucional}{1}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Lectura recomendada}{1}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Contexto, Vision y Mision}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Contexto institucional}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Problema a resolver}{3}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Mision}{3}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Vision}{3}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Principios rectores}{3}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Objetivos, Alcance y Supuestos}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Objetivo general}{5}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Objetivos especificos}{5}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Alcance funcional total}{5}{section.3.3}%
+\contentsline {section}{\numberline {3.4}No alcance}{5}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Supuestos}{6}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Requerimientos del Sistema}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Enfoque de requerimientos}{7}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Requerimientos funcionales (RF)}{7}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}RF de acceso y sesion}{7}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}RF del modulo Archivo}{7}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}RF del modulo RRHH}{7}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}RF del panel administrativo}{8}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}RF de auditoria y trazabilidad}{8}{subsection.4.2.5}%
+\contentsline {section}{\numberline {4.3}Requerimientos no funcionales (RNF)}{8}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}RNF de seguridad y privacidad}{8}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}RNF de rendimiento y capacidad}{9}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}RNF de disponibilidad y continuidad}{9}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}RNF de calidad y mantenibilidad}{9}{subsection.4.3.4}%
+\contentsline {section}{\numberline {4.4}Requerimientos de plataforma e infraestructura}{9}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Requisitos minimos}{10}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Requisitos del sistema (hardware recomendado)}{10}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Requisitos del sistema (software recomendado)}{10}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Requisitos para VPS (produccion recomendada)}{10}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Restricciones y supuestos}{11}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Criterios de aceptacion de alto nivel}{11}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Arquitectura Objetivo de la Solucion}{12}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Vista de arquitectura}{12}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Capa de presentacion}{12}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Capa de aplicacion}{12}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Capa de servicios de dominio}{12}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Capa de datos y evolucion}{12}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Arquitectura de referencia futura}{13}{section.5.6}%
+\contentsline {chapter}{\numberline {6}Diseno Funcional Integral}{14}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Dominio Archivo Institucional}{14}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Capacidades funcionales}{14}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Flujo funcional de consulta}{14}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Dominio RRHH}{14}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Capacidades funcionales}{14}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Flujo funcional de expediente}{15}{subsection.6.2.2}%
+\contentsline {section}{\numberline {6.3}Panel Administrativo}{15}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Matriz de casos de uso}{15}{section.6.4}%
+\contentsline {chapter}{\numberline {7}Diseno Tecnico}{16}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Arquitectura tecnica}{16}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Patrones de diseno aplicados}{16}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Diseno de componentes}{16}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Interfaz}{16}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Servidor}{16}{subsection.7.3.2}%
+\contentsline {subsection}{\numberline {7.3.3}Servicios}{16}{subsection.7.3.3}%
+\contentsline {section}{\numberline {7.4}Escalabilidad tecnica}{16}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Observabilidad tecnica}{17}{section.7.5}%
+\contentsline {chapter}{\numberline {8}Modelo de Datos y Gobierno de Informacion}{18}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Modelo conceptual institucional}{18}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Entidades nucleares}{18}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Gobierno de metadatos}{18}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Reglas de consistencia}{18}{section.8.4}%
+\contentsline {section}{\numberline {8.5}Estrategia de evolucion de datos}{19}{section.8.5}%
+\contentsline {chapter}{\numberline {9}Seguridad, Privacidad y Trazabilidad}{20}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Marco de seguridad institucional}{20}{section.9.1}%
+\contentsline {section}{\numberline {9.2}Control de acceso}{20}{section.9.2}%
+\contentsline {section}{\numberline {9.3}Proteccion de datos sensibles}{20}{section.9.3}%
+\contentsline {section}{\numberline {9.4}Auditoria y no repudio}{20}{section.9.4}%
+\contentsline {section}{\numberline {9.5}Riesgos y mitigacion}{20}{section.9.5}%
+\contentsline {chapter}{\numberline {10}Operacion, Despliegue y Continuidad}{21}{chapter.10}%
+\contentsline {section}{\numberline {10.1}Modelo operativo}{21}{section.10.1}%
+\contentsline {section}{\numberline {10.2}Ambientes de trabajo}{21}{section.10.2}%
+\contentsline {section}{\numberline {10.3}Despliegue y publicacion}{21}{section.10.3}%
+\contentsline {section}{\numberline {10.4}Continuidad y respaldos}{21}{section.10.4}%
+\contentsline {section}{\numberline {10.5}Monitoreo y soporte}{21}{section.10.5}%
+\contentsline {chapter}{\numberline {11}Calidad, Validacion y Aseguramiento}{22}{chapter.11}%
+\contentsline {section}{\numberline {11.1}Modelo de calidad}{22}{section.11.1}%
+\contentsline {section}{\numberline {11.2}Estrategia de pruebas}{22}{section.11.2}%
+\contentsline {section}{\numberline {11.3}Aseguramiento documental}{22}{section.11.3}%
+\contentsline {section}{\numberline {11.4}Integracion continua y entrega continua (CI/CD)}{22}{section.11.4}%
+\contentsline {section}{\numberline {11.5}Flujo de pipeline de referencia}{23}{section.11.5}%
+\contentsline {section}{\numberline {11.6}Indicadores de calidad}{23}{section.11.6}%
+\contentsline {section}{\numberline {11.7}Mejora continua}{23}{section.11.7}%
+\contentsline {chapter}{\numberline {12}Gobernanza, Marco Legal y Propiedad Intelectual}{24}{chapter.12}%
+\contentsline {section}{\numberline {12.1}Gobernanza del producto}{24}{section.12.1}%
+\contentsline {section}{\numberline {12.2}Modelo de decision}{24}{section.12.2}%
+\contentsline {section}{\numberline {12.3}Politicas de versionado y cambio}{24}{section.12.3}%
+\contentsline {section}{\numberline {12.4}Marco legal y cumplimiento}{24}{section.12.4}%
+\contentsline {section}{\numberline {12.5}RACI de alto nivel}{24}{section.12.5}%
+\contentsline {chapter}{\numberline {13}Hoja de Ruta y Vision de Escalamiento}{26}{chapter.13}%
+\contentsline {section}{\numberline {13.1}Estrategia de evolucion}{26}{section.13.1}%
+\contentsline {section}{\numberline {13.2}Fase I: Consolidacion funcional}{26}{section.13.2}%
+\contentsline {section}{\numberline {13.3}Fase II: Escalamiento de datos y operacion}{26}{section.13.3}%
+\contentsline {section}{\numberline {13.4}Fase III: Inteligencia y analitica avanzada}{26}{section.13.4}%
+\contentsline {section}{\numberline {13.5}Indicadores de exito por fase}{26}{section.13.5}%
+\contentsline {section}{\numberline {13.6}Riesgos de evolucion}{27}{section.13.6}%
+\contentsline {chapter}{\numberline {A}Glosario}{28}{appendix.Alph1}%
+\contentsline {chapter}{\numberline {B}Diccionario de Datos Extendido}{29}{appendix.Alph2}%
+\contentsline {section}{\numberline {B.1}Entidad: Usuario}{29}{section.Alph2.1}%
+\contentsline {section}{\numberline {B.2}Entidad: Archivo Institucional}{29}{section.Alph2.2}%
+\contentsline {section}{\numberline {B.3}Entidad: Persona RRHH}{29}{section.Alph2.3}%
+\contentsline {section}{\numberline {B.4}Entidad: Archivo RRHH}{30}{section.Alph2.4}%
+\contentsline {chapter}{\numberline {C}Matriz de Trazabilidad}{31}{appendix.Alph3}%
+\contentsline {section}{\numberline {C.1}Matriz de trazabilidad macro}{31}{section.Alph3.1}%
+\contentsline {section}{\numberline {C.2}Lineamientos de uso}{31}{section.Alph3.2}%
+\contentsline {chapter}{\numberline {D}Referencias}{33}{appendix.Alph4}%
+\contentsline {chapter}{\numberline {E}Diagramas Maestros}{34}{appendix.Alph5}%
+\contentsline {section}{\numberline {E.1}Arquitectura Objetivo}{34}{section.Alph5.1}%
+\contentsline {section}{\numberline {E.2}Flujo de Autenticacion}{34}{section.Alph5.2}%
+\contentsline {section}{\numberline {E.3}Modelo de Datos}{34}{section.Alph5.3}%
+\contentsline {section}{\numberline {E.4}Hoja de Ruta por Fases}{34}{section.Alph5.4}%
+\contentsline {section}{\numberline {E.5}Gobierno y Control de Acceso}{34}{section.Alph5.5}%
+\contentsline {section}{\numberline {E.6}Despliegue y Continuidad Operativa}{34}{section.Alph5.6}%
+\contentsline {section}{\numberline {E.7}Paquetes del Sistema}{34}{section.Alph5.7}%
+\contentsline {section}{\numberline {E.8}Casos de Uso Generales}{34}{section.Alph5.8}%
+\contentsline {section}{\numberline {E.9}Ciclo de Vida de Entrega}{34}{section.Alph5.9}%

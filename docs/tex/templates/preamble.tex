@@ -13,7 +13,7 @@
 \usepackage{geometry}
 \geometry{margin=2.5cm}
 \usepackage{setspace}
-\doublespacing
+\setstretch{1.25}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -25,7 +25,7 @@
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
 
 \hypersetup{
   colorlinks=true,
@@ -40,10 +40,22 @@
 \setlist[enumerate]{itemsep=0.3em, topsep=0.3em}
 
 \titleformat{\chapter}[display]
-  {\bfseries\large}
+  {\bfseries\normalsize}
   {\chaptername\ \thechapter}
   {0.5em}
-  {\LARGE}
+  {\Large}
+
+\titleformat{\section}
+  {\bfseries\normalsize}
+  {\thesection}
+  {0.6em}
+  {}
+
+\titleformat{\subsection}
+  {\bfseries\small}
+  {\thesubsection}
+  {0.6em}
+  {}
 
 \pagestyle{fancy}
 \fancyhf{}
