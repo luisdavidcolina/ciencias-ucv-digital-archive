@@ -14,7 +14,7 @@ ui <- bs4DashPage(
         tags$span(
           class = "ds-navbar-logo nav-link",
           tags$i(class = "fas fa-landmark"),
-          " Departamento de Extension"
+          " Archivo Institucional"
         )
       )
     ),
@@ -55,7 +55,7 @@ ui <- bs4DashPage(
           div(class="card p-5 ds-login-card",
               div(style="text-align: center; width: 100%; margin-bottom: 20px;",
                   tags$i(class="fas fa-landmark", style="font-size: 4.5rem; color: #2b4e72; margin-bottom: 15px;"),
-                 tags$h3(style="font-family: 'Nunito', sans-serif; color: #2b4e72; font-weight: 800; margin-bottom: 5px;", "Departamento de Extensión"),
+                 tags$h3(style="font-family: 'Nunito', sans-serif; color: #2b4e72; font-weight: 800; margin-bottom: 5px;", "Archivo Institucional"),
                  tags$p(class="text-muted", "Intranet Cifrada de Acceso Restringido", style="font-size:0.95rem;")
               ),
               div(style="text-align: left; width: 100%; margin-bottom: 20px; position: relative;",
@@ -92,6 +92,6 @@ ui <- bs4DashPage(
   ),
   footer = bs4DashFooter(
       left = tags$a(href="#", "Universidad Central de Venezuela"),
-      right = "© 2024 Archivo Ciencias"
+      right = "© 2024 Archivo Institucional"
   )
 )

@@ -1,4 +1,4 @@
-# Ciencias UCV Digital Archive
+# Archivo Institucional
 
 Aplicacion web interna para gestion documental de la Facultad de Ciencias UCV, construida con R Shiny y bs4Dash, con separacion funcional entre Extension y RRHH.
 
@@ -63,7 +63,7 @@ datos_rrhh.csv
 - cedula
 - departamento
 - doc_type
-- estatus
+- estado
 - fecha_ingreso
 - ubicacion
 
@@ -106,7 +106,7 @@ usuarios.csv
 
 - Busqueda por empleado o cedula.
 - Filtro por tipologia.
-- Filtro por estatus.
+- Filtro por estado.
 - Filtro por rango de fechas.
 - Filtro por rango de anos.
 - Tarjetas de expediente con metadatos de adscripcion y ubicacion.

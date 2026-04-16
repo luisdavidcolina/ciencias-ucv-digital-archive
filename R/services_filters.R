@@ -56,7 +56,7 @@ filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
   out
 }
 
-filter_rrhh_data <- function(datos, search_term) {
+filter_rrhh_data <- function(datos, search_term, sort_mode = NULL) {
   out <- datos
 
   if (!is.null(search_term) && nzchar(search_term)) {
@@ -65,7 +65,7 @@ filter_rrhh_data <- function(datos, search_term) {
     tokens <- tokens[nzchar(tokens)]
 
     search_cols <- c(
-      "empleado", "cedula", "departamento", "doc_type", "estatus",
+      "empleado", "cedula", "departamento", "doc_type", "estado",
       "personas_relacionadas", "tesauro_primario", "tesauro_secundario", "descriptores_libres"
     )
     search_cols <- search_cols[search_cols %in% names(out)]
@@ -79,6 +79,14 @@ filter_rrhh_data <- function(datos, search_term) {
     }, logical(1))
 
     out <- out[keep, , drop = FALSE]
+  }
+
+  if (!is.null(sort_mode) && sort_mode %in% c("Título A-Z", "Lo más relevante")) {
+    if (identical(sort_mode, "Título A-Z")) {
+      if ("empleado" %in% names(out)) {
+        out <- out[order(out$empleado), , drop = FALSE]
+      }
+    }
   }
 
   out

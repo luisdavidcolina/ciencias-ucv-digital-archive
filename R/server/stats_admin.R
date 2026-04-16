@@ -13,7 +13,7 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
     max_fecha <- if (length(fechas_ok) > 0) max(fechas_ok) else Sys.Date()
 
     third_filter_ui <- if (session_state$modulo == "RRHH") {
-      selectInput("stats_status_filter", "Estatus", choices = c("Todos" = "", sort(unique(df$estatus))), width = "100%")
+      selectInput("stats_status_filter", "Estado", choices = c("Todos" = "", sort(unique(df$estado))), width = "100%")
     } else {
       selectInput("stats_author_filter", "Responsable", choices = c("Todos" = "", sort(unique(df$autor))), width = "100%")
     }
@@ -76,7 +76,7 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
 
     if (session_state$modulo == "RRHH") {
       if (!is.null(input$stats_status_filter) && nzchar(input$stats_status_filter)) {
-        keep <- df$estatus == input$stats_status_filter
+        keep <- df$estado == input$stats_status_filter
         df <- df[keep, , drop = FALSE]
         fechas <- fechas[keep]
       }

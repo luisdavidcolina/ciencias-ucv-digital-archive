@@ -86,8 +86,8 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
             textInput("submit_depto", NULL, placeholder = "Ej: Biología", width = "100%")
           ),
           column(4,
-            tags$label(class = "font-weight-bold text-muted mt-2", "Estatus *"),
-            selectInput("submit_estatus", NULL, choices = c("Activo", "Inactivo", "Jubilado"), width = "100%")
+            tags$label(class = "font-weight-bold text-muted mt-2", "Estado *"),
+            selectInput("submit_estado", NULL, choices = c("Activo", "Inactivo", "Jubilado"), width = "100%")
           )
         ),
         fluidRow(
@@ -189,13 +189,13 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
           )
         )
       } else {
-        color_st <- switch(f$estatus, "Activo" = "#28a745", "Jubilado" = "#6f42c1", "Inactivo" = "#dc3545", "#6c757d")
+        color_st <- switch(f$estado, "Activo" = "#28a745", "Jubilado" = "#6f42c1", "Inactivo" = "#dc3545", "#6c757d")
         tags$tr(
           tags$td(style = "vertical-align:middle; font-weight:600;", f$empleado),
           tags$td(style = "vertical-align:middle;", f$cedula),
           tags$td(style = "vertical-align:middle; font-size:0.85em;", f$personas_relacionadas),
           tags$td(style = "vertical-align:middle;", f$departamento),
-          tags$td(style = "vertical-align:middle;", tags$span(class = "ds-badge", style = sprintf("background-color:%s;", color_st), f$estatus)),
+          tags$td(style = "vertical-align:middle;", tags$span(class = "ds-badge", style = sprintf("background-color:%s;", color_st), f$estado)),
           tags$td(style = "vertical-align:middle;", tags$span(class = "ds-badge", style = "background-color:#6c757d;", f$doc_type)),
           tags$td(style = "vertical-align:middle;",
             actionButton(paste0("view_", real_idx), NULL, icon = icon("eye"), class = "btn btn-sm btn-outline-secondary", title = "Ver"),
@@ -209,7 +209,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     encabezados <- if (session_state$modulo == "Extensión") {
       tags$tr(tags$th("Título"), tags$th("Autor"), tags$th("Fecha"), tags$th("Tipo"), tags$th("Ubicación"), tags$th("Acciones"))
     } else {
-      tags$tr(tags$th("Persona titular"), tags$th("C.I."), tags$th("Personas vinculadas"), tags$th("Depto."), tags$th("Estatus"), tags$th("Tipo de archivo"), tags$th("Acciones"))
+      tags$tr(tags$th("Persona titular"), tags$th("C.I."), tags$th("Personas vinculadas"), tags$th("Depto."), tags$th("Estado"), tags$th("Tipo de archivo"), tags$th("Acciones"))
     }
 
     tags$div(class = "table-responsive",
@@ -338,14 +338,14 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     }
 
     depto_top <- names(sort(table(rows$departamento), decreasing = TRUE))[1]
-    estatus_top <- names(sort(table(rows$estatus), decreasing = TRUE))[1]
+    estado_top <- names(sort(table(rows$estado), decreasing = TRUE))[1]
     tipos <- paste(sort(unique(rows$doc_type)), collapse = ", ")
 
     tags$div(class = "p-2", style = "background:#f8f9fa; border:1px solid #e3e7ec; border-radius:8px;",
       tags$p(tags$strong("Persona:"), " ", person, style = "margin-bottom:0.35rem;"),
       tags$p(tags$strong("Total de archivos:"), " ", nrow(rows), style = "margin-bottom:0.35rem;"),
       tags$p(tags$strong("Departamento predominante:"), " ", depto_top, style = "margin-bottom:0.35rem;"),
-      tags$p(tags$strong("Estatus predominante:"), " ", estatus_top, style = "margin-bottom:0.35rem;"),
+      tags$p(tags$strong("Estado predominante:"), " ", estado_top, style = "margin-bottom:0.35rem;"),
       tags$p(tags$strong("Tipos de archivo:"), " ", tipos, style = "margin-bottom:0;")
     )
   })
@@ -371,12 +371,12 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
         tags$td(r$cedula),
         tags$td(r$doc_type),
         tags$td(r$departamento),
-        tags$td(r$estatus)
+        tags$td(r$estado)
       )
     })
 
     tags$table(class = "table table-sm table-striped mb-0",
-      tags$thead(class = "thead-light", tags$tr(tags$th("Archivo"), tags$th("C.I."), tags$th("Tipo"), tags$th("Depto."), tags$th("Estatus"))),
+      tags$thead(class = "thead-light", tags$tr(tags$th("Archivo"), tags$th("C.I."), tags$th("Tipo"), tags$th("Depto."), tags$th("Estado"))),
       tags$tbody(body)
     )
   })

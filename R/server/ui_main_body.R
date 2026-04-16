@@ -61,6 +61,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
         ),
         column(width = 9,
           div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_ext", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
+          div(class = "d-flex justify-content-end mb-2", downloadButton("download_ext_xls", "Exportar XLS", class = "btn btn-outline-success btn-sm")),
           uiOutput("list_extension"),
           uiOutput("ext_pagination_controls")
         )
@@ -112,11 +113,11 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 )
               ),
               bs4AccordionItem(
-                title = "Estatus",
+                title = "Estado",
                 status = "secondary",
                 solidHeader = FALSE,
                 collapsed = TRUE,
-                radioButtons("rrhh_estatus", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
+                radioButtons("rrhh_estado", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
               ),
               bs4AccordionItem(
                 title = "Personas",
@@ -141,11 +142,18 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
               )
             ),
             actionButton("btn_update_rrhh", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
+          ),
+          bs4Card(
+            title = "Vista", status = "secondary", width = 12, class = "mt-3",
+            selectInput("sort_rrhh", "Recientes", choices = c("Lo más relevante", "Título A-Z")),
+            selectInput("rpp_rrhh", "Pág:", choices = c("5", "10"), selected = "5")
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar por persona, cédula o descriptor..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
-          uiOutput("list_rrhh")
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por persona..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
+          div(class = "d-flex justify-content-end mb-2", downloadButton("download_rrhh_xls", "Exportar XLS", class = "btn btn-outline-success btn-sm")),
+          uiOutput("list_rrhh"),
+          uiOutput("rrhh_pagination_controls")
         )
       )
     )

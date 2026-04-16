@@ -403,6 +403,129 @@ a:hover {
     font-size: 0.92rem;
 }
 
+.rrhh-person-modal .modal-dialog {
+    max-width: 1080px;
+}
+
+.rrhh-person-modal .modal-body {
+    max-height: 78vh;
+    overflow-y: auto;
+}
+
+.rrhh-person-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rrhh-person-photo-card {
+    border: 1px solid #d9e6f4;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #f6f9fc, #eef4fb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px;
+}
+
+.rrhh-person-photo {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+}
+
+.rrhh-person-photo-fallback {
+    flex-direction: column;
+    gap: 0.75rem;
+    color: #2b4e72;
+}
+
+.rrhh-person-photo-initials {
+    width: 110px;
+    height: 110px;
+    border-radius: 999px;
+    background: #2b4e72;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.rrhh-person-photo-icon {
+    font-size: 1.1rem;
+    opacity: 0.75;
+}
+
+.rrhh-person-summary p {
+    font-size: 0.88rem;
+}
+
+.rrhh-person-modal .nav-pills .nav-link {
+    border-radius: 999px;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.rrhh-person-modal .nav-pills .nav-link.active {
+    background-color: #2b4e72;
+}
+
+.rrhh-person-category-panel {
+    margin-top: 0.75rem;
+}
+
+.rrhh-person-file-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.rrhh-person-file-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.rrhh-person-file-sub {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.rrhh-person-file-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.8rem;
+    margin-top: 0.65rem;
+    font-size: 0.84rem;
+    color: #485463;
+}
+
+.rrhh-person-file-item {
+    background: #ffffff;
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    padding: 0.85rem 0.95rem;
+    box-shadow: 0 6px 16px rgba(16, 24, 40, 0.05);
+}
+
+.rrhh-person-file-item .ds-item-tags {
+    margin-top: 0.55rem;
+}
+
+.rrhh-person-file-item .btn.btn-outline-info {
+    white-space: nowrap;
+}
+
+.rrhh-person-modal .tab-content {
+    margin-top: 0.75rem;
+}
+
 .ds-item-title {
     font-size: 1.15rem;
     font-weight: 600;
@@ -489,6 +612,24 @@ a:hover {
 
     .ds-doc-thumb {
         height: 120px;
+    }
+
+    .rrhh-person-photo-card {
+        min-height: 200px;
+    }
+
+    .rrhh-person-photo {
+        height: 200px;
+    }
+
+    .rrhh-person-photo-initials {
+        width: 92px;
+        height: 92px;
+        font-size: 1.7rem;
+    }
+
+    .rrhh-person-file-head {
+        flex-direction: column;
     }
     
     .ds-item-title {
