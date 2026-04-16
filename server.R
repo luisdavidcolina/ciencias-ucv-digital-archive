@@ -305,6 +305,23 @@ server <- function(input, output, session) {
         tags$span(class = "ds-badge", if (nzchar(fila$tipos)) fila$tipos else "Sin tipologías")
       )
 
+      btn_actions <- if (session_state$rol == "Admin") {
+        div(
+          class = "ds-item-actions",
+          tags$button(
+            type = "button",
+            class = "btn btn-sm btn-outline-info ds-action-btn",
+            title = "Visualizar",
+            onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'rrhh_person', person: %s, nonce: Date.now()}, {priority: 'event'});", persona_js),
+            tags$i(class = "fas fa-eye")
+          ),
+          tags$button(type = "button", class = "btn btn-sm btn-outline-warning ds-action-btn", title = "Editar", tags$i(class = "fas fa-pen")),
+          tags$button(type = "button", class = "btn btn-sm btn-outline-primary ds-action-btn", title = "Descargar", tags$i(class = "fas fa-download"))
+        )
+      } else {
+        NULL
+      }
+
       div(
         class = "ds-item-card",
         div(class = "ds-item-thumbnail", tags$i(class = "fas fa-user-circle", style = "color:#2b4e72;")),
@@ -321,10 +338,11 @@ server <- function(input, output, session) {
           ),
           div(class = "ds-item-authors", paste("Expedientes asociados:", fila$doc_count)),
           div(class = "ds-item-date", paste("Cédula:", if (nzchar(fila$cedulas)) fila$cedulas else "Sin cédula")),
-          div(class = "ds-item-publisher", paste("Departamento(s):", if (nzchar(fila$departamentos)) fila$departamentos else "Sin departamento")),
+          div(class = "ds-item-publisher", paste("Dependencia o AP:", if (nzchar(fila$departamentos)) fila$departamentos else "Sin dependencia o AP")),
           div(class = "ds-item-abstract", paste("Estatus:", if (nzchar(fila$estatuses)) fila$estatuses else "Sin estatus")),
           card_badges
-        )
+        ),
+        btn_actions
       )
     })
     tagList(tarjetas)

@@ -51,7 +51,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       ),
       tags$div(
         class = "rrhh-person-file-meta",
-        tags$span(paste("Departamento:", if ("departamento" %in% names(file_row)) file_row$departamento else "Sin departamento")),
+        tags$span(paste("Dependencia o AP:", if ("departamento" %in% names(file_row)) file_row$departamento else "Sin dependencia o AP")),
         tags$span(paste("Estatus:", file_status)),
         tags$span(paste("Ubicación:", if ("ubicacion" %in% names(file_row)) file_row$ubicacion else "Sin ubicación"))
       ),
@@ -86,7 +86,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
     } else {
       titulo <- paste("Archivo de:", doc$empleado)
       estado_value <- if ("estatus" %in% names(doc)) doc$estatus else if ("estado" %in% names(doc)) doc$estado else "Sin estatus"
-      resumen <- paste("Documento de RRHH en estado", estado_value, "adscrito a", doc$departamento)
+      resumen <- paste("Documento de RRHH en estado", estado_value, "en", doc$departamento)
       thumb_icon <- "fas fa-user-lock"
       thumb_badge <- get_doc_primary_term(doc)
       tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
@@ -196,7 +196,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
               tags$p(tags$strong("Fecha ingreso:"), " ", ingresos_text, style = "margin-bottom:0.35rem;"),
               tags$p(tags$strong("Fecha jubilación:"), " ", jubilacion_text, style = "margin-bottom:0.35rem;"),
               tags$p(tags$strong("Fecha pensión:"), " ", pension_text, style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Departamento(s):"), " ", if (nzchar(profile$departamentos)) profile$departamentos else "Sin departamento", style = "margin-bottom:0.35rem;"),
+              tags$p(tags$strong("Dependencia o AP:"), " ", if (nzchar(profile$departamentos)) profile$departamentos else "Sin dependencia o AP", style = "margin-bottom:0.35rem;"),
               tags$p(tags$strong("Estatus(es):"), " ", if (nzchar(profile$statuses)) profile$statuses else "Sin estatus", style = "margin-bottom:0.35rem;"),
               tags$p(tags$strong("Tipología(s):"), " ", if (nzchar(profile$tipos)) profile$tipos else "Sin tipología", style = "margin-bottom:0;")
             )
@@ -212,7 +212,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
                 textInput(
                   "rrhh_modal_search",
                   "Buscar dentro del expediente",
-                  placeholder = "Tipo, departamento, ubicación o persona relacionada",
+                  placeholder = "Tipo, dependencia o AP, ubicación o persona relacionada",
                   width = "100%"
                 )
               ),

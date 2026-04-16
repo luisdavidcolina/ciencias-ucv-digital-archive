@@ -126,7 +126,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 collapsed = TRUE,
                 selectizeInput(
                   "rrhh_people",
-                  "Persona(s) asociada(s)",
+                  "Apellidos, Nombres asociados",
                   choices = rrhh_people_choices,
                   multiple = TRUE,
                   width = "100%",
@@ -150,7 +150,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por persona..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por Apellidos, Nombres..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
           div(class = "d-flex justify-content-end mb-2", downloadButton("download_rrhh_xls", "Exportar XLS", class = "btn btn-outline-success btn-sm")),
           uiOutput("list_rrhh"),
           uiOutput("rrhh_pagination_controls")

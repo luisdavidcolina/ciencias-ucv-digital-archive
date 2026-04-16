@@ -6,6 +6,41 @@ split_person_terms <- function(x) {
   unique(vals)
 }
 
+format_rrhh_person_name <- function(person_name) {
+  person_name <- trimws(as.character(person_name))
+  if (!nzchar(person_name)) {
+    return("")
+  }
+
+  if (grepl(",", person_name, fixed = TRUE)) {
+    parts <- trimws(unlist(strsplit(person_name, ",", fixed = TRUE), use.names = FALSE))
+    parts <- parts[nzchar(parts)]
+    if (length(parts) >= 2) {
+      return(paste0(parts[1], ", ", paste(parts[-1], collapse = " ")))
+    }
+    return(person_name)
+  }
+
+  parts <- strsplit(person_name, "\\s+")[[1]]
+  parts <- parts[nzchar(parts)]
+  if (length(parts) <= 1) {
+    return(person_name)
+  }
+
+  if (length(parts) == 2) {
+    return(paste0(parts[2], ", ", parts[1]))
+  }
+
+  surnames <- paste(parts[(length(parts) - 1):length(parts)], collapse = " ")
+  given_names <- paste(parts[1:(length(parts) - 2)], collapse = " ")
+
+  if (!nzchar(given_names)) {
+    return(person_name)
+  }
+
+  paste0(surnames, ", ", given_names)
+}
+
 ensure_person_columns <- function(df) {
   if (!"personas_relacionadas" %in% names(df)) {
     df$personas_relacionadas <- ""
@@ -98,6 +133,7 @@ get_rrhh_status_column <- function(datos) {
 build_rrhh_person_index <- function(datos) {
   if (is.null(datos) || nrow(datos) == 0) {
     return(data.frame(
+      persona_raw = character(0),
       persona = character(0),
       doc_count = integer(0),
       primary_count = integer(0),
@@ -124,7 +160,8 @@ build_rrhh_person_index <- function(datos) {
   })
 
   index_df <- data.frame(
-    persona = persons,
+    persona_raw = persons,
+    persona = vapply(persons, format_rrhh_person_name, character(1)),
     doc_count = vapply(row_indices, length, integer(1)),
     primary_count = vapply(persons, function(person_name) sum(employees == person_name, na.rm = TRUE), integer(1)),
     cedulas = vapply(persons, function(person_name) {
@@ -184,7 +221,8 @@ build_rrhh_person_profile <- function(datos, persona) {
   primary_rows <- trimws(as.character(rows$empleado)) == persona
 
   list(
-    persona = persona,
+    persona_raw = persona,
+    persona = format_rrhh_person_name(persona),
     row_indices = which(keep),
     rows = rows,
     foto_url = if ("foto_url" %in% names(rows)) first_non_empty_value(rows$foto_url) else "",
@@ -211,7 +249,7 @@ filter_rrhh_person_index <- function(index_df, search_term) {
     return(index_df)
   }
 
-  search_cols <- c("persona", "cedulas", "departamentos", "estatuses", "tipos")
+  search_cols <- c("persona", "persona_raw", "cedulas", "departamentos", "estatuses", "tipos")
   search_cols <- search_cols[search_cols %in% names(index_df)]
   if (length(search_cols) == 0) {
     return(index_df)

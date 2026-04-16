@@ -59,7 +59,7 @@ datos_extension.csv
 
 datos_rrhh.csv
 
-- empleado
+- Apellidos, Nombres
 - cedula
 - departamento
 - doc_type
@@ -104,12 +104,12 @@ usuarios.csv
 
 ## Modulo RRHH
 
-- Busqueda por empleado o cedula.
+- Busqueda por Apellidos, Nombres o cedula.
 - Filtro por tipologia.
 - Filtro por estado.
 - Filtro por rango de fechas.
 - Filtro por rango de anos.
-- Tarjetas de expediente con metadatos de adscripcion y ubicacion.
+- Tarjetas de expediente con metadatos de dependencia o AP y ubicacion.
 
 ## Panel Admin
 
