@@ -148,7 +148,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
     profile <- context
 
     ingresos_text <- if (nzchar(profile$fecha_ingreso)) profile$fecha_ingreso else "No registrada"
-    jubilacion_text <- if (grepl("Jubilado", profile$statuses, fixed = TRUE)) {
+    jubilacion_text <- if (grepl("Retirado", profile$statuses, fixed = TRUE)) {
       if (nzchar(profile$fecha_jubilacion)) profile$fecha_jubilacion else "No registrada"
     } else {
       "No aplica"

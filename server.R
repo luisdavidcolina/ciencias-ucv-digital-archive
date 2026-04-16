@@ -230,7 +230,9 @@ server <- function(input, output, session) {
         datos <- filter_by_tesauro(datos, input$rrhh_tesauro)
 
         if (!is.null(input$rrhh_estado) && nzchar(input$rrhh_estado) && input$rrhh_estado != "Todos") {
-            datos <- datos[datos$estado == input$rrhh_estado, , drop = FALSE]
+          estado_buscado <- input$rrhh_estado
+          if (estado_buscado == "Retirado") estado_buscado <- c("Retirado", "Jubilado")
+          datos <- datos[datos$estado %in% estado_buscado, , drop = FALSE]
         }
 
         if (!is.null(input$rrhh_date_range) && length(input$rrhh_date_range) == 2) {

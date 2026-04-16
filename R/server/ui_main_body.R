@@ -117,7 +117,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 status = "secondary",
                 solidHeader = FALSE,
                 collapsed = TRUE,
-                radioButtons("rrhh_estado", "Condición", choices = c("Todos", "Activo", "Jubilado", "Inactivo"))
+                radioButtons("rrhh_estado", "Condición", choices = c("Todos", "Activo", "Inactivo", "Retirado", "Pensionado"))
               ),
               bs4AccordionItem(
                 title = "Personas",

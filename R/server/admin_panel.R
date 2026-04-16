@@ -87,7 +87,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
           ),
           column(4,
             tags$label(class = "font-weight-bold text-muted mt-2", "Estado *"),
-            selectInput("submit_estado", NULL, choices = c("Activo", "Inactivo", "Jubilado"), width = "100%")
+            selectInput("submit_estado", NULL, choices = c("Activo", "Inactivo", "Retirado", "Pensionado"), width = "100%")
           )
         ),
         fluidRow(
@@ -189,7 +189,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
           )
         )
       } else {
-        color_st <- switch(f$estado, "Activo" = "#28a745", "Jubilado" = "#6f42c1", "Inactivo" = "#dc3545", "#6c757d")
+        color_st <- switch(f$estado, "Activo" = "#28a745", "Inactivo" = "#dc3545", "Retirado" = "#6f42c1", "Pensionado" = "#0056b3", "#6c757d")
         tags$tr(
           tags$td(style = "vertical-align:middle; font-weight:600;", f$empleado),
           tags$td(style = "vertical-align:middle;", f$cedula),
