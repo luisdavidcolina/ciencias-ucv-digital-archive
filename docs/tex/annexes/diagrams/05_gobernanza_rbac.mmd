@@ -1,0 +1,36 @@
+---
+title: Gobierno y Control de Acceso
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eef9f0', 'primaryTextColor': '#163b21', 'primaryBorderColor': '#2d6a3a', 'lineColor': '#2d6a3a', 'fontFamily': 'Arial' }}}%%
+flowchart TB
+        subgraph GOV[Linea de Gobierno]
+            C[Comite Institucional]
+            CF[Comite Funcional]
+            CT[Comite Tecnico]
+            C --> CF
+            C --> CT
+            CF --> P1[Priorizacion de requerimientos]
+            CT --> P2[Validacion de arquitectura y seguridad]
+        end
+
+        subgraph RBAC[Linea de Acceso y Operacion]
+            U1[Rol Consulta]
+            U2[Rol Editor]
+            U3[Rol Administrador]
+            U1 --> M1[Acceso de lectura]
+            U2 --> M2[Operacion controlada]
+            U3 --> M3[Operacion integral]
+            M1 --> D1[Modulo Archivo]
+            M1 --> D2[Modulo RRHH]
+            M2 --> D1
+            M2 --> D2
+            M3 --> D1
+            M3 --> D2
+            M3 --> D3[Administracion y Gobierno]
+        end
+
+        P1 --> RBAC
+        P2 --> RBAC
+        D1 --> LOG[Auditoria de eventos]
+        D2 --> LOG
+        D3 --> LOG

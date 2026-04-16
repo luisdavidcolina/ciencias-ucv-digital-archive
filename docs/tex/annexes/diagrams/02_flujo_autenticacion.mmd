@@ -1,0 +1,28 @@
+---
+title: Flujo de Autenticacion y Control de Acceso
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eef6ef', 'primaryTextColor': '#17351f', 'primaryBorderColor': '#2d6a3a', 'lineColor': '#2d6a3a', 'secondaryColor': '#f8fdf8', 'tertiaryColor': '#ffffff', 'fontFamily': 'Arial' }}}%%
+sequenceDiagram
+    participant U as Usuario
+    participant UI as Interfaz
+    participant S as Servidor
+    participant A as Servicio Auth
+    participant DB as Usuarios
+    participant L as Auditoria
+
+    U->>UI: Ingresa credenciales
+    UI->>S: Envia solicitud de login
+    S->>A: Validar usuario y password
+    A->>DB: Consultar credenciales
+    DB-->>A: Resultado
+    A-->>S: Valido o invalido
+
+    alt Credenciales validas
+      S->>L: Registrar Login Success
+      S-->>UI: Abrir modulo autorizado
+      UI-->>U: Acceso concedido
+    else Credenciales invalidas
+      S->>L: Registrar Login Failure
+      S-->>UI: Mostrar error
+      UI-->>U: Acceso denegado
+    end

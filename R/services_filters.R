@@ -44,15 +44,21 @@ filter_archivo_data <- function(datos, search_term, doc_types, sort_mode) {
   out <- filter_by_doc_types(out, doc_types)
 
   if (!is.null(sort_mode)) {
-    if (sort_mode == "AlfabÃ©tico (A-Z)") {
+    if (sort_mode == "Alfabético (A-Z)") {
       out <- out[order(out$titulo), , drop = FALSE]
-    } else if (sort_mode == "AlfabÃ©tico (Z-A)") {
+    } else if (sort_mode == "Alfabético (Z-A)") {
       out <- out[order(out$titulo, decreasing = TRUE), , drop = FALSE]
-    } else if (sort_mode == "MÃ¡s recientes primero") {
+    } else if (sort_mode == "Más recientes primero") {
       out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
-    } else if (sort_mode == "MÃ¡s antiguos primero") {
+    } else if (sort_mode == "Más antiguos primero") {
       out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d"))), , drop = FALSE]
+    } else {
+      # Default to A-Z if string doesn't match
+      out <- out[order(out$titulo), , drop = FALSE]
     }
+  } else {
+    # Default to A-Z if sort_mode is NULL
+    out <- out[order(out$titulo), , drop = FALSE]
   }
 
   out
@@ -83,10 +89,22 @@ filter_rrhh_data <- function(datos, search_term, sort_mode = NULL) {
     out <- out[keep, , drop = FALSE]
   }
 
-  if (!is.null(sort_mode) && sort_mode %in% c("TÃ­tulo A-Z", "Lo mÃ¡s relevante")) {
-    if (identical(sort_mode, "TÃ­tulo A-Z")) {
+  if (!is.null(sort_mode)) {
+    if (sort_mode == "Alfabético (A-Z)") {
       if ("empleado" %in% names(out)) {
         out <- out[order(out$empleado), , drop = FALSE]
+      }
+    } else if (sort_mode == "Alfabético (Z-A)") {
+      if ("empleado" %in% names(out)) {
+        out <- out[order(out$empleado, decreasing = TRUE), , drop = FALSE]
+      }
+    } else if (sort_mode == "Más recientes primero") {
+      if ("fecha_ingreso" %in% names(out)) {
+        out <- out[order(suppressWarnings(as.Date(out$fecha_ingreso, format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
+      }
+    } else if (sort_mode == "Más antiguos primero") {
+      if ("fecha_ingreso" %in% names(out)) {
+        out <- out[order(suppressWarnings(as.Date(out$fecha_ingreso, format = "%Y-%m-%d"))), , drop = FALSE]
       }
     }
   }

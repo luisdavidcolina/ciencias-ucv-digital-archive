@@ -1,0 +1,18 @@
+---
+title: Hoja de Ruta por Fases
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#edf4ff', 'primaryTextColor': '#10253f', 'primaryBorderColor': '#2b4e72', 'lineColor': '#2b4e72', 'fontFamily': 'Arial' }}}%%
+flowchart LR
+    F1[Fase I<br/>Consolidacion Funcional] --> F2[Fase II<br/>Escalamiento de Datos y Operacion]
+    F2 --> F3[Fase III<br/>Inteligencia y Analitica Avanzada]
+
+    F1a[Seguridad y trazabilidad]:::k --> F1
+    F1b[Normalizacion documental]:::k --> F1
+
+    F2a[Migracion relacional]:::k --> F2
+    F2b[Respaldos y continuidad]:::k --> F2
+
+    F3a[Busqueda semantica]:::k --> F3
+    F3b[Analitica ejecutiva]:::k --> F3
+
+    classDef k fill:#ffffff,stroke:#2b4e72,stroke-width:1px,color:#10253f;

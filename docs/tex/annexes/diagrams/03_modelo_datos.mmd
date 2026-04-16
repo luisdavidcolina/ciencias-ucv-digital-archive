@@ -1,0 +1,46 @@
+---
+title: Modelo de Datos Institucional
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fff6ea', 'primaryTextColor': '#3d2b10', 'primaryBorderColor': '#8a5a20', 'lineColor': '#8a5a20', 'secondaryColor': '#fffaf3', 'tertiaryColor': '#ffffff', 'fontFamily': 'Arial' }}}%%
+erDiagram
+    PERSONA ||--o{ ARCHIVO_RRHH : posee
+
+    PERSONA {
+        string cedula PK
+        string empleado
+        string rif
+        string cargo
+        string departamento
+        string estado
+        date fecha_ingreso
+        date fecha_jubilacion
+        date fecha_pension
+        string foto_url
+    }
+
+    ARCHIVO_RRHH {
+        string id_archivo PK
+        string cedula FK
+        string doc_type
+        string ubicacion
+        string personas_relacionadas
+    }
+
+    ARCHIVO_INSTITUCIONAL {
+        string titulo
+        string autor
+        string doc_type
+        date fecha
+        string abstract
+        string ubicacion
+        string tesauro_primario
+        string tesauro_secundario
+        string descriptores_libres
+    }
+
+    USUARIO {
+        string usuario PK
+        string password
+        string modulo
+        string rol
+    }

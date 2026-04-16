@@ -1,0 +1,30 @@
+\section{Arquitectura tecnica}
+La solucion se define sobre una arquitectura modular que separa interfaz, orquestacion de servidor y servicios especializados por responsabilidad.
+
+\section{Patrones de diseno aplicados}
+\begin{itemize}
+  \item Separacion de responsabilidades por capas y servicios.
+  \item Modularizacion de funcionalidades de alto acoplamiento.
+  \item Construccion reactiva para actualizacion incremental de vistas.
+  \item Normalizacion de utilidades transversales (filtros, paginacion, exportacion).
+\end{itemize}
+
+\section{Diseno de componentes}
+\subsection{Interfaz}
+Componentes visuales para autenticacion, navegacion, filtros, resultados y control administrativo.
+
+\subsection{Servidor}
+Coordinacion de estado de sesion, renderizado dinamico y llamadas a servicios.
+
+\subsection{Servicios}
+Funciones de negocio para autenticacion, filtrado documental, taxonomias, personas, auditoria y exportacion.
+
+\section{Escalabilidad tecnica}
+\begin{itemize}
+  \item Evolucion a persistencia relacional.
+  \item Desacople de almacenamiento de activos digitales.
+  \item Integracion progresiva de pipelines de analitica y busqueda semantica.
+\end{itemize}
+
+\section{Observabilidad tecnica}
+Definir en version final un esquema de monitoreo de eventos, metricas de uso, errores de aplicacion y tiempos de respuesta por flujo critico.

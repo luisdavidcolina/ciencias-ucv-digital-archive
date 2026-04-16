@@ -1,0 +1,59 @@
+---
+title: Vista de Contenedores - Arquitectura Objetivo
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#e9f1fb', 'primaryTextColor': '#10253f', 'primaryBorderColor': '#2b4e72', 'lineColor': '#2b4e72', 'secondaryColor': '#f7fbff', 'tertiaryColor': '#ffffff', 'fontFamily': 'Arial' }}}%%
+flowchart LR
+    U[Usuario Operativo]:::actor --> WEB[Cliente Web - Navegador]:::client
+    ADMUSR[Administrador]:::actor --> WEB
+
+    subgraph APP[Contenedor Aplicacion - Plataforma Shiny]
+      UI[Interfaz bs4Dash]:::service
+      CTRL[Controlador Reactivo]:::service
+      AUTH[Servicio de Autenticacion]:::service
+      FIND[Servicio de Busqueda y Filtros]:::service
+      DOS[Servicio de Expedientes RRHH]:::service
+      EXP[Servicio de Exportacion XLS]:::service
+      AUD[Servicio de Auditoria]:::service
+    end
+
+    subgraph DATA[Contenedor de Datos]
+      UDB[(usuarios.csv)]:::db
+      ADB[(datos_archivo.csv)]:::db
+      PDB[(rrhh_personas.csv)]:::db
+      FDB[(rrhh_archivos.csv)]:::db
+      LDB[(audit_log.csv)]:::db
+    end
+
+    subgraph OPS[Servicios Operacionales]
+      DEP[Servicio de Despliegue]:::ops
+      BCK[Backups Programados]:::ops
+      MON[Monitoreo y Alertas]:::ops
+    end
+
+    WEB --> UI
+    UI --> CTRL
+
+    CTRL --> AUTH
+    CTRL --> FIND
+    CTRL --> DOS
+    CTRL --> EXP
+    CTRL --> AUD
+
+    AUTH --> UDB
+    FIND --> ADB
+    DOS --> PDB
+    DOS --> FDB
+    AUD --> LDB
+
+    DEP -. hospeda .-> UI
+    BCK -. protege .-> UDB
+    BCK -. protege .-> ADB
+    BCK -. protege .-> PDB
+    BCK -. protege .-> FDB
+    MON -. observa .-> CTRL
+
+    classDef actor fill:#ffffff,stroke:#1b365d,stroke-width:1.6px,color:#10253f;
+    classDef client fill:#f6fbff,stroke:#2b4e72,stroke-width:1.4px,color:#10253f;
+    classDef service fill:#eef5ff,stroke:#2b4e72,stroke-width:1.2px,color:#10253f;
+    classDef db fill:#fffaf2,stroke:#8a5a20,stroke-width:1.4px,color:#3f2a15;
+    classDef ops fill:#f4fff6,stroke:#2d6a3a,stroke-width:1.2px,color:#163b21;

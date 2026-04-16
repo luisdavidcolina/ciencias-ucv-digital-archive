@@ -1,0 +1,16 @@
+---
+title: Despliegue y Continuidad Operativa
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fff7ef', 'primaryTextColor': '#3f2a15', 'primaryBorderColor': '#8a5a20', 'lineColor': '#8a5a20', 'fontFamily': 'Arial' }}}%%
+flowchart LR
+    DEV[Entorno de Desarrollo] --> QA[Entorno de Pruebas]
+    QA --> PRD[Entorno de Produccion]
+
+    PRD --> MON[Monitoreo y Observabilidad]
+    PRD --> BCK[Respaldos Programados]
+    BCK --> REC[Recuperacion ante Contingencias]
+
+    MON --> INC[Gestion de Incidentes]
+    INC --> RCA[Analisis de Causa Raiz]
+    RCA --> MEJ[Mejora Continua]
+    MEJ --> DEV

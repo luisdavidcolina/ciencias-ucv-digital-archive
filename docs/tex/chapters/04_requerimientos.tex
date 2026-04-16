@@ -1,0 +1,138 @@
+\section{Enfoque de requerimientos}
+Este capitulo consolida los requerimientos del sistema en forma estructurada para asegurar cobertura funcional, tecnica, operativa y de cumplimiento institucional.
+
+\section{Requerimientos funcionales (RF)}
+\subsection{RF de acceso y sesion}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RF-001 & El sistema debe permitir inicio de sesion con credenciales institucionales. \\
+RF-002 & El sistema debe identificar perfil de rol y modulo para controlar la navegacion inicial. \\
+RF-003 & El sistema debe permitir cierre de sesion seguro. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RF del modulo Archivo}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RF-010 & Debe permitir busqueda por texto libre sobre metadatos documentales. \\
+RF-011 & Debe filtrar por tipologia documental, tesauro y rango de fechas. \\
+RF-012 & Debe ordenar resultados por criterio alfabetico y cronologico. \\
+RF-013 & Debe paginar resultados de consulta. \\
+RF-014 & Debe mostrar tarjetas de resultado con metadatos y ubicacion fisica. \\
+RF-015 & Debe permitir apertura de modal de detalle documental. \\
+RF-016 & Debe permitir exportar resultados filtrados a formato XLS. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RF del modulo RRHH}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RF-020 & Debe construir expediente unificado por persona titular. \\
+RF-021 & Debe permitir busqueda por nombre, apellido o identificador de persona. \\
+RF-022 & Debe filtrar por tipologia, estado, personas relacionadas y fecha de ingreso. \\
+RF-023 & Debe presentar dossier de persona con metadatos laborales y archivos asociados. \\
+RF-024 & Debe ordenar resultados por criterio alfabetico y cronologico. \\
+RF-025 & Debe exportar expediente consolidado por persona a XLS. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RF del panel administrativo}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RF-030 & Debe ofrecer panel de control administrativo por rol autorizado. \\
+RF-031 & Debe incluir vistas de nuevo ingreso, monitor, categorias, usuarios y estadisticas. \\
+RF-032 & Debe aplicar filtros analiticos por modulo y metadatos. \\
+RF-033 & Debe mostrar indicadores de operacion por modulo. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RF de auditoria y trazabilidad}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RF-040 & Debe registrar eventos criticos de autenticacion, consulta y exportacion. \\
+RF-041 & Debe preservar datos de actor, accion, modulo, detalle y marca temporal. \\
+RF-042 & Debe habilitar evidencia para auditoria interna y analisis forense. \\
+\bottomrule
+\end{longtable}
+
+\section{Requerimientos no funcionales (RNF)}
+\subsection{RNF de seguridad y privacidad}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RNF-001 & El sistema debe aplicar segregacion por modulo y rol. \\
+RNF-002 & El sistema debe proteger datos sensibles de RRHH bajo principio de minimo privilegio. \\
+RNF-003 & El sistema debe mantener trazabilidad integral para no repudio. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RNF de rendimiento y capacidad}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RNF-010 & La plataforma debe operar eficientemente en infraestructura institucional de bajo costo. \\
+RNF-011 & Debe sostener crecimiento progresivo de volumen documental sin degradacion critica. \\
+RNF-012 & Debe permitir evolucion a almacenamiento desacoplado y motor relacional. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RNF de disponibilidad y continuidad}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RNF-020 & Debe disponer de estrategia de respaldos periodicos. \\
+RNF-021 & Debe contemplar restauracion y recuperacion ante contingencias. \\
+RNF-022 & Debe tener monitoreo basico de operacion e incidentes. \\
+\bottomrule
+\end{longtable}
+
+\subsection{RNF de calidad y mantenibilidad}
+\begin{longtable}{p{0.12\textwidth} p{0.78\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Descripcion} \\
+\midrule
+RNF-030 & El codigo debe mantener arquitectura modular y separacion de responsabilidades. \\
+RNF-031 & Debe contar con estrategia de pruebas unitarias y evolucion a pruebas integrales. \\
+RNF-032 & Debe contar con documentacion versionada y trazable. \\
+\bottomrule
+\end{longtable}
+
+\section{Requerimientos de plataforma e infraestructura}
+\begin{itemize}
+  \item Requisito de ejecucion: R 4.x o superior.
+  \item Entorno recomendado: RStudio Desktop.
+  \item Dependencias base: shiny, bs4Dash, jsonlite.
+  \item Dependencias ampliadas documentadas: tidyverse, plotly, DT, shinyWidgets.
+  \item Hardware de referencia: 1 GB RAM/1 vCPU para desarrollo; 2 GB RAM/1-2 vCPU para operacion ampliada.
+  \item Navegadores objetivo: Chrome, Firefox y Edge.
+\end{itemize}
+
+\section{Restricciones y supuestos}
+\begin{itemize}
+  \item Restriccion de soberania: priorizar procesamiento local/institucional.
+  \item Restriccion de costos: minimizar dependencia de licenciamiento propietario.
+  \item Supuesto de adopcion: acompanamiento funcional de Archivo y RRHH.
+  \item Supuesto de gobernanza: aprobacion institucional de politicas de datos y seguridad.
+\end{itemize}
+
+\section{Criterios de aceptacion de alto nivel}
+\begin{enumerate}
+  \item El usuario accede unicamente al modulo autorizado por su perfil.
+  \item La busqueda por metadatos retorna resultados paginados y exportables.
+  \item El expediente RRHH se visualiza por persona con sus archivos asociados.
+  \item El panel administrativo presenta vistas de control y estadisticas por modulo.
+  \item Las acciones criticas quedan registradas para auditoria.
+\end{enumerate}

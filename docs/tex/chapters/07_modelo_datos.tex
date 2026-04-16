@@ -1,0 +1,35 @@
+\section{Modelo conceptual institucional}
+El modelo de informacion integra dominios documentales academicos y administrativos, garantizando consistencia semantica y trazabilidad de metadatos.
+
+\section{Entidades nucleares}
+\begin{itemize}
+  \item Usuario: identidad de acceso y perfil operativo.
+  \item Archivo Institucional: unidad documental academica con metadatos descriptivos.
+  \item Persona RRHH: entidad titular del expediente laboral.
+  \item Archivo RRHH: documento asociado al expediente de una persona.
+  \item Taxonomia/Tesauro: terminos controlados para clasificacion y recuperacion.
+  \item Evento de auditoria: huella de acciones criticas y evidencia de operacion.
+\end{itemize}
+
+\section{Gobierno de metadatos}
+\begin{itemize}
+  \item Normalizacion de campos obligatorios y opcionales.
+  \item Catalogacion semantica por tipologia y tesauro.
+  \item Reglas de calidad para integridad, completitud y unicidad.
+  \item Politicas de versionado de estructuras de datos.
+\end{itemize}
+
+\section{Reglas de consistencia}
+\begin{enumerate}
+  \item Todo documento debe mantener contexto de origen, tipo y ubicacion.
+  \item Los expedientes RRHH deben ser trazables a persona titular.
+  \item La clasificacion documental debe alinearse con taxonomias vigentes.
+  \item Los eventos criticos deben registrar actor, accion, modulo y marca temporal.
+\end{enumerate}
+
+\section{Estrategia de evolucion de datos}
+\begin{itemize}
+  \item Migracion progresiva a esquema relacional empresarial.
+  \item Endurecimiento de validaciones de integridad referencial.
+  \item Preparacion para busqueda semantica y analitica historica.
+\end{itemize}

@@ -1,0 +1,59 @@
+\section{Entidad: Usuario}
+\begin{longtable}{p{0.22\textwidth} p{0.18\textwidth} p{0.16\textwidth} p{0.36\textwidth}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
+\midrule
+usuario & String & Si & Identificador de acceso. \\
+password & String & Si & Credencial de autenticacion. \\
+modulo & String & Si & Dominio habilitado (Archivo/RRHH). \\
+rol & String & Si & Perfil de autorizacion. \\
+\bottomrule
+\end{longtable}
+
+\section{Entidad: Archivo Institucional}
+\begin{longtable}{p{0.22\textwidth} p{0.18\textwidth} p{0.16\textwidth} p{0.36\textwidth}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
+\midrule
+titulo & String & Si & Titulo documental. \\
+autor & String & Si & Autor o productor documental. \\
+doc\_type & String & Si & Tipologia documental. \\
+fecha & Date & Si & Fecha de emision o registro. \\
+abstract & String & No & Resumen descriptivo. \\
+ubicacion & String & Si & Referencia fisica o logica. \\
+tesauro\_primario & String & No & Descriptor principal controlado. \\
+tesauro\_secundario & String & No & Descriptor secundario. \\
+descriptores\_libres & String & No & Terminos adicionales abiertos. \\
+\bottomrule
+\end{longtable}
+
+\section{Entidad: Persona RRHH}
+\begin{longtable}{p{0.22\textwidth} p{0.18\textwidth} p{0.16\textwidth} p{0.36\textwidth}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
+\midrule
+cedula & String & Si & Identificador principal de persona. \\
+empleado & String & Si & Nombre de persona titular. \\
+rif & String & No & Registro fiscal. \\
+cargo & String & Si & Cargo institucional. \\
+departamento & String & Si & Dependencia administrativa. \\
+estado & String & Si & Estado laboral. \\
+fecha\_ingreso & Date & Si & Fecha de ingreso institucional. \\
+fecha\_jubilacion & Date & No & Fecha de jubilacion, si aplica. \\
+fecha\_pension & Date & No & Fecha de pension, si aplica. \\
+foto\_url & String & No & Referencia visual institucional. \\
+\bottomrule
+\end{longtable}
+
+\section{Entidad: Archivo RRHH}
+\begin{longtable}{p{0.22\textwidth} p{0.18\textwidth} p{0.16\textwidth} p{0.36\textwidth}}
+\toprule
+\textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
+\midrule
+id\_archivo & String & Si & Identificador unico del documento RRHH. \\
+cedula & String & Si & Clave de vinculacion con persona titular. \\
+doc\_type & String & Si & Tipologia de archivo laboral. \\
+ubicacion & String & Si & Referencia fisica/logica de resguardo. \\
+personas\_relacionadas & String & No & Personas vinculadas al expediente. \\
+\bottomrule
+\end{longtable}

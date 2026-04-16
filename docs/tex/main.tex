@@ -1,0 +1,71 @@
+\documentclass[12pt,a4paper]{report}
+
+\input{templates/preamble}
+
+\begin{document}
+
+\input{templates/cover}
+\input{templates/frontmatter}
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\chapter{Resumen Ejecutivo}
+\input{chapters/01_resumen_ejecutivo}
+
+\chapter{Contexto, Vision y Mision}
+\input{chapters/02_contexto_mision}
+
+\chapter{Objetivos, Alcance y Supuestos}
+\input{chapters/03_objetivos_alcance}
+
+\chapter{Requerimientos del Sistema}
+\input{chapters/04_requerimientos}
+
+\chapter{Arquitectura Objetivo de la Solucion}
+\input{chapters/04_arquitectura_objetivo}
+
+\chapter{Diseno Funcional Integral}
+\input{chapters/05_diseno_funcional}
+
+\chapter{Diseno Tecnico Empresarial}
+\input{chapters/06_diseno_tecnico}
+
+\chapter{Modelo de Datos y Gobierno de Informacion}
+\input{chapters/07_modelo_datos}
+
+\chapter{Seguridad, Privacidad y Trazabilidad}
+\input{chapters/08_seguridad_auditoria}
+
+\chapter{Operacion, Despliegue y Continuidad}
+\input{chapters/09_operacion_despliegue}
+
+\chapter{Calidad, Validacion y Aseguramiento}
+\input{chapters/10_calidad_qa}
+
+\chapter{Gobernanza, Marco Legal y Propiedad Intelectual}
+\input{chapters/11_gobernanza_legal}
+
+\chapter{Hoja de Ruta y Vision de Escalamiento}
+\input{chapters/12_roadmap}
+
+\appendix
+\chapter{Glosario}
+\input{annexes/A_glosario}
+
+\chapter{Diccionario de Datos Extendido}
+\input{annexes/B_diccionario_datos}
+
+\chapter{Matriz de Trazabilidad}
+\input{annexes/C_matriz_trazabilidad}
+
+\chapter{Referencias}
+\input{annexes/D_referencias}
+
+\chapter{Diagramas Maestros}
+\input{annexes/E_diagramas}
+
+\chapter{Cobertura Total del README}
+\input{annexes/F_cobertura_readme}
+
+\end{document}

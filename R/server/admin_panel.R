@@ -157,6 +157,15 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     df <- filter_by_doc_types(df, input$admin_type_filter)
     if (identical(session_state$modulo, "RRHH")) {
       df <- filter_by_persons(df, input$admin_person_filter)
+      # Default sort for RRHH: Employee name
+      if ("empleado" %in% names(df)) {
+        df <- df[order(df$empleado), , drop = FALSE]
+      }
+    } else {
+      # Default sort for Archivo: Title
+      if ("titulo" %in% names(df)) {
+        df <- df[order(df$titulo), , drop = FALSE]
+      }
     }
 
     if (nrow(df) == 0) {
