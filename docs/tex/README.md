@@ -1,4 +1,4 @@
-# Memoria Tecnica Integral (LaTeX)
+# Documento Maestro Institucional (LaTeX)
 
 ## Estructura
 
@@ -26,3 +26,12 @@ powershell -ExecutionPolicy Bypass -File "c:/ciencias-ucv-digital-archive/docs/t
 cd c:/ciencias-ucv-digital-archive/docs/tex
 pdflatex -interaction=nonstopmode -halt-on-error main.tex
 pdflatex -interaction=nonstopmode -halt-on-error main.tex
+
+## Tipografia
+
+- Para usar Arial real, compila con XeLaTeX:
+
+xelatex -interaction=nonstopmode -halt-on-error main.tex
+xelatex -interaction=nonstopmode -halt-on-error main.tex
+
+- Si usas pdfLaTeX, se aplica una fuente sans-serif compatible como fallback.

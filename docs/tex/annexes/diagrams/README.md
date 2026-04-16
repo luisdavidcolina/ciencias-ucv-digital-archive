@@ -10,6 +10,9 @@ Esta carpeta contiene los diagramas fuente en Mermaid para la documentacion prof
 - 04_roadmap_fases.mmd
 - 05_gobernanza_rbac.mmd
 - 06_despliegue_continuidad.mmd
+- 07_paquetes_sistema.mmd
+- 08_casos_uso_general.mmd
+- 09_ciclo_vida_entrega.mmd
 
 Cada archivo Mermaid incluye un titulo embebido en el propio diagrama mediante frontmatter (`title:`), de modo que la imagen exportada ya muestra su encabezado.
 

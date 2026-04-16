@@ -1,0 +1,12 @@
+---
+title: Ciclo de Vida de Entrega y Mejora Continua
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fff8ef', 'primaryTextColor': '#3f2a15', 'primaryBorderColor': '#8a5a20', 'lineColor': '#8a5a20', 'fontFamily': 'Arial' }}}%%
+flowchart LR
+    P1[Planificacion de Sprint] --> P2[Desarrollo de Funcionalidad]
+    P2 --> P3[Pruebas Unitarias y Funcionales]
+    P3 --> P4[Revision Tecnica y QA]
+    P4 --> P5[Despliegue Controlado]
+    P5 --> P6[Monitoreo y Auditoria]
+    P6 --> P7[Retroalimentacion de Usuarios]
+    P7 --> P1

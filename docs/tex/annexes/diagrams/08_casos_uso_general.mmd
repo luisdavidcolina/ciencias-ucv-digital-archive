@@ -1,0 +1,39 @@
+---
+title: Diagrama de Casos de Uso General
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#f3f9f4', 'primaryTextColor': '#163b21', 'primaryBorderColor': '#2d6a3a', 'lineColor': '#2d6a3a', 'fontFamily': 'Arial' }}}%%
+flowchart TB
+    A1[Actor: Usuario Archivo]
+    A2[Actor: Usuario RRHH]
+    A3[Actor: Administrador]
+
+    U1((Autenticarse))
+    U2((Consultar Archivo))
+    U3((Consultar Expediente RRHH))
+    U4((Aplicar Filtros))
+    U5((Exportar Reporte XLS))
+    U6((Abrir Detalle/Modal))
+    U7((Gestionar Panel Admin))
+    U8((Consultar Estadisticas))
+    U9((Registrar Auditoria))
+
+    A1 --> U1
+    A1 --> U2
+    A1 --> U4
+    A1 --> U5
+    A1 --> U6
+
+    A2 --> U1
+    A2 --> U3
+    A2 --> U4
+    A2 --> U5
+    A2 --> U6
+
+    A3 --> U1
+    A3 --> U7
+    A3 --> U8
+
+    U2 --> U9
+    U3 --> U9
+    U5 --> U9
+    U7 --> U9

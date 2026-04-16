@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  16 APR 2026 14:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  16 APR 2026 14:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -78,6 +78,9 @@ on input line 2.
 LaTeX Encoding Info:    Redeclaring text command \guillemotright (encoding OT1)
  on input line 2.
 
+(C:\Program Files\MiKTeX\tex/generic/iftex\iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+)
 (C:\Program Files\MiKTeX\tex/latex/base\inputenc.sty
 Package: inputenc 2024/02/08 v1.3d Input encoding file
 \inpenc@prehook=\toks18
@@ -86,54 +89,19 @@ Package: inputenc 2024/02/08 v1.3d Input encoding file
 (C:\Program Files\MiKTeX\tex/latex/base\fontenc.sty
 Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
 )
-(C:\Program Files\MiKTeX\tex/latex/lm\lmodern.sty
-Package: lmodern 2015/05/01 v1.6.1 Latin Modern Fonts
-LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> OT1/lmr/m/n on input line 22.
-LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
-(Font)                  OML/cmm/m/it --> OML/lmm/m/it on input line 23.
-LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
-(Font)                  OMS/cmsy/m/n --> OMS/lmsy/m/n on input line 24.
-LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
-(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 25.
-LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 26.
-LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
-(Font)                  OML/cmm/b/it --> OML/lmm/b/it on input line 27.
-LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
-(Font)                  OMS/cmsy/b/n --> OMS/lmsy/b/n on input line 28.
-LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
-(Font)                  OMX/cmex/m/n --> OMX/lmex/m/n on input line 29.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 31.
-LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> OT1/lmss/m/n on input line 32.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> OT1/lmr/m/it on input line 33.
-LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 34.
-LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
-(Font)                  OT1/cmr/bx/n --> OT1/lmr/bx/n on input line 35.
-LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> OT1/lmss/bx/n on input line 36.
-LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> OT1/lmr/bx/it on input line 37.
-LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> OT1/lmtt/m/n on input line 38.
-)
-(C:\Program Files\MiKTeX\tex/latex/geometry\geometry.sty
-Package: geometry 2020/01/02 v5.9 Page Geometry
+(C:\Program Files\MiKTeX\tex/latex/psnfss\helvet.sty
+Package: helvet 2020/03/25 PSNFSS-v9.3 (WaS) 
 
 (C:\Program Files\MiKTeX\tex/latex/graphics\keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks20
-)
+))
+(C:\Program Files\MiKTeX\tex/latex/geometry\geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
 (C:\Program Files\MiKTeX\tex/generic/iftex\ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
-
-(C:\Program Files\MiKTeX\tex/generic/iftex\iftex.sty
-Package: iftex 2024/12/12 v1.0g TeX engine tests
-))
+)
 \Gm@cnth=\count287
 \Gm@cntv=\count288
 \c@Gm@tempcnt=\count289
@@ -414,17 +382,274 @@ Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \f@nch@widthR=\skip74
 \@temptokenb=\toks27
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 27.
+(C:\Program Files\MiKTeX\tex/latex/pgf/frontendlayer\tikz.sty
+(C:\Program Files\MiKTeX\tex/latex/pgf/basiclayer\pgf.sty
+(C:\Program Files\MiKTeX\tex/latex/pgf/utilities\pgfrcs.sty
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfutil-common.tex
+\pgfutil@everybye=\toks28
+\pgfutil@tempdima=\dimen191
+\pgfutil@tempdimb=\dimen192
 )
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 5.
-
-
-(C:\Program Files\MiKTeX\tex/latex/lm\t1lmr.fd
-File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfutil-latex.def
+\pgfutil@abb=\box62
 )
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfrcs.code.tex
+(C:\Program Files\MiKTeX\tex/generic/pgf\pgf.revision.tex)
+Package: pgfrcs 2025-08-29 v3.1.11a (3.1.11a)
+))
+Package: pgf 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/latex/pgf/basiclayer\pgfcore.sty
+(C:\Program Files\MiKTeX\tex/latex/pgf/systemlayer\pgfsys.sty
+(C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsys.code.tex
+Package: pgfsys 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks29
+\pgfkeys@temptoks=\toks30
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfkeyslibraryfiltered.code.
+tex
+\pgfkeys@tmptoks=\toks31
+))
+\pgf@x=\dimen193
+\pgf@y=\dimen194
+\pgf@xa=\dimen195
+\pgf@ya=\dimen196
+\pgf@xb=\dimen197
+\pgf@yb=\dimen198
+\pgf@xc=\dimen199
+\pgf@yc=\dimen256
+\pgf@xd=\dimen257
+\pgf@yd=\dimen258
+\w@pgf@writea=\write3
+\r@pgf@reada=\read3
+\c@pgf@counta=\count314
+\c@pgf@countb=\count315
+\c@pgf@countc=\count316
+\c@pgf@countd=\count317
+\t@pgf@toka=\toks32
+\t@pgf@tokb=\toks33
+\t@pgf@tokc=\toks34
+\pgf@sys@id@count=\count318
+ (C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgf.cfg
+File: pgf.cfg 2025-08-29 v3.1.11a (3.1.11a)
+)
+Driver file for pgf: pgfsys-pdftex.def
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsys-common-pdf.def
+File: pgfsys-common-pdf.def 2025-08-29 v3.1.11a (3.1.11a)
+)))
+(C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsyssoftpath.code.tex
+File: pgfsyssoftpath.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfsyssoftpath@smallbuffer@items=\count319
+\pgfsyssoftpath@bigbuffer@items=\count320
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsysprotocol.code.tex
+File: pgfsysprotocol.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+))
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcore.code.tex
+Package: pgfcore 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathutil.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathparser.code.tex
+\pgfmath@dimen=\dimen259
+\pgfmath@count=\count321
+\pgfmath@box=\box63
+\pgfmath@toks=\toks35
+\pgfmath@stack@operand=\toks36
+\pgfmath@stack@operation=\toks37
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.basic.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.trigonometric.co
+de.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.random.code.tex)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.comparison.code.
+tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.base.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.round.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.misc.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.integerarithmeti
+cs.code.tex) (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathcalc.code.tex
+) (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count322
+))
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfint.code.tex)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepoints.code.tex
+File: pgfcorepoints.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@picminx=\dimen260
+\pgf@picmaxx=\dimen261
+\pgf@picminy=\dimen262
+\pgf@picmaxy=\dimen263
+\pgf@pathminx=\dimen264
+\pgf@pathmaxx=\dimen265
+\pgf@pathminy=\dimen266
+\pgf@pathmaxy=\dimen267
+\pgf@xx=\dimen268
+\pgf@xy=\dimen269
+\pgf@yx=\dimen270
+\pgf@yy=\dimen271
+\pgf@zx=\dimen272
+\pgf@zy=\dimen273
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathconstruct.code.t
+ex
+File: pgfcorepathconstruct.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@path@lastx=\dimen274
+\pgf@path@lasty=\dimen275
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathusage.code.tex
+File: pgfcorepathusage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@shorten@end@additional=\dimen276
+\pgf@shorten@start@additional=\dimen277
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorescopes.code.tex
+File: pgfcorescopes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfpic=\box64
+\pgf@hbox=\box65
+\pgf@layerbox@main=\box66
+\pgf@picture@serial@count=\count323
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoregraphicstate.code.te
+x
+File: pgfcoregraphicstate.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgflinewidth=\dimen278
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoretransformations.code
+.tex
+File: pgfcoretransformations.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@pt@x=\dimen279
+\pgf@pt@y=\dimen280
+\pgf@pt@temp=\dimen281
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreobjects.code.tex
+File: pgfcoreobjects.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathprocessing.code.
+tex
+File: pgfcorepathprocessing.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorearrows.code.tex
+File: pgfcorearrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfarrowsep=\dimen282
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@max=\dimen283
+\pgf@sys@shading@range@num=\count324
+\pgf@shadingcount=\count325
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreexternal.code.tex
+File: pgfcoreexternal.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfexternal@startupbox=\box67
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoretransparency.code.te
+x
+File: pgfcoretransparency.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepatterns.code.tex
+File: pgfcorepatterns.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)))
+(C:\Program Files\MiKTeX\tex/generic/pgf/modules\pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfnodeparttextbox=\box68
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/modules\pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)
+(C:\Program Files\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-0-65.sty
+Package: pgfcomp-version-0-65 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@nodesepstart=\dimen284
+\pgf@nodesepend=\dimen285
+)
+(C:\Program Files\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-1-18.sty
+Package: pgfcomp-version-1-18 2025-08-29 v3.1.11a (3.1.11a)
+)) (C:\Program Files\MiKTeX\tex/latex/pgf/utilities\pgffor.sty
+(C:\Program Files\MiKTeX\tex/latex/pgf/utilities\pgfkeys.sty
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfkeys.code.tex))
+(C:\Program Files\MiKTeX\tex/latex/pgf/math\pgfmath.sty
+(C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex))
+(C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgffor.code.tex
+Package: pgffor 2025-08-29 v3.1.11a (3.1.11a)
+\pgffor@iter=\dimen286
+\pgffor@skip=\dimen287
+\pgffor@stack=\toks38
+\pgffor@toks=\toks39
+))
+(C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz\tikz.code.tex
+Package: tikz 2025-08-29 v3.1.11a (3.1.11a)
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/libraries\pgflibraryplothandlers.code.
+tex
+File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgf@plot@mark@count=\count326
+\pgfplotmarksize=\dimen288
+)
+\tikz@lastx=\dimen289
+\tikz@lasty=\dimen290
+\tikz@lastxsaved=\dimen291
+\tikz@lastysaved=\dimen292
+\tikz@lastmovetox=\dimen293
+\tikz@lastmovetoy=\dimen294
+\tikzleveldistance=\dimen295
+\tikzsiblingdistance=\dimen296
+\tikz@figbox=\box69
+\tikz@figbox@bg=\box70
+\tikz@tempbox=\box71
+\tikz@tempbox@bg=\box72
+\tikztreelevel=\count327
+\tikznumberofchildren=\count328
+\tikznumberofcurrentchild=\count329
+\tikz@fig@count=\count330
+ (C:\Program Files\MiKTeX\tex/generic/pgf/modules\pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfmatrixcurrentrow=\count331
+\pgfmatrixcurrentcolumn=\count332
+\pgf@matrix@numberofcolumns=\count333
+)
+\tikz@expandcount=\count334
+
+(C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibra
+rytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)))
+(C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibra
+rypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+)
+(C:\Program Files\MiKTeX\tex/generic/pgf/libraries\pgflibraryarrows.meta.code.t
+ex
+File: pgflibraryarrows.meta.code.tex 2025-08-29 v3.1.11a (3.1.11a)
+\pgfarrowinset=\dimen297
+\pgfarrowlength=\dimen298
+\pgfarrowwidth=\dimen299
+\pgfarrowlinewidth=\dimen300
+)
+Package hyperref Info: Option `colorlinks' set `true' on input line 37.
+)
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 5.
+
+ (C:\Program Files\MiKTeX\tex/latex/psnfss\t1phv.fd
+File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
+)
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 11.39996pt on input line 5.
+
 (C:\Program Files\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count314
+\l__color_backend_stack_int=\count335
 )
 (c:\ciencias-ucv-digital-archive\docs\tex\main.aux
 LaTeX Info: Redefining \. on input line 11.
@@ -491,17 +716,17 @@ LaTeX Info: Redefining \% on input line 5.
 
 (C:\Program Files\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count315
-\scratchdimen=\dimen191
-\scratchbox=\box62
-\nofMPsegments=\count316
-\nofMParguments=\count317
-\everyMPshowfont=\toks28
-\MPscratchCnt=\count318
-\MPscratchDim=\dimen192
-\MPnumerator=\count319
-\makeMPintoPDFobject=\count320
-\everyMPtoPDFconversion=\toks29
+\scratchcounter=\count336
+\scratchdimen=\dimen301
+\scratchbox=\box73
+\nofMPsegments=\count337
+\nofMParguments=\count338
+\everyMPshowfont=\toks40
+\MPscratchCnt=\count339
+\MPscratchDim=\dimen302
+\MPnumerator=\count340
+\makeMPintoPDFobject=\count341
+\everyMPtoPDFconversion=\toks41
 ) (C:\Program Files\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
@@ -514,109 +739,80 @@ Package hyperref Info: Link coloring ON on input line 5.
 
 (c:\ciencias-ucv-digital-archive\docs\tex\main.out)
 (c:\ciencias-ucv-digital-archive\docs\tex\main.out)
-\@outlinefile=\write3
-\openout3 = `main.out'.
+\@outlinefile=\write4
+\openout4 = `main.out'.
 
 
 (c:\ciencias-ucv-digital-archive\docs\tex\templates/cover.tex
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 1
-6.
-
-(C:\Program Files\MiKTeX\tex/latex/lm\ot1lmr.fd
-File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 1
-6.
-
-(C:\Program Files\MiKTeX\tex/latex/lm\omllmm.fd
-File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-16.
-
-(C:\Program Files\MiKTeX\tex/latex/lm\omslmsy.fd
-File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-16.
-
-(C:\Program Files\MiKTeX\tex/latex/lm\omxlmex.fd
-File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 16.41594pt on input line 3.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 13.67995pt on input line 5.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 23.63593pt on input line 8.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 23.63593pt on input line 8.
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 19.70294pt on input line 10.
+LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <12> on input line 16.
-LaTeX Font Info:    External font `lmex10' loaded for size
+LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <8> on input line 16.
-LaTeX Font Info:    External font `lmex10' loaded for size
+LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 16.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 11.39996pt on input line 17.
  [1
 
 {C:/Users/usuario/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Program 
-Files/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}])
+Files/MiKTeX/fonts/enc/dvips/base/8r.enc}])
 (c:\ciencias-ucv-digital-archive\docs\tex\templates/frontmatter.tex
-Overfull \hbox (1.23639pt too wide) in alignment at lines 6--17
- [] [] 
- []
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 13.67995pt on input line 3.
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 19.70294pt on input line 3.
 
-[1
-
-]
-Overfull \hbox (8.67949pt too wide) in alignment at lines 22--28
+Overfull \hbox (8.67949pt too wide) in alignment at lines 6--12
  [] [] [] 
  []
 
-[2
+LaTeX Font Info:    Font shape `T1/phv/m/sc' will be
+(Font)              scaled to size 11.39996pt on input line 14.
+[1
 
-] (c:\ciencias-ucv-digital-archive\docs\tex\main.toc
-LaTeX Info: Redefining \. on input line 1.
-LaTeX Info: Redefining \% on input line 1.
+] (c:\ciencias-ucv-digital-archive\docs\tex\main.toc)
+\tf@toc=\write5
+\openout5 = `main.toc'.
 
-
-LaTeX Font Warning: Font shape `T1/lmr/bx/sc' undefined
-(Font)              using `T1/lmr/bx/n' instead on input line 2.
-
-
-Package spanish Warning: Replacing `T1/lmr/bx/sc' by 
-(spanish)                faked small caps on input line 2.
-
-
-Package spanish Warning: Replacing `T1/lmr/bx/sc' by 
-(spanish)                faked small caps on input line 3.
-
-[3
-
-] [4] [5])
-\tf@toc=\write4
-\openout4 = `main.toc'.
-
- [6] (c:\ciencias-ucv-digital-archive\docs\tex\main.lof
-LaTeX Info: Redefining \. on input line 1.
-LaTeX Info: Redefining \% on input line 1.
-)
-\tf@lof=\write5
-\openout5 = `main.lof'.
-
- [7
+ [2
 
 ]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.lot
-LaTeX Info: Redefining \. on input line 1.
-LaTeX Info: Redefining \% on input line 1.
-)
-\tf@lot=\write6
-\openout6 = `main.lot'.
+(c:\ciencias-ucv-digital-archive\docs\tex\main.lof)
+\tf@lof=\write6
+\openout6 = `main.lof'.
 
- [8
+ [3
+
+]
+(c:\ciencias-ucv-digital-archive\docs\tex\main.lot)
+\tf@lot=\write7
+\openout7 = `main.lot'.
+
+ [4
 
 ])
 Cap\'{\i }tulo 1.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/01_resumen_ejecutivo.tex
+LaTeX Font Info:    Font shape `T1/phv/b/n' will be
+(Font)              scaled to size 16.41594pt on input line 3.
+
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.26   \item N
-              ivel tecnico: Capitulos 5 al 10 y anexos. [1
+l.20   \item E
+              standarizacion archivistica y fortalecimiento de control interno.
+[1
 
 
 ]) [2]
@@ -627,102 +823,128 @@ Cap\'{\i }tulo 2.
 ]) [4]
 Cap\'{\i }tulo 3.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/03_objetivos_alcance.tex
-Overfull \hbox (2.2065pt too wide) in paragraph at lines 2--3
-[]\T1/lmr/m/n/12 Implementar una so-lu-cion in-te-gral pa-ra la ges-tion do-cu-
-men-tal ins-ti-tu-cio-nal y de RRHH,
+Overfull \hbox (12.15762pt too wide) in paragraph at lines 9--10
+[]\T1/phv/m/n/12 Definir una ar-qui-tec-tu-ra de evo-lu-cion ha-cia en-tor-nos 
+re-la-cio-na-les y nu-be pri-va-da/hibrida. 
  []
 
 [5
 
 ]) [6]
 Cap\'{\i }tulo 4.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_requerimientos.tex
+ignored error: Infinite glue shrinkage found in box being split [7
+
+] [8]
+ignored error: Infinite glue shrinkage found in box being split [9] [10]
+Underfull \hbox (badness 10000) in paragraph at lines 138--138
+[]|\T1/phv/m/n/12 Produccion (App + Post-
+ []
+
+[11]) [12]
+Cap\'{\i }tulo 5.
 
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_arquitectura_objetivo.tex
-[7
+[13
 
-]) [8]
-Cap\'{\i }tulo 5.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/05_diseno_funcional.tex
-[9
-
-]) [10]
+]) [14]
 Cap\'{\i }tulo 6.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/06_diseno_tecnico.tex
-[11
-
-]) [12]
-Cap\'{\i }tulo 7.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/07_modelo_datos.tex [13
-
-])
-[14]
-Cap\'{\i }tulo 8.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/08_seguridad_auditoria.tex
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/05_diseno_funcional.tex
 [15
 
 ]) [16]
-Cap\'{\i }tulo 9.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex
+Cap\'{\i }tulo 7.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/06_diseno_tecnico.tex
 [17
 
 ]) [18]
-Cap\'{\i }tulo 10.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/10_calidad_qa.tex [19
+Cap\'{\i }tulo 8.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/07_modelo_datos.tex [19
 
 ])
 [20]
-Cap\'{\i }tulo 11.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/11_gobernanza_legal.tex
+Cap\'{\i }tulo 9.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/08_seguridad_auditoria.tex
 [21
+
+]) [22]
+Cap\'{\i }tulo 10.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex
+[23
+
+]) [24]
+Cap\'{\i }tulo 11.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/10_calidad_qa.tex [25
+
+]
+LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 22.
+LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
+(Font)              scaled to size 11.39996pt on input line 22.
+
+[26]) [27]
+Cap\'{\i }tulo 12.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/11_gobernanza_legal.tex
+[28
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 31--31
-[]|\T1/lmr/m/n/12 Equipo fun-
+[]|\T1/phv/m/n/12 Coordinacion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 31--31
-[]|\T1/lmr/m/n/12 Coordinacion
+Underfull \hbox (badness 3701) in paragraph at lines 31--31
+[]|\T1/phv/m/n/12 Equipo tec-ni-
  []
 
 
-Underfull \hbox (badness 1776) in paragraph at lines 32--32
-[]|\T1/lmr/m/n/12 Aprobacion de des-plie-
+Underfull \hbox (badness 2368) in paragraph at lines 32--32
+[]|\T1/phv/m/n/12 Aprobacion de des-plie-
+ []
+
+
+Underfull \hbox (badness 3701) in paragraph at lines 32--32
+[]|\T1/phv/m/n/12 Equipo tec-ni-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 32--32
-[]|\T1/lmr/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinacion
  []
 
 
-Overfull \hbox (1.8985pt too wide) in paragraph at lines 32--32
-[]|\T1/lmr/m/n/12 Seguridad/QA| 
+Underfull \hbox (badness 3449) in paragraph at lines 32--33
+[]|\T1/phv/m/n/12 Usuarios cla-
  []
 
 
-Underfull \hbox (badness 1147) in paragraph at lines 33--33
-[]|\T1/lmr/m/n/12 Actualizacion do-cu-men-
+Underfull \hbox (badness 3965) in paragraph at lines 33--33
+[]|\T1/phv/m/n/12 Actualizacion do-cu-men-
+ []
+
+
+Underfull \hbox (badness 2689) in paragraph at lines 33--33
+[]|\T1/phv/m/n/12 Equipo do-cu-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 33--33
-[]|\T1/lmr/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinacion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 33--33
-[]|\T1/lmr/m/n/12 Equipo fun-
- []
-
-
-Overfull \hbox (22.79169pt too wide) in paragraph at lines 34--34
-[]|\T1/lmr/m/n/12 Seguridad/Control| 
+Overfull \hbox (19.20122pt too wide) in paragraph at lines 34--34
+[]|\T1/phv/m/n/12 Seguridad/Control| 
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 34--34
-[]|\T1/lmr/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinacion
+ []
+
+
+Underfull \hbox (badness 3701) in paragraph at lines 34--34
+[]|\T1/phv/m/n/12 Equipo tec-ni-
  []
 
 
@@ -730,25 +952,25 @@ Overfull \hbox (23.58653pt too wide) in alignment at lines 27--36
  [] [] [] [] [] 
  []
 
-) [22]
-Cap\'{\i }tulo 12.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [23
+) [29]
+Cap\'{\i }tulo 13.
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [30
 
 ])
-[24]
+[31]
 Ap\'{e}ndice A.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/A_glosario.tex
 Overfull \hbox (1.23639pt too wide) in alignment at lines 1--13
  [] [] 
  []
 
-) [25
+) [32
 
 ]
 Ap\'{e}ndice B.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/B_diccionario_datos.tex
 Underfull \hbox (badness 10000) in paragraph at lines 8--9
-[]|\T1/lmr/m/n/12 Dominio ha-bi-li-ta-do (Ar-chi-
+[]|\T1/phv/m/n/12 Dominio ha-bi-li-ta-do (Ar-chi-
  []
 
 
@@ -761,26 +983,21 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 14--28
  [] [] [] [] 
  []
 
+ignored error: Infinite glue shrinkage found in box being split [33
 
+]
 Overfull \hbox (11.5796pt too wide) in alignment at lines 31--46
  [] [] [] [] 
  []
 
-[26
 
-]
-Underfull \hbox (badness 2285) in paragraph at lines 53--54
-[]|\T1/lmr/m/n/12 Identificador uni-co del do-cu-
+Overfull \hbox (17.69739pt too wide) in paragraph at lines 57--57
+[]|\T1/phv/m/n/12 personas_relacionadas| 
  []
 
 
-Overfull \hbox (15.57861pt too wide) in paragraph at lines 57--57
-[]|\T1/lmr/m/n/12 personas_relacionadas| 
- []
-
-
-Underfull \hbox (badness 2277) in paragraph at lines 57--58
-[]|\T1/lmr/m/n/12 Personas vin-cu-la-das al ex-pe-
+Underfull \hbox (badness 2197) in paragraph at lines 57--58
+[]|\T1/phv/m/n/12 Personas vin-cu-la-das al ex-pe-
  []
 
 
@@ -788,99 +1005,110 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 49--59
  [] [] [] [] 
  []
 
-) [27]
+ignored error: Infinite glue shrinkage found in box being split [34]) [35]
 Ap\'{e}ndice C.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/C_matriz_trazabilidad.tex
-Underfull \hbox (badness 10000) in paragraph at lines 6--6
-[]|\T1/lmr/m/n/12 Diseno fun-cio-
+Underfull \hbox (badness 1852) in paragraph at lines 7--7
+[]|\T1/phv/m/n/12 Servicio de fil-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 7--7
-[]|\T1/lmr/m/n/12 Diseno fun-cio-
+Overfull \hbox (2.32693pt too wide) in paragraph at lines 7--7
+\T1/phv/m/n/12 tros/documentos| 
  []
 
 
-Underfull \hbox (badness 3229) in paragraph at lines 11--11
-[]|\T1/lmr/m/n/12 Continuidad y re-cu-pe-ra-cion
+Underfull \hbox (badness 1902) in paragraph at lines 8--9
+[]|\T1/phv/m/n/12 Cap. 4, Cap. 5,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 11--11
-[]|\T1/lmr/m/n/12 Operacion y
+Underfull \hbox (badness 3758) in paragraph at lines 9--9
+[]|\T1/phv/m/n/12 Panel ad-mi-nis-tra-ti-vo in-te-gral
  []
 
 
-Overfull \hbox (11.57266pt too wide) in alignment at lines 2--15
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
+[]|\T1/phv/m/n/12 Arquitectura
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12--12
+\T1/phv/m/n/12 tec-ni-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13--13
+[]|\T1/phv/m/n/12 Operacion y
+ []
+
+
+Underfull \hbox (badness 5446) in paragraph at lines 14--14
+[]|\T1/phv/m/n/12 Diseno tec-ni-co
+ []
+
+
+Underfull \hbox (badness 7888) in paragraph at lines 15--15
+[]|\T1/phv/m/n/12 Trazabilidad do-cu-men-tal de
+ []
+
+
+Underfull \hbox (badness 1253) in paragraph at lines 15--15
+[]|\T1/phv/m/n/12 QA y go-bierno
+ []
+
+
+Overfull \hbox (11.57266pt too wide) in alignment at lines 2--17
  [] [] [] [] 
  []
 
-) [28
+ignored error: Infinite glue shrinkage found in box being split [36
 
-]
+]) [37]
 Ap\'{e}ndice D.
-(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [29
+(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [38
 
 ]
 Ap\'{e}ndice E.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/E_diagramas.tex
-<figures/generated/01_arquitectura_objetivo.pdf, id=705, 614.295pt x 794.97pt>
+<figures/generated/01_arquitectura_objetivo.pdf, id=695, 614.295pt x 794.97pt>
 File: figures/generated/01_arquitectura_objetivo.pdf Graphic file (type pdf)
 <use figures/generated/01_arquitectura_objetivo.pdf>
 Package pdftex.def Info: figures/generated/01_arquitectura_objetivo.pdf  used o
 n input line 10.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/02_flujo_autenticacion.pdf, id=706, 614.295pt x 794.97pt>
+<figures/generated/02_flujo_autenticacion.pdf, id=696, 614.295pt x 794.97pt>
 File: figures/generated/02_flujo_autenticacion.pdf Graphic file (type pdf)
 <use figures/generated/02_flujo_autenticacion.pdf>
 Package pdftex.def Info: figures/generated/02_flujo_autenticacion.pdf  used on 
 input line 21.
 (pdftex.def)             Requested size: 432.48051pt x 559.68973pt.
-<figures/generated/03_modelo_datos.pdf, id=707, 614.295pt x 794.97pt>
+<figures/generated/03_modelo_datos.pdf, id=697, 614.295pt x 794.97pt>
 File: figures/generated/03_modelo_datos.pdf Graphic file (type pdf)
 <use figures/generated/03_modelo_datos.pdf>
 Package pdftex.def Info: figures/generated/03_modelo_datos.pdf  used on input l
 ine 32.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-) [30
 
-]
-[31 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/01_arquitectura
-_objetivo.pdf>] [32 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated
-/02_flujo_autenticacion.pdf>] [33 <c:/ciencias-ucv-digital-archive/docs/tex/fig
-ures/generated/03_modelo_datos.pdf>]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.aux
-LaTeX Info: Redefining \. on input line 11.
-LaTeX Info: Redefining \% on input line 11.
-)
- ***********
-LaTeX2e <2025-11-01>
-L3 programming layer <2025-12-24>
- ***********
+! Argument of \language@active@arg> has an extra }.
+<inserted text> 
+                \par 
+l.96 }
+      
+I've run across a `}' that doesn't seem to match anything.
+For example, `\def\a#1{...}' and `\a}' would produce
+this error. If you simply proceed now, the `\par' that
+I've just inserted will cause me to report a runaway
+argument that might be the root of the problem. But if
+your `}' was spurious, just type `2' and it will go away.
 
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 2D3F7122B6E75BC0EB57BFB697ACA746;17297.
- ) 
+ 
 Here is how much of TeX's memory you used:
- 13022 strings out of 467871
- 207753 string characters out of 5428438
- 654380 words of memory out of 5000000
- 41480 multiletter control sequences out of 15000+600000
- 676895 words of font info for 64 fonts, out of 8000000 for 9000
+ 23342 strings out of 467871
+ 433875 string characters out of 5428438
+ 849531 words of memory out of 5000000
+ 51565 multiletter control sequences out of 15000+600000
+ 666351 words of font info for 73 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 80i,12n,82p,376b,820s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Program Files/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Program Files/M
-iKTeX/fonts/type1/public/lm/lmbx8.pfb><C:/Program Files/MiKTeX/fonts/type1/publ
-ic/lm/lmcsc10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/
-Program Files/MiKTeX/fonts/type1/public/lm/lmr17.pfb><C:/Program Files/MiKTeX/f
-onts/type1/public/lm/lmri12.pfb>
-Output written on c:\ciencias-ucv-digital-archive\docs\tex\main.pdf (42 pages, 
-399890 bytes).
-PDF statistics:
- 827 PDF objects out of 1000 (max. 8388607)
- 186 named destinations out of 1000 (max. 500000)
- 800 words of extra memory for PDF output out of 10000 (max. 10000000)
-
+ 89i,11n,97p,493b,600s stack positions out of 10000i,1000n,20000p,200000b,200000s
+!  ==> Fatal error occurred, no output PDF file produced!

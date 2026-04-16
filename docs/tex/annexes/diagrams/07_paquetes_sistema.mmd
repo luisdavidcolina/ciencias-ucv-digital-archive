@@ -1,0 +1,45 @@
+---
+title: Diagrama de Paquetes del Sistema
+---
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#eef4ff', 'primaryTextColor': '#10253f', 'primaryBorderColor': '#2b4e72', 'lineColor': '#2b4e72', 'fontFamily': 'Arial' }}}%%
+flowchart LR
+    subgraph UI[Paquete UI]
+      U1[ui.R]
+      U2[R/server/ui_main_body.R]
+    end
+
+    subgraph CORE[Paquete Core]
+      C1[global.R]
+      C2[server.R]
+      C3[app.R]
+    end
+
+    subgraph SVC[Paquete Servicios]
+      S1[services_auth.R]
+      S2[services_filters.R]
+      S3[services_persons.R]
+      S4[services_thesaurus.R]
+      S5[services_export.R]
+      S6[services_audit.R]
+      S7[services_navigation.R]
+      S8[services_pagination.R]
+    end
+
+    subgraph MOD[Paquete Modulos Server]
+      M1[admin_panel.R]
+      M2[stats_admin.R]
+      M3[document_modal.R]
+    end
+
+    subgraph DAT[Paquete Datos]
+      D1[(usuarios.csv)]
+      D2[(datos_archivo.csv)]
+      D3[(rrhh_personas.csv)]
+      D4[(rrhh_archivos.csv)]
+    end
+
+    UI --> CORE
+    CORE --> SVC
+    CORE --> MOD
+    SVC --> DAT
+    MOD --> SVC

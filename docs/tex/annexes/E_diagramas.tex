@@ -63,3 +63,56 @@
 }{
 \textit{Diagrama pendiente de exportacion: 06\_despliegue\_continuidad.pdf}
 }
+
+\section{Paquetes del Sistema}
+\IfFileExists{figures/generated/07_paquetes_sistema.pdf}{
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/generated/07_paquetes_sistema.pdf}
+  \caption{Diagrama de paquetes y dependencias principales del sistema}
+\end{figure}
+}{
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+    node distance = 1.25cm and 1.35cm,
+    box/.style={draw, rounded corners, align=center, minimum width=3.2cm, minimum height=0.95cm, font=\small},
+    >={Latex[length=2mm]}
+  ]
+    \node[box, fill=blue!8] (ui) {Paquete UI\\ui.R, ui\_main\_body.R};
+    \node[box, fill=blue!8, right=of ui] (core) {Paquete Core\\app.R, global.R, server.R};
+    \node[box, fill=green!8, below=of core] (svc) {Paquete Servicios\\auth, filters, persons, export, audit};
+    \node[box, fill=green!8, left=of svc] (mod) {Paquete Modulos Server\\admin, stats, modal};
+    \node[box, fill=orange!10, right=of svc] (dat) {Paquete Datos\\usuarios, archivo, rrhh};
+
+    \draw[->] (ui) -- (core);
+    \draw[->] (core) -- (svc);
+    \draw[->] (core) -- (mod);
+    \draw[->] (mod) -- (svc);
+    \draw[->] (svc) -- (dat);
+  \end{tikzpicture}
+  \caption{Diagrama de paquetes y dependencias principales del sistema (fallback LaTeX)}
+\end{figure}
+}
+
+\section{Casos de Uso Generales}
+\IfFileExists{figures/generated/08_casos_uso_general.pdf}{
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/generated/08_casos_uso_general.pdf}
+  \caption{Vista general de actores y casos de uso del sistema}
+\end{figure}
+}{
+\textit{Diagrama pendiente de exportacion: 08\_casos\_uso\_general.pdf}
+}
+
+\section{Ciclo de Vida de Entrega}
+\IfFileExists{figures/generated/09_ciclo_vida_entrega.pdf}{
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/generated/09_ciclo_vida_entrega.pdf}
+  \caption{Ciclo de vida de entrega, control de calidad y mejora continua}
+\end{figure}
+}{
+\textit{Diagrama pendiente de exportacion: 09\_ciclo\_vida\_entrega.pdf}
+}

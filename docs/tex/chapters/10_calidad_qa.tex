@@ -16,12 +16,32 @@ La calidad de la solucion se asegura mediante controles tecnicos, validacion fun
   \item Criterios de aprobacion por etapa de liberacion.
 \end{itemize}
 
+\section{Integracion continua y entrega continua (CI/CD)}
+\begin{itemize}
+  \item Gestion de entorno reproducible mediante control de dependencias y versionado de librerias.
+  \item Automatizacion de validaciones tecnicas en cada \textit{pull request} y en cada \textit{push} a rama principal.
+  \item Ejecucion automatizada de pruebas unitarias, chequeos de calidad de codigo y verificacion de build.
+  \item Publicacion controlada con compuertas de aprobacion para evitar regresiones en produccion.
+  \item Registro de evidencias de pipeline para auditoria de cambios y trazabilidad de entregas.
+\end{itemize}
+
+\section{Flujo de pipeline de referencia}
+\begin{enumerate}
+  \item Disparador de pipeline por evento de versionamiento (PR o push).
+  \item Preparacion del entorno y restauracion de dependencias.
+  \item Validacion de estilo y calidad estatica del codigo.
+  \item Ejecucion de suite de pruebas y consolidacion de resultados.
+  \item Generacion de artefactos de build y reporte de evidencias.
+  \item Promocion a entorno objetivo segun politica de aprobacion.
+\end{enumerate}
+
 \section{Indicadores de calidad}
 \begin{itemize}
   \item Tasa de incidencias por modulo.
   \item Cobertura de pruebas por componente.
   \item Tiempo medio de resolucion de defectos.
   \item Cumplimiento de ventanas de liberacion.
+  \item Tasa de pipelines exitosos y estabilidad de despliegues.
 \end{itemize}
 
 \section{Mejora continua}

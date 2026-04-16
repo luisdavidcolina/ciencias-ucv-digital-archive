@@ -107,6 +107,8 @@ RNF-022 & Debe tener monitoreo basico de operacion e incidentes. \\
 RNF-030 & El codigo debe mantener arquitectura modular y separacion de responsabilidades. \\
 RNF-031 & Debe contar con estrategia de pruebas unitarias y evolucion a pruebas integrales. \\
 RNF-032 & Debe contar con documentacion versionada y trazable. \\
+RNF-033 & Debe incorporar integracion continua para ejecutar validaciones automaticas en cada cambio. \\
+RNF-034 & Debe contemplar entrega continua controlada con compuertas de aprobacion. \\
 \bottomrule
 \end{longtable}
 
@@ -118,6 +120,32 @@ RNF-032 & Debe contar con documentacion versionada y trazable. \\
   \item Dependencias ampliadas documentadas: tidyverse, plotly, DT, shinyWidgets.
   \item Hardware de referencia: 1 GB RAM/1 vCPU para desarrollo; 2 GB RAM/1-2 vCPU para operacion ampliada.
   \item Navegadores objetivo: Chrome, Firefox y Edge.
+\end{itemize}
+
+\subsection{Requisitos minimos (alineados al README)}
+\begin{itemize}
+  \item R version 4.x o superior.
+  \item RStudio Desktop.
+  \item Paquetes requeridos: shiny, bs4Dash, jsonlite, tidyverse, plotly, DT, shinyWidgets.
+\end{itemize}
+
+\subsection{Requisitos del sistema (hardware recomendado)}
+\begin{longtable}{p{0.35\textwidth} p{0.55\textwidth}}
+\toprule
+\textbf{Escenario} & \textbf{Especificacion} \\
+\midrule
+Desarrollo minimo & 1 GB RAM y 1 vCPU. \\
+Produccion (App + PostgreSQL) & 2 GB RAM y 1-2 vCPU, apto para decenas de miles de documentos. \\
+Almacenamiento & Depende de la volumetria de PDFs; escalable mediante buckets. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Requisitos del sistema (software recomendado)}
+\begin{itemize}
+  \item Entorno de ejecucion: R 4.2.0 o superior.
+  \item Base de datos objetivo: PostgreSQL 13+ (opcional CSV/SQLite para prototipos).
+  \item Contenedores: Docker opcional para despliegues consistentes.
+  \item Navegadores soportados: Chrome, Firefox o Edge.
 \end{itemize}
 
 \section{Restricciones y supuestos}
