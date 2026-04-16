@@ -1,0 +1,13 @@
+cedula,empleado,rif,cargo,departamento,estado,fecha_ingreso,fecha_jubilacion,fecha_pension,foto_url
+"V-12345678","Carlos Gomez","J-12345678-0","Director General","Decanato","Activo","2015-06-20","","","https://i.pravatar.cc/150?img=11"
+"V-23456789","Maria Lopez","J-23456789-1","Analista de Sistemas","Informática","Activo","2020-01-10","","","https://i.pravatar.cc/150?img=5"
+"V-09876543","José Martinez","J-09876543-2","Superintendente","Mantenimiento","Retirado","1995-02-15","2020-03-01","","https://i.pravatar.cc/150?img=15"
+"V-18765432","Ana Silva","J-18765432-3","Coordinadora de Nómina","Recursos Humanos","Activo","2018-09-01","","","https://i.pravatar.cc/150?img=9"
+"V-15678901","Luis Rodriguez","J-15678901-4","Profesor Titular","Biología","Activo","2021-03-12","","","https://i.pravatar.cc/150?img=8"
+"V-10293847","Carmen Suarez","J-10293847-5","Asistente Administrativo","Química","Retirado","1988-11-04","2015-12-15","","https://i.pravatar.cc/150?img=42"
+"V-21345678","David Bello","J-21345678-6","Técnico de Laboratorio","Física","Activo","2019-07-25","","","https://i.pravatar.cc/150?img=13"
+"V-25678912","Sofia Herrera","J-25678912-7","Asistente Contable","Matemáticas","Inactivo","2022-02-14","","","https://i.pravatar.cc/150?img=28"
+"V-11223344","Roberto Alfonzo","J-11223344-8","Consultor Jurídico","Decanato","Activo","2010-08-30","","","https://i.pravatar.cc/150?img=53"
+"V-24561234","Lucia Jimenez","J-24561234-9","Desarrolladora Web","Informática","Activo","2017-05-05","","","https://i.pravatar.cc/150?img=36"
+"V-08765432","Fernando Silva","J-08765432-0","Personal Obrero","Mantenimiento","Pensionado","1990-01-20","","2018-05-10","https://i.pravatar.cc/150?img=14"
+"V-19876543","Patricia Meza","J-19876543-1","Gerente de RRHH","Recursos Humanos","Activo","2016-10-18","","","https://i.pravatar.cc/150?img=47"

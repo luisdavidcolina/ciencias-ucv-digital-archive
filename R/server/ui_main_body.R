@@ -55,13 +55,12 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
           ),
           bs4Card(
             title = "Vista", status = "secondary", width = 12, class = "mt-3",
-            selectInput("sort_ext", "Recientes", choices = c("Lo más relevante", "Título A-Z")),
+            selectInput("sort_ext", "Criterio de orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)"),
             selectInput("rpp_ext", "Pág:", choices = c("5", "10"), selected = "5")
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_ext", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
-          div(class = "d-flex justify-content-end mb-2", downloadButton("download_ext_xls", "Exportar XLS", class = "btn btn-outline-success btn-sm")),
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_ext", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_ext_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
           uiOutput("list_extension"),
           uiOutput("ext_pagination_controls")
         )
@@ -117,7 +116,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 status = "secondary",
                 solidHeader = FALSE,
                 collapsed = TRUE,
-                radioButtons("rrhh_estado", "Condición", choices = c("Todos", "Activo", "Inactivo", "Retirado", "Pensionado"))
+                checkboxGroupInput("rrhh_estado", "Condición", choices = c("Activo", "Inactivo", "Retirado", "Pensionado"))
               ),
               bs4AccordionItem(
                 title = "Personas",
@@ -145,13 +144,12 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
           ),
           bs4Card(
             title = "Vista", status = "secondary", width = 12, class = "mt-3",
-            selectInput("sort_rrhh", "Recientes", choices = c("Lo más relevante", "Título A-Z")),
+            selectInput("sort_rrhh", "Criterio de orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)"),
             selectInput("rpp_rrhh", "Pág:", choices = c("5", "10"), selected = "5")
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por Apellidos, Nombres..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary")))),
-          div(class = "d-flex justify-content-end mb-2", downloadButton("download_rrhh_xls", "Exportar XLS", class = "btn btn-outline-success btn-sm")),
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por Apellidos, Nombres..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_rrhh_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
           uiOutput("list_rrhh"),
           uiOutput("rrhh_pagination_controls")
         )
@@ -224,9 +222,11 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             )
           )
         ),
-        tabPanel("Personas", icon = icon("users"), tags$br(),
-          uiOutput("admin_people_tab")
-        ),
+        if (identical(session_state$modulo, "RRHH")) {
+          tabPanel("Personas", icon = icon("users"), tags$br(),
+            uiOutput("admin_people_tab")
+          )
+        },
         tabPanel("Categorías", icon = icon("sitemap"), tags$br(),
           fluidRow(
             column(width = 5,

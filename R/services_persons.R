@@ -138,9 +138,12 @@ build_rrhh_person_index <- function(datos) {
       doc_count = integer(0),
       primary_count = integer(0),
       cedulas = character(0),
+      rifs = character(0),
       departamentos = character(0),
+      cargos = character(0),
       estatuses = character(0),
       tipos = character(0),
+      fecha_ingreso = character(0),
       row_indices = I(list()),
       stringsAsFactors = FALSE
     ))
@@ -168,8 +171,15 @@ build_rrhh_person_index <- function(datos) {
       primary_rows <- employees == person_name
       collapse_unique_terms(if ("cedula" %in% names(datos)) datos$cedula[primary_rows] else character(0))
     }, character(1)),
+    rifs = vapply(persons, function(person_name) {
+      primary_rows <- employees == person_name
+      collapse_unique_terms(if ("rif" %in% names(datos)) datos$rif[primary_rows] else character(0))
+    }, character(1)),
     departamentos = vapply(row_indices, function(indices) {
       if ("departamento" %in% names(datos)) collapse_unique_terms(datos$departamento[indices]) else ""
+    }, character(1)),
+    cargos = vapply(row_indices, function(indices) {
+      if ("cargo" %in% names(datos)) collapse_unique_terms(datos$cargo[indices]) else ""
     }, character(1)),
     estatuses = vapply(row_indices, function(indices) {
       if (is.null(status_column)) return("")
@@ -177,6 +187,9 @@ build_rrhh_person_index <- function(datos) {
     }, character(1)),
     tipos = vapply(row_indices, function(indices) {
       if ("doc_type" %in% names(datos)) collapse_unique_terms(datos$doc_type[indices]) else ""
+    }, character(1)),
+    fecha_ingreso = vapply(row_indices, function(indices) {
+      if ("fecha_ingreso" %in% names(datos)) collapse_unique_terms(datos$fecha_ingreso[indices]) else ""
     }, character(1)),
     row_indices = I(row_indices),
     stringsAsFactors = FALSE
@@ -186,7 +199,7 @@ build_rrhh_person_index <- function(datos) {
     return(index_df)
   }
 
-  index_df <- index_df[order(-index_df$doc_count, index_df$persona), , drop = FALSE]
+  index_df
   rownames(index_df) <- NULL
   index_df
 }
@@ -227,7 +240,9 @@ build_rrhh_person_profile <- function(datos, persona) {
     rows = rows,
     foto_url = if ("foto_url" %in% names(rows)) first_non_empty_value(rows$foto_url) else "",
     cedulas = if ("cedula" %in% names(rows)) collapse_unique_terms(rows$cedula[primary_rows]) else "",
+    rifs = if ("rif" %in% names(rows)) collapse_unique_terms(rows$rif[primary_rows]) else "",
     departamentos = if ("departamento" %in% names(rows)) collapse_unique_terms(rows$departamento) else "",
+    cargos = if ("cargo" %in% names(rows)) collapse_unique_terms(rows$cargo) else "",
     statuses = if (!is.null(status_column)) collapse_unique_terms(rows[[status_column]]) else "",
     fecha_ingreso = if ("fecha_ingreso" %in% names(rows)) collapse_unique_terms(rows$fecha_ingreso) else "",
     fecha_jubilacion = if ("fecha_jubilacion" %in% names(rows)) collapse_unique_terms(rows$fecha_jubilacion) else "",
@@ -237,33 +252,43 @@ build_rrhh_person_profile <- function(datos, persona) {
   )
 }
 
-filter_rrhh_person_index <- function(index_df, search_term) {
-  if (is.null(search_term) || !nzchar(search_term)) {
-    return(index_df)
+filter_rrhh_person_index <- function(index_df, search_term = NULL, sort_mode = NULL) {
+  if (!is.null(search_term) && nzchar(search_term)) {
+    query <- tolower(trimws(search_term))
+    tokens <- strsplit(query, "\\s+")[[1]]
+    tokens <- tokens[nzchar(tokens)]
+    if (length(tokens) > 0) {
+      search_cols <- c("persona", "persona_raw", "cedulas", "rifs", "departamentos", "cargos", "estatuses", "tipos")
+      search_cols <- search_cols[search_cols %in% names(index_df)]
+      if (length(search_cols) > 0) {
+        haystack <- apply(index_df[, search_cols, drop = FALSE], 1, function(row) {
+          tolower(paste(row, collapse = " "))
+        })
+
+        keep <- vapply(haystack, function(text) {
+          all(vapply(tokens, function(token) grepl(token, text, fixed = TRUE), logical(1)))
+        }, logical(1))
+
+        index_df <- index_df[keep, , drop = FALSE]
+      }
+    }
   }
 
-  query <- tolower(trimws(search_term))
-  tokens <- strsplit(query, "\\s+")[[1]]
-  tokens <- tokens[nzchar(tokens)]
-  if (length(tokens) == 0) {
-    return(index_df)
+  if (!is.null(sort_mode)) {
+    if (sort_mode == "Alfabético (A-Z)") {
+      index_df <- index_df[order(index_df$persona), , drop = FALSE]
+    } else if (sort_mode == "Alfabético (Z-A)") {
+      index_df <- index_df[order(index_df$persona, decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más recientes primero") {
+      index_df <- index_df[order(suppressWarnings(as.Date(substr(index_df$fecha_ingreso, 1, 10), format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más antiguos primero") {
+      index_df <- index_df[order(suppressWarnings(as.Date(substr(index_df$fecha_ingreso, 1, 10), format = "%Y-%m-%d"))), , drop = FALSE]
+    }
+  } else {
+    index_df <- index_df[order(index_df$persona), , drop = FALSE]
   }
 
-  search_cols <- c("persona", "persona_raw", "cedulas", "departamentos", "estatuses", "tipos")
-  search_cols <- search_cols[search_cols %in% names(index_df)]
-  if (length(search_cols) == 0) {
-    return(index_df)
-  }
-
-  haystack <- apply(index_df[, search_cols, drop = FALSE], 1, function(row) {
-    tolower(paste(row, collapse = " "))
-  })
-
-  keep <- vapply(haystack, function(text) {
-    all(vapply(tokens, function(token) grepl(token, text, fixed = TRUE), logical(1)))
-  }, logical(1))
-
-  index_df[keep, , drop = FALSE]
+  index_df
 }
 
 filter_rrhh_person_files <- function(datos, search_term = NULL, doc_types = NULL, sort_mode = NULL) {
@@ -297,15 +322,14 @@ filter_rrhh_person_files <- function(datos, search_term = NULL, doc_types = NULL
   out <- filter_by_doc_types(out, doc_types)
 
   if (!is.null(sort_mode)) {
-    if (identical(sort_mode, "Título A-Z")) {
-      if ("doc_type" %in% names(out)) {
-        out <- out[order(out$doc_type, out$empleado), , drop = FALSE]
-      }
-    } else if (identical(sort_mode, "Lo más relevante")) {
-      if ("fecha_ingreso" %in% names(out)) {
-        fechas <- suppressWarnings(as.Date(out$fecha_ingreso, format = "%Y-%m-%d"))
-        out <- out[order(fechas, out$empleado, decreasing = TRUE), , drop = FALSE]
-      }
+    if (sort_mode == "Alfabético (A-Z)") {
+      out <- out[order(out$doc_type, out$empleado), , drop = FALSE]
+    } else if (sort_mode == "Alfabético (Z-A)") {
+      out <- out[order(out$doc_type, out$empleado, decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más recientes primero") {
+      out <- out[order(suppressWarnings(as.Date(out$fecha_ingreso, format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más antiguos primero") {
+      out <- out[order(suppressWarnings(as.Date(out$fecha_ingreso, format = "%Y-%m-%d"))), , drop = FALSE]
     }
   }
 

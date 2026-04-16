@@ -44,12 +44,14 @@ filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
   out <- filter_by_doc_types(out, doc_types)
 
   if (!is.null(sort_mode)) {
-    if (sort_mode %in% c("Titulo A-Z", "Título A-Z")) {
+    if (sort_mode == "Alfabético (A-Z)") {
       out <- out[order(out$titulo), , drop = FALSE]
-    } else if (sort_mode %in% c("Fecha de Emision (Asc)", "Fecha de Emisión (Asc)")) {
-      out <- out[order(out$fecha), , drop = FALSE]
-    } else if (sort_mode %in% c("Fecha de Emision (Desc)", "Fecha de Emisión (Desc)")) {
-      out <- out[order(out$fecha, decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Alfabético (Z-A)") {
+      out <- out[order(out$titulo, decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más recientes primero") {
+      out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
+    } else if (sort_mode == "Más antiguos primero") {
+      out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d"))), , drop = FALSE]
     }
   }
 

@@ -229,9 +229,11 @@ server <- function(input, output, session) {
       datos <- filter_by_persons(datos, input$rrhh_people)
         datos <- filter_by_tesauro(datos, input$rrhh_tesauro)
 
-        if (!is.null(input$rrhh_estado) && nzchar(input$rrhh_estado) && input$rrhh_estado != "Todos") {
+        if (!is.null(input$rrhh_estado) && length(input$rrhh_estado) > 0) {
           estado_buscado <- input$rrhh_estado
-          if (estado_buscado == "Retirado") estado_buscado <- c("Retirado", "Jubilado")
+          if ("Retirado" %in% estado_buscado) {
+            estado_buscado <- unique(c(estado_buscado, "Jubilado"))
+          }
           datos <- datos[datos$estado %in% estado_buscado, , drop = FALSE]
         }
 
@@ -255,7 +257,7 @@ server <- function(input, output, session) {
 
   rrhh_person_index <- reactive({
     index_df <- build_rrhh_person_index(dat_rrhh_react())
-    filter_rrhh_person_index(index_df, input$search_rrhh)
+    filter_rrhh_person_index(index_df, input$search_rrhh, sort_mode = input$sort_rrhh)
   })
 
   rrhh_pagination <- reactive({
@@ -300,10 +302,10 @@ server <- function(input, output, session) {
 
     tarjetas <- lapply(seq_len(nrow(datos_view)), function(i) {
       fila <- datos_view[i, ]
-      persona_js <- jsonlite::toJSON(fila$persona, auto_unbox = TRUE)
+      persona_js <- jsonlite::toJSON(fila$persona_raw, auto_unbox = TRUE)
       card_badges <- tags$div(
         class = "ds-item-tags",
-        tags$span(class = "ds-badge", paste(fila$doc_count, "expedientes")),
+        tags$span(class = "ds-badge ds-badge-status", if (nzchar(fila$estatuses)) fila$estatuses else "Sin estado"),
         tags$span(class = "ds-badge", if (nzchar(fila$tipos)) fila$tipos else "Sin tipologías")
       )
 
@@ -338,10 +340,9 @@ server <- function(input, output, session) {
             ),
             fila$persona
           ),
-          div(class = "ds-item-authors", paste("Expedientes asociados:", fila$doc_count)),
-          div(class = "ds-item-date", paste("Cédula:", if (nzchar(fila$cedulas)) fila$cedulas else "Sin cédula")),
-          div(class = "ds-item-publisher", paste("Dependencia o AP:", if (nzchar(fila$departamentos)) fila$departamentos else "Sin dependencia o AP")),
-          div(class = "ds-item-abstract", paste("Estatus:", if (nzchar(fila$estatuses)) fila$estatuses else "Sin estatus")),
+          div(class = "ds-item-authors", paste("Cargo:", if (nzchar(fila$cargos)) fila$cargos else "Sin cargo asignado")),
+          div(class = "ds-item-date", paste("Ingreso:", if (nzchar(fila$fecha_ingreso)) fila$fecha_ingreso else "Sin fecha", "| C.I.:", if (nzchar(fila$cedulas)) fila$cedulas else "Sin cédula")),
+          div(class = "ds-item-publisher", paste("Adscripción:", if (nzchar(fila$departamentos)) fila$departamentos else "Sin dependencia o AP")),
           card_badges
         ),
         btn_actions

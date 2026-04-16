@@ -203,6 +203,112 @@ a:hover {
     box-shadow: 0 4px 12px rgba(43, 78, 114, 0.3);
 }
 
+.ds-search-action-btn {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: calc(1.5em + 1rem + 2px) !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.ds-btn-export {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+}
+
+.ds-btn-export i,
+.ds-btn-export .fa,
+.ds-btn-export .fas {
+    color: #ffffff !important;
+}
+
+.ds-btn-export:hover,
+.ds-btn-export:focus,
+.ds-btn-export:active {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: #ffffff !important;
+}
+
+/* Force search/export action buttons in both modules to look identical in size. */
+#btn_s_ext,
+#btn_s_rrhh,
+#download_ext_xls,
+#download_rrhh_xls {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: calc(1.5em + 1rem + 2px) !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.ds-search-bar .input-group .input-group-append {
+    margin-left: 6px;
+}
+
+.ds-search-bar .input-group .input-group-append > .btn {
+    margin-left: 6px;
+}
+
+.ds-search-bar .input-group .input-group-append > .btn:first-child {
+    margin-left: 0;
+}
+
+#admin_workspace_tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+#admin_workspace_tabs.nav-pills {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+}
+
+#download_ext_xls,
+#download_rrhh_xls {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #ffffff !important;
+}
+
+#download_ext_xls i,
+#download_rrhh_xls i,
+#download_ext_xls .fa,
+#download_rrhh_xls .fa,
+#download_ext_xls .fas,
+#download_rrhh_xls .fas {
+    color: #ffffff !important;
+}
+
+#download_ext_xls:hover,
+#download_rrhh_xls:hover,
+#download_ext_xls:focus,
+#download_rrhh_xls:focus,
+#download_ext_xls:active,
+#download_rrhh_xls:active {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: #ffffff !important;
+}
+
+#download_ext_xls.disabled,
+#download_rrhh_xls.disabled,
+#download_ext_xls[disabled],
+#download_rrhh_xls[disabled] {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #ffffff !important;
+    opacity: 0.75 !important;
+}
+
 /* --- RESULTS HEADER --- */
 .ds-results-header {
     display: flex;
@@ -419,46 +525,45 @@ a:hover {
 }
 
 .rrhh-person-photo-card {
-    border: 1px solid #d9e6f4;
-    border-radius: 14px;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
     overflow: hidden;
     background: linear-gradient(160deg, #f6f9fc, #eef4fb);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 240px;
+    width: 150px;
+    height: 150px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 .rrhh-person-photo {
     width: 100%;
-    height: 240px;
+    height: 100%;
     object-fit: cover;
     display: block;
 }
 
 .rrhh-person-photo-fallback {
-    flex-direction: column;
-    gap: 0.75rem;
     color: #2b4e72;
 }
 
 .rrhh-person-photo-initials {
-    width: 110px;
-    height: 110px;
-    border-radius: 999px;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
     background: #2b4e72;
     color: #ffffff;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 3rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
 }
 
 .rrhh-person-photo-icon {
-    font-size: 1.1rem;
-    opacity: 0.75;
+    display: none;
 }
 
 .rrhh-person-summary p {
@@ -615,17 +720,36 @@ a:hover {
     }
 
     .rrhh-person-photo-card {
-        min-height: 200px;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
     }
 
     .rrhh-person-photo {
-        height: 200px;
+        width: 100%;
+        height: 100%;
     }
 
     .rrhh-person-photo-initials {
-        width: 92px;
-        height: 92px;
-        font-size: 1.7rem;
+        font-size: 2.2rem;
+    }
+
+    .ds-person-profile-header .d-flex {
+        align-items: center !important;
+        text-align: center;
+    }
+
+    .ds-person-info .row .col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .ds-person-info .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        border-bottom: none !important;
     }
 
     .rrhh-person-file-head {

@@ -160,86 +160,67 @@ register_document_modal_handlers <- function(input, output, session, session_sta
     }
 
     if (visible_files == 0) {
-      files_body <- tags$div(class = "alert alert-secondary", "No se encontraron archivos con estos filtros.")
+      files_body <- tags$div(class = "alert alert-secondary mt-3", "No se encontraron archivos con estos filtros en el expediente.")
     } else {
       categories <- sort(unique(filtered_rows$doc_type))
       categories <- categories[nzchar(categories)]
 
-      tab_panels <- lapply(categories, function(category_name) {
+      category_blocks <- lapply(categories, function(category_name) {
         category_rows <- filtered_rows[filtered_rows$doc_type == category_name, , drop = FALSE]
-        tabPanel(
-          category_name,
-          tags$div(class = "rrhh-person-category-panel", build_category_panel(category_name, category_rows))
+        tags$div(
+          class = "rrhh-person-category-section mb-4",
+          tags$h5(class = "border-bottom pb-2 mb-3 ds-category-title", tags$i(class = "fas fa-folder-open mr-2"), category_name),
+          build_category_panel(category_name, category_rows)
         )
       })
 
-      files_body <- if (length(tab_panels) == 0) {
-        tags$div(class = "alert alert-secondary", "No hay categorías disponibles con estos filtros.")
+      files_body <- if (length(category_blocks) == 0) {
+        tags$div(class = "alert alert-secondary mt-3", "No hay categorías disponibles con estos filtros.")
       } else {
-        do.call(tabsetPanel, c(list(id = "rrhh_person_category_tabs", type = "pills", selected = categories[1]), tab_panels))
+        tags$div(class = "rrhh-category-list mt-2", category_blocks)
       }
     }
 
     tags$div(
       class = "rrhh-person-modal-wrap",
-      style = "max-height: 75vh; overflow-y: auto;",
-      div(class = "ds-doc-modal-head", tags$i(class = "fas fa-folder-open"), tags$h4(paste("Expediente de:", profile$persona))),
-      fluidRow(
-        column(
-          4,
-          bs4Card(
-            title = "Persona", status = "primary", solidHeader = FALSE, width = 12,
-            build_photo_panel(profile),
-            tags$div(class = "rrhh-person-summary", style = "margin-top:0.9rem;",
-              tags$p(tags$strong("Expedientes:"), " ", total_files, style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Cédula:"), " ", if (nzchar(profile$cedulas)) profile$cedulas else "Sin cédula", style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Fecha ingreso:"), " ", ingresos_text, style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Fecha jubilación:"), " ", jubilacion_text, style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Fecha pensión:"), " ", pension_text, style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Dependencia o AP:"), " ", if (nzchar(profile$departamentos)) profile$departamentos else "Sin dependencia o AP", style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Estatus(es):"), " ", if (nzchar(profile$statuses)) profile$statuses else "Sin estatus", style = "margin-bottom:0.35rem;"),
-              tags$p(tags$strong("Tipología(s):"), " ", if (nzchar(profile$tipos)) profile$tipos else "Sin tipología", style = "margin-bottom:0;")
-            )
-          )
-        ),
-        column(
-          8,
-          bs4Card(
-            title = "Filtros del expediente", status = "secondary", solidHeader = FALSE, width = 12,
-            fluidRow(
-              column(
-                7,
-                textInput(
-                  "rrhh_modal_search",
-                  "Buscar dentro del expediente",
-                  placeholder = "Tipo, dependencia o AP, ubicación o persona relacionada",
-                  width = "100%"
-                )
+      style = "max-height: 75vh; overflow-y: auto; overflow-x: hidden;",
+      
+      tags$div(
+        class = "ds-person-profile-header mb-4 p-3 bg-white rounded shadow-sm border",
+        fluidRow(
+          column(12, class="d-flex flex-column flex-md-row align-items-center align-items-md-start",
+            div(class = "ds-person-avatar-wrap mb-3 mb-md-0 mr-md-4", style="width: 150px; min-width: 150px;", build_photo_panel(profile)),
+            div(class = "ds-person-info flex-grow-1 w-100",
+              tags$div(class = "d-flex justify-content-between align-items-center border-bottom pb-2 mb-3",
+                 tags$h3(class = "ds-person-name m-0 text-primary font-weight-bold", profile$persona),
+                 tags$span(class = "badge badge-info text-uppercase px-3 py-2", if(nzchar(profile$statuses)) profile$statuses else "Sin estado")
               ),
-              column(
-                5,
-                selectizeInput(
-                  "rrhh_modal_doc_type",
-                  "Tipos",
-                  choices = doc_type_choices,
-                  multiple = TRUE,
-                  width = "100%",
-                  options = list(plugins = list("remove_button"), dropdownParent = "body")
-                )
+              tags$h5(class = "ds-person-cargo text-secondary mb-3 font-weight-bold", tags$i(class = "fas fa-user-tie mr-2"), if(nzchar(profile$cargos)) profile$cargos else "Cargo no especificado"),
+              fluidRow(
+                column(6, class="mb-2", tags$strong("C.I.:"), " ", if(nzchar(profile$cedulas)) profile$cedulas else "N/A", 
+                  if(nzchar(profile$cedulas)) tags$a(href="#", class="btn btn-xs btn-outline-primary ml-2 py-0 px-2", onclick="alert('Abriendo visor Cédula de Identidad...');return false;", tags$i(class="fas fa-id-card"), " Ver") else NULL),
+                column(6, class="mb-2", tags$strong("RIF:"), " ", if(nzchar(profile$rifs)) profile$rifs else "N/A"),
+                column(6, class="mb-2", tags$strong("Adscripción:"), " ", if(nzchar(profile$departamentos)) profile$departamentos else "N/A"),
+                column(6, class="mb-2", tags$strong("Ingreso:"), " ", ingresos_text),
+                if (grepl("Retirado", profile$statuses, fixed = TRUE)) column(6, class="mb-2", tags$strong("Jubilación:"), " ", jubilacion_text) else NULL,
+                if (grepl("Pensionado", profile$statuses, fixed = TRUE)) column(6, class="mb-2", tags$strong("Pensión:"), " ", pension_text) else NULL
               )
-            ),
-            selectInput(
-              "rrhh_modal_sort",
-              "Orden",
-              choices = c("Lo más relevante", "Título A-Z"),
-              width = "100%"
-            ),
-            tags$small(class = "text-muted", paste("Navega entre categorías disponibles.", visible_files, "archivo(s) visibles con los filtros actuales."))
+            )
           )
         )
       ),
-      tags$hr(),
-      tags$div(class = "rrhh-person-files", files_body)
+
+      bs4Card(
+        title = "Buscador y Orden del Expediente", status = "secondary", solidHeader = FALSE, width = 12, collapsed = TRUE, maximizable = FALSE,
+        fluidRow(
+          column(6, textInput("rrhh_modal_search", "Buscar documento", placeholder = "Tipo, dependencia, ubicación...", width = "100%")),
+          column(6, selectizeInput("rrhh_modal_doc_type", "Filtrar por Categoría", choices = doc_type_choices, multiple = TRUE, width = "100%", options = list(plugins = list("remove_button"), dropdownParent = "body")))
+        ),
+        selectInput("rrhh_modal_sort", "Orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)", width = "100%"),
+        tags$small(class = "text-muted", paste("Mostrando", visible_files, "archivo(s) dentro del expediente."))
+      ),
+      
+      tags$div(class = "rrhh-person-files px-1", files_body)
     )
   })
 
@@ -273,7 +254,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
 
       updateTextInput(session, "rrhh_modal_search", value = "")
       updateSelectizeInput(session, "rrhh_modal_doc_type", selected = character(0))
-      updateSelectInput(session, "rrhh_modal_sort", selected = "Lo más relevante")
+      updateSelectInput(session, "rrhh_modal_sort", selected = "Alfabético (A-Z)")
 
       removeModal()
       showModal(modalDialog(
