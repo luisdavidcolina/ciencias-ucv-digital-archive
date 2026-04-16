@@ -152,12 +152,25 @@ Requisitos minimos:
 - R 4.x
 - Paquetes: shiny, bs4Dash
 
-Ejecucion recomendada:
+Ejecucion recomendada desde RStudio:
 
-1. Abrir el proyecto en su carpeta raiz.
-2. Ejecutar en R:
+1. Abrir RStudio.
+2. Abrir el proyecto desde la carpeta raiz `c:/ciencias-ucv-digital-archive`.
+3. Si faltan dependencias, instalar una sola vez en la consola de RStudio:
+
+    install.packages(c("shiny", "bs4Dash"), repos = "https://cloud.r-project.org")
+
+4. Ubicar la sesion en la carpeta del proyecto:
+
+    setwd("c:/ciencias-ucv-digital-archive")
+
+5. Levantar la aplicacion:
 
     shiny::runApp()
+
+Tambien puedes abrirla directamente con:
+
+    shiny::runApp("c:/ciencias-ucv-digital-archive")
 
 Nota: existe app.R para bootstrap robusto con mensajes de error de carga mas claros.
 
