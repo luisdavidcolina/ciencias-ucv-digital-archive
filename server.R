@@ -33,6 +33,7 @@ server <- function(input, output, session) {
         match <- authenticate_user(db_users, input$login_user, input$login_pass)
     
         if (!is.null(match) && nrow(match) == 1) {
+      log_event(match$usuario[1], "Login Success", match$modulo[1], paste("Rol:", match$rol[1]))
       session_state$logged <- TRUE
       session_state$username <- match$usuario[1]
       session_state$modulo <- match$modulo[1]
@@ -41,7 +42,8 @@ server <- function(input, output, session) {
             # Trigger client-side navigation after successful login.
             session$sendCustomMessage("navigateToSearch", list(modulo = session_state$modulo))
     } else {
-      showNotification("Credenciales inválidas. Acceso denegado.", type = "error")
+      log_event(input$login_user, "Login Failure", "Auth", "Credenciales incorrectas", "Failure")
+      showNotification("Credenciales incorrectas", type = "error")
     }
   })
 
@@ -204,6 +206,7 @@ server <- function(input, output, session) {
       paste0("archivo_institucional_archivo_", format(Sys.Date(), "%Y%m%d"), ".xls")
     },
     content = function(file) {
+      log_event(session_state$username, "Export XLS", session_state$modulo, "Descarga de reporte filtrado")
       export_df <- dat_archivo_react()
       write_excel_compatible_xls(
         path = file,
@@ -227,7 +230,6 @@ server <- function(input, output, session) {
 
         datos <- filter_by_doc_types(datos, input$rrhh_doc_type)
       datos <- filter_by_persons(datos, input$rrhh_people)
-        datos <- filter_by_tesauro(datos, input$rrhh_tesauro)
 
         if (!is.null(input$rrhh_estado) && length(input$rrhh_estado) > 0) {
           estado_buscado <- input$rrhh_estado

@@ -9,6 +9,7 @@ source("R/services_pagination.R")
 source("R/services_export.R")
 source("R/services_thesaurus.R")
 source("R/services_persons.R")
+source("R/services_audit.R")
 source("R/server/ui_main_body.R")
 source("R/server/admin_panel.R")
 source("R/server/stats_admin.R")
@@ -24,5 +25,4 @@ db_rrhh <- merge(db_rrhh_personas, db_rrhh_archivos, by = "cedula", all.x = TRUE
 db_rrhh[is.na(db_rrhh)] <- ""
 
 db_archivo <- ensure_tesauro_columns(db_archivo)
-db_rrhh <- ensure_tesauro_columns(db_rrhh)
 db_rrhh <- ensure_person_columns(db_rrhh)

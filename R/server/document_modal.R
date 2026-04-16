@@ -55,7 +55,6 @@ register_document_modal_handlers <- function(input, output, session, session_sta
         tags$span(paste("Estatus:", file_status)),
         tags$span(paste("Ubicación:", if ("ubicacion" %in% names(file_row)) file_row$ubicacion else "Sin ubicación"))
       ),
-      tags$div(class = "ds-item-tags", render_tesauro_badges(file_row))
     )
   }
 
@@ -89,13 +88,11 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       resumen <- paste("Documento de RRHH en estado", estado_value, "en", doc$departamento)
       thumb_icon <- "fas fa-user-lock"
       thumb_badge <- get_doc_primary_term(doc)
-      tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
       meta <- tagList(
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Persona titular"), tags$span(class = "v", doc$empleado)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Cédula"), tags$span(class = "v", doc$cedula)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Personas vinculadas"), tags$span(class = "v", doc$personas_relacionadas)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
-        div(class = "ds-doc-meta-row", tags$span(class = "k", "Tesauro"), tags$span(class = "v", if (nzchar(tesauro)) tesauro else "Sin tesauro")),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Ubicación física"), tags$span(class = "v", doc$ubicacion)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de ingreso"), tags$span(class = "v", doc$fecha_ingreso))
       )
@@ -242,21 +239,28 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       idx <- as.integer(payload$idx)
       if (is.na(idx) || idx < 1) return()
       datos <- dat_archivo_react()
-      if (idx <= nrow(datos)) show_doc_modal(datos[idx, ], "ext")
+      if (idx <= nrow(datos)) {
+        doc <- datos[idx, ]
+        log_event(session_state$username, "View Document", "Archivo", paste("Titulo:", doc$titulo))
+        show_doc_modal(doc, "ext")
+      }
     } else if (identical(payload$mod, "rrhh_file") || identical(payload$mod, "rrhh")) {
       req(!is.null(payload$idx))
       idx <- as.integer(payload$idx)
       if (is.na(idx) || idx < 1) return()
       datos <- dat_rrhh_react()
       if (idx <= nrow(datos)) {
+        doc <- datos[idx, ]
+        log_event(session_state$username, "View RRHH File", "RRHH", paste("Empleado:", doc$empleado, "| Tipo:", doc$doc_type))
         removeModal()
-        show_doc_modal(datos[idx, ], "rrhh")
+        show_doc_modal(doc, "rrhh")
       }
     } else if (identical(payload$mod, "rrhh_person")) {
       req(!is.null(payload$person))
       persona <- as.character(payload$person)
       if (!nzchar(persona)) return()
 
+      log_event(session_state$username, "Open Dossier", "RRHH", paste("Persona:", persona))
       context <- build_rrhh_person_profile(dat_rrhh_react(), persona)
       req(!is.null(context))
       rrhh_modal_context(context)

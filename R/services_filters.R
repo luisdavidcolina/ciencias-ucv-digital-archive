@@ -68,7 +68,7 @@ filter_rrhh_data <- function(datos, search_term, sort_mode = NULL) {
 
     search_cols <- c(
       "empleado", "cedula", "departamento", "doc_type", "estado",
-      "personas_relacionadas", "tesauro_primario", "tesauro_secundario", "descriptores_libres"
+      "personas_relacionadas"
     )
     search_cols <- search_cols[search_cols %in% names(out)]
 

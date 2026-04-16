@@ -70,7 +70,6 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
 
   if (session_state$modulo == "RRHH") {
     rrhh_doc_types <- extract_doc_type_set(db_rrhh$doc_type)
-    rrhh_tesauro_choices <- extract_tesauro_choices(db_rrhh)
     rrhh_people_choices <- extract_people_choices(db_rrhh)
     rrhh_fechas <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
     rrhh_fechas <- rrhh_fechas[!is.na(rrhh_fechas)]
@@ -131,13 +130,6 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                   width = "100%",
                   options = list(plugins = list("remove_button"), dropdownParent = "body")
                 )
-              ),
-              bs4AccordionItem(
-                title = "Tesauro",
-                status = "indigo",
-                solidHeader = FALSE,
-                collapsed = TRUE,
-                selectizeInput("rrhh_tesauro", "Descriptores", choices = rrhh_tesauro_choices, multiple = TRUE, width = "100%")
               )
             ),
             actionButton("btn_update_rrhh", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")

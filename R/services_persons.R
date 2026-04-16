@@ -301,8 +301,7 @@ filter_rrhh_person_files <- function(datos, search_term = NULL, doc_types = NULL
 
     search_cols <- c(
       "empleado", "cedula", "departamento", "doc_type", "estatus",
-      "fecha_ingreso", "ubicacion", "personas_relacionadas",
-      "tesauro_primario", "tesauro_secundario", "descriptores_libres"
+      "fecha_ingreso", "ubicacion", "personas_relacionadas"
     )
     search_cols <- search_cols[search_cols %in% names(out)]
 
