@@ -49,7 +49,7 @@ El sistema implementa:
 
 ## Contrato de datos (CSV)
 
-datos_extension.csv
+datos_archivo.csv
 
 - titulo
 - autor
@@ -205,9 +205,16 @@ Nota: existe app.R para bootstrap robusto con mensajes de error de carga mas cla
 
 ## Despliegue
 
-- Existe configuracion de despliegue en la carpeta rsconnect.
-- Archivo de token auxiliar presente en deploy_token.R.
-- Para despliegues productivos, mover credenciales y tokens a variables de entorno seguras.
+Para publicar rápidamente una versión Demo a los servidores públicos de ShinyApps.io u otro contenedor Connect remoto:
+
+```R
+# Correr dentro de la consola nativa de RStudio (en la raíz del proyecto):
+rsconnect::deployApp(".")
+```
+
+- Existe configuracion de despliegue local persistente en la carpeta rsconnect.
+- Archivo de token auxiliar opcional presente en deploy_token.R.
+- Para despliegues productivos corporativos, mover credenciales y tokens a variables de entorno seguras.
 
 ## Problemas conocidos y diagnostico
 

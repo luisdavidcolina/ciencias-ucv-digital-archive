@@ -1,11 +1,11 @@
-register_stats_admin_outputs <- function(input, output, session, session_state, db_ext, db_rrhh) {
+register_stats_admin_outputs <- function(input, output, session, session_state, db_archivo, db_rrhh) {
   # --- FILTROS DE ESTADISTICAS ---
   output$stats_filters_panel <- renderUI({
     req(session_state$logged, session_state$rol == "Admin")
 
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
+    df <- if (session_state$modulo == "Archivo") db_archivo else db_rrhh
     type_choices <- extract_doc_type_set(df$doc_type)
-    fecha_col <- if (session_state$modulo == "Extensión") "fecha" else "fecha_ingreso"
+    fecha_col <- if (session_state$modulo == "Archivo") "fecha" else "fecha_ingreso"
     fechas <- suppressWarnings(as.Date(df[[fecha_col]], format = "%Y-%m-%d"))
     fechas_ok <- fechas[!is.na(fechas)]
 
@@ -15,7 +15,7 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
     third_filter_ui <- if (session_state$modulo == "RRHH") {
       selectInput("stats_status_filter", "Estado", choices = c("Todos" = "", sort(unique(df$estado))), width = "100%")
     } else {
-      selectInput("stats_author_filter", "Responsable", choices = c("Todos" = "", sort(unique(df$autor))), width = "100%")
+      selectInput("stats_author_filter", "Autor", choices = c("Todos" = "", sort(unique(df$autor))), width = "100%")
     }
 
     fourth_filter_ui <- if (session_state$modulo == "RRHH") {
@@ -56,8 +56,8 @@ register_stats_admin_outputs <- function(input, output, session, session_state, 
   stats_filtered_df <- reactive({
     req(session_state$logged, session_state$rol == "Admin")
 
-    df <- if (session_state$modulo == "Extensión") db_ext else db_rrhh
-    fecha_col <- if (session_state$modulo == "Extensión") "fecha" else "fecha_ingreso"
+    df <- if (session_state$modulo == "Archivo") db_archivo else db_rrhh
+    fecha_col <- if (session_state$modulo == "Archivo") "fecha" else "fecha_ingreso"
     fechas <- suppressWarnings(as.Date(df[[fecha_col]], format = "%Y-%m-%d"))
 
     if (!is.null(input$stats_date_range) && length(input$stats_date_range) == 2) {

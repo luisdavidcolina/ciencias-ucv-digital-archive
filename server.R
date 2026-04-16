@@ -13,7 +13,7 @@ server <- function(input, output, session) {
     rol = NULL
   )
   
-  p_ext <- reactiveVal(1)
+  p_archivo <- reactiveVal(1)
   p_rrhh <- reactiveVal(1)
 
   # EXPORTAR ESTADO PARA CONDITIONALPANEL
@@ -53,7 +53,7 @@ server <- function(input, output, session) {
 
     target_tab <- resolve_default_tab(modulo_actual, rol_actual)
     if (is.null(target_tab) || !nzchar(target_tab)) {
-      target_tab <- if (identical(modulo_actual, "RRHH")) "tab_rrhh" else "tab_extension"
+      target_tab <- if (identical(modulo_actual, "RRHH")) "tab_rrhh" else "tab_archivo"
     }
 
     session$onFlushed(function() {
@@ -80,12 +80,12 @@ server <- function(input, output, session) {
 
     lista_menu <- list()
     
-    if (session_state$modulo == "Extensión") {
+    if (session_state$modulo == "Archivo") {
             lista_menu[[length(lista_menu) + 1]] <- bs4SidebarMenuItem(
           "Archivo Institucional",
-                tabName = "tab_extension",
+                tabName = "tab_archivo",
                 icon = icon("folder-open"),
-                selected = identical(tab_default, "tab_extension")
+                selected = identical(tab_default, "tab_archivo")
             )
     }
     if (session_state$modulo == "RRHH") {
@@ -113,31 +113,31 @@ server <- function(input, output, session) {
   # ==========================================
   # LÓGICA DE DATOS: EXTENSIÓN & RRHH (Restaurada)
   # ==========================================
-  observeEvent(c(input$btn_s_ext, input$btn_update_ext), { p_ext(1) }, ignoreInit = TRUE)
-  dat_ext_react <- reactive({
-    input$btn_s_ext
-    input$btn_update_ext
-        datos <- filter_extension_data(
-            datos = db_ext,
-            search_term = input$search_ext,
-            doc_types = input$ext_doc_type,
-            sort_mode = input$sort_ext
+  observeEvent(c(input$btn_s_archivo, input$btn_update_archivo), { p_archivo(1) }, ignoreInit = TRUE)
+  dat_archivo_react <- reactive({
+    input$btn_s_archivo
+    input$btn_update_archivo
+        datos <- filter_archivo_data(
+            datos = db_archivo,
+            search_term = input$search_archivo,
+            doc_types = input$archivo_doc_type,
+            sort_mode = input$sort_archivo
         )
 
-        datos <- filter_by_tesauro(datos, input$ext_tesauro)
+        datos <- filter_by_tesauro(datos, input$archivo_tesauro)
 
-        if (!is.null(input$ext_date_range) && length(input$ext_date_range) == 2) {
-            f_ini <- as.Date(input$ext_date_range[1])
-            f_fin <- as.Date(input$ext_date_range[2])
+        if (!is.null(input$archivo_date_range) && length(input$archivo_date_range) == 2) {
+            f_ini <- as.Date(input$archivo_date_range[1])
+            f_fin <- as.Date(input$archivo_date_range[2])
             fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
             keep <- !is.na(fechas) & fechas >= f_ini & fechas <= f_fin
             datos <- datos[keep, , drop = FALSE]
         }
 
-        if (!is.null(input$ext_year_range) && length(input$ext_year_range) == 2) {
+        if (!is.null(input$archivo_year_range) && length(input$archivo_year_range) == 2) {
             fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
             anios <- as.integer(format(fechas, "%Y"))
-            keep <- !is.na(anios) & anios >= input$ext_year_range[1] & anios <= input$ext_year_range[2]
+            keep <- !is.na(anios) & anios >= input$archivo_year_range[1] & anios <= input$archivo_year_range[2]
             datos <- datos[keep, , drop = FALSE]
         }
 
@@ -145,16 +145,16 @@ server <- function(input, output, session) {
   })
 
   ext_pagination <- reactive({
-  paginate_rows(dat_ext_react(), p_ext(), input$rpp_ext)
+  paginate_rows(dat_archivo_react(), p_archivo(), input$rpp_archivo)
   })
   
-  observeEvent(input$ext_prev, { p_ext(max(1, p_ext() - 1)) })
-  observeEvent(input$ext_next, { 
+  observeEvent(input$archivo_prev, { p_archivo(max(1, p_archivo() - 1)) })
+  observeEvent(input$archivo_next, { 
     pag <- ext_pagination()
-  p_ext(min(pag$total_pages, p_ext() + 1)) 
+  p_archivo(min(pag$total_pages, p_archivo() + 1)) 
   })
 
-    output$ext_page_info <- renderText({
+    output$archivo_page_info <- renderText({
     pag <- ext_pagination()
     if (nrow(pag$data) == 0) {
             return("Pág. 0 de 0")
@@ -165,12 +165,12 @@ server <- function(input, output, session) {
 
     output$ext_pagination_controls <- renderUI({
     pag <- ext_pagination()
-    build_pagination_controls("ext_prev", "ext_next", "ext_page_info", pag$page, pag$total_pages)
+    build_pagination_controls("archivo_prev", "archivo_next", "archivo_page_info", pag$page, pag$total_pages)
     })
   
-  output$list_extension <- renderUI({
+  output$list_archivo <- renderUI({
   pag <- ext_pagination()
-  if (nrow(pag$data) == 0) return(div(class = "alert alert-secondary", "No se encontraron proyectos."))
+  if (nrow(pag$data) == 0) return(tags$div(class = "text-center my-5 py-4", tags$i(class = "fas fa-folder-open fa-4x text-muted mb-3 opacity-50"), tags$h5(class = "text-secondary font-weight-bold", "El Archivo está vacío"), tags$p(class = "text-muted", "No hay folios institucionales que coincidan con estos filtros.")))
   datos_view <- pag$data
   idx_inicio <- pag$start
   tarjetas <- lapply(seq_len(nrow(datos_view)), function(i) {
@@ -189,7 +189,7 @@ server <- function(input, output, session) {
 
             div(class = "ds-item-card", div(class = "ds-item-thumbnail", tags$i(class = "fas fa-file-alt")),
         div(class = "ds-item-metadata", tags$a(class = "ds-item-title", href="#", onclick = sprintf("Shiny.setInputValue('open_doc', {mod: 'ext', idx: %s, nonce: Date.now()}, {priority: 'event'}); return false;", idx_real), fila$titulo),
-           div(class = "ds-item-authors", paste("Responsable:", fila$autor)),
+           div(class = "ds-item-authors", paste("Autor:", fila$autor)),
            div(class = "ds-item-date", paste("Fecha Emisión:", fila$fecha)),
                      div(class = "ds-item-publisher", paste("Ubicación física:", fila$ubicacion)),
                      div(class = "ds-item-abstract", fila$abstract),
@@ -199,15 +199,15 @@ server <- function(input, output, session) {
     tagList(tarjetas)
   })
 
-  output$download_ext_xls <- downloadHandler(
+  output$download_archivo_xls <- downloadHandler(
     filename = function() {
-      paste0("archivo_institucional_extension_", format(Sys.Date(), "%Y%m%d"), ".xls")
+      paste0("archivo_institucional_archivo_", format(Sys.Date(), "%Y%m%d"), ".xls")
     },
     content = function(file) {
-      export_df <- dat_ext_react()
+      export_df <- dat_archivo_react()
       write_excel_compatible_xls(
         path = file,
-        title = "Exportación de resultados de Archivo Institucional - Extensión",
+        title = "Exportación de resultados de Archivo Institucional - Archivo",
         sections = list(
           list(
             title = "Resultados filtrados",
@@ -289,13 +289,13 @@ server <- function(input, output, session) {
         output = output,
         session = session,
         session_state = session_state,
-        dat_ext_react = dat_ext_react,
+        dat_archivo_react = dat_archivo_react,
         dat_rrhh_react = dat_rrhh_react
     )
   
   output$list_rrhh <- renderUI({
     pag <- rrhh_pagination()
-    if (nrow(pag$data) == 0) return(div(class = "alert alert-secondary", "No se encontraron expedientes para esta búsqueda."))
+    if (nrow(pag$data) == 0) return(tags$div(class = "text-center my-5 py-5", tags$i(class = "fas fa-id-badge fa-4x text-muted mb-3 opacity-50"), tags$h5(class = "text-secondary font-weight-bold", "Sin Perfiles Activos"), tags$p(class = "text-muted", "No existen trabajadores o expedientes asociados a tu búsqueda.")))
 
     datos_view <- pag$data
     idx_inicio <- pag$start
@@ -410,7 +410,7 @@ server <- function(input, output, session) {
   # ==========================================
   output$main_body <- renderUI({
     req(session_state$logged)
-    build_main_body_ui(session_state, db_ext, db_rrhh)
+    build_main_body_ui(session_state, db_archivo, db_rrhh)
   })
 
   register_admin_panel_outputs(
@@ -418,7 +418,7 @@ server <- function(input, output, session) {
       output = output,
       session = session,
       session_state = session_state,
-      db_ext = db_ext,
+      db_archivo = db_archivo,
       db_rrhh = db_rrhh,
       db_users = db_users
   )
@@ -428,7 +428,7 @@ server <- function(input, output, session) {
       output = output,
       session = session,
       session_state = session_state,
-      db_ext = db_ext,
+      db_archivo = db_archivo,
       db_rrhh = db_rrhh
   )
 }

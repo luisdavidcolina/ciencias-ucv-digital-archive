@@ -1,10 +1,10 @@
-register_admin_panel_outputs <- function(input, output, session, session_state, db_ext, db_rrhh, db_users) {
+register_admin_panel_outputs <- function(input, output, session, session_state, db_archivo, db_rrhh, db_users) {
   rrhh_admin_data <- reactiveVal(db_rrhh)
   rrhh_people_store <- reactiveVal(extract_people_choices(db_rrhh))
 
   get_mod_df <- function() {
-    if (identical(session_state$modulo, "Extensión")) {
-      db_ext
+    if (identical(session_state$modulo, "Archivo")) {
+      db_archivo
     } else {
       rrhh_admin_data()
     }
@@ -28,14 +28,14 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
 
   output$kpi_ultimo_ingreso <- renderUI({
     df <- get_mod_df()
-    fecha_col <- if (session_state$modulo == "Extensión") df$fecha else df$fecha_ingreso
+    fecha_col <- if (session_state$modulo == "Archivo") df$fecha else df$fecha_ingreso
     ultima <- max(as.Date(fecha_col, format = "%Y-%m-%d"), na.rm = TRUE)
     bs4ValueBox(value = format(ultima, "%d/%m/%Y"), subtitle = "Última Entrada", icon = icon("clock"), color = "info", width = 12)
   })
 
   # --- FORMULARIO DINÁMICO DE SUBMISSION ---
   output$admin_submit_form <- renderUI({
-    if (session_state$modulo == "Extensión") {
+    if (session_state$modulo == "Archivo") {
       tagList(
         fluidRow(
           column(6,
@@ -110,7 +110,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
     n <- min(3, nrow(df))
     items <- lapply(1:n, function(i) {
       f <- df[i, ]
-      nombre <- if (session_state$modulo == "Extensión") f$titulo else f$empleado
+      nombre <- if (session_state$modulo == "Archivo") f$titulo else f$empleado
       tags$div(class = "d-flex align-items-center mb-2 p-2", style = "background:#f8f9fa; border-radius:8px;",
         tags$i(class = "fas fa-file-alt mr-2", style = "color:#2b4e72; font-size:1.2rem;"),
         tags$div(
@@ -147,7 +147,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
 
     if (!is.null(input$admin_search) && input$admin_search != "") {
       term <- tolower(input$admin_search)
-      if (session_state$modulo == "Extensión") {
+      if (session_state$modulo == "Archivo") {
         df <- df[grepl(term, tolower(df$titulo)) | grepl(term, tolower(df$autor)), ]
       } else {
         df <- df[grepl(term, tolower(df$empleado)) | grepl(term, tolower(df$cedula)), ]
@@ -175,7 +175,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
       f <- df_view[i, ]
       real_idx <- idx_i + i - 1
 
-      if (session_state$modulo == "Extensión") {
+      if (session_state$modulo == "Archivo") {
         tags$tr(
           tags$td(style = "vertical-align:middle; font-weight:600;", substr(f$titulo, 1, 40)),
           tags$td(style = "vertical-align:middle;", f$autor),
@@ -206,7 +206,7 @@ register_admin_panel_outputs <- function(input, output, session, session_state, 
       }
     })
 
-    encabezados <- if (session_state$modulo == "Extensión") {
+    encabezados <- if (session_state$modulo == "Archivo") {
       tags$tr(tags$th("Título"), tags$th("Autor"), tags$th("Fecha"), tags$th("Tipo"), tags$th("Ubicación"), tags$th("Acciones"))
     } else {
       tags$tr(tags$th("Persona titular"), tags$th("C.I."), tags$th("Personas vinculadas"), tags$th("Depto."), tags$th("Estado"), tags$th("Tipo de archivo"), tags$th("Acciones"))

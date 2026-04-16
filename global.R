@@ -15,7 +15,7 @@ source("R/server/stats_admin.R")
 source("R/server/document_modal.R")
 
 # Data sources.
-db_ext <- read.csv("datos_extension.csv", stringsAsFactors = FALSE)
+db_archivo <- read.csv("datos_archivo.csv", stringsAsFactors = FALSE)
 db_rrhh_personas <- read.csv("rrhh_personas.csv", stringsAsFactors = FALSE)
 db_rrhh_archivos <- read.csv("rrhh_archivos.csv", stringsAsFactors = FALSE)
 db_users <- read.csv("usuarios.csv", stringsAsFactors = FALSE)
@@ -23,6 +23,6 @@ db_users <- read.csv("usuarios.csv", stringsAsFactors = FALSE)
 db_rrhh <- merge(db_rrhh_personas, db_rrhh_archivos, by = "cedula", all.x = TRUE)
 db_rrhh[is.na(db_rrhh)] <- ""
 
-db_ext <- ensure_tesauro_columns(db_ext)
+db_archivo <- ensure_tesauro_columns(db_archivo)
 db_rrhh <- ensure_tesauro_columns(db_rrhh)
 db_rrhh <- ensure_person_columns(db_rrhh)

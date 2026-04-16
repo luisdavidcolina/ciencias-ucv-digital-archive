@@ -33,7 +33,7 @@ filter_by_doc_types <- function(datos, selected_types) {
   datos[keep, , drop = FALSE]
 }
 
-filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
+filter_archivo_data <- function(datos, search_term, doc_types, sort_mode) {
   out <- datos
 
   if (!is.null(search_term) && nzchar(search_term)) {
@@ -44,13 +44,13 @@ filter_extension_data <- function(datos, search_term, doc_types, sort_mode) {
   out <- filter_by_doc_types(out, doc_types)
 
   if (!is.null(sort_mode)) {
-    if (sort_mode == "Alfabético (A-Z)") {
+    if (sort_mode == "AlfabÃ©tico (A-Z)") {
       out <- out[order(out$titulo), , drop = FALSE]
-    } else if (sort_mode == "Alfabético (Z-A)") {
+    } else if (sort_mode == "AlfabÃ©tico (Z-A)") {
       out <- out[order(out$titulo, decreasing = TRUE), , drop = FALSE]
-    } else if (sort_mode == "Más recientes primero") {
+    } else if (sort_mode == "MÃ¡s recientes primero") {
       out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d")), decreasing = TRUE), , drop = FALSE]
-    } else if (sort_mode == "Más antiguos primero") {
+    } else if (sort_mode == "MÃ¡s antiguos primero") {
       out <- out[order(suppressWarnings(as.Date(out$fecha, format = "%Y-%m-%d"))), , drop = FALSE]
     }
   }
@@ -83,8 +83,8 @@ filter_rrhh_data <- function(datos, search_term, sort_mode = NULL) {
     out <- out[keep, , drop = FALSE]
   }
 
-  if (!is.null(sort_mode) && sort_mode %in% c("Título A-Z", "Lo más relevante")) {
-    if (identical(sort_mode, "Título A-Z")) {
+  if (!is.null(sort_mode) && sort_mode %in% c("TÃ­tulo A-Z", "Lo mÃ¡s relevante")) {
+    if (identical(sort_mode, "TÃ­tulo A-Z")) {
       if ("empleado" %in% names(out)) {
         out <- out[order(out$empleado), , drop = FALSE]
       }

@@ -1,12 +1,15 @@
 authenticate_user <- function(db_users, user_id, password) {
-  if (is.null(user_id) || is.null(password) || !nzchar(user_id) || !nzchar(password)) {
+  safe_user <- trimws(as.character(user_id[1]))
+  safe_pass <- as.character(password[1])
+
+  if (is.na(safe_user) || is.na(safe_pass) || !nzchar(safe_user) || !nzchar(safe_pass)) {
     return(NULL)
   }
 
-  match <- db_users[db_users$usuario == user_id & db_users$password == password, , drop = FALSE]
-  if (nrow(match) != 1) {
+  match_idx <- which(db_users$usuario == safe_user & db_users$password == safe_pass)
+  if (length(match_idx) != 1) {
     return(NULL)
   }
 
-  match[1, , drop = FALSE]
+  db_users[match_idx, , drop = FALSE]
 }

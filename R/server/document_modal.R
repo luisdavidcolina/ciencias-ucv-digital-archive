@@ -1,4 +1,4 @@
-register_document_modal_handlers <- function(input, output, session, session_state, dat_ext_react, dat_rrhh_react) {
+register_document_modal_handlers <- function(input, output, session, session_state, dat_archivo_react, dat_rrhh_react) {
   rrhh_modal_context <- reactiveVal(NULL)
 
   person_initials <- function(person_name) {
@@ -77,7 +77,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       thumb_badge <- get_doc_primary_term(doc)
       tesauro <- paste(get_doc_tesauro_terms(doc), collapse = "; ")
       meta <- tagList(
-        div(class = "ds-doc-meta-row", tags$span(class = "k", "Responsable"), tags$span(class = "v", doc$autor)),
+        div(class = "ds-doc-meta-row", tags$span(class = "k", "Autor"), tags$span(class = "v", doc$autor)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tipo"), tags$span(class = "v", doc$doc_type)),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Tesauro"), tags$span(class = "v", if (nzchar(tesauro)) tesauro else "Sin tesauro")),
         div(class = "ds-doc-meta-row", tags$span(class = "k", "Fecha de emisión"), tags$span(class = "v", doc$fecha)),
@@ -241,7 +241,7 @@ register_document_modal_handlers <- function(input, output, session, session_sta
       req(!is.null(payload$idx))
       idx <- as.integer(payload$idx)
       if (is.na(idx) || idx < 1) return()
-      datos <- dat_ext_react()
+      datos <- dat_archivo_react()
       if (idx <= nrow(datos)) show_doc_modal(datos[idx, ], "ext")
     } else if (identical(payload$mod, "rrhh_file") || identical(payload$mod, "rrhh")) {
       req(!is.null(payload$idx))

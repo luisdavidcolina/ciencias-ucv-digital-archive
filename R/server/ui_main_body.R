@@ -1,18 +1,18 @@
-build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
+build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
   lista_tabs <- list()
 
-  if (session_state$modulo == "Extensión") {
-    ext_doc_types <- extract_doc_type_set(db_ext$doc_type)
-    ext_tesauro_choices <- extract_tesauro_choices(db_ext)
-    ext_fechas <- suppressWarnings(as.Date(db_ext$fecha, format = "%Y-%m-%d"))
+  if (session_state$modulo == "Archivo") {
+    archivo_doc_types <- extract_doc_type_set(db_archivo$doc_type)
+    archivo_tesauro_choices <- extract_tesauro_choices(db_archivo)
+    ext_fechas <- suppressWarnings(as.Date(db_archivo$fecha, format = "%Y-%m-%d"))
     ext_fechas <- ext_fechas[!is.na(ext_fechas)]
     ext_min_fecha <- if (length(ext_fechas) > 0) min(ext_fechas) else Sys.Date() - 365
     ext_max_fecha <- if (length(ext_fechas) > 0) max(ext_fechas) else Sys.Date()
     ext_min_year <- as.integer(format(ext_min_fecha, "%Y"))
     ext_max_year <- as.integer(format(ext_max_fecha, "%Y"))
 
-    lista_tabs[[length(lista_tabs) + 1]] <- bs4TabItem(tabName = "tab_extension",
-      fluidRow(column(12, div(class = "ds-breadcrumb-wrapper", div(class = "ds-breadcrumb", "Comunidades / Extensión / Búsqueda")))),
+    lista_tabs[[length(lista_tabs) + 1]] <- bs4TabItem(tabName = "tab_archivo",
+      fluidRow(column(12, div(class = "ds-breadcrumb-wrapper", div(class = "ds-breadcrumb", "Comunidades / Archivo / Búsqueda")))),
       fluidRow(
         column(width = 3,
           bs4Card(
@@ -25,9 +25,9 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 solidHeader = FALSE,
                 collapsed = FALSE,
                 selectizeInput(
-                  "ext_doc_type",
+                  "archivo_doc_type",
                   "Selecciona una o más",
-                  choices = ext_doc_types,
+                  choices = archivo_doc_types,
                   multiple = TRUE,
                   width = "100%",
                   options = list(plugins = list("remove_button"), dropdownParent = "body")
@@ -39,8 +39,8 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 solidHeader = FALSE,
                 collapsed = TRUE,
                 tagList(
-                  dateRangeInput("ext_date_range", "Rango de fecha", start = ext_min_fecha, end = ext_max_fecha, language = "es", width = "100%"),
-                  sliderInput("ext_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = "")
+                  dateRangeInput("archivo_date_range", "Rango de fecha", start = ext_min_fecha, end = ext_max_fecha, language = "es", width = "100%"),
+                  sliderInput("archivo_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = "")
                 )
               ),
               bs4AccordionItem(
@@ -48,20 +48,20 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
                 status = "indigo",
                 solidHeader = FALSE,
                 collapsed = TRUE,
-                selectizeInput("ext_tesauro", "Descriptores", choices = ext_tesauro_choices, multiple = TRUE, width = "100%")
+                selectizeInput("archivo_tesauro", "Descriptores", choices = archivo_tesauro_choices, multiple = TRUE, width = "100%")
               )
             ),
-            actionButton("btn_update_ext", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
+            actionButton("btn_update_archivo", "Aplicar", class = "btn ds-btn-primary w-100 mt-2")
           ),
           bs4Card(
             title = "Vista", status = "secondary", width = 12, class = "mt-3",
-            selectInput("sort_ext", "Criterio de orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)"),
-            selectInput("rpp_ext", "Pág:", choices = c("5", "10"), selected = "5")
+            selectInput("sort_archivo", "Criterio de orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)"),
+            selectInput("rpp_archivo", "Pág:", choices = c("5", "10"), selected = "5")
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_ext", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_ext", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_ext_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
-          uiOutput("list_extension"),
+          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_archivo", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_archivo", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_archivo_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
+          uiOutput("list_archivo"),
           uiOutput("ext_pagination_controls")
         )
       )
@@ -166,8 +166,8 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
         column(3, uiOutput("kpi_total_usuarios")),
         column(3, uiOutput("kpi_ultimo_ingreso"))
       ),
-      tabsetPanel(id = "admin_workspace_tabs", type = "pills", selected = "Estadísticas",
-        tabPanel("Nuevo Ingreso", icon = icon("plus-circle"), tags$br(),
+      do.call(tabsetPanel, c(list(id = "admin_workspace_tabs", type = "pills", selected = "admin_stats"), Filter(function(x) !is.null(x), list(
+        tabPanel("Nuevo Ingreso", value = "admin_new", icon = icon("plus-circle"), tags$br(),
           fluidRow(
             column(width = 8,
               bs4Card(title = tags$span(tags$i(class = "fas fa-pen-fancy"), " Formulario de Metadatos Dublin Core"), status = "primary", solidHeader = FALSE, width = 12, collapsible = FALSE,
@@ -199,7 +199,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             )
           )
         ),
-        tabPanel("Monitor de Archivos", icon = icon("table"), tags$br(),
+        tabPanel("Monitor de Archivos", value = "admin_monitor", icon = icon("table"), tags$br(),
           bs4Card(title = tags$span(tags$i(class = "fas fa-database"), " Directorio Activo Local"), status = "info", solidHeader = FALSE, width = 12, collapsible = FALSE,
             fluidRow(
               column(3, textInput("admin_search", NULL, placeholder = "Buscar en tabla...", width = "100%")),
@@ -223,17 +223,17 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
           )
         ),
         if (identical(session_state$modulo, "RRHH")) {
-          tabPanel("Personas", icon = icon("users"), tags$br(),
+          tabPanel("Personas", value = "admin_people", icon = icon("users"), tags$br(),
             uiOutput("admin_people_tab")
           )
-        },
-        tabPanel("Categorías", icon = icon("sitemap"), tags$br(),
+        } else { NULL },
+        tabPanel("Categorías", value = "admin_categories", icon = icon("sitemap"), tags$br(),
           fluidRow(
             column(width = 5,
               bs4Card(title = tags$span(tags$i(class = "fas fa-plus-square"), " Nueva Categoría"), status = "warning", solidHeader = FALSE, width = 12, collapsible = FALSE,
                 textInput("new_tax_name", "Nombre de la Tipología *", placeholder = "Ej: Resolución Rectoral", width = "100%"),
                 textAreaInput("new_tax_desc", "Descripción", placeholder = "Breve descripción de esta tipología documental...", rows = 3, width = "100%"),
-                selectInput("new_tax_scope", "Alcance", choices = c("Extensión", "RRHH", "Ambos"), width = "100%"),
+                selectInput("new_tax_scope", "Alcance", choices = c("Archivo", "RRHH", "Ambos"), width = "100%"),
                 actionButton("add_tax_btn", "Registrar Categoría", icon = icon("check-circle"), class = "btn btn-warning w-100 font-weight-bold", style = "border-radius:8px;")
               )
             ),
@@ -244,7 +244,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             )
           )
         ),
-        tabPanel("Usuarios", icon = icon("users-cog"), tags$br(),
+        tabPanel("Usuarios", value = "admin_users", icon = icon("users-cog"), tags$br(),
           bs4Card(title = tags$span(tags$i(class = "fas fa-user-shield"), " Control de Acceso"), status = "danger", solidHeader = FALSE, width = 12, collapsible = FALSE,
             uiOutput("admin_users_table"),
             tags$hr(),
@@ -252,13 +252,13 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             fluidRow(
               column(3, textInput("new_user_name", NULL, placeholder = "Usuario", width = "100%")),
               column(3, passwordInput("new_user_pass", NULL, placeholder = "Contraseña", width = "100%")),
-              column(3, selectInput("new_user_modulo", NULL, choices = c("Extensión", "RRHH"), width = "100%")),
+              column(3, selectInput("new_user_modulo", NULL, choices = c("Archivo", "RRHH"), width = "100%")),
               column(3, selectInput("new_user_rol", NULL, choices = c("Normal", "Admin"), width = "100%"))
             ),
             actionButton("btn_add_user", "Crear Usuario", icon = icon("user-plus"), class = "btn btn-outline-danger", style = "border-radius:8px;")
           )
         ),
-        tabPanel("Estadísticas", icon = icon("chart-bar"), tags$br(),
+        tabPanel("Estadísticas", value = "admin_stats", icon = icon("chart-bar"), tags$br(),
           bs4Card(title = tags$span(tags$i(class = "fas fa-filter"), " Filtros Analíticos"), status = "info", solidHeader = FALSE, width = 12, collapsible = FALSE,
             uiOutput("stats_filters_panel")
           ),
@@ -270,7 +270,7 @@ build_main_body_ui <- function(session_state, db_ext, db_rrhh) {
             column(12, bs4Card(title = tags$span(tags$i(class = "fas fa-server"), " Estado del Sistema"), status = "secondary", solidHeader = FALSE, width = 12, collapsible = FALSE, uiOutput("stats_system")))
           )
         )
-      )
+      ))))
     )
   }
 
