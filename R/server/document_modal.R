@@ -210,14 +210,23 @@ register_document_modal_handlers <- function(input, output, session, session_sta
         )
       ),
 
-      bs4Card(
-        title = "Buscador y Orden del Expediente", status = "secondary", solidHeader = FALSE, width = 12, collapsed = TRUE, maximizable = FALSE,
+      tags$div(
+        class = "ds-modal-filters-wrap bg-light p-3 rounded border mb-4",
         fluidRow(
-          column(6, textInput("rrhh_modal_search", "Buscar documento", placeholder = "Tipo, dependencia, ubicación...", width = "100%")),
-          column(6, selectizeInput("rrhh_modal_doc_type", "Filtrar por Categoría", choices = doc_type_choices, multiple = TRUE, width = "100%", options = list(plugins = list("remove_button"), dropdownParent = "body")))
+          column(12, tags$h6(class="font-weight-bold text-secondary text-uppercase shadow-sm-text mb-3", tags$i(class="fas fa-sliders-h mr-2"), "Explorar Documentos")),
+          column(12, md = 5, class = "mb-2 mb-md-0",
+            textInput("rrhh_modal_search", NULL, placeholder="🔍 Buscar palabras, ubicaciones, fechas...", width="100%")
+          ),
+          column(12, md = 4, class = "mb-2 mb-md-0",
+            selectizeInput("rrhh_modal_doc_type", NULL, choices = doc_type_choices, multiple = TRUE, width = "100%", options = list(placeholder="📂 Elegir categorías...", plugins = list("remove_button"), dropdownParent = "body"))
+          ),
+          column(12, md = 3, class = "mb-2 mb-md-0",
+            selectInput("rrhh_modal_sort", NULL, choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)", width = "100%")
+          )
         ),
-        selectInput("rrhh_modal_sort", "Orden", choices = c("Alfabético (A-Z)", "Alfabético (Z-A)", "Más recientes primero", "Más antiguos primero"), selected = "Alfabético (A-Z)", width = "100%"),
-        tags$small(class = "text-muted", paste("Mostrando", visible_files, "archivo(s) dentro del expediente."))
+        fluidRow(
+          column(12, tags$div(class="text-right mt-1", tags$span(class="badge badge-pill badge-primary px-3 py-1", paste(visible_files, "folios visibles"))))
+        )
       ),
       
       tags$div(class = "rrhh-person-files px-1", files_body)
