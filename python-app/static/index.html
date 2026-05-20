@@ -24,6 +24,7 @@
   
   <!-- Estilos de DSpace 7 Emulation y Glassmorphism -->
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap4.min.css">
 </head>
 <body class="hold-transition sidebar-mini">
 
@@ -183,10 +184,7 @@
                     </div>
                     <div id="collapse-arch-type" class="collapse show" data-parent="#ext_filters_acc">
                       <div class="card-body p-2">
-                        <label class="text-muted mb-1">Selecciona tipologías:</label>
-                        <div id="choice-archivo-doc-type" class="custom-select-tags d-flex flex-wrap gap-1">
-                          <!-- Inyectado dinámicamente -->
-                        </div>
+                        <select id="choice-archivo-doc-type" multiple placeholder="Buscar tipología..."></select>
                       </div>
                     </div>
                   </div>
@@ -243,10 +241,7 @@
                     </div>
                     <div id="collapse-arch-tesauro" class="collapse" data-parent="#ext_filters_acc">
                       <div class="card-body p-2">
-                        <label class="text-muted mb-1">Descriptores:</label>
-                        <div id="choice-archivo-tesauro" class="custom-select-tags d-flex flex-wrap gap-1">
-                          <!-- Inyectado dinámicamente -->
-                        </div>
+                        <select id="choice-archivo-tesauro" multiple placeholder="Buscar descriptor..."></select>
                       </div>
                     </div>
                   </div>
@@ -345,10 +340,7 @@
                     </div>
                     <div id="collapse-rh-type" class="collapse show" data-parent="#rrhh_filters_acc">
                       <div class="card-body p-2">
-                        <label class="text-muted mb-1">Tipo de archivo:</label>
-                        <div id="choice-rrhh-doc-type" class="custom-select-tags d-flex flex-wrap gap-1">
-                          <!-- Inyectado dinámicamente -->
-                        </div>
+                        <select id="choice-rrhh-doc-type" multiple placeholder="Buscar tipo..."></select>
                       </div>
                     </div>
                   </div>
@@ -400,9 +392,7 @@
                     </div>
                     <div id="collapse-rh-estado" class="collapse" data-parent="#rrhh_filters_acc">
                       <div class="card-body p-2">
-                        <div id="choice-rrhh-estado" class="custom-select-tags d-flex flex-wrap gap-1">
-                          <!-- Inyectado dinámicamente -->
-                        </div>
+                        <select id="choice-rrhh-estado" multiple placeholder="Filtrar por estado..."></select>
                       </div>
                     </div>
                   </div>
@@ -416,10 +406,7 @@
                     </div>
                     <div id="collapse-rh-people" class="collapse" data-parent="#rrhh_filters_acc">
                       <div class="card-body p-2">
-                        <label class="text-muted mb-1">Apellidos, Nombres asociados:</label>
-                        <div id="choice-rrhh-people" class="custom-select-tags d-flex flex-wrap gap-1">
-                          <!-- Inyectado dinámicamente -->
-                        </div>
+                        <select id="choice-rrhh-people" multiple placeholder="Buscar persona..."></select>
                       </div>
                     </div>
                   </div>
@@ -459,7 +446,7 @@
           <div class="col-md-9">
             <div class="ds-search-bar">
               <div class="input-group">
-                <input type="text" id="search_rrhh" class="form-control ds-search-input" placeholder="Buscar expediente por Apellidos, Nombres...">
+                <input type="text" id="search_rrhh" class="form-control ds-search-input" placeholder="Buscar expediente por Cédula, Nombres, Apellidos...">
                 <div class="input-group-append">
                   <button id="btn_s_rrhh" class="btn ds-btn-primary ds-search-action-btn" title="Buscar"><i class="fas fa-search"></i></button>
                   <button id="btn_clear_rrhh" class="btn btn-outline-secondary ds-search-action-btn" title="Limpiar filtros"><i class="fas fa-eraser"></i></button>
@@ -1274,7 +1261,7 @@
   </div>
 
   <!-- Modal Expediente RRHH Completo (Dossier con sub-filtros, fotos y pestañas) -->
-  <div id="rrhh-person-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="rrhh-person-modal" class="modal fade rrhh-person-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content" style="border-radius: 14px; border: 1px solid #d6dbe1; box-shadow: 0 18px 40px rgba(16, 24, 40, 0.2);">
         <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
@@ -1293,6 +1280,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   <!-- Lógica SPA Conectora -->
   <script src="/static/app.js"></script>
 </body>

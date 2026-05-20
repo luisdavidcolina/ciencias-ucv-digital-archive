@@ -113,6 +113,15 @@ def format_rrhh_person_name(name: str) -> str:
     given_names = " ".join(parts[:-2])
     return f"{surnames}, {given_names}"
 
+def first_non_empty_value(values) -> str:
+    if values is None:
+        return ""
+    series = pd.Series(values).dropna().astype(str).str.strip()
+    series = series[series != ""]
+    if series.empty:
+        return ""
+    return series.iloc[0]
+
 def build_rrhh_person_index(df: pd.DataFrame) -> List[Dict[str, Any]]:
     if df.empty:
         return []
@@ -161,6 +170,8 @@ def build_rrhh_person_index(df: pd.DataFrame) -> List[Dict[str, Any]]:
         tipos = "; ".join(sorted(p_df["doc_type"].dropna().unique().tolist()))
         fecha_ingreso = "; ".join(sorted(p_df["fecha_ingreso"].dropna().unique().tolist()))
         
+        foto_url = first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else [])
+
         profiles.append({
             "persona_raw": p,
             "persona": format_rrhh_person_name(p),
@@ -173,6 +184,7 @@ def build_rrhh_person_index(df: pd.DataFrame) -> List[Dict[str, Any]]:
             "estatuses": estados or "Sin estado",
             "tipos": tipos,
             "fecha_ingreso": fecha_ingreso,
+            "foto_url": foto_url,
             "row_indices": p_indices
         })
         
@@ -506,8 +518,7 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
     p_df = pd.DataFrame(row_list)
     
     # Atributos de Perfil
-    primary_rows = p_df[p_df["empleado"] == p]
-    foto_url = primary_rows["foto_url"].dropna().iloc[0] if not primary_rows.empty and "foto_url" in primary_rows.columns and primary_rows["foto_url"].dropna().str.strip().any() else ""
+    foto_url = first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else [])
     cedulas = "; ".join(sorted(p_df["cedula"].dropna().unique().tolist()))
     rifs = "; ".join(sorted(p_df["rif"].dropna().unique().tolist())) if "rif" in p_df.columns else ""
     departamentos = "; ".join(sorted(p_df["departamento"].dropna().unique().tolist()))

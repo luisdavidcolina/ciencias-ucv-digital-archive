@@ -532,8 +532,9 @@ a:hover {
 
 .ds-item-thumbnail i {
     font-size: 48px;
-    color: #6c757d; 
+    color: #6c757d;
 }
+
 
 .ds-item-metadata {
     flex-grow: 1;
@@ -800,6 +801,24 @@ a:hover {
 
 .rrhh-person-modal .tab-content {
     margin-top: 0.75rem;
+}
+
+.ds-modal-filters-wrap {
+    border-radius: 8px;
+}
+
+.ds-category-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2b4e72;
+}
+
+.ds-person-name {
+    font-size: 1.4rem;
+}
+
+.ds-person-cargo {
+    font-size: 1rem;
 }
 
 .ds-item-title {

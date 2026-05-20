@@ -303,8 +303,8 @@ async function loadDynamicChoices() {
     state.rrhh.dateStart = data.rrhh.min_date;
     state.rrhh.dateEnd = data.rrhh.max_date;
     
-    // Renderizar listados de etiquetas multiselect
-    renderChoicesTags();
+    // Inicializar selectores Tom Select
+    initTomSelects();
     
     // Configurar controladores de fechas
     initDateControls("archivo", data.archivo);
@@ -315,33 +315,46 @@ async function loadDynamicChoices() {
   }
 }
 
-function renderChoicesTags() {
-  if (!state.choices) return;
-  function fillTags(id, items, onclick) {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = items.map(v => `<span class="select-tag" onclick="${onclick(v)}">${v}</span>`).join("");
-  }
-  fillTags("choice-archivo-doc-type", state.choices.archivo.doc_types, t => `toggleTag('archivo','selectedTypes','${t}',this)`);
-  fillTags("choice-archivo-tesauro", state.choices.archivo.tesauro, t => `toggleTag('archivo','selectedTesauro','${t}',this)`);
-  fillTags("choice-rrhh-doc-type", state.choices.rrhh.doc_types, t => `toggleTag('rrhh','selectedTypes','${t}',this)`);
-  fillTags("choice-rrhh-estado", state.choices.rrhh.estados, e => `toggleTag('rrhh','selectedEstados','${e}',this)`);
-  fillTags("choice-rrhh-people", state.choices.rrhh.people, p => `toggleTag('rrhh','selectedPeople','${p}',this)`);
-}
+const tsInstances = {};
 
-function toggleTag(module, stateKey, val, elem) {
-  const arr = state[module][stateKey];
-  const idx = arr.indexOf(val);
-  if (idx === -1) {
-    arr.push(val);
-    elem.classList.add("active");
-  } else {
-    arr.splice(idx, 1);
-    elem.classList.remove("active");
+function initTomSelects() {
+  if (!state.choices || typeof TomSelect === "undefined") return;
+
+  function makeSel(id, items, onChange) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (tsInstances[id]) { tsInstances[id].destroy(); delete tsInstances[id]; }
+    tsInstances[id] = new TomSelect(el, {
+      plugins: ["remove_button"],
+      create: false,
+      maxOptions: null,
+      options: items.map(v => ({ value: v, text: v })),
+      items: [],
+      placeholder: el.getAttribute("placeholder") || "Seleccionar...",
+      onChange
+    });
   }
-  
-  state[module].page = 1;
-  if (module === "archivo") triggerArchivoSearch();
-  else triggerRrhhSearch();
+
+  makeSel("choice-archivo-doc-type", state.choices.archivo.doc_types, (val) => {
+    state.archivo.selectedTypes = Array.isArray(val) ? val : (val ? [val] : []);
+    state.archivo.page = 1; triggerArchivoSearch();
+  });
+  makeSel("choice-archivo-tesauro", state.choices.archivo.tesauro, (val) => {
+    state.archivo.selectedTesauro = Array.isArray(val) ? val : (val ? [val] : []);
+    state.archivo.page = 1; triggerArchivoSearch();
+  });
+  makeSel("choice-rrhh-doc-type", state.choices.rrhh.doc_types, (val) => {
+    state.rrhh.selectedTypes = Array.isArray(val) ? val : (val ? [val] : []);
+    state.rrhh.page = 1; triggerRrhhSearch();
+  });
+  makeSel("choice-rrhh-estado", state.choices.rrhh.estados, (val) => {
+    state.rrhh.selectedEstados = Array.isArray(val) ? val : (val ? [val] : []);
+    state.rrhh.page = 1; triggerRrhhSearch();
+  });
+  makeSel("choice-rrhh-people", state.choices.rrhh.people, (val) => {
+    state.rrhh.selectedPeople = Array.isArray(val) ? val : (val ? [val] : []);
+    state.rrhh.page = 1; triggerRrhhSearch();
+  });
 }
 
 // ==========================================================================
@@ -448,14 +461,19 @@ function resetDateFilters(module) {
   
   if (module === "archivo") {
     state.archivo.selectedTesauro = [];
-    document.getElementById("search_archivo").value = "";
+    const sa = document.getElementById("search_archivo");
+    if (sa) sa.value = "";
+    if (tsInstances["choice-archivo-doc-type"]) tsInstances["choice-archivo-doc-type"].clear(true);
+    if (tsInstances["choice-archivo-tesauro"]) tsInstances["choice-archivo-tesauro"].clear(true);
   } else {
     state.rrhh.selectedPeople = [];
     state.rrhh.selectedEstados = [];
-    document.getElementById("search_rrhh").value = "";
+    const sr = document.getElementById("search_rrhh");
+    if (sr) sr.value = "";
+    if (tsInstances["choice-rrhh-doc-type"]) tsInstances["choice-rrhh-doc-type"].clear(true);
+    if (tsInstances["choice-rrhh-estado"]) tsInstances["choice-rrhh-estado"].clear(true);
+    if (tsInstances["choice-rrhh-people"]) tsInstances["choice-rrhh-people"].clear(true);
   }
-  
-  document.querySelectorAll(`#tab-${module} .select-tag`).forEach(tag => tag.classList.remove("active"));
   
   const limits = state.choices[module];
   state[module].dateStart = limits.min_date;
@@ -616,8 +634,8 @@ function renderRrhhList() {
       <div class="ds-item-card ds-person-card" onclick="openRrhhPersonDossier('${p.persona_raw}')" style="cursor:pointer;">
         <!-- Thumbnail -->
         <div class="ds-item-thumbnail" style="align-items: center; padding-top: 0;">
-          <div class="rrhh-person-photo-card" style="width: 54px; height: 54px; border-radius: 50%; box-shadow: none; border: 2px solid #dee2e6; display: flex; align-items: center; justify-content: center; background: #eef4fb; color: #2b4e72;">
-            <span class="font-weight-bold" style="font-size: 1.25rem;">${initials}</span>
+          <div style="width: 54px; height: 54px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #eef4fb; border: 2px solid #dee2e6; flex-shrink: 0;">
+            ${p.foto_url ? `<img src="${p.foto_url}" style="width:100%;height:100%;object-fit:cover;display:block;">` : `<span style="width:100%;height:100%;background:#2b4e72;color:#ffffff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">${initials}</span>`}
           </div>
         </div>
         <!-- Metadata -->
@@ -753,133 +771,150 @@ async function openRrhhPersonDossier(personaRaw) {
 function renderRrhhDossierModal() {
   const profile = state.activePersonProfile;
   if (!profile) return;
-  
+
   const initials = getPersonInitials(profile.persona_raw);
-  const colorState = getStatusColor(profile.statuses);
-  
-  // 1. Cabecera y Foto del Expediente
-  let headerHtml = `
-    <div class="rrhh-person-photo-card mb-4">
-      <div class="d-flex align-items-center">
-        <div class="rrhh-person-avatar mr-4" style="width:90px; height:90px; border-radius:50%; background:#2b4e72; color:white; font-size:2rem; font-weight:bold; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-          ${profile.foto_url ? `<img src="${profile.foto_url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : `<span>${initials}</span>`}
+
+  const photoHtml = profile.foto_url
+    ? `<div class="rrhh-person-photo-card"><img src="${profile.foto_url}" class="rrhh-person-photo" alt="${profile.persona}"></div>`
+    : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${initials}</span><i class="fas fa-user rrhh-person-photo-icon"></i></div>`;
+
+  const isRetirado = (profile.statuses || "").includes("Retirado");
+  const isPensionado = (profile.statuses || "").includes("Pensionado");
+  const ciHtml = profile.cedulas
+    ? `${profile.cedulas} <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="alert('Abriendo visor Cédula de Identidad...');return false;"><i class="fas fa-id-card"></i> Ver</a>`
+    : "N/A";
+
+  const headerHtml = `
+    <div class="ds-person-profile-header mb-4 p-3 bg-white rounded shadow-sm border">
+      <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
+        <div class="ds-person-avatar-wrap mb-3 mb-md-0 mr-md-4" style="width:150px;min-width:150px;">
+          ${photoHtml}
         </div>
-        <div style="flex-grow:1;">
-          <div class="d-flex align-items-center mb-1">
-            <h3 class="font-weight-bold text-dark m-0 mr-3" style="font-size:1.6rem;">${profile.persona}</h3>
-            <span class="badge" style="background-color: ${colorState}; color: white; padding: 5px 10px; border-radius: 4px; font-size:0.8rem;">${profile.statuses}</span>
+        <div class="ds-person-info flex-grow-1 w-100">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h3 class="ds-person-name m-0 text-primary font-weight-bold">${profile.persona}</h3>
+            <span class="badge badge-info text-uppercase px-3 py-2">${profile.statuses || "Sin estado"}</span>
           </div>
-          <div class="ds-person-profile-header row" style="font-size:0.9rem;">
-            <div class="col-md-4 mb-1">
-              <i class="fas fa-id-card text-muted mr-1"></i> Cédula: <strong>${profile.cedulas}</strong>
-            </div>
-            <div class="col-md-4 mb-1">
-              <i class="fas fa-fingerprint text-muted mr-1"></i> RIF: <strong>${profile.rifs || "N/A"}</strong>
-            </div>
-            <div class="col-md-4 mb-1">
-              <i class="fas fa-user-tie text-muted mr-1"></i> Cargo: <strong>${profile.cargos}</strong>
-            </div>
-            <div class="col-md-4 mb-1">
-              <i class="fas fa-sitemap text-muted mr-1"></i> Adscripción: <strong>${profile.departamentos}</strong>
-            </div>
-            <div class="col-md-4 mb-1">
-              <i class="far fa-calendar-check text-muted mr-1"></i> Ingreso: <strong>${formatISOToSpanish(profile.fecha_ingreso)}</strong>
-            </div>
-            ${profile.fecha_jubilacion ? `<div class="col-md-4 mb-1"><i class="fas fa-user-clock text-indigo mr-1"></i> Jubilado: <strong>${formatISOToSpanish(profile.fecha_jubilacion)}</strong></div>` : ""}
-            ${profile.fecha_pension ? `<div class="col-md-4 mb-1"><i class="fas fa-user-shield text-teal mr-1"></i> Pensionado: <strong>${formatISOToSpanish(profile.fecha_pension)}</strong></div>` : ""}
+          <h5 class="ds-person-cargo text-secondary mb-3 font-weight-bold">
+            <i class="fas fa-user-tie mr-2"></i>${profile.cargos || "Cargo no especificado"}
+          </h5>
+          <div class="row">
+            <div class="col-6 mb-2"><strong>C.I.:</strong> ${ciHtml}</div>
+            <div class="col-6 mb-2"><strong>RIF:</strong> ${profile.rifs || "N/A"}</div>
+            <div class="col-6 mb-2"><strong>Adscripción:</strong> ${profile.departamentos || "N/A"}</div>
+            <div class="col-6 mb-2"><strong>Ingreso:</strong> ${formatISOToSpanish(profile.fecha_ingreso) || "No registrada"}</div>
+            ${isRetirado ? `<div class="col-6 mb-2"><strong>Jubilación:</strong> ${formatISOToSpanish(profile.fecha_jubilacion) || "No registrada"}</div>` : ""}
+            ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong> ${formatISOToSpanish(profile.fecha_pension) || "No registrada"}</div>` : ""}
           </div>
         </div>
       </div>
     </div>
   `;
-  
-  // 2. Buscador y Filtros del expediente interno
-  let filtersHtml = `
-    <div class="card p-3 mb-3 bg-light border-0">
-      <div class="row align-items-center">
-        <div class="col-md-4">
-          <input type="text" id="inner-dossier-search" class="form-control form-control-sm" placeholder="Buscar en expediente..." value="${state.innerDossierSearch}" oninput="state.innerDossierSearch = this.value; filterInnerDossier();">
+
+  const docTypes = profile.categories || [];
+  const filtersHtml = `
+    <div class="ds-modal-filters-wrap bg-light p-3 rounded border mb-4">
+      <h6 class="font-weight-bold text-secondary text-uppercase mb-3">
+        <i class="fas fa-sliders-h mr-2"></i>Explorar Documentos
+      </h6>
+      <div class="row">
+        <div class="col-md-5 mb-2">
+          <input type="text" id="inner-dossier-search" class="form-control form-control-sm" placeholder="Buscar palabras, ubicaciones, fechas..." oninput="state.innerDossierSearch = this.value; filterInnerDossier();">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 mb-2">
           <select id="inner-dossier-class" class="form-control form-control-sm" onchange="state.innerDossierClass = this.value; filterInnerDossier();">
-            <option value="">Todas las clasificaciones</option>
-            ${profile.categories.map(c => `<option value="${c}" ${state.innerDossierClass === c ? "selected" : ""}>${c}</option>`).join("")}
+            <option value="">Todas las categorías</option>
+            ${docTypes.map(c => `<option value="${c}">${c}</option>`).join("")}
           </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3 mb-2">
           <select id="inner-dossier-sort" class="form-control form-control-sm" onchange="state.innerDossierSort = this.value; filterInnerDossier();">
-            <option value="Alfabético (A-Z)" ${state.innerDossierSort === "Alfabético (A-Z)" ? "selected" : ""}>Alfabético (A-Z)</option>
-            <option value="Alfabético (Z-A)" ${state.innerDossierSort === "Alfabético (Z-A)" ? "selected" : ""}>Alfabético (Z-A)</option>
-            <option value="Más recientes primero" ${state.innerDossierSort === "Más recientes primero" ? "selected" : ""}>Más recientes primero</option>
-            <option value="Más antiguos primero" ${state.innerDossierSort === "Más antiguos primero" ? "selected" : ""}>Más antiguos primero</option>
+            <option value="Alfabético (A-Z)">Alfabético (A-Z)</option>
+            <option value="Alfabético (Z-A)">Alfabético (Z-A)</option>
+            <option value="Más recientes primero">Más recientes primero</option>
+            <option value="Más antiguos primero">Más antiguos primero</option>
           </select>
         </div>
       </div>
+      <div class="text-right mt-1">
+        <span id="inner-dossier-folio-count" class="badge badge-pill badge-primary px-3 py-1">0 folios visibles</span>
+      </div>
     </div>
   `;
-  
-  // 3. Contenedor de lista de archivos filtrados
-  let listHtml = `<div id="inner-dossier-items-container"></div>`;
-  
+
   const target = document.getElementById("rrhh-person-modal-content");
-  target.innerHTML = headerHtml + filtersHtml + listHtml;
-  
-  // Renderizar folios filtrados de inmediato
+  target.innerHTML = headerHtml + filtersHtml + `<div class="rrhh-person-files px-1" id="inner-dossier-items-container"></div>`;
+
   filterInnerDossier();
 }
 
 function filterInnerDossier() {
   const profile = state.activePersonProfile;
   if (!profile) return;
-  
+
   let files = [...profile.rows];
-  
-  // Buscar texto
+
   if (state.innerDossierSearch) {
     const q = state.innerDossierSearch.toLowerCase().trim();
-    files = files.filter(f => 
-      f.doc_type.toLowerCase().includes(q) ||
-      f.ubicacion.toLowerCase().includes(q) ||
-      f.personas_relacionadas.toLowerCase().includes(q)
+    files = files.filter(f =>
+      (f.doc_type || "").toLowerCase().includes(q) ||
+      (f.ubicacion || "").toLowerCase().includes(q) ||
+      (f.personas_relacionadas || "").toLowerCase().includes(q)
     );
   }
-  
-  // Clasificación
+
   if (state.innerDossierClass) {
     files = files.filter(f => f.doc_type === state.innerDossierClass);
   }
-  
-  // Ordenación
+
   if (state.innerDossierSort === "Alfabético (A-Z)") {
-    files.sort((a, b) => a.doc_type.localeCompare(b.doc_type));
+    files.sort((a, b) => (a.doc_type || "").localeCompare(b.doc_type || ""));
   } else if (state.innerDossierSort === "Alfabético (Z-A)") {
-    files.sort((a, b) => b.doc_type.localeCompare(a.doc_type));
+    files.sort((a, b) => (b.doc_type || "").localeCompare(a.doc_type || ""));
   } else if (state.innerDossierSort === "Más recientes primero") {
-    files.sort((a, b) => b.fecha_ingreso.localeCompare(a.fecha_ingreso));
+    files.sort((a, b) => (b.fecha_ingreso || "").localeCompare(a.fecha_ingreso || ""));
   } else if (state.innerDossierSort === "Más antiguos primero") {
-    files.sort((a, b) => a.fecha_ingreso.localeCompare(b.fecha_ingreso));
+    files.sort((a, b) => (a.fecha_ingreso || "").localeCompare(b.fecha_ingreso || ""));
   }
-  
+
+  const countBadge = document.getElementById("inner-dossier-folio-count");
+  if (countBadge) countBadge.textContent = `${files.length} folios visibles`;
+
   const container = document.getElementById("inner-dossier-items-container");
   if (files.length === 0) {
-    container.innerHTML = `<div class="alert alert-secondary text-center p-3">No hay archivos en el expediente con los filtros ingresados.</div>`;
+    container.innerHTML = `<div class="alert alert-secondary text-center p-3">No se encontraron archivos con estos filtros en el expediente.</div>`;
     return;
   }
-  
-  container.innerHTML = files.map(f => `
-    <div class="rrhh-person-file-item p-3 mb-2 border rounded bg-white shadow-sm d-flex justify-content-between align-items-center" style="border-left: 4px solid #2b4e72 !important;">
-      <div>
-        <h5 class="font-weight-bold text-dark mb-1" style="font-size:1.05rem;"><i class="far fa-file-alt mr-2 text-primary"></i> ${f.doc_type}</h5>
-        <div style="font-size:0.82rem; color:#6c757d;">
-          <span class="mr-3"><i class="fas fa-map-marker-alt mr-1"></i> Ubicación: <strong>${f.ubicacion}</strong></span>
-          <span><i class="far fa-calendar-alt mr-1"></i> Fecha Ingreso: <strong>${formatISOToSpanish(f.fecha_ingreso)}</strong></span>
+
+  // Group by doc_type category
+  const grouped = {};
+  for (const f of files) {
+    const cat = f.doc_type || "Sin categoría";
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(f);
+  }
+
+  container.innerHTML = Object.entries(grouped).map(([cat, catFiles]) => `
+    <div class="rrhh-person-category-section mb-4">
+      <h5 class="border-bottom pb-2 mb-3 ds-category-title">
+        <i class="fas fa-folder-open mr-2"></i>${cat}
+      </h5>
+      ${catFiles.map(f => `
+        <div class="rrhh-person-file-item">
+          <div class="rrhh-person-file-head">
+            <div class="rrhh-person-file-main">
+              <strong>${f.doc_type}</strong>
+              <span class="rrhh-person-file-sub">Fecha de ingreso: ${formatISOToSpanish(f.fecha_ingreso)}</span>
+            </div>
+            <a href="#" class="btn btn-sm btn-outline-info" onclick="openDocMetadataModal('${f.__idx}'); return false;">Abrir archivo</a>
+          </div>
+          <div class="rrhh-person-file-meta">
+            <span>Dependencia o AP: <strong>${f.departamento || "N/A"}</strong></span>
+            <span>Estatus: <strong>${f.estatus || f.estado || "N/A"}</strong></span>
+            <span>Ubicación: <strong>${f.ubicacion || "N/A"}</strong></span>
+          </div>
         </div>
-      </div>
-      <div>
-        <button class="btn btn-outline-info btn-sm" onclick="openDocMetadataModal('${f.__idx}')">
-          <i class="fas fa-folder-open mr-1"></i> Abrir archivo
-        </button>
-      </div>
+      `).join("")}
     </div>
   `).join("");
 }
@@ -1556,7 +1591,11 @@ function setupEventListeners() {
 
   // Login
   safeOn("login_btn", "click", performLogin);
+  safeOn("login_user", "keydown", (e) => { if (e.key === "Enter") performLogin(); });
   safeOn("login_pass", "keydown", (e) => { if (e.key === "Enter") performLogin(); });
+  if (document.body.dataset.page === "login") {
+    document.addEventListener("keydown", (e) => { if (e.key === "Enter") performLogin(); });
+  }
   safeOn("toggle_login_pass", "click", () => {
     const input = document.getElementById("login_pass");
     const icon = document.querySelector("#toggle_login_pass i");
