@@ -3,10 +3,10 @@
 \toprule
 \textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
 \midrule
-usuario & String & Si & Identificador de acceso. \\
-password & String & Si & Credencial de autenticacion. \\
-modulo & String & Si & Dominio habilitado (Archivo/RRHH). \\
-rol & String & Si & Perfil de autorizacion. \\
+usuario & String & Sí & Identificador de acceso. \\
+password & String & Sí & Credencial de autenticación. \\
+modulo & String & Sí & Dominio habilitado (Archivo/RRHH). \\
+rol & String & Sí & Perfil de autorización. \\
 \bottomrule
 \end{longtable}
 
@@ -15,15 +15,15 @@ rol & String & Si & Perfil de autorizacion. \\
 \toprule
 \textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
 \midrule
-titulo & String & Si & Titulo documental. \\
-autor & String & Si & Autor o productor documental. \\
-doc\_type & String & Si & Tipologia documental. \\
-fecha & Date & Si & Fecha de emision o registro. \\
+titulo & String & Sí & Título documental. \\
+autor & String & Sí & Autor o productor documental. \\
+doc\_type & String & Sí & Tipología documental. \\
+fecha & Date & Sí & Fecha de emisión o registro. \\
 abstract & String & No & Resumen descriptivo. \\
-ubicacion & String & Si & Referencia fisica o logica. \\
+ubicacion & String & Sí & Referencia física o lógica. \\
 tesauro\_primario & String & No & Descriptor principal controlado. \\
 tesauro\_secundario & String & No & Descriptor secundario. \\
-descriptores\_libres & String & No & Terminos adicionales abiertos. \\
+descriptores\_libres & String & No & Términos adicionales abiertos. \\
 \bottomrule
 \end{longtable}
 
@@ -32,15 +32,15 @@ descriptores\_libres & String & No & Terminos adicionales abiertos. \\
 \toprule
 \textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
 \midrule
-cedula & String & Si & Identificador principal de persona. \\
-empleado & String & Si & Nombre de persona titular. \\
+cedula & String & Sí & Identificador principal de persona. \\
+empleado & String & Sí & Nombre de persona titular. \\
 rif & String & No & Registro fiscal. \\
-cargo & String & Si & Cargo institucional. \\
-departamento & String & Si & Dependencia administrativa. \\
-estado & String & Si & Estado laboral. \\
-fecha\_ingreso & Date & Si & Fecha de ingreso institucional. \\
-fecha\_jubilacion & Date & No & Fecha de jubilacion, si aplica. \\
-fecha\_pension & Date & No & Fecha de pension, si aplica. \\
+cargo & String & Sí & Cargo institucional. \\
+departamento & String & Sí & Dependencia administrativa. \\
+estado & String & Sí & Estado laboral. \\
+fecha\_ingreso & Date & Sí & Fecha de ingreso institucional. \\
+fecha\_jubilacion & Date & No & Fecha de jubilación, si aplica. \\
+fecha\_pension & Date & No & Fecha de pensión, si aplica. \\
 foto\_url & String & No & Referencia visual institucional. \\
 \bottomrule
 \end{longtable}
@@ -50,10 +50,10 @@ foto\_url & String & No & Referencia visual institucional. \\
 \toprule
 \textbf{Campo} & \textbf{Tipo} & \textbf{Requerido} & \textbf{Descripcion} \\
 \midrule
-id\_archivo & String & Si & Identificador unico del documento RRHH. \\
-cedula & String & Si & Clave de vinculacion con persona titular. \\
-doc\_type & String & Si & Tipologia de archivo laboral. \\
-ubicacion & String & Si & Referencia fisica/logica de resguardo. \\
+id\_archivo & String & Sí & Identificador único del documento RRHH. \\
+cedula & String & Sí & Clave de vinculación con persona titular. \\
+doc\_type & String & Sí & Tipología de archivo laboral. \\
+ubicacion & String & Sí & Referencia física/lógica de resguardo. \\
 personas\_relacionadas & String & No & Personas vinculadas al expediente. \\
 \bottomrule
 \end{longtable}

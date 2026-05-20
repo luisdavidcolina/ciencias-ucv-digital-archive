@@ -116,6 +116,22 @@ server <- function(input, output, session) {
   # LÓGICA DE DATOS: EXTENSIÓN & RRHH (Restaurada)
   # ==========================================
   observeEvent(c(input$btn_s_archivo, input$btn_update_archivo), { p_archivo(1) }, ignoreInit = TRUE)
+  observeEvent(input$btn_clear_archivo, {
+    archivo_fechas <- suppressWarnings(as.Date(db_archivo$fecha, format = "%Y-%m-%d"))
+    archivo_fechas <- archivo_fechas[!is.na(archivo_fechas)]
+    archivo_min_fecha <- if (length(archivo_fechas) > 0) min(archivo_fechas) else Sys.Date() - 365
+    archivo_max_fecha <- if (length(archivo_fechas) > 0) max(archivo_fechas) else Sys.Date()
+    archivo_min_year <- as.integer(format(archivo_min_fecha, "%Y"))
+    archivo_max_year <- as.integer(format(archivo_max_fecha, "%Y"))
+
+    updateTextInput(session, "search_archivo", value = "")
+    updateSelectizeInput(session, "archivo_doc_type", selected = character(0))
+    updateSelectizeInput(session, "archivo_tesauro", selected = character(0))
+    updateDateRangeInput(session, "archivo_date_range", start = archivo_min_fecha, end = archivo_max_fecha)
+    updateSliderInput(session, "archivo_year_range", value = c(archivo_min_year, archivo_max_year))
+    p_archivo(1)
+  }, ignoreInit = TRUE)
+
   dat_archivo_react <- reactive({
     input$btn_s_archivo
     input$btn_update_archivo
@@ -140,6 +156,14 @@ server <- function(input, output, session) {
             fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
             anios <- as.integer(format(fechas, "%Y"))
             keep <- !is.na(anios) & anios >= input$archivo_year_range[1] & anios <= input$archivo_year_range[2]
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        if (!is.null(input$archivo_specific_year) && nzchar(input$archivo_specific_year)) {
+            fechas <- suppressWarnings(as.Date(datos$fecha, format = "%Y-%m-%d"))
+            anios <- as.integer(format(fechas, "%Y"))
+            target_year <- as.integer(input$archivo_specific_year)
+            keep <- !is.na(anios) & anios == target_year
             datos <- datos[keep, , drop = FALSE]
         }
 
@@ -223,6 +247,23 @@ server <- function(input, output, session) {
   )
 
   observeEvent(c(input$btn_s_rrhh, input$btn_update_rrhh), { p_rrhh(1) }, ignoreInit = TRUE)
+  observeEvent(input$btn_clear_rrhh, {
+    rrhh_fechas <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
+    rrhh_fechas <- rrhh_fechas[!is.na(rrhh_fechas)]
+    rrhh_min_fecha <- if (length(rrhh_fechas) > 0) min(rrhh_fechas) else Sys.Date() - 365
+    rrhh_max_fecha <- if (length(rrhh_fechas) > 0) max(rrhh_fechas) else Sys.Date()
+    rrhh_min_year <- as.integer(format(rrhh_min_fecha, "%Y"))
+    rrhh_max_year <- as.integer(format(rrhh_max_fecha, "%Y"))
+
+    updateTextInput(session, "search_rrhh", value = "")
+    updateSelectizeInput(session, "rrhh_doc_type", selected = character(0))
+    updateCheckboxGroupInput(session, "rrhh_estado", selected = character(0))
+    updateSelectizeInput(session, "rrhh_people", selected = character(0))
+    updateDateRangeInput(session, "rrhh_date_range", start = rrhh_min_fecha, end = rrhh_max_fecha)
+    updateSliderInput(session, "rrhh_year_range", value = c(rrhh_min_year, rrhh_max_year))
+    p_rrhh(1)
+  }, ignoreInit = TRUE)
+
   dat_rrhh_react <- reactive({
       input$btn_s_rrhh
       input$btn_update_rrhh
@@ -251,6 +292,14 @@ server <- function(input, output, session) {
             fechas <- suppressWarnings(as.Date(datos$fecha_ingreso, format = "%Y-%m-%d"))
             anios <- as.integer(format(fechas, "%Y"))
             keep <- !is.na(anios) & anios >= input$rrhh_year_range[1] & anios <= input$rrhh_year_range[2]
+            datos <- datos[keep, , drop = FALSE]
+        }
+
+        if (!is.null(input$rrhh_specific_year) && nzchar(input$rrhh_specific_year)) {
+            fechas <- suppressWarnings(as.Date(datos$fecha_ingreso, format = "%Y-%m-%d"))
+            anios <- as.integer(format(fechas, "%Y"))
+            target_year <- as.integer(input$rrhh_specific_year)
+            keep <- !is.na(anios) & anios == target_year
             datos <- datos[keep, , drop = FALSE]
         }
 

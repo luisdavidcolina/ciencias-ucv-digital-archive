@@ -1,30 +1,32 @@
-\section{Arquitectura tecnica}
-La solucion se define sobre una arquitectura modular que separa interfaz, orquestacion de servidor y servicios especializados por responsabilidad.
+\section{Arquitectura técnica}
+La solución se define sobre una arquitectura modular que separa interfaz, orquestación de servidor y servicios especializados por responsabilidad.
+La descomposición de esta arquitectura puede leerse junto con la Figura~\ref{fig:paquetes-sistema}, que organiza las dependencias entre interfaz, núcleo, servicios, módulos y datos.
 
-\section{Patrones de diseno aplicados}
+\section{Patrones de diseño aplicados}
 \begin{itemize}
-  \item Separacion de responsabilidades por capas y servicios.
-  \item Modularizacion de funcionalidades de alto acoplamiento.
-  \item Construccion reactiva para actualizacion incremental de vistas.
-  \item Normalizacion de utilidades transversales (filtros, paginacion, exportacion).
+  \item Separación de responsabilidades por capas y servicios.
+  \item Modularización de funcionalidades de alto acoplamiento.
+  \item Construcción reactiva para actualización incremental de vistas.
+  \item Normalización de utilidades transversales (filtros, paginación, exportación).
 \end{itemize}
 
-\section{Diseno de componentes}
+\section{Diseño de componentes}
 \subsection{Interfaz}
-Componentes visuales para autenticacion, navegacion, filtros, resultados y control administrativo.
+Componentes visuales para autenticación, navegación, filtros, resultados y control administrativo.
 
 \subsection{Servidor}
-Coordinacion de estado de sesion, renderizado dinamico y llamadas a servicios.
+Coordinación de estado de sesión, renderizado dinámico y llamadas a servicios.
 
 \subsection{Servicios}
-Funciones de negocio para autenticacion, filtrado documental, taxonomias, personas, auditoria y exportacion.
+Funciones de negocio para autenticación, filtrado documental, taxonomías, personas, auditoría y exportación.
 
-\section{Escalabilidad tecnica}
+\section{Escalabilidad técnica}
 \begin{itemize}
   \item Evolucion a persistencia relacional.
   \item Desacople de almacenamiento de activos digitales.
-  \item Integracion progresiva de pipelines de analitica y busqueda semantica.
+  \item Integración progresiva de pipelines de analítica y búsqueda semántica.
 \end{itemize}
+La evolución técnica descrita aquí se alinea con la Figura~\ref{fig:gobernanza-rbac} para control de acceso y con la Figura~\ref{fig:despliegue-continuidad} para el ciclo operativo.
 
-\section{Observabilidad tecnica}
-Definir en version final un esquema de monitoreo de eventos, metricas de uso, errores de aplicacion y tiempos de respuesta por flujo critico.
+\section{Observabilidad técnica}
+Definir en versión final un esquema de monitoreo de eventos, métricas de uso, errores de aplicación y tiempos de respuesta por flujo crítico.

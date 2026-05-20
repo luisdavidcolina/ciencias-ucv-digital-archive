@@ -1,0 +1,108 @@
+\section{Sistemas de Gestión Documental (DMS)}
+\subsection{Comparativa técnica y análisis de factibilidad}
+\subsubsection{Archivo de la Facultad de Ciencias}
+Este documento consolida la información técnica de los sistemas de gestión documental evaluados, orientando la toma de decisiones para su despliegue en el Archivo de la Facultad de Ciencias.
+
+\subsection{Comparativa técnica de sistemas}
+\begin{longtable}{p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth}}
+\toprule
+\textbf{Característica} & \textbf{Alfresco} & \textbf{DSpace} & \textbf{Mayan EDMS} & \textbf{Paperless-ngx} \\
+\midrule
+Lenguaje & Java (Spring) & Java (JSP/UI) & Python (Django) & Python (Django) \\
+Base de datos & PostgreSQL/MySQL & PostgreSQL/Oracle & PostgreSQL/MySQL & PostgreSQL/SQLite \\
+Busqueda & Solr & Apache Solr & Whoosh / ES & Whoosh \\
+Interfaz & ADF (Angular) & Tradicional & Bootstrap & Angular (moderna) \\
+Permisos & Alta (ACL) & Pública / académica & Muy alta (ACL) & Básica \\
+\bottomrule
+\end{longtable}
+
+\subsection{Análisis de DSpace}
+DSpace opera como un software de preservación digital institucional, no como un DMS administrativo para la gestión cotidiana de expedientes.
+
+\begin{itemize}
+  \item Modelo de datos basado en Dublin Core, orientado a descripción académica y difusión.
+  \item Flujo de trabajo rígido de envío, revisión y publicación.
+  \item Acceso optimizado para consulta pública y preservación.
+  \item Personalización profunda mediante archivos de configuración y esquemas XML.
+\end{itemize}
+
+\subsection{Ventajas y desventajas por plataforma}
+\subsubsection{Alfresco Community}
+\begin{itemize}
+  \item A favor: soporte CMIS y flujos de trabajo complejos.
+  \item En contra: alta demanda de hardware y mantenimiento pesado.
+\end{itemize}
+
+\subsubsection{Mayan EDMS}
+\begin{itemize}
+  \item A favor: permisos ACL granulares, metadatos flexibles y OCR integrado.
+  \item En contra: interfaz funcional, menos orientada a una experiencia editorial/académica simplificada.
+\end{itemize}
+
+\subsubsection{Paperless-ngx}
+\begin{itemize}
+  \item A favor: interfaz moderna, bajo consumo de recursos y etiquetado asistido.
+  \item En contra: permisos multiusuario menos robustos para segregar áreas sensibles.
+\end{itemize}
+
+\subsection{Shiny como alternativa institucional}
+La alternativa basada en Shiny permite construir una interfaz inspirada en DSpace en lo visual y en la simplicidad de consulta, pero adaptada a la gestión administrativa del Archivo de la Facultad de Ciencias.
+
+\begin{itemize}
+  \item Interfaz web personalizada con flujo de consulta claro y controlado.
+  \item Adaptación total a expedientes, metadatos y vistas institucionales.
+  \item Menor costo de despliegue al reutilizar la arquitectura R existente.
+  \item Mayor facilidad para mantener segregación funcional entre roles y módulos.
+\end{itemize}
+
+\subsection{Arquitectura de almacenamiento e indexación}
+El ecosistema tipico de estos sistemas opera en tres capas conceptuales:
+
+\begin{enumerate}
+  \item Almacenamiento físico: sanitización y renombrado de archivos a UUID para evitar colisiones.
+  \item Base de datos de metadatos: relación lógica entre identificador, nombre real, autor y campos personalizados.
+  \item Motor de búsqueda: OCR integrado y búsqueda de texto completo sobre índice documental.
+\end{enumerate}
+
+\subsection{Requisitos de hardware (instalación Docker)}
+\begin{longtable}{p{0.26\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.16\textwidth}}
+\toprule
+\textbf{Especificación} & \textbf{Paperless-ngx} & \textbf{Mayan EDMS} & \textbf{DSpace} & \textbf{Alfresco} \\
+\midrule
+RAM mínima & 1 GB & 2 GB & 4 GB & 8 GB \\
+RAM sugerida & 2 GB & 4 GB & 8 GB & 16 GB \\
+CPU & 1 core & 2 cores & 2-4 cores & 4 cores \\
+Arquitectura & x86_64 / ARM & x86_64 / ARM & x86_64 & x86_64 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Comunidad y sostenibilidad externa}
+\begin{itemize}
+  \item DSpace: respaldo institucional amplio y estabilidad a largo plazo.
+  \item Mayan EDMS: comunidad técnica activa y arquitectura flexible.
+  \item Paperless-ngx: comunidad muy dinámica, con mejoras rápidas.
+  \item Alfresco: modelo mixto con dependencia de intereses corporativos.
+\end{itemize}
+
+\subsection{Proyección de costos de infraestructura VPS}
+\begin{longtable}{p{0.24\textwidth} p{0.17\textwidth} p{0.17\textwidth} p{0.17\textwidth} p{0.17\textwidth}}
+\toprule
+\textbf{Proveedor} & \textbf{2 GB RAM} & \textbf{4 GB RAM} & \textbf{8 GB RAM} & \textbf{16 GB RAM+} \\
+\midrule
+Hetzner & 5.00--6.50 & 9.00--12.00 & 18.00--22.00 & 38.00--45.00 \\
+Contabo & 6.00--7.50 & 9.50--11.00 & 15.00--18.00 & 30.00--35.00 \\
+Vultr & 10.00--12.00 & 20.00--24.00 & 40.00--48.00 & 80.00--90.00 \\
+DigitalOcean & 12.00--15.00 & 24.00--28.00 & 48.00--56.00 & 96.00--110.00 \\
+AWS Lightsail & 10.00 & 20.00 & 40.00 & 80.00 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Cargos adicionales de sostenibilidad}
+\begin{itemize}
+  \item Respaldos: recargo promedio del 20--25\% sobre el valor de la instancia.
+  \item Expansiones de almacenamiento: block storage o almacenamiento adicional según volumetría.
+  \item Tráfico y transferencia: la cuota incluida suele cubrir el escenario actual.
+\end{itemize}
+
+\subsection{Resumen de viabilidad}
+Para el Archivo de la Facultad de Ciencias, la opción más viable es una interfaz Shiny inspirada en DSpace en experiencia de consulta, pero con lógica administrativa propia. Esto permite combinar una presentación clara para usuarios institucionales con menor costo de despliegue, mejor control de roles y mayor adaptación a expedientes internos que un DMS académico puro.

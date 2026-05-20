@@ -1,0 +1,158 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[spanish]{babel}
+\usepackage{iftex}
+\ifPDFTeX
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\else
+\usepackage{fontspec}
+\setmainfont{Arial}
+\setsansfont{Arial}
+\fi
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\setstretch{1.25}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	urlcolor=blue,
+	citecolor=blue,
+	pdftitle={Especificación resumida de infraestructura y operación},
+	pdfauthor={Luisdavid Colina; Susana Carvallo}
+}
+
+\titleformat{\section}
+	{\bfseries\Large}
+	{\thesection}
+	{0.6em}
+	{\Large}
+
+\titleformat{\subsection}
+	{\bfseries\normalsize}
+	{\thesubsection}
+	{0.6em}
+	{\large}
+
+\titlespacing*{\chapter}{0pt}{-8pt}{18pt}
+\titlespacing*{\section}{0pt}{14pt}{8pt}
+\titlespacing*{\subsection}{0pt}{10pt}{6pt}
+
+\setlist[itemize]{itemsep=0.3em, topsep=0.3em}
+\setlist[enumerate]{itemsep=0.3em, topsep=0.3em}
+
+\pagestyle{plain}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Especificación resumida}
+\end{center}
+\addcontentsline{toc}{chapter}{Especificación resumida}
+
+\section*{Propósito operativo}
+La solución debe poder ejecutarse con una base técnica simple: R 4.2.0 o superior, PostgreSQL 13+ como base de datos objetivo y Docker como opción.
+En términos prácticos, esto significa que cada componente cumple una función concreta: el servidor ejecuta la aplicación, la base de datos guarda la información organizada, el almacenamiento conserva los archivos, la red permite acceso seguro y el monitoreo mantiene el servicio sano.
+Para una puesta en marcha rápida y de bajo costo, la base de datos puede ir en la misma máquina que la aplicación al inicio; si luego crece el uso, se puede separar más adelante sin rehacer todo el sistema.
+
+\subsection*{Especificaciones de Hardware de Referencia}
+
+Para garantizar la integridad operativa y la eficiencia en la ejecución del sistema, se definen los siguientes parámetros de hardware inicial:
+
+\begin{itemize}
+    \item \textbf{Capacidad de Cómputo:} 1 a 2 vCPU como base técnica. Esta configuración asegura un procesamiento concurrente estable para las tareas de indexación y servicio de peticiones, manteniendo un perfil de consumo de recursos optimizado.
+    \item \textbf{Memoria RAM:} Configuración base de 1 a 2 GB, con un escalado recomendado a 4 GB para entornos de producción muy demandantes. Este margen técnico permite la gestión eficiente de la caché de base de datos y la carga de objetos en el entorno R sin comprometer el rendimiento del sistema operativo.
+    \item \textbf{Almacenamiento y Persistencia:} 40 GB en estado sólido (SSD) para el volumen de sistema. La arquitectura contempla la segregación de activos digitales en un volumen lógico independiente, permitiendo el crecimiento asíncrono del repositorio documental y mitigando riesgos de saturación en la partición raíz.
+\end{itemize}
+\subsection*{Servidor principal}
+El servidor de aplicación es la computadora donde corre el sistema. Allí se realizan las consultas, los inicios de sesión, los filtros, la navegación y las exportaciones.
+\begin{longtable}{p{0.28\textwidth} p{0.62\textwidth}}
+\toprule
+\textbf{Elemento} & \textbf{Especificación y explicación} \\
+\midrule
+CPU & 1 a 2 vCPU según el escenario. Como recomendación práctica, 2 vCPU da un margen cómodo para operación estable. \\
+RAM & 1 GB para desarrollo mínimo y 2 GB como operación objetivo. Si se quiere más holgura, 4 GB es una cifra razonable para producción demandante. \\
+Disco & 40 GB SSD como base operativa, ampliable según el crecimiento del repositorio. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Almacenamiento de archivos}
+El almacenamiento documental sirve para guardar los archivos digitales del repositorio aparte del sistema operativo. Así, si el programa se reinstala, los documentos siguen seguros y el sistema no se vuelve lento por falta de espacio.
+El disco de almacenamiento puede ampliarse cuando crezca el repositorio.
+También debe existir un volumen o espacio separado y exclusivo para los archivos escaneados, de modo que no se mezclen con otros datos del sistema.
+\begin{longtable}{p{0.28\textwidth} p{0.62\textwidth}}
+\toprule
+\textbf{Elemento} & \textbf{Especificación y explicación} \\
+\midrule
+Volumen para archivos & Debe estar separado del sistema operativo y crecer de forma independiente. Esto evita que el aumento de PDFs comprometa la estabilidad del servidor. \\
+Disco & 40 GB SSD como base operativa, con posibilidad de ampliar si el repositorio crece. \\
+Estructura de respaldo & Debe existir un destino adicional para copias de seguridad. El repositorio no debe depender de una sola ubicación física. \\
+Retención & Se recomienda conservar varias generaciones de respaldo para poder recuperar información ante errores humanos o corrupción de datos. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Base de datos local}
+La base de datos es donde se guardan los datos organizados: usuarios, nombres, fechas, categorías y relaciones entre documentos. No guarda la pantalla del sistema ni los PDF; guarda la información que permite buscar y ordenar todo.
+Si se busca rapidez de despliegue y menor costo, se puede montar junto al sistema en la misma máquina.
+\begin{longtable}{p{0.28\textwidth} p{0.62\textwidth}}
+\toprule
+\textbf{Elemento} & \textbf{Especificación y explicación} \\
+\midrule
+Motor & PostgreSQL 13 o superior, como base de datos objetivo. \\
+RAM dedicada & Si la base de datos corre en la misma máquina, una reserva práctica de 2 GB adicionales es razonable para mantener el sistema fluido. Si se mantiene todo junto al inicio, conviene dejar margen para que no se vuelva lento. \\
+Persistencia & La base debe sobrevivir reinicios y despliegues, por lo que no puede depender de almacenamiento temporal. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Conectividad y acceso}
+La red y el acceso controlan cómo entra la gente al sistema y cómo se administra. Su función es que el sistema pueda abrirse de forma segura, sin mostrar cosas que no deben estar visibles.
+\begin{longtable}{p{0.28\textwidth} p{0.62\textwidth}}
+\toprule
+\textbf{Elemento} & \textbf{Especificación y explicación} \\
+\midrule
+Conectividad & Acceso estable a la red institucional. Si el sistema se publica externamente, debe hacerlo por HTTPS. \\
+Firewall & Solo deben quedar expuestos los puertos necesarios para la aplicación y la administración. Reduce superficie de ataque y errores operativos. \\
+Acceso remoto & La administración del servidor debe hacerse por canales restringidos, con credenciales individuales y registro de actividad. \\
+\bottomrule
+\end{longtable}
+
+\section*{Mantenimiento operativo}
+\subsection*{Copias de seguridad}
+Debe existir una copia automática de los datos, la configuración y los archivos. Sirve para recuperar el repositorio si ocurre una falla, un error humano o una pérdida de información.
+
+\subsection*{Seguimiento básico}
+Debe haber una revisión básica del estado del sistema: si está encendido, si le queda espacio, si usa demasiada memoria o si está fallando. Eso permite actuar antes de que el servicio se caiga.
+
+\subsection*{Actualización controlada}
+El entorno debe permitir actualizaciones controladas del programa y sus componentes. Eso ayuda a corregir fallas y evita que el sistema se quede viejo o incompatible.
+
+\subsection*{Guía técnica}
+Se debe conservar una guía básica de instalación, configuración y recuperación. Esa guía permite que otra persona pueda operar o restaurar el sistema sin depender de que alguien se acuerde de todo.
+
+\section*{Criterios de sostenibilidad}
+\begin{itemize}
+	\item La plataforma debe poder mantenerse con infraestructura de bajo costo. Así no se vuelve una carga difícil de pagar o sostener.
+	\item La base de datos puede ir junto al sistema al inicio. Eso reduce costo y acelera el arranque.
+	\item La arquitectura debe permitir crecer sin cambiar todo desde cero. Eso facilita sumar usuarios, documentos o módulos sin empezar de nuevo.
+	\item La separación entre aplicación, datos y archivos debe ser clara. Eso ayuda a cuidar mejor la información y a arreglar cada parte por separado.
+	\item La solución debe ser administrable por personal institucional con apoyo técnico limitado. Eso garantiza que el sistema siga funcionando aunque no haya un equipo grande de soporte.
+\end{itemize}
+
+\section*{Criterios de dimensionamiento}
+Las cifras que no están fijadas de forma exacta se pusieron como estimaciones operativas realistas. Sirven para orientar la compra o el despliegue, pero pueden ajustarse si luego se define una carga de usuarios o un volumen documental más preciso.
+
+\section*{Resumen operativo}
+La prioridad no es construir un sistema grande, sino uno que pueda operar con recursos razonables, recuperarse ante fallos y mantenerse vigente con mantenimiento simple. Por eso los requisitos se enfocan en estabilidad, almacenamiento separado, respaldo, monitoreo y posibilidad de crecimiento gradual.
+
+\end{document}

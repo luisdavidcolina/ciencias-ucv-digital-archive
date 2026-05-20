@@ -1,38 +1,239 @@
-\section{Estrategia de evolucion}
-La hoja de ruta proyecta la consolidacion progresiva de la solucion hasta un estado empresarial, manteniendo continuidad operativa y control de riesgos.
+\section{Estrategia de evolución}
+La hoja de ruta proyecta la consolidación progresiva de la solución hasta un estado empresarial, manteniendo continuidad operativa y control de riesgos.
+La progresión por fases se resume en la Figura~\ref{fig:roadmap-fases}, que conviene leer como mapa de evolución y no como una secuencia rígida.
 
 \section{Fase I: Consolidacion funcional}
 \begin{itemize}
   \item Cierre integral de funcionalidades documentales y administrativas.
-  \item Endurecimiento de seguridad y auditoria operativa.
-  \item Normalizacion documental y estandarizacion de procesos.
+  \item Endurecimiento de seguridad y auditoría operativa.
+  \item Normalización documental y estandarización de procesos.
 \end{itemize}
 
-\section{Fase II: Escalamiento de datos y operacion}
+\section{Fase II: Escalamiento de datos y operación}
 \begin{itemize}
-  \item Migracion de persistencia a plataforma relacional.
-  \item Automatizacion de respaldos y controles de continuidad.
+  \item Migración de persistencia a plataforma relacional.
+  \item Automatización de respaldos y controles de continuidad.
   \item Mejoras de rendimiento, trazabilidad y observabilidad.
 \end{itemize}
 
-\section{Fase III: Inteligencia y analitica avanzada}
+\section{Fase III: Inteligencia y analítica avanzada}
 \begin{itemize}
-  \item Busqueda semantica sobre corpus documental institucional.
-  \item Analitica ejecutiva para toma de decisiones.
+  \item Búsqueda semántica sobre corpus documental institucional.
+  \item Analítica ejecutiva para toma de decisiones.
   \item Integraciones controladas con ecosistemas corporativos.
 \end{itemize}
 
-\section{Indicadores de exito por fase}
+\section{Indicadores de éxito por fase}
 \begin{itemize}
-  \item Tiempo medio de recuperacion documental.
+  \item Tiempo medio de recuperación documental.
   \item Tasa de cumplimiento de controles de seguridad.
-  \item Cobertura de trazabilidad de eventos criticos.
-  \item Nivel de satisfaccion de usuarios institucionales.
+  \item Cobertura de trazabilidad de eventos críticos.
+  \item Nivel de satisfacción de usuarios institucionales.
 \end{itemize}
 
-\section{Riesgos de evolucion}
+\section{Riesgos de evolución}
 \begin{itemize}
   \item Dependencias de infraestructura y adquisiciones.
-  \item Adopcion organizacional y gestion del cambio.
+  \item Adopción organizacional y gestión del cambio.
   \item Disponibilidad de recursos para gobierno y soporte.
 \end{itemize}
+
+\section{Levantamiento de información y validación participativa}
+Durante la elaboración de este documento se mantuvieron reuniones semanales entre los autores para explorar alternativas, investigar herramientas y definir de manera argumentada las elecciones técnicas y funcionales de la propuesta.
+Esa validación participativa se relaciona con la Figura~\ref{fig:roadmap-fases}, porque la hoja de ruta recoge las decisiones que surgieron de ese proceso.
+
+\begin{itemize}
+  \item Se revisaron casos de uso y experiencias de personas que trabajan con DSpace y otros sistemas de gestión documental.
+  \item Se recibió orientación de distintos profesores y colaboradores con experiencia institucional y técnica.
+  \item Se realizó una revisión del estado actual del archivo, incluyendo el análisis de las ubicaciones físicas y la forma en que se organiza la documentación.
+  \item Las reuniones periódicas permitieron contrastar necesidades reales, restricciones operativas y criterios de decisión antes de consolidar la memoria técnica.
+\end{itemize}
+
+\section{Sistemas de Gestión Documental (DMS)}
+\subsection{Comparativa técnica y análisis de factibilidad}
+\subsubsection{Archivo de la Facultad de Ciencias}
+Este documento consolida la información técnica de los sistemas de gestión documental evaluados, orientando la toma de decisiones para su despliegue en el Archivo de la Facultad de Ciencias.
+La lógica de comparación también se apoya en la Figura~\ref{fig:casos-uso-general}, porque el sistema se evalúa según los actores y acciones que realmente debe cubrir.
+
+\subsection{Comparativa técnica de sistemas}
+\begin{longtable}{p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth}}
+\toprule
+\textbf{Característica} & \textbf{Alfresco} & \textbf{DSpace} & \textbf{Mayan EDMS} & \textbf{Paperless-ngx} \\
+\midrule
+Lenguaje & Java (Spring) & Java (JSP/UI) & Python (Django) & Python (Django) \\
+Base de datos & PostgreSQL/MySQL & PostgreSQL/Oracle & PostgreSQL/MySQL & PostgreSQL/SQLite \\
+Busqueda & Solr & Apache Solr & Whoosh / ES & Whoosh \\
+Interfaz & ADF (Angular) & Tradicional & Bootstrap & Angular (moderna) \\
+Permisos & Alta (ACL) & Pública / académica & Muy alta (ACL) & Básica \\
+\bottomrule
+\end{longtable}
+
+\subsection{Análisis de DSpace}
+DSpace opera como un software de preservación digital institucional, no como un DMS administrativo para la gestión cotidiana de expedientes.
+
+\begin{itemize}
+  \item Modelo de datos basado en Dublin Core, orientado a descripción académica y difusión.
+  \item Flujo de trabajo rígido de envío, revisión y publicación.
+  \item Acceso optimizado para consulta pública y preservación.
+  \item Personalización profunda mediante archivos de configuración y esquemas XML.
+\end{itemize}
+
+\subsection{Ventajas y desventajas por plataforma}
+\subsubsection{Alfresco Community}
+\begin{itemize}
+  \item A favor: soporte CMIS y flujos de trabajo complejos.
+  \item En contra: alta demanda de hardware y mantenimiento pesado.
+\end{itemize}
+
+\subsubsection{Mayan EDMS}
+\begin{itemize}
+  \item A favor: permisos ACL granulares, metadatos flexibles y OCR integrado.
+  \item En contra: interfaz funcional, menos orientada a una experiencia editorial/académica simplificada.
+\end{itemize}
+
+\subsubsection{Paperless-ngx}
+\begin{itemize}
+  \item A favor: interfaz moderna, bajo consumo de recursos y etiquetado asistido.
+  \item En contra: permisos multiusuario menos robustos para segregar áreas sensibles.
+\end{itemize}
+
+\subsection{Shiny como alternativa institucional}
+La alternativa basada en Shiny permite construir una interfaz inspirada en DSpace en lo visual y en la simplicidad de consulta, pero adaptada a la gestión administrativa del Archivo de la Facultad de Ciencias.
+
+\begin{itemize}
+  \item Interfaz web personalizada con flujo de consulta claro y controlado.
+  \item Adaptación total a expedientes, metadatos y vistas institucionales.
+  \item Menor costo de despliegue al reutilizar la arquitectura R existente.
+  \item Mayor facilidad para mantener segregación funcional entre roles y módulos.
+\end{itemize}
+
+\subsection{Por qué construir desde cero en R y no en Python}
+La decisión se plantea como criterio previo de arquitectura, antes de la implementación. Python es una opción válida, pero para este caso se priorizó R/Shiny por ajuste funcional, costo operativo y velocidad de entrega institucional.
+
+\begin{itemize}
+  \item Ajuste al caso de uso: la prioridad era construir una interfaz documental administrativa, inspirada en DSpace, con alta flexibilidad de filtros, vistas y roles institucionales.
+  \item Costo de entrada y operación: para el alcance definido, R/Shiny permitía una ruta de despliegue más económica en infraestructura de bajo costo.
+  \item Tiempo de puesta en marcha: la alternativa R/Shiny ofrecía menor complejidad de ensamblaje para entregar valor funcional en menor plazo.
+  \item Riesgo técnico controlado: se priorizó una pila con menor carga de integración para autenticación, auditoría y paneles operativos del Archivo.
+  \item Gobernanza del producto: la decisión favorece mantenibilidad práctica por parte del equipo institucional en su contexto real de soporte.
+\end{itemize}
+
+En consecuencia, la selección de R/Shiny se justifica por criterios ex ante de factibilidad y pertinencia institucional. Python puede evaluarse más adelante para componentes puntuales de analítica o integraciones, sin alterar la decisión base de plataforma.
+
+\subsection{Ventaja de R frente a DMS tradicionales}
+Frente a Alfresco, DSpace, Mayan EDMS y Paperless-ngx, la ventaja de R/Shiny no es reemplazar un DMS documental puro, sino resolver con mayor precisión el caso de uso institucional de esta propuesta: una interfaz de consulta y administración adaptada al flujo real del Archivo de la Facultad de Ciencias.
+
+\begingroup
+\small
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth} p{0.12\textwidth} p{0.12\textwidth} p{0.10\textwidth} X@{}}
+\toprule
+\textbf{Criterio} & \textbf{DMS clásicos} & \textbf{R/Shiny} & \textbf{Resultado} & \textbf{Comentario} \\
+\midrule
+Interfaz inspirada en DSpace & Media & Alta & Gana R/Shiny & Permite una consulta limpia sin heredar la rigidez de la preservación académica. \\
+Personalización funcional & Media & Muy alta & Gana R/Shiny & Los módulos, filtros y vistas se ajustan al archivo y RRHH sin depender de una estructura cerrada. \\
+Control de roles y flujo interno & Alta & Muy alta & Gana R/Shiny & La lógica de acceso se diseña exactamente para los perfiles institucionales requeridos. \\
+Costo de despliegue & Alto/variable & Bajo & Gana R/Shiny & Aprovecha la pila ya existente en R y reduce infraestructura innecesaria. \\
+Mantenimiento evolutivo & Complejo & Directo & Gana R/Shiny & El código queda alineado con la solución propia, no con la curva de un producto externo. \\
+Adecuación a expedientes internos & Media & Muy alta & Gana R/Shiny & El modelo se construye sobre el proceso real, no sobre una taxonomía generalista. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\endgroup
+
+\begin{itemize}
+  \item En DSpace, la experiencia está orientada a preservación y difusión académica; en R/Shiny, la experiencia se adapta a consulta administrativa y expedientes internos.
+  \item En Alfresco y Mayan EDMS la potencia funcional es alta, pero la complejidad de implementación y administración es mayor que la necesaria para esta coordinación.
+  \item En Paperless-ngx la experiencia es ligera, pero la segregación de roles y la personalización institucional quedan más limitadas.
+  \item R/Shiny ofrece una interfaz inspirada en DSpace, pero con la libertad de modelar exactamente los flujos, nombres, filtros y vistas que la institucion necesita.
+\end{itemize}
+
+\subsection{Arquitectura de almacenamiento e indexación}
+El ecosistema tipico de estos sistemas opera en tres capas conceptuales:
+
+\begin{enumerate}
+  \item Almacenamiento físico: sanitización y renombrado de archivos a UUID para evitar colisiones.
+  \item Base de datos de metadatos: relación lógica entre identificador, nombre real, autor y campos personalizados.
+  \item Motor de búsqueda: OCR integrado y búsqueda de texto completo sobre índice documental.
+\end{enumerate}
+
+\subsection{Requisitos de hardware (instalación Docker)}
+\begin{longtable}{p{0.26\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.16\textwidth}}
+\toprule
+\textbf{Especificación} & \textbf{Paperless-ngx} & \textbf{Mayan EDMS} & \textbf{DSpace} & \textbf{Alfresco} \\
+\midrule
+RAM mínima & 1 GB & 2 GB & 4 GB & 8 GB \\
+RAM sugerida & 2 GB & 4 GB & 8 GB & 16 GB \\
+CPU & 1 core & 2 cores & 2-4 cores & 4 cores \\
+Arquitectura & x86\_64 / ARM & x86\_64 / ARM & x86\_64 & x86\_64 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Comunidad y sostenibilidad externa}
+\begin{itemize}
+  \item DSpace: respaldo institucional amplio y estabilidad a largo plazo.
+  \item Mayan EDMS: comunidad técnica activa y arquitectura flexible.
+  \item Paperless-ngx: comunidad muy dinámica, con mejoras rápidas.
+  \item Alfresco: modelo mixto con dependencia de intereses corporativos.
+\end{itemize}
+
+\subsection{Proyección de costos de infraestructura VPS}
+\begin{longtable}{p{0.24\textwidth} p{0.17\textwidth} p{0.17\textwidth} p{0.17\textwidth} p{0.17\textwidth}}
+\toprule
+\textbf{Proveedor} & \textbf{2 GB RAM} & \textbf{4 GB RAM} & \textbf{8 GB RAM} & \textbf{16 GB RAM+} \\
+\midrule
+Hetzner & 5.00--6.50 & 9.00--12.00 & 18.00--22.00 & 38.00--45.00 \\
+Contabo & 6.00--7.50 & 9.50--11.00 & 15.00--18.00 & 30.00--35.00 \\
+Vultr & 10.00--12.00 & 20.00--24.00 & 40.00--48.00 & 80.00--90.00 \\
+DigitalOcean & 12.00--15.00 & 24.00--28.00 & 48.00--56.00 & 96.00--110.00 \\
+AWS Lightsail & 10.00 & 20.00 & 40.00 & 80.00 \\
+\bottomrule
+\end{longtable}
+
+\subsection{Totales mensuales estimados (base + respaldo)}
+Para facilitar la decisión presupuestaria, se presentan totales mensuales referenciales aplicando un recargo de respaldo del 25\% sobre el costo base de la instancia.
+
+\begin{longtable}{p{0.24\textwidth} p{0.22\textwidth} p{0.22\textwidth} p{0.22\textwidth}}
+\toprule
+\textbf{Proveedor} & \textbf{Total 2 GB (USD/mes)} & \textbf{Total 4 GB (USD/mes)} & \textbf{Comentario} \\
+\midrule
+Hetzner & 6.25--8.13 & 11.25--15.00 & Rango bajo y competitivo para despliegue inicial. \\
+Contabo & 7.50--9.38 & 11.88--13.75 & Alternativa económica con buena relación costo/recursos. \\
+Vultr & 12.50--15.00 & 25.00--30.00 & Mayor costo, orientado a entornos con crecimiento rápido. \\
+DigitalOcean & 15.00--18.75 & 30.00--35.00 & Opción estable, pero con costo superior al promedio. \\
+AWS Lightsail & 12.50 & 25.00 & Precio fijo por tramo, útil para presupuestos cerrados. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{p{0.38\textwidth} p{0.52\textwidth}}
+\toprule
+\textbf{Escenario} & \textbf{Total mensual estimado} \\
+\midrule
+Operación mínima (1 GB RAM, 1 vCPU) & Viable para piloto o baja concurrencia; usar con monitoreo por su menor margen operativo. \\
+Operación objetivo (2 GB RAM, 1--2 vCPU) & 6.25--18.75 USD/mes según proveedor (incluye respaldo). \\
+Operación ampliada (4 GB RAM, 2 vCPU) & 11.25--35.00 USD/mes según proveedor (incluye respaldo). \\
+\bottomrule
+\end{longtable}
+
+\subsection{Cargos adicionales de sostenibilidad}
+\begin{itemize}
+  \item Respaldos: recargo promedio del 20--25\% sobre el valor de la instancia.
+  \item Expansiones de almacenamiento: block storage o almacenamiento adicional según volumetría.
+  \item Tráfico y transferencia: la cuota incluida suele cubrir el escenario actual.
+\end{itemize}
+
+\subsection{Resumen de viabilidad}
+Para el Archivo de la Facultad de Ciencias, la opción más viable es una interfaz Shiny inspirada en DSpace en experiencia de consulta, pero con lógica administrativa propia. La plataforma puede operar con menos RAM (1 GB) en escenarios de piloto o baja concurrencia; sin embargo, para una operación estable se recomienda como base 2 GB de RAM y 1 a 2 vCPU.
+
+Comparado con los DMS evaluados, R/Shiny resulta más viable porque reduce la carga de infraestructura, evita la complejidad operativa de Alfresco y DSpace, y conserva una personalización institucional mucho más alta que Paperless-ngx. En especial:
+
+\begin{itemize}
+  \item Frente a Alfresco, consume menos recursos y requiere menos mantenimiento de plataforma.
+  \item Frente a DSpace, ofrece una experiencia más directa para consulta administrativa y expedientes internos.
+  \item Frente a Mayan EDMS, brinda una interfaz más alineada con el flujo institucional y con mayor libertad de diseño.
+  \item Frente a Paperless-ngx, mantiene mejor segregación de roles y mayor capacidad de ajuste a los procesos de Archivo y RRHH.
+\end{itemize}
+
+Por tanto, en este contexto, R/Shiny no solo es suficiente: es la alternativa más conveniente por equilibrio entre consumo, costo, flexibilidad y adecuación al uso real del Archivo de la Facultad de Ciencias.

@@ -40,7 +40,8 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                 collapsed = TRUE,
                 tagList(
                   dateRangeInput("archivo_date_range", "Rango de fecha", start = ext_min_fecha, end = ext_max_fecha, language = "es", width = "100%"),
-                  sliderInput("archivo_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = "")
+                  sliderInput("archivo_year_range", "Rango de años", min = ext_min_year, max = ext_max_year, value = c(ext_min_year, ext_max_year), sep = ""),
+                  selectInput("archivo_specific_year", "Año específico", choices = c("Todos" = "", seq(ext_max_year, ext_min_year, by = -1)), selected = "", width = "100%")
                 )
               ),
               bs4AccordionItem(
@@ -60,7 +61,19 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_archivo", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."), div(class = "input-group-append", actionButton("btn_s_archivo", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_archivo_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
+          div(
+            class = "ds-search-bar",
+            div(
+              class = "input-group",
+              tags$input(id = "search_archivo", type = "text", class = "form-control ds-search-input", placeholder = "Buscar..."),
+              div(
+                class = "input-group-append",
+                actionButton("btn_s_archivo", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn", title = "Buscar"),
+                actionButton("btn_clear_archivo", label = NULL, icon = icon("eraser"), class = "btn btn-outline-secondary ds-search-action-btn", title = "Limpiar filtros"),
+                downloadButton("download_archivo_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")
+              )
+            )
+          ),
           uiOutput("list_archivo"),
           uiOutput("ext_pagination_controls")
         )
@@ -107,7 +120,8 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                 collapsed = TRUE,
                 tagList(
                   dateRangeInput("rrhh_date_range", "Fecha de ingreso", start = rrhh_min_fecha, end = rrhh_max_fecha, language = "es", width = "100%"),
-                  sliderInput("rrhh_year_range", "Rango de años", min = rrhh_min_year, max = rrhh_max_year, value = c(rrhh_min_year, rrhh_max_year), sep = "")
+                  sliderInput("rrhh_year_range", "Rango de años", min = rrhh_min_year, max = rrhh_max_year, value = c(rrhh_min_year, rrhh_max_year), sep = ""),
+                  selectInput("rrhh_specific_year", "Año específico", choices = c("Todos" = "", seq(rrhh_max_year, rrhh_min_year, by = -1)), selected = "", width = "100%")
                 )
               ),
               bs4AccordionItem(
@@ -141,7 +155,19 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
           )
         ),
         column(width = 9,
-          div(class = "ds-search-bar", div(class = "input-group", tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por Apellidos, Nombres..."), div(class = "input-group-append", actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn"), downloadButton("download_rrhh_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")))),
+          div(
+            class = "ds-search-bar",
+            div(
+              class = "input-group",
+              tags$input(id = "search_rrhh", type = "text", class = "form-control ds-search-input", placeholder = "Buscar expediente por Apellidos, Nombres..."),
+              div(
+                class = "input-group-append",
+                actionButton("btn_s_rrhh", label = NULL, icon = icon("search"), class = "btn ds-btn-primary ds-search-action-btn", title = "Buscar"),
+                actionButton("btn_clear_rrhh", label = NULL, icon = icon("eraser"), class = "btn btn-outline-secondary ds-search-action-btn", title = "Limpiar filtros"),
+                downloadButton("download_rrhh_xls", label = NULL, icon = icon("file-excel"), class = "btn ds-btn-export ds-search-action-btn", title = "Exportar XLS")
+              )
+            )
+          ),
           uiOutput("list_rrhh"),
           uiOutput("rrhh_pagination_controls")
         )
@@ -167,7 +193,7 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                 tags$hr(),
                 tags$div(class = "d-flex justify-content-between align-items-center",
                   tags$span(class = "text-muted", style = "font-size:0.85rem;", tags$i(class = "fas fa-info-circle"), " Los campos marcados con * son obligatorios"),
-                  actionButton("btn_submit_workspace", "Registrar en Archivo", class = "btn btn-success", icon = icon("cloud-upload-alt"), style = "border-radius: 8px; font-weight: bold; padding: 10px 30px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);")
+                  actionButton("btn_submit_workspace", "Guardar en Archivo", class = "btn btn-success", icon = icon("cloud-upload-alt"), style = "border-radius: 8px; font-weight: bold; padding: 10px 30px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);")
                 )
               )
             ),
@@ -226,7 +252,7 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                 textInput("new_tax_name", "Nombre de la Tipología *", placeholder = "Ej: Resolución Rectoral", width = "100%"),
                 textAreaInput("new_tax_desc", "Descripción", placeholder = "Breve descripción de esta tipología documental...", rows = 3, width = "100%"),
                 selectInput("new_tax_scope", "Alcance", choices = c("Archivo", "RRHH", "Ambos"), width = "100%"),
-                actionButton("add_tax_btn", "Registrar Categoría", icon = icon("check-circle"), class = "btn btn-warning w-100 font-weight-bold", style = "border-radius:8px;")
+                actionButton("add_tax_btn", "Guardar Categoría", icon = icon("check-circle"), class = "btn btn-warning w-100 font-weight-bold", style = "border-radius:8px;")
               )
             ),
             column(width = 7,

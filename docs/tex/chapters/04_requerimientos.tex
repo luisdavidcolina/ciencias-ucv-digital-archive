@@ -1,5 +1,5 @@
 \section{Enfoque de requerimientos}
-Este capitulo consolida los requerimientos del sistema en forma estructurada para asegurar cobertura funcional, tecnica, operativa y de cumplimiento institucional.
+Este capítulo consolida los requerimientos del sistema en forma estructurada para asegurar cobertura funcional, técnica, operativa y de cumplimiento institucional.
 
 \section{Requerimientos funcionales (RF)}
 \subsection{RF de acceso y sesion}
@@ -48,9 +48,9 @@ RF-025 & Debe exportar expediente consolidado por persona a XLS. \\
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
 RF-030 & Debe ofrecer panel de control administrativo por rol autorizado. \\
-RF-031 & Debe incluir vistas de nuevo ingreso, monitor, categorias, usuarios y estadisticas. \\
+RF-031 & Debe incluir vistas de nuevo ingreso, monitor, categorías, usuarios y estadísticas. \\
 RF-032 & Debe aplicar filtros analiticos por modulo y metadatos. \\
-RF-033 & Debe mostrar indicadores de operacion por modulo. \\
+RF-033 & Debe mostrar indicadores de operación por módulo. \\
 \bottomrule
 \end{longtable}
 
@@ -59,9 +59,9 @@ RF-033 & Debe mostrar indicadores de operacion por modulo. \\
 \toprule
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
-RF-040 & Debe registrar eventos criticos de autenticacion, consulta y exportacion. \\
+RF-040 & Debe registrar eventos críticos de autenticación, consulta y exportación. \\
 RF-041 & Debe preservar datos de actor, accion, modulo, detalle y marca temporal. \\
-RF-042 & Debe habilitar evidencia para auditoria interna y analisis forense. \\
+RF-042 & Debe habilitar evidencia para auditoría interna y análisis forense. \\
 \bottomrule
 \end{longtable}
 
@@ -71,8 +71,8 @@ RF-042 & Debe habilitar evidencia para auditoria interna y analisis forense. \\
 \toprule
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
-RNF-001 & El sistema debe aplicar segregacion por modulo y rol. \\
-RNF-002 & El sistema debe proteger datos sensibles de RRHH bajo principio de minimo privilegio. \\
+RNF-001 & El sistema debe aplicar segregación por módulo y rol. \\
+RNF-002 & El sistema debe proteger datos sensibles de RRHH bajo principio de mínimo privilegio. \\
 RNF-003 & El sistema debe mantener trazabilidad integral para no repudio. \\
 \bottomrule
 \end{longtable}
@@ -83,8 +83,8 @@ RNF-003 & El sistema debe mantener trazabilidad integral para no repudio. \\
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
 RNF-010 & La plataforma debe operar eficientemente en infraestructura institucional de bajo costo. \\
-RNF-011 & Debe sostener crecimiento progresivo de volumen documental sin degradacion critica. \\
-RNF-012 & Debe permitir evolucion a almacenamiento desacoplado y motor relacional. \\
+RNF-011 & Debe sostener crecimiento progresivo de volumen documental sin degradación crítica. \\
+RNF-012 & Debe permitir evolución a almacenamiento desacoplado y motor relacional. \\
 \bottomrule
 \end{longtable}
 
@@ -93,9 +93,9 @@ RNF-012 & Debe permitir evolucion a almacenamiento desacoplado y motor relaciona
 \toprule
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
-RNF-020 & Debe disponer de estrategia de respaldos periodicos. \\
-RNF-021 & Debe contemplar restauracion y recuperacion ante contingencias. \\
-RNF-022 & Debe tener monitoreo basico de operacion e incidentes. \\
+RNF-020 & Debe disponer de estrategia de respaldos periódicos. \\
+RNF-021 & Debe contemplar restauración y recuperación ante contingencias. \\
+RNF-022 & Debe tener monitoreo básico de operación e incidentes. \\
 \bottomrule
 \end{longtable}
 
@@ -104,29 +104,28 @@ RNF-022 & Debe tener monitoreo basico de operacion e incidentes. \\
 \toprule
 \textbf{ID} & \textbf{Descripcion} \\
 \midrule
-RNF-030 & El codigo debe mantener arquitectura modular y separacion de responsabilidades. \\
-RNF-031 & Debe contar con estrategia de pruebas unitarias y evolucion a pruebas integrales. \\
-RNF-032 & Debe contar con documentacion versionada y trazable. \\
-RNF-033 & Debe incorporar integracion continua para ejecutar validaciones automaticas en cada cambio. \\
-RNF-034 & Debe contemplar entrega continua controlada con compuertas de aprobacion. \\
+RNF-030 & El código debe mantener arquitectura modular y separación de responsabilidades. \\
+RNF-031 & Debe contar con estrategia de pruebas unitarias y evolución a pruebas integrales. \\
+RNF-032 & Debe contar con documentación versionada y trazable. \\
+RNF-033 & Debe incorporar integración continua para ejecutar validaciones automáticas en cada cambio. \\
+RNF-034 & Debe contemplar entrega continua controlada con compuertas de aprobación. \\
 \bottomrule
 \end{longtable}
 
 \section{Requerimientos de plataforma e infraestructura}
 \begin{itemize}
-  \item Requisito de ejecucion: R 4.x o superior.
-  \item Entorno recomendado: RStudio Desktop.
-  \item Dependencias base: shiny, bs4Dash, jsonlite.
-  \item Dependencias ampliadas documentadas: tidyverse, plotly, DT, shinyWidgets.
-  \item Hardware de referencia: 1 GB RAM/1 vCPU para desarrollo; 2 GB RAM/1-2 vCPU para operacion ampliada.
-  \item Navegadores objetivo: Chrome, Firefox y Edge.
+  \item Entorno recomendado para desarrollo local: RStudio Desktop.
+  \item Entorno de ejecución: R 4.2.0 o superior.
+  \item Codificación UTF-8 para evitar errores por caracteres acentuados en Windows.
 \end{itemize}
+Los requerimientos de esta sección están organizados por prioridad de operación: producción es el objetivo principal y desarrollo solo marca el piso mínimo para trabajo local.
 
-\subsection{Requisitos minimos}
+\subsection{Requisitos mínimos de desarrollo}
 \begin{itemize}
-  \item R version 4.x o superior.
-  \item RStudio Desktop.
-  \item Paquetes requeridos: shiny, bs4Dash, jsonlite, tidyverse, plotly, DT, shinyWidgets.
+  \item R versión 4.x o superior.
+  \item RStudio Desktop (solo para desarrollo local y pruebas manuales).
+  \item Paquetes requeridos para desarrollo: shiny, bs4Dash, jsonlite, tidyverse, plotly, DT, shinyWidgets.
+  \item Estos requisitos son mínimos y no definen el despliegue final.
 \end{itemize}
 
 \subsection{Requisitos del sistema (hardware recomendado)}
@@ -134,49 +133,35 @@ RNF-034 & Debe contemplar entrega continua controlada con compuertas de aprobaci
 \toprule
 \textbf{Escenario} & \textbf{Especificacion} \\
 \midrule
-Desarrollo minimo & 1 GB RAM y 1 vCPU. \\
-Produccion (App + PostgreSQL) & 2 GB RAM y 1-2 vCPU, apto para decenas de miles de documentos. \\
+Desarrollo mínimo & 1 GB RAM y 1 vCPU; suficiente para edición, pruebas y validación local. \\
+Producción (App + PostgreSQL) & 2 GB RAM y 1-2 vCPU, apto para decenas de miles de documentos. Este es el umbral de referencia para operación real. \\
 Almacenamiento & Depende de la volumetria de PDFs; escalable mediante buckets. \\
 \bottomrule
 \end{longtable}
 
 \subsection{Requisitos del sistema (software recomendado)}
 \begin{itemize}
-  \item Entorno de ejecucion: R 4.2.0 o superior.
-  \item Sistema operativo local soportado: Windows 10/11, Ubuntu 20.04+ o Debian 11+.
+  \item Entorno de ejecución: R 4.2.0 o superior.
+  \item Sistema operativo: cualquier sistema operativo compatible con R.
+  \item En producción no se requiere RStudio; es suficiente el runtime de R con las dependencias del proyecto.
   \item Base de datos objetivo: PostgreSQL 13+ (opcional CSV/SQLite para prototipos).
   \item Contenedores: Docker opcional para despliegues consistentes.
   \item Navegadores soportados: Chrome, Firefox o Edge.
 \end{itemize}
 
-\subsection{Requisitos para VPS (produccion recomendada)}
-\begin{longtable}{p{0.35\textwidth} p{0.55\textwidth}}
-\toprule
-\textbf{Componente} & \textbf{Especificacion recomendada} \\
-\midrule
-Sistema operativo & Ubuntu Server 22.04 LTS o Debian 12 (64-bit). \\
-CPU & 2 vCPU dedicadas (minimo 1 vCPU para cargas bajas). \\
-Memoria RAM & 2 GB minimo; 4 GB recomendada para crecimiento y concurrencia. \\
-Disco & 30 GB SSD minimo (incrementar segun volumetria documental). \\
-Runtime & R 4.2+ y librerias del proyecto instaladas en entorno limpio. \\
-Base de datos & PostgreSQL 13+ en el mismo VPS o instancia separada. \\
-Red y seguridad & HTTPS con certificado TLS, acceso SSH restringido y respaldos programados. \\
-\bottomrule
-\end{longtable}
-
 \section{Restricciones y supuestos}
 \begin{itemize}
-  \item Restriccion de soberania: priorizar procesamiento local/institucional.
-  \item Restriccion de costos: minimizar dependencia de licenciamiento propietario.
-  \item Supuesto de adopcion: acompanamiento funcional de Archivo y RRHH.
-  \item Supuesto de gobernanza: aprobacion institucional de politicas de datos y seguridad.
+  \item Restricción de soberanía: priorizar procesamiento local/institucional.
+  \item Restricción de costos: minimizar dependencia de licenciamiento propietario.
+  \item Supuesto de adopción: acompañamiento funcional de Archivo y RRHH.
+  \item Supuesto de gobernanza: aprobación institucional de políticas de datos y seguridad.
 \end{itemize}
 
 \section{Criterios de aceptacion de alto nivel}
 \begin{enumerate}
-  \item El usuario accede unicamente al modulo autorizado por su perfil.
-  \item La busqueda por metadatos retorna resultados paginados y exportables.
+  \item El usuario accede únicamente al módulo autorizado por su perfil.
+  \item La búsqueda por metadatos retorna resultados paginados y exportables.
   \item El expediente RRHH se visualiza por persona con sus archivos asociados.
-  \item El panel administrativo presenta vistas de control y estadisticas por modulo.
-  \item Las acciones criticas quedan registradas para auditoria.
+  \item El panel administrativo presenta vistas de control y estadísticas por módulo.
+  \item Las acciones críticas quedan registradas para auditoría.
 \end{enumerate}

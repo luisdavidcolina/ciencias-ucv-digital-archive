@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  16 APR 2026 14:43
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.3.5)  21 APR 2026 13:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -207,6 +207,28 @@ Package: enumitem 2025/02/06 v3.11 Customized lists
 \enit@count@id=\count300
 \enitdp@description=\count301
 )
+(C:\Program Files\MiKTeX\tex/latex/caption\caption.sty
+Package: caption 2023/08/05 v3.6o Customizing captions (AR)
+
+(C:\Program Files\MiKTeX\tex/latex/caption\caption3.sty
+Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
+\caption@tempdima=\dimen182
+\captionmargin=\dimen183
+\caption@leftmargin=\dimen184
+\caption@rightmargin=\dimen185
+\caption@width=\dimen186
+\caption@indent=\dimen187
+\caption@parindent=\dimen188
+\caption@hangindent=\dimen189
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count302
+\c@continuedfloat=\count303
+Package caption Info: longtable package is loaded.
+
+(C:\Program Files\MiKTeX\tex/latex/caption\ltcaption.sty
+Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
+))
 (C:\Program Files\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2025-07-12 v7.01o Hypertext links for LaTeX
 
@@ -248,19 +270,19 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (C:\Program Files\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count302
+\c@section@level=\count304
 )
 (C:\Program Files\MiKTeX\tex/latex/etoolbox\etoolbox.sty
 Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count303
+\etb@tempcnta=\count305
 )
 (C:\Program Files\MiKTeX\tex/generic/stringenc\stringenc.sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\@linkdim=\dimen182
-\Hy@linkcounter=\count304
-\Hy@pagecounter=\count305
+\@linkdim=\dimen190
+\Hy@linkcounter=\count306
+\Hy@pagecounter=\count307
 
 (C:\Program Files\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2025-07-12 v7.01o Hyperref: PDFDocEncoding definition (HO)
@@ -270,7 +292,7 @@ Now handling font encoding PD1 ...
 (C:\Program Files\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count306
+\Hy@SavedSpaceFactor=\count308
 
 (C:\Program Files\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2025-07-12 v7.01o Hyperref: PDF Unicode definition (HO)
@@ -284,14 +306,14 @@ Package hyperref Info: Plain pages OFF on input line 4210.
 Package hyperref Info: Backreferencing OFF on input line 4215.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4462.
-\c@Hy@tempcnt=\count307
+\c@Hy@tempcnt=\count309
 
 (C:\Program Files\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip17
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4801.
-\XeTeXLinkMargin=\dimen183
+\XeTeXLinkMargin=\dimen191
 
 (C:\Program Files\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
@@ -300,9 +322,9 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count308
-\Field@Width=\dimen184
-\Fld@charsize=\dimen185
+\Fld@menulength=\count310
+\Field@Width=\dimen192
+\Fld@charsize=\dimen193
 Package hyperref Info: Hyper figures OFF on input line 6078.
 Package hyperref Info: Link nesting OFF on input line 6083.
 Package hyperref Info: Hyper index ON on input line 6086.
@@ -310,16 +332,16 @@ Package hyperref Info: backreferencing OFF on input line 6093.
 Package hyperref Info: Link coloring OFF on input line 6098.
 Package hyperref Info: Link coloring with OCG OFF on input line 6103.
 Package hyperref Info: PDF/A mode OFF on input line 6108.
-\Hy@abspage=\count309
-\c@Item=\count310
-\c@Hfootnote=\count311
+\Hy@abspage=\count311
+\c@Item=\count312
+\c@Hfootnote=\count313
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 
 (C:\Program Files\MiKTeX\tex/latex/hyperref\hpdftex.def
 File: hpdftex.def 2025-07-12 v7.01o Hyperref driver for pdfTeX
-\Fld@listcount=\count312
-\c@bookmark@seq@number=\count313
+\Fld@listcount=\count314
+\c@bookmark@seq@number=\count315
 
 (C:\Program Files\MiKTeX\tex/latex/rerunfilecheck\rerunfilecheck.sty
 Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
@@ -356,12 +378,12 @@ Package: titlesec 2025/01/04 v2.17 Sectioning titles
 \ttl@box=\box61
 \beforetitleunit=\skip59
 \aftertitleunit=\skip60
-\ttl@plus=\dimen186
-\ttl@minus=\dimen187
+\ttl@plus=\dimen194
+\ttl@minus=\dimen195
 \ttl@toksa=\toks26
-\titlewidth=\dimen188
-\titlewidthlast=\dimen189
-\titlewidthfirst=\dimen190
+\titlewidth=\dimen196
+\titlewidthlast=\dimen197
+\titlewidthfirst=\dimen198
 )
 (C:\Program Files\MiKTeX\tex/latex/fancyhdr\fancyhdr.sty
 Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
@@ -387,8 +409,8 @@ Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 (C:\Program Files\MiKTeX\tex/latex/pgf/utilities\pgfrcs.sty
 (C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfutil-common.tex
 \pgfutil@everybye=\toks28
-\pgfutil@tempdima=\dimen191
-\pgfutil@tempdimb=\dimen192
+\pgfutil@tempdima=\dimen199
+\pgfutil@tempdimb=\dimen256
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgfutil-latex.def
 \pgfutil@abb=\box62
@@ -412,26 +434,26 @@ Package: pgfsys 2025-08-29 v3.1.11a (3.1.11a)
 tex
 \pgfkeys@tmptoks=\toks31
 ))
-\pgf@x=\dimen193
-\pgf@y=\dimen194
-\pgf@xa=\dimen195
-\pgf@ya=\dimen196
-\pgf@xb=\dimen197
-\pgf@yb=\dimen198
-\pgf@xc=\dimen199
-\pgf@yc=\dimen256
-\pgf@xd=\dimen257
-\pgf@yd=\dimen258
+\pgf@x=\dimen257
+\pgf@y=\dimen258
+\pgf@xa=\dimen259
+\pgf@ya=\dimen260
+\pgf@xb=\dimen261
+\pgf@yb=\dimen262
+\pgf@xc=\dimen263
+\pgf@yc=\dimen264
+\pgf@xd=\dimen265
+\pgf@yd=\dimen266
 \w@pgf@writea=\write3
 \r@pgf@reada=\read3
-\c@pgf@counta=\count314
-\c@pgf@countb=\count315
-\c@pgf@countc=\count316
-\c@pgf@countd=\count317
+\c@pgf@counta=\count316
+\c@pgf@countb=\count317
+\c@pgf@countc=\count318
+\c@pgf@countd=\count319
 \t@pgf@toka=\toks32
 \t@pgf@tokb=\toks33
 \t@pgf@tokc=\toks34
-\pgf@sys@id@count=\count318
+\pgf@sys@id@count=\count320
  (C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgf.cfg
 File: pgf.cfg 2025-08-29 v3.1.11a (3.1.11a)
 )
@@ -445,8 +467,8 @@ File: pgfsys-common-pdf.def 2025-08-29 v3.1.11a (3.1.11a)
 )))
 (C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsyssoftpath.code.tex
 File: pgfsyssoftpath.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfsyssoftpath@smallbuffer@items=\count319
-\pgfsyssoftpath@bigbuffer@items=\count320
+\pgfsyssoftpath@smallbuffer@items=\count321
+\pgfsyssoftpath@bigbuffer@items=\count322
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/systemlayer\pgfsysprotocol.code.tex
 File: pgfsysprotocol.code.tex 2025-08-29 v3.1.11a (3.1.11a)
@@ -457,8 +479,8 @@ Package: pgfcore 2025-08-29 v3.1.11a (3.1.11a)
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathutil.code.tex)
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathparser.code.tex
-\pgfmath@dimen=\dimen259
-\pgfmath@count=\count321
+\pgfmath@dimen=\dimen267
+\pgfmath@count=\count323
 \pgfmath@box=\box63
 \pgfmath@toks=\toks35
 \pgfmath@stack@operand=\toks36
@@ -478,55 +500,55 @@ tex)
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfunctions.integerarithmeti
 cs.code.tex) (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathcalc.code.tex
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmathfloat.code.tex
-\c@pgfmathroundto@lastzeros=\count322
+\c@pgfmathroundto@lastzeros=\count324
 ))
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfint.code.tex)
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@picminx=\dimen260
-\pgf@picmaxx=\dimen261
-\pgf@picminy=\dimen262
-\pgf@picmaxy=\dimen263
-\pgf@pathminx=\dimen264
-\pgf@pathmaxx=\dimen265
-\pgf@pathminy=\dimen266
-\pgf@pathmaxy=\dimen267
-\pgf@xx=\dimen268
-\pgf@xy=\dimen269
-\pgf@yx=\dimen270
-\pgf@yy=\dimen271
-\pgf@zx=\dimen272
-\pgf@zy=\dimen273
+\pgf@picminx=\dimen268
+\pgf@picmaxx=\dimen269
+\pgf@picminy=\dimen270
+\pgf@picmaxy=\dimen271
+\pgf@pathminx=\dimen272
+\pgf@pathmaxx=\dimen273
+\pgf@pathminy=\dimen274
+\pgf@pathmaxy=\dimen275
+\pgf@xx=\dimen276
+\pgf@xy=\dimen277
+\pgf@yx=\dimen278
+\pgf@yy=\dimen279
+\pgf@zx=\dimen280
+\pgf@zy=\dimen281
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathconstruct.code.t
 ex
 File: pgfcorepathconstruct.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@path@lastx=\dimen274
-\pgf@path@lasty=\dimen275
+\pgf@path@lastx=\dimen282
+\pgf@path@lasty=\dimen283
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorepathusage.code.tex
 File: pgfcorepathusage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@shorten@end@additional=\dimen276
-\pgf@shorten@start@additional=\dimen277
+\pgf@shorten@end@additional=\dimen284
+\pgf@shorten@start@additional=\dimen285
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorescopes.code.tex
 File: pgfcorescopes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfpic=\box64
 \pgf@hbox=\box65
 \pgf@layerbox@main=\box66
-\pgf@picture@serial@count=\count323
+\pgf@picture@serial@count=\count325
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoregraphicstate.code.te
 x
 File: pgfcoregraphicstate.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgflinewidth=\dimen278
+\pgflinewidth=\dimen286
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoretransformations.code
 .tex
 File: pgfcoretransformations.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@pt@x=\dimen279
-\pgf@pt@y=\dimen280
-\pgf@pt@temp=\dimen281
+\pgf@pt@x=\dimen287
+\pgf@pt@y=\dimen288
+\pgf@pt@temp=\dimen289
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorequick.code.tex
 File: pgfcorequick.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreobjects.code.tex
@@ -537,12 +559,12 @@ tex
 File: pgfcorepathprocessing.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcorearrows.code.tex
 File: pgfcorearrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfarrowsep=\dimen282
+\pgfarrowsep=\dimen290
 ) (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreshade.code.tex
 File: pgfcoreshade.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@max=\dimen283
-\pgf@sys@shading@range@num=\count324
-\pgf@shadingcount=\count325
+\pgf@max=\dimen291
+\pgf@sys@shading@range@num=\count326
+\pgf@shadingcount=\count327
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/basiclayer\pgfcoreimage.code.tex
 File: pgfcoreimage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
@@ -571,8 +593,8 @@ File: pgfmoduleplot.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 )
 (C:\Program Files\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-0-65.sty
 Package: pgfcomp-version-0-65 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@nodesepstart=\dimen284
-\pgf@nodesepend=\dimen285
+\pgf@nodesepstart=\dimen292
+\pgf@nodesepend=\dimen293
 )
 (C:\Program Files\MiKTeX\tex/latex/pgf/compatibility\pgfcomp-version-1-18.sty
 Package: pgfcomp-version-1-18 2025-08-29 v3.1.11a (3.1.11a)
@@ -583,8 +605,8 @@ Package: pgfcomp-version-1-18 2025-08-29 v3.1.11a (3.1.11a)
 (C:\Program Files\MiKTeX\tex/generic/pgf/math\pgfmath.code.tex))
 (C:\Program Files\MiKTeX\tex/generic/pgf/utilities\pgffor.code.tex
 Package: pgffor 2025-08-29 v3.1.11a (3.1.11a)
-\pgffor@iter=\dimen286
-\pgffor@skip=\dimen287
+\pgffor@iter=\dimen294
+\pgffor@skip=\dimen295
 \pgffor@stack=\toks38
 \pgffor@toks=\toks39
 ))
@@ -594,32 +616,32 @@ Package: tikz 2025-08-29 v3.1.11a (3.1.11a)
 (C:\Program Files\MiKTeX\tex/generic/pgf/libraries\pgflibraryplothandlers.code.
 tex
 File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgf@plot@mark@count=\count326
-\pgfplotmarksize=\dimen288
+\pgf@plot@mark@count=\count328
+\pgfplotmarksize=\dimen296
 )
-\tikz@lastx=\dimen289
-\tikz@lasty=\dimen290
-\tikz@lastxsaved=\dimen291
-\tikz@lastysaved=\dimen292
-\tikz@lastmovetox=\dimen293
-\tikz@lastmovetoy=\dimen294
-\tikzleveldistance=\dimen295
-\tikzsiblingdistance=\dimen296
+\tikz@lastx=\dimen297
+\tikz@lasty=\dimen298
+\tikz@lastxsaved=\dimen299
+\tikz@lastysaved=\dimen300
+\tikz@lastmovetox=\dimen301
+\tikz@lastmovetoy=\dimen302
+\tikzleveldistance=\dimen303
+\tikzsiblingdistance=\dimen304
 \tikz@figbox=\box69
 \tikz@figbox@bg=\box70
 \tikz@tempbox=\box71
 \tikz@tempbox@bg=\box72
-\tikztreelevel=\count327
-\tikznumberofchildren=\count328
-\tikznumberofcurrentchild=\count329
-\tikz@fig@count=\count330
+\tikztreelevel=\count329
+\tikznumberofchildren=\count330
+\tikznumberofcurrentchild=\count331
+\tikz@fig@count=\count332
  (C:\Program Files\MiKTeX\tex/generic/pgf/modules\pgfmodulematrix.code.tex
 File: pgfmodulematrix.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfmatrixcurrentrow=\count331
-\pgfmatrixcurrentcolumn=\count332
-\pgf@matrix@numberofcolumns=\count333
+\pgfmatrixcurrentrow=\count333
+\pgfmatrixcurrentcolumn=\count334
+\pgf@matrix@numberofcolumns=\count335
 )
-\tikz@expandcount=\count334
+\tikz@expandcount=\count336
 
 (C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibra
 rytopaths.code.tex
@@ -632,10 +654,10 @@ File: tikzlibrarypositioning.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 (C:\Program Files\MiKTeX\tex/generic/pgf/libraries\pgflibraryarrows.meta.code.t
 ex
 File: pgflibraryarrows.meta.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-\pgfarrowinset=\dimen297
-\pgfarrowlength=\dimen298
-\pgfarrowwidth=\dimen299
-\pgfarrowlinewidth=\dimen300
+\pgfarrowinset=\dimen305
+\pgfarrowlength=\dimen306
+\pgfarrowwidth=\dimen307
+\pgfarrowlinewidth=\dimen308
 )
 (C:\Program Files\MiKTeX\tex/generic/pgf/frontendlayer/tikz/libraries\tikzlibra
 ryshapes.geometric.code.tex
@@ -645,7 +667,7 @@ File: tikzlibraryshapes.geometric.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 etric.code.tex
 File: pgflibraryshapes.geometric.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 ))
-Package hyperref Info: Option `colorlinks' set `true' on input line 37.
+Package hyperref Info: Option `colorlinks' set `true' on input line 39.
 )
 LaTeX Font Info:    Trying to load font information for T1+phv on input line 5.
 
@@ -657,7 +679,7 @@ LaTeX Font Info:    Font shape `T1/phv/m/n' will be
 
 (C:\Program Files\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def
 File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count335
+\l__color_backend_stack_int=\count337
 )
 (c:\ciencias-ucv-digital-archive\docs\tex\main.aux
 LaTeX Info: Redefining \. on input line 11.
@@ -724,16 +746,16 @@ LaTeX Info: Redefining \% on input line 5.
 
 (C:\Program Files\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count336
-\scratchdimen=\dimen301
+\scratchcounter=\count338
+\scratchdimen=\dimen309
 \scratchbox=\box73
-\nofMPsegments=\count337
-\nofMParguments=\count338
+\nofMPsegments=\count339
+\nofMParguments=\count340
 \everyMPshowfont=\toks40
-\MPscratchCnt=\count339
-\MPscratchDim=\dimen302
-\MPnumerator=\count340
-\makeMPintoPDFobject=\count341
+\MPscratchCnt=\count341
+\MPscratchDim=\dimen310
+\MPnumerator=\count342
+\makeMPintoPDFobject=\count343
 \everyMPtoPDFconversion=\toks41
 ) (C:\Program Files\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -743,6 +765,9 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 (C:\Program Files\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: hyperref package is loaded.
+Package caption Info: End \AtBeginDocument code.
 Package hyperref Info: Link coloring ON on input line 5.
 
 (c:\ciencias-ucv-digital-archive\docs\tex\main.out)
@@ -782,6 +807,8 @@ Overfull \hbox (8.67949pt too wide) in alignment at lines 6--12
  [] [] [] 
  []
 
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 9.49997pt on input line 14.
 LaTeX Font Info:    Font shape `T1/phv/m/sc' will be
 (Font)              scaled to size 11.39996pt on input line 14.
 [1
@@ -793,27 +820,41 @@ LaTeX Font Info:    Font shape `T1/phv/b/sc' will be
 (Font)              scaled to size 11.39996pt on input line 2.
  [2
 
-] [3] [4])
+] [3] [4]
+Overfull \hbox (4.71887pt too wide) detected at line 118
+\T1/phv/m/n/12 13.8.10. 
+ []
+
+
+Overfull \hbox (4.71887pt too wide) detected at line 119
+\T1/phv/m/n/12 13.8.11. 
+ []
+
+
+Overfull \hbox (4.71887pt too wide) detected at line 120
+\T1/phv/m/n/12 13.8.12. 
+ []
+
+
+Overfull \hbox (4.71887pt too wide) detected at line 121
+\T1/phv/m/n/12 13.8.13. 
+ []
+
+
+Overfull \hbox (4.71887pt too wide) detected at line 122
+\T1/phv/m/n/12 13.8.14. 
+ []
+
+[5])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [5]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.lof
+ [6] (c:\ciencias-ucv-digital-archive\docs\tex\main.lof
 LaTeX Info: Redefining \. on input line 1.
 LaTeX Info: Redefining \% on input line 1.
 )
 \tf@lof=\write6
 \openout6 = `main.lof'.
-
- [6
-
-]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.lot
-LaTeX Info: Redefining \. on input line 1.
-LaTeX Info: Redefining \% on input line 1.
-)
-\tf@lot=\write7
-\openout7 = `main.lot'.
 
  [7
 
@@ -846,18 +887,15 @@ re-la-cio-na-les y nu-be pri-va-da/hibrida.
 ]) [6]
 Cap\'{\i }tulo 4.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_requerimientos.tex
-LaTeX Font Info:    Font shape `T1/phv/b/n' will be
-(Font)              scaled to size 10.40245pt on input line 5.
-
 [7
 
 ]
 ignored error: Infinite glue shrinkage found in box being split [8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 138--138
-[]|\T1/phv/m/n/12 Produccion (App + Post-
+Underfull \hbox (badness 10000) in paragraph at lines 137--137
+[]|\T1/phv/m/n/12 Producción (App + Post-
  []
 
-ignored error: Infinite glue shrinkage found in box being split [10]) [11]
+[10]) [11]
 Cap\'{\i }tulo 5.
 
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/04_arquitectura_objetivo.tex
@@ -885,44 +923,44 @@ Cap\'{\i }tulo 9.
 
 ]
 Cap\'{\i }tulo 10.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex)
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/09_operacion_despliegue.tex
 [21
 
-]
+]) [22]
 Cap\'{\i }tulo 11.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/10_calidad_qa.tex
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <12> not available
 (Font)              Font shape `T1/phv/m/sl' tried instead on input line 22.
 LaTeX Font Info:    Font shape `T1/phv/m/sl' will be
 (Font)              scaled to size 11.39996pt on input line 22.
- [22
+ [23
 
 ])
-[23]
+[24]
 Cap\'{\i }tulo 12.
 (c:\ciencias-ucv-digital-archive\docs\tex\chapters/11_gobernanza_legal.tex
 Underfull \hbox (badness 10000) in paragraph at lines 31--31
-[]|\T1/phv/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinación
  []
 
 
 Underfull \hbox (badness 3701) in paragraph at lines 31--31
-[]|\T1/phv/m/n/12 Equipo tec-ni-
+[]|\T1/phv/m/n/12 Equipo téc-ni-
  []
 
 
 Underfull \hbox (badness 2368) in paragraph at lines 32--32
-[]|\T1/phv/m/n/12 Aprobacion de des-plie-
+[]|\T1/phv/m/n/12 Aprobación de des-plie-
  []
 
 
 Underfull \hbox (badness 3701) in paragraph at lines 32--32
-[]|\T1/phv/m/n/12 Equipo tec-ni-
+[]|\T1/phv/m/n/12 Equipo téc-ni-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 32--32
-[]|\T1/phv/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinación
  []
 
 
@@ -952,12 +990,12 @@ Overfull \hbox (19.20122pt too wide) in paragraph at lines 34--34
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 34--34
-[]|\T1/phv/m/n/12 Coordinacion
+[]|\T1/phv/m/n/12 Coordinación
  []
 
 
 Underfull \hbox (badness 3701) in paragraph at lines 34--34
-[]|\T1/phv/m/n/12 Equipo tec-ni-
+[]|\T1/phv/m/n/12 Equipo téc-ni-
  []
 
 
@@ -965,23 +1003,156 @@ Overfull \hbox (23.58653pt too wide) in alignment at lines 27--36
  [] [] [] [] [] 
  []
 
-[24
+[25
 
-]) [25]
+]) [26]
 Cap\'{\i }tulo 13.
-(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [26
+(c:\ciencias-ucv-digital-archive\docs\tex\chapters/12_roadmap.tex [27
 
-])
-[27]
+]
+Overfull \hbox (20.64644pt too wide) in paragraph at lines 64--64
+[]|\T1/phv/m/n/12 PostgreSQL/MySQL| 
+ []
+
+
+Overfull \hbox (16.09784pt too wide) in paragraph at lines 64--64
+[]|\T1/phv/m/n/12 PostgreSQL/Oracle| 
+ []
+
+
+Overfull \hbox (20.64644pt too wide) in paragraph at lines 64--64
+[]|\T1/phv/m/n/12 PostgreSQL/MySQL| 
+ []
+
+
+Overfull \hbox (17.48845pt too wide) in paragraph at lines 64--65
+[]|\T1/phv/m/n/12 PostgreSQL/SQLite| 
+ []
+
+
+Overfull \hbox (14.45888pt too wide) in alignment at lines 59--69
+ [] [] [] [] [] 
+ []
+
+[28] [29]
+LaTeX Font Info:    Font shape `T1/phv/m/n' will be
+(Font)              scaled to size 10.40245pt on input line 127.
+
+Overfull \hbox (4.75781pt too wide) in paragraph at lines 142--142
+[]|\T1/phv/b/n/10.95 Resultado| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Personalización
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+
+Overfull \hbox (2.29425pt too wide) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Alto/variable| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Mantenimiento
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Adecuación a
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+\T1/phv/m/n/10.95 ex-pe-dien-tes in-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
+[]|\T1/phv/m/n/10.95 Gana
+ []
+
+[30]
+Overfull \hbox (41.77936pt too wide) in alignment at lines 163--172
+ [] [] [] [] [] 
+ []
+
+[31]
+Overfull \hbox (23.57959pt too wide) in alignment at lines 183--193
+ [] [] [] [] [] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 200--200
+[]|\T1/phv/b/n/12 Total 2 GB
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 200--200
+[]|\T1/phv/b/n/12 Total 4 GB
+ []
+
+
+Underfull \hbox (badness 4156) in paragraph at lines 202--203
+\T1/phv/m/n/12 pe-ti-ti-vo pa-ra des-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 203--204
+[]|\T1/phv/m/n/12 Alternativa eco-nó-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 203--204
+\T1/phv/m/n/12 mi-ca con bue-na
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 203--204
+\T1/phv/m/n/12 re-la-ción cos-
+ []
+
+
+Overfull \hbox (2.47972pt too wide) in alignment at lines 198--208
+ [] [] [] [] 
+ []
+
+ignored error: Infinite glue shrinkage found in box being split [32] [33])
+[34]
 Ap\'{e}ndice A.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/A_glosario.tex
-Overfull \hbox (1.23639pt too wide) in alignment at lines 1--13
+Overfull \hbox (1.23639pt too wide) in alignment at lines 1--28
  [] [] 
  []
 
-) [28
+ignored error: Infinite glue shrinkage found in box being split [35
 
-]
+]) [36]
 Ap\'{e}ndice B.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/B_diccionario_datos.tex
 Underfull \hbox (badness 10000) in paragraph at lines 8--9
@@ -1003,7 +1174,7 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 31--46
  [] [] [] [] 
  []
 
-ignored error: Infinite glue shrinkage found in box being split [29
+ignored error: Infinite glue shrinkage found in box being split [37
 
 ]
 Overfull \hbox (17.69739pt too wide) in paragraph at lines 57--57
@@ -1020,7 +1191,7 @@ Overfull \hbox (11.5796pt too wide) in alignment at lines 49--59
  [] [] [] [] 
  []
 
-) [30]
+) [38]
 Ap\'{e}ndice C.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/C_matriz_trazabilidad.tex
 Underfull \hbox (badness 1852) in paragraph at lines 7--7
@@ -1049,17 +1220,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 12--12
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 12--12
-\T1/phv/m/n/12 tec-ni-
+\T1/phv/m/n/12 téc-ni-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 13--13
-[]|\T1/phv/m/n/12 Operacion y
+[]|\T1/phv/m/n/12 Operación y
  []
 
 
 Underfull \hbox (badness 5446) in paragraph at lines 14--14
-[]|\T1/phv/m/n/12 Diseno tec-ni-co
+[]|\T1/phv/m/n/12 Diseño téc-ni-co
  []
 
 
@@ -1077,85 +1248,85 @@ Overfull \hbox (11.57266pt too wide) in alignment at lines 2--17
  [] [] [] [] 
  []
 
-[31
+[39
 
-]) [32]
+]) [40]
 Ap\'{e}ndice D.
-(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [33
+(c:\ciencias-ucv-digital-archive\docs\tex\annexes/D_referencias.tex) [41
 
 ]
 Ap\'{e}ndice E.
 (c:\ciencias-ucv-digital-archive\docs\tex\annexes/E_diagramas.tex
-<figures/generated/01_arquitectura_objetivo.pdf, id=871, 614.295pt x 794.97pt>
+<figures/generated/01_arquitectura_objetivo.pdf, id=1048, 614.295pt x 794.97pt>
+
 File: figures/generated/01_arquitectura_objetivo.pdf Graphic file (type pdf)
 <use figures/generated/01_arquitectura_objetivo.pdf>
 Package pdftex.def Info: figures/generated/01_arquitectura_objetivo.pdf  used o
-n input line 10.
+n input line 12.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/02_flujo_autenticacion.pdf, id=872, 614.295pt x 794.97pt>
+<figures/generated/02_flujo_autenticacion.pdf, id=1050, 614.295pt x 794.97pt>
 File: figures/generated/02_flujo_autenticacion.pdf Graphic file (type pdf)
 <use figures/generated/02_flujo_autenticacion.pdf>
 Package pdftex.def Info: figures/generated/02_flujo_autenticacion.pdf  used on 
-input line 21.
+input line 25.
 (pdftex.def)             Requested size: 432.48051pt x 559.68973pt.
-<figures/generated/03_modelo_datos.pdf, id=873, 614.295pt x 794.97pt>
+<figures/generated/03_modelo_datos.pdf, id=1052, 614.295pt x 794.97pt>
 File: figures/generated/03_modelo_datos.pdf Graphic file (type pdf)
 <use figures/generated/03_modelo_datos.pdf>
 Package pdftex.def Info: figures/generated/03_modelo_datos.pdf  used on input l
-ine 32.
+ine 38.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/04_roadmap_fases.pdf, id=874, 614.295pt x 794.97pt>
+<figures/generated/04_roadmap_fases.pdf, id=1054, 614.295pt x 794.97pt>
 File: figures/generated/04_roadmap_fases.pdf Graphic file (type pdf)
 <use figures/generated/04_roadmap_fases.pdf>
 Package pdftex.def Info: figures/generated/04_roadmap_fases.pdf  used on input 
-line 69.
+line 78.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/05_gobernanza_rbac.pdf, id=875, 614.295pt x 794.97pt>
+<figures/generated/05_gobernanza_rbac.pdf, id=1056, 614.295pt x 794.97pt>
 File: figures/generated/05_gobernanza_rbac.pdf Graphic file (type pdf)
 <use figures/generated/05_gobernanza_rbac.pdf>
 Package pdftex.def Info: figures/generated/05_gobernanza_rbac.pdf  used on inpu
-t line 120.
+t line 132.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/06_despliegue_continuidad.pdf, id=876, 614.295pt x 794.97pt>
-
+<figures/generated/06_despliegue_continuidad.pdf, id=1058, 614.295pt x 794.97pt
+>
 File: figures/generated/06_despliegue_continuidad.pdf Graphic file (type pdf)
 <use figures/generated/06_despliegue_continuidad.pdf>
 Package pdftex.def Info: figures/generated/06_despliegue_continuidad.pdf  used 
-on input line 161.
+on input line 176.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/07_paquetes_sistema.pdf, id=877, 614.295pt x 794.97pt>
+<figures/generated/07_paquetes_sistema.pdf, id=1060, 614.295pt x 794.97pt>
 File: figures/generated/07_paquetes_sistema.pdf Graphic file (type pdf)
 <use figures/generated/07_paquetes_sistema.pdf>
 Package pdftex.def Info: figures/generated/07_paquetes_sistema.pdf  used on inp
-ut line 197.
+ut line 215.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/08_casos_uso_general.pdf, id=878, 614.295pt x 794.97pt>
+ [42
+
+] [43 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/01_arquitectu
+ra_objetivo.pdf>] [44 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generat
+ed/02_flujo_autenticacion.pdf>] [45 <c:/ciencias-ucv-digital-archive/docs/tex/f
+igures/generated/03_modelo_datos.pdf>] [46 <c:/ciencias-ucv-digital-archive/doc
+s/tex/figures/generated/04_roadmap_fases.pdf>] [47 <c:/ciencias-ucv-digital-arc
+hive/docs/tex/figures/generated/05_gobernanza_rbac.pdf>] [48 <c:/ciencias-ucv-d
+igital-archive/docs/tex/figures/generated/06_despliegue_continuidad.pdf>]
+<figures/generated/08_casos_uso_general.pdf, id=1162, 614.295pt x 794.97pt>
 File: figures/generated/08_casos_uso_general.pdf Graphic file (type pdf)
 <use figures/generated/08_casos_uso_general.pdf>
 Package pdftex.def Info: figures/generated/08_casos_uso_general.pdf  used on in
-put line 241.
+put line 262.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-<figures/generated/09_ciclo_vida_entrega.pdf, id=879, 614.295pt x 794.97pt>
+<figures/generated/09_ciclo_vida_entrega.pdf, id=1164, 614.295pt x 794.97pt>
 File: figures/generated/09_ciclo_vida_entrega.pdf Graphic file (type pdf)
 <use figures/generated/09_ciclo_vida_entrega.pdf>
 Package pdftex.def Info: figures/generated/09_ciclo_vida_entrega.pdf  used on i
-nput line 279.
+nput line 303.
 (pdftex.def)             Requested size: 455.24411pt x 589.14197pt.
-) [34
-
-]
-[35 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/01_arquitectura
-_objetivo.pdf>] [36 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated
-/02_flujo_autenticacion.pdf>] [37 <c:/ciencias-ucv-digital-archive/docs/tex/fig
-ures/generated/03_modelo_datos.pdf>] [38 <c:/ciencias-ucv-digital-archive/docs/
-tex/figures/generated/04_roadmap_fases.pdf>] [39 <c:/ciencias-ucv-digital-archi
-ve/docs/tex/figures/generated/05_gobernanza_rbac.pdf>] [40 <c:/ciencias-ucv-dig
-ital-archive/docs/tex/figures/generated/06_despliegue_continuidad.pdf>]
-[41 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/07_paquetes_sis
-tema.pdf>] [42 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/08_c
-asos_uso_general.pdf>] [43 <c:/ciencias-ucv-digital-archive/docs/tex/figures/ge
-nerated/09_ciclo_vida_entrega.pdf>]
-(c:\ciencias-ucv-digital-archive\docs\tex\main.aux
+) [49] [50 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generated/07_paque
+tes_sistema.pdf>] [51 <c:/ciencias-ucv-digital-archive/docs/tex/figures/generat
+ed/08_casos_uso_general.pdf>] [52 <c:/ciencias-ucv-digital-archive/docs/tex/fig
+ures/generated/09_ciclo_vida_entrega.pdf>] (c:\ciencias-ucv-digital-archive\doc
+s\tex\main.aux
 LaTeX Info: Redefining \. on input line 11.
 LaTeX Info: Redefining \% on input line 11.
 )
@@ -1164,23 +1335,23 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: CD70A8E343A5819AAC691CA5EE515215;22719.
+(rerunfilecheck)             Checksum: 69B9A840ACCB4E192F01C4F2B148F2B2;26901.
  ) 
 Here is how much of TeX's memory you used:
- 23928 strings out of 467871
- 448903 string characters out of 5428438
- 873212 words of memory out of 5000000
- 52112 multiletter control sequences out of 15000+600000
- 668695 words of font info for 73 fonts, out of 8000000 for 9000
+ 25356 strings out of 467871
+ 476434 string characters out of 5428438
+ 897221 words of memory out of 5000000
+ 53502 multiletter control sequences out of 15000+600000
+ 675391 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  89i,12n,97p,510b,793s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Program Files/MiKTeX/fonts/type1/urw/helvetic/uhvb8a.pfb><C:/Program File
 s/MiKTeX/fonts/type1/urw/helvetic/uhvr8a.pfb><C:/Program Files/MiKTeX/fonts/typ
 e1/urw/helvetic/uhvro8a.pfb>
-Output written on c:\ciencias-ucv-digital-archive\docs\tex\main.pdf (51 pages, 
-605194 bytes).
+Output written on c:\ciencias-ucv-digital-archive\docs\tex\main.pdf (60 pages, 
+662185 bytes).
 PDF statistics:
- 1085 PDF objects out of 1200 (max. 8388607)
- 246 named destinations out of 1000 (max. 500000)
- 1034 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1290 PDF objects out of 1440 (max. 8388607)
+ 276 named destinations out of 1000 (max. 500000)
+ 1154 words of extra memory for PDF output out of 10000 (max. 10000000)
 

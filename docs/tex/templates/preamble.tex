@@ -20,12 +20,14 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{enumitem}
+\usepackage{caption}
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes.geometric}
+\captionsetup[figure]{skip=4pt}
 
 \hypersetup{
   colorlinks=true,
@@ -52,14 +54,37 @@
   {}
 
 \titleformat{\subsection}
-  {\bfseries\small}
+  {\bfseries\normalsize}
   {\thesubsection}
   {0.6em}
   {}
+
+\titleformat{\subsubsection}
+  {\bfseries\normalsize}
+  {\thesubsubsection}
+  {0.6em}
+  {}
+
+\makeatletter
+\renewcommand{\tableofcontents}{%
+  \chapter*{\contentsname}%
+  \phantomsection\label{tocindex}%
+  \@starttoc{toc}%
+}
+\makeatother
 
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{Archivo Institucional: Ciencias UCV}
 \fancyhead[R]{Documento Maestro}
+\fancyfoot[L]{\footnotesize \hyperref[tocindex]{Volver al indice}}
 \fancyfoot[C]{\thepage}
 \setlength{\headheight}{15pt}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyhead[L]{Archivo Institucional: Ciencias UCV}
+  \fancyhead[R]{Documento Maestro}
+  \fancyfoot[L]{\footnotesize \hyperref[tocindex]{Volver al indice}}
+  \fancyfoot[C]{\thepage}
+  \setlength{\headheight}{15pt}
+}
