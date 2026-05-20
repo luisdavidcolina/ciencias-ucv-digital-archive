@@ -127,3 +127,11 @@ timestamp,username,action,modulo,details,result
 2026-05-20 19:04:49,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
 2026-05-20 19:04:57,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
 2026-05-20 19:04:59,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 19:06:44,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 19:08:53,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 19:08:57,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 19:09:02,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 19:09:02,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 19:10:41,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 19:11:56,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 19:11:58,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success

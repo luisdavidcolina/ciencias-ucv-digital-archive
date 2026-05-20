@@ -197,8 +197,25 @@ function configureSidebarVisibilities(user) {
   if (roleArchivo === "Admin" && linkAdminArchivo) linkAdminArchivo.style.display = "flex";
   if (roleRrhh === "Admin" && linkAdminRrhh) linkAdminRrhh.style.display = "flex";
 
-  // En páginas standalone usar el tab de la página actual, si no el módulo del usuario
+  // En páginas standalone: controlar acceso y usar el tab de la página actual
   const standalonePage = document.body.dataset.page;
+  if (standalonePage) {
+    const mods = user.modules || (user.modulo ? [user.modulo] : []);
+    const rArch = (user.roles && user.roles["Archivo"]) ? user.roles["Archivo"] : null;
+    const rRrhh = (user.roles && user.roles["RRHH"]) ? user.roles["RRHH"] : null;
+    let allowed = false;
+    if (standalonePage === "archivo") allowed = mods.includes("Archivo");
+    else if (standalonePage === "rrhh") allowed = mods.includes("RRHH");
+    else if (standalonePage === "admin-archivo") allowed = rArch === "Admin";
+    else if (standalonePage === "admin-rrhh") allowed = rRrhh === "Admin";
+    if (!allowed) {
+      if (rArch === "Admin") { window.location.href = "/admin/archivo"; return; }
+      if (rRrhh === "Admin") { window.location.href = "/admin/rrhh"; return; }
+      if (mods.includes("RRHH")) { window.location.href = "/rrhh"; return; }
+      window.location.href = "/archivo";
+      return;
+    }
+  }
   const defaultTab = standalonePage || ((user.modulo === "RRHH") ? "rrhh" : "archivo");
   switchTab(defaultTab);
 }
@@ -1556,11 +1573,12 @@ function setupEventListeners() {
   safeOn("sidebar-close-btn", "click", closeSidebar);
   safeOn("sidebar-overlay", "click", closeSidebar);
 
-  // Tabs Sidebar
-  safeOn("menu-btn-archivo", "click", (e) => { e.preventDefault(); switchTab("archivo"); });
-  safeOn("menu-btn-rrhh", "click", (e) => { e.preventDefault(); switchTab("rrhh"); });
-  safeOn("menu-btn-admin-archivo", "click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
-  safeOn("menu-btn-admin-rrhh", "click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "RRHH"; switchTab("admin-rrhh"); });
+  // Tabs Sidebar (only intercept in SPA mode; on standalone pages let the <a href> navigate)
+  const isSPA = !!document.getElementById("app-portal");
+  safeOn("menu-btn-archivo", "click", (e) => { if (!isSPA) return; e.preventDefault(); switchTab("archivo"); });
+  safeOn("menu-btn-rrhh", "click", (e) => { if (!isSPA) return; e.preventDefault(); switchTab("rrhh"); });
+  safeOn("menu-btn-admin-archivo", "click", (e) => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
+  safeOn("menu-btn-admin-rrhh", "click", (e) => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "RRHH"; switchTab("admin-rrhh"); });
   safeOn("module_switch_btn", "click", handleModuleSwitch);
 
   // Buscador de Archivo
