@@ -27,7 +27,6 @@ const state = {
     results: [],
     search: "",
     selectedTypes: [],
-    selectedPeople: [],
     selectedEstados: [],
     dateStart: "",
     dateEnd: "",
@@ -351,10 +350,6 @@ function initTomSelects() {
     state.rrhh.selectedEstados = Array.isArray(val) ? val : (val ? [val] : []);
     state.rrhh.page = 1; triggerRrhhSearch();
   });
-  makeSel("choice-rrhh-people", state.choices.rrhh.people, (val) => {
-    state.rrhh.selectedPeople = Array.isArray(val) ? val : (val ? [val] : []);
-    state.rrhh.page = 1; triggerRrhhSearch();
-  });
 }
 
 // ==========================================================================
@@ -466,13 +461,11 @@ function resetDateFilters(module) {
     if (tsInstances["choice-archivo-doc-type"]) tsInstances["choice-archivo-doc-type"].clear(true);
     if (tsInstances["choice-archivo-tesauro"]) tsInstances["choice-archivo-tesauro"].clear(true);
   } else {
-    state.rrhh.selectedPeople = [];
     state.rrhh.selectedEstados = [];
     const sr = document.getElementById("search_rrhh");
     if (sr) sr.value = "";
     if (tsInstances["choice-rrhh-doc-type"]) tsInstances["choice-rrhh-doc-type"].clear(true);
     if (tsInstances["choice-rrhh-estado"]) tsInstances["choice-rrhh-estado"].clear(true);
-    if (tsInstances["choice-rrhh-people"]) tsInstances["choice-rrhh-people"].clear(true);
   }
   
   const limits = state.choices[module];
@@ -578,7 +571,6 @@ async function triggerRrhhSearch() {
   const payload = {
     search_term: state.rrhh.search,
     doc_types: state.rrhh.selectedTypes,
-    people_terms: state.rrhh.selectedPeople,
     estados: state.rrhh.selectedEstados,
     date_start: state.rrhh.dateStart,
     date_end: state.rrhh.dateEnd,
@@ -665,15 +657,27 @@ function renderRrhhList() {
 // Helpers
 function getPersonInitials(name) {
   if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
+
+  const normalized = String(name).trim();
+  if (!normalized) return "?";
+
+  const commaParts = normalized.split(",").map(part => part.trim()).filter(Boolean);
+  if (commaParts.length >= 2) {
+    const surnameToken = (commaParts[0].split(/\s+/).filter(Boolean)[0] || "").charAt(0);
+    const givenToken = (commaParts[1].split(/\s+/).filter(Boolean)[0] || "").charAt(0);
+    if (surnameToken || givenToken) return `${surnameToken}${givenToken}`.toUpperCase();
+  }
+
+  const parts = normalized.split(/\s+/).filter(Boolean);
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  if (parts.length >= 4) return (parts[0][0] + parts[2][0]).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 function getStatusColor(status) {
   switch (status) {
     case "Activo": return "#28a745";
-    case "Inactivo": return "#dc3545";
+    case "Retirado": return "#dc3545";
     case "Retirado": return "#6f42c1";
     case "Pensionado": return "#0056b3";
     default: return "#6c757d";
@@ -1231,7 +1235,7 @@ function renderDynamicSubmitFields() {
           <label class="font-weight-bold text-muted">Estado *</label>
           <select id="reg-estado-${suf}" class="form-control" required>
             <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
+            <option value="Retirado">Retirado</option>
             <option value="Retirado">Retirado</option>
             <option value="Pensionado">Pensionado</option>
           </select>

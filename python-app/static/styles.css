@@ -85,6 +85,13 @@ a:hover {
     margin-right: 0.35rem;
 }
 
+.ds-navbar-logo-img {
+    display: block;
+    height: 34px;
+    width: auto;
+    margin-left: 0.35rem;
+}
+
 .main-header .ds-navbar-logo {
     text-align: left !important;
     font-weight: 800;
