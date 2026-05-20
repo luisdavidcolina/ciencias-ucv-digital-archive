@@ -129,7 +129,7 @@ build_main_body_ui <- function(session_state, db_archivo, db_rrhh) {
                 status = "secondary",
                 solidHeader = FALSE,
                 collapsed = TRUE,
-                checkboxGroupInput("rrhh_estado", "Condición", choices = c("Activo", "Inactivo", "Retirado", "Pensionado"))
+                checkboxGroupInput("rrhh_estado", label = NULL, choices = c("Activo", "Inactivo", "Retirado", "Pensionado"))
               ),
               bs4AccordionItem(
                 title = "Personas",

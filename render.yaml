@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ciencias-ucv-digital-archive
+    env: python
+    branch: main
+    root: python-app
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    runtime: python3.10
+    autoDeploy: true
+    plan: free
+    healthCheckPath: /

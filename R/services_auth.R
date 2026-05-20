@@ -13,3 +13,18 @@ authenticate_user <- function(db_users, user_id, password) {
 
   db_users[match_idx, , drop = FALSE]
 }
+
+restore_user_session <- function(db_users, user_id) {
+  safe_user <- trimws(as.character(user_id[1]))
+
+  if (is.na(safe_user) || !nzchar(safe_user)) {
+    return(NULL)
+  }
+
+  match_idx <- which(db_users$usuario == safe_user)
+  if (length(match_idx) != 1) {
+    return(NULL)
+  }
+
+  db_users[match_idx, , drop = FALSE]
+}

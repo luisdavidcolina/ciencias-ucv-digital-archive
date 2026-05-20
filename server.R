@@ -16,6 +16,270 @@ server <- function(input, output, session) {
   p_archivo <- reactiveVal(1)
   p_rrhh <- reactiveVal(1)
 
+  # Límites absolutos de fechas para resetear Archivo
+  archivo_fechas_raw <- suppressWarnings(as.Date(db_archivo$fecha, format = "%Y-%m-%d"))
+  archivo_fechas_raw <- archivo_fechas_raw[!is.na(archivo_fechas_raw)]
+  abs_archivo_min_fecha <- if (length(archivo_fechas_raw) > 0) min(archivo_fechas_raw) else Sys.Date() - 365
+  abs_archivo_max_fecha <- if (length(archivo_fechas_raw) > 0) max(archivo_fechas_raw) else Sys.Date()
+  abs_archivo_min_year <- as.integer(format(abs_archivo_min_fecha, "%Y"))
+  abs_archivo_max_year <- as.integer(format(abs_archivo_max_fecha, "%Y"))
+
+  # Límites absolutos de fechas para resetear RRHH
+  rrhh_fechas_raw <- suppressWarnings(as.Date(db_rrhh$fecha_ingreso, format = "%Y-%m-%d"))
+  rrhh_fechas_raw <- rrhh_fechas_raw[!is.na(rrhh_fechas_raw)]
+  abs_rrhh_min_fecha <- if (length(rrhh_fechas_raw) > 0) min(rrhh_fechas_raw) else Sys.Date() - 365
+  abs_rrhh_max_fecha <- if (length(rrhh_fechas_raw) > 0) max(rrhh_fechas_raw) else Sys.Date()
+  abs_rrhh_min_year <- as.integer(format(abs_rrhh_min_fecha, "%Y"))
+  abs_rrhh_max_year <- as.integer(format(abs_rrhh_max_fecha, "%Y"))
+
+  # Helper para conversión de fecha segura (evita errores charToDate durante digitación del usuario)
+  safe_get_year <- function(date_val) {
+    if (is.null(date_val) || length(date_val) == 0) return(NA_integer_)
+    tryCatch({
+      d <- as.Date(date_val)
+      if (is.na(d)) return(NA_integer_)
+      as.integer(format(d, "%Y"))
+    }, error = function(e) {
+      NA_integer_
+    })
+  }
+
+  safe_check_dates_equal <- function(d1, d2) {
+    tryCatch({
+      as.Date(d1) == as.Date(d2)
+    }, error = function(e) {
+      FALSE
+    })
+  }
+
+  # Sincronización Archivo
+  observeEvent(input$archivo_date_range, {
+    dates <- input$archivo_date_range
+    req(length(dates) == 2)
+    
+    y_start <- safe_get_year(dates[1])
+    y_end <- safe_get_year(dates[2])
+    req(!is.na(y_start), !is.na(y_end))
+    
+    # Sincronizar el Slider si los valores no coinciden
+    if (!is.null(input$archivo_year_range)) {
+      current_slider <- input$archivo_year_range
+      if (current_slider[1] != y_start || current_slider[2] != y_end) {
+        updateSliderInput(session, "archivo_year_range", value = c(y_start, y_end))
+      }
+    }
+    
+    # Sincronizar el Selector de Año Específico si no coincide
+    if (!is.null(input$archivo_specific_year)) {
+      current_spec <- input$archivo_specific_year
+      expected_spec <- if (y_start == y_end) as.character(y_start) else ""
+      if (current_spec != expected_spec) {
+        updateSelectInput(session, "archivo_specific_year", selected = expected_spec)
+      }
+    }
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$archivo_year_range, {
+    years <- input$archivo_year_range
+    req(length(years) == 2, !any(is.na(years)))
+    
+    # Si el date range actual ya cubre el mismo año o rango de años, NO lo sobreescribimos.
+    if (!is.null(input$archivo_date_range)) {
+      current_dates <- input$archivo_date_range
+      if (length(current_dates) == 2) {
+        y_start <- safe_get_year(current_dates[1])
+        y_end <- safe_get_year(current_dates[2])
+        if (!is.na(y_start) && !is.na(y_end) && y_start == years[1] && y_end == years[2]) {
+          return()
+        }
+      }
+    }
+    
+    expected_start <- as.Date(paste0(years[1], "-01-01"))
+    expected_end <- as.Date(paste0(years[2], "-12-31"))
+    
+    updateDateRangeInput(session, "archivo_date_range", start = expected_start, end = expected_end)
+    
+    if (!is.null(input$archivo_specific_year)) {
+      current_spec <- input$archivo_specific_year
+      expected_spec <- if (years[1] == years[2]) as.character(years[1]) else ""
+      if (current_spec != expected_spec) {
+        updateSelectInput(session, "archivo_specific_year", selected = expected_spec)
+      }
+    }
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$archivo_specific_year, {
+    spec_year <- input$archivo_specific_year
+    req(!is.null(spec_year), !is.na(spec_year))
+    
+    if (nzchar(spec_year)) {
+      y <- as.integer(spec_year)
+      req(!is.na(y))
+      
+      # Si las fechas ya están dentro de este año específico, no las machacamos
+      if (!is.null(input$archivo_date_range)) {
+        current_dates <- input$archivo_date_range
+        if (length(current_dates) == 2) {
+          y_start <- safe_get_year(current_dates[1])
+          y_end <- safe_get_year(current_dates[2])
+          if (!is.na(y_start) && !is.na(y_end) && y_start == y && y_end == y) {
+            return()
+          }
+        }
+      }
+      
+      expected_start <- as.Date(paste0(y, "-01-01"))
+      expected_end <- as.Date(paste0(y, "-12-31"))
+      
+      updateDateRangeInput(session, "archivo_date_range", start = expected_start, end = expected_end)
+      
+      if (!is.null(input$archivo_year_range)) {
+        current_slider <- input$archivo_year_range
+        if (current_slider[1] != y || current_slider[2] != y) {
+          updateSliderInput(session, "archivo_year_range", value = c(y, y))
+        }
+      }
+    } else {
+      # Si es "Todos", solo restablecemos si el rango anterior estaba acotado a un único año
+      if (!is.null(input$archivo_date_range)) {
+        current_dates <- input$archivo_date_range
+        if (length(current_dates) == 2) {
+          y_start <- safe_get_year(current_dates[1])
+          y_end <- safe_get_year(current_dates[2])
+          
+          if (!is.na(y_start) && !is.na(y_end) && y_start == y_end) {
+            if (!safe_check_dates_equal(current_dates[1], abs_archivo_min_fecha) || 
+                !safe_check_dates_equal(current_dates[2], abs_archivo_max_fecha)) {
+              updateDateRangeInput(session, "archivo_date_range", start = abs_archivo_min_fecha, end = abs_archivo_max_fecha)
+            }
+            
+            if (!is.null(input$archivo_year_range)) {
+              current_slider <- input$archivo_year_range
+              if (current_slider[1] != abs_archivo_min_year || current_slider[2] != abs_archivo_max_year) {
+                updateSliderInput(session, "archivo_year_range", value = c(abs_archivo_min_year, abs_archivo_max_year))
+              }
+            }
+          }
+        }
+      }
+    }
+  }, ignoreInit = TRUE)
+
+  # Sincronización RRHH
+  observeEvent(input$rrhh_date_range, {
+    dates <- input$rrhh_date_range
+    req(length(dates) == 2)
+    
+    y_start <- safe_get_year(dates[1])
+    y_end <- safe_get_year(dates[2])
+    req(!is.na(y_start), !is.na(y_end))
+    
+    # Sincronizar el Slider si los valores no coinciden
+    if (!is.null(input$rrhh_year_range)) {
+      current_slider <- input$rrhh_year_range
+      if (current_slider[1] != y_start || current_slider[2] != y_end) {
+        updateSliderInput(session, "rrhh_year_range", value = c(y_start, y_end))
+      }
+    }
+    
+    # Sincronizar el Selector de Año Específico si no coincide
+    if (!is.null(input$rrhh_specific_year)) {
+      current_spec <- input$rrhh_specific_year
+      expected_spec <- if (y_start == y_end) as.character(y_start) else ""
+      if (current_spec != expected_spec) {
+        updateSelectInput(session, "rrhh_specific_year", selected = expected_spec)
+      }
+    }
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$rrhh_year_range, {
+    years <- input$rrhh_year_range
+    req(length(years) == 2, !any(is.na(years)))
+    
+    # Si el date range actual ya cubre el mismo año o rango de años, NO lo sobreescribimos.
+    if (!is.null(input$rrhh_date_range)) {
+      current_dates <- input$rrhh_date_range
+      if (length(current_dates) == 2) {
+        y_start <- safe_get_year(current_dates[1])
+        y_end <- safe_get_year(current_dates[2])
+        if (!is.na(y_start) && !is.na(y_end) && y_start == years[1] && y_end == years[2]) {
+          return()
+        }
+      }
+    }
+    
+    expected_start <- as.Date(paste0(years[1], "-01-01"))
+    expected_end <- as.Date(paste0(years[2], "-12-31"))
+    
+    updateDateRangeInput(session, "rrhh_date_range", start = expected_start, end = expected_end)
+    
+    if (!is.null(input$rrhh_specific_year)) {
+      current_spec <- input$rrhh_specific_year
+      expected_spec <- if (years[1] == years[2]) as.character(years[1]) else ""
+      if (current_spec != expected_spec) {
+        updateSelectInput(session, "rrhh_specific_year", selected = expected_spec)
+      }
+    }
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$rrhh_specific_year, {
+    spec_year <- input$rrhh_specific_year
+    req(!is.null(spec_year), !is.na(spec_year))
+    
+    if (nzchar(spec_year)) {
+      y <- as.integer(spec_year)
+      req(!is.na(y))
+      
+      # Si las fechas ya están dentro de este año específico, no las machacamos
+      if (!is.null(input$rrhh_date_range)) {
+        current_dates <- input$rrhh_date_range
+        if (length(current_dates) == 2) {
+          y_start <- safe_get_year(current_dates[1])
+          y_end <- safe_get_year(current_dates[2])
+          if (!is.na(y_start) && !is.na(y_end) && y_start == y && y_end == y) {
+            return()
+          }
+        }
+      }
+      
+      expected_start <- as.Date(paste0(y, "-01-01"))
+      expected_end <- as.Date(paste0(y, "-12-31"))
+      
+      updateDateRangeInput(session, "rrhh_date_range", start = expected_start, end = expected_end)
+      
+      if (!is.null(input$rrhh_year_range)) {
+        current_slider <- input$rrhh_year_range
+        if (current_slider[1] != y || current_slider[2] != y) {
+          updateSliderInput(session, "rrhh_year_range", value = c(y, y))
+        }
+      }
+    } else {
+      # Si es "Todos", solo restablecemos si el rango anterior estaba acotado a un único año
+      if (!is.null(input$rrhh_date_range)) {
+        current_dates <- input$rrhh_date_range
+        if (length(current_dates) == 2) {
+          y_start <- safe_get_year(current_dates[1])
+          y_end <- safe_get_year(current_dates[2])
+          
+          if (!is.na(y_start) && !is.na(y_end) && y_start == y_end) {
+            if (!safe_check_dates_equal(current_dates[1], abs_rrhh_min_fecha) || 
+                !safe_check_dates_equal(current_dates[2], abs_rrhh_max_fecha)) {
+              updateDateRangeInput(session, "rrhh_date_range", start = abs_rrhh_min_fecha, end = abs_rrhh_max_fecha)
+            }
+            
+            if (!is.null(input$rrhh_year_range)) {
+              current_slider <- input$rrhh_year_range
+              if (current_slider[1] != abs_rrhh_min_year || current_slider[2] != abs_rrhh_max_year) {
+                updateSliderInput(session, "rrhh_year_range", value = c(abs_rrhh_min_year, abs_rrhh_max_year))
+              }
+            }
+          }
+        }
+      }
+    }
+  }, ignoreInit = TRUE)
+
   # EXPORTAR ESTADO PARA CONDITIONALPANEL
   output$is_logged <- reactive({ isTRUE(session_state$logged) })
   outputOptions(output, "is_logged", suspendWhenHidden = FALSE)
@@ -38,6 +302,13 @@ server <- function(input, output, session) {
       session_state$username <- match$usuario[1]
       session_state$modulo <- match$modulo[1]
       session_state$rol <- match$rol[1]
+
+            # Persistir sesión en el cliente
+            session$sendCustomMessage("persistSession", list(
+              username = match$usuario[1],
+              modulo = match$modulo[1],
+              rol = match$rol[1]
+            ))
 
             # Trigger client-side navigation after successful login.
             session$sendCustomMessage("navigateToSearch", list(modulo = session_state$modulo))
@@ -67,8 +338,27 @@ server <- function(input, output, session) {
   
   observeEvent(input$logout_btn, {
     session_state$logged <- FALSE
+    session_state$username <- NULL
     session_state$modulo <- NULL
     session_state$rol <- NULL
+    # Limpiar sesión persistida en el cliente
+    session$sendCustomMessage("clearPersistedSession", list())
+  })
+
+  observeEvent(input$restore_session, {
+    saved <- input$restore_session
+    req(saved, saved$username)
+    
+    match <- restore_user_session(db_users, saved$username)
+    if (!is.null(match) && nrow(match) == 1) {
+      log_event(match$usuario[1], "Session Restored", match$modulo[1], paste("Rol:", match$rol[1]))
+      session_state$logged <- TRUE
+      session_state$username <- match$usuario[1]
+      session_state$modulo <- match$modulo[1]
+      session_state$rol <- match$rol[1]
+      
+      session$sendCustomMessage("navigateToSearch", list(modulo = session_state$modulo))
+    }
   })
 
   # ==========================================
