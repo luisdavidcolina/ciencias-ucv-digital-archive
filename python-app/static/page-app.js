@@ -101,10 +101,8 @@ async function performLogin() {
 
 function chooseLandingPage(user) {
   if (!user) return "/archivo";
-  if (user.roles && user.roles.Archivo === "Admin") return "/admin/archivo";
-  if (user.roles && user.roles.RRHH === "Admin") return "/admin/rrhh";
-  if (user.modules?.includes("Archivo")) return "/archivo";
   if (user.modules?.includes("RRHH")) return "/rrhh";
+  if (user.modules?.includes("Archivo")) return "/archivo";
   return "/archivo";
 }
 

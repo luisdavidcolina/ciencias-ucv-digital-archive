@@ -10,32 +10,37 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body data-page="login">
-  <div class="ds-login-backdrop" style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px;">
-    <div class="card p-5 ds-login-card" style="max-width:420px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.12);">
-      <div style="text-align:center;margin-bottom:24px;">
-        <img src="/static/logoblanco.png" alt="UCV" height="64" style="margin-bottom:16px;">
-        <h1 style="font-size:1.5rem;margin:0;color:#2b4e72;">Archivo Digital UCV</h1>
-        <p class="text-muted" style="font-size:0.95rem;margin-top:8px;">Acceso institucional con seguridad básica</p>
+  <div class="ds-login-backdrop" style="display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;gap:15px;">
+    <div style="text-align:center;width:100%;margin-bottom:5px;">
+      <img src="/static/logoblanco.png" height="64px" style="display:block;margin:0 auto;" alt="Logo UCV Blanco">
+    </div>
+    <div class="card p-5 ds-login-card">
+      <div style="text-align:center;width:100%;margin-bottom:10px;">
+        <p class="text-muted" style="font-size:0.95rem;margin:0 0 8px;">
+          <i class="fas fa-lock" style="color:#2b4e72;margin-right:8px;"></i>
+          Intranet Cifrada de Acceso Restringido
+        </p>
       </div>
-      <div class="form-group">
-        <label for="login_user">Usuario</label>
-        <div class="input-group">
-          <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-user"></i></span></div>
-          <input id="login_user" class="form-control" type="text" placeholder="ID de usuario">
+      <div class="form-group" style="text-align:left;width:100%;margin-bottom:20px;position:relative;">
+        <label style="font-weight:bold;color:#495057;font-size:0.95rem;margin-bottom:5px;display:block;">Credencial Institucional</label>
+        <i class="fas fa-user auth-icon"></i>
+        <input type="text" id="login_user" class="form-control" placeholder="ID de Usuario" style="border-radius:25px !important;padding-left:45px !important;height:52px !important;font-size:1.1rem !important;border:1px solid #ced4da !important;width:100% !important;display:block !important;">
+      </div>
+      <div class="form-group" style="text-align:left;width:100%;margin-bottom:30px;position:relative;">
+        <label style="font-weight:bold;color:#495057;font-size:0.95rem;margin-bottom:5px;display:block;">Contraseña</label>
+        <i class="fas fa-key auth-icon"></i>
+        <div class="ds-password-wrap">
+          <input type="password" id="login_pass" class="form-control" placeholder="••••••••" style="border-radius:25px !important;padding-left:45px !important;height:52px !important;font-size:1.1rem !important;border:1px solid #ced4da !important;width:100% !important;display:block !important;">
+          <button id="toggle_login_pass" type="button" class="ds-pass-toggle" aria-label="Mostrar contraseña">
+            <i class="fas fa-eye-slash"></i>
+          </button>
         </div>
       </div>
-      <div class="form-group">
-        <label for="login_pass">Contraseña</label>
-        <div class="input-group">
-          <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-key"></i></span></div>
-          <input id="login_pass" class="form-control" type="password" placeholder="********">
-          <div class="input-group-append">
-            <button id="toggle_login_pass" type="button" class="btn btn-outline-secondary"><i class="fas fa-eye-slash"></i></button>
-          </div>
-        </div>
+      <div style="width:100%;">
+        <button id="login_btn" class="btn w-100" style="background-color:#2b4e72;color:white;border:none;border-radius:25px;padding:12px;font-weight:bold;font-size:1.15rem;box-shadow:0 4px 15px rgba(43,78,114,0.4);">
+          <i class="fas fa-shield-alt" style="margin-right:8px;"></i> Autorizar Ingreso
+        </button>
       </div>
-      <button id="login_btn" class="btn btn-primary btn-block" style="font-weight:bold;">Ingresar</button>
-      <p class="text-muted" style="margin-top:16px;font-size:0.9rem;">Usuario de prueba: <strong>admin</strong> / Contraseña: <strong>admin</strong></p>
     </div>
   </div>
   <script src="/static/page-app.js"></script>

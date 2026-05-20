@@ -955,6 +955,13 @@ a:hover {
 /* ========================================================
    MODERN UI/UX UPGRADES (GLASSMORPHISM & AUTH)
    ======================================================== */
+body[data-page="login"] {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: none !important;
+}
+
 .ds-login-backdrop {
     position: fixed;
     top: 0;

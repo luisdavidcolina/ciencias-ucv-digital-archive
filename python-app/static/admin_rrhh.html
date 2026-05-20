@@ -3,66 +3,481 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin RRHH - UCV</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/static/styles.css">
+  <title>Panel RRHH - UCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body data-page="admin_rrhh">
-  <div class="wrapper">
-    <header class="main-header navbar navbar-expand navbar-white navbar-light">
-      <div class="container-fluid d-flex align-items-center">
-        <a href="/rrhh" class="navbar-brand ds-navbar-logo"><i class="fas fa-tools"></i> Admin RRHH</a>
-        <span id="current_user_info" class="ds-user-badge ml-3"></span>
-        <div class="ml-auto d-flex align-items-center ds-header-actions">
-          <a href="/admin/archivo" class="btn btn-outline-secondary btn-sm mr-2">Admin Archivo</a>
-          <button id="logout_btn" class="btn btn-danger btn-sm">Cerrar sesión</button>
-        </div>
-      </div>
-    </header>
-    <div class="content-wrapper">
-    <main class="container py-4">
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <div class="card p-4">
-          <h3>Indicadores RRHH</h3>
-          <div class="row mt-3">
-            <div class="col-6 mb-3"><div class="card card-body text-center"><strong id="stat_total_docs">0</strong><div class="text-muted">Expedientes</div></div></div>
-            <div class="col-6 mb-3"><div class="card card-body text-center"><strong id="stat_categories">0</strong><div class="text-muted">Categorías</div></div></div>
-          </div>
-          <div class="row">
-            <div class="col-6 mb-3"><div class="card card-body text-center"><strong id="stat_users">0</strong><div class="text-muted">Usuarios</div></div></div>
-            <div class="col-6 mb-3"><div class="card card-body text-center"><strong id="stat_latest">N/A</strong><div class="text-muted">Último ingreso</div></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-4">
-          <h3>Nuevo ingreso RRHH</h3>
-          <form id="admin_submit_form">
-            <div class="form-group"><label for="reg_empleado">Empleado</label><input id="reg_empleado" class="form-control" required></div>
-            <div class="form-group"><label for="reg_cedula">Cédula</label><input id="reg_cedula" class="form-control" required></div>
-            <div class="form-group"><label for="reg_doc_type">Tipología</label><input id="reg_doc_type" class="form-control" required></div>
-            <div class="form-row">
-              <div class="form-group col-md-6"><label for="reg_fecha">Fecha ingreso</label><input id="reg_fecha" type="date" class="form-control" required></div>
-              <div class="form-group col-md-6"><label for="reg_location">Ubicación</label><input id="reg_location" class="form-control" required></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6"><label for="reg_departamento">Departamento</label><input id="reg_departamento" class="form-control" required></div>
-              <div class="form-group col-md-6"><label for="reg_estado">Estado</label><input id="reg_estado" class="form-control" required></div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Guardar RRHH</button>
-          </form>
-        </div>
-      </div>
+<body class="hold-transition sidebar-mini" data-page="admin-rrhh">
+
+  <!-- HEADER NAVBAR -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <button id="sidebar-toggle-btn" class="btn btn-link nav-link px-2" title="Menú" style="font-size:1.3rem; color:#2b4e72;">
+          <i class="fas fa-bars"></i>
+        </button>
+      </li>
+      <li class="nav-item dropdown">
+        <span class="ds-navbar-logo nav-link">
+          <i class="fas fa-landmark"></i> Archivo Institucional
+        </span>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown ds-nav-user">
+        <span style="padding-top:10px; display:inline-block; margin-right:8px; font-weight:bold; color:#dc3545;">
+          <i class="fas fa-user-circle"></i> <span id="nav_username">ID: anonymous</span>
+        </span>
+      </li>
+      <li class="nav-item dropdown ds-nav-logout">
+        <button id="logout_btn" class="btn btn-outline-secondary btn-sm" style="margin-top:5px; margin-right:10px;">
+          <i class="fas fa-sign-out-alt"></i> Cerrar
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- SIDEBAR OVERLAY -->
+  <div id="sidebar-overlay" class="ds-sidebar-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="app-sidebar" class="ds-sidebar">
+    <div class="ds-sidebar-header">
+      <img src="/static/logo.png" alt="Logo UCV" class="ds-sidebar-logo">
+      <span class="ds-sidebar-brand">Ciencias UCV</span>
+      <button id="sidebar-close-btn" class="ds-sidebar-close" title="Cerrar menú">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-    <div class="card">
-      <div class="card-header"><strong>Historial RRHH</strong></div>
-      <div class="card-body" id="admin_history">Cargando...</div>
+    <div class="ds-sidebar-divider"></div>
+    <nav class="ds-sidebar-nav">
+      <a href="/archivo" class="ds-sidebar-link">
+        <i class="fas fa-folder-open"></i>
+        <span>Archivo Institucional</span>
+      </a>
+      <a href="/rrhh" class="ds-sidebar-link">
+        <i class="fas fa-id-card"></i>
+        <span>Archivos RRHH</span>
+      </a>
+      <a href="/admin/archivo" class="ds-sidebar-link">
+        <i class="fas fa-sliders-h"></i>
+        <span>Panel Archivo</span>
+        <span class="ds-sidebar-badge">A</span>
+      </a>
+      <a href="/admin/rrhh" class="ds-sidebar-link active">
+        <i class="fas fa-user-shield"></i>
+        <span>Panel RRHH</span>
+        <span class="ds-sidebar-badge">R</span>
+      </a>
+    </nav>
+    <div class="ds-sidebar-footer">
+      <i class="fas fa-shield-alt mr-1"></i> Intranet Cifrada
     </div>
-  </main>
+  </aside>
+
+  <!-- CONTENT WRAPPER -->
+  <div class="content-wrapper">
+
+    <!-- TAB PANEL DE CONTROL (ADMIN RRHH) -->
+    <section id="tab-admin-rrhh" class="app-tab-section p-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="ds-breadcrumb-wrapper">
+            <div class="ds-breadcrumb">
+              <i class="fas fa-shield-alt"></i> Panel de Control / Administración - RRHH
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI METRICS -->
+      <div class="row mb-4">
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #0056b3;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Total Documentos</h6>
+                <h3 id="kpi-total-docs-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+              </div>
+              <i class="fas fa-file-invoice fa-2x text-primary opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #28a745;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Categorías Activas</h6>
+                <h3 id="kpi-total-cats-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+              </div>
+              <i class="fas fa-tags fa-2x text-success opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #ffc107;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Usuarios Módulo</h6>
+                <h3 id="kpi-total-users-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+              </div>
+              <i class="fas fa-users-cog fa-2x text-warning opacity-50"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #dc3545;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Último Ingreso</h6>
+                <h3 id="kpi-latest-entry-rrhh" class="font-weight-bold text-dark mb-0" style="font-size: 1.15rem; line-height: 1.8;">N/A</h3>
+              </div>
+              <i class="fas fa-history fa-2x text-danger opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS DE ADMINISTRACIÓN -->
+      <div class="card">
+        <div class="card-header p-2 bg-light">
+          <ul id="admin_workspace_tabs-rrhh" class="nav nav-pills" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="tab-admin-rrhh-stats" data-toggle="pill" href="#pane-admin-rrhh-stats" role="tab">
+                <i class="fas fa-chart-bar"></i> Estadísticas
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-new" data-toggle="pill" href="#pane-admin-rrhh-new" role="tab">
+                <i class="fas fa-plus-circle"></i> Nuevo Ingreso
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-monitor" data-toggle="pill" href="#pane-admin-rrhh-monitor" role="tab">
+                <i class="fas fa-table"></i> Monitor RRHH
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-categories" data-toggle="pill" href="#pane-admin-rrhh-categories" role="tab">
+                <i class="fas fa-sitemap"></i> Categorías
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-users" data-toggle="pill" href="#pane-admin-rrhh-users" role="tab">
+                <i class="fas fa-users-cog"></i> Usuarios
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-body">
+          <div class="tab-content">
+
+            <!-- 1. PESTAÑA: ESTADÍSTICAS -->
+            <div class="tab-pane fade show active" id="pane-admin-rrhh-stats" role="tabpanel">
+              <div class="card card-info mb-3">
+                <div class="card-header p-3">
+                  <h5 class="card-title m-0"><i class="fas fa-filter mr-2"></i> Filtros Analíticos</h5>
+                </div>
+                <div class="card-body p-3">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="font-weight-bold text-muted">Rango de fechas para analíticas</label>
+                      <div class="d-flex align-items-center gap-1">
+                        <input type="date" id="stats-date-start-rrhh" class="form-control form-control-sm">
+                        <span class="px-1 text-muted">a</span>
+                        <input type="date" id="stats-date-end-rrhh" class="form-control form-control-sm">
+                      </div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                      <button id="btn-apply-stats-rrhh" class="btn btn-info btn-sm w-100">Actualizar Análisis</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card card-primary">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie"></i> Distribución por Tipo</h3></div>
+                    <div class="card-body p-3">
+                      <div id="stats_by_type-rrhh" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
+                        [Cargando Gráfico...]
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card card-success">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-alt"></i> Cronología de Ingresos</h3></div>
+                    <div class="card-body p-3">
+                      <div id="stats_timeline-rrhh" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
+                        [Cargando Histograma...]
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12">
+                  <div class="card card-secondary">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-server"></i> Estado del Sistema</h3></div>
+                    <div class="card-body p-3">
+                      <div id="stats_system-rrhh" class="row"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. PESTAÑA: NUEVO INGRESO -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-new" role="tabpanel">
+              <div class="row">
+                <div class="col-md-8">
+                  <form id="admin-submit-form-rrhh" class="card card-primary">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-pen-fancy"></i> Formulario de Metadatos Dublin Core</h3>
+                    </div>
+                    <div class="card-body p-4">
+                      <div id="dynamic-submit-fields-rrhh"></div>
+                      <hr>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="text-muted" style="font-size:0.85rem;">
+                          <i class="fas fa-info-circle"></i> Los campos marcados con * son obligatorios
+                        </span>
+                        <button type="submit" id="btn_submit_workspace-rrhh" class="btn btn-success" style="border-radius: 8px; font-weight: bold; padding: 10px 30px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);">
+                          <i class="fas fa-cloud-upload-alt"></i> Guardar en RRHH
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="col-md-4">
+                  <div class="card card-secondary">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Zona de Carga</h3>
+                    </div>
+                    <div class="card-body p-4 text-center">
+                      <div style="border: 2px dashed #adb5bd; border-radius: 10px; padding: 30px; background-color: #f8f9fa; margin-bottom: 15px;">
+                        <i class="fas fa-file-upload fa-3x text-secondary mb-2"></i>
+                        <h5 class="font-weight-bold text-dark">ZONA DROP</h5>
+                        <p class="text-muted mb-3" style="font-size:0.85rem;">Arrastra aquí o selecciona archivos</p>
+                        <input type="file" id="file_upload-rrhh" class="form-control-file" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-rrhh').click()">Explorar...</button>
+                      </div>
+                      <div class="text-left mt-3" style="font-size:0.85rem; color:#6c757d;">
+                        <p class="mb-1"><i class="fas fa-check-circle text-success"></i> Formatos: PDF, DOC, ZIP, PNG</p>
+                        <p class="mb-1"><i class="fas fa-weight-hanging text-warning"></i> Peso Máximo: 200MB</p>
+                        <p class="mb-0"><i class="fas fa-star text-primary"></i> Recomendado: PDF/A (ISO 19005)</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card mt-3">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-history"></i> Últimos Ingresos</h3>
+                    </div>
+                    <div class="card-body p-3">
+                      <ul id="recent_submissions-rrhh" class="list-unstyled m-0" style="font-size:0.85rem; max-height: 200px; overflow-y:auto;"></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. PESTAÑA: MONITOR RRHH -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-monitor" role="tabpanel">
+              <div class="card card-info">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-database"></i> Directorio Activo RRHH</h3>
+                </div>
+                <div class="card-body p-4">
+                  <div class="row mb-3 align-items-center">
+                    <div class="col-md-3">
+                      <input type="text" id="admin_search-rrhh" class="form-control form-control-sm" placeholder="Buscar en tabla...">
+                    </div>
+                    <div class="col-md-3">
+                      <select id="admin_filter_type-rrhh" class="form-control form-control-sm">
+                        <option value="">Filtrar por Tipología...</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <select id="admin_filter_person-rrhh" class="form-control form-control-sm">
+                        <option value="">Filtrar por Persona...</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 text-right">
+                      <button id="btn_export_csv-rrhh" class="btn btn-outline-secondary btn-sm mr-1"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                      <button id="btn_refresh_table-rrhh" class="btn btn-outline-info btn-sm"><i class="fas fa-sync-alt"></i> Refrescar</button>
+                    </div>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-striped" style="font-size:0.85rem;">
+                      <thead>
+                        <tr class="bg-light text-dark">
+                          <th>Título / Empleado</th>
+                          <th>Tipo / Cédula</th>
+                          <th>Ubicación</th>
+                          <th>Fecha</th>
+                          <th>Auditoría / Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="admin_control_table-rrhh"></tbody>
+                    </table>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span id="admin_table_summary-rrhh" class="text-muted" style="font-size:0.85rem;">Mostrando 0 registros</span>
+                    <div>
+                      <button id="admin_prev-rrhh" class="btn btn-outline-secondary btn-sm mr-1"><i class="fas fa-chevron-left"></i></button>
+                      <span id="admin_page_info-rrhh" class="text-muted" style="font-size:0.85rem;">Pág 1 de 1</span>
+                      <button id="admin_next-rrhh" class="btn btn-outline-secondary btn-sm ml-1"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. PESTAÑA: CATEGORÍAS -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-categories" role="tabpanel">
+              <div class="row">
+                <div class="col-md-5">
+                  <div class="card card-warning">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-plus-square"></i> Nueva Categoría</h3>
+                    </div>
+                    <div class="card-body p-4">
+                      <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted">Nombre de la Tipología *</label>
+                        <input type="text" id="new_tax_name-rrhh" class="form-control" placeholder="Ej: Resolución Rectoral">
+                      </div>
+                      <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted">Descripción</label>
+                        <textarea id="new_tax_desc-rrhh" class="form-control" rows="3" placeholder="Breve descripción de esta tipología documental..."></textarea>
+                      </div>
+                      <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted">Alcance</label>
+                        <select id="new_tax_scope-rrhh" class="form-control">
+                          <option value="Archivo">Archivo</option>
+                          <option value="RRHH">RRHH</option>
+                          <option value="Ambos">Ambos</option>
+                        </select>
+                      </div>
+                      <button id="add_tax_btn-rrhh" class="btn btn-warning w-100 font-weight-bold" style="border-radius:8px;">
+                        <i class="fas fa-check-circle"></i> Guardar Categoría
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="card card-secondary">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-tags"></i> Taxonomías Activas</h3>
+                    </div>
+                    <div class="card-body p-3">
+                      <div id="admin_tax_list-rrhh" class="list-group"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. PESTAÑA: USUARIOS -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-users" role="tabpanel">
+              <div class="card card-danger">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-user-shield"></i> Control de Acceso</h3>
+                </div>
+                <div class="card-body p-4">
+                  <div id="admin_users_table-rrhh" class="table-responsive mb-4"></div>
+                  <hr>
+                  <h6 class="font-weight-bold text-dark mb-3"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h6>
+                  <div class="row mb-3">
+                    <div class="col-md-3">
+                      <input type="text" id="new_user_name-rrhh" class="form-control form-control-sm" placeholder="Usuario">
+                    </div>
+                    <div class="col-md-3">
+                      <input type="password" id="new_user_pass-rrhh" class="form-control form-control-sm" placeholder="Contraseña">
+                    </div>
+                    <div class="col-md-3">
+                      <select id="new_user_modulo-rrhh" class="form-control form-control-sm">
+                        <option value="Archivo">Archivo</option>
+                        <option value="RRHH">RRHH</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <select id="new_user_rol-rrhh" class="form-control form-control-sm">
+                        <option value="Normal">Normal</option>
+                        <option value="Admin">Admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button id="btn_add_user-rrhh" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
+                    <i class="fas fa-user-plus"></i> Crear Usuario
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
-  <script src="/static/page-app.js"></script>
+
+  <!-- Modal Documento -->
+  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content" style="border-radius:14px; border:1px solid #d6dbe1; box-shadow:0 18px 40px rgba(16,24,40,0.2);">
+        <div class="modal-body p-4">
+          <div class="ds-doc-modal-head mb-3">
+            <i class="fas fa-file-alt"></i>
+            <h4 id="modal-doc-title" class="m-0 text-primary font-weight-bold">Detalle de Documento</h4>
+          </div>
+          <div class="ds-doc-modal-grid">
+            <div class="ds-doc-panel ds-doc-thumb-panel">
+              <h5 class="font-weight-bold text-primary mb-2">Miniatura</h5>
+              <div class="ds-doc-thumb">
+                <i id="modal-doc-thumb-icon" class="fas fa-file-alt"></i>
+                <span id="modal-doc-thumb-badge" class="ds-doc-thumb-badge">N/A</span>
+              </div>
+            </div>
+            <div class="ds-doc-panel">
+              <h5 class="font-weight-bold text-primary mb-2">Metadata</h5>
+              <div id="modal-doc-meta-container"></div>
+            </div>
+            <div class="ds-doc-panel" style="grid-column:span 2;">
+              <h5 class="font-weight-bold text-primary mb-2">Descripción</h5>
+              <p id="modal-doc-abstract" class="ds-doc-abstract text-muted">Sin resumen disponible.</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 d-flex justify-content-end p-3">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+          <button id="btn-modal-view" class="btn btn-outline-info" title="Visualizar"><i class="fas fa-eye"></i></button>
+          <button id="btn-modal-edit" class="btn btn-outline-warning d-none" title="Editar"><i class="fas fa-pen"></i></button>
+          <button id="btn-modal-download" class="btn btn-outline-primary d-none" title="Descargar"><i class="fas fa-download"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Expediente RRHH -->
+  <div id="rrhh-person-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content" style="border-radius:14px; border:1px solid #d6dbe1; box-shadow:0 18px 40px rgba(16,24,40,0.2);">
+        <div class="modal-body p-4" style="max-height:80vh; overflow-y:auto;">
+          <div id="rrhh-person-modal-content"></div>
+        </div>
+        <div class="modal-footer border-top-0 p-3">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>

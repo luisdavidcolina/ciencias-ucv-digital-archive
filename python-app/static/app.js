@@ -76,7 +76,10 @@ function getAdminEl(base) {
 
 async function checkPersistedSession() {
   const raw = localStorage.getItem("archive_session");
-  if (!raw) return;
+  if (!raw) {
+    if (document.body.dataset.page) window.location.href = "/";
+    return;
+  }
   
   try {
     const saved = JSON.parse(raw);
@@ -103,6 +106,11 @@ async function checkPersistedSession() {
 }
 
 function loginSuccess(user) {
+  // Force modulo for standalone admin pages
+  const pageAttr = document.body.dataset.page;
+  if (pageAttr === "admin-archivo") user.modulo = "Archivo";
+  else if (pageAttr === "admin-rrhh") user.modulo = "RRHH";
+
   // Normalizar estructura de usuario: soportar `modules` y `roles` (multi-módulo)
   user.modules = user.modules || (user.modulo ? [user.modulo] : []);
   user.roles = user.roles || { };
@@ -124,8 +132,10 @@ function loginSuccess(user) {
   }));
   
   // Ajustar vistas en UI
-  document.getElementById("login-screen").style.setProperty("display", "none", "important");
-  document.getElementById("app-portal").style.display = "block";
+  const loginScr = document.getElementById("login-screen");
+  const appPortal = document.getElementById("app-portal");
+  if (loginScr) loginScr.style.setProperty("display", "none", "important");
+  if (appPortal) appPortal.style.display = "block";
   
   // Mostrar username + módulo activo y rol
   const activeRole = user.roles && user.roles[user.modulo] ? user.roles[user.modulo] : user.rol;
@@ -139,21 +149,29 @@ function loginSuccess(user) {
 
   // Mostrar botón de cambio de módulo si tiene más de uno
   const switchBtn = document.getElementById("module_switch_btn");
-  if (user.modules && user.modules.length > 1) {
-    switchBtn.style.display = "inline-block";
-    switchBtn.innerText = `Switch (${user.modules.join(" / ")})`;
-  } else {
-    switchBtn.style.display = "none";
+  if (switchBtn) {
+    if (user.modules && user.modules.length > 1) {
+      switchBtn.style.display = "inline-block";
+      switchBtn.innerText = `Switch (${user.modules.join(" / ")})`;
+    } else {
+      switchBtn.style.display = "none";
+    }
   }
 }
 
 function logout() {
   state.user = null;
   localStorage.removeItem("archive_session");
-  document.getElementById("app-portal").style.display = "none";
-  document.getElementById("login-screen").style.setProperty("display", "flex", "important");
-  
-  document.getElementById("login_pass").value = "";
+  const appPortal = document.getElementById("app-portal");
+  const loginScr = document.getElementById("login-screen");
+  if (appPortal) appPortal.style.display = "none";
+  if (loginScr) {
+    loginScr.style.setProperty("display", "flex", "important");
+    const lp = document.getElementById("login_pass");
+    if (lp) lp.value = "";
+  } else {
+    window.location.href = "/";
+  }
 }
 
 function configureSidebarVisibilities(user) {
@@ -162,25 +180,26 @@ function configureSidebarVisibilities(user) {
   const linkAdminArchivo = document.getElementById("menu-btn-admin-archivo");
   const linkAdminRrhh = document.getElementById("menu-btn-admin-rrhh");
   
-  linkArchivo.style.display = "none";
-  linkRrhh.style.display = "none";
-  linkAdminArchivo.style.display = "none";
-  linkAdminRrhh.style.display = "none";
+  if (linkArchivo) linkArchivo.style.display = "none";
+  if (linkRrhh) linkRrhh.style.display = "none";
+  if (linkAdminArchivo) linkAdminArchivo.style.display = "none";
+  if (linkAdminRrhh) linkAdminRrhh.style.display = "none";
   // Mostrar módulos disponibles
   const modules = user.modules || (user.modulo ? [user.modulo] : []);
   modules.forEach(m => {
-    if (m === "Archivo") linkArchivo.style.display = "flex";
-    if (m === "RRHH") linkRrhh.style.display = "flex";
+    if (m === "Archivo" && linkArchivo) linkArchivo.style.display = "flex";
+    if (m === "RRHH" && linkRrhh) linkRrhh.style.display = "flex";
   });
 
   // Mostrar admin específico por módulo si tiene rol Admin en ese módulo
   const roleArchivo = (user.roles && user.roles["Archivo"]) ? user.roles["Archivo"] : null;
   const roleRrhh = (user.roles && user.roles["RRHH"]) ? user.roles["RRHH"] : null;
-  if (roleArchivo === "Admin") linkAdminArchivo.style.display = "flex";
-  if (roleRrhh === "Admin") linkAdminRrhh.style.display = "flex";
+  if (roleArchivo === "Admin" && linkAdminArchivo) linkAdminArchivo.style.display = "flex";
+  if (roleRrhh === "Admin" && linkAdminRrhh) linkAdminRrhh.style.display = "flex";
 
-  // Navegar al módulo predeterminado (módulo activo ya en user.modulo)
-  const defaultTab = (user.modulo === "RRHH") ? "rrhh" : "archivo";
+  // En páginas standalone usar el tab de la página actual, si no el módulo del usuario
+  const standalonePage = document.body.dataset.page;
+  const defaultTab = standalonePage || ((user.modulo === "RRHH") ? "rrhh" : "archivo");
   switchTab(defaultTab);
 }
 
@@ -217,19 +236,23 @@ function switchTab(tabId) {
   
   // Secciones
   document.querySelectorAll(".app-tab-section").forEach(sec => sec.style.display = "none");
-  if (tabId === "archivo") {
-    document.getElementById("tab-archivo").style.display = "block";
+  const tabArchivo = document.getElementById("tab-archivo");
+  const tabRrhh = document.getElementById("tab-rrhh");
+  const tabAdminArchivo = document.getElementById("tab-admin-archivo");
+  const tabAdminRrhh = document.getElementById("tab-admin-rrhh");
+  if (tabId === "archivo" && tabArchivo) {
+    tabArchivo.style.display = "block";
     triggerArchivoSearch();
-  } else if (tabId === "rrhh") {
-    document.getElementById("tab-rrhh").style.display = "block";
+  } else if (tabId === "rrhh" && tabRrhh) {
+    tabRrhh.style.display = "block";
     triggerRrhhSearch();
-  } else if (tabId === "admin-archivo") {
+  } else if (tabId === "admin-archivo" && tabAdminArchivo) {
     state.activeTab = tabId;
-    document.getElementById("tab-admin-archivo").style.display = "block";
+    tabAdminArchivo.style.display = "block";
     loadAdminTab("stats");
-  } else if (tabId === "admin-rrhh") {
+  } else if (tabId === "admin-rrhh" && tabAdminRrhh) {
     state.activeTab = tabId;
-    document.getElementById("tab-admin-rrhh").style.display = "block";
+    tabAdminRrhh.style.display = "block";
     loadAdminTab("stats");
   }
 }
@@ -277,36 +300,15 @@ async function loadDynamicChoices() {
 
 function renderChoicesTags() {
   if (!state.choices) return;
-  
-  // Archivo Tipologías
-  const divArchType = document.getElementById("choice-archivo-doc-type");
-  divArchType.innerHTML = state.choices.archivo.doc_types.map(t => 
-    `<span class="select-tag" onclick="toggleTag('archivo', 'selectedTypes', '${t}', this)">${t}</span>`
-  ).join("");
-  
-  // Archivo Tesauros
-  const divArchTesauro = document.getElementById("choice-archivo-tesauro");
-  divArchTesauro.innerHTML = state.choices.archivo.tesauro.map(t => 
-    `<span class="select-tag" onclick="toggleTag('archivo', 'selectedTesauro', '${t}', this)">${t}</span>`
-  ).join("");
-  
-  // RRHH Tipologías
-  const divRhType = document.getElementById("choice-rrhh-doc-type");
-  divRhType.innerHTML = state.choices.rrhh.doc_types.map(t => 
-    `<span class="select-tag" onclick="toggleTag('rrhh', 'selectedTypes', '${t}', this)">${t}</span>`
-  ).join("");
-  
-  // RRHH Estados
-  const divRhEstado = document.getElementById("choice-rrhh-estado");
-  divRhEstado.innerHTML = state.choices.rrhh.estados.map(e => 
-    `<span class="select-tag" onclick="toggleTag('rrhh', 'selectedEstados', '${e}', this)">${e}</span>`
-  ).join("");
-  
-  // RRHH Personas
-  const divRhPeople = document.getElementById("choice-rrhh-people");
-  divRhPeople.innerHTML = state.choices.rrhh.people.map(p => 
-    `<span class="select-tag" onclick="toggleTag('rrhh', 'selectedPeople', '${p}', this)">${p}</span>`
-  ).join("");
+  function fillTags(id, items, onclick) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = items.map(v => `<span class="select-tag" onclick="${onclick(v)}">${v}</span>`).join("");
+  }
+  fillTags("choice-archivo-doc-type", state.choices.archivo.doc_types, t => `toggleTag('archivo','selectedTypes','${t}',this)`);
+  fillTags("choice-archivo-tesauro", state.choices.archivo.tesauro, t => `toggleTag('archivo','selectedTesauro','${t}',this)`);
+  fillTags("choice-rrhh-doc-type", state.choices.rrhh.doc_types, t => `toggleTag('rrhh','selectedTypes','${t}',this)`);
+  fillTags("choice-rrhh-estado", state.choices.rrhh.estados, e => `toggleTag('rrhh','selectedEstados','${e}',this)`);
+  fillTags("choice-rrhh-people", state.choices.rrhh.people, p => `toggleTag('rrhh','selectedPeople','${p}',this)`);
 }
 
 function toggleTag(module, stateKey, val, elem) {
@@ -331,29 +333,28 @@ function toggleTag(module, stateKey, val, elem) {
 function initDateControls(module, data) {
   const minYear = parseInt(data.min_date.substring(0, 4));
   const maxYear = parseInt(data.max_date.substring(0, 4));
-  
+
   const sliderStart = document.getElementById(`slider-${module}-start`);
   const sliderEnd = document.getElementById(`slider-${module}-end`);
-  
-  sliderStart.min = minYear;
-  sliderStart.max = maxYear;
-  sliderStart.value = minYear;
-  
-  sliderEnd.min = minYear;
-  sliderEnd.max = maxYear;
-  sliderEnd.value = maxYear;
-  
-  document.getElementById(`label-${module}-start`).innerText = minYear;
-  document.getElementById(`label-${module}-end`).innerText = maxYear;
-  
+  if (!sliderStart || !sliderEnd) return;
+
+  sliderStart.min = minYear; sliderStart.max = maxYear; sliderStart.value = minYear;
+  sliderEnd.min = minYear; sliderEnd.max = maxYear; sliderEnd.value = maxYear;
+
+  const labelStart = document.getElementById(`label-${module}-start`);
+  const labelEnd = document.getElementById(`label-${module}-end`);
+  if (labelStart) labelStart.innerText = minYear;
+  if (labelEnd) labelEnd.innerText = maxYear;
+
   const selectYear = document.getElementById(`select-${module}-year`);
-  selectYear.innerHTML = `<option value="">Todos los años</option>` +
+  if (selectYear) selectYear.innerHTML = `<option value="">Todos los años</option>` +
     Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i)
-      .reverse()
-      .map(y => `<option value="${y}">${y}</option>`).join("");
-      
-  document.getElementById(`date-${module}-start`).value = data.min_date;
-  document.getElementById(`date-${module}-end`).value = data.max_date;
+      .reverse().map(y => `<option value="${y}">${y}</option>`).join("");
+
+  const ds = document.getElementById(`date-${module}-start`);
+  const de = document.getElementById(`date-${module}-end`);
+  if (ds) ds.value = data.min_date;
+  if (de) de.value = data.max_date;
 }
 
 function handleDateChange(module, source) {
@@ -1534,136 +1535,75 @@ async function handleAddUser() {
 // ==========================================================================
 function setupEventListeners() {
   
+  function safeOn(id, ev, fn) { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); }
+
   // Login
-  document.getElementById("login_btn").addEventListener("click", performLogin);
-  document.getElementById("login_pass").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") performLogin();
-  });
-  
-  // Ocultar / Mostrar contraseña
-  document.getElementById("toggle_login_pass").addEventListener("click", () => {
+  safeOn("login_btn", "click", performLogin);
+  safeOn("login_pass", "keydown", (e) => { if (e.key === "Enter") performLogin(); });
+  safeOn("toggle_login_pass", "click", () => {
     const input = document.getElementById("login_pass");
     const icon = document.querySelector("#toggle_login_pass i");
-    if (input.type === "password") {
-      input.type = "text";
-      icon.className = "fas fa-eye";
-    } else {
-      input.type = "password";
-      icon.className = "fas fa-eye-slash";
-    }
+    if (!input || !icon) return;
+    if (input.type === "password") { input.type = "text"; icon.className = "fas fa-eye"; }
+    else { input.type = "password"; icon.className = "fas fa-eye-slash"; }
   });
 
   // Logout
-  document.getElementById("logout_btn").addEventListener("click", logout);
+  safeOn("logout_btn", "click", logout);
 
   // Sidebar Toggle
-  document.getElementById("sidebar-toggle-btn").addEventListener("click", openSidebar);
-  document.getElementById("sidebar-close-btn").addEventListener("click", closeSidebar);
-  document.getElementById("sidebar-overlay").addEventListener("click", closeSidebar);
+  safeOn("sidebar-toggle-btn", "click", openSidebar);
+  safeOn("sidebar-close-btn", "click", closeSidebar);
+  safeOn("sidebar-overlay", "click", closeSidebar);
 
   // Tabs Sidebar
-  document.getElementById("menu-btn-archivo").addEventListener("click", (e) => { e.preventDefault(); switchTab("archivo"); });
-  document.getElementById("menu-btn-rrhh").addEventListener("click", (e) => { e.preventDefault(); switchTab("rrhh"); });
-  // Admin buttons per módulo
-  document.getElementById("menu-btn-admin-archivo").addEventListener("click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
-  document.getElementById("menu-btn-admin-rrhh").addEventListener("click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "RRHH"; switchTab("admin-rrhh"); });
-  document.getElementById("module_switch_btn").addEventListener("click", handleModuleSwitch);
+  safeOn("menu-btn-archivo", "click", (e) => { e.preventDefault(); switchTab("archivo"); });
+  safeOn("menu-btn-rrhh", "click", (e) => { e.preventDefault(); switchTab("rrhh"); });
+  safeOn("menu-btn-admin-archivo", "click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
+  safeOn("menu-btn-admin-rrhh", "click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "RRHH"; switchTab("admin-rrhh"); });
+  safeOn("module_switch_btn", "click", handleModuleSwitch);
 
   // Buscador de Archivo
-  document.getElementById("search_archivo").addEventListener("input", (e) => {
-    state.archivo.search = e.target.value;
-    state.archivo.page = 1;
-    triggerArchivoSearch();
-  });
-  document.getElementById("btn_s_archivo").addEventListener("click", triggerArchivoSearch);
-  document.getElementById("btn_clear_archivo").addEventListener("click", () => resetDateFilters("archivo"));
-  
-  // Descargar XLS Mock Archivo
-  document.getElementById("download_archivo_xls").addEventListener("click", () => {
-    alert("Generando y exportando reporte XLS de folios académicos DSpace...\nDescargado con éxito.");
-  });
+  safeOn("search_archivo", "input", (e) => { state.archivo.search = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("btn_s_archivo", "click", triggerArchivoSearch);
+  safeOn("btn_clear_archivo", "click", () => resetDateFilters("archivo"));
+  safeOn("download_archivo_xls", "click", () => { alert("Generando y exportando reporte XLS de folios académicos DSpace...\nDescargado con éxito."); });
 
   // Buscador de RRHH
-  document.getElementById("search_rrhh").addEventListener("input", (e) => {
-    state.rrhh.search = e.target.value;
-    state.rrhh.page = 1;
-    triggerRrhhSearch();
-  });
-  document.getElementById("btn_s_rrhh").addEventListener("click", triggerRrhhSearch);
-  document.getElementById("btn_clear_rrhh").addEventListener("click", () => resetDateFilters("rrhh"));
-  
-  // Descargar XLS Mock RRHH
-  document.getElementById("download_rrhh_xls").addEventListener("click", () => {
-    alert("Generando y exportando reporte consolidado de personal de RRHH...\nDescargado con éxito.");
-  });
+  safeOn("search_rrhh", "input", (e) => { state.rrhh.search = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("btn_s_rrhh", "click", triggerRrhhSearch);
+  safeOn("btn_clear_rrhh", "click", () => resetDateFilters("rrhh"));
+  safeOn("download_rrhh_xls", "click", () => { alert("Generando y exportando reporte consolidado de personal de RRHH...\nDescargado con éxito."); });
 
   // Ordenación y RPP - Archivo
-  document.getElementById("sort_archivo").addEventListener("change", (e) => {
-    state.archivo.sortMode = e.value || e.target.value;
-    state.archivo.page = 1;
-    triggerArchivoSearch();
-  });
-  document.getElementById("rpp_archivo").addEventListener("change", (e) => {
-    state.archivo.perPage = parseInt(e.target.value);
-    state.archivo.page = 1;
-    renderArchivoList();
-  });
+  safeOn("sort_archivo", "change", (e) => { state.archivo.sortMode = e.value || e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("rpp_archivo", "change", (e) => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; renderArchivoList(); });
 
   // Ordenación y RPP - RRHH
-  document.getElementById("sort_rrhh").addEventListener("change", (e) => {
-    state.rrhh.sortMode = e.value || e.target.value;
-    state.rrhh.page = 1;
-    triggerRrhhSearch();
-  });
-  document.getElementById("rpp_rrhh").addEventListener("change", (e) => {
-    state.rrhh.perPage = parseInt(e.target.value);
-    state.rrhh.page = 1;
-    renderRrhhList();
-  });
+  safeOn("sort_rrhh", "change", (e) => { state.rrhh.sortMode = e.value || e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("rpp_rrhh", "change", (e) => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; renderRrhhList(); });
 
   // Fechas Bidireccionales - Archivo
-  document.getElementById("slider-archivo-start").addEventListener("input", () => handleDateChange("archivo", "slider"));
-  document.getElementById("slider-archivo-end").addEventListener("input", () => handleDateChange("archivo", "slider"));
-  document.getElementById("select-archivo-year").addEventListener("change", () => handleDateChange("archivo", "select"));
-  document.getElementById("date-archivo-start").addEventListener("change", () => handleDateChange("archivo", "calendar"));
-  document.getElementById("date-archivo-end").addEventListener("change", () => handleDateChange("archivo", "calendar"));
+  safeOn("slider-archivo-start", "input", () => handleDateChange("archivo", "slider"));
+  safeOn("slider-archivo-end", "input", () => handleDateChange("archivo", "slider"));
+  safeOn("select-archivo-year", "change", () => handleDateChange("archivo", "select"));
+  safeOn("date-archivo-start", "change", () => handleDateChange("archivo", "calendar"));
+  safeOn("date-archivo-end", "change", () => handleDateChange("archivo", "calendar"));
 
   // Fechas Bidireccionales - RRHH
-  document.getElementById("slider-rrhh-start").addEventListener("input", () => handleDateChange("rrhh", "slider"));
-  document.getElementById("slider-rrhh-end").addEventListener("input", () => handleDateChange("rrhh", "slider"));
-  document.getElementById("select-rrhh-year").addEventListener("change", () => handleDateChange("rrhh", "select"));
-  document.getElementById("date-rrhh-start").addEventListener("change", () => handleDateChange("rrhh", "calendar"));
-  document.getElementById("date-rrhh-end").addEventListener("change", () => handleDateChange("rrhh", "calendar"));
+  safeOn("slider-rrhh-start", "input", () => handleDateChange("rrhh", "slider"));
+  safeOn("slider-rrhh-end", "input", () => handleDateChange("rrhh", "slider"));
+  safeOn("select-rrhh-year", "change", () => handleDateChange("rrhh", "select"));
+  safeOn("date-rrhh-start", "change", () => handleDateChange("rrhh", "calendar"));
+  safeOn("date-rrhh-end", "change", () => handleDateChange("rrhh", "calendar"));
 
   // Paginación - Archivo
-  document.getElementById("btn-archivo-prev").addEventListener("click", () => {
-    if (state.archivo.page > 1) {
-      state.archivo.page--;
-      renderArchivoList();
-    }
-  });
-  document.getElementById("btn-archivo-next").addEventListener("click", () => {
-    const totalPages = Math.ceil(state.archivo.results.length / state.archivo.perPage);
-    if (state.archivo.page < totalPages) {
-      state.archivo.page++;
-      renderArchivoList();
-    }
-  });
+  safeOn("btn-archivo-prev", "click", () => { if (state.archivo.page > 1) { state.archivo.page--; renderArchivoList(); } });
+  safeOn("btn-archivo-next", "click", () => { const t = Math.ceil(state.archivo.results.length / state.archivo.perPage); if (state.archivo.page < t) { state.archivo.page++; renderArchivoList(); } });
 
   // Paginación - RRHH
-  document.getElementById("btn-rrhh-prev").addEventListener("click", () => {
-    if (state.rrhh.page > 1) {
-      state.rrhh.page--;
-      renderRrhhList();
-    }
-  });
-  document.getElementById("btn-rrhh-next").addEventListener("click", () => {
-    const totalPages = Math.ceil(state.rrhh.results.length / state.rrhh.perPage);
-    if (state.rrhh.page < totalPages) {
-      state.rrhh.page++;
-      renderRrhhList();
-    }
-  });
+  safeOn("btn-rrhh-prev", "click", () => { if (state.rrhh.page > 1) { state.rrhh.page--; renderRrhhList(); } });
+  safeOn("btn-rrhh-next", "click", () => { const t = Math.ceil(state.rrhh.results.length / state.rrhh.perPage); if (state.rrhh.page < t) { state.rrhh.page++; renderRrhhList(); } });
 
   // --- EVENTOS PESTAÑAS ADMIN ---
   // --- EVENTOS PESTAÑAS ADMIN (aplicar a ambos namespaces) ---

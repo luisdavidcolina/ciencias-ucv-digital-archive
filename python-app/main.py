@@ -757,12 +757,24 @@ async def root():
     return RedirectResponse(url="/login")
 
 @app.get("/login", include_in_schema=False)
+async def serve_login():
+    return FileResponse(os.path.join(static_path, "login.html"))
+
 @app.get("/archivo", include_in_schema=False)
+async def serve_archivo():
+    return FileResponse(os.path.join(static_path, "archivo.html"))
+
 @app.get("/rrhh", include_in_schema=False)
+async def serve_rrhh():
+    return FileResponse(os.path.join(static_path, "rrhh.html"))
+
 @app.get("/admin/archivo", include_in_schema=False)
+async def serve_admin_archivo():
+    return FileResponse(os.path.join(static_path, "admin_archivo.html"))
+
 @app.get("/admin/rrhh", include_in_schema=False)
-async def serve_ui():
-    return FileResponse(os.path.join(static_path, "index.html"))
+async def serve_admin_rrhh():
+    return FileResponse(os.path.join(static_path, "admin_rrhh.html"))
 
 app.mount("/static", StaticFiles(directory=static_path), name="static")
 

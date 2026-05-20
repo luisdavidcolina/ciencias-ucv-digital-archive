@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process \"http://localhost:8000/\")",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue)",
+      "Bash(uvicorn main:app --port 8000)",
+      "Bash(curl -s http://localhost:8000/rrhh)",
+      "Bash(netstat -ano)"
+    ]
+  }
+}
