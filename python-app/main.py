@@ -8,6 +8,7 @@ from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 import pandas as pd
 
@@ -255,36 +256,68 @@ class UserCreateRequest(BaseModel):
 @app.post("/api/auth/login")
 def login(req: LoginRequest):
     df = get_users_df()
-    user_row = df[(df["usuario"].str.strip() == req.username.strip()) & (df["password"].str.strip() == req.password.strip())]
-    if len(user_row) == 1:
-        match = user_row.iloc[0].to_dict()
-        log_event(match["usuario"], "Login Success", match["modulo"], f"Rol: {match['rol']}")
+    user_rows = df[(df["usuario"].str.strip() == req.username.strip()) & (df["password"].str.strip() == req.password.strip())]
+    if len(user_rows) >= 1:
+        # Aggregar módulos y roles por módulo (soporte para filas múltiples por mismo usuario)
+        modules = []
+        roles = {}
+        for _, row in user_rows.iterrows():
+            mod = str(row.get("modulo", "")).strip()
+            rol = str(row.get("rol", "Normal")).strip() or "Normal"
+            if mod and mod not in modules:
+                modules.append(mod)
+            if mod:
+                roles[mod] = rol
+
+        primary_mod = modules[0] if modules else "Archivo"
+        primary_role = roles.get(primary_mod, "Normal")
+
+        log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
         return {
             "success": True,
             "user": {
-                "username": match["usuario"],
-                "modulo": match["modulo"],
-                "rol": match["rol"]
+                "username": req.username.strip(),
+                "modules": modules,
+                "roles": roles,
+                # compatibilidad con cliente anterior
+                "modulo": primary_mod,
+                "rol": primary_role
             }
         }
+
     log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas", "Failure")
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales incorrectas")
 
 @app.post("/api/auth/restore")
 def restore_session(req: RestoreSessionRequest):
     df = get_users_df()
-    user_row = df[df["usuario"].str.strip() == req.username.strip()]
-    if len(user_row) == 1:
-        match = user_row.iloc[0].to_dict()
-        log_event(match["usuario"], "Session Restored", match["modulo"], f"Rol: {match['rol']}")
+    user_rows = df[df["usuario"].str.strip() == req.username.strip()]
+    if len(user_rows) >= 1:
+        modules = []
+        roles = {}
+        for _, row in user_rows.iterrows():
+            mod = str(row.get("modulo", "")).strip()
+            rol = str(row.get("rol", "Normal")).strip() or "Normal"
+            if mod and mod not in modules:
+                modules.append(mod)
+            if mod:
+                roles[mod] = rol
+
+        primary_mod = modules[0] if modules else "Archivo"
+        primary_role = roles.get(primary_mod, "Normal")
+
+        log_event(req.username, "Session Restored", ";".join(modules), f"Roles: {roles}")
         return {
             "success": True,
             "user": {
-                "username": match["usuario"],
-                "modulo": match["modulo"],
-                "rol": match["rol"]
+                "username": req.username.strip(),
+                "modules": modules,
+                "roles": roles,
+                "modulo": primary_mod,
+                "rol": primary_role
             }
         }
+
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sesión no encontrada")
 
 @app.get("/api/choices")
@@ -713,12 +746,25 @@ def create_user(req: UserCreateRequest):
     log_event(req.creator, "Create User", req.modulo, f"Nuevo: {req.usuario} ({req.rol})")
     return {"success": True}
 
-# Montar archivos estáticos de la SPA
+# Montar archivos estáticos
 static_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 if not os.path.exists(static_path):
     os.makedirs(static_path)
 
-app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
+# Rutas para forzar el uso de la UI original en los endpoints principales
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/login")
+
+@app.get("/login", include_in_schema=False)
+@app.get("/archivo", include_in_schema=False)
+@app.get("/rrhh", include_in_schema=False)
+@app.get("/admin/archivo", include_in_schema=False)
+@app.get("/admin/rrhh", include_in_schema=False)
+async def serve_ui():
+    return FileResponse(os.path.join(static_path, "index.html"))
+
+app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 if __name__ == "__main__":
     import uvicorn

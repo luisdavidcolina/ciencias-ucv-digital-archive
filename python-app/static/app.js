@@ -62,6 +62,18 @@ document.addEventListener("DOMContentLoaded", () => {
   checkPersistedSession();
 });
 
+// Helper para panel admin namespaced
+function adminSuffixFromTab(tab) {
+  const t = tab || state.activeTab;
+  return (t === 'admin-rrhh') ? 'rrhh' : 'archivo';
+}
+function adminId(base) {
+  return `${base}-${adminSuffixFromTab()}`;
+}
+function getAdminEl(base) {
+  return document.getElementById(adminId(base));
+}
+
 async function checkPersistedSession() {
   const raw = localStorage.getItem("archive_session");
   if (!raw) return;
@@ -91,11 +103,21 @@ async function checkPersistedSession() {
 }
 
 function loginSuccess(user) {
+  // Normalizar estructura de usuario: soportar `modules` y `roles` (multi-módulo)
+  user.modules = user.modules || (user.modulo ? [user.modulo] : []);
+  user.roles = user.roles || { };
+  if (!user.roles || Object.keys(user.roles).length === 0) {
+    // compatibilidad con API antigua
+    if (user.modulo) user.roles[user.modulo] = user.rol || "Normal";
+  }
+
   state.user = user;
-  
+
   // Guardar sesión persistente
   localStorage.setItem("archive_session", JSON.stringify({
     username: user.username,
+    modules: user.modules,
+    roles: user.roles,
     modulo: user.modulo,
     rol: user.rol,
     ts: Date.now()
@@ -105,13 +127,24 @@ function loginSuccess(user) {
   document.getElementById("login-screen").style.setProperty("display", "none", "important");
   document.getElementById("app-portal").style.display = "block";
   
-  document.getElementById("nav_username").innerText = `ID: ${user.username} (${user.rol})`;
+  // Mostrar username + módulo activo y rol
+  const activeRole = user.roles && user.roles[user.modulo] ? user.roles[user.modulo] : user.rol;
+  document.getElementById("nav_username").innerText = `ID: ${user.username} (${user.modulo} - ${activeRole})`;
   
   // CargarChoices dinámicos
   loadDynamicChoices();
   
   // Control de accesos a pestañas del sidebar
   configureSidebarVisibilities(user);
+
+  // Mostrar botón de cambio de módulo si tiene más de uno
+  const switchBtn = document.getElementById("module_switch_btn");
+  if (user.modules && user.modules.length > 1) {
+    switchBtn.style.display = "inline-block";
+    switchBtn.innerText = `Switch (${user.modules.join(" / ")})`;
+  } else {
+    switchBtn.style.display = "none";
+  }
 }
 
 function logout() {
@@ -126,25 +159,47 @@ function logout() {
 function configureSidebarVisibilities(user) {
   const linkArchivo = document.getElementById("menu-btn-archivo");
   const linkRrhh = document.getElementById("menu-btn-rrhh");
-  const linkAdmin = document.getElementById("menu-btn-admin");
+  const linkAdminArchivo = document.getElementById("menu-btn-admin-archivo");
+  const linkAdminRrhh = document.getElementById("menu-btn-admin-rrhh");
   
   linkArchivo.style.display = "none";
   linkRrhh.style.display = "none";
-  linkAdmin.style.display = "none";
-  
-  if (user.modulo === "Archivo" || user.rol === "Admin") {
-    linkArchivo.style.display = "flex";
-  }
-  if (user.modulo === "RRHH" || user.rol === "Admin") {
-    linkRrhh.style.display = "flex";
-  }
-  if (user.rol === "Admin") {
-    linkAdmin.style.display = "flex";
-  }
-  
-  // Navegar al módulo predeterminado
+  linkAdminArchivo.style.display = "none";
+  linkAdminRrhh.style.display = "none";
+  // Mostrar módulos disponibles
+  const modules = user.modules || (user.modulo ? [user.modulo] : []);
+  modules.forEach(m => {
+    if (m === "Archivo") linkArchivo.style.display = "flex";
+    if (m === "RRHH") linkRrhh.style.display = "flex";
+  });
+
+  // Mostrar admin específico por módulo si tiene rol Admin en ese módulo
+  const roleArchivo = (user.roles && user.roles["Archivo"]) ? user.roles["Archivo"] : null;
+  const roleRrhh = (user.roles && user.roles["RRHH"]) ? user.roles["RRHH"] : null;
+  if (roleArchivo === "Admin") linkAdminArchivo.style.display = "flex";
+  if (roleRrhh === "Admin") linkAdminRrhh.style.display = "flex";
+
+  // Navegar al módulo predeterminado (módulo activo ya en user.modulo)
   const defaultTab = (user.modulo === "RRHH") ? "rrhh" : "archivo";
   switchTab(defaultTab);
+}
+
+// Cambiar módulo activo (para usuarios con varios módulos)
+function handleModuleSwitch() {
+  if (!state.user || !state.user.modules || state.user.modules.length < 2) return;
+  const current = state.user.modulo;
+  const idx = state.user.modules.indexOf(current);
+  const next = state.user.modules[(idx + 1) % state.user.modules.length];
+  state.user.modulo = next;
+
+  // Actualizar nav y visibilidades
+  const activeRole = state.user.roles && state.user.roles[state.user.modulo] ? state.user.roles[state.user.modulo] : "Normal";
+  document.getElementById("nav_username").innerText = `ID: ${state.user.username} (${state.user.modulo} - ${activeRole})`;
+  configureSidebarVisibilities(state.user);
+
+  // Cambiar a la pestaña de búsqueda del módulo seleccionado
+  const tab = (state.user.modulo === "RRHH") ? "rrhh" : "archivo";
+  switchTab(tab);
 }
 
 function switchTab(tabId) {
@@ -168,8 +223,13 @@ function switchTab(tabId) {
   } else if (tabId === "rrhh") {
     document.getElementById("tab-rrhh").style.display = "block";
     triggerRrhhSearch();
-  } else if (tabId === "admin") {
-    document.getElementById("tab-admin").style.display = "block";
+  } else if (tabId === "admin-archivo") {
+    state.activeTab = tabId;
+    document.getElementById("tab-admin-archivo").style.display = "block";
+    loadAdminTab("stats");
+  } else if (tabId === "admin-rrhh") {
+    state.activeTab = tabId;
+    document.getElementById("tab-admin-rrhh").style.display = "block";
     loadAdminTab("stats");
   }
 }
@@ -858,13 +918,20 @@ function openDocMetadataModal(idxReal) {
 function loadAdminTab(adminTabId) {
   state.activeAdminTab = adminTabId;
   
-  // Clases active
-  document.querySelectorAll("#admin_workspace_tabs .nav-link").forEach(l => l.classList.remove("active"));
-  document.getElementById(`tab-admin-${adminTabId}`).classList.add("active");
-  
+  // Determinar sufijo y root según panel activo
+  const suf = adminSuffixFromTab();
+  const adminTabsRoot = `#admin_workspace_tabs-${suf}`;
+  const adminSectionRoot = `#tab-admin-${suf}`;
+
+  // Clases active (tabs)
+  document.querySelectorAll(`${adminTabsRoot} .nav-link`).forEach(l => l.classList.remove("active"));
+  const tabEl = document.getElementById(`tab-admin-${suf}-${adminTabId}`);
+  if (tabEl) tabEl.classList.add("active");
+
   // Panes
-  document.querySelectorAll("#tab-admin .tab-pane").forEach(p => p.classList.remove("show", "active"));
-  document.getElementById(`pane-admin-${adminTabId}`).classList.add("show", "active");
+  document.querySelectorAll(`${adminSectionRoot} .tab-pane`).forEach(p => p.classList.remove("show", "active"));
+  const paneEl = document.getElementById(`pane-admin-${suf}-${adminTabId}`);
+  if (paneEl) paneEl.classList.add("show", "active");
   
   if (adminTabId === "stats") {
     loadDynamicStats();
@@ -879,13 +946,41 @@ function loadAdminTab(adminTabId) {
   } else if (adminTabId === "users") {
     loadUsersTab();
   }
+
+  // Ajustes de texto y etiquetas según el módulo activo (Archivo vs RRHH)
+  try {
+    const mod = state.user && state.user.modulo ? state.user.modulo : "Archivo";
+    // Breadcrumb dentro del admin
+    const bc = document.querySelector(`${adminSectionRoot} .ds-breadcrumb`);
+    if (bc) bc.innerHTML = `<i class="fas fa-shield-alt"></i> Panel de Control / Administración - ${mod}`;
+
+    // Botón de submit del formulario de nuevo ingreso
+    const submitBtn = document.getElementById(`btn_submit_workspace-${suf}`);
+    if (submitBtn) {
+      if (mod === "RRHH") {
+        submitBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Guardar en RRHH`;
+      } else {
+        submitBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Guardar en Archivo`;
+      }
+    }
+
+    // Título del monitor
+    const monitorTitle = document.querySelector(`${adminSectionRoot} .card-title`);
+    if (monitorTitle) {
+      if (mod === "RRHH") monitorTitle.innerHTML = `<i class=\"fas fa-database\"></i> Monitor de RRHH`;
+      else monitorTitle.innerHTML = `<i class=\"fas fa-database\"></i> Monitor de Archivos`;
+    }
+  } catch (e) {
+    console.error("Error updating admin panel labels:", e);
+  }
 }
 
 async function loadDynamicStats() {
+  const suf = adminSuffixFromTab();
   const reqPayload = {
     modulo: state.user.modulo,
-    date_start: document.getElementById("stats-date-start").value || "",
-    date_end: document.getElementById("stats-date-end").value || ""
+    date_start: (document.getElementById(`stats-date-start-${suf}`) && document.getElementById(`stats-date-start-${suf}`).value) || "",
+    date_end: (document.getElementById(`stats-date-end-${suf}`) && document.getElementById(`stats-date-end-${suf}`).value) || ""
   };
   
   try {
@@ -898,28 +993,33 @@ async function loadDynamicStats() {
     const stats = await res.json();
     
     // 1. KPIs
-    document.getElementById("kpi-total-docs").innerText = stats.total_docs;
-    document.getElementById("kpi-total-cats").innerText = stats.categories_count;
+    const kpiDocs = document.getElementById(`kpi-total-docs-${suf}`);
+    const kpiCats = document.getElementById(`kpi-total-cats-${suf}`);
+    if (kpiDocs) kpiDocs.innerText = stats.total_docs;
+    if (kpiCats) kpiCats.innerText = stats.categories_count;
     
     // Usuarios mockeados
-    const resUsers = await fetch(`${API_BASE}/api/admin/users`);
-    if (resUsers.ok) {
-      const uList = await resUsers.json();
-      document.getElementById("kpi-total-users").innerText = uList.filter(u => u.modulo === state.user.modulo).length;
-    }
+      const resUsers = await fetch(`${API_BASE}/api/admin/users`);
+      if (resUsers.ok) {
+        const uList = await resUsers.json();
+        const kpiUsers = document.getElementById(`kpi-total-users-${suf}`);
+        if (kpiUsers) kpiUsers.innerText = uList.filter(u => u.modulo === state.user.modulo).length;
+      }
     
     // Último ingreso
     const isArchivo = state.user.modulo === "Archivo";
     const db_list = isArchivo ? state.archivo.results : state.rrhh.results;
-    if (db_list.length > 0) {
+      if (db_list.length > 0) {
       const dates = db_list.map(r => isArchivo ? r.fecha : r.fecha_ingreso).filter(Boolean).sort().reverse();
-      document.getElementById("kpi-latest-entry").innerText = formatISOToSpanish(dates[0]);
+      const kpiLatest = document.getElementById(`kpi-latest-entry-${suf}`);
+      if (kpiLatest) kpiLatest.innerText = formatISOToSpanish(dates[0]);
     } else {
-      document.getElementById("kpi-latest-entry").innerText = "N/A";
+      const kpiLatest = document.getElementById(`kpi-latest-entry-${suf}`);
+      if (kpiLatest) kpiLatest.innerText = "N/A";
     }
     
     // 2. Gráfico Distribución por Tipo
-    const typeContainer = document.getElementById("stats_by_type");
+    const typeContainer = document.getElementById(`stats_by_type-${suf}`);
     if (stats.by_type.length === 0) {
       typeContainer.innerHTML = `<div class="text-muted">Sin datos.</div>`;
     } else {
@@ -945,7 +1045,7 @@ async function loadDynamicStats() {
     }
     
     // 3. Gráfico Histograma Anual
-    const timelineContainer = document.getElementById("stats_timeline");
+    const timelineContainer = document.getElementById(`stats_timeline-${suf}`);
     if (stats.timeline.length === 0) {
       timelineContainer.innerHTML = `<div class="text-muted">Sin datos de línea de tiempo.</div>`;
     } else {
@@ -970,7 +1070,7 @@ async function loadDynamicStats() {
     }
     
     // 4. Estado del Sistema
-    const sysContainer = document.getElementById("stats_system");
+    const sysContainer = document.getElementById(`stats_system-${suf}`);
     sysContainer.innerHTML = `
       <div class="col-md-3 text-center p-3 border-right">
         <i class="fas fa-server fa-2x text-primary mb-2"></i>
@@ -1000,7 +1100,8 @@ async function loadDynamicStats() {
 }
 
 function renderDynamicSubmitFields() {
-  const container = document.getElementById("dynamic-submit-fields");
+  const suf = adminSuffixFromTab();
+  const container = document.getElementById(`dynamic-submit-fields-${suf}`);
   const isArchivo = state.user.modulo === "Archivo";
   
   if (isArchivo) {
@@ -1008,32 +1109,32 @@ function renderDynamicSubmitFields() {
       <div class="row">
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">dc.title (Título) *</label>
-          <input type="text" id="reg-title" class="form-control" placeholder="Ej: Proyecto SVD Compresión" required>
+          <input type="text" id="reg-title-${suf}" class="form-control" placeholder="Ej: Proyecto SVD Compresión" required>
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">dc.contributor.author (Autor) *</label>
-          <input type="text" id="reg-author" class="form-control" placeholder="Ej: Dr. Juan Pérez" required>
+          <input type="text" id="reg-author-${suf}" class="form-control" placeholder="Ej: Dr. Juan Pérez" required>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">dc.type (Tipología) *</label>
-          <select id="reg-doc-type" class="form-control" required>
+          <select id="reg-doc-type-${suf}" class="form-control" required>
             ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación", "Informe"]).map(t => `<option value="${t}">${t}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">dc.date.issued (Fecha Emisión) *</label>
-          <input type="date" id="reg-fecha" class="form-control" required value="${new Date().toISOString().substring(0, 10)}">
+          <input type="date" id="reg-fecha-${suf}" class="form-control" required value="${new Date().toISOString().substring(0, 10)}">
         </div>
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">dc.description.abstract (Resumen)</label>
-        <textarea id="reg-resumen" class="form-control" rows="3" placeholder="Síntesis del folio..."></textarea>
+          <textarea id="reg-resumen-${suf}" class="form-control" rows="3" placeholder="Síntesis del folio..."></textarea>
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">dc.identifier.location (Ubicación Topográfica) *</label>
-        <input type="text" id="reg-location" class="form-control" placeholder="Ej: Estante B2, Gaveta 3" required>
+          <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Estante B2, Gaveta 3" required>
       </div>
     `;
   } else {
@@ -1041,21 +1142,21 @@ function renderDynamicSubmitFields() {
       <div class="row">
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Nombre Completo del Personal *</label>
-          <input type="text" id="reg-empleado" class="form-control" placeholder="Ej: Susana Pérez" required>
+          <input type="text" id="reg-empleado-${suf}" class="form-control" placeholder="Ej: Susana Pérez" required>
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Cédula de Identidad *</label>
-          <input type="text" id="reg-cedula" class="form-control" placeholder="Ej: V-12345678" required>
+          <input type="text" id="reg-cedula-${suf}" class="form-control" placeholder="Ej: V-12345678" required>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">C.I.F. (RIF)</label>
-          <input type="text" id="reg-rif" class="form-control" placeholder="Ej: J-12345678-0">
+          <input type="text" id="reg-rif-${suf}" class="form-control" placeholder="Ej: J-12345678-0">
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Cargo Asignado</label>
-          <input type="text" id="reg-cargo" class="form-control" placeholder="Ej: Analista Contable">
+          <input type="text" id="reg-cargo-${suf}" class="form-control" placeholder="Ej: Analista Contable">
         </div>
       </div>
       <div class="form-group mt-2">
@@ -1065,17 +1166,17 @@ function renderDynamicSubmitFields() {
       <div class="row mt-2">
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Clasificación de Archivo *</label>
-          <select id="reg-doc-type" class="form-control" required>
+          <select id="reg-doc-type-${suf}" class="form-control" required>
             ${(state.choices?.rrhh?.doc_types || ["Hoja de Vida", "Contrato"]).map(t => `<option value="${t}">${t}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Departamento *</label>
-          <input type="text" id="reg-depto" class="form-control" placeholder="Ej: Biología" required>
+          <input type="text" id="reg-depto-${suf}" class="form-control" placeholder="Ej: Biología" required>
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Estado *</label>
-          <select id="reg-estado" class="form-control" required>
+          <select id="reg-estado-${suf}" class="form-control" required>
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
             <option value="Retirado">Retirado</option>
@@ -1086,25 +1187,25 @@ function renderDynamicSubmitFields() {
       <div class="row mt-2">
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Fecha de Ingreso *</label>
-          <input type="date" id="reg-fecha" class="form-control" required value="${new Date().toISOString().substring(0, 10)}">
+          <input type="date" id="reg-fecha-${suf}" class="form-control" required value="${new Date().toISOString().substring(0, 10)}">
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Retención Física *</label>
-          <input type="text" id="reg-location" class="form-control" placeholder="Ej: Archivo Central - Caja J-02" required>
+          <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Archivo Central - Caja J-02" required>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Fecha de Jubilación (Opcional)</label>
-          <input type="date" id="reg-jubilacion" class="form-control">
+          <input type="date" id="reg-jubilacion-${suf}" class="form-control">
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Fecha de Pensión (Opcional)</label>
-          <input type="date" id="reg-pension" class="form-control">
+          <input type="date" id="reg-pension-${suf}" class="form-control">
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">URL Foto Avatar (Opcional)</label>
-          <input type="text" id="reg-foto" class="form-control" placeholder="https://...">
+          <input type="text" id="reg-foto-${suf}" class="form-control" placeholder="https://...">
         </div>
       </div>
     `;
@@ -1116,8 +1217,11 @@ function loadRecentSubmissions() {
   const list = isArchivo ? state.archivo.results : state.rrhh.results;
   
   const container = document.getElementById("recent_submissions");
+  const suf = adminSuffixFromTab();
+  const containerEl = document.getElementById(`recent_submissions-${suf}`);
+  if (!containerEl) return;
   if (list.length === 0) {
-    container.innerHTML = `<li class="text-muted text-center p-2">Sin ingresos previos.</li>`;
+    containerEl.innerHTML = `<li class="text-muted text-center p-2">Sin ingresos previos.</li>`;
     return;
   }
   
@@ -1127,7 +1231,7 @@ function loadRecentSubmissions() {
     return fB.localeCompare(fA);
   }).slice(0, 3);
   
-  container.innerHTML = sorted.map(item => {
+  containerEl.innerHTML = sorted.map(item => {
     const title = isArchivo ? item.titulo : item.empleado;
     return `
       <li class="d-flex align-items-center mb-2 p-2 border rounded bg-light">
@@ -1144,30 +1248,30 @@ function loadRecentSubmissions() {
 async function handleNewSubmission(e) {
   e.preventDefault();
   const isArchivo = state.user.modulo === "Archivo";
-  
+  const suf = adminSuffixFromTab();
   const payload = {
     modulo: state.user.modulo,
     usuario: state.user.username,
-    doc_type: document.getElementById("reg-doc-type").value,
-    fecha: document.getElementById("reg-fecha").value,
-    ubicacion: document.getElementById("reg-location").value
+    doc_type: (document.getElementById(`reg-doc-type-${suf}`) && document.getElementById(`reg-doc-type-${suf}`).value) || "",
+    fecha: (document.getElementById(`reg-fecha-${suf}`) && document.getElementById(`reg-fecha-${suf}`).value) || "",
+    ubicacion: (document.getElementById(`reg-location-${suf}`) && document.getElementById(`reg-location-${suf}`).value) || ""
   };
   
-  if (isArchivo) {
-    payload.titulo = document.getElementById("reg-title").value;
-    payload.autor = document.getElementById("reg-author").value;
-    payload.resumen = document.getElementById("reg-resumen").value;
+    if (isArchivo) {
+    payload.titulo = (document.getElementById(`reg-title-${suf}`) && document.getElementById(`reg-title-${suf}`).value) || "";
+    payload.autor = (document.getElementById(`reg-author-${suf}`) && document.getElementById(`reg-author-${suf}`).value) || "";
+    payload.resumen = (document.getElementById(`reg-resumen-${suf}`) && document.getElementById(`reg-resumen-${suf}`).value) || "";
   } else {
-    payload.empleado = document.getElementById("reg-empleado").value;
-    payload.cedula = document.getElementById("reg-cedula").value;
-    payload.personas_relacionadas = document.getElementById("reg-personas").value;
-    payload.departamento = document.getElementById("reg-depto").value;
-    payload.estado = document.getElementById("reg-estado").value;
-    payload.rif = document.getElementById("reg-rif").value;
-    payload.cargo = document.getElementById("reg-cargo").value;
-    payload.fecha_jubilacion = document.getElementById("reg-jubilacion").value || "";
-    payload.fecha_pension = document.getElementById("reg-pension").value || "";
-    payload.foto_url = document.getElementById("reg-foto").value || "";
+    payload.empleado = (document.getElementById(`reg-empleado-${suf}`) && document.getElementById(`reg-empleado-${suf}`).value) || "";
+    payload.cedula = (document.getElementById(`reg-cedula-${suf}`) && document.getElementById(`reg-cedula-${suf}`).value) || "";
+    payload.personas_relacionadas = (document.getElementById(`reg-personas-${suf}`) && document.getElementById(`reg-personas-${suf}`).value) || "";
+    payload.departamento = (document.getElementById(`reg-depto-${suf}`) && document.getElementById(`reg-depto-${suf}`).value) || "";
+    payload.estado = (document.getElementById(`reg-estado-${suf}`) && document.getElementById(`reg-estado-${suf}`).value) || "";
+    payload.rif = (document.getElementById(`reg-rif-${suf}`) && document.getElementById(`reg-rif-${suf}`).value) || "";
+    payload.cargo = (document.getElementById(`reg-cargo-${suf}`) && document.getElementById(`reg-cargo-${suf}`).value) || "";
+    payload.fecha_jubilacion = (document.getElementById(`reg-jubilacion-${suf}`) && document.getElementById(`reg-jubilacion-${suf}`).value) || "";
+    payload.fecha_pension = (document.getElementById(`reg-pension-${suf}`) && document.getElementById(`reg-pension-${suf}`).value) || "";
+    payload.foto_url = (document.getElementById(`reg-foto-${suf}`) && document.getElementById(`reg-foto-${suf}`).value) || "";
   }
   
   try {
@@ -1196,8 +1300,11 @@ async function handleNewSubmission(e) {
 // 3. MONITOR DE ARCHIVOS (TABLA CRUD LOCAL)
 async function loadMonitorTable() {
   const mod = state.user.modulo;
-  const q = document.getElementById("admin_search").value || "";
-  const typeF = document.getElementById("admin_filter_type").value || "";
+  const suf = adminSuffixFromTab();
+  const qEl = document.getElementById(`admin_search-${suf}`);
+  const typeEl = document.getElementById(`admin_filter_type-${suf}`);
+  const q = (qEl && qEl.value) || "";
+  const typeF = (typeEl && typeEl.value) || "";
   
   try {
     const res = await fetch(`${API_BASE}/api/admin/list_all?modulo=${mod}&search=${q}&type_filter=${typeF}`);
@@ -1206,8 +1313,8 @@ async function loadMonitorTable() {
     state.adminTable.results = data;
     
     // Llenar selector de tipologías en el monitor
-    const typeSelector = document.getElementById("admin_filter_type");
-    if (typeSelector.options.length <= 1 && state.choices) {
+    const typeSelector = document.getElementById(`admin_filter_type-${suf}`);
+    if (typeSelector && typeSelector.options.length <= 1 && state.choices) {
       const types = isArchivoModule() ? state.choices.archivo.doc_types : state.choices.rrhh.doc_types;
       typeSelector.innerHTML = `<option value="">Filtrar por Tipología...</option>` +
         types.map(t => `<option value="${t}">${t}</option>`).join("");
@@ -1225,15 +1332,18 @@ function isArchivoModule() {
 }
 
 function renderMonitorTable() {
-  const container = document.getElementById("admin_control_table");
+  const suf = adminSuffixFromTab();
+  const container = document.getElementById(`admin_control_table-${suf}`);
   const results = state.adminTable.results;
   const isArch = isArchivoModule();
   
-  document.getElementById("admin_table_summary").innerText = `Total: ${results.length} registros en el módulo ${state.user.modulo}`;
+  const summaryEl = document.getElementById(`admin_table_summary-${suf}`);
+  if (summaryEl) summaryEl.innerText = `Total: ${results.length} registros en el módulo ${state.user.modulo}`;
   
   if (results.length === 0) {
     container.innerHTML = `<tr><td colspan="${isArch ? 6 : 7}" class="text-muted text-center p-3">Ningún archivo coincide con los criterios de búsqueda local.</td></tr>`;
-    document.getElementById("admin_page_info").innerText = "Pág 1 de 1";
+    const pageInfo = document.getElementById(`admin_page_info-${suf}`);
+    if (pageInfo) pageInfo.innerText = "Pág 1 de 1";
     return;
   }
   
@@ -1243,7 +1353,8 @@ function renderMonitorTable() {
   const start = (state.adminTable.page - 1) * state.adminTable.perPage;
   const pageItems = results.slice(start, start + state.adminTable.perPage);
   
-  document.getElementById("admin_page_info").innerText = `Pág ${state.adminTable.page} de ${totalPages}`;
+  const pageInfo = document.getElementById(`admin_page_info-${suf}`);
+  if (pageInfo) pageInfo.innerText = `Pág ${state.adminTable.page} de ${totalPages}`;
   
   if (isArch) {
     container.innerHTML = pageItems.map(f => `
@@ -1280,14 +1391,15 @@ function renderMonitorTable() {
 
 // 4. CATEGORÍAS TAB
 function loadCategoriesTab() {
-  const container = document.getElementById("admin_tax_list");
+  const suf = adminSuffixFromTab();
+  const container = document.getElementById(`admin_tax_list-${suf}`);
   if (!state.choices) {
-    container.innerHTML = `<div class="text-muted p-2">Sin tipologías activas.</div>`;
+    if (container) container.innerHTML = `<div class="text-muted p-2">Sin tipologías activas.</div>`;
     return;
   }
-  
+
   const types = isArchivoModule() ? state.choices.archivo.doc_types : state.choices.rrhh.doc_types;
-  container.innerHTML = types.map(t => `
+  if (container) container.innerHTML = types.map(t => `
     <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm border-left" style="border-left: 4px solid #ffc107 !important;">
       <div>
         <h6 class="font-weight-bold text-dark mb-0">${t}</h6>
@@ -1299,9 +1411,13 @@ function loadCategoriesTab() {
 }
 
 async function handleAddCategory() {
-  const name = document.getElementById("new_tax_name").value.trim();
-  const desc = document.getElementById("new_tax_desc").value.trim();
-  const scope = document.getElementById("new_tax_scope").value;
+  const suf = adminSuffixFromTab();
+  const nameEl = document.getElementById(`new_tax_name-${suf}`);
+  const descEl = document.getElementById(`new_tax_desc-${suf}`);
+  const scopeEl = document.getElementById(`new_tax_scope-${suf}`);
+  const name = nameEl ? nameEl.value.trim() : "";
+  const desc = descEl ? descEl.value.trim() : "";
+  const scope = scopeEl ? scopeEl.value : "";
   
   if (!name) {
     alert("Por favor, ingrese el nombre de la tipología.");
@@ -1317,8 +1433,8 @@ async function handleAddCategory() {
     if (!res.ok) throw new Error();
     
     alert("¡Nueva taxonomía tipológica guardada con éxito!");
-    document.getElementById("new_tax_name").value = "";
-    document.getElementById("new_tax_desc").value = "";
+    if (nameEl) nameEl.value = "";
+    if (descEl) descEl.value = "";
     
     loadDynamicChoices();
     loadAdminTab("categories");
@@ -1330,7 +1446,8 @@ async function handleAddCategory() {
 
 // 5. CONTROL DE USUARIOS
 async function loadUsersTab() {
-  const container = document.getElementById("admin_users_table");
+  const suf = adminSuffixFromTab();
+  const container = document.getElementById(`admin_users_table-${suf}`);
   
   try {
     const res = await fetch(`${API_BASE}/api/admin/users`);
@@ -1368,10 +1485,15 @@ async function loadUsersTab() {
 }
 
 async function handleAddUser() {
-  const username = document.getElementById("new_user_name").value.trim();
-  const pass = document.getElementById("new_user_pass").value.trim();
-  const modulo = document.getElementById("new_user_modulo").value;
-  const rol = document.getElementById("new_user_rol").value;
+  const suf = adminSuffixFromTab();
+  const usernameEl = document.getElementById(`new_user_name-${suf}`);
+  const passEl = document.getElementById(`new_user_pass-${suf}`);
+  const moduloEl = document.getElementById(`new_user_modulo-${suf}`);
+  const rolEl = document.getElementById(`new_user_rol-${suf}`);
+  const username = usernameEl ? usernameEl.value.trim() : "";
+  const pass = passEl ? passEl.value.trim() : "";
+  const modulo = moduloEl ? moduloEl.value : "";
+  const rol = rolEl ? rolEl.value : "";
   
   if (!username || !pass) {
     alert("Por favor, ingrese todos los datos requeridos para registrar el usuario.");
@@ -1397,8 +1519,8 @@ async function handleAddUser() {
     }
     
     alert(`¡Usuario ${username} registrado en base de datos de control de acceso!`);
-    document.getElementById("new_user_name").value = "";
-    document.getElementById("new_user_pass").value = "";
+    if (usernameEl) usernameEl.value = "";
+    if (passEl) passEl.value = "";
     
     loadUsersTab();
     
@@ -1442,7 +1564,10 @@ function setupEventListeners() {
   // Tabs Sidebar
   document.getElementById("menu-btn-archivo").addEventListener("click", (e) => { e.preventDefault(); switchTab("archivo"); });
   document.getElementById("menu-btn-rrhh").addEventListener("click", (e) => { e.preventDefault(); switchTab("rrhh"); });
-  document.getElementById("menu-btn-admin").addEventListener("click", (e) => { e.preventDefault(); switchTab("admin"); });
+  // Admin buttons per módulo
+  document.getElementById("menu-btn-admin-archivo").addEventListener("click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
+  document.getElementById("menu-btn-admin-rrhh").addEventListener("click", (e) => { e.preventDefault(); if (state.user) state.user.modulo = "RRHH"; switchTab("admin-rrhh"); });
+  document.getElementById("module_switch_btn").addEventListener("click", handleModuleSwitch);
 
   // Buscador de Archivo
   document.getElementById("search_archivo").addEventListener("input", (e) => {
@@ -1541,52 +1666,58 @@ function setupEventListeners() {
   });
 
   // --- EVENTOS PESTAÑAS ADMIN ---
-  document.getElementById("tab-admin-stats").addEventListener("click", (e) => { e.preventDefault(); loadAdminTab("stats"); });
-  document.getElementById("tab-admin-new").addEventListener("click", (e) => { e.preventDefault(); loadAdminTab("new"); });
-  document.getElementById("tab-admin-monitor").addEventListener("click", (e) => { e.preventDefault(); loadAdminTab("monitor"); });
-  document.getElementById("tab-admin-categories").addEventListener("click", (e) => { e.preventDefault(); loadAdminTab("categories"); });
-  document.getElementById("tab-admin-users").addEventListener("click", (e) => { e.preventDefault(); loadAdminTab("users"); });
+  // --- EVENTOS PESTAÑAS ADMIN (aplicar a ambos namespaces) ---
+  ["archivo", "rrhh"].forEach(suf => {
+    // Tabs
+    ["stats", "new", "monitor", "categories", "users"].forEach(t => {
+      const tabId = `tab-admin-${suf}-${t}`;
+      const tabEl = document.getElementById(tabId);
+      if (tabEl) tabEl.addEventListener("click", (e) => { e.preventDefault(); loadAdminTab(t); });
+    });
 
-  // Botón aplicar filtros analíticos
-  document.getElementById("btn-apply-stats").addEventListener("click", loadDynamicStats);
+    // Botón aplicar filtros analíticos
+    const applyBtn = document.getElementById(`btn-apply-stats-${suf}`);
+    if (applyBtn) applyBtn.addEventListener("click", loadDynamicStats);
 
-  // Formulario nuevo ingreso
-  document.getElementById("admin-submit-form").addEventListener("submit", handleNewSubmission);
+    // Formulario nuevo ingreso
+    const submitForm = document.getElementById(`admin-submit-form-${suf}`);
+    if (submitForm) submitForm.addEventListener("submit", handleNewSubmission);
 
-  // Monitor buscador local
-  document.getElementById("admin_search").addEventListener("input", () => {
-    state.adminTable.page = 1;
-    loadMonitorTable();
-  });
-  document.getElementById("admin_filter_type").addEventListener("change", () => {
-    state.adminTable.page = 1;
-    loadMonitorTable();
-  });
-  document.getElementById("btn_refresh_table").addEventListener("click", loadMonitorTable);
-  document.getElementById("btn_export_csv").addEventListener("click", () => {
-    alert("Consolidando directorio local y exportando reporte CSV...\nGenerado con éxito.");
-  });
-  
-  // Monitor Paginación
-  document.getElementById("admin_prev").addEventListener("click", () => {
-    if (state.adminTable.page > 1) {
-      state.adminTable.page--;
-      renderMonitorTable();
-    }
-  });
-  document.getElementById("admin_next").addEventListener("click", () => {
-    const totalPages = Math.ceil(state.adminTable.results.length / state.adminTable.perPage);
-    if (state.adminTable.page < totalPages) {
-      state.adminTable.page++;
-      renderMonitorTable();
-    }
-  });
+    // Monitor buscador local
+    const searchEl = document.getElementById(`admin_search-${suf}`);
+    if (searchEl) searchEl.addEventListener("input", () => { state.adminTable.page = 1; loadMonitorTable(); });
+    const filterEl = document.getElementById(`admin_filter_type-${suf}`);
+    if (filterEl) filterEl.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
+    const refreshBtn = document.getElementById(`btn_refresh_table-${suf}`);
+    if (refreshBtn) refreshBtn.addEventListener("click", loadMonitorTable);
+    const exportBtn = document.getElementById(`btn_export_csv-${suf}`);
+    if (exportBtn) exportBtn.addEventListener("click", () => { alert("Consolidando directorio local y exportando reporte CSV...\nGenerado con éxito."); });
 
-  // Nueva categoría click
-  document.getElementById("add_tax_btn").addEventListener("click", handleAddCategory);
+    // Monitor Paginación
+    const prevBtn = document.getElementById(`admin_prev-${suf}`);
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      if (state.adminTable.page > 1) {
+        state.adminTable.page--;
+        renderMonitorTable();
+      }
+    });
+    const nextBtn = document.getElementById(`admin_next-${suf}`);
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      const totalPages = Math.ceil(state.adminTable.results.length / state.adminTable.perPage);
+      if (state.adminTable.page < totalPages) {
+        state.adminTable.page++;
+        renderMonitorTable();
+      }
+    });
 
-  // Crear usuario click
-  document.getElementById("btn_add_user").addEventListener("click", handleAddUser);
+    // Nueva categoría click
+    const addTax = document.getElementById(`add_tax_btn-${suf}`) || document.getElementById(`add_tax_btn-${suf}`);
+    if (addTax) addTax.addEventListener("click", handleAddCategory);
+
+    // Crear usuario click
+    const addUserBtn = document.getElementById(`btn_add_user-${suf}`);
+    if (addUserBtn) addUserBtn.addEventListener("click", handleAddUser);
+  });
 }
 
 async function performLogin() {

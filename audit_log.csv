@@ -8,3 +8,47 @@ timestamp,username,action,modulo,details,result
 2026-05-20 16:35:29,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
 2026-05-20 16:43:10,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
 2026-05-20 16:43:33,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:01,rrhh_admin,Login Success,RRHH,Rol: Admin,Success
+2026-05-20 16:55:04,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:05,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:05,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:06,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:06,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:06,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:07,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:07,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:07,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:08,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:08,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:55:09,rrhh_admin,Session Restored,RRHH,Rol: Admin,Success
+2026-05-20 16:57:03,admin,Login Failure,Auth,Credenciales incorrectas,Failure
+2026-05-20 16:57:16,admin,Login Failure,Auth,Credenciales incorrectas,Failure
+2026-05-20 16:57:19,admin,Login Failure,Auth,Credenciales incorrectas,Failure
+2026-05-20 16:57:47,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 16:58:00,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 16:58:33,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:01:07,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:02:00,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:03:28,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:07:39,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:07:45,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:08:04,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:08:16,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:08:23,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:10:35,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:11:19,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:12:06,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:17:21,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:21:52,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:29:22,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:32:21,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-20 17:35:52,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:37:04,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:37:21,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:37:36,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:38:13,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:38:56,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:39:01,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:39:06,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:44:49,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-20 17:44:56,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
