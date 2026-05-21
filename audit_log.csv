@@ -196,3 +196,5 @@ timestamp,username,action,modulo,details,result
 2026-05-20 20:10:31,archivo_admin,Session Restored,Archivo,Roles: {'Archivo': 'Admin'},Success
 2026-05-20 20:11:05,archivo_admin,Session Restored,Archivo,Roles: {'Archivo': 'Admin'},Success
 2026-05-20 20:11:12,archivo_admin,Session Restored,Archivo,Roles: {'Archivo': 'Admin'},Success
+2026-05-21 00:57:16,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-21 01:00:17,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success

@@ -1200,7 +1200,7 @@
        3. MODALES DETALLADOS DUBLIN CORE & DOSSIERS (100% FIDELIDAD)
        ========================================================================== -->
   <!-- Modal Genérico de Documentos (.ds-doc-modal) -->
-  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" style="border-radius: 14px; border: 1px solid #d6dbe1; box-shadow: 0 18px 40px rgba(16, 24, 40, 0.2);">
         <div class="modal-body p-4">
@@ -1248,7 +1248,7 @@
   </div>
 
   <!-- Modal Expediente RRHH Completo (Dossier con sub-filtros, fotos y pestañas) -->
-  <div id="rrhh-person-modal" class="modal fade rrhh-person-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="rrhh-person-modal" class="modal fade rrhh-person-modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content" style="border-radius: 14px; border: 1px solid #d6dbe1; box-shadow: 0 18px 40px rgba(16, 24, 40, 0.2);">
         <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
@@ -1270,5 +1270,8 @@
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
   <!-- Lógica SPA Conectora -->
   <script src="/static/app.js"></script>
+  <script src="/static/archivo.js"></script>
+  <script src="/static/rrhh.js"></script>
+  <script src="/static/admin.js"></script>
 </body>
 </html>
