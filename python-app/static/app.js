@@ -111,16 +111,14 @@ async function checkPersistedSession() {
     const saved = JSON.parse(raw);
     const ttlMs = 12 * 60 * 60 * 1000;
     if (saved && saved.username && saved.ts && (Date.now() - saved.ts) < ttlMs) {
-      const res = await fetch(`${API_BASE}/api/auth/restore`, {
+      // Restore immediately from cache — no flash, no redirect delay
+      loginSuccess(saved);
+      // Validate with server in the background; log out only if session is revoked
+      fetch(`${API_BASE}/api/auth/restore`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: saved.username })
-      });
-      if (res.ok) {
-        loginSuccess((await res.json()).user);
-      } else {
-        logout();
-      }
+      }).then(res => { if (!res.ok) logout(); }).catch(() => {});
     } else {
       logout();
     }
@@ -447,8 +445,8 @@ function setupEventListeners() {
 
   // Buscador Archivo
   safeOn("search_archivo",    "input",  e => { state.archivo.search = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
-  safeOn("btn_s_archivo",     "click",  triggerArchivoSearch);
-  safeOn("btn_update_archivo","click",  triggerArchivoSearch);
+  safeOn("btn_s_archivo",     "click",  (typeof triggerArchivoSearch === 'function') ? triggerArchivoSearch : (()=>{}));
+  safeOn("btn_update_archivo","click",  (typeof triggerArchivoSearch === 'function') ? triggerArchivoSearch : (()=>{}));
   safeOn("btn_clear_archivo", "click",  () => resetDateFilters("archivo"));
   safeOn("download_archivo_xls","click",() => alert("Exportando reporte XLS de folios académicos...\nDescargado con éxito."));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
@@ -456,8 +454,8 @@ function setupEventListeners() {
 
   // Buscador RRHH
   safeOn("search_rrhh",       "input",  e => { state.rrhh.search = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
-  safeOn("btn_s_rrhh",        "click",  triggerRrhhSearch);
-  safeOn("btn_update_rrhh",   "click",  triggerRrhhSearch);
+  safeOn("btn_s_rrhh",        "click",  (typeof triggerRrhhSearch === 'function') ? triggerRrhhSearch : (()=>{}));
+  safeOn("btn_update_rrhh",   "click",  (typeof triggerRrhhSearch === 'function') ? triggerRrhhSearch : (()=>{}));
   safeOn("btn_clear_rrhh",    "click",  () => resetDateFilters("rrhh"));
   safeOn("download_rrhh_xls", "click",  () => alert("Exportando reporte consolidado de personal RRHH...\nDescargado con éxito."));
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
