@@ -1338,3 +1338,224 @@ body.theme-cian .ds-sidebar-link:hover i { color:#13a0b4 !important; }
 body.theme-cian .ds-item-title { color:#0d6e7c !important; }
 body.theme-cian .ds-page-header { border-left-color:#0d6e7c !important; color:#0d6e7c !important; }
 body.theme-cian .ds-sidebar-badge { background:#13a0b4 !important; }
+
+/* ==========================================================================
+   TEMAS — Extensión completa: botones, cards, badges, modales, accents
+   ========================================================================== */
+
+/* Mixin conceptual: cada tema define --t-primary y --t-accent por medio de reglas directas */
+
+/* ── AZUL PROFUNDO ── */
+body.theme-azul-profundo .ds-btn-primary { background-color:#0f3460 !important; border-color:#0f3460 !important; }
+body.theme-azul-profundo .ds-btn-primary:hover { background-color:#0a2645 !important; border-color:#081e38 !important; box-shadow:0 4px 12px rgba(15,52,96,0.4) !important; }
+body.theme-azul-profundo .ds-item-card:hover { border-left-color:#1a5fa0 !important; box-shadow:0 10px 20px rgba(15,52,96,0.12),0 6px 6px rgba(15,52,96,0.07) !important; }
+body.theme-azul-profundo .ds-search-input:focus { border-color:#5488bb !important; box-shadow:0 0 0 0.2rem rgba(15,52,96,0.25) !important; }
+body.theme-azul-profundo .ds-results-header { border-bottom-color:#1a5fa0 !important; }
+body.theme-azul-profundo .select-tag.active { background-color:#0f3460 !important; border-color:#0f3460 !important; }
+body.theme-azul-profundo .select-tag:hover { color:#0f3460 !important; border-color:#0f3460 !important; }
+body.theme-azul-profundo .ds-badge { background-color:#0f3460 !important; }
+body.theme-azul-profundo .ds-doc-thumb-badge { background:#0f3460 !important; }
+body.theme-azul-profundo .ds-doc-thumb i { color:#0f3460 !important; }
+body.theme-azul-profundo .ds-doc-modal-head { background:linear-gradient(135deg,#d0e4f7,#e8f3ff) !important; border-color:#aacbee !important; }
+body.theme-azul-profundo .ds-doc-modal-head i, body.theme-azul-profundo .ds-doc-modal-head h4 { color:#0f3460 !important; }
+body.theme-azul-profundo .ds-doc-panel h5, body.theme-azul-profundo .ds-category-title { color:#0f3460 !important; }
+body.theme-azul-profundo .rrhh-person-photo-initials { background:#0f3460 !important; }
+body.theme-azul-profundo .rrhh-person-modal .nav-pills .nav-link.active { background-color:#0f3460 !important; }
+body.theme-azul-profundo .ds-login-card { border-top-color:#0f3460 !important; }
+
+/* ── DORADO ── */
+body.theme-dorado .ds-btn-primary { background-color:#9a7017 !important; border-color:#9a7017 !important; }
+body.theme-dorado .ds-btn-primary:hover { background-color:#7d5b12 !important; border-color:#6a4d0f !important; box-shadow:0 4px 12px rgba(154,112,23,0.4) !important; }
+body.theme-dorado .ds-item-card:hover { border-left-color:#B8860B !important; box-shadow:0 10px 20px rgba(154,112,23,0.12),0 6px 6px rgba(154,112,23,0.07) !important; }
+body.theme-dorado .ds-search-input:focus { border-color:#d4a843 !important; box-shadow:0 0 0 0.2rem rgba(154,112,23,0.25) !important; }
+body.theme-dorado .ds-results-header { border-bottom-color:#B8860B !important; }
+body.theme-dorado .select-tag.active { background-color:#9a7017 !important; border-color:#9a7017 !important; }
+body.theme-dorado .select-tag:hover { color:#7B5800 !important; border-color:#B8860B !important; }
+body.theme-dorado .ds-badge { background-color:#9a7017 !important; }
+body.theme-dorado .ds-doc-thumb-badge { background:#9a7017 !important; }
+body.theme-dorado .ds-doc-thumb i { color:#9a7017 !important; }
+body.theme-dorado .ds-doc-modal-head { background:linear-gradient(135deg,#fef3cd,#fffaed) !important; border-color:#e8d08a !important; }
+body.theme-dorado .ds-doc-modal-head i, body.theme-dorado .ds-doc-modal-head h4 { color:#7B5800 !important; }
+body.theme-dorado .ds-doc-panel h5, body.theme-dorado .ds-category-title { color:#7B5800 !important; }
+body.theme-dorado .rrhh-person-photo-initials { background:#9a7017 !important; }
+body.theme-dorado .rrhh-person-modal .nav-pills .nav-link.active { background-color:#9a7017 !important; }
+body.theme-dorado .ds-login-card { border-top-color:#9a7017 !important; }
+
+/* ── MANILA ── */
+body.theme-manila .ds-btn-primary { background-color:#8B7355 !important; border-color:#8B7355 !important; }
+body.theme-manila .ds-btn-primary:hover { background-color:#725e44 !important; border-color:#5e4d37 !important; box-shadow:0 4px 12px rgba(139,115,85,0.4) !important; }
+body.theme-manila .ds-item-card:hover { border-left-color:#A0856A !important; box-shadow:0 10px 20px rgba(139,115,85,0.12),0 6px 6px rgba(139,115,85,0.07) !important; }
+body.theme-manila .ds-search-input:focus { border-color:#c4aa8a !important; box-shadow:0 0 0 0.2rem rgba(139,115,85,0.25) !important; }
+body.theme-manila .ds-results-header { border-bottom-color:#A0856A !important; }
+body.theme-manila .select-tag.active { background-color:#8B7355 !important; border-color:#8B7355 !important; }
+body.theme-manila .select-tag:hover { color:#5C4A2A !important; border-color:#A0856A !important; }
+body.theme-manila .ds-badge { background-color:#8B7355 !important; }
+body.theme-manila .ds-doc-thumb-badge { background:#8B7355 !important; }
+body.theme-manila .ds-doc-thumb i { color:#8B7355 !important; }
+body.theme-manila .ds-doc-modal-head { background:linear-gradient(135deg,#ede0c4,#f8f0e0) !important; border-color:#d5c8a0 !important; }
+body.theme-manila .ds-doc-modal-head i, body.theme-manila .ds-doc-modal-head h4 { color:#5C4A2A !important; }
+body.theme-manila .ds-doc-panel h5, body.theme-manila .ds-category-title { color:#5C4A2A !important; }
+body.theme-manila .rrhh-person-photo-initials { background:#8B7355 !important; }
+body.theme-manila .rrhh-person-modal .nav-pills .nav-link.active { background-color:#8B7355 !important; }
+body.theme-manila .ds-login-card { border-top-color:#8B7355 !important; }
+body.theme-manila .ds-breadcrumb-wrapper { background-color:#ede0c4 !important; }
+
+/* ── ESMERALDA ── */
+body.theme-esmeralda .ds-btn-primary { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
+body.theme-esmeralda .ds-btn-primary:hover { background-color:#1f5239 !important; border-color:#1b4332 !important; box-shadow:0 4px 12px rgba(45,106,79,0.4) !important; }
+body.theme-esmeralda .ds-item-card:hover { border-left-color:#40916c !important; box-shadow:0 10px 20px rgba(45,106,79,0.12),0 6px 6px rgba(45,106,79,0.07) !important; }
+body.theme-esmeralda .ds-search-input:focus { border-color:#74c69d !important; box-shadow:0 0 0 0.2rem rgba(45,106,79,0.25) !important; }
+body.theme-esmeralda .ds-results-header { border-bottom-color:#40916c !important; }
+body.theme-esmeralda .select-tag.active { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
+body.theme-esmeralda .select-tag:hover { color:#1b4332 !important; border-color:#40916c !important; }
+body.theme-esmeralda .ds-badge { background-color:#2d6a4f !important; }
+body.theme-esmeralda .ds-doc-thumb-badge { background:#2d6a4f !important; }
+body.theme-esmeralda .ds-doc-thumb i { color:#2d6a4f !important; }
+body.theme-esmeralda .ds-doc-modal-head { background:linear-gradient(135deg,#d8f3dc,#f0faf2) !important; border-color:#aadcb8 !important; }
+body.theme-esmeralda .ds-doc-modal-head i, body.theme-esmeralda .ds-doc-modal-head h4 { color:#1b4332 !important; }
+body.theme-esmeralda .ds-doc-panel h5, body.theme-esmeralda .ds-category-title { color:#1b4332 !important; }
+body.theme-esmeralda .rrhh-person-photo-initials { background:#2d6a4f !important; }
+body.theme-esmeralda .rrhh-person-modal .nav-pills .nav-link.active { background-color:#2d6a4f !important; }
+body.theme-esmeralda .ds-login-card { border-top-color:#2d6a4f !important; }
+
+/* ── CIAN ── */
+body.theme-cian .ds-btn-primary { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
+body.theme-cian .ds-btn-primary:hover { background-color:#09555f !important; border-color:#074a55 !important; box-shadow:0 4px 12px rgba(13,110,124,0.4) !important; }
+body.theme-cian .ds-item-card:hover { border-left-color:#13a0b4 !important; box-shadow:0 10px 20px rgba(13,110,124,0.12),0 6px 6px rgba(13,110,124,0.07) !important; }
+body.theme-cian .ds-search-input:focus { border-color:#5dcfdd !important; box-shadow:0 0 0 0.2rem rgba(13,110,124,0.25) !important; }
+body.theme-cian .ds-results-header { border-bottom-color:#13a0b4 !important; }
+body.theme-cian .select-tag.active { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
+body.theme-cian .select-tag:hover { color:#074a55 !important; border-color:#13a0b4 !important; }
+body.theme-cian .ds-badge { background-color:#0d6e7c !important; }
+body.theme-cian .ds-doc-thumb-badge { background:#0d6e7c !important; }
+body.theme-cian .ds-doc-thumb i { color:#0d6e7c !important; }
+body.theme-cian .ds-doc-modal-head { background:linear-gradient(135deg,#c7f0f5,#e8fafc) !important; border-color:#8ddce8 !important; }
+body.theme-cian .ds-doc-modal-head i, body.theme-cian .ds-doc-modal-head h4 { color:#074a55 !important; }
+body.theme-cian .ds-doc-panel h5, body.theme-cian .ds-category-title { color:#074a55 !important; }
+body.theme-cian .rrhh-person-photo-initials { background:#0d6e7c !important; }
+body.theme-cian .rrhh-person-modal .nav-pills .nav-link.active { background-color:#0d6e7c !important; }
+body.theme-cian .ds-login-card { border-top-color:#0d6e7c !important; }
+
+/* ── LAVANDA ── */
+body.theme-lavanda .ds-btn-primary { background-color:#4a3570 !important; border-color:#4a3570 !important; }
+body.theme-lavanda .ds-btn-primary:hover { background-color:#362659 !important; border-color:#2d1b5c !important; box-shadow:0 4px 12px rgba(74,53,112,0.4) !important; }
+body.theme-lavanda .ds-item-card:hover { border-left-color:#7c5cbf !important; box-shadow:0 10px 20px rgba(74,53,112,0.12),0 6px 6px rgba(74,53,112,0.07) !important; }
+body.theme-lavanda .ds-search-input:focus { border-color:#a98fd9 !important; box-shadow:0 0 0 0.2rem rgba(74,53,112,0.25) !important; }
+body.theme-lavanda .ds-results-header { border-bottom-color:#7c5cbf !important; }
+body.theme-lavanda .select-tag.active { background-color:#4a3570 !important; border-color:#4a3570 !important; }
+body.theme-lavanda .select-tag:hover { color:#4a3570 !important; border-color:#7c5cbf !important; }
+body.theme-lavanda .ds-badge { background-color:#4a3570 !important; }
+body.theme-lavanda .ds-doc-thumb-badge { background:#4a3570 !important; }
+body.theme-lavanda .ds-doc-thumb i { color:#4a3570 !important; }
+body.theme-lavanda .ds-doc-modal-head { background:linear-gradient(135deg,#e8dff5,#f2ecff) !important; border-color:#c4aee8 !important; }
+body.theme-lavanda .ds-doc-modal-head i, body.theme-lavanda .ds-doc-modal-head h4 { color:#2d1b5c !important; }
+body.theme-lavanda .ds-doc-panel h5, body.theme-lavanda .ds-category-title { color:#2d1b5c !important; }
+body.theme-lavanda .rrhh-person-photo-initials { background:#4a3570 !important; }
+body.theme-lavanda .rrhh-person-modal .nav-pills .nav-link.active { background-color:#4a3570 !important; }
+body.theme-lavanda .ds-login-card { border-top-color:#4a3570 !important; }
+
+/* ── GRANATE ── */
+body.theme-granate .ds-btn-primary { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
+body.theme-granate .ds-btn-primary:hover { background-color:#631f2d !important; border-color:#5a1e2b !important; box-shadow:0 4px 12px rgba(124,45,60,0.4) !important; }
+body.theme-granate .ds-item-card:hover { border-left-color:#a03048 !important; box-shadow:0 10px 20px rgba(124,45,60,0.12),0 6px 6px rgba(124,45,60,0.07) !important; }
+body.theme-granate .ds-search-input:focus { border-color:#d07082 !important; box-shadow:0 0 0 0.2rem rgba(124,45,60,0.25) !important; }
+body.theme-granate .ds-results-header { border-bottom-color:#a03048 !important; }
+body.theme-granate .select-tag.active { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
+body.theme-granate .select-tag:hover { color:#7c2d3c !important; border-color:#a03048 !important; }
+body.theme-granate .ds-badge { background-color:#7c2d3c !important; }
+body.theme-granate .ds-doc-thumb-badge { background:#7c2d3c !important; }
+body.theme-granate .ds-doc-thumb i { color:#7c2d3c !important; }
+body.theme-granate .ds-doc-modal-head { background:linear-gradient(135deg,#fce4e9,#fff0f2) !important; border-color:#f0b4bf !important; }
+body.theme-granate .ds-doc-modal-head i, body.theme-granate .ds-doc-modal-head h4 { color:#5a1e2b !important; }
+body.theme-granate .ds-doc-panel h5, body.theme-granate .ds-category-title { color:#5a1e2b !important; }
+body.theme-granate .rrhh-person-photo-initials { background:#7c2d3c !important; }
+body.theme-granate .rrhh-person-modal .nav-pills .nav-link.active { background-color:#7c2d3c !important; }
+body.theme-granate .ds-login-card { border-top-color:#7c2d3c !important; }
+
+/* ── TERRACOTA ── */
+body.theme-terracota .ds-btn-primary { background-color:#b5451b !important; border-color:#b5451b !important; }
+body.theme-terracota .ds-btn-primary:hover { background-color:#943814 !important; border-color:#7a2d10 !important; box-shadow:0 4px 12px rgba(181,69,27,0.4) !important; }
+body.theme-terracota .ds-item-card:hover { border-left-color:#d4623a !important; box-shadow:0 10px 20px rgba(181,69,27,0.12),0 6px 6px rgba(181,69,27,0.07) !important; }
+body.theme-terracota .ds-search-input:focus { border-color:#e09070 !important; box-shadow:0 0 0 0.2rem rgba(181,69,27,0.25) !important; }
+body.theme-terracota .ds-results-header { border-bottom-color:#d4623a !important; }
+body.theme-terracota .select-tag.active { background-color:#b5451b !important; border-color:#b5451b !important; }
+body.theme-terracota .select-tag:hover { color:#b5451b !important; border-color:#d4623a !important; }
+body.theme-terracota .ds-badge { background-color:#b5451b !important; }
+body.theme-terracota .ds-doc-thumb-badge { background:#b5451b !important; }
+body.theme-terracota .ds-doc-thumb i { color:#b5451b !important; }
+body.theme-terracota .ds-doc-modal-head { background:linear-gradient(135deg,#fde9e0,#fff5f0) !important; border-color:#f0b89a !important; }
+body.theme-terracota .ds-doc-modal-head i, body.theme-terracota .ds-doc-modal-head h4 { color:#7a2d10 !important; }
+body.theme-terracota .ds-doc-panel h5, body.theme-terracota .ds-category-title { color:#7a2d10 !important; }
+body.theme-terracota .rrhh-person-photo-initials { background:#b5451b !important; }
+body.theme-terracota .rrhh-person-modal .nav-pills .nav-link.active { background-color:#b5451b !important; }
+body.theme-terracota .ds-login-card { border-top-color:#b5451b !important; }
+
+/* ── NOCHE (dark sidebar, blue accent en contenido) ── */
+body.theme-noche .ds-btn-primary { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
+body.theme-noche .ds-btn-primary:hover { background-color:#2f76c0 !important; border-color:#2464aa !important; box-shadow:0 4px 12px rgba(74,144,217,0.4) !important; }
+body.theme-noche .ds-item-card:hover { border-left-color:#4a90d9 !important; box-shadow:0 10px 20px rgba(74,144,217,0.12),0 6px 6px rgba(74,144,217,0.07) !important; }
+body.theme-noche .ds-search-input:focus { border-color:#7ab4e8 !important; box-shadow:0 0 0 0.2rem rgba(74,144,217,0.25) !important; }
+body.theme-noche .ds-results-header { border-bottom-color:#4a90d9 !important; }
+body.theme-noche .select-tag.active { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
+body.theme-noche .select-tag:hover { color:#2f76c0 !important; border-color:#4a90d9 !important; }
+body.theme-noche .ds-badge { background-color:#4a90d9 !important; }
+body.theme-noche .ds-doc-thumb-badge { background:#1a3a6b !important; }
+body.theme-noche .ds-doc-thumb i { color:#4a90d9 !important; }
+body.theme-noche .ds-doc-modal-head { background:linear-gradient(135deg,#d0e8f7,#eaf4ff) !important; border-color:#a0ccee !important; }
+body.theme-noche .ds-doc-modal-head i, body.theme-noche .ds-doc-modal-head h4 { color:#1a3a6b !important; }
+body.theme-noche .ds-doc-panel h5, body.theme-noche .ds-category-title { color:#1a3a6b !important; }
+body.theme-noche .rrhh-person-photo-initials { background:#1a3a6b !important; }
+body.theme-noche .rrhh-person-modal .nav-pills .nav-link.active { background-color:#4a90d9 !important; }
+body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
+body.theme-noche .ds-item-title { color:#1a3a6b !important; }
+
+/* ── CARBON (dark sidebar, charcoal accent) ── */
+body.theme-carbon .ds-btn-primary { background-color:#444 !important; border-color:#444 !important; }
+body.theme-carbon .ds-btn-primary:hover { background-color:#2a2a2a !important; border-color:#1a1a1a !important; box-shadow:0 4px 12px rgba(68,68,68,0.4) !important; }
+body.theme-carbon .ds-item-card:hover { border-left-color:#555 !important; box-shadow:0 10px 20px rgba(68,68,68,0.12),0 6px 6px rgba(68,68,68,0.07) !important; }
+body.theme-carbon .ds-search-input:focus { border-color:#999 !important; box-shadow:0 0 0 0.2rem rgba(68,68,68,0.2) !important; }
+body.theme-carbon .ds-results-header { border-bottom-color:#555 !important; }
+body.theme-carbon .select-tag.active { background-color:#444 !important; border-color:#444 !important; }
+body.theme-carbon .select-tag:hover { color:#2c2c2c !important; border-color:#777 !important; }
+body.theme-carbon .ds-badge { background-color:#444 !important; }
+body.theme-carbon .ds-doc-thumb-badge { background:#2c2c2c !important; }
+body.theme-carbon .ds-doc-thumb i { color:#555 !important; }
+body.theme-carbon .ds-doc-modal-head { background:linear-gradient(135deg,#e8e8e8,#f5f5f5) !important; border-color:#ccc !important; }
+body.theme-carbon .ds-doc-modal-head i, body.theme-carbon .ds-doc-modal-head h4 { color:#1a1a1a !important; }
+body.theme-carbon .ds-doc-panel h5, body.theme-carbon .ds-category-title { color:#1a1a1a !important; }
+body.theme-carbon .rrhh-person-photo-initials { background:#2c2c2c !important; }
+body.theme-carbon .rrhh-person-modal .nav-pills .nav-link.active { background-color:#444 !important; }
+body.theme-carbon .ds-login-card { border-top-color:#2c2c2c !important; }
+
+/* ── OLIVA ── */
+body.theme-oliva .ds-btn-primary { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
+body.theme-oliva .ds-btn-primary:hover { background-color:#47551f !important; border-color:#3a4517 !important; box-shadow:0 4px 12px rgba(90,107,42,0.4) !important; }
+body.theme-oliva .ds-item-card:hover { border-left-color:#7a9040 !important; box-shadow:0 10px 20px rgba(90,107,42,0.12),0 6px 6px rgba(90,107,42,0.07) !important; }
+body.theme-oliva .ds-search-input:focus { border-color:#a0b865 !important; box-shadow:0 0 0 0.2rem rgba(90,107,42,0.25) !important; }
+body.theme-oliva .ds-results-header { border-bottom-color:#7a9040 !important; }
+body.theme-oliva .select-tag.active { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
+body.theme-oliva .select-tag:hover { color:#3a4517 !important; border-color:#7a9040 !important; }
+body.theme-oliva .ds-badge { background-color:#5a6b2a !important; }
+body.theme-oliva .ds-doc-thumb-badge { background:#5a6b2a !important; }
+body.theme-oliva .ds-doc-thumb i { color:#5a6b2a !important; }
+body.theme-oliva .ds-doc-modal-head { background:linear-gradient(135deg,#e8f0d0,#f2f8e0) !important; border-color:#c0d490 !important; }
+body.theme-oliva .ds-doc-modal-head i, body.theme-oliva .ds-doc-modal-head h4 { color:#3a4517 !important; }
+body.theme-oliva .ds-doc-panel h5, body.theme-oliva .ds-category-title { color:#3a4517 !important; }
+body.theme-oliva .rrhh-person-photo-initials { background:#5a6b2a !important; }
+body.theme-oliva .rrhh-person-modal .nav-pills .nav-link.active { background-color:#5a6b2a !important; }
+body.theme-oliva .ds-login-card { border-top-color:#5a6b2a !important; }
+
+/* ==========================================================================
+   Bootstrap .btn-primary overrides por tema (item action buttons, etc.)
+   ========================================================================== */
+body.theme-azul-profundo .btn.btn-primary:not(.ds-btn-primary) { background-color:#0f3460 !important; border-color:#0f3460 !important; }
+body.theme-dorado         .btn.btn-primary:not(.ds-btn-primary) { background-color:#9a7017 !important; border-color:#9a7017 !important; }
+body.theme-manila         .btn.btn-primary:not(.ds-btn-primary) { background-color:#8B7355 !important; border-color:#8B7355 !important; }
+body.theme-esmeralda      .btn.btn-primary:not(.ds-btn-primary) { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
+body.theme-cian           .btn.btn-primary:not(.ds-btn-primary) { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
+body.theme-lavanda        .btn.btn-primary:not(.ds-btn-primary) { background-color:#4a3570 !important; border-color:#4a3570 !important; }
+body.theme-granate        .btn.btn-primary:not(.ds-btn-primary) { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
+body.theme-terracota      .btn.btn-primary:not(.ds-btn-primary) { background-color:#b5451b !important; border-color:#b5451b !important; }
+body.theme-noche          .btn.btn-primary:not(.ds-btn-primary) { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
+body.theme-carbon         .btn.btn-primary:not(.ds-btn-primary) { background-color:#444    !important; border-color:#444    !important; }
+body.theme-oliva          .btn.btn-primary:not(.ds-btn-primary) { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
