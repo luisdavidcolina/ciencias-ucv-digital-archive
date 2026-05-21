@@ -184,7 +184,12 @@ a:hover {
     font-weight: 700;
     color: #ffffff;
     letter-spacing: 0.3px;
-    flex-grow: 1;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex-grow: 0; 
 }
 
 .ds-sidebar-close {

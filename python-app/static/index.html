@@ -87,7 +87,7 @@
         </li>
         <li class="nav-item dropdown">
           <span class="ds-navbar-logo nav-link">
-            <img src="/static/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
+            <img src="/assets/icons/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
           </span>
         </li>
       </ul>
@@ -114,11 +114,25 @@
     <aside id="app-sidebar" class="ds-sidebar">
       <!-- Logo -->
       <div class="ds-sidebar-header">
-       <span class="ds-sidebar-brand">Ciencias UCV</span>
-        <button id="sidebar-close-btn" class="ds-sidebar-close" title="Cerrar menú">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
+
+  <div class="ds-sidebar-brand"
+       style="display:flex; align-items:center; gap:10px;">
+
+    <img src="/assets/icons/logo.png"
+         alt="logo"
+         style="height:28px; width:28px; object-fit:contain;">
+
+    <span style="vertical-align:middle;">Ciencias UCV</span>
+
+  </div>
+
+  <button id="sidebar-close-btn"
+          class="ds-sidebar-close"
+          title="Cerrar menú">
+    <i class="fas fa-times"></i>
+  </button>
+
+</div>
 
       <!-- Separador -->
       <div class="ds-sidebar-divider"></div>

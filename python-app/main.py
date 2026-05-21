@@ -788,6 +788,7 @@ async def serve_admin_rrhh():
     return FileResponse(os.path.join(static_path, "admin_rrhh.html"))
 
 app.mount("/static", StaticFiles(directory=static_path), name="static")
+app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
 
 if __name__ == "__main__":
     import uvicorn
