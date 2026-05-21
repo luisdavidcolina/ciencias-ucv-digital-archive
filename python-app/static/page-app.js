@@ -61,11 +61,6 @@ function saveSession(user) {
 
 function chooseLandingPage(user) {
   if (!user) return "/archivo";
-  const isAdmin = Object.values(user.roles || {}).some(r => r === "Admin" || r === "admin");
-  if (isAdmin) {
-    if (user.modulo === "RRHH" || user.modules?.includes("RRHH")) return "/admin/rrhh";
-    return "/admin/archivo";
-  }
   if (user.modulo === "RRHH" || user.modules?.includes("RRHH")) return "/rrhh";
   return "/archivo";
 }

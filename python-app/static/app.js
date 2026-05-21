@@ -96,6 +96,7 @@ function isArchivoModule() { return state.user && state.user.modulo === "Archivo
 // CICLO DE VIDA DE SESIÓN
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   setupEventListeners();
   checkPersistedSession();
 });
@@ -217,8 +218,6 @@ function configureSidebarVisibilities(user) {
     else if (standalonePage === "admin-archivo") allowed = rArch === "Admin";
     else if (standalonePage === "admin-rrhh")    allowed = rRrhh === "Admin";
     if (!allowed) {
-      if (rArch === "Admin") { window.location.href = "/admin/archivo"; return; }
-      if (rRrhh === "Admin") { window.location.href = "/admin/rrhh"; return; }
       if (modules.includes("RRHH")) { window.location.href = "/rrhh"; return; }
       window.location.href = "/archivo";
       return;
@@ -519,4 +518,73 @@ async function performLogin() {
   } catch {
     alert("Credenciales incorrectas de acceso institucional.");
   }
+}
+
+// ==========================================================================
+// SISTEMA DE TEMAS
+// ==========================================================================
+const THEMES = [
+  { id:"default",           name:"Clásico UCV",          sidebar:"#2b4e72", content:"#f8f9fa", bar:"#2b4e72" },
+  { id:"theme-azul-profundo",name:"Azul Profundo",        sidebar:"#0f3460", content:"#e8f3ff", bar:"#1a5fa0" },
+  { id:"theme-dorado",      name:"Dorado Académico",     sidebar:"#9a7017", content:"#fffdf0", bar:"#B8860B" },
+  { id:"theme-manila",      name:"Manila / Cartón",      sidebar:"#8B7355", content:"#f5ead0", bar:"#A0856A" },
+  { id:"theme-esmeralda",   name:"Verde Esmeralda",      sidebar:"#2d6a4f", content:"#f0faf2", bar:"#40916c" },
+  { id:"theme-cian",        name:"Cian Institucional",   sidebar:"#0d6e7c", content:"#e8fafc", bar:"#13a0b4" },
+  { id:"theme-lavanda",     name:"Lavanda",              sidebar:"#4a3570", content:"#f5f0ff", bar:"#7c5cbf" },
+  { id:"theme-granate",     name:"Granate Académico",    sidebar:"#7c2d3c", content:"#fff5f7", bar:"#a03048" },
+  { id:"theme-terracota",   name:"Terracota",            sidebar:"#b5451b", content:"#fff8f5", bar:"#d4623a" },
+  { id:"theme-noche",       name:"Medianoche",           sidebar:"#0d1b2a", content:"#f0f4f8", bar:"#4a90d9" },
+  { id:"theme-carbon",      name:"Gris Carbón",          sidebar:"#2c2c2c", content:"#f8f8f8", bar:"#555555" },
+  { id:"theme-oliva",       name:"Verde Oliva",          sidebar:"#5a6b2a", content:"#f5fae0", bar:"#7a9040" },
+];
+
+function initTheme() {
+  const saved = localStorage.getItem("ds_theme");
+  if (saved && saved !== "default") document.body.classList.add(saved);
+}
+
+function openThemePanel() {
+  let panel = document.getElementById("ds-theme-panel");
+  if (!panel) { panel = createThemePanel(); document.body.appendChild(panel); }
+  else { panel.remove(); panel = createThemePanel(); document.body.appendChild(panel); }
+  requestAnimationFrame(() => panel.classList.add("open"));
+}
+
+function closeThemePanel() {
+  document.getElementById("ds-theme-panel")?.classList.remove("open");
+}
+
+function createThemePanel() {
+  const current = localStorage.getItem("ds_theme") || "default";
+  const panel = document.createElement("div");
+  panel.id = "ds-theme-panel";
+  panel.className = "ds-theme-panel";
+  panel.innerHTML = `
+    <div class="ds-theme-panel-header">
+      <h6><i class="fas fa-palette mr-2"></i>Personalización</h6>
+      <button class="ds-theme-panel-close" onclick="closeThemePanel()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ds-theme-panel-body">
+      ${THEMES.map(t => `
+        <div class="ds-theme-card${current === t.id ? " active" : ""}" onclick="applyTheme('${t.id}')">
+          <div class="ds-theme-preview">
+            <div class="ds-theme-preview-sidebar" style="background:${t.sidebar};"></div>
+            <div class="ds-theme-preview-content" style="background:${t.content};">
+              <div class="ds-theme-preview-bar" style="background:${t.bar};opacity:0.75;height:7px;width:80%;"></div>
+              <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:90%;"></div>
+              <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:65%;"></div>
+            </div>
+          </div>
+          <div class="ds-theme-name">${t.name}</div>
+        </div>`).join("")}
+    </div>`;
+  return panel;
+}
+
+function applyTheme(themeId) {
+  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b/g, "").trim();
+  if (themeId !== "default") document.body.classList.add(themeId);
+  localStorage.setItem("ds_theme", themeId);
+  closeThemePanel();
+  setTimeout(() => openThemePanel(), 50);
 }

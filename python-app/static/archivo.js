@@ -31,7 +31,7 @@ function renderArchivoList() {
   if (results.length === 0) {
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
       <i class="fas fa-search fa-2x mb-2 text-muted"></i>
-      <p class="mb-0">No se encontraron folios correspondientes a los criterios ingresados.</p>
+      <p class="mb-0">No se encontraron expedientes o ejemplares correspondientes a los criterios ingresados.</p>
     </div>`;
     document.getElementById("info-archivo-pagination").innerText = "Pág 1 de 1";
     return;
@@ -87,14 +87,33 @@ function openArchivoModal(idxReal) {
   document.getElementById("modal-doc-thumb-icon").className  = "fas fa-file-alt";
   document.getElementById("modal-doc-thumb-badge").innerText = doc.doc_type;
 
-  document.getElementById("modal-doc-meta-container").innerHTML = `
-    <div class="ds-doc-meta-row"><span class="k">dc.title</span><span class="v">${doc.titulo}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">dc.contributor.author</span><span class="v">${doc.autor}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">dc.date.issued</span><span class="v">${formatISOToSpanish(doc.fecha)}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">dc.type</span><span class="v">${doc.doc_type}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">dc.identifier.location</span><span class="v">${doc.ubicacion}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">dc.subject.classification</span><span class="v">${doc.tesauro_badges.join("; ")}</span></div>
-  `;
+  const isActa   = /^acta|^resoluc/i.test(doc.doc_type);
+  const isPlano  = /plano/i.test(doc.doc_type);
+  const anio     = (doc.fecha || "").substring(0, 4);
+
+  if (isPlano) {
+    document.getElementById("modal-doc-meta-container").innerHTML = `
+      <div class="ds-doc-meta-row"><span class="k">Proyecto</span><span class="v">${doc.proyecto || doc.titulo}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Año</span><span class="v">${anio || "N/A"}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Dibujante / Autor</span><span class="v">${doc.autor || "N/A"}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
+    `;
+  } else {
+    const dateLabel = isActa ? "dc.date.session" : "dc.date.issued";
+    const dateValue = isActa
+      ? `${formatISOToSpanish(doc.fecha)} <small class="text-muted">(Fecha de Sesión)</small>`
+      : formatISOToSpanish(doc.fecha);
+    document.getElementById("modal-doc-meta-container").innerHTML = `
+      <div class="ds-doc-meta-row"><span class="k">dc.title</span><span class="v">${doc.titulo}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">dc.contributor.author</span><span class="v">${doc.autor}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">${dateLabel}</span><span class="v">${dateValue}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">dc.type</span><span class="v">${doc.doc_type}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">dc.identifier.location</span><span class="v">${doc.ubicacion}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">dc.subject.classification</span><span class="v">${doc.tesauro_badges.join("; ")}</span></div>
+    `;
+  }
   document.getElementById("modal-doc-abstract").innerText =
     doc.resumen || "No se ha registrado un resumen descriptivo abstracto (dc.description.abstract) para este folio.";
 
