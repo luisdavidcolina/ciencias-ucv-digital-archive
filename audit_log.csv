@@ -244,3 +244,7 @@ timestamp,username,action,modulo,details,result
 2026-05-21 02:14:27,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
 2026-05-21 02:16:07,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
 2026-05-21 02:16:47,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-21 02:21:19,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-21 02:21:26,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-21 02:21:30,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-21 02:21:31,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success

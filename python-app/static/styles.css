@@ -1559,3 +1559,370 @@ body.theme-terracota      .btn.btn-primary:not(.ds-btn-primary) { background-col
 body.theme-noche          .btn.btn-primary:not(.ds-btn-primary) { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
 body.theme-carbon         .btn.btn-primary:not(.ds-btn-primary) { background-color:#444    !important; border-color:#444    !important; }
 body.theme-oliva          .btn.btn-primary:not(.ds-btn-primary) { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
+
+/* ==========================================================================
+   UI/UX — ACCESIBILIDAD, RESPONSIVE & COMPONENTES MEJORADOS
+   ========================================================================== */
+
+/* Skip nav (accessibility) */
+.ds-skip-nav {
+  position: absolute;
+  top: -50px;
+  left: 12px;
+  background: #0056b3;
+  color: #fff !important;
+  padding: 8px 18px;
+  border-radius: 0 0 8px 8px;
+  z-index: 9999;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none !important;
+  transition: top 0.2s;
+}
+.ds-skip-nav:focus { top: 0; color: #fff !important; }
+
+/* Better focus rings */
+*:focus-visible {
+  outline: 2px solid #0056b3 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(0,86,179,0.15) !important;
+  border-radius: 4px;
+}
+.ds-sidebar-link:focus-visible { border-radius: 0 !important; }
+
+/* ==========================================================================
+   KPI CARDS (Panel de administración)
+   ========================================================================== */
+.ds-kpi-card {
+  border-radius: 12px !important;
+  border: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.ds-kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.13) !important;
+}
+.ds-kpi-icon {
+  opacity: 0.5;
+  transition: opacity 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.ds-kpi-card:hover .ds-kpi-icon { opacity: 0.75; transform: scale(1.12); }
+.ds-kpi-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #6c757d;
+}
+.ds-kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #212529;
+}
+.ds-kpi-value-sm {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #212529;
+}
+
+/* ==========================================================================
+   ADMIN NAV TABS (scrollable, themed)
+   ========================================================================== */
+.ds-admin-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 4px;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #dee2e6 transparent;
+}
+.ds-admin-tabs::-webkit-scrollbar { height: 3px; }
+.ds-admin-tabs::-webkit-scrollbar-track { background: transparent; }
+.ds-admin-tabs::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 3px; }
+.ds-admin-tabs .nav-item { flex-shrink: 0; }
+.ds-admin-tabs .nav-link {
+  border-radius: 8px !important;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #495057;
+  padding: 8px 14px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.ds-admin-tabs .nav-link i { margin-right: 5px; opacity: 0.7; }
+.ds-admin-tabs .nav-link:hover { background: #f0f4f8; color: #2b4e72; border-color: #dee2e6; }
+.ds-admin-tabs .nav-link.active {
+  background-color: #0056b3 !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 3px 10px rgba(0,86,179,0.28);
+}
+.ds-admin-tabs .nav-link.active i { opacity: 1; }
+
+/* Theme overrides for admin tabs active state */
+body.theme-azul-profundo .ds-admin-tabs .nav-link.active { background-color:#0f3460 !important; box-shadow:0 3px 10px rgba(15,52,96,0.3); }
+body.theme-dorado         .ds-admin-tabs .nav-link.active { background-color:#9a7017 !important; box-shadow:0 3px 10px rgba(154,112,23,0.3); }
+body.theme-manila         .ds-admin-tabs .nav-link.active { background-color:#8B7355 !important; box-shadow:0 3px 10px rgba(139,115,85,0.3); }
+body.theme-esmeralda      .ds-admin-tabs .nav-link.active { background-color:#2d6a4f !important; box-shadow:0 3px 10px rgba(45,106,79,0.3); }
+body.theme-cian           .ds-admin-tabs .nav-link.active { background-color:#0d6e7c !important; box-shadow:0 3px 10px rgba(13,110,124,0.3); }
+body.theme-lavanda        .ds-admin-tabs .nav-link.active { background-color:#4a3570 !important; box-shadow:0 3px 10px rgba(74,53,112,0.3); }
+body.theme-granate        .ds-admin-tabs .nav-link.active { background-color:#7c2d3c !important; box-shadow:0 3px 10px rgba(124,45,60,0.3); }
+body.theme-terracota      .ds-admin-tabs .nav-link.active { background-color:#b5451b !important; box-shadow:0 3px 10px rgba(181,69,27,0.3); }
+body.theme-noche          .ds-admin-tabs .nav-link.active { background-color:#4a90d9 !important; box-shadow:0 3px 10px rgba(74,144,217,0.3); }
+body.theme-carbon         .ds-admin-tabs .nav-link.active { background-color:#444    !important; box-shadow:0 3px 10px rgba(68,68,68,0.3); }
+body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a6b2a !important; box-shadow:0 3px 10px rgba(90,107,42,0.3); }
+
+/* ==========================================================================
+   ADMIN TABLE
+   ========================================================================== */
+.ds-admin-table { font-size: 0.83rem; margin-bottom: 0 !important; }
+.ds-admin-table thead th {
+  background: linear-gradient(180deg, #f4f7fb, #edf1f8) !important;
+  color: #3a4f66 !important;
+  font-weight: 700;
+  font-size: 0.73rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 2px solid #cdd8e8 !important;
+  border-top: none !important;
+  white-space: nowrap;
+  padding: 10px 12px !important;
+}
+.ds-admin-table tbody tr { transition: background 0.15s; }
+.ds-admin-table tbody tr:hover { background-color: #f0f7ff !important; }
+.ds-admin-table td { vertical-align: middle !important; padding: 8px 12px !important; }
+.ds-admin-table .ds-tbl-actions { white-space: nowrap; }
+.ds-admin-table .ds-tbl-actions .btn { margin: 1px; }
+
+/* ==========================================================================
+   UPLOAD ZONE (Nuevo Ingreso)
+   ========================================================================== */
+.ds-upload-zone {
+  border: 2px dashed #ced4da;
+  border-radius: 12px;
+  padding: 28px 16px;
+  background: linear-gradient(135deg, #f8f9fa, #fff);
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.ds-upload-zone:hover, .ds-upload-zone.drag-over {
+  border-color: #0056b3;
+  background: linear-gradient(135deg, #eef4fb, #f5f9ff);
+  box-shadow: 0 4px 16px rgba(0,86,179,0.1);
+}
+.ds-upload-zone .ds-upload-icon {
+  font-size: 2.4rem;
+  color: #adb5bd;
+  margin-bottom: 10px;
+  display: block;
+  transition: color 0.25s, transform 0.25s;
+}
+.ds-upload-zone:hover .ds-upload-icon { color: #0056b3; transform: translateY(-4px); }
+.ds-upload-zone h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.ds-upload-zone p { font-size: 0.8rem; color: #6c757d; margin-bottom: 10px; }
+
+/* ==========================================================================
+   ITEM CARDS — clases CSS para reemplazar inline styles del JS
+   ========================================================================== */
+.ds-item-type-badge {
+  font-size: 0.73rem;
+  color: #2b4e72;
+  font-weight: 700;
+  border: 1px solid #d9e6f4;
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: #eef4fb;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ds-item-date-text { font-size: 0.78rem; color: #6c757d; }
+.ds-item-kw-badge {
+  background-color: #2b4e72;
+  color: white;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.ds-item-kw-more {
+  background-color: #6c757d;
+  color: white;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Avatar pequeño en resultados RRHH */
+.ds-person-avatar-sm {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef4fb;
+  border: 2px solid #dee2e6;
+  flex-shrink: 0;
+}
+.ds-person-avatar-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ds-person-initials-sm {
+  width: 100%; height: 100%;
+  background: #2b4e72;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.88rem;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   ESTADOS VACÍO / CARGANDO
+   ========================================================================== */
+.ds-empty {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #6c757d;
+}
+.ds-empty i { font-size: 3rem; opacity: 0.25; display: block; margin-bottom: 1rem; }
+.ds-empty h5 { font-weight: 700; color: #495057; margin-bottom: 6px; }
+.ds-empty p { font-size: 0.88rem; margin: 0; }
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+.ds-spinner {
+  width: 22px; height: 22px;
+  border: 3px solid #dee2e6;
+  border-top-color: #0056b3;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   BREADCRUMB — acento izquierdo
+   ========================================================================== */
+.ds-breadcrumb-wrapper {
+  border-left: 4px solid #2b4e72;
+}
+/* Breadcrumb themed */
+body.theme-azul-profundo .ds-breadcrumb-wrapper { border-left-color: #0f3460 !important; }
+body.theme-dorado         .ds-breadcrumb-wrapper { border-left-color: #9a7017 !important; }
+body.theme-manila         .ds-breadcrumb-wrapper { border-left-color: #8B7355 !important; }
+body.theme-esmeralda      .ds-breadcrumb-wrapper { border-left-color: #2d6a4f !important; }
+body.theme-cian           .ds-breadcrumb-wrapper { border-left-color: #0d6e7c !important; }
+body.theme-lavanda        .ds-breadcrumb-wrapper { border-left-color: #4a3570 !important; }
+body.theme-granate        .ds-breadcrumb-wrapper { border-left-color: #7c2d3c !important; }
+body.theme-terracota      .ds-breadcrumb-wrapper { border-left-color: #b5451b !important; }
+body.theme-noche          .ds-breadcrumb-wrapper { border-left-color: #4a90d9 !important; }
+body.theme-carbon         .ds-breadcrumb-wrapper { border-left-color: #555    !important; }
+body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !important; }
+
+/* ==========================================================================
+   MOBILE — Toggle de filtros en buscadores
+   ========================================================================== */
+.ds-filter-toggle-btn {
+  display: none;
+  width: 100%;
+  margin-bottom: 14px;
+  font-weight: 600;
+  border-radius: 8px !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+@media (max-width: 767px) {
+  .ds-filter-toggle-btn { display: flex; }
+  .ds-filter-col-mobile { display: none; }
+  .ds-filter-col-mobile.open { display: block; }
+}
+
+/* ==========================================================================
+   RESPONSIVE GENERAL
+   ========================================================================== */
+@media (max-width: 575px) {
+  .app-tab-section { padding: 0.85rem !important; }
+  .ds-search-bar { margin-bottom: 1.25rem; }
+  .ds-results-title { font-size: 1.1rem; }
+  .ds-item-card { padding: 0.65rem 0.5rem; }
+  /* KPI 2x2 en móvil */
+  .ds-kpi-row > .col-md-3 { flex: 0 0 50%; max-width: 50%; padding: 0 6px; }
+}
+@media (max-width: 400px) {
+  .ds-kpi-row > .col-md-3 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ==========================================================================
+   ADMIN CARD HEADERS — limpiar inline colors, mejor visual
+   ========================================================================== */
+.card.card-primary .card-header  { background: linear-gradient(90deg,#d0e4f7,#e8f3ff) !important; color:#0f3460 !important; border-bottom-color:#b8d5ef !important; }
+.card.card-success .card-header  { background: linear-gradient(90deg,#d4edda,#eaf5ee) !important; color:#1a5c30 !important; border-bottom-color:#b5d9c5 !important; }
+.card.card-info    .card-header  { background: linear-gradient(90deg,#d1ecf1,#e8f7fa) !important; color:#0c545d !important; border-bottom-color:#aadfe7 !important; }
+.card.card-warning .card-header  { background: linear-gradient(90deg,#fff3cd,#fffaed) !important; color:#7B5800 !important; border-bottom-color:#eedfa0 !important; }
+.card.card-danger  .card-header  { background: linear-gradient(90deg,#f8d7da,#fff0f2) !important; color:#7c2d3c !important; border-bottom-color:#f0b4bf !important; }
+.card.card-secondary .card-header { background: linear-gradient(90deg,#e9ecef,#f5f5f5) !important; color:#495057 !important; }
+.card.card-primary .card-header .card-title  { color: #0f3460 !important; }
+.card.card-success .card-header .card-title  { color: #1a5c30 !important; }
+.card.card-info    .card-header .card-title  { color: #0c545d !important; }
+.card.card-warning .card-header .card-title  { color: #7B5800 !important; }
+.card.card-danger  .card-header .card-title  { color: #7c2d3c !important; }
+
+/* ==========================================================================
+   PAGINATION CONTROLS — visual mejorado
+   ========================================================================== */
+#ext_pagination_controls,
+#rrhh_pagination_controls {
+  border-top: 1px solid #e9ecef;
+  padding-top: 12px;
+}
+#ext_pagination_controls .btn,
+#rrhh_pagination_controls .btn,
+[id^="admin_prev-"], [id^="admin_next-"] {
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 6px 14px;
+  transition: all 0.2s;
+}
+#ext_pagination_controls .btn:hover:not(:disabled),
+#rrhh_pagination_controls .btn:hover:not(:disabled) {
+  background: #f0f4f8;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   NAVBAR — username badge
+   ========================================================================== */
+.ds-nav-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #2b4e72;
+  padding: 5px 10px;
+  background: #eef4fb;
+  border-radius: 20px;
+  border: 1px solid #d9e6f4;
+  margin-right: 8px;
+  margin-top: 2px;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-nav-user-badge i { color: #2b4e72; opacity: 0.8; flex-shrink: 0; }
