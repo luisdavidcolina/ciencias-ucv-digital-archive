@@ -1,0 +1,23 @@
+timestamp,usuario,accion,modulo,detalle,status
+2026-05-23 17:04:20,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-23 17:04:21,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-23 17:06:11,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:06:12,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:00,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:00,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:03,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:05,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:10,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:08:13,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:09:52,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:09:53,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:09:54,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:22:07,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:23:51,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:45:09,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-23 17:45:10,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-23 17:46:06,admin,Login Success,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:46:06,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:46:11,admin,Session Restored,Archivo;RRHH,"Roles: {'Archivo': 'Admin', 'RRHH': 'Admin'}",Success
+2026-05-23 17:46:30,rrhh_admin,Login Success,RRHH,Roles: {'RRHH': 'Admin'},Success
+2026-05-23 17:46:31,rrhh_admin,Session Restored,RRHH,Roles: {'RRHH': 'Admin'},Success

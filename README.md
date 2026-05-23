@@ -421,7 +421,6 @@ Bugs corregidos durante la modularización:
 
 ### Deuda técnica
 - [ ] El campo `audit_log.csv` se escribe pero su contenido no es consultable desde ninguna vista de la UI.
-- [ ] `datos_test.csv` en la raíz — revisar si es necesario o puede eliminarse.
 - [ ] La función de restaurar sesión (`/api/auth/restore`) existe en el backend pero no está siendo llamada en el frontend al recargar páginas protegidas.
 
 ---
