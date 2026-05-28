@@ -609,8 +609,10 @@ a:hover {
 
 .ds-doc-modal-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.9rem;
+    grid-template-columns: 280px 1fr;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
 }
 
 .ds-doc-panel {
@@ -623,6 +625,9 @@ a:hover {
 .ds-doc-thumb-panel {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .ds-doc-thumb {
@@ -635,6 +640,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     gap: 0.55rem;
+    padding: 10px;
 }
 
 .ds-doc-thumb i {
@@ -647,13 +653,14 @@ a:hover {
     background: #2b4e72;
     color: #fff;
     border-radius: 999px;
-    padding: 0.2rem 0.65rem;
+    padding: 0.35rem 0.65rem;
     font-size: 0.75rem;
     font-weight: 700;
-    max-width: 90%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    max-width: 95%;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
 }
 
 .ds-doc-panel h5 {
@@ -661,14 +668,14 @@ a:hover {
     font-weight: 800;
     color: #2b4e72;
     margin-bottom: 0.65rem;
+    word-break: break-word;
 }
 
 .ds-doc-meta-row {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 0.55rem;
+    display: flex;
     padding: 0.3rem 0;
     border-bottom: 1px dashed #e6ebf1;
+    word-break: break-word;
 }
 
 .ds-doc-meta-row:last-child {
@@ -679,11 +686,17 @@ a:hover {
     color: #6a7786;
     font-weight: 700;
     font-size: 0.82rem;
+    min-width: 110px;
+    flex-shrink: 0;
 }
 
 .ds-doc-meta-row .v {
     color: #2f3943;
     font-size: 0.88rem;
+    flex: 1;
+    min-width: 0;
+    padding-left: 8px;
+    overflow-wrap: break-word;
 }
 
 .ds-doc-abstract {
@@ -691,6 +704,8 @@ a:hover {
     color: #485463;
     line-height: 1.45;
     font-size: 0.92rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .rrhh-person-modal .modal-dialog {
@@ -1931,3 +1946,130 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
   text-overflow: ellipsis;
 }
 .ds-nav-user-badge i { color: #2b4e72; opacity: 0.8; flex-shrink: 0; }
+
+/* ==========================================================================
+   FLATPICKR DATE RANGE PICKER — Integración sidebar
+   ========================================================================== */
+.flatpickr-calendar {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.82rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+    border: 1px solid #d6e4f0;
+}
+.flatpickr-months {
+    background: #2b4e72;
+    border-radius: 10px 10px 0 0;
+    padding: 4px 0;
+}
+.flatpickr-months .flatpickr-month,
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: #fff;
+    fill: #fff;
+}
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    color: #a8d4f5;
+    fill: #a8d4f5;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: #2b4e72;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+.flatpickr-current-month input.cur-year {
+    color: #fff;
+    font-weight: 700;
+}
+.flatpickr-weekdays { background: #eef4fb; }
+span.flatpickr-weekday {
+    background: #eef4fb;
+    color: #2b4e72;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+.flatpickr-day {
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #2f3943;
+}
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+    background: #d6e9f8;
+    border-color: #d6e9f8;
+    color: #2b4e72;
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: #2b4e72 !important;
+    border-color: #2b4e72 !important;
+    color: #fff !important;
+    font-weight: 700;
+}
+.flatpickr-day.inRange {
+    background: #d6e9f8 !important;
+    border-color: #d6e9f8 !important;
+    color: #2b4e72;
+    box-shadow: -5px 0 0 #d6e9f8, 5px 0 0 #d6e9f8;
+}
+.flatpickr-day.today {
+    border-color: #2b4e72;
+    color: #2b4e72;
+    font-weight: 700;
+}
+.flatpickr-day.today:hover {
+    background: #2b4e72;
+    color: #fff;
+}
+.flatpickr-day.disabled,
+.flatpickr-day.disabled:hover {
+    color: #ccc;
+}
+/* ==========================================================================
+   DATE SLICER — chips de preset
+   ========================================================================== */
+.ds-date-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.ds-date-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    border: 1.5px solid #c8d9ea;
+    background: #f4f9ff;
+    color: #4a6a8a;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+.ds-date-chip:hover {
+    background: #dceefa;
+    border-color: #2b4e72;
+    color: #2b4e72;
+}
+.ds-date-chip.active {
+    background: #2b4e72;
+    border-color: #2b4e72;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(43,78,114,0.25);
+}
+.ds-date-chip i {
+    font-size: 0.68rem;
+    opacity: 0.85;
+}
+.ds-date-active-label {
+    color: #2b4e72;
+    font-weight: 600;
+    font-size: 0.78rem;
+    min-height: 1.1em;
+}

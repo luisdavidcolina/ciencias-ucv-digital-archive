@@ -35,6 +35,10 @@ function renderRrhhList() {
       <p class="mb-0">No se encontraron expedientes coincidentes con los filtros seleccionados.</p>
     </div>`;
     document.getElementById("info-rrhh-pagination").innerText = "Pág 1 de 1";
+    const prevBtn = document.getElementById("btn-rrhh-prev");
+    const nextBtn = document.getElementById("btn-rrhh-next");
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
     return;
   }
 
@@ -43,6 +47,10 @@ function renderRrhhList() {
   const start     = (state.rrhh.page - 1) * state.rrhh.perPage;
   const pageItems = results.slice(start, start + state.rrhh.perPage);
   document.getElementById("info-rrhh-pagination").innerText = `Pág ${state.rrhh.page} de ${totalPages}`;
+  const prevBtnR = document.getElementById("btn-rrhh-prev");
+  const nextBtnR = document.getElementById("btn-rrhh-next");
+  if (prevBtnR) prevBtnR.disabled = state.rrhh.page <= 1;
+  if (nextBtnR) nextBtnR.disabled = state.rrhh.page >= totalPages;
 
   container.innerHTML = pageItems.map(p => {
     const initials   = getPersonInitials(p.persona_raw);

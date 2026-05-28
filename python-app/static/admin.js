@@ -363,6 +363,10 @@ function renderMonitorTable() {
   if (results.length === 0) {
     container.innerHTML = `<tr><td colspan="${isArch ? 6 : 7}" class="text-muted text-center p-3">Ningún archivo coincide con los criterios de búsqueda local.</td></tr>`;
     document.getElementById(`admin_page_info-${suf}`)?.innerText && (document.getElementById(`admin_page_info-${suf}`).innerText = "Pág 1 de 1");
+    const prevBtn = document.getElementById(`admin_prev-${suf}`);
+    const nextBtn = document.getElementById(`admin_next-${suf}`);
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
     return;
   }
 
@@ -372,6 +376,10 @@ function renderMonitorTable() {
   const pageItems = results.slice(start, start + state.adminTable.perPage);
   const pageInfo  = document.getElementById(`admin_page_info-${suf}`);
   if (pageInfo) pageInfo.innerText = `Pág ${state.adminTable.page} de ${totalPages}`;
+  const prevBtnAdm = document.getElementById(`admin_prev-${suf}`);
+  const nextBtnAdm = document.getElementById(`admin_next-${suf}`);
+  if (prevBtnAdm) prevBtnAdm.disabled = state.adminTable.page <= 1;
+  if (nextBtnAdm) nextBtnAdm.disabled = state.adminTable.page >= totalPages;
 
   if (isArch) {
     container.innerHTML = pageItems.map(f => `

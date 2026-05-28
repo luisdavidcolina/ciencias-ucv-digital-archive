@@ -44,6 +44,7 @@ const state = {
 
 const API_BASE = window.location.origin;
 const tsInstances = {};
+const fpInstances = {};
 
 // ==========================================================================
 // HELPERS COMPARTIDOS
@@ -322,65 +323,119 @@ function initTomSelects() {
 }
 
 function initDateControls(module, data) {
-  const minYear = parseInt(data.min_date.substring(0, 4));
-  const maxYear = parseInt(data.max_date.substring(0, 4));
-  const ss = document.getElementById(`slider-${module}-start`);
-  const se = document.getElementById(`slider-${module}-end`);
-  if (!ss || !se) return;
-  ss.min = minYear; ss.max = maxYear; ss.value = minYear;
-  se.min = minYear; se.max = maxYear; se.value = maxYear;
-  const ls = document.getElementById(`label-${module}-start`);
-  const le = document.getElementById(`label-${module}-end`);
-  if (ls) ls.innerText = minYear;
-  if (le) le.innerText = maxYear;
-  const sy = document.getElementById(`select-${module}-year`);
-  if (sy) sy.innerHTML = `<option value="">Todos los años</option>` +
-    Array.from({ length: maxYear - minYear + 1 }, (_, i) => minYear + i)
-      .reverse().map(y => `<option value="${y}">${y}</option>`).join("");
-  const ds = document.getElementById(`date-${module}-start`);
-  const de = document.getElementById(`date-${module}-end`);
-  if (ds) ds.value = data.min_date;
-  if (de) de.value = data.max_date;
-}
-
-function handleDateChange(module, source) {
-  const ds   = document.getElementById(`date-${module}-start`);
-  const de   = document.getElementById(`date-${module}-end`);
-  const ss   = document.getElementById(`slider-${module}-start`);
-  const se   = document.getElementById(`slider-${module}-end`);
-  const sy   = document.getElementById(`select-${module}-year`);
-  let startVal = ds.value, endVal = de.value;
-
-  if (source === "slider") {
-    const sY = parseInt(ss.value), eY = parseInt(se.value);
-    if (sY > eY) { ss.value = eY; return; }
-    startVal = `${sY}-01-01`; endVal = `${eY}-12-31`;
-    ds.value = startVal; de.value = endVal;
-    sy.value = (sY === eY) ? sY : "";
-  } else if (source === "select") {
-    const y = sy.value;
-    if (y) {
-      startVal = `${y}-01-01`; endVal = `${y}-12-31`;
-      ds.value = startVal; de.value = endVal; ss.value = y; se.value = y;
-    } else {
-      const lim = state.choices[module];
-      startVal = lim.min_date; endVal = lim.max_date;
-      ds.value = startVal; de.value = endVal;
-      ss.value = lim.min_date.substring(0, 4); se.value = lim.max_date.substring(0, 4);
-    }
-  } else if (source === "calendar") {
-    const sY = startVal ? parseInt(startVal.substring(0, 4)) : null;
-    const eY = endVal   ? parseInt(endVal.substring(0, 4))   : null;
-    if (sY && eY) { ss.value = sY; se.value = eY; sy.value = (sY === eY) ? sY : ""; }
+  const input = document.getElementById(`fp-${module}-range`);
+  if (input) {
+    if (fpInstances[module]) fpInstances[module].destroy();
+    fpInstances[module] = flatpickr(input, {
+      mode: "range",
+      dateFormat: "Y-m-d",
+      minDate: data.min_date,
+      maxDate: data.max_date,
+      locale: {
+        rangeSeparator: " → ",
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+          longhand:  ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+        },
+        months: {
+          shorthand: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+          longhand:  ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        }
+      },
+      onChange: (selectedDates) => {
+        if (selectedDates.length === 2) {
+          const fmt = d => d.toISOString().split("T")[0];
+          state[module].dateStart = fmt(selectedDates[0]);
+          state[module].dateEnd   = fmt(selectedDates[1]);
+          state[module].page = 1;
+          const lbl = document.getElementById(`fp-${module}-label`);
+          if (lbl) lbl.innerText = `${formatISOToSpanish(state[module].dateStart)} → ${formatISOToSpanish(state[module].dateEnd)}`;
+          if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
+        }
+      }
+    });
   }
 
-  document.getElementById(`label-${module}-start`).innerText = ss.value;
-  document.getElementById(`label-${module}-end`).innerText   = se.value;
-  state[module].dateStart = startVal;
-  state[module].dateEnd   = endVal;
+  const minYear = parseInt(data.min_date.substring(0, 4));
+  const maxYear = parseInt(data.max_date.substring(0, 4));
+  const sy = document.getElementById(`year-select-${module}`);
+  if (sy) {
+    sy.innerHTML = `<option value="">Seleccionar año…</option>` +
+      Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i)
+        .map(y => `<option value="${y}">${y}</option>`).join("");
+  }
+
+  state[module].dateStart = data.min_date;
+  state[module].dateEnd   = data.max_date;
+  _setChipActive(module, "all");
+  const lbl = document.getElementById(`fp-${module}-label`);
+  if (lbl) lbl.innerText = `${formatISOToSpanish(data.min_date)} → ${formatISOToSpanish(data.max_date)}`;
+}
+
+function _setChipActive(module, preset) {
+  document.querySelectorAll(`.ds-date-chip[data-module="${module}"]`).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.preset === preset);
+  });
+}
+
+function applyDatePreset(module, preset) {
+  _setChipActive(module, preset);
+  const yearPanel  = document.getElementById(`year-panel-${module}`);
+  const rangePanel = document.getElementById(`range-panel-${module}`);
+  const lbl = document.getElementById(`fp-${module}-label`);
+  const lim = state.choices?.[module];
+
+  if (preset === "year") {
+    if (yearPanel)  yearPanel.style.display  = "";
+    if (rangePanel) rangePanel.style.display = "none";
+    if (lbl) lbl.innerText = "";
+    return;
+  }
+  if (preset === "custom") {
+    if (yearPanel)  yearPanel.style.display  = "none";
+    if (rangePanel) rangePanel.style.display = "";
+    if (lbl) lbl.innerText = "";
+    return;
+  }
+
+  if (yearPanel)  yearPanel.style.display  = "none";
+  if (rangePanel) rangePanel.style.display = "none";
+
+  const today = new Date();
+  const fmt   = d => d.toISOString().split("T")[0];
+  let startDate, endDate = fmt(today);
+
+  if (preset === "all") {
+    startDate = lim?.min_date || fmt(new Date(today.getFullYear() - 10, 0, 1));
+    endDate   = lim?.max_date || fmt(today);
+  } else if (preset === "3d") {
+    const d = new Date(today); d.setDate(d.getDate() - 3);
+    startDate = fmt(d);
+  } else if (preset === "1y") {
+    const d = new Date(today); d.setFullYear(d.getFullYear() - 1);
+    startDate = fmt(d);
+  }
+
+  state[module].dateStart = startDate;
+  state[module].dateEnd   = endDate;
   state[module].page = 1;
+  if (lbl) lbl.innerText = `${formatISOToSpanish(startDate)} → ${formatISOToSpanish(endDate)}`;
   if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
 }
+
+function handleYearSelect(module) {
+  const sy = document.getElementById(`year-select-${module}`);
+  if (!sy || !sy.value) return;
+  const y = sy.value;
+  state[module].dateStart = `${y}-01-01`;
+  state[module].dateEnd   = `${y}-12-31`;
+  state[module].page = 1;
+  const lbl = document.getElementById(`fp-${module}-label`);
+  if (lbl) lbl.innerText = `Año ${y}`;
+  if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
+}
+
 
 function resetDateFilters(module) {
   state[module].search       = "";
@@ -401,11 +456,7 @@ function resetDateFilters(module) {
     if (tsInstances["choice-rrhh-estado"])   tsInstances["choice-rrhh-estado"].clear(true);
     if (tsInstances["choice-rrhh-people"])   tsInstances["choice-rrhh-people"].clear(true);
   }
-  const lim = state.choices[module];
-  state[module].dateStart = lim.min_date;
-  state[module].dateEnd   = lim.max_date;
-  initDateControls(module, lim);
-  if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
+  applyDatePreset(module, "all");
 }
 
 // ==========================================================================
@@ -461,19 +512,16 @@ function setupEventListeners() {
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; renderRrhhList(); });
 
-  // Fechas Archivo
-  safeOn("slider-archivo-start", "input",  () => handleDateChange("archivo", "slider"));
-  safeOn("slider-archivo-end",   "input",  () => handleDateChange("archivo", "slider"));
-  safeOn("select-archivo-year",  "change", () => handleDateChange("archivo", "select"));
-  safeOn("date-archivo-start",   "change", () => handleDateChange("archivo", "calendar"));
-  safeOn("date-archivo-end",     "change", () => handleDateChange("archivo", "calendar"));
-
-  // Fechas RRHH
-  safeOn("slider-rrhh-start", "input",  () => handleDateChange("rrhh", "slider"));
-  safeOn("slider-rrhh-end",   "input",  () => handleDateChange("rrhh", "slider"));
-  safeOn("select-rrhh-year",  "change", () => handleDateChange("rrhh", "select"));
-  safeOn("date-rrhh-start",   "change", () => handleDateChange("rrhh", "calendar"));
-  safeOn("date-rrhh-end",     "change", () => handleDateChange("rrhh", "calendar"));
+  // Chips de fecha (event delegation por módulo)
+  ["archivo", "rrhh"].forEach(mod => {
+    document.querySelectorAll(`.ds-date-chip[data-module="${mod}"]`).forEach(btn => {
+      btn.addEventListener("click", () => applyDatePreset(mod, btn.dataset.preset));
+    });
+    safeOn(`year-select-${mod}`, "change", () => handleYearSelect(mod));
+  });
+  // Botón × del rango vuelve a Todo
+  safeOn("fp-archivo-clear", "click", () => applyDatePreset("archivo", "all"));
+  safeOn("fp-rrhh-clear",   "click", () => applyDatePreset("rrhh",    "all"));
 
   // Paginación Archivo
   safeOn("btn-archivo-prev", "click", () => { if (state.archivo.page > 1) { state.archivo.page--; renderArchivoList(); } });

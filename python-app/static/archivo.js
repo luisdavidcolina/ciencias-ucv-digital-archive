@@ -34,6 +34,10 @@ function renderArchivoList() {
       <p class="mb-0">No se encontraron expedientes o ejemplares correspondientes a los criterios ingresados.</p>
     </div>`;
     document.getElementById("info-archivo-pagination").innerText = "Pág 1 de 1";
+    const prevBtn = document.getElementById("btn-archivo-prev");
+    const nextBtn = document.getElementById("btn-archivo-next");
+    if (prevBtn) prevBtn.disabled = true;
+    if (nextBtn) nextBtn.disabled = true;
     return;
   }
 
@@ -42,6 +46,10 @@ function renderArchivoList() {
   const start     = (state.archivo.page - 1) * state.archivo.perPage;
   const pageItems = results.slice(start, start + state.archivo.perPage);
   document.getElementById("info-archivo-pagination").innerText = `Pág ${state.archivo.page} de ${totalPages}`;
+  const prevBtnA = document.getElementById("btn-archivo-prev");
+  const nextBtnA = document.getElementById("btn-archivo-next");
+  if (prevBtnA) prevBtnA.disabled = state.archivo.page <= 1;
+  if (nextBtnA) nextBtnA.disabled = state.archivo.page >= totalPages;
 
   container.innerHTML = pageItems.map(doc => `
     <div class="ds-item-card" onclick="openArchivoModal('${doc.__idx}')" style="cursor:pointer;">

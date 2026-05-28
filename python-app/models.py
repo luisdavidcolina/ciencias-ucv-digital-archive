@@ -1,0 +1,93 @@
+from typing import List, Optional
+from pydantic import BaseModel
+
+
+# =============================================================================
+# AUTENTICACIÓN
+# =============================================================================
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class RestoreSessionRequest(BaseModel):
+    username: str
+
+
+# =============================================================================
+# BÚSQUEDA
+# =============================================================================
+
+class ArchivoSearchRequest(BaseModel):
+    search_term: Optional[str] = ""
+    doc_types: Optional[List[str]] = []
+    tesauro_terms: Optional[List[str]] = []
+    date_start: Optional[str] = ""
+    date_end: Optional[str] = ""
+    sort_mode: Optional[str] = "Alfabético (A-Z)"
+
+
+class RrhhSearchRequest(BaseModel):
+    search_term: Optional[str] = ""
+    doc_types: Optional[List[str]] = []
+    people_terms: Optional[List[str]] = []
+    estados: Optional[List[str]] = []
+    date_start: Optional[str] = ""
+    date_end: Optional[str] = ""
+    sort_mode: Optional[str] = "Alfabético (A-Z)"
+
+
+class RrhhProfileRequest(BaseModel):
+    persona: str
+
+
+# =============================================================================
+# ADMINISTRACIÓN
+# =============================================================================
+
+class DocumentSubmitRequest(BaseModel):
+    modulo: str
+    usuario: str
+    titulo: Optional[str] = ""
+    autor: Optional[str] = ""
+    resumen: Optional[str] = ""
+    empleado: Optional[str] = ""
+    cedula: Optional[str] = ""
+    personas_relacionadas: Optional[str] = ""
+    departamento: Optional[str] = ""
+    estado: Optional[str] = ""
+    fecha_jubilacion: Optional[str] = ""
+    fecha_pension: Optional[str] = ""
+    foto_url: Optional[str] = ""
+    rif: Optional[str] = ""
+    cargo: Optional[str] = ""
+    doc_type: str
+    fecha: str
+    ubicacion: str
+
+
+class StatsRequest(BaseModel):
+    modulo: str
+    date_start: Optional[str] = ""
+    date_end: Optional[str] = ""
+    doc_types: Optional[List[str]] = []
+    status: Optional[str] = ""
+    dept: Optional[str] = ""
+    author: Optional[str] = ""
+    only_recent: Optional[bool] = False
+
+
+class CategoryCreateRequest(BaseModel):
+    name: str
+    desc: str
+    scope: str
+    usuario: str
+
+
+class UserCreateRequest(BaseModel):
+    usuario: str
+    password: str
+    modulo: str
+    rol: str
+    creator: str

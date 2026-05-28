@@ -1,0 +1,84 @@
+from fastapi import APIRouter, HTTPException, status
+
+from database import db_query, log_event
+from models import LoginRequest, RestoreSessionRequest
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+# =============================================================================
+# HELPERS
+# =============================================================================
+
+def _build_user_response(rows, username: str) -> dict:
+    """Construye el payload de usuario a partir de las filas devueltas por la BD."""
+    modules: list = []
+    roles: dict = {}
+    for row in rows:
+        mod = str(row.get("modulo", "")).strip()
+        rol = str(row.get("rol", "Normal")).strip() or "Normal"
+        if mod and mod not in modules:
+            modules.append(mod)
+        if mod:
+            roles[mod] = rol
+    primary_mod = modules[0] if modules else "Archivo"
+    primary_role = roles.get(primary_mod, "Normal")
+    return {
+        "success": True,
+        "user": {
+            "username": username,
+            "modules": modules,
+            "roles": roles,
+            "modulo": primary_mod,
+            "rol": primary_role,
+        },
+    }
+
+
+# =============================================================================
+# ENDPOINTS
+# =============================================================================
+
+@router.post("/login")
+def login(req: LoginRequest):
+    rows = db_query(
+        "SELECT usuario, nombre_usuario, modulo, rol "
+        "FROM public.usuarios_sistema "
+        "WHERE TRIM(usuario) = %s AND TRIM(contrasena) = %s",
+        (req.username.strip(), req.password.strip()),
+        fetch="all",
+    )
+    if rows:
+        payload = _build_user_response(rows, req.username.strip())
+        modules = payload["user"]["modules"]
+        roles = payload["user"]["roles"]
+        log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
+        return payload
+
+    log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas", "Failure")
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Credenciales incorrectas",
+    )
+
+
+@router.post("/restore")
+def restore_session(req: RestoreSessionRequest):
+    rows = db_query(
+        "SELECT usuario, nombre_usuario, modulo, rol "
+        "FROM public.usuarios_sistema "
+        "WHERE TRIM(usuario) = %s",
+        (req.username.strip(),),
+        fetch="all",
+    )
+    if rows:
+        payload = _build_user_response(rows, req.username.strip())
+        modules = payload["user"]["modules"]
+        roles = payload["user"]["roles"]
+        log_event(req.username, "Session Restored", ";".join(modules), f"Roles: {roles}")
+        return payload
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Sesión no encontrada",
+    )
