@@ -6,12 +6,14 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from fastapi import HTTPException
+import bcrypt
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("DigitalArchive")
+
 
 
 # =============================================================================
@@ -121,3 +123,13 @@ def split_terms(val_str: str) -> List[str]:
     if not val_str:
         return []
     return [t.strip() for t in str(val_str).split(";") if t.strip()]
+
+
+def hash_password(password: str) -> str:
+    """Retorna el hash bcrypt de una contraseña."""
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica si una contraseña en texto plano coincide con su hash."""
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))

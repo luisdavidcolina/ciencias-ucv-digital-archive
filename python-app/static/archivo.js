@@ -59,7 +59,7 @@ function renderArchivoList() {
       <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <span class="badge badge-light" style="font-size:0.75rem;color:#2b4e72;font-weight:bold;border:1px solid #d9e6f4;border-radius:12px;padding:3px 10px;">
-            <i class="fas fa-bookmark mr-1"></i> ${doc.doc_type}
+            <i class="fas fa-bookmark mr-1"></i> ${doc.categoria || doc.doc_type}
           </span>
           <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${formatISOToSpanish(doc.fecha)}</span>
         </div>

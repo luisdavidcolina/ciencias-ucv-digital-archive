@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from database import db_query, log_event
+from database import db_query, log_event, verify_password
 from models import LoginRequest, RestoreSessionRequest
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -21,6 +21,16 @@ def _build_user_response(rows, username: str) -> dict:
             modules.append(mod)
         if mod:
             roles[mod] = rol
+
+    # Si el usuario tiene módulo "Global", agregar ambos módulos
+    if "Global" in modules:
+        if "Archivo" not in modules:
+            modules.append("Archivo")
+        if "RRHH" not in modules:
+            modules.append("RRHH")
+        roles["Archivo"] = roles.get("Global", "Admin")
+        roles["RRHH"] = roles.get("Global", "Admin")
+
     primary_mod = modules[0] if modules else "Archivo"
     primary_role = roles.get(primary_mod, "Normal")
     return {
@@ -42,18 +52,21 @@ def _build_user_response(rows, username: str) -> dict:
 @router.post("/login")
 def login(req: LoginRequest):
     rows = db_query(
-        "SELECT usuario, nombre_usuario, modulo, rol "
+        "SELECT usuario, nombre_usuario, contrasena, modulo, rol "
         "FROM public.usuarios_sistema "
-        "WHERE TRIM(usuario) = %s AND TRIM(contrasena) = %s",
-        (req.username.strip(), req.password.strip()),
+        "WHERE TRIM(usuario) = %s",
+        (req.username.strip(),),
         fetch="all",
     )
     if rows:
-        payload = _build_user_response(rows, req.username.strip())
-        modules = payload["user"]["modules"]
-        roles = payload["user"]["roles"]
-        log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
-        return payload
+        # Verificar la contraseña con bcrypt
+        for row in rows:
+            if verify_password(req.password.strip(), row["contrasena"]):
+                payload = _build_user_response([row], req.username.strip())
+                modules = payload["user"]["modules"]
+                roles = payload["user"]["roles"]
+                log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
+                return payload
 
     log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas", "Failure")
     raise HTTPException(

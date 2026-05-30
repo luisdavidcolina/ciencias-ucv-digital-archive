@@ -304,10 +304,20 @@ function initTomSelects() {
     state.archivo.selectedTypes  = Array.isArray(val) ? val : (val ? [val] : []);
     state.archivo.page = 1; triggerArchivoSearch();
   });
-  makeSel("choice-archivo-tesauro", state.choices.archivo.tesauro, val => {
+  makeSel("choice-archivo-tesauro", [], val => {
     state.archivo.selectedTesauro = Array.isArray(val) ? val : (val ? [val] : []);
     state.archivo.page = 1; triggerArchivoSearch();
   });
+  // Configurar carga remota para el Tom Select de palabras clave
+  if (tsInstances["choice-archivo-tesauro"]) {
+    tsInstances["choice-archivo-tesauro"].settings.load = (query, callback) => {
+      if (!query.trim()) { callback([]); return; }
+      fetch(`${API_BASE}/api/archivo/documentos/buscar?q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(data => callback(data.map(d => ({ value: d.nombre_corto, text: d.nombre_corto }))))
+        .catch(() => callback([]));
+    };
+  }
   makeSel("choice-rrhh-doc-type", state.choices.rrhh.doc_types, val => {
     state.rrhh.selectedTypes  = Array.isArray(val) ? val : (val ? [val] : []);
     state.rrhh.page = 1; triggerRrhhSearch();

@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 import pandas as pd
 
-from database import db_query, log_event, logger
+from database import db_query, log_event, logger, hash_password
 from models import (
     DocumentSubmitRequest,
     StatsRequest,
@@ -26,11 +26,12 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 def _resolve_or_create_lookup(table: str, nombre: str, default_name: str = "Por Asignar") -> int:
     """Busca o crea un registro en una tabla de catálogo y retorna su id."""
     nombre = (nombre or "").strip() or default_name
-    row = db_query(f"SELECT id FROM public.{table} WHERE nombre = %s", (nombre,), fetch="one")
+    col = "estados" if table == "estados_laborales" else "nombre"
+    row = db_query(f"SELECT id FROM public.{table} WHERE {col} = %s", (nombre,), fetch="one")
     if row:
         return row["id"]
     new_row = db_query(
-        f"INSERT INTO public.{table} (nombre) VALUES (%s) RETURNING id",
+        f"INSERT INTO public.{table} ({col}) VALUES (%s) RETURNING id",
         (nombre,),
         fetch="one",
         commit=True,
@@ -201,13 +202,16 @@ def admin_submit(req: DocumentSubmitRequest):
         emp_row = db_query(
             """
             INSERT INTO public.empleados
-                (cedula, nombre_completo, rif, cargo_id, departamento_id,
+                (cedula, nombres, apellidos, rif, cargo_id, departamento_id,
                  estado_id, fecha_ingreso, fecha_jubilacion, fecha_pension, foto_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
             (
-                cedula, req.empleado or cedula, req.rif or None,
+                cedula,
+                req.empleado or cedula,  # nombres (temporalmente usando empleado)
+                "",                        # apellidos (vacío por ahora)
+                req.rif or None,
                 cargo_id, dept_id, estado_id, fecha_doc,
                 req.fecha_jubilacion or None, req.fecha_pension or None, req.foto_url or None,
             ),
@@ -299,12 +303,13 @@ def create_user(req: UserCreateRequest):
     if existing:
         raise HTTPException(status_code=400, detail="Usuario ya existe")
 
+    hashed_pw = hash_password(req.password.strip())
     db_query(
         """
         INSERT INTO public.usuarios_sistema (usuario, nombre_usuario, contrasena, modulo, rol)
         VALUES (%s, %s, %s, %s, %s)
         """,
-        (req.usuario.strip(), req.usuario.strip(), req.password.strip(), req.modulo, req.rol),
+        (req.usuario.strip(), req.usuario.strip(), hashed_pw, req.modulo, req.rol),
         fetch="none",
         commit=True,
     )

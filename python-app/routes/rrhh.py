@@ -57,24 +57,24 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
         SELECT
             e.id                                      AS empleado_id,
             e.cedula,
-            e.nombre_completo                         AS empleado,
+            e.nombres || ' ' || e.apellidos           AS empleado,
             e.rif,
             c.nombre                                  AS cargo,
             d.nombre                                  AS departamento,
-            el.nombre                                 AS estado,
+            el.estados                                AS estado,
             TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD') AS fecha_ingreso,
             TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD') AS fecha_jubilacion,
             TO_CHAR(e.fecha_pension,    'YYYY-MM-DD') AS fecha_pension,
             COALESCE(e.foto_url, '')                  AS foto_url,
             da.id_archivo,
             da.codigo_documento,
-            COALESCE(td.nombre, '')                   AS doc_type,
+            COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
             COALESCE(da.ubicacion, '')                AS ubicacion,
             COALESCE(da.titulo, '')                   AS titulo_doc,
             COALESCE(da.autor_ente, '')               AS autor_ente,
             COALESCE(da.abstract, '')                 AS abstract,
             TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha_documento,
-            COALESCE(e.nombre_completo, '')           AS personas_relacionadas
+            e.nombres || ' ' || e.apellidos           AS personas_relacionadas
         FROM public.empleados e
         LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
         LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id

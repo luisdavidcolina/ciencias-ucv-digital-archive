@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 import pandas as pd
 
 from database import db_query, split_terms
@@ -25,7 +25,8 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
             da.titulo,
             COALESCE(da.autor_ente, '')         AS autor,
             TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
-            COALESCE(td.nombre, '')             AS doc_type,
+            COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
+            COALESCE(cat.nombre, '')            AS categoria,
             COALESCE(da.ubicacion, '')          AS ubicacion,
             COALESCE(da.tesauro_primario, '')   AS tesauro_primario,
             COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
@@ -34,6 +35,7 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
             da.empleado_id
         FROM public.datos_archivo da
         LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
+        LEFT JOIN public.categoria cat ON td.id_categoria = cat.id
     """
     if filters_sql:
         base_sql += " WHERE " + filters_sql
@@ -41,7 +43,7 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
     rows = db_query(base_sql, filter_params, fetch="all")
     if not rows:
         return pd.DataFrame(columns=[
-            "id", "titulo", "autor", "fecha", "doc_type", "ubicacion",
+            "id", "titulo", "autor", "fecha", "doc_type", "categoria", "ubicacion",
             "tesauro_primario", "tesauro_secundario", "descriptores_libres", "resumen",
         ])
 
@@ -112,3 +114,20 @@ def search_archivo(req: ArchivoSearchRequest):
             + split_terms(rec.get("descriptores_libres", ""))
         ))
     return records
+
+
+@router.get("/documentos/buscar")
+def buscar_tipo_documento(q: str = Query(..., description="Palabra clave a buscar")):
+    rows = db_query(
+        """
+        SELECT id, nombre_corto, nombre
+        FROM public.tipo_documento
+        WHERE unaccent(nombre) ILIKE unaccent(%s)
+           OR unaccent(nombre_corto) ILIKE unaccent(%s)
+        ORDER BY nombre_corto
+        LIMIT 20
+        """,
+        (f"%{q}%", f"%{q}%"),
+        fetch="all",
+    )
+    return [{"id": r["id"], "nombre_corto": r["nombre_corto"], "nombre": r["nombre"]} for r in rows]
