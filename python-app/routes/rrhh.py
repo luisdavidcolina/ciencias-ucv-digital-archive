@@ -69,6 +69,7 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
             da.id_archivo,
             da.codigo_documento,
             COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
+            COALESCE(cat.nombre, '')               AS categoria,
             COALESCE(da.ubicacion, '')                AS ubicacion,
             COALESCE(da.titulo, '')                   AS titulo_doc,
             COALESCE(da.autor_ente, '')               AS autor_ente,
@@ -81,6 +82,7 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
         LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
         LEFT JOIN public.datos_archivo     da ON da.empleado_id    = e.id
         LEFT JOIN public.tipo_documento    td ON da.id_tipo_documento = td.id
+        LEFT JOIN public.categoria        cat ON td.id_categoria = cat.id
     """
     if filters_sql:
         base_sql += " WHERE " + filters_sql
@@ -89,7 +91,7 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
     if not rows:
         return pd.DataFrame(columns=[
             "cedula", "empleado", "personas_relacionadas", "departamento", "estado",
-            "doc_type", "fecha_ingreso", "ubicacion", "foto_url",
+            "doc_type", "categoria", "fecha_ingreso", "ubicacion", "foto_url",
             "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo",
         ])
     return pd.DataFrame([dict(r) for r in rows]).fillna("")
@@ -143,7 +145,7 @@ def build_rrhh_person_index(df: pd.DataFrame) -> List[Dict[str, Any]]:
             "rifs":          rif,
             "departamentos": "; ".join(sorted(set(p_df["departamento"].dropna().astype(str).tolist()))),
             "cargos":        cargo or "Sin cargo asignado",
-            "estatuses":     "; ".join(sorted(set(p_df["estado"].dropna().astype(str).tolist()))) or "Sin estado",
+            "estatuses":     "; ".join(sorted(set(primary_rows["estado"].dropna().astype(str).tolist()))) if not primary_rows.empty else "; ".join(sorted(set(p_df["estado"].dropna().astype(str).tolist()))) or "Sin estado",
             "tipos":         "; ".join(sorted(set([t for t in p_df["doc_type"].dropna().astype(str).tolist() if t.strip()]))),
             "fecha_ingreso": "; ".join(sorted(set([f for f in p_df["fecha_ingreso"].dropna().astype(str).tolist() if f.strip()]))),
             "foto_url":      first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else []),
@@ -239,6 +241,6 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
         "fecha_ingreso":    _join_unique(p_df["fecha_ingreso"]),
         "fecha_jubilacion": _join_unique("fecha_jubilacion"),
         "fecha_pension":    _join_unique("fecha_pension"),
-        "categories":       sorted(set([x for x in p_df["doc_type"].dropna().astype(str).tolist() if x.strip()])),
+        "categories":       sorted(set([x for x in p_df["categoria"].dropna().astype(str).tolist() if x.strip()])),
         "rows":             row_list,
     }

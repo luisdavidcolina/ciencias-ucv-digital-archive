@@ -223,7 +223,7 @@ function filterInnerDossier() {
   // Agrupar por categoría
   const grouped = {};
   for (const f of files) {
-    const cat = f.doc_type || "Sin categoría";
+    const cat = f.categoria || f.doc_type || "Sin categoría";
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(f);
   }
