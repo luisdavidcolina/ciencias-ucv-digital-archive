@@ -77,22 +77,6 @@ def _resolve_user_id(usuario: str) -> int:
     return fallback["id"] if fallback else 1
 
 
-def _next_codigo_documento() -> str:
-    """Genera el siguiente código correlativo DOC-NNN."""
-    row = db_query(
-        "SELECT codigo_documento FROM public.datos_archivo "
-        "WHERE codigo_documento ~ '^DOC-[0-9]+$' ORDER BY id_archivo DESC LIMIT 1",
-        fetch="one",
-    )
-    n = 1
-    if row and row.get("codigo_documento"):
-        try:
-            n = int(str(row["codigo_documento"]).split("-")[1]) + 1
-        except Exception:
-            n = 1
-    return f"DOC-{str(n).zfill(3)}"
-
-
 # =============================================================================
 # ENDPOINTS
 # =============================================================================
@@ -165,29 +149,27 @@ def admin_submit(req: DocumentSubmitRequest):
     log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}")
     creado_por = _resolve_user_id(req.usuario)
     tipo_id    = _resolve_or_create_tipo_documento(req.doc_type)
-    codigo     = _next_codigo_documento()
     fecha_doc  = req.fecha or datetime.now().strftime("%Y-%m-%d")
 
     if req.modulo == "Archivo":
         new_row = db_query(
             """
             INSERT INTO public.datos_archivo
-                (codigo_documento, titulo, abstract, autor_ente,
-                 id_tipo_documento, fecha_documento, ubicacion, creado_por, tesauro_primario)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id_archivo, codigo_documento
+                (titulo, abstract, autor,
+                 fecha_documento, ubicacion, creado_por, tesauro_primario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id_archivo
             """,
             (
-                codigo,
                 req.titulo or "Sin título",
                 req.resumen or "",
                 req.autor or "Anónimo",
-                tipo_id, fecha_doc, req.ubicacion, creado_por, req.doc_type,
+                fecha_doc, req.ubicacion, creado_por, req.doc_type,
             ),
             fetch="one",
             commit=True,
         )
-        return {"success": True, "id": new_row["codigo_documento"] or str(new_row["id_archivo"])}
+        return {"success": True, "id": str(new_row["id_archivo"])}
 
     # ── Módulo RRHH ──────────────────────────────────────────────────────────
     cedula = (req.cedula or "").strip()
@@ -221,14 +203,13 @@ def admin_submit(req: DocumentSubmitRequest):
 
     new_row = db_query(
         """
-        INSERT INTO public.datos_archivo
-            (codigo_documento, titulo, autor_ente, id_tipo_documento,
+        INSERT INTO public.datos_rrhh
+            (titulo, autor, id_tipo_documento,
              empleado_id, fecha_documento, ubicacion, creado_por, tesauro_primario)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        RETURNING id_archivo, codigo_documento
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id_rrhh
         """,
         (
-            codigo,
             f"{req.doc_type} de {req.personas_relacionadas or req.empleado}",
             "Recursos Humanos",
             tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por, req.doc_type,
@@ -236,7 +217,7 @@ def admin_submit(req: DocumentSubmitRequest):
         fetch="one",
         commit=True,
     )
-    return {"success": True, "id": new_row["codigo_documento"] or str(new_row["id_archivo"])}
+    return {"success": True, "id": str(new_row["id_rrhh"])}
 
 
 @router.get("/list_all")

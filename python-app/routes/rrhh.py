@@ -66,22 +66,21 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
             TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD') AS fecha_jubilacion,
             TO_CHAR(e.fecha_pension,    'YYYY-MM-DD') AS fecha_pension,
             COALESCE(e.foto_url, '')                  AS foto_url,
-            da.id_archivo,
-            da.codigo_documento,
+            dr.id_rrhh,
             COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
             COALESCE(cat.nombre, '')               AS categoria,
-            COALESCE(da.ubicacion, '')                AS ubicacion,
-            COALESCE(da.titulo, '')                   AS titulo_doc,
-            COALESCE(da.autor_ente, '')               AS autor_ente,
-            COALESCE(da.abstract, '')                 AS abstract,
-            TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha_documento,
+            COALESCE(dr.ubicacion, '')                AS ubicacion,
+            COALESCE(dr.titulo, '')                   AS titulo_doc,
+            COALESCE(dr.autor, '')                    AS autor,
+            COALESCE(dr.abstract, '')                 AS abstract,
+            TO_CHAR(dr.fecha_documento, 'YYYY-MM-DD') AS fecha_documento,
             e.nombres || ' ' || e.apellidos           AS personas_relacionadas
         FROM public.empleados e
         LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
         LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
         LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
-        LEFT JOIN public.datos_archivo     da ON da.empleado_id    = e.id
-        LEFT JOIN public.tipo_documento    td ON da.id_tipo_documento = td.id
+        LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id
+        LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
         LEFT JOIN public.categoria        cat ON td.id_categoria = cat.id
     """
     if filters_sql:

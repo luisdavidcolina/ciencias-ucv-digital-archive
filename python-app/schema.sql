@@ -70,11 +70,24 @@ CREATE TABLE public.empleados (
 
 CREATE TABLE public.datos_archivo (
     id_archivo INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    codigo_documento CHARACTER VARYING(30) UNIQUE, -- Almacena códigos tipo 'DOC-001'
     titulo TEXT NOT NULL,
     abstract TEXT,
-    autor_ente TEXT, -- Ente o departamento que emitió el documento
-    id_tipo_documento INTEGER NOT NULL,
+    autor TEXT, -- Ente o departamento que emitió el documento
+    fecha_documento DATE DEFAULT CURRENT_DATE,
+    tesauro_primario TEXT,
+    tesauro_secundario TEXT,
+    descriptores_libres TEXT,
+    ubicacion TEXT NOT NULL, -- Gaveta física, estante o 'Digitalizado Exclusivo'
+    creado_por INTEGER NOT NULL, -- Pista de Auditoría: ID del usuario del sistema
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE public.datos_rrhh (
+    id_rrhh INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    titulo TEXT NOT NULL,
+    abstract TEXT,
+    autor TEXT, -- Ente o departamento que emitió el documento
+    id_tipo_documento INTEGER,
     empleado_id INTEGER, -- Vinculación con el empleado dueño del expediente
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
@@ -249,73 +262,100 @@ DROP TABLE tmp_rrhh_personas;
 -- =============================================================================
 
 CREATE TEMP TABLE tmp_csv_archivos (
-    id_archivo varchar(20), cedula varchar(20), doc_type text, ubicacion text, nombres text, apellidos text
+    titulo text,
+    autor text,
+    abstract text,
+    fecha_documento date,
+    tesauro_primario text,
+    tesauro_secundario text,
+    descriptores_libres text,
+    ubicacion text
 );
 
-INSERT INTO tmp_csv_archivos (id_archivo, cedula, doc_type, ubicacion, nombres, apellidos) VALUES
-('DOC-001','V-12345678','Hoja de Vida','Expedientes Activos - Gaveta 14','Carlos Alberto','Gomez Perez'),
-('DOC-002','V-12345678','Contrato','Digitalizado Exclusivo','Carlos Alberto','Gomez Perez'),
-('DOC-003','V-12345678','Resoluciones','Expedientes Activos - Gaveta 14','Carlos Alberto','Gomez Perez'),
-('DOC-004','V-18765432','Evaluación Desempeño','Expedientes Activos - Gaveta 10','Ana Lucia','Silva Torres'),
-('DOC-005','V-18765432','Nómina Especial','Digitalizado Exclusivo','Ana Lucia','Silva Torres'),
-('DOC-006','V-11223344','Nombramiento','Expedientes Jubilados - Caja RRHH-01','Pedro Miguel','Hernandez Castro'),
-('DOC-007','V-11223344','Acta de Jubilación','Digitalizado Exclusivo','Pedro Miguel','Hernandez Castro'),
-('DOC-008','V-25678912','Evaluación Desempeño','Expedientes Activos - Gaveta 11','Sofia Valentina','Herrera Mendez'),
-('DOC-009','V-25678912','Contrato','Caja RRHH-02','Sofia Valentina','Herrera Mendez'),
-('DOC-010','V-09876543','Certificado Médico','Expedientes Pasivos - Sotano A','José Antonio','Martinez Rojas'),
-('DOC-011','V-23456789','Antecedentes Penales','Expedientes Activos - Gaveta 12','Maria Fernanda','Lopez Ruiz'),
-('DOC-012','V-15678901','Título Universitario','Expedientes Activos - Gaveta 13','Luis Miguel','Rodriguez Garcia'),
-('DOC-013','V-21345678','Oficios Varios','Expedientes Pasivos - Sotano B','David Andres','Bello Castillo'),
-('DOC-014','V-21345678','Contrato','Digitalizado Exclusivo','David Andres','Bello Castillo'),
-('DOC-015','V-10293847','Hoja de Vida','Expedientes Activos - Gaveta 15','Carmen Elena','Suarez Navarro'),
-('DOC-016','V-55443322','Resoluciones','Expedientes Activos - Gaveta 16','Luisa Elena','Rodriguez Moreno'),
-('DOC-017','V-55443322','Contrato','Digitalizado Exclusivo','Luisa Elena','Rodriguez Moreno'),
-('DOC-018','V-77889900','Evaluación Desempeño','Expedientes Activos - Gaveta 17','Roberto Enrique','Vargas Peña'),
-('DOC-019','V-25678912','Nómina Especial','Digitalizado Exclusivo','Sofia Valentina','Herrera Mendez'),
-('DOC-020','V-12345678','Nombramiento','Expedientes Jubilados - Caja RRHH-03','Carlos Alberto','Gomez Perez');
+INSERT INTO tmp_csv_archivos (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion) VALUES
+('Hoja de Vida','Recursos Humanos','Curriculum','2015-06-20','Curriculum Vitae y Anexos','Parte IV','CV','Expedientes Activos - Gaveta 14'),
+('Contrato','Recursos Humanos','Contrato de trabajo','2015-06-20','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
+('Resolucion','Recursos Humanos','Resolucion rectoral','2015-06-20','Nombramientos y Designaciones','Parte I','Resolucion','Expedientes Activos - Gaveta 14'),
+('Evaluación Desempeño','Recursos Humanos','Evaluación anual','2018-09-01','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 10'),
+('Nómina Especial','Recursos Humanos','Registro de sueldos','2018-09-01','RAS','Parte II','Nómina','Digitalizado Exclusivo'),
+('Nombramiento','Recursos Humanos','Nombramiento docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento','Expedientes Jubilados - Caja RRHH-01'),
+('Acta de Jubilación','Recursos Humanos','Acta de jubilacion','2015-06-30','Jubilación y Pensión','Parte II','Jubilación','Digitalizado Exclusivo'),
+('Evaluación Desempeño','Recursos Humanos','Evaluación de desempeño','2022-02-14','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 11'),
+('Contrato','Recursos Humanos','Contrato de trabajo','2022-02-14','Contratos y Suplencias','Parte I','Contrato','Caja RRHH-02'),
+('Certificado Médico','Recursos Humanos','Evaluacion medica de ingreso','1995-02-15','Documentos de Ingreso','Parte I','Salud','Expedientes Pasivos - Sotano A'),
+('Antecedentes Penales','Recursos Humanos','Antecedentes de ingreso','2020-01-10','Documentos de Ingreso','Parte I','Ingreso','Expedientes Activos - Gaveta 12'),
+('Título Universitario','Recursos Humanos','Título universitario adjunto','2021-03-12','Curriculum Vitae y Anexos','Parte IV','Título','Expedientes Activos - Gaveta 13'),
+('Oficios Varios','Recursos Humanos','Oficio de solicitud de datos','2019-07-25','Movimientos de Personal','Parte II','Oficio','Expedientes Pasivos - Sotano B'),
+('Contrato','Recursos Humanos','Contrato docente','2019-07-25','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
+('Hoja de Vida','Recursos Humanos','Curriculum','1988-11-04','Curriculum Vitae y Anexos','Parte IV','CV','Expedientes Activos - Gaveta 15'),
+('Resoluciones','Recursos Humanos','Resolucion rectoral de ingreso','1990-07-15','Nombramientos y Designaciones','Parte I','Resolucion','Expedientes Activos - Gaveta 16'),
+('Contrato','Recursos Humanos','Contrato de secretaria','1990-07-15','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
+('Evaluación Desempeño','Recursos Humanos','Evaluación de taller','1992-01-20','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 17'),
+('Nómina Especial','Recursos Humanos','Registro de sueldos','2022-02-14','RAS','Parte II','Nómina','Digitalizado Exclusivo'),
+('Nombramiento','Recursos Humanos','Nombramiento rectoral','2015-06-20','Nombramientos y Designaciones','Parte I','Nombramiento','Expedientes Jubilados - Caja RRHH-03');
 
--- Control de Alertas de Empleados No Registrados (Mapeo a banderas Por Asignar)
-INSERT INTO public.empleados (cedula, nombres, apellidos, cargo_id, departamento_id, estado_id, fecha_ingreso)
-SELECT DISTINCT
-    csv.cedula,
-    csv.nombres,
-    csv.apellidos,
-    (SELECT id FROM public.cargos WHERE nombre = 'Por Asignar'),
-    (SELECT id FROM public.departamentos WHERE nombre = 'Por Asignar'),
-    (SELECT id FROM public.estados_laborales WHERE estados = 'Pendiente de Registro'),
-    CURRENT_DATE
-FROM tmp_csv_archivos csv
-WHERE NOT EXISTS (SELECT 1 FROM public.empleados e WHERE e.cedula = csv.cedula);
-
--- Insertar los expedientes traduciendo dinámicamente los términos del CSV al catálogo oficial institucional
-INSERT INTO public.datos_archivo (codigo_documento, titulo, autor_ente, id_tipo_documento, empleado_id, ubicacion, creado_por)
+-- Insertar los expedientes directamente a la tabla oficial de datos_archivo
+INSERT INTO public.datos_archivo (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por)
 SELECT
-    csv.id_archivo,
-    csv.doc_type || ' de ' || csv.nombres || ' ' || csv.apellidos,
-    'Recursos Humanos',
-    td.id,
-    emp.id,
-    csv.ubicacion,
+    titulo,
+    autor,
+    abstract,
+    fecha_documento,
+    tesauro_primario,
+    tesauro_secundario,
+    descriptores_libres,
+    ubicacion,
     2 -- Pista de auditoría vinculada al ID del usuario 'archivo_admin'
-FROM tmp_csv_archivos csv
-JOIN public.empleados emp ON csv.cedula = emp.cedula
-JOIN public.tipo_documento td ON LOWER(UNACCENT(td.nombre)) =
-    CASE
-        WHEN LOWER(csv.doc_type) = 'hoja de vida' THEN 'curriculum vitae y anexos'
-        WHEN LOWER(csv.doc_type) = 'contrato' THEN 'contratos, renovaciones, prorrogas de contratos y suplencias'
-        WHEN LOWER(csv.doc_type) = 'resoluciones' THEN 'nombramiento provisional, nombramiento definitivo, otros nombramientos y designaciones'
-        WHEN LOWER(csv.doc_type) = 'evaluación desempeño' THEN 'estudios de cargos y evaluacion de credenciales'
-        WHEN LOWER(csv.doc_type) = 'nómina especial' THEN 'registro de asignacion de sueldos (ras)'
-        WHEN LOWER(csv.doc_type) = 'nombramiento' THEN 'nombramiento provisional, nombramiento definitivo, otros nombramientos y designaciones'
-        WHEN LOWER(csv.doc_type) = 'acta de jubilación' THEN 'jubilacion y pension'
-        WHEN LOWER(csv.doc_type) = 'certificado médico' THEN 'documentos de ingreso (planillas de solicitud de empleo, evaluacion medica pre_empleo, copia certificado de salud, copia numero de cuenta bancaria, periodo de prueba)'
-        WHEN LOWER(csv.doc_type) = 'antecedentes penales' THEN 'documentos de ingreso (planillas de solicitud de empleo, evaluacion medica pre_empleo, copia certificado de salud, copia numero de cuenta bancaria, periodo de prueba)'
-        WHEN LOWER(csv.doc_type) = 'título universitario' THEN 'curriculum vitae y anexos'
-        WHEN LOWER(csv.doc_type) = 'oficios varios' THEN 'modificaciones y actualizacion de datos (movimientos de personal)'
-        ELSE LOWER(csv.doc_type) -- Por si acaso hay coincidencia exacta de otro tipo
-    END;
+FROM tmp_csv_archivos;
 
 DROP TABLE tmp_csv_archivos;
+
+-- =============================================================================
+-- 7.5 CARGA DE DATOS DE PRUEBA PARA RRHH
+-- =============================================================================
+
+CREATE TEMP TABLE tmp_rrhh_documentos (
+    titulo text,
+    autor text,
+    abstract text,
+    fecha_documento date,
+    tesauro_primario text,
+    tesauro_secundario text,
+    descriptores_libres text,
+    ubicacion text,
+    doc_type text
+);
+
+INSERT INTO tmp_rrhh_documentos (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, doc_type) VALUES
+('Contrato de Carlos Gomez','Recursos Humanos','Contrato de trabajo','2015-06-20','Contratos y Suplencias','Parte I','Contrato, Carlos','Digitalizado Exclusivo','Contrato'),
+('Nombramiento de Pedro Hernandez','Recursos Humanos','Nombramiento docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento, Pedro','Expedientes Jubilados - Caja RRHH-01','Nombramiento'),
+('Acta de Jubilación de Pedro Hernandez','Recursos Humanos','Acta de jubilacion','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pedro','Digitalizado Exclusivo','Acta de Jubilación');
+
+-- Insertar los documentos de RRHH en la tabla datos_rrhh
+INSERT INTO public.datos_rrhh (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por, id_tipo_documento, empleado_id)
+SELECT
+    tmp.titulo,
+    tmp.autor,
+    tmp.abstract,
+    tmp.fecha_documento,
+    tmp.tesauro_primario,
+    tmp.tesauro_secundario,
+    tmp.descriptores_libres,
+    tmp.ubicacion,
+    2, -- creado_por (archivo_admin)
+    td.id,
+    e.id
+FROM tmp_rrhh_documentos tmp
+JOIN public.empleados e ON e.cedula = 'V-12345678' OR e.cedula = 'V-11223344'
+JOIN public.tipo_documento td ON LOWER(UNACCENT(td.nombre)) =
+    CASE
+        WHEN LOWER(tmp.doc_type) = 'contrato' THEN 'contratos, renovaciones, prorrogas de contratos y suplencias'
+        WHEN LOWER(tmp.doc_type) = 'nombramiento' THEN 'nombramiento provisional, nombramiento definitivo, otros nombramientos y designaciones'
+        WHEN LOWER(tmp.doc_type) = 'acta de jubilación' THEN 'jubilacion y pension'
+        ELSE LOWER(tmp.doc_type)
+    END;
+
+DROP TABLE tmp_rrhh_documentos;
 
 -- =============================================================================
 -- 8. CREACIÓN DE LLAVES FORÁNEAS (INTEGRIDAD REFERENCIAL)
@@ -325,9 +365,12 @@ ALTER TABLE ONLY public.tipo_documento
     ADD CONSTRAINT fk_tipo_documento_categoria FOREIGN KEY (id_categoria) REFERENCES public.categoria(id) ON DELETE RESTRICT;
 
 ALTER TABLE ONLY public.datos_archivo
-    ADD CONSTRAINT fk_datos_archivo_tipo FOREIGN KEY (id_tipo_documento) REFERENCES public.tipo_documento(id) ON DELETE RESTRICT,
-    ADD CONSTRAINT fk_datos_archivo_empleado FOREIGN KEY (empleado_id) REFERENCES public.empleados(id) ON DELETE SET NULL,
     ADD CONSTRAINT fk_datos_archivo_usuario FOREIGN KEY (creado_por) REFERENCES public.usuarios_sistema(id) ON DELETE RESTRICT;
+
+ALTER TABLE ONLY public.datos_rrhh
+    ADD CONSTRAINT fk_datos_rrhh_tipo FOREIGN KEY (id_tipo_documento) REFERENCES public.tipo_documento(id) ON DELETE RESTRICT,
+    ADD CONSTRAINT fk_datos_rrhh_empleado FOREIGN KEY (empleado_id) REFERENCES public.empleados(id) ON DELETE SET NULL,
+    ADD CONSTRAINT fk_datos_rrhh_usuario FOREIGN KEY (creado_por) REFERENCES public.usuarios_sistema(id) ON DELETE RESTRICT;
 
 ALTER TABLE ONLY public.empleados
     ADD CONSTRAINT fk_empleado_cargo FOREIGN KEY (cargo_id) REFERENCES public.cargos(id) ON DELETE RESTRICT,

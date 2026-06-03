@@ -21,21 +21,17 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
     base_sql = """
         SELECT
             da.id_archivo AS id,
-            da.codigo_documento,
             da.titulo,
-            COALESCE(da.autor_ente, '')         AS autor,
+            COALESCE(da.autor, '')         AS autor,
             TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
-            COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
-            COALESCE(cat.nombre, '')            AS categoria,
+            COALESCE(da.tesauro_primario, '')   AS doc_type,
+            COALESCE(da.tesauro_secundario, '') AS categoria,
             COALESCE(da.ubicacion, '')          AS ubicacion,
             COALESCE(da.tesauro_primario, '')   AS tesauro_primario,
             COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
             COALESCE(da.descriptores_libres, '') AS descriptores_libres,
-            COALESCE(da.abstract, '')           AS resumen,
-            da.empleado_id
+            COALESCE(da.abstract, '')           AS resumen
         FROM public.datos_archivo da
-        LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
-        LEFT JOIN public.categoria cat ON td.id_categoria = cat.id
     """
     if filters_sql:
         base_sql += " WHERE " + filters_sql
@@ -120,14 +116,17 @@ def search_archivo(req: ArchivoSearchRequest):
 def buscar_tipo_documento(q: str = Query(..., description="Palabra clave a buscar")):
     rows = db_query(
         """
-        SELECT id, nombre_corto, nombre
-        FROM public.tipo_documento
-        WHERE unaccent(nombre) ILIKE unaccent(%s)
-           OR unaccent(nombre_corto) ILIKE unaccent(%s)
-        ORDER BY nombre_corto
+        SELECT DISTINCT val AS nombre_corto
+        FROM (
+            SELECT UNNEST(ARRAY[tesauro_primario, tesauro_secundario]) AS val
+            FROM public.datos_archivo
+        ) sub
+        WHERE val IS NOT NULL AND val != ''
+          AND unaccent(val) ILIKE unaccent(%s)
+        ORDER BY val
         LIMIT 20
         """,
-        (f"%{q}%", f"%{q}%"),
+        (f"%{q}%",),
         fetch="all",
     )
-    return [{"id": r["id"], "nombre_corto": r["nombre_corto"], "nombre": r["nombre"]} for r in rows]
+    return [{"nombre_corto": r["nombre_corto"]} for r in rows]

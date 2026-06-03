@@ -59,7 +59,7 @@ function renderArchivoList() {
       <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <span class="badge badge-light" style="font-size:0.75rem;color:#2b4e72;font-weight:bold;border:1px solid #d9e6f4;border-radius:12px;padding:3px 10px;">
-            <i class="fas fa-bookmark mr-1"></i> ${doc.categoria || doc.doc_type}
+            <i class="fas fa-bookmark mr-1"></i> ${doc.tesauro_secundario || doc.categoria || doc.doc_type}
           </span>
           <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${formatISOToSpanish(doc.fecha)}</span>
         </div>
@@ -72,8 +72,8 @@ function renderArchivoList() {
         </div>
         ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${doc.resumen}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
-          ${doc.tesauro_badges.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${b}</span>`).join("")}
-          ${doc.tesauro_badges.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${doc.tesauro_badges.length - 4}</span>` : ""}
+          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_secundario); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${b}</span>`).join(""); })()}
+          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_secundario); return filtered.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${filtered.length - 4}</span>` : ""; })()}
         </div>
       </div>
       <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;">
@@ -109,17 +109,17 @@ function openArchivoModal(idxReal) {
       <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
     `;
   } else {
-    const dateLabel = isActa ? "dc.date.session" : "dc.date.issued";
+    const dateLabel = isActa ? "Fecha de Sesión" : "Fecha de Emisión";
     const dateValue = isActa
-      ? `${formatISOToSpanish(doc.fecha)} <small class="text-muted">(Fecha de Sesión)</small>`
+      ? `${formatISOToSpanish(doc.fecha)} <small class="text-muted">(Sesión)</small>`
       : formatISOToSpanish(doc.fecha);
     document.getElementById("modal-doc-meta-container").innerHTML = `
-      <div class="ds-doc-meta-row"><span class="k">dc.title</span><span class="v">${doc.titulo}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">dc.contributor.author</span><span class="v">${doc.autor}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Autor / Ente</span><span class="v">${doc.autor}</span></div>
       <div class="ds-doc-meta-row"><span class="k">${dateLabel}</span><span class="v">${dateValue}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">dc.type</span><span class="v">${doc.doc_type}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">dc.identifier.location</span><span class="v">${doc.ubicacion}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">dc.subject.classification</span><span class="v">${doc.tesauro_badges.join("; ")}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${doc.tesauro_badges.join("; ")}</span></div>
     `;
   }
   document.getElementById("modal-doc-abstract").innerText =
