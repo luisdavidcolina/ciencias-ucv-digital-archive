@@ -32,6 +32,9 @@ async function performLogin() {
     alert("Ingrese usuario y contraseña.");
     return;
   }
+  const btn = document.getElementById("login_btn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Verificando...';
   try {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
@@ -44,6 +47,8 @@ async function performLogin() {
     window.location.href = chooseLandingPage(data.user);
   } catch {
     alert("Credenciales incorrectas o error de conexión.");
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-shield-alt" style="margin-right:8px;"></i> Autorizar Ingreso';
   }
 }
 
