@@ -7,6 +7,10 @@
       "config": {
         "maxDuration": 15
       }
+    },
+    {
+      "src": "python-app/static/**/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
