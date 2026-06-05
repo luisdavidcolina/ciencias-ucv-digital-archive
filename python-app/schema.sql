@@ -5,6 +5,7 @@
 
 -- 1. ACTIVAR EXTENSIONES PARA EL TRATAMIENTO DE TEXTO (Para quitar acentos en Slugs)
 CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- =============================================================================
 -- 2. CREACIÓN DE TABLAS MAESTRAS Y DE CONFIGURACIÓN
@@ -87,7 +88,7 @@ CREATE TABLE public.datos_rrhh (
     titulo TEXT NOT NULL,
     abstract TEXT,
     autor TEXT, -- Ente o departamento que emitió el documento
-    id_tipo_documento INTEGER,
+    id_tipo_documento INTEGER NOT NULL,
     empleado_id INTEGER, -- Vinculación con el empleado dueño del expediente
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
@@ -273,26 +274,26 @@ CREATE TEMP TABLE tmp_csv_archivos (
 );
 
 INSERT INTO tmp_csv_archivos (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion) VALUES
-('Hoja de Vida','Recursos Humanos','Curriculum','2015-06-20','Curriculum Vitae y Anexos','Parte IV','CV','Expedientes Activos - Gaveta 14'),
-('Contrato','Recursos Humanos','Contrato de trabajo','2015-06-20','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
-('Resolucion','Recursos Humanos','Resolucion rectoral','2015-06-20','Nombramientos y Designaciones','Parte I','Resolucion','Expedientes Activos - Gaveta 14'),
-('Evaluación Desempeño','Recursos Humanos','Evaluación anual','2018-09-01','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 10'),
-('Nómina Especial','Recursos Humanos','Registro de sueldos','2018-09-01','RAS','Parte II','Nómina','Digitalizado Exclusivo'),
-('Nombramiento','Recursos Humanos','Nombramiento docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento','Expedientes Jubilados - Caja RRHH-01'),
-('Acta de Jubilación','Recursos Humanos','Acta de jubilacion','2015-06-30','Jubilación y Pensión','Parte II','Jubilación','Digitalizado Exclusivo'),
-('Evaluación Desempeño','Recursos Humanos','Evaluación de desempeño','2022-02-14','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 11'),
-('Contrato','Recursos Humanos','Contrato de trabajo','2022-02-14','Contratos y Suplencias','Parte I','Contrato','Caja RRHH-02'),
-('Certificado Médico','Recursos Humanos','Evaluacion medica de ingreso','1995-02-15','Documentos de Ingreso','Parte I','Salud','Expedientes Pasivos - Sotano A'),
-('Antecedentes Penales','Recursos Humanos','Antecedentes de ingreso','2020-01-10','Documentos de Ingreso','Parte I','Ingreso','Expedientes Activos - Gaveta 12'),
-('Título Universitario','Recursos Humanos','Título universitario adjunto','2021-03-12','Curriculum Vitae y Anexos','Parte IV','Título','Expedientes Activos - Gaveta 13'),
-('Oficios Varios','Recursos Humanos','Oficio de solicitud de datos','2019-07-25','Movimientos de Personal','Parte II','Oficio','Expedientes Pasivos - Sotano B'),
-('Contrato','Recursos Humanos','Contrato docente','2019-07-25','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
-('Hoja de Vida','Recursos Humanos','Curriculum','1988-11-04','Curriculum Vitae y Anexos','Parte IV','CV','Expedientes Activos - Gaveta 15'),
-('Resoluciones','Recursos Humanos','Resolucion rectoral de ingreso','1990-07-15','Nombramientos y Designaciones','Parte I','Resolucion','Expedientes Activos - Gaveta 16'),
-('Contrato','Recursos Humanos','Contrato de secretaria','1990-07-15','Contratos y Suplencias','Parte I','Contrato','Digitalizado Exclusivo'),
-('Evaluación Desempeño','Recursos Humanos','Evaluación de taller','1992-01-20','Evaluación de Cargos','Parte I','Evaluación','Expedientes Activos - Gaveta 17'),
-('Nómina Especial','Recursos Humanos','Registro de sueldos','2022-02-14','RAS','Parte II','Nómina','Digitalizado Exclusivo'),
-('Nombramiento','Recursos Humanos','Nombramiento rectoral','2015-06-20','Nombramientos y Designaciones','Parte I','Nombramiento','Expedientes Jubilados - Caja RRHH-03');
+('Informe Anual de Gestión 2023','Decanato Ciencias','Informe anual de gestión institucional de la Facultad de Ciencias correspondiente al año 2023.','2024-01-10','Informe','Parte I','Evaluación de desempeño institucional, Informe, Rendición de cuentas académica, cumplimiento de metas','Digitalizado Exclusivo'),
+('Plan Regulador de Áreas Verdes','Arq. Villanueva','Plan maestro de ordenamiento y diseño paisajístico de las áreas verdes del campus universitario.','2022-11-20','Plano Arquitectónico','Parte IV','Ordenamiento territorial interno, Planificación ambiental universitaria, Plano Arquitectónico, inventario vegetal','Mapoteca - Gaveta 1'),
+('Planos Eléctricos Edificio A','Ing. Ramirez','Planos técnicos de la red de distribución eléctrica e iluminación del Edificio A de laboratorios.','2023-12-01','Plano Arquitectónico','Parte IV','Actualización de infraestructura técnica, Ingeniería eléctrica edilicia, Plano Arquitectónico, mantenimiento preventivo','Mapoteca - Gaveta 4'),
+('Planos Nuevo Pabellón Biología','Arq. Mendez','Planos estructurales y de distribución del nuevo pabellón de investigación del Instituto de Biología.','2024-01-15','Plano Arquitectónico','Parte IV','Arquitectura académica, Infraestructura universitaria, Plano Arquitectónico, distribución espacial','Mapoteca - Gaveta 3'),
+('Reglamento Interno de Trabajos de Grado','Consejo de Facultad','Normativa vigente para la presentación y evaluación de trabajos especiales de grado de licenciatura.','2021-05-18','Reglamento','Parte I','Normativa académica, Licenciatura, Trabajo de grado, Consejo de Facultad','Archivo General - Estante A'),
+('Presupuesto Anual de Funcionamiento 2024','Dirección de Administración','Distribución presupuestaria aprobada para gastos operativos y de investigación del ejercicio fiscal 2024.','2023-11-15','Presupuesto','Parte II','Planificación financiera, Presupuesto anual, Gastos operativos, Gestión administrativa','Bóveda de Seguridad - Estante 2'),
+('Plan de Desarrollo Curricular de Computación','Escuela de Computación','Propuesta de actualización del plan de estudios de la Licenciatura en Computación bajo enfoque por competencias.','2022-06-30','Plan de Estudio','Parte I','Reforma curricular, Computación, Pensum de estudios, Acreditación académica','Archivo General - Estante C'),
+('Convenio de Cooperación UCV - IVIC','Rectorado UCV','Acuerdo marco de cooperación institucional para el desarrollo de proyectos de investigación conjunta de postgrado.','2020-10-05','Convenio','Parte III','Alianza interinstitucional, Investigación científica, Postgrado conjunto, Cooperación técnica','Digitalizado Exclusivo'),
+('Acta de Grado Promoción Ciencias 2023','Control de Estudios','Acta oficial de otorgamiento de títulos de la promoción de Licenciados de la Facultad de Ciencias.','2023-07-20','Acta de Grado','Parte II','Graduación, Registro de egresados, Actas de grado, Promoción académica','Archivo Histórico - Caja 4'),
+('Inventario de Equipos de Alta Tecnología','Coordinación de Laboratorios','Catálogo detallado y estado de funcionamiento de los equipos de microscopía y resonancia de la facultad.','2023-09-12','Inventario','Parte IV','Control patrimonial, Microscopía electrónica, Resonancia magnética, Equipamiento científico','Sótano A - Gaveta 12'),
+('Informe de Autoevaluación Institucional 2022','Comisión de Acreditación','Resultado del proceso de autoevaluación interna de la facultad con miras a la reacreditación internacional.','2022-12-15','Informe','Parte I','Calidad educativa, Autoevaluación, Indicadores académicos, Acreditación internacional','Digitalizado Exclusivo'),
+('Planos de Instalaciones Sanitarias Edificio B','Ing. Mendoza','Plano de la red de tuberías de aguas blancas, servidas y sistemas de drenaje del Edificio B.','2018-04-22','Plano Sanitario','Parte IV','Red de tuberías, Edificio de docencia, Instalaciones sanitarias, Mantenimiento preventivo','Mapoteca - Gaveta 5'),
+('Resolución de Creación del Doctorado en Química','Consejo Universitario','Resolución del Consejo Universitario que aprueba formalmente la creación y apertura del Doctorado en Química.','1998-03-11','Resolución','Parte II','Doctorado en Química, Postgrado, Creación de programa, Resolución oficial','Bóveda de Seguridad - Estante 1'),
+('Informe Técnico de Vulnerabilidad Estructural','Instituto de Materiales','Estudio y diagnóstico técnico de las estructuras de concreto y acero de los pabellones más antiguos de la facultad.','2021-10-30','Informe Técnico','Parte III','Vulnerabilidad estructural, Pabellones antiguos, Diagnóstico de concreto, Ingeniería civil','Archivo Técnico - Estante D'),
+('Plan Estratégico Decanal 2023-2026','Decanato Ciencias','Líneas estratégicas y metas de desarrollo de la Facultad de Ciencias para el periodo de gestión actual.','2023-03-15','Plan Estratégico','Parte I','Planificación estratégica, Visión decanal, Metas de gestión, Desarrollo institucional','Digitalizado Exclusivo'),
+('Acta de Sesión Extraordinaria Nro 15','Consejo de Facultad','Acta oficial de la discusión plenaria del Consejo de Facultad sobre el reinicio presencial de clases.','2022-09-18','Acta de Sesión','Parte II','Consejo de Facultad, Clases presenciales, Discusión académica, Actas oficiales','Archivo de Actas - Tomo 2022'),
+('Guía de Normas de Seguridad en Laboratorios','Coordinación de Higiene','Manual y protocolo oficial de seguridad biológica, química y radiológica para estudiantes y profesores.','2019-11-04','Manual','Parte I','Seguridad en laboratorios, Protocolo biológico, Normas de higiene, Prevención de riesgos','Digitalizado Exclusivo'),
+('Resolución de Designación de Jefes de Departamento','Decanato Ciencias','Resolución rectoral de designación de los nuevos Jefes de Departamento para el periodo académico actual.','2023-06-15','Resolución','Parte I','Designación de cargos, Jefes de departamento, Gestión académica, Resoluciones decanales','Expedientes de Gestión - Caja 2'),
+('Proyecto de Investigación: Nanotecnología Aplicada','Dr. Briceño','Propuesta y fases de ejecución del proyecto de investigación sobre síntesis de nanopartículas de oro en medicina.','2021-08-25','Proyecto','Parte III','Nanotecnología aplicada, Nanopartículas de oro, Investigación médica, Proyecto financiado','Archivo Técnico - Estante E'),
+('Planos Estructurales Auditorio de Ciencias','Arq. Villanueva','Plano original detallado del diseño de fundaciones, vigas y techado del Auditorio Principal de la Facultad.','1965-02-18','Plano Arquitectónico','Parte IV','Planos originales, Auditorio de Ciencias, Fundaciones estructurales, Patrimonio arquitectónico','Mapoteca - Gaveta 2');
 
 -- Insertar los expedientes directamente a la tabla oficial de datos_archivo
 INSERT INTO public.datos_archivo (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por)
@@ -327,9 +328,9 @@ CREATE TEMP TABLE tmp_rrhh_documentos (
 );
 
 INSERT INTO tmp_rrhh_documentos (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, doc_type) VALUES
-('Contrato de Carlos Gomez','Recursos Humanos','Contrato de trabajo','2015-06-20','Contratos y Suplencias','Parte I','Contrato, Carlos','Digitalizado Exclusivo','Contrato'),
-('Nombramiento de Pedro Hernandez','Recursos Humanos','Nombramiento docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento, Pedro','Expedientes Jubilados - Caja RRHH-01','Nombramiento'),
-('Acta de Jubilación de Pedro Hernandez','Recursos Humanos','Acta de jubilacion','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pedro','Digitalizado Exclusivo','Acta de Jubilación');
+('Contrato Individual de Trabajo','Recursos Humanos','Contrato de trabajo administrativo','2015-06-20','Contratos y Suplencias','Parte I','Contrato, Ingreso, Administrativo','Digitalizado Exclusivo','Contrato'),
+('Nombramiento de Cátedra Docente','Recursos Humanos','Nombramiento ordinario provisional de docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento, Docente, Escalafón','Expedientes Jubilados - Caja RRHH-01','Nombramiento'),
+('Acta de Jubilación de Personal Ordinario','Recursos Humanos','Acta de jubilacion ordinaria aprobada por Consejo de Facultad','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pensión, Trámite','Digitalizado Exclusivo','Acta de Jubilación');
 
 -- Insertar los documentos de RRHH en la tabla datos_rrhh
 INSERT INTO public.datos_rrhh (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por, id_tipo_documento, empleado_id)
@@ -383,6 +384,35 @@ ALTER TABLE ONLY public.fotos_empleado
 ALTER TABLE ONLY public.historial_cargos
     ADD CONSTRAINT fk_historial_empleado FOREIGN KEY (empleado_id) REFERENCES public.empleados(id) ON DELETE CASCADE,
     ADD CONSTRAINT fk_historial_cargo FOREIGN KEY (cargo_id) REFERENCES public.cargos(id) ON DELETE RESTRICT;
+
+-- =============================================================================
+-- 9. ÍNDICES PARA RENDIMIENTO INSTITUCIONAL (BUENAS PRÁCTICAS)
+-- =============================================================================
+
+-- 9.1 Índices en claves foráneas (aceleran JOINs)
+CREATE INDEX idx_datos_rrhh_empleado     ON public.datos_rrhh(empleado_id);
+CREATE INDEX idx_datos_rrhh_tipo_doc     ON public.datos_rrhh(id_tipo_documento);
+CREATE INDEX idx_datos_rrhh_creado_por   ON public.datos_rrhh(creado_por);
+CREATE INDEX idx_datos_archivo_creado_por ON public.datos_archivo(creado_por);
+CREATE INDEX idx_empleados_cargo         ON public.empleados(cargo_id);
+CREATE INDEX idx_empleados_departamento  ON public.empleados(departamento_id);
+CREATE INDEX idx_empleados_estado        ON public.empleados(estado_id);
+CREATE INDEX idx_fotos_empleado_ref      ON public.fotos_empleado(empleado_id);
+CREATE INDEX idx_historial_empleado      ON public.historial_cargos(empleado_id);
+CREATE INDEX idx_tipo_documento_categoria ON public.tipo_documento(id_categoria);
+
+-- 9.2 Índices en fechas (aceleran ORDER BY y filtros por rango)
+CREATE INDEX idx_datos_archivo_fecha     ON public.datos_archivo(fecha_documento DESC);
+CREATE INDEX idx_datos_rrhh_fecha        ON public.datos_rrhh(fecha_documento DESC);
+CREATE INDEX idx_empleados_fecha_ingreso ON public.empleados(fecha_ingreso DESC);
+
+-- 9.3 Índices GIN para búsqueda de texto (aceleran ILIKE con unaccent)
+CREATE INDEX idx_datos_archivo_titulo_trgm      ON public.datos_archivo USING GIN (unaccent(titulo) gin_trgm_ops);
+CREATE INDEX idx_datos_archivo_tesauro1_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_primario) gin_trgm_ops);
+CREATE INDEX idx_datos_archivo_tesauro2_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_secundario) gin_trgm_ops);
+CREATE INDEX idx_datos_archivo_descriptores_trgm ON public.datos_archivo USING GIN (unaccent(descriptores_libres) gin_trgm_ops);
+CREATE INDEX idx_datos_rrhh_titulo_trgm         ON public.datos_rrhh USING GIN (unaccent(titulo) gin_trgm_ops);
+CREATE INDEX idx_empleados_nombres_trgm         ON public.empleados USING GIN (unaccent(nombres || ' ' || apellidos) gin_trgm_ops);
 
 -- =============================================================================
 -- Fin del Script. Base de datos e inicio de sesión integrados correctamente.

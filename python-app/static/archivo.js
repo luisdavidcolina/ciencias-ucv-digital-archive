@@ -23,6 +23,26 @@ async function triggerArchivoSearch() {
   }
 }
 
+function getDocumentIcon(docType) {
+  const dt = (docType || "").toLowerCase();
+  if (dt.includes("plano")) {
+    return { icon: "fas fa-drafting-compass", color: "#17a2b8" }; // teal
+  }
+  if (dt.includes("informe") || dt.includes("reporte")) {
+    return { icon: "fas fa-file-contract", color: "#28a745" }; // green
+  }
+  if (dt.includes("acta") || dt.includes("resolución") || dt.includes("resolucion")) {
+    return { icon: "fas fa-gavel", color: "#dc3545" }; // red
+  }
+  if (dt.includes("reglamento") || dt.includes("manual") || dt.includes("guía") || dt.includes("guia")) {
+    return { icon: "fas fa-book", color: "#6f42c1" }; // purple
+  }
+  if (dt.includes("convenio")) {
+    return { icon: "fas fa-handshake", color: "#fd7e14" }; // orange
+  }
+  return { icon: "fas fa-file-alt", color: "#2b4e72" }; // default blue-grey
+}
+
 function renderArchivoList() {
   const container = document.getElementById("list_archivo");
   const results   = state.archivo.results;
@@ -51,15 +71,17 @@ function renderArchivoList() {
   if (prevBtnA) prevBtnA.disabled = state.archivo.page <= 1;
   if (nextBtnA) nextBtnA.disabled = state.archivo.page >= totalPages;
 
-  container.innerHTML = pageItems.map(doc => `
+  container.innerHTML = pageItems.map(doc => {
+    const iconData = getDocumentIcon(doc.doc_type);
+    return `
     <div class="ds-item-card" onclick="openArchivoModal('${doc.__idx}')" style="cursor:pointer;">
       <div class="ds-item-thumbnail">
-        <i class="fas fa-file-alt" style="font-size:40px;color:#2b4e72;"></i>
+        <i class="${iconData.icon}" style="font-size:40px;color:${iconData.color};"></i>
       </div>
       <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <span class="badge badge-light" style="font-size:0.75rem;color:#2b4e72;font-weight:bold;border:1px solid #d9e6f4;border-radius:12px;padding:3px 10px;">
-            <i class="fas fa-bookmark mr-1"></i> ${doc.tesauro_secundario || doc.categoria || doc.doc_type}
+            <i class="fas fa-bookmark mr-1"></i> ${doc.tesauro_primario || doc.doc_type}
           </span>
           <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${formatISOToSpanish(doc.fecha)}</span>
         </div>
@@ -72,8 +94,8 @@ function renderArchivoList() {
         </div>
         ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${doc.resumen}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
-          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_secundario); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${b}</span>`).join(""); })()}
-          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_secundario); return filtered.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${filtered.length - 4}</span>` : ""; })()}
+          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${b}</span>`).join(""); })()}
+          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${filtered.length - 4}</span>` : ""; })()}
         </div>
       </div>
       <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;">
@@ -84,15 +106,18 @@ function renderArchivoList() {
         </button>
       </div>
     </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function openArchivoModal(idxReal) {
   const doc = state.archivo.results.find(d => d.__idx == idxReal);
   if (!doc) return;
 
+  const iconData = getDocumentIcon(doc.doc_type);
   document.getElementById("modal-doc-title").innerText       = doc.titulo;
-  document.getElementById("modal-doc-thumb-icon").className  = "fas fa-file-alt";
+  document.getElementById("modal-doc-thumb-icon").className  = iconData.icon;
+  document.getElementById("modal-doc-thumb-icon").style.color = iconData.color;
   document.getElementById("modal-doc-thumb-badge").innerText = doc.doc_type;
 
   const isActa   = /^acta|^resoluc/i.test(doc.doc_type);

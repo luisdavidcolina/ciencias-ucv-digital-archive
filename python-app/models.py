@@ -65,6 +65,8 @@ class DocumentSubmitRequest(BaseModel):
     doc_type: str
     fecha: str
     ubicacion: str
+    tesauro_secundario: Optional[str] = ""
+    descriptores_libres: Optional[str] = ""
 
 
 class StatsRequest(BaseModel):

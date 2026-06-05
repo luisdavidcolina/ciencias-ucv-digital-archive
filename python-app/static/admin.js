@@ -144,33 +144,46 @@ function renderDynamicSubmitFields() {
     container.innerHTML = `
       <div class="row">
         <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">dc.title (Título) *</label>
-          <input type="text" id="reg-title-${suf}" class="form-control" placeholder="Ej: Proyecto SVD Compresión" required>
+          <label class="font-weight-bold text-muted">Título del Documento *</label>
+          <input type="text" id="reg-title-${suf}" class="form-control" placeholder="Ej: Plan Regulador de Áreas Verdes" required>
         </div>
         <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">dc.contributor.author (Autor) *</label>
-          <input type="text" id="reg-author-${suf}" class="form-control" placeholder="Ej: Dr. Juan Pérez" required>
+          <label class="font-weight-bold text-muted">Autor / Ente Emisor *</label>
+          <input type="text" id="reg-author-${suf}" class="form-control" placeholder="Ej: Arq. Villanueva" required>
         </div>
       </div>
       <div class="row mt-2">
-        <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">dc.type (Tipología) *</label>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Tesauro Primario (Tipología) *</label>
           <select id="reg-doc-type-${suf}" class="form-control" required>
-            ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe"]).map(t => `<option value="${t}">${t}</option>`).join("")}
+            ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe","Plano Arquitectónico","Acta de Sesión","Resolución","Reglamento"]).map(t => `<option value="${t}">${t}</option>`).join("")}
           </select>
         </div>
-        <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">dc.date.issued (Fecha Emisión) *</label>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Tesauro Secundario (Clasificación) *</label>
+          <select id="reg-secundario-${suf}" class="form-control" required>
+            <option value="Parte I">Parte I</option>
+            <option value="Parte II">Parte II</option>
+            <option value="Parte III">Parte III</option>
+            <option value="Parte IV">Parte IV</option>
+          </select>
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Fecha de Emisión *</label>
           <input type="date" id="reg-fecha-${suf}" class="form-control" required value="${new Date().toISOString().substring(0,10)}">
         </div>
       </div>
       <div class="form-group mt-2">
-        <label class="font-weight-bold text-muted">dc.description.abstract (Resumen)</label>
-        <textarea id="reg-resumen-${suf}" class="form-control" rows="3" placeholder="Síntesis del folio..."></textarea>
+        <label class="font-weight-bold text-muted">Descriptores Libres (Palabras Clave separadas por coma) *</label>
+        <input type="text" id="reg-descriptores-${suf}" class="form-control" placeholder="Ej: Ordenamiento territorial interno, Planificación ambiental universitaria, inventario vegetal" required>
       </div>
       <div class="form-group mt-2">
-        <label class="font-weight-bold text-muted">dc.identifier.location (Ubicación Topográfica) *</label>
-        <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Estante B2, Gaveta 3" required>
+        <label class="font-weight-bold text-muted">Resumen Descriptivo (Abstract)</label>
+        <textarea id="reg-resumen-${suf}" class="form-control" rows="3" placeholder="Breve síntesis o abstract del documento..."></textarea>
+      </div>
+      <div class="form-group mt-2">
+        <label class="font-weight-bold text-muted">Ubicación Física (Estante, Gaveta o Caja) *</label>
+        <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Mapoteca - Gaveta 1 o Digitalizado Exclusivo" required>
       </div>
     `;
   } else {
@@ -296,9 +309,11 @@ async function handleNewSubmission(e) {
   };
 
   if (isArchivo) {
-    payload.titulo  = val(`reg-title-${suf}`);
-    payload.autor   = val(`reg-author-${suf}`);
-    payload.resumen = val(`reg-resumen-${suf}`);
+    payload.titulo              = val(`reg-title-${suf}`);
+    payload.autor               = val(`reg-author-${suf}`);
+    payload.resumen             = val(`reg-resumen-${suf}`);
+    payload.tesauro_secundario  = val(`reg-secundario-${suf}`);
+    payload.descriptores_libres = val(`reg-descriptores-${suf}`);
   } else {
     payload.empleado              = val(`reg-empleado-${suf}`);
     payload.cedula                = val(`reg-cedula-${suf}`);
