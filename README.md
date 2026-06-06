@@ -6,7 +6,7 @@ Ecosistema de gestión documental de **Alta Eficiencia y Bajo Costo**. Diseñado
 
 ## Misión e Impacto Institucional
 
-Este proyecto nace de la necesidad de modernizar la gestión documental de la **Facultad de Ciencias UCV**, bajo tres pilares fundamentales:
+El proyecto surge de la necesidad de modernizar la gestión documental de la **Facultad de Ciencias UCV**, bajo tres pilares fundamentales:
 
 1. **Preservación Histórica**: Asegurar la integridad de la memoria documental de la facultad frente al deterioro físico y el paso del tiempo.
 2. **Soberanía Tecnológica**: Desarrollo local utilizando herramientas Open Source, eliminando la dependencia de licencias costosas y garantizando que el control total de los datos permanezca en la institución.
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-Abrir en el navegador: `http://localhost:8000`
+La aplicación se accede desde el navegador en `http://localhost:8000`.
 
 ### Credenciales de prueba
 
@@ -247,14 +247,14 @@ sequenceDiagram
     participant A as FastAPI /api/auth/login
     participant DB as usuarios.csv
 
-    U->>L: Ingresa credenciales + Enter o clic
+    U->>L: Ingreso de credenciales y pulsación de Enter o clic
     L->>A: POST {username, password}
-    A->>DB: Valida hash y módulo
+    A->>DB: Validación de hash y módulo
     alt Credenciales válidas
         DB-->>A: {user: {username, modules, roles, modulo, rol}}
         A-->>L: 200 OK + user payload
         L->>L: saveSession() → localStorage
-        L->>U: Redirige según rol y módulo
+        L->>U: Redirección según rol y módulo
     else Inválidas
         A-->>L: 401
         L->>U: Alert "Credenciales incorrectas"
@@ -406,23 +406,23 @@ Bugs corregidos durante la modularización:
 
 ### Funcionalidades críticas
 - [ ] **Favicon en sidebar**: mostrar el logo/favicon al lado de "Ciencias UCV" en la barra lateral de todas las páginas.
-- [ ] **Visor de documentos digitalizados**: el botón "Abrir archivo" en el dossier RRHH y el modal de Archivo abren un `alert()` placeholder — implementar visor real (PDF en iframe o ventana nueva).
-- [ ] **Descarga de expediente XLS**: el botón de descarga en el modal del dossier aún es placeholder — exportar el expediente filtrado a Excel.
-- [ ] **Edición de registros**: el botón "Editar" en el panel admin es placeholder — formulario de edición inline o modal.
+- [ ] **Visor de documentos digitalizados**: el botón "Abrir archivo" en el dossier RRHH y el modal de Archivo abren un `alert()` placeholder — se debe implementar un visor real (PDF en iframe o ventana nueva).
+- [ ] **Descarga de expediente XLS**: el botón de descarga en el modal del dossier aún es placeholder — implementar la exportación del expediente filtrado a Excel.
+- [ ] **Edición de registros**: el botón "Editar" en el panel admin es placeholder — implementar un formulario de edición inline o modal.
 
 ### Mejoras técnicas
-- [ ] **Paginación en módulo Archivo y RRHH**: los botones de página existen en el HTML pero los handlers `prev`/`next` necesitan revisión de wiring en `app.js`.
+- [ ] **Paginación en módulo Archivo y RRHH**: los botones de página existen en el HTML, pero los handlers `prev`/`next` necesitan revisión de wiring en `app.js`.
 - [ ] **Búsqueda semántica / vectorial**: integrar `sentence-transformers` o pgvector para recuperación por contexto.
 - [ ] **Migración a PostgreSQL**: reemplazar CSV por base de datos relacional para concurrencia y escalabilidad.
 - [ ] **Almacenamiento de archivos**: configurar bucket S3/GCS para desacoplar PDFs del servidor.
 - [ ] **Tests**: no hay cobertura de tests en el stack Python — agregar `pytest` con tests de los endpoints críticos.
-- [ ] **Exportación a XLS desde monitor admin**: el monitor lista registros pero no permite exportar.
+- [ ] **Exportación a XLS desde monitor admin**: el monitor lista registros, pero no permite exportar.
 - [ ] **SPA `index.html`**: evaluar si mantener o deprecar — actualmente duplica las páginas standalone.
 
 ### Deuda técnica
-- [ ] El campo `audit_log.csv` se escribe pero su contenido no es consultable desde ninguna vista de la UI.
+- [ ] El campo `audit_log.csv` se escribe, pero su contenido no es consultable desde ninguna vista de la UI.
 - [ ] `datos_test.csv` en la raíz — revisar si es necesario o puede eliminarse.
-- [ ] La función de restaurar sesión (`/api/auth/restore`) existe en el backend pero no está siendo llamada en el frontend al recargar páginas protegidas.
+- [ ] La función de restaurar sesión (`/api/auth/restore`) existe en el backend, pero no está siendo llamada en el frontend al recargar páginas protegidas.
 
 ---
 
@@ -452,6 +452,44 @@ pip install -r requirements.txt
 # Start command
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
+
+---
+
+## Despliegue en Vercel
+
+El proyecto incluye soporte para despliegue serverless en [Vercel](https://vercel.com) a través del archivo `api/index.py`.
+
+### Requisitos
+- Cuenta en Vercel.
+- CLI de Vercel instalado globalmente: `npm i -g vercel`.
+
+### Instrucciones
+
+1.  **Inicio de sesión** desde la raíz del repositorio:
+    ```bash
+    vercel login
+    ```
+
+2.  **Configuración del proyecto** (solo la primera vez):
+    ```bash
+    vercel
+    ```
+    El asistente guía el proceso para vincular el repositorio.
+
+3.  **Despliegue** (para actualizaciones posteriores):
+    ```bash
+    vercel --prod
+    ```
+
+### Cómo funciona
+- Vercel detecta automáticamente el archivo `api/index.py` y lo expone como una función serverless.
+- `api/index.py` importa y expone el objeto `app` de FastAPI desde `python-app/main.py`.
+- Los archivos estáticos de `python-app/static/` se sirven a través del middleware de FastAPI.
+
+### Consideraciones
+- La capa de datos (PostgreSQL/Neon) debe estar accesible desde internet y su `DATABASE_URL` debe configurarse como variable de entorno en el panel de Vercel.
+- Las sesiones y el `audit_log` se mantienen en la base de datos, garantizando persistencia sin depender del sistema de archivos local del contenedor serverless.
+- Para el despliegue inicial, es necesario asegurarse de que la base de datos esté poblada ejecutando `schema.sql`.
 
 ---
 

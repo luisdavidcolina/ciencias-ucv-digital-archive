@@ -157,8 +157,8 @@ def admin_submit(req: DocumentSubmitRequest):
             INSERT INTO public.datos_archivo
                 (titulo, abstract, autor,
                  fecha_documento, ubicacion, creado_por, tesauro_primario,
-                 tesauro_secundario, descriptores_libres)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 tesauro_secundario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id_archivo
             """,
             (
@@ -167,11 +167,38 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.autor or "Anónimo",
                 fecha_doc, req.ubicacion, creado_por, req.doc_type,
                 req.tesauro_secundario or "",
-                req.descriptores_libres or "",
             ),
             fetch="one",
             commit=True,
         )
+
+        # Guardar palabras clave relacionales (descriptores libres)
+        if req.descriptores_libres:
+            raw_descs = req.descriptores_libres.replace(";", ",").split(",")
+            descriptores = [d.strip() for d in raw_descs if d.strip()]
+            for desc in descriptores:
+                desc_row = db_query(
+                    """
+                    INSERT INTO public.descriptores_libres (nombre)
+                    VALUES (%s)
+                    ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
+                    RETURNING id_descriptor
+                    """,
+                    (desc,),
+                    fetch="one",
+                    commit=True,
+                )
+                db_query(
+                    """
+                    INSERT INTO public.archivo_descriptores (id_archivo, id_descriptor)
+                    VALUES (%s, %s)
+                    ON CONFLICT DO NOTHING
+                    """,
+                    (new_row["id_archivo"], desc_row["id_descriptor"]),
+                    fetch="none",
+                    commit=True,
+                )
+
         return {"success": True, "id": str(new_row["id_archivo"])}
 
     # ── Módulo RRHH ──────────────────────────────────────────────────────────
@@ -208,18 +235,48 @@ def admin_submit(req: DocumentSubmitRequest):
         """
         INSERT INTO public.datos_rrhh
             (titulo, autor, id_tipo_documento,
-             empleado_id, fecha_documento, ubicacion, creado_por, tesauro_primario)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+             empleado_id, fecha_documento, ubicacion, creado_por, 
+             tesauro_primario, tesauro_secundario, abstract)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id_rrhh
         """,
         (
             f"{req.doc_type} de {req.personas_relacionadas or req.empleado}",
             "Recursos Humanos",
-            tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por, req.doc_type,
+            tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por, 
+            req.doc_type, req.tesauro_secundario or "", req.resumen or "",
         ),
         fetch="one",
         commit=True,
     )
+
+    # Guardar palabras clave relacionales (descriptores libres) para RRHH
+    if req.descriptores_libres:
+        raw_descs = req.descriptores_libres.replace(";", ",").split(",")
+        descriptores = [d.strip() for d in raw_descs if d.strip()]
+        for desc in descriptores:
+            desc_row = db_query(
+                """
+                INSERT INTO public.descriptores_libres (nombre)
+                VALUES (%s)
+                ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
+                RETURNING id_descriptor
+                """,
+                (desc,),
+                fetch="one",
+                commit=True,
+            )
+            db_query(
+                """
+                INSERT INTO public.rrhh_descriptores (id_rrhh, id_descriptor)
+                VALUES (%s, %s)
+                ON CONFLICT DO NOTHING
+                """,
+                (new_row["id_rrhh"], desc_row["id_descriptor"]),
+                fetch="none",
+                commit=True,
+            )
+
     return {"success": True, "id": str(new_row["id_rrhh"])}
 
 

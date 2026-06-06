@@ -29,12 +29,16 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
             COALESCE(da.ubicacion, '')          AS ubicacion,
             COALESCE(da.tesauro_primario, '')   AS tesauro_primario,
             COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
-            COALESCE(da.descriptores_libres, '') AS descriptores_libres,
+            COALESCE(STRING_AGG(dl.nombre, '; '), '') AS descriptores_libres,
             COALESCE(da.abstract, '')           AS resumen
         FROM public.datos_archivo da
+        LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
+        LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
     """
     if filters_sql:
         base_sql += " WHERE " + filters_sql
+
+    base_sql += " GROUP BY da.id_archivo"
 
     rows = db_query(base_sql, filter_params, fetch="all")
     if not rows:
@@ -120,6 +124,9 @@ def buscar_tipo_documento(q: str = Query(..., description="Palabra clave a busca
         FROM (
             SELECT UNNEST(ARRAY[tesauro_primario, tesauro_secundario]) AS val
             FROM public.datos_archivo
+            UNION
+            SELECT nombre AS val
+            FROM public.descriptores_libres
         ) sub
         WHERE val IS NOT NULL AND val != ''
           AND unaccent(val) ILIKE unaccent(%s)

@@ -77,7 +77,6 @@ CREATE TABLE public.datos_archivo (
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
     tesauro_secundario TEXT,
-    descriptores_libres TEXT,
     ubicacion TEXT NOT NULL, -- Gaveta física, estante o 'Digitalizado Exclusivo'
     creado_por INTEGER NOT NULL, -- Pista de Auditoría: ID del usuario del sistema
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -93,10 +92,26 @@ CREATE TABLE public.datos_rrhh (
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
     tesauro_secundario TEXT,
-    descriptores_libres TEXT,
     ubicacion TEXT NOT NULL, -- Gaveta física, estante o 'Digitalizado Exclusivo'
     creado_por INTEGER NOT NULL, -- Pista de Auditoría: ID del usuario del sistema
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE public.descriptores_libres (
+    id_descriptor INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nombre VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE public.archivo_descriptores (
+    id_archivo INTEGER REFERENCES public.datos_archivo(id_archivo) ON DELETE CASCADE,
+    id_descriptor INTEGER REFERENCES public.descriptores_libres(id_descriptor) ON DELETE CASCADE,
+    PRIMARY KEY (id_archivo, id_descriptor)
+);
+
+CREATE TABLE public.rrhh_descriptores (
+    id_rrhh INTEGER REFERENCES public.datos_rrhh(id_rrhh) ON DELETE CASCADE,
+    id_descriptor INTEGER REFERENCES public.descriptores_libres(id_descriptor) ON DELETE CASCADE,
+    PRIMARY KEY (id_rrhh, id_descriptor)
 );
 
 CREATE TABLE public.fotos_empleado (
@@ -296,7 +311,7 @@ INSERT INTO tmp_csv_archivos (titulo, autor, abstract, fecha_documento, tesauro_
 ('Planos Estructurales Auditorio de Ciencias','Arq. Villanueva','Plano original detallado del diseño de fundaciones, vigas y techado del Auditorio Principal de la Facultad.','1965-02-18','Plano Arquitectónico','Parte IV','Planos originales, Auditorio de Ciencias, Fundaciones estructurales, Patrimonio arquitectónico','Mapoteca - Gaveta 2');
 
 -- Insertar los expedientes directamente a la tabla oficial de datos_archivo
-INSERT INTO public.datos_archivo (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por)
+INSERT INTO public.datos_archivo (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, ubicacion, creado_por)
 SELECT
     titulo,
     autor,
@@ -304,10 +319,28 @@ SELECT
     fecha_documento,
     tesauro_primario,
     tesauro_secundario,
-    descriptores_libres,
     ubicacion,
     2 -- Pista de auditoría vinculada al ID del usuario 'archivo_admin'
 FROM tmp_csv_archivos;
+
+-- Población de la tabla de catálogo descriptores_libres con los descriptores de datos_archivo
+INSERT INTO public.descriptores_libres (nombre)
+SELECT DISTINCT TRIM(val)
+FROM (
+    SELECT regexp_split_to_table(descriptores_libres, ',') AS val
+    FROM tmp_csv_archivos
+) sub
+WHERE val IS NOT NULL AND TRIM(val) != ''
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Relacionar datos_archivo con sus descriptores libres en la tabla de unión
+INSERT INTO public.archivo_descriptores (id_archivo, id_descriptor)
+SELECT DISTINCT da.id_archivo, dl.id_descriptor
+FROM tmp_csv_archivos tmp
+JOIN public.datos_archivo da ON da.titulo = tmp.titulo
+CROSS JOIN LATERAL regexp_split_to_table(tmp.descriptores_libres, ',') AS term
+JOIN public.descriptores_libres dl ON LOWER(TRIM(dl.nombre)) = LOWER(TRIM(term))
+ON CONFLICT DO NOTHING;
 
 DROP TABLE tmp_csv_archivos;
 
@@ -332,8 +365,8 @@ INSERT INTO tmp_rrhh_documentos (titulo, autor, abstract, fecha_documento, tesau
 ('Nombramiento de Cátedra Docente','Recursos Humanos','Nombramiento ordinario provisional de docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento, Docente, Escalafón','Expedientes Jubilados - Caja RRHH-01','Nombramiento'),
 ('Acta de Jubilación de Personal Ordinario','Recursos Humanos','Acta de jubilacion ordinaria aprobada por Consejo de Facultad','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pensión, Trámite','Digitalizado Exclusivo','Acta de Jubilación');
 
--- Insertar los documentos de RRHH en la tabla datos_rrhh
-INSERT INTO public.datos_rrhh (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, creado_por, id_tipo_documento, empleado_id)
+-- Insertar los documentos de RRHH en la tabla datos_rrhh (sin la columna descriptores_libres que ahora es relacional)
+INSERT INTO public.datos_rrhh (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, ubicacion, creado_por, id_tipo_documento, empleado_id)
 SELECT
     tmp.titulo,
     tmp.autor,
@@ -341,7 +374,6 @@ SELECT
     tmp.fecha_documento,
     tmp.tesauro_primario,
     tmp.tesauro_secundario,
-    tmp.descriptores_libres,
     tmp.ubicacion,
     2, -- creado_por (archivo_admin)
     td.id,
@@ -355,6 +387,25 @@ JOIN public.tipo_documento td ON LOWER(UNACCENT(td.nombre)) =
         WHEN LOWER(tmp.doc_type) = 'acta de jubilación' THEN 'jubilacion y pension'
         ELSE LOWER(tmp.doc_type)
     END;
+
+-- Población de la tabla de catálogo descriptores_libres con los descriptores de datos_rrhh
+INSERT INTO public.descriptores_libres (nombre)
+SELECT DISTINCT TRIM(val)
+FROM (
+    SELECT regexp_split_to_table(descriptores_libres, ',') AS val
+    FROM tmp_rrhh_documentos
+) sub
+WHERE val IS NOT NULL AND TRIM(val) != ''
+ON CONFLICT (nombre) DO NOTHING;
+
+-- Relacionar datos_rrhh con sus descriptores libres en la tabla de unión
+INSERT INTO public.rrhh_descriptores (id_rrhh, id_descriptor)
+SELECT DISTINCT dr.id_rrhh, dl.id_descriptor
+FROM tmp_rrhh_documentos tmp
+JOIN public.datos_rrhh dr ON dr.titulo = tmp.titulo
+CROSS JOIN LATERAL regexp_split_to_table(tmp.descriptores_libres, ',') AS term
+JOIN public.descriptores_libres dl ON LOWER(TRIM(dl.nombre)) = LOWER(TRIM(term))
+ON CONFLICT DO NOTHING;
 
 DROP TABLE tmp_rrhh_documentos;
 
@@ -400,6 +451,10 @@ CREATE INDEX idx_empleados_estado        ON public.empleados(estado_id);
 CREATE INDEX idx_fotos_empleado_ref      ON public.fotos_empleado(empleado_id);
 CREATE INDEX idx_historial_empleado      ON public.historial_cargos(empleado_id);
 CREATE INDEX idx_tipo_documento_categoria ON public.tipo_documento(id_categoria);
+CREATE INDEX idx_archivo_descriptores_arch ON public.archivo_descriptores(id_archivo);
+CREATE INDEX idx_archivo_descriptores_desc ON public.archivo_descriptores(id_descriptor);
+CREATE INDEX idx_rrhh_descriptores_rrhh ON public.rrhh_descriptores(id_rrhh);
+CREATE INDEX idx_rrhh_descriptores_desc ON public.rrhh_descriptores(id_descriptor);
 
 -- 9.2 Índices en fechas (aceleran ORDER BY y filtros por rango)
 CREATE INDEX idx_datos_archivo_fecha     ON public.datos_archivo(fecha_documento DESC);
@@ -410,7 +465,7 @@ CREATE INDEX idx_empleados_fecha_ingreso ON public.empleados(fecha_ingreso DESC)
 CREATE INDEX idx_datos_archivo_titulo_trgm      ON public.datos_archivo USING GIN (unaccent(titulo) gin_trgm_ops);
 CREATE INDEX idx_datos_archivo_tesauro1_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_primario) gin_trgm_ops);
 CREATE INDEX idx_datos_archivo_tesauro2_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_secundario) gin_trgm_ops);
-CREATE INDEX idx_datos_archivo_descriptores_trgm ON public.datos_archivo USING GIN (unaccent(descriptores_libres) gin_trgm_ops);
+CREATE INDEX idx_descriptores_libres_nombre_trgm ON public.descriptores_libres USING GIN (unaccent(nombre) gin_trgm_ops);
 CREATE INDEX idx_datos_rrhh_titulo_trgm         ON public.datos_rrhh USING GIN (unaccent(titulo) gin_trgm_ops);
 CREATE INDEX idx_empleados_nombres_trgm         ON public.empleados USING GIN (unaccent(nombres || ' ' || apellidos) gin_trgm_ops);
 

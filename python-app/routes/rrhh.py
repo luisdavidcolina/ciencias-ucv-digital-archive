@@ -74,7 +74,8 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
             COALESCE(dr.autor, '')                    AS autor,
             COALESCE(dr.abstract, '')                 AS abstract,
             TO_CHAR(dr.fecha_documento, 'YYYY-MM-DD') AS fecha_documento,
-            e.nombres || ' ' || e.apellidos           AS personas_relacionadas
+            e.nombres || ' ' || e.apellidos           AS personas_relacionadas,
+            COALESCE(STRING_AGG(dl.nombre, '; '), '') AS descriptores_libres
         FROM public.empleados e
         LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
         LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
@@ -82,16 +83,20 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
         LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id
         LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
         LEFT JOIN public.categoria        cat ON td.id_categoria = cat.id
+        LEFT JOIN public.rrhh_descriptores rd ON dr.id_rrhh = rd.id_rrhh
+        LEFT JOIN public.descriptores_libres dl ON rd.id_descriptor = dl.id_descriptor
     """
     if filters_sql:
         base_sql += " WHERE " + filters_sql
+
+    base_sql += " GROUP BY e.id, c.id, d.id, el.id, dr.id_rrhh, td.id, cat.id"
 
     rows = db_query(base_sql, filter_params, fetch="all")
     if not rows:
         return pd.DataFrame(columns=[
             "cedula", "empleado", "personas_relacionadas", "departamento", "estado",
             "doc_type", "categoria", "fecha_ingreso", "ubicacion", "foto_url",
-            "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo",
+            "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo", "descriptores_libres"
         ])
     return pd.DataFrame([dict(r) for r in rows]).fillna("")
 
