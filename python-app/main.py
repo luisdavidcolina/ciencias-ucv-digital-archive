@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from database import ensure_audit_table
+from utils import populate_missing_slugs
 from routes.auth    import router as auth_router
 from routes.archivo import router as archivo_router
 from routes.rrhh    import router as rrhh_router
@@ -42,6 +43,7 @@ async def add_no_cache_header(request, call_next):
 @app.on_event("startup")
 def on_startup():
     ensure_audit_table()
+    populate_missing_slugs()
 
 
 # =============================================================================

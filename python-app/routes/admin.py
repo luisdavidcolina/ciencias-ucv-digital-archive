@@ -13,6 +13,7 @@ from models import (
     CategoryCreateRequest,
     UserCreateRequest,
 )
+from utils import generate_unique_slug
 from .archivo import fetch_archivo_dataframe
 from .rrhh import fetch_rrhh_dataframe
 
@@ -54,10 +55,10 @@ def _resolve_or_create_tipo_documento(nombre: str) -> int:
     cat = db_query("SELECT id FROM public.categoria ORDER BY id LIMIT 1", fetch="one")
     if not cat:
         raise HTTPException(status_code=500, detail="No existen categorías en la BD")
-    slug = nombre.lower().replace(" ", "-")[:250]
+    slug = generate_unique_slug(nombre, "tipo_documento")
     new_row = db_query(
-        "INSERT INTO public.tipo_documento (nombre, slug, id_categoria) VALUES (%s, %s, %s) RETURNING id",
-        (nombre, slug, cat["id"]),
+        "INSERT INTO public.tipo_documento (nombre, nombre_corto, slug, id_categoria) VALUES (%s, %s, %s, %s) RETURNING id",
+        (nombre, nombre, slug, cat["id"]),
         fetch="one",
         commit=True,
     )

@@ -419,12 +419,6 @@ function applyDatePreset(module, preset) {
   if (preset === "all") {
     startDate = lim?.min_date || fmt(new Date(today.getFullYear() - 10, 0, 1));
     endDate   = lim?.max_date || fmt(today);
-  } else if (preset === "3d") {
-    const d = new Date(today); d.setDate(d.getDate() - 3);
-    startDate = fmt(d);
-  } else if (preset === "1y") {
-    const d = new Date(today); d.setFullYear(d.getFullYear() - 1);
-    startDate = fmt(d);
   }
 
   state[module].dateStart = startDate;

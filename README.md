@@ -58,10 +58,10 @@ Implementar una plataforma integral de gestión documental y digitalización par
 ```bash
 cd python-app
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+python -m uvicorn main:app --reload --port 8000
 ```
 
-La aplicación se accede desde el navegador en `http://localhost:8000`.
+La aplicación se accede desde el navegador en `http://127.0.0.1:8000`.
 
 ### Credenciales de prueba
 
@@ -337,11 +337,11 @@ erDiagram
 | :--- | :---: | :---: |
 | Búsqueda y consulta | ✅ | ✅ |
 | Ver modal de documento/expediente | ✅ | ✅ |
-| Ingresar nuevo documento | ❌ | ✅ |
-| Monitor de expedientes | ❌ | ✅ |
-| Gestión de categorías | ❌ | ✅ |
-| Gestión de usuarios | ❌ | ✅ |
-| Ver estadísticas | ❌ | ✅ |
+| Ingresar nuevo documento | � | ✅ |
+| Monitor de expedientes | � | ✅ |
+| Gestión de categorías | � | ✅ |
+| Gestión de usuarios | � | ✅ |
+| Ver estadísticas | � | ✅ |
 
 La segregación por módulo es absoluta: un usuario de Archivo no puede acceder a rutas RRHH y viceversa.
 
@@ -534,3 +534,4 @@ Todos los derechos reservados. El uso, copia, modificación o distribución de e
 ---
 
 Documentación y desarrollo: **Luisdavid Colina** & **Lic. Susana Carvallo**
+

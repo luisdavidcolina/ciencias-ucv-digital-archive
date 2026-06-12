@@ -222,22 +222,8 @@ INSERT INTO public.tipo_documento (nombre, nombre_corto, id_categoria) VALUES
 ('Rutagrama', 'Rutagrama', 4);
 
 -- =============================================================================
--- 5. GENERACIÓN AUTOMÁTICA DE SLUGS (PROCESO INSTITUCIONAL)
--- =============================================================================
-
-UPDATE public.tipo_documento
-SET slug = SUBSTRING(
-    REGEXP_REPLACE(
-        REGEXP_REPLACE(
-            LOWER(UNACCENT(nombre)),
-            '[^a-z0-9\s_]', '', 'g'
-        ),
-        '\s+', '-', 'g'
-    ) FROM 1 FOR 250
-);
-
--- =============================================================================
--- 6. CARGA Y PROCESAMIENTO AUTOMÁTICO DE EMPLEADOS DE NÓMINA INICIAL
+-- 5. CARGA Y PROCESAMIENTO AUTOMÁTICO DE EMPLEADOS DE NÓMINA INICIAL
+-- (Los slugs de tipo_documento se generan en Python al iniciar la aplicación)
 -- =============================================================================
 
 CREATE TEMP TABLE tmp_rrhh_personas (
@@ -274,7 +260,7 @@ JOIN public.estados_laborales e ON t.estado = e.estados;
 DROP TABLE tmp_rrhh_personas;
 
 -- =============================================================================
--- 7. CARGA, HOMOLOGACIÓN AUTOMÁTICA E INSERCIÓN DEL CSV DE ARCHIVOS
+-- 6. CARGA, HOMOLOGACIÓN AUTOMÁTICA E INSERCIÓN DEL CSV DE ARCHIVOS
 -- =============================================================================
 
 CREATE TEMP TABLE tmp_csv_archivos (
@@ -345,7 +331,7 @@ ON CONFLICT DO NOTHING;
 DROP TABLE tmp_csv_archivos;
 
 -- =============================================================================
--- 7.5 CARGA DE DATOS DE PRUEBA PARA RRHH
+-- 6.5 CARGA DE DATOS DE PRUEBA PARA RRHH
 -- =============================================================================
 
 CREATE TEMP TABLE tmp_rrhh_documentos (
@@ -363,7 +349,11 @@ CREATE TEMP TABLE tmp_rrhh_documentos (
 INSERT INTO tmp_rrhh_documentos (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, descriptores_libres, ubicacion, doc_type) VALUES
 ('Contrato Individual de Trabajo','Recursos Humanos','Contrato de trabajo administrativo','2015-06-20','Contratos y Suplencias','Parte I','Contrato, Ingreso, Administrativo','Digitalizado Exclusivo','Contrato'),
 ('Nombramiento de Cátedra Docente','Recursos Humanos','Nombramiento ordinario provisional de docente','1985-03-10','Nombramientos y Designaciones','Parte I','Nombramiento, Docente, Escalafón','Expedientes Jubilados - Caja RRHH-01','Nombramiento'),
-('Acta de Jubilación de Personal Ordinario','Recursos Humanos','Acta de jubilacion ordinaria aprobada por Consejo de Facultad','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pensión, Trámite','Digitalizado Exclusivo','Acta de Jubilación');
+('Acta de Jubilación de Personal Ordinario','Recursos Humanos','Acta de jubilacion ordinaria aprobada por Consejo de Facultad','2015-06-30','Jubilación y Pensión','Parte II','Jubilación, Pensión, Trámite','Digitalizado Exclusivo','Acta de Jubilación'),
+('Cedula de Identidad - Expediente Personal','Recursos Humanos','Copia de la cedula de identidad del empleado archivada en el expediente personal.','2015-06-20','Cédula','Parte IV','Cédula, Identificación, Documento personal','Digitalizado Exclusivo','Cedula de Identidad'),
+('Registro de Informacion Fiscal del Empleado','Recursos Humanos','Copia del RIF del empleado consignada para el expediente de nomina.','2015-06-20','RIF','Parte IV','RIF, Fiscal, Impuestos, SENIAT','Digitalizado Exclusivo','RIF'),
+('Curriculum Vitae y Soportes Academicos','Recursos Humanos','Curriculum vitae y soportes academicos consignados al momento del ingreso.','2015-06-20','CV','Parte IV','Curriculum, Formación académica, Experiencia laboral','Digitalizado Exclusivo','Curriculum Vitae'),
+('Planilla de Actualizacion de Datos Personales','Recursos Humanos','Planilla de registro y actualizacion de datos personales del empleado.','2015-06-20','Actualización de datos','Parte IV','Datos personales, Planilla, Actualización','Digitalizado Exclusivo','Planilla de Datos');
 
 -- Insertar los documentos de RRHH en la tabla datos_rrhh (sin la columna descriptores_libres que ahora es relacional)
 INSERT INTO public.datos_rrhh (titulo, autor, abstract, fecha_documento, tesauro_primario, tesauro_secundario, ubicacion, creado_por, id_tipo_documento, empleado_id)
@@ -385,6 +375,10 @@ JOIN public.tipo_documento td ON LOWER(UNACCENT(td.nombre)) =
         WHEN LOWER(tmp.doc_type) = 'contrato' THEN 'contratos, renovaciones, prorrogas de contratos y suplencias'
         WHEN LOWER(tmp.doc_type) = 'nombramiento' THEN 'nombramiento provisional, nombramiento definitivo, otros nombramientos y designaciones'
         WHEN LOWER(tmp.doc_type) = 'acta de jubilación' THEN 'jubilacion y pension'
+        WHEN LOWER(tmp.doc_type) = 'cedula de identidad' THEN 'cedula de identidad'
+        WHEN LOWER(tmp.doc_type) = 'rif' THEN 'registro de informacion fiscal (rif)'
+        WHEN LOWER(tmp.doc_type) = 'curriculum vitae' THEN 'curriculum vitae y anexos'
+        WHEN LOWER(tmp.doc_type) = 'planilla de datos' THEN 'registro y/o planilla de datos personales o de actualizacion de datos'
         ELSE LOWER(tmp.doc_type)
     END;
 
@@ -410,7 +404,7 @@ ON CONFLICT DO NOTHING;
 DROP TABLE tmp_rrhh_documentos;
 
 -- =============================================================================
--- 8. CREACIÓN DE LLAVES FORÁNEAS (INTEGRIDAD REFERENCIAL)
+-- 7. CREACIÓN DE LLAVES FORÁNEAS (INTEGRIDAD REFERENCIAL)
 -- =============================================================================
 
 ALTER TABLE ONLY public.tipo_documento
@@ -437,10 +431,10 @@ ALTER TABLE ONLY public.historial_cargos
     ADD CONSTRAINT fk_historial_cargo FOREIGN KEY (cargo_id) REFERENCES public.cargos(id) ON DELETE RESTRICT;
 
 -- =============================================================================
--- 9. ÍNDICES PARA RENDIMIENTO INSTITUCIONAL (BUENAS PRÁCTICAS)
+-- 8. ÍNDICES PARA RENDIMIENTO INSTITUCIONAL (BUENAS PRÁCTICAS)
 -- =============================================================================
 
--- 9.1 Índices en claves foráneas (aceleran JOINs)
+-- 8.1 Índices en claves foráneas (aceleran JOINs)
 CREATE INDEX idx_datos_rrhh_empleado     ON public.datos_rrhh(empleado_id);
 CREATE INDEX idx_datos_rrhh_tipo_doc     ON public.datos_rrhh(id_tipo_documento);
 CREATE INDEX idx_datos_rrhh_creado_por   ON public.datos_rrhh(creado_por);
@@ -456,12 +450,12 @@ CREATE INDEX idx_archivo_descriptores_desc ON public.archivo_descriptores(id_des
 CREATE INDEX idx_rrhh_descriptores_rrhh ON public.rrhh_descriptores(id_rrhh);
 CREATE INDEX idx_rrhh_descriptores_desc ON public.rrhh_descriptores(id_descriptor);
 
--- 9.2 Índices en fechas (aceleran ORDER BY y filtros por rango)
+-- 8.2 Índices en fechas (aceleran ORDER BY y filtros por rango)
 CREATE INDEX idx_datos_archivo_fecha     ON public.datos_archivo(fecha_documento DESC);
 CREATE INDEX idx_datos_rrhh_fecha        ON public.datos_rrhh(fecha_documento DESC);
 CREATE INDEX idx_empleados_fecha_ingreso ON public.empleados(fecha_ingreso DESC);
 
--- 9.3 Índices GIN para búsqueda de texto (aceleran ILIKE con unaccent)
+-- 8.3 Índices GIN para búsqueda de texto (aceleran ILIKE con unaccent)
 CREATE INDEX idx_datos_archivo_titulo_trgm      ON public.datos_archivo USING GIN (unaccent(titulo) gin_trgm_ops);
 CREATE INDEX idx_datos_archivo_tesauro1_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_primario) gin_trgm_ops);
 CREATE INDEX idx_datos_archivo_tesauro2_trgm    ON public.datos_archivo USING GIN (unaccent(tesauro_secundario) gin_trgm_ops);

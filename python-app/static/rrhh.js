@@ -110,6 +110,54 @@ async function openRrhhPersonDossier(personaRaw) {
   }
 }
 
+// Normaliza texto: minúsculas y sin acentos (para comparar tipos de documento)
+function normalizeDocText(text) {
+  return (text || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+// Busca en el expediente el primer documento cuyo doc_type o título coincida con alguna palabra clave
+function findPersonKeyDoc(profile, keywords) {
+  if (!profile?.rows) return null;
+  for (const row of profile.rows) {
+    const docType = normalizeDocText(row.doc_type);
+    const titulo  = normalizeDocText(row.titulo_doc);
+    if (keywords.some(k => docType === k || docType.includes(k) || titulo.includes(k))) {
+      return row;
+    }
+  }
+  return null;
+}
+
+// Renderiza los botones de acceso directo a documentos de identidad del expediente
+function renderQuickDocLinks(profile) {
+  const quickDocs = [
+    { label: "Cédula",            icon: "fa-id-card",        keywords: ["cedula"] },
+    { label: "RIF",               icon: "fa-file-invoice",   keywords: ["rif", "registro de informacion fiscal"] },
+    { label: "Currículo Vitae",   icon: "fa-file-alt",       keywords: ["cv", "curriculum"] },
+    { label: "Planilla de Datos", icon: "fa-clipboard-list", keywords: ["actualizacion de datos", "datos personales", "planilla de datos"] },
+  ];
+
+  return quickDocs.map(qd => {
+    const doc = findPersonKeyDoc(profile, qd.keywords);
+    if (doc) {
+      return `
+        <button class="btn btn-sm btn-outline-primary mr-2 mb-2"
+          onclick="openDocMetadataModal('${doc.__idx}')" title="Ver ${qd.label} en el expediente">
+          <i class="fas ${qd.icon} mr-1"></i>${qd.label}
+        </button>`;
+    }
+    return `
+      <button class="btn btn-sm btn-outline-secondary mr-2 mb-2" disabled
+        title="${qd.label} no registrado en el expediente">
+        <i class="fas ${qd.icon} mr-1"></i>${qd.label} <small>(no registrado)</small>
+      </button>`;
+  }).join("");
+}
+
 function renderRrhhDossierModal() {
   const profile = state.activePersonProfile;
   if (!profile) return;
@@ -121,8 +169,9 @@ function renderRrhhDossierModal() {
 
   const isRetirado  = (profile.statuses || "").includes("Retirado");
   const isPensionado = (profile.statuses || "").includes("Pensionado");
+  const cedulaDoc = findPersonKeyDoc(profile, ["cedula"]);
   const ciHtml = profile.cedulas
-    ? `${profile.cedulas} <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="alert('Abriendo visor Cédula de Identidad...');return false;"><i class="fas fa-id-card"></i> Ver</a>`
+    ? `${profile.cedulas}${cedulaDoc ? ` <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="openDocMetadataModal('${cedulaDoc.__idx}');return false;"><i class="fas fa-id-card"></i> Ver</a>` : ""}`
     : "N/A";
 
   const docTypes = profile.categories || [];
@@ -147,6 +196,14 @@ function renderRrhhDossierModal() {
             <div class="col-6 mb-2"><strong>Ingreso:</strong> ${formatISOToSpanish(profile.fecha_ingreso) || "No registrada"}</div>
             ${isRetirado   ? `<div class="col-6 mb-2"><strong>Jubilación:</strong> ${formatISOToSpanish(profile.fecha_jubilacion) || "No registrada"}</div>` : ""}
             ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong>    ${formatISOToSpanish(profile.fecha_pension)    || "No registrada"}</div>` : ""}
+          </div>
+          <div class="border-top pt-3 mt-2">
+            <h6 class="font-weight-bold text-secondary text-uppercase mb-2" style="font-size:0.78rem;">
+              <i class="fas fa-folder mr-2"></i>Documentos de Identidad
+            </h6>
+            <div class="d-flex flex-wrap">
+              ${renderQuickDocLinks(profile)}
+            </div>
           </div>
         </div>
       </div>
