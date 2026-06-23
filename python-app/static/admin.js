@@ -1,4 +1,31 @@
 // ==========================================================================
+// TOAST SYSTEM
+// ==========================================================================
+function showToast(message, type) {
+  type = type || "info";
+  const container = document.getElementById("ds-toast-container");
+  if (!container) return;
+
+  const colors = {
+    success: { bg: "#d4edda", color: "#155724", border: "#c3e6cb", icon: "fas fa-check-circle" },
+    error:   { bg: "#f8d7da", color: "#721c24", border: "#f5c6cb", icon: "fas fa-times-circle" },
+    warning: { bg: "#fff3cd", color: "#856404", border: "#ffeeba", icon: "fas fa-exclamation-triangle" },
+    info:    { bg: "#d1ecf1", color: "#0c5460", border: "#bee5eb", icon: "fas fa-info-circle" },
+  };
+  const cfg = colors[type] || colors.info;
+
+  const toast = document.createElement("div");
+  toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:6px;padding:10px 14px;margin-bottom:8px;min-width:260px;display:flex;align-items:center;box-shadow:0 3px 10px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s;`;
+  toast.innerHTML = `<i class="${cfg.icon}" style="margin-right:8px;font-size:1rem;"></i><span>${message}</span>`;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// ==========================================================================
 // PANEL DE CONTROL ADMINISTRATIVO
 // ==========================================================================
 function loadAdminTab(adminTabId) {
@@ -154,13 +181,13 @@ function renderDynamicSubmitFields() {
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Tesauro Primario (Tipología) *</label>
+          <label class="font-weight-bold text-muted">Tipo de Documento *</label>
           <select id="reg-doc-type-${suf}" class="form-control" required>
             ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe","Plano Arquitectónico","Acta de Sesión","Resolución","Reglamento"]).map(t => `<option value="${t}">${t}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Tesauro Secundario (Clasificación) *</label>
+          <label class="font-weight-bold text-muted">Clasificación *</label>
           <select id="reg-secundario-${suf}" class="form-control" required>
             <option value="Parte I">Parte I</option>
             <option value="Parte II">Parte II</option>
@@ -174,8 +201,8 @@ function renderDynamicSubmitFields() {
         </div>
       </div>
       <div class="form-group mt-2">
-        <label class="font-weight-bold text-muted">Descriptores Libres (Palabras Clave separadas por coma) *</label>
-        <input type="text" id="reg-descriptores-${suf}" class="form-control" placeholder="Ej: Ordenamiento territorial interno, Planificación ambiental universitaria, inventario vegetal" required>
+        <label class="font-weight-bold text-muted">Palabras Clave (separadas por coma) *</label>
+        <input type="text" id="reg-descriptores-${suf}" class="form-control" placeholder="Ej: Planificación académica, Gestión institucional" required>
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">Resumen Descriptivo (Abstract)</label>
@@ -350,12 +377,16 @@ async function handleNewSubmission(e) {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error();
-    alert("¡Expediente indexado y guardado con éxito!");
+    showToast("Ingreso guardado con éxito.", "success");
+    const form = document.getElementById(`admin-submit-form-${suf}`);
+    if (form) form.reset();
+    renderDynamicSubmitFields();
+    loadRecentSubmissions();
     loadDynamicChoices();
     if (isArchivo) triggerArchivoSearch(); else triggerRrhhSearch();
     loadAdminTab("stats");
   } catch {
-    alert("Error al intentar registrar el nuevo folio.");
+    showToast("Error al intentar registrar el nuevo folio.", "error");
   }
 }
 
@@ -436,7 +467,11 @@ function renderMonitorTable() {
         <td>${formatISOToSpanish(f.fecha)}</td>
         <td><span class="ds-badge">${f.doc_type}</span></td>
         <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
-        <td><button class="btn btn-sm btn-outline-secondary" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button></td>
+        <td>
+          <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditDocModal(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},'${(f.titulo||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+        </td>
       </tr>
     `).join("");
   } else {
@@ -450,7 +485,11 @@ function renderMonitorTable() {
           <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado}</span></td>
           <td><span class="badge badge-secondary" style="padding:3px 6px;">${f.doc_type}</span></td>
           <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
-          <td><button class="btn btn-sm btn-outline-secondary" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver"><i class="fas fa-eye"></i></button></td>
+          <td>
+            <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver Expediente"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar"><i class="fas fa-edit"></i></button>
+            <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteEmpleado(${f.empleado_id},'${(f.empleado||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+          </td>
         </tr>
       `;
     }).join("");
@@ -473,9 +512,154 @@ function openAdminDocById(id) {
   });
 }
 
+// --- EDITAR / ELIMINAR DOCUMENTO (ARCHIVO) ---
+function openEditDocModal(id) {
+  const rec = state.adminTable.results.find(r => r.id == id);
+  if (!rec) return;
+
+  document.getElementById("edit-doc-id").value        = rec.id || "";
+  document.getElementById("edit-doc-titulo").value    = rec.titulo || "";
+  document.getElementById("edit-doc-autor").value     = rec.autor || "";
+  document.getElementById("edit-doc-fecha").value     = rec.fecha || "";
+  document.getElementById("edit-doc-secundario").value = rec.tesauro_secundario || "";
+  document.getElementById("edit-doc-resumen").value   = rec.resumen || "";
+  document.getElementById("edit-doc-ubicacion").value = rec.ubicacion || "";
+  document.getElementById("edit-doc-palabras").value  = "";
+
+  // Poblar select de tipos
+  const sel = document.getElementById("edit-doc-type");
+  if (sel) {
+    const types = state.choices?.archivo?.doc_types || [];
+    sel.innerHTML = types.map(t => `<option value="${t}"${t === rec.doc_type ? " selected" : ""}>${t}</option>`).join("");
+    if (!types.includes(rec.doc_type) && rec.doc_type) {
+      sel.innerHTML = `<option value="${rec.doc_type}" selected>${rec.doc_type}</option>` + sel.innerHTML;
+    }
+  }
+
+  $("#editArchivoModal").modal("show");
+}
+
+async function handleSaveEditDoc() {
+  const id = document.getElementById("edit-doc-id")?.value;
+  if (!id) return;
+
+  const payload = {
+    modulo:             state.user.modulo,
+    id:                 parseInt(id),
+    titulo:             document.getElementById("edit-doc-titulo")?.value || null,
+    autor:              document.getElementById("edit-doc-autor")?.value || null,
+    fecha:              document.getElementById("edit-doc-fecha")?.value || null,
+    doc_type:           document.getElementById("edit-doc-type")?.value || null,
+    tesauro_secundario: document.getElementById("edit-doc-secundario")?.value ?? null,
+    palabras_clave:     document.getElementById("edit-doc-palabras")?.value || null,
+    resumen:            document.getElementById("edit-doc-resumen")?.value || null,
+    ubicacion:          document.getElementById("edit-doc-ubicacion")?.value || null,
+    usuario:            state.user.username,
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error();
+    $("#editArchivoModal").modal("hide");
+    showToast("Documento actualizado.", "success");
+    loadMonitorTable();
+  } catch {
+    showToast("Error al actualizar el documento.", "error");
+  }
+}
+
+async function handleDeleteDoc(id, nombre) {
+  if (!confirm(`¿Eliminar el documento "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}&usuario=${encodeURIComponent(state.user.username)}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error();
+    showToast("Documento eliminado.", "success");
+    state.adminTable.page = 1;
+    loadMonitorTable();
+  } catch {
+    showToast("Error al eliminar el documento.", "error");
+  }
+}
+
+// --- EDITAR / ELIMINAR EMPLEADO (RRHH) ---
+function openEditEmpleadoModal(empId) {
+  const rec = state.adminTable.results.find(r => r.empleado_id == empId);
+  if (!rec) return;
+
+  document.getElementById("edit-emp-id").value          = rec.empleado_id || "";
+  // Split nombre completo into nombres/apellidos (best-effort)
+  const partes = (rec.empleado || "").split(" ");
+  document.getElementById("edit-emp-nombres").value     = partes.slice(0, Math.ceil(partes.length / 2)).join(" ");
+  document.getElementById("edit-emp-apellidos").value   = partes.slice(Math.ceil(partes.length / 2)).join(" ");
+  document.getElementById("edit-emp-cargo").value       = rec.cargo || "";
+  document.getElementById("edit-emp-departamento").value = rec.departamento || "";
+  const estadoSel = document.getElementById("edit-emp-estado");
+  if (estadoSel) {
+    Array.from(estadoSel.options).forEach(o => { o.selected = o.value === rec.estado; });
+  }
+  document.getElementById("edit-emp-rif").value         = "";
+  document.getElementById("edit-emp-jubilacion").value  = "";
+  document.getElementById("edit-emp-pension").value     = "";
+  document.getElementById("edit-emp-foto").value        = "";
+
+  $("#editEmpleadoModal").modal("show");
+}
+
+async function handleSaveEditEmpleado() {
+  const empId = document.getElementById("edit-emp-id")?.value;
+  if (!empId) return;
+
+  const payload = {
+    nombres:         document.getElementById("edit-emp-nombres")?.value || null,
+    apellidos:       document.getElementById("edit-emp-apellidos")?.value || null,
+    cargo:           document.getElementById("edit-emp-cargo")?.value || null,
+    departamento:    document.getElementById("edit-emp-departamento")?.value || null,
+    estado:          document.getElementById("edit-emp-estado")?.value || null,
+    rif:             document.getElementById("edit-emp-rif")?.value || null,
+    fecha_jubilacion: document.getElementById("edit-emp-jubilacion")?.value || null,
+    fecha_pension:   document.getElementById("edit-emp-pension")?.value || null,
+    foto_url:        document.getElementById("edit-emp-foto")?.value || null,
+    usuario:         state.user.username,
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error();
+    $("#editEmpleadoModal").modal("hide");
+    showToast("Empleado actualizado.", "success");
+    loadMonitorTable();
+  } catch {
+    showToast("Error al actualizar el empleado.", "error");
+  }
+}
+
+async function handleDeleteEmpleado(empId, nombre) {
+  if (!confirm(`¿Eliminar el expediente de "${nombre}"?\nSe eliminarán todos sus documentos. Esta acción no se puede deshacer.`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}?usuario=${encodeURIComponent(state.user.username)}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error();
+    showToast("Expediente eliminado.", "success");
+    loadMonitorTable();
+  } catch {
+    showToast("Error al eliminar el expediente.", "error");
+  }
+}
+
 function exportAdminCSV() {
   const records = state.adminTable.results;
-  if (!records || records.length === 0) { alert("No hay datos para exportar."); return; }
+  if (!records || records.length === 0) { showToast("No hay datos para exportar.", "warning"); return; }
   const isArch = isArchivoModule();
 
   let headers, rows;
@@ -606,7 +790,7 @@ async function loadKeywordsSection() {
 async function handleAddKeyword() {
   const input  = document.getElementById("new_keyword_input");
   const nombre = (input?.value || "").trim();
-  if (!nombre) { alert("Ingrese una palabra clave."); return; }
+  if (!nombre) { showToast("Ingrese una palabra clave.", "warning"); return; }
   try {
     const res = await fetch(`${API_BASE}/api/admin/keywords`, {
       method: "POST",
@@ -620,7 +804,7 @@ async function handleAddKeyword() {
     if (input) input.value = "";
     loadKeywordsSection();
   } catch (err) {
-    alert(err.message || "Error al agregar palabra clave.");
+    showToast(err.message || "Error al agregar palabra clave.", "error");
   }
 }
 
@@ -638,7 +822,7 @@ async function handleEditKeyword(id) {
     if (!res.ok) throw new Error();
     loadKeywordsSection();
   } catch {
-    alert("Error al renombrar la palabra clave.");
+    showToast("Error al renombrar la palabra clave.", "error");
   }
 }
 
@@ -649,7 +833,7 @@ async function handleDeleteKeyword(id, nombre) {
     if (!res.ok) throw new Error();
     loadKeywordsSection();
   } catch {
-    alert("Error al eliminar la palabra clave.");
+    showToast("Error al eliminar la palabra clave.", "error");
   }
 }
 
@@ -659,7 +843,7 @@ async function handleAddCategory() {
   const desc  = document.getElementById(`new_tax_desc-${suf}`)?.value.trim() || "";
   const scope = isArchivoModule() ? "Archivo" : "RRHH";
   const parte = document.getElementById(`new_tax_parte-${suf}`)?.value || "";
-  if (!name) { alert("Por favor, ingrese el nombre de la tipología."); return; }
+  if (!name) { showToast("Por favor, ingrese el nombre de la tipología.", "warning"); return; }
   try {
     const res = await fetch(`${API_BASE}/api/admin/add_category`, {
       method: "POST",
@@ -667,13 +851,13 @@ async function handleAddCategory() {
       body: JSON.stringify({ name, desc, scope, parte, usuario: state.user.username }),
     });
     if (!res.ok) throw new Error();
-    alert("¡Nueva tipología guardada con éxito!");
+    showToast("¡Nueva tipología guardada con éxito!", "success");
     if (document.getElementById(`new_tax_name-${suf}`)) document.getElementById(`new_tax_name-${suf}`).value = "";
     if (document.getElementById(`new_tax_desc-${suf}`)) document.getElementById(`new_tax_desc-${suf}`).value = "";
     await loadDynamicChoices();
     loadAdminTab("categories");
   } catch {
-    alert("Error al guardar tipología.");
+    showToast("Error al guardar tipología.", "error");
   }
 }
 
@@ -687,7 +871,7 @@ async function loadUsersTab() {
     const users = await res.json();
     container.innerHTML = `
       <table class="table table-striped table-bordered" style="font-size:0.85rem;">
-        <thead><tr class="bg-light"><th>Usuario</th><th>Contraseña</th><th>Módulo</th><th>Rol</th><th>Estado</th></tr></thead>
+        <thead><tr class="bg-light"><th>Usuario</th><th>Contraseña</th><th>Módulo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
           ${users.map(u => `
             <tr>
@@ -696,6 +880,11 @@ async function loadUsersTab() {
               <td>${u.modulo}</td>
               <td><span class="badge ${u.rol === "Admin" ? "badge-danger" : "badge-primary"}">${u.rol}</span></td>
               <td><span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i> Autorizado</span></td>
+              <td>
+                <button class="btn btn-xs btn-outline-secondary" onclick="handleChangePassword(${u.id},'${u.usuario}')">
+                  <i class="fas fa-key"></i> Cambiar clave
+                </button>
+              </td>
             </tr>
           `).join("")}
         </tbody>
@@ -706,13 +895,32 @@ async function loadUsersTab() {
   }
 }
 
+async function handleChangePassword(uid, username) {
+  const newPass = prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
+  if (!newPass || newPass.trim().length < 6) {
+    if (newPass !== null) showToast("La contraseña debe tener al menos 6 caracteres.", "warning");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/${uid}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_password: newPass.trim(), requester: state.user.username }),
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Contraseña de "${username}" actualizada.`, "success");
+  } catch {
+    showToast("Error al cambiar la contraseña.", "error");
+  }
+}
+
 async function handleAddUser() {
   const suf      = adminSuffixFromTab();
   const username = document.getElementById(`new_user_name-${suf}`)?.value.trim() || "";
   const pass     = document.getElementById(`new_user_pass-${suf}`)?.value.trim()  || "";
   const modulo   = document.getElementById(`new_user_modulo-${suf}`)?.value       || "";
   const rol      = document.getElementById(`new_user_rol-${suf}`)?.value          || "";
-  if (!username || !pass) { alert("Por favor, ingrese todos los datos requeridos."); return; }
+  if (!username || !pass) { showToast("Por favor, ingrese todos los datos requeridos.", "warning"); return; }
   try {
     const res = await fetch(`${API_BASE}/api/admin/users/create`, {
       method: "POST",
@@ -723,11 +931,11 @@ async function handleAddUser() {
       const err = await res.json();
       throw new Error(err.detail || "Error");
     }
-    alert(`¡Usuario ${username} registrado con éxito!`);
+    showToast(`¡Usuario ${username} registrado con éxito!`, "success");
     document.getElementById(`new_user_name-${suf}`) && (document.getElementById(`new_user_name-${suf}`).value = "");
     document.getElementById(`new_user_pass-${suf}`) && (document.getElementById(`new_user_pass-${suf}`).value = "");
     loadUsersTab();
   } catch (err) {
-    alert(err.message || "Error al registrar el nuevo usuario.");
+    showToast(err.message || "Error al registrar el nuevo usuario.", "error");
   }
 }

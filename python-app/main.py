@@ -106,6 +106,22 @@ def run_migrations():
                 END IF;
             END $$
         """),
+        ("is_active en usuarios_sistema",
+         "ALTER TABLE public.usuarios_sistema ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE"),
+        ("created_at en usuarios_sistema",
+         "ALTER TABLE public.usuarios_sistema ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW()"),
+        ("last_login en usuarios_sistema",
+         "ALTER TABLE public.usuarios_sistema ADD COLUMN IF NOT EXISTS last_login TIMESTAMP"),
+        ("updated_at en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP"),
+        ("updated_by en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS updated_by INTEGER"),
+        ("updated_at en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP"),
+        ("updated_by en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS updated_by INTEGER"),
+        ("idx_tipo_doc_nombre_lower",
+         "CREATE INDEX IF NOT EXISTS idx_tipo_doc_nombre_lower ON public.tipo_documento (LOWER(nombre))"),
     ]
     for label, sql in migrations:
         try:
