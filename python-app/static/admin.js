@@ -189,11 +189,15 @@ function renderDynamicSubmitFields() {
   } else {
     container.innerHTML = `
       <div class="row">
-        <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">Nombre Completo del Personal *</label>
-          <input type="text" id="reg-empleado-${suf}" class="form-control" placeholder="Ej: Susana Pérez" required>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Nombres *</label>
+          <input type="text" id="reg-nombres-${suf}" class="form-control" placeholder="Ej: Susana María" required>
         </div>
-        <div class="col-md-6 form-group">
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Apellidos *</label>
+          <input type="text" id="reg-apellidos-${suf}" class="form-control" placeholder="Ej: Pérez González" required>
+        </div>
+        <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Cédula de Identidad *</label>
           <input type="text" id="reg-cedula-${suf}" class="form-control" placeholder="Ej: V-12345678" required>
         </div>
@@ -315,7 +319,11 @@ async function handleNewSubmission(e) {
     payload.tesauro_secundario  = val(`reg-secundario-${suf}`);
     payload.descriptores_libres = val(`reg-descriptores-${suf}`);
   } else {
-    payload.empleado              = val(`reg-empleado-${suf}`);
+    const nombres   = val(`reg-nombres-${suf}`).trim();
+    const apellidos = val(`reg-apellidos-${suf}`).trim();
+    payload.nombres               = nombres;
+    payload.apellidos             = apellidos;
+    payload.empleado              = `${nombres} ${apellidos}`.trim();
     payload.cedula                = val(`reg-cedula-${suf}`);
     payload.personas_relacionadas = val(`reg-personas-${suf}`);
     payload.departamento          = val(`reg-depto-${suf}`);
@@ -404,7 +412,7 @@ function renderMonitorTable() {
         <td>${formatISOToSpanish(f.fecha)}</td>
         <td><span class="ds-badge">${f.doc_type}</span></td>
         <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
-        <td><button class="btn btn-sm btn-outline-secondary" onclick="openArchivoModal('${f.__idx}')" title="Ver"><i class="fas fa-eye"></i></button></td>
+        <td><button class="btn btn-sm btn-outline-secondary" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button></td>
       </tr>
     `).join("");
   } else {
@@ -423,6 +431,46 @@ function renderMonitorTable() {
       `;
     }).join("");
   }
+}
+
+function openAdminDocById(id) {
+  const rec = state.adminTable.results.find(r => r.id == id);
+  if (!rec) return;
+  openDocModalWithRecord({
+    titulo:           rec.titulo          || "",
+    autor:            rec.autor           || "",
+    fecha:            rec.fecha           || "",
+    doc_type:         rec.doc_type        || "",
+    ubicacion:        rec.ubicacion       || "",
+    resumen:          rec.resumen         || "",
+    file_url:         rec.file_url        || "",
+    tesauro_secundario: rec.tesauro_secundario || "",
+    tesauro_badges:   [rec.doc_type, rec.tesauro_secundario].filter(Boolean),
+  });
+}
+
+function exportAdminCSV() {
+  const records = state.adminTable.results;
+  if (!records || records.length === 0) { alert("No hay datos para exportar."); return; }
+  const isArch = isArchivoModule();
+
+  let headers, rows;
+  if (isArch) {
+    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Ubicación", "Resumen"];
+    rows = records.map(r => [r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.ubicacion, r.resumen || ""].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
+  } else {
+    headers = ["ID", "Empleado", "Cédula", "Departamento", "Estado", "Cargo", "Fecha Ingreso", "Tipología", "Ubicación"];
+    rows = records.map(r => [r.empleado_id, r.empleado, r.cedula, r.departamento, r.estado, r.cargo, r.fecha_ingreso, r.doc_type, r.ubicacion].map(v => `"${String(v||"").replace(/"/g, '""')}"`).join(","));
+  }
+
+  const csv  = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url;
+  a.download = `admin_${isArch ? "archivo" : "rrhh"}_pag${state.adminTable.page}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // --- CATEGORÍAS ---

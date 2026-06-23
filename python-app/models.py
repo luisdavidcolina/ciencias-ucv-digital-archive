@@ -53,6 +53,8 @@ class DocumentSubmitRequest(BaseModel):
     autor: Optional[str] = ""
     resumen: Optional[str] = ""
     empleado: Optional[str] = ""
+    nombres: Optional[str] = ""
+    apellidos: Optional[str] = ""
     cedula: Optional[str] = ""
     personas_relacionadas: Optional[str] = ""
     departamento: Optional[str] = ""

@@ -224,8 +224,8 @@ def admin_submit(req: DocumentSubmitRequest):
             """,
             (
                 cedula,
-                req.empleado or cedula,  # nombres (temporalmente usando empleado)
-                "",                        # apellidos (vacío por ahora)
+                (req.nombres or req.empleado or cedula).strip(),
+                (req.apellidos or "").strip(),
                 req.rif or None,
                 cargo_id, dept_id, estado_id, fecha_doc,
                 req.fecha_jubilacion or None, req.fecha_pension or None, req.foto_url or None,
@@ -323,7 +323,10 @@ def list_all_files(
                 COALESCE(da.autor, '') AS autor,
                 TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
                 COALESCE(da.tesauro_primario, '') AS doc_type,
-                COALESCE(da.ubicacion, '') AS ubicacion
+                COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
+                COALESCE(da.ubicacion, '') AS ubicacion,
+                COALESCE(da.abstract, '') AS resumen,
+                COALESCE(da.file_url, '') AS file_url
             FROM public.datos_archivo da
             {where}
             ORDER BY da.fecha_documento DESC NULLS LAST

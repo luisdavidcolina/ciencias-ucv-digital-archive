@@ -113,7 +113,10 @@ function renderArchivoList() {
 function openArchivoModal(idxReal) {
   const doc = state.archivo.results.find(d => d.__idx == idxReal);
   if (!doc) return;
+  openDocModalWithRecord(doc);
+}
 
+function openDocModalWithRecord(doc) {
   const iconData = getDocumentIcon(doc.doc_type);
   document.getElementById("modal-doc-title").innerText       = doc.titulo;
   document.getElementById("modal-doc-thumb-icon").className  = iconData.icon;
@@ -123,6 +126,7 @@ function openArchivoModal(idxReal) {
   const isActa   = /^acta|^resoluc/i.test(doc.doc_type);
   const isPlano  = /plano/i.test(doc.doc_type);
   const anio     = (doc.fecha || "").substring(0, 4);
+  const badges   = doc.tesauro_badges || [doc.doc_type, doc.tesauro_secundario].filter(Boolean);
 
   if (isPlano) {
     document.getElementById("modal-doc-meta-container").innerHTML = `
@@ -144,7 +148,7 @@ function openArchivoModal(idxReal) {
       <div class="ds-doc-meta-row"><span class="k">${dateLabel}</span><span class="v">${dateValue}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${doc.tesauro_badges.join("; ")}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${badges.join("; ")}</span></div>
     `;
   }
   document.getElementById("modal-doc-abstract").innerText =

@@ -546,7 +546,7 @@ function setupEventListeners() {
     document.getElementById(`admin_search-${suf}`)?.addEventListener("input",  () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_type-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`btn_refresh_table-${suf}`)?.addEventListener("click",  loadMonitorTable);
-    document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click",     () => alert("Exportando reporte CSV...\nGenerado con éxito."));
+    document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click", exportAdminCSV);
     document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; loadMonitorTable(); } });
     document.getElementById(`admin_next-${suf}`)?.addEventListener("click", () => { const totalPages = Math.ceil((state.adminTable.total || 0) / (state.adminTable.perPage || 25)); if (state.adminTable.page < totalPages) { state.adminTable.page++; loadMonitorTable(); } });
     document.getElementById(`add_tax_btn-${suf}`)?.addEventListener("click",  handleAddCategory);
