@@ -100,3 +100,35 @@ class UserCreateRequest(BaseModel):
     modulo: str
     rol: str
     creator: str
+
+
+class DocumentUpdateRequest(BaseModel):
+    modulo: str
+    id: int
+    titulo: Optional[str] = None
+    autor: Optional[str] = None
+    resumen: Optional[str] = None
+    doc_type: Optional[str] = None
+    fecha: Optional[str] = None
+    ubicacion: Optional[str] = None
+    palabras_clave: Optional[str] = None  # comma-separated
+    tesauro_secundario: Optional[str] = None
+    usuario: str
+
+
+class EmpleadoUpdateRequest(BaseModel):
+    nombres: Optional[str] = None
+    apellidos: Optional[str] = None
+    cargo: Optional[str] = None
+    departamento: Optional[str] = None
+    estado: Optional[str] = None
+    fecha_jubilacion: Optional[str] = None
+    fecha_pension: Optional[str] = None
+    foto_url: Optional[str] = None
+    rif: Optional[str] = None
+    usuario: str
+
+
+class PasswordChangeRequest(BaseModel):
+    new_password: str
+    requester: str

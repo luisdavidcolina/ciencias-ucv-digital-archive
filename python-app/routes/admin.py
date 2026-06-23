@@ -13,6 +13,9 @@ from models import (
     CategoryCreateRequest,
     KeywordRequest,
     UserCreateRequest,
+    DocumentUpdateRequest,
+    EmpleadoUpdateRequest,
+    PasswordChangeRequest,
 )
 from utils import generate_unique_slug
 from .archivo import fetch_archivo_dataframe
@@ -540,4 +543,197 @@ def create_user(req: UserCreateRequest):
         commit=True,
     )
     log_event(req.creator, "Create User", req.modulo, f"Nuevo: {req.usuario} ({req.rol})")
+    return {"success": True}
+
+
+# =============================================================================
+# EDICIÓN Y ELIMINACIÓN DE DOCUMENTOS
+# =============================================================================
+
+@router.put("/documento/{doc_id}")
+def update_documento(doc_id: int, req: DocumentUpdateRequest):
+    updated_by = _resolve_user_id(req.usuario)
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    if req.modulo == "Archivo":
+        set_clauses, params = [], []
+
+        if req.titulo is not None:
+            set_clauses.append("titulo = %s"); params.append(req.titulo)
+        if req.autor is not None:
+            set_clauses.append("autor = %s"); params.append(req.autor)
+        if req.resumen is not None:
+            set_clauses.append("abstract = %s"); params.append(req.resumen)
+        if req.fecha is not None:
+            set_clauses.append("fecha_documento = %s"); params.append(req.fecha)
+        if req.ubicacion is not None:
+            set_clauses.append("ubicacion = %s"); params.append(req.ubicacion)
+        if req.tesauro_secundario is not None:
+            set_clauses.append("tesauro_secundario = %s"); params.append(req.tesauro_secundario)
+
+        if req.doc_type is not None:
+            tipo_id = _resolve_or_create_tipo_documento(req.doc_type, cat_slug="archivo")
+            set_clauses.append("id_tipo_documento = %s"); params.append(tipo_id)
+            set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
+
+        set_clauses.append("updated_at = %s"); params.append(updated_at)
+        set_clauses.append("updated_by = %s"); params.append(updated_by)
+
+        if set_clauses:
+            params.append(doc_id)
+            db_query(
+                f"UPDATE public.datos_archivo SET {', '.join(set_clauses)} WHERE id_archivo = %s",
+                params, fetch="none", commit=True,
+            )
+
+        if req.palabras_clave is not None:
+            db_query(
+                "DELETE FROM public.archivo_descriptores WHERE id_archivo = %s",
+                (doc_id,), fetch="none", commit=True,
+            )
+            raw_descs = req.palabras_clave.replace(";", ",").split(",")
+            descriptores = [d.strip() for d in raw_descs if d.strip()]
+            for desc in descriptores:
+                desc_row = db_query(
+                    "INSERT INTO public.descriptores_libres (nombre) VALUES (%s) "
+                    "ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre RETURNING id_descriptor",
+                    (desc,), fetch="one", commit=True,
+                )
+                db_query(
+                    "INSERT INTO public.archivo_descriptores (id_archivo, id_descriptor) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                    (doc_id, desc_row["id_descriptor"]), fetch="none", commit=True,
+                )
+
+        invalidate_choices_cache()
+        log_event(req.usuario, "Update Document", "Archivo", f"ID: {doc_id}")
+        return {"success": True}
+
+    else:  # RRHH
+        set_clauses, params = [], []
+
+        if req.titulo is not None:
+            set_clauses.append("titulo = %s"); params.append(req.titulo)
+        if req.autor is not None:
+            set_clauses.append("autor = %s"); params.append(req.autor)
+        if req.resumen is not None:
+            set_clauses.append("abstract = %s"); params.append(req.resumen)
+        if req.fecha is not None:
+            set_clauses.append("fecha_documento = %s"); params.append(req.fecha)
+        if req.ubicacion is not None:
+            set_clauses.append("ubicacion = %s"); params.append(req.ubicacion)
+        if req.tesauro_secundario is not None:
+            set_clauses.append("tesauro_secundario = %s"); params.append(req.tesauro_secundario)
+        if req.doc_type is not None:
+            set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
+
+        set_clauses.append("updated_at = %s"); params.append(updated_at)
+        set_clauses.append("updated_by = %s"); params.append(updated_by)
+
+        if set_clauses:
+            params.append(doc_id)
+            db_query(
+                f"UPDATE public.datos_rrhh SET {', '.join(set_clauses)} WHERE id_rrhh = %s",
+                params, fetch="none", commit=True,
+            )
+
+        invalidate_choices_cache()
+        log_event(req.usuario, "Update Document", "RRHH", f"ID: {doc_id}")
+        return {"success": True}
+
+
+@router.delete("/documento/{doc_id}")
+def delete_documento(doc_id: int, modulo: str, usuario: str):
+    if modulo == "Archivo":
+        db_query(
+            "DELETE FROM public.archivo_descriptores WHERE id_archivo = %s",
+            (doc_id,), fetch="none", commit=True,
+        )
+        db_query(
+            "DELETE FROM public.datos_archivo WHERE id_archivo = %s",
+            (doc_id,), fetch="none", commit=True,
+        )
+    else:
+        db_query(
+            "DELETE FROM public.rrhh_descriptores WHERE id_rrhh = %s",
+            (doc_id,), fetch="none", commit=True,
+        )
+        db_query(
+            "DELETE FROM public.datos_rrhh WHERE id_rrhh = %s",
+            (doc_id,), fetch="none", commit=True,
+        )
+
+    invalidate_choices_cache()
+    log_event(usuario, "Delete Document", modulo, f"ID: {doc_id}")
+    return {"success": True}
+
+
+@router.put("/empleado/{emp_id}")
+def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
+    set_clauses, params = [], []
+
+    if req.nombres is not None:
+        set_clauses.append("nombres = %s"); params.append(req.nombres)
+    if req.apellidos is not None:
+        set_clauses.append("apellidos = %s"); params.append(req.apellidos)
+    if req.rif is not None:
+        set_clauses.append("rif = %s"); params.append(req.rif)
+    if req.foto_url is not None:
+        set_clauses.append("foto_url = %s"); params.append(req.foto_url)
+    if req.fecha_jubilacion is not None:
+        set_clauses.append("fecha_jubilacion = %s")
+        params.append(req.fecha_jubilacion if req.fecha_jubilacion else None)
+    if req.fecha_pension is not None:
+        set_clauses.append("fecha_pension = %s")
+        params.append(req.fecha_pension if req.fecha_pension else None)
+
+    if req.cargo is not None:
+        cargo_id = _resolve_or_create_lookup("cargos", req.cargo)
+        set_clauses.append("cargo_id = %s"); params.append(cargo_id)
+    if req.departamento is not None:
+        dept_id = _resolve_or_create_lookup("departamentos", req.departamento)
+        set_clauses.append("departamento_id = %s"); params.append(dept_id)
+    if req.estado is not None:
+        estado_id = _resolve_or_create_lookup("estados_laborales", req.estado)
+        set_clauses.append("estado_id = %s"); params.append(estado_id)
+
+    if set_clauses:
+        params.append(emp_id)
+        db_query(
+            f"UPDATE public.empleados SET {', '.join(set_clauses)} WHERE id = %s",
+            params, fetch="none", commit=True,
+        )
+
+    log_event(req.usuario, "Update Empleado", "RRHH", f"ID: {emp_id}")
+    return {"success": True}
+
+
+@router.delete("/empleado/{emp_id}")
+def delete_empleado(emp_id: int, usuario: str):
+    db_query(
+        """DELETE FROM public.rrhh_descriptores
+           WHERE id_rrhh IN (SELECT id_rrhh FROM public.datos_rrhh WHERE empleado_id = %s)""",
+        (emp_id,), fetch="none", commit=True,
+    )
+    db_query(
+        "DELETE FROM public.datos_rrhh WHERE empleado_id = %s",
+        (emp_id,), fetch="none", commit=True,
+    )
+    db_query(
+        "DELETE FROM public.empleados WHERE id = %s",
+        (emp_id,), fetch="none", commit=True,
+    )
+    log_event(usuario, "Delete Empleado", "RRHH", f"ID: {emp_id}")
+    return {"success": True}
+
+
+@router.put("/users/{uid}/password")
+def change_password(uid: int, req: PasswordChangeRequest):
+    if len(req.new_password.strip()) < 6:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    hashed_pw = hash_password(req.new_password.strip())
+    db_query(
+        "UPDATE public.usuarios_sistema SET contrasena = %s WHERE id = %s",
+        (hashed_pw, uid), fetch="none", commit=True,
+    )
+    log_event(req.requester, "Change Password", "Admin", f"Usuario ID: {uid}")
     return {"success": True}
