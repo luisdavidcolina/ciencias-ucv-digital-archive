@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter
 import pandas as pd
 
-from database import split_terms
+from database import db_query, split_terms
 from .archivo import fetch_archivo_dataframe
 from .rrhh import fetch_rrhh_dataframe
 
@@ -63,19 +63,45 @@ def get_choices():
     min_rh = rh_dates.min().strftime("%Y-%m-%d") if not rh_dates.empty else "2000-01-01"
     max_rh = rh_dates.max().strftime("%Y-%m-%d") if not rh_dates.empty else datetime.now().strftime("%Y-%m-%d")
 
+    # Tipos de documento para RRHH agrupados por Parte (I, II, III, IV)
+    rrhh_tipos_rows = db_query(
+        """SELECT td.nombre_corto, c.nombre AS parte
+           FROM public.tipo_documento td
+           JOIN public.categoria c ON td.id_categoria = c.id
+           WHERE c.slug IN ('parte-i','parte-ii','parte-iii','parte-iv')
+           ORDER BY c.id, td.nombre_corto""",
+        fetch="all",
+    ) or []
+    rrhh_tipos_por_parte: dict = {}
+    for r in rrhh_tipos_rows:
+        p = r["parte"]
+        rrhh_tipos_por_parte.setdefault(p, []).append(r["nombre_corto"])
+
+    # Tipos de documento para Archivo (categoría 'archivo')
+    arch_tipo_rows = db_query(
+        """SELECT td.nombre_corto
+           FROM public.tipo_documento td
+           JOIN public.categoria c ON td.id_categoria = c.id
+           WHERE c.slug = 'archivo'
+           ORDER BY td.nombre_corto""",
+        fetch="all",
+    ) or []
+    arch_tipos_catalog = [r["nombre_corto"] for r in arch_tipo_rows] or arch_doc_types
+
     result = {
         "archivo": {
-            "doc_types": arch_doc_types,
+            "doc_types": arch_tipos_catalog,
             "tesauro":   arch_tesauro,
             "min_date":  min_arch,
             "max_date":  max_arch,
         },
         "rrhh": {
-            "doc_types": rh_doc_types,
-            "estados":   rh_estados,
-            "people":    rh_people,
-            "min_date":  min_rh,
-            "max_date":  max_rh,
+            "doc_types":       rh_doc_types,
+            "estados":         rh_estados,
+            "people":          rh_people,
+            "min_date":        min_rh,
+            "max_date":        max_rh,
+            "tipos_por_parte": rrhh_tipos_por_parte,
         },
     }
 

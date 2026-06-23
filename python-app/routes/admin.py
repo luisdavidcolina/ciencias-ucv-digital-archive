@@ -11,6 +11,7 @@ from models import (
     DocumentSubmitRequest,
     StatsRequest,
     CategoryCreateRequest,
+    KeywordRequest,
     UserCreateRequest,
 )
 from utils import generate_unique_slug
@@ -41,7 +42,7 @@ def _resolve_or_create_lookup(table: str, nombre: str, default_name: str = "Por 
     return new_row["id"]
 
 
-def _resolve_or_create_tipo_documento(nombre: str) -> int:
+def _resolve_or_create_tipo_documento(nombre: str, cat_slug: str = None) -> int:
     """Busca o crea un tipo de documento y retorna su id."""
     nombre = (nombre or "").strip()
     if not nombre:
@@ -53,7 +54,13 @@ def _resolve_or_create_tipo_documento(nombre: str) -> int:
     )
     if row:
         return row["id"]
-    cat = db_query("SELECT id FROM public.categoria ORDER BY id LIMIT 1", fetch="one")
+    # Obtener categoría correcta
+    if cat_slug:
+        cat = db_query("SELECT id FROM public.categoria WHERE slug = %s", (cat_slug,), fetch="one")
+    else:
+        cat = None
+    if not cat:
+        cat = db_query("SELECT id FROM public.categoria ORDER BY id LIMIT 1", fetch="one")
     if not cat:
         raise HTTPException(status_code=500, detail="No existen categorías en la BD")
     slug = generate_unique_slug(nombre, "tipo_documento")
@@ -150,17 +157,17 @@ def get_admin_stats(req: StatsRequest):
 def admin_submit(req: DocumentSubmitRequest):
     log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}")
     creado_por = _resolve_user_id(req.usuario)
-    tipo_id    = _resolve_or_create_tipo_documento(req.doc_type)
     fecha_doc  = req.fecha or datetime.now().strftime("%Y-%m-%d")
 
     if req.modulo == "Archivo":
+        tipo_id = _resolve_or_create_tipo_documento(req.doc_type, cat_slug="archivo")
         new_row = db_query(
             """
             INSERT INTO public.datos_archivo
                 (titulo, abstract, autor,
                  fecha_documento, ubicacion, creado_por, tesauro_primario,
-                 tesauro_secundario)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                 tesauro_secundario, id_tipo_documento)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id_archivo
             """,
             (
@@ -168,7 +175,7 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.resumen or "",
                 req.autor or "Anónimo",
                 fecha_doc, req.ubicacion, creado_por, req.doc_type,
-                req.tesauro_secundario or "",
+                req.tesauro_secundario or "", tipo_id,
             ),
             fetch="one",
             commit=True,
@@ -205,6 +212,7 @@ def admin_submit(req: DocumentSubmitRequest):
         return {"success": True, "id": str(new_row["id_archivo"])}
 
     # ── Módulo RRHH ──────────────────────────────────────────────────────────
+    tipo_id = _resolve_or_create_tipo_documento(req.doc_type)
     cedula = (req.cedula or "").strip()
     if not cedula:
         raise HTTPException(status_code=400, detail="Cédula es requerida para RRHH")
@@ -289,6 +297,7 @@ def list_all_files(
     modulo: str,
     search: Optional[str] = "",
     type_filter: Optional[str] = "",
+    person_filter: Optional[str] = "",
     page: int = 1,
     per_page: int = 25,
 ):
@@ -306,6 +315,9 @@ def list_all_files(
         if type_filter:
             conditions.append("da.tesauro_primario = %s")
             params.append(type_filter)
+        if person_filter:
+            conditions.append("unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)")
+            params.append(f"%{person_filter}%")
 
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
@@ -351,6 +363,9 @@ def list_all_files(
         if type_filter:
             conditions.append("COALESCE(td.nombre_corto, td.nombre) = %s")
             params.append(type_filter)
+        if person_filter:
+            conditions.append("unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)")
+            params.append(f"%{person_filter}%")
 
         join = """
             FROM public.empleados e
@@ -404,10 +419,88 @@ def list_all_files(
 @router.post("/add_category")
 def add_category(req: CategoryCreateRequest):
     log_event(req.usuario, "Create Category", req.scope, f"Nueva Tipología: {req.name}")
-    try:
-        _resolve_or_create_tipo_documento(req.name)
-    except Exception as e:
-        logger.error(f"Error creando tipo_documento: {e}")
+    nombre = (req.name or "").strip()
+    if not nombre:
+        raise HTTPException(400, "Nombre vacío")
+
+    # Determinar categoría destino
+    if req.parte:
+        cat_slug = req.parte  # "parte-i", "parte-ii", "archivo", etc.
+    elif req.scope == "Archivo":
+        cat_slug = "archivo"
+    else:
+        cat_slug = "parte-i"  # fallback RRHH
+
+    cat = db_query("SELECT id FROM public.categoria WHERE slug = %s", (cat_slug,), fetch="one")
+    if not cat:
+        cat = db_query("SELECT id FROM public.categoria ORDER BY id LIMIT 1", fetch="one")
+    if not cat:
+        raise HTTPException(500, "No hay categorías en la BD")
+
+    existing = db_query("SELECT id FROM public.tipo_documento WHERE LOWER(nombre) = LOWER(%s)", (nombre,), fetch="one")
+    if existing:
+        return {"success": True, "detail": "Ya existe"}
+
+    slug = generate_unique_slug(nombre, "tipo_documento")
+    db_query(
+        "INSERT INTO public.tipo_documento (nombre, nombre_corto, slug, id_categoria) VALUES (%s, %s, %s, %s)",
+        (nombre, nombre, slug, cat["id"]),
+        fetch="none", commit=True,
+    )
+    invalidate_choices_cache()
+    return {"success": True}
+
+
+@router.get("/keywords")
+def get_keywords():
+    rows = db_query(
+        """SELECT dl.id_descriptor AS id, dl.nombre,
+                  COUNT(DISTINCT ad.id_archivo) AS uso_archivo
+           FROM public.descriptores_libres dl
+           LEFT JOIN public.archivo_descriptores ad ON ad.id_descriptor = dl.id_descriptor
+           GROUP BY dl.id_descriptor, dl.nombre
+           ORDER BY dl.nombre""",
+        fetch="all",
+    ) or []
+    return [dict(r) for r in rows]
+
+
+@router.post("/keywords")
+def create_keyword(req: KeywordRequest):
+    nombre = (req.nombre or "").strip()
+    if not nombre:
+        raise HTTPException(400, "Nombre vacío")
+    existing = db_query(
+        "SELECT id_descriptor FROM public.descriptores_libres WHERE LOWER(nombre) = LOWER(%s)",
+        (nombre,), fetch="one",
+    )
+    if existing:
+        raise HTTPException(400, "Palabra clave ya existe")
+    row = db_query(
+        "INSERT INTO public.descriptores_libres (nombre) VALUES (%s) RETURNING id_descriptor AS id",
+        (nombre,), fetch="one", commit=True,
+    )
+    return {"success": True, "id": row["id"]}
+
+
+@router.put("/keywords/{kid}")
+def update_keyword(kid: int, req: KeywordRequest):
+    nombre = (req.nombre or "").strip()
+    if not nombre:
+        raise HTTPException(400, "Nombre vacío")
+    db_query(
+        "UPDATE public.descriptores_libres SET nombre = %s WHERE id_descriptor = %s",
+        (nombre, kid), fetch="none", commit=True,
+    )
+    return {"success": True}
+
+
+@router.delete("/keywords/{kid}")
+def delete_keyword(kid: int):
+    db_query(
+        "DELETE FROM public.descriptores_libres WHERE id_descriptor = %s",
+        (kid,), fetch="none", commit=True,
+    )
     return {"success": True}
 
 

@@ -87,6 +87,11 @@ class CategoryCreateRequest(BaseModel):
     desc: str
     scope: str
     usuario: str
+    parte: Optional[str] = ""  # slug de categoría: 'parte-i', 'parte-ii', 'archivo', etc.
+
+
+class KeywordRequest(BaseModel):
+    nombre: str
 
 
 class UserCreateRequest(BaseModel):

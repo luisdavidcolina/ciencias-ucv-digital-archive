@@ -22,14 +22,17 @@ def _build_user_response(rows, username: str) -> dict:
         if mod:
             roles[mod] = rol
 
-    # Si el usuario tiene módulo "Global", agregar ambos módulos
+    # Si el usuario tiene módulo "Global", expandir a Archivo + RRHH y quitar "Global"
     if "Global" in modules:
+        global_role = roles.get("Global", "Admin")
+        modules = [m for m in modules if m != "Global"]
         if "Archivo" not in modules:
             modules.append("Archivo")
         if "RRHH" not in modules:
             modules.append("RRHH")
-        roles["Archivo"] = roles.get("Global", "Admin")
-        roles["RRHH"] = roles.get("Global", "Admin")
+        roles["Archivo"] = global_role
+        roles["RRHH"] = global_role
+        roles.pop("Global", None)
 
     primary_mod = modules[0] if modules else "Archivo"
     primary_role = roles.get(primary_mod, "Normal")

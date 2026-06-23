@@ -218,9 +218,17 @@ function renderDynamicSubmitFields() {
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Clasificación de Archivo *</label>
+          <label class="font-weight-bold text-muted">Tipo de Documento *</label>
           <select id="reg-doc-type-${suf}" class="form-control" required>
-            ${(state.choices?.rrhh?.doc_types || ["Hoja de Vida","Contrato"]).map(t => `<option value="${t}">${t}</option>`).join("")}
+            ${(function() {
+              const tiposPP = state.choices?.rrhh?.tipos_por_parte || {};
+              if (Object.keys(tiposPP).length > 0) {
+                return Object.entries(tiposPP).map(([parte, tipos]) =>
+                  `<optgroup label="${parte}">${tipos.map(t => `<option value="${t}">${t}</option>`).join("")}</optgroup>`
+                ).join("");
+              }
+              return (state.choices?.rrhh?.doc_types || ["Hoja de Vida","Contrato"]).map(t => `<option value="${t}">${t}</option>`).join("");
+            })()}
           </select>
         </div>
         <div class="col-md-4 form-group">
@@ -355,13 +363,14 @@ async function handleNewSubmission(e) {
 async function loadMonitorTable() {
   const mod     = state.user.modulo;
   const suf     = adminSuffixFromTab();
-  const q       = document.getElementById(`admin_search-${suf}`)?.value      || "";
-  const type    = document.getElementById(`admin_filter_type-${suf}`)?.value || "";
+  const q       = document.getElementById(`admin_search-${suf}`)?.value         || "";
+  const type    = document.getElementById(`admin_filter_type-${suf}`)?.value    || "";
+  const person  = document.getElementById(`admin_filter_person-${suf}`)?.value  || "";
   const page    = state.adminTable.page    || 1;
   const perPage = state.adminTable.perPage || 25;
 
   try {
-    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&page=${page}&per_page=${perPage}`;
+    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&page=${page}&per_page=${perPage}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error();
     const data = await res.json();
@@ -369,12 +378,27 @@ async function loadMonitorTable() {
     state.adminTable.results = data.records;
     state.adminTable.total   = data.total;
 
+    // Poblar filtro de tipología
     const typeSelector = document.getElementById(`admin_filter_type-${suf}`);
     if (typeSelector && typeSelector.options.length <= 1 && state.choices) {
       const types = isArchivoModule() ? state.choices.archivo.doc_types : state.choices.rrhh.doc_types;
       typeSelector.innerHTML = `<option value="">Filtrar por Tipología...</option>` +
         types.map(t => `<option value="${t}">${t}</option>`).join("");
     }
+
+    // Poblar filtro de persona (solo primera carga)
+    const personSelector = document.getElementById(`admin_filter_person-${suf}`);
+    if (personSelector && personSelector.options.length <= 1) {
+      let people = [];
+      if (isArchivoModule()) {
+        people = [...new Set((data.records || []).map(r => r.autor).filter(Boolean))].sort();
+      } else {
+        people = state.choices?.rrhh?.people || [];
+      }
+      personSelector.innerHTML = `<option value="">Filtrar por Persona...</option>` +
+        people.map(p => `<option value="${p}">${p}</option>`).join("");
+    }
+
     renderMonitorTable();
   } catch (e) {
     console.error("Error al cargar monitor:", e);
@@ -481,38 +505,175 @@ function loadCategoriesTab() {
     if (container) container.innerHTML = `<div class="text-muted p-2">Sin tipologías activas.</div>`;
     return;
   }
-  const types = isArchivoModule() ? state.choices.archivo.doc_types : state.choices.rrhh.doc_types;
-  if (container) container.innerHTML = types.map(t => `
-    <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm border-left" style="border-left:4px solid #ffc107!important;">
-      <div>
-        <h6 class="font-weight-bold text-dark mb-0">${t}</h6>
-        <small class="text-muted">Tipología de alcance: ${state.user.modulo}</small>
-      </div>
-      <span class="badge badge-warning badge-pill">Activa</span>
-    </div>
-  `).join("");
+
+  if (isArchivoModule()) {
+    // Archivo: lista plana de tipos
+    const types = state.choices.archivo.doc_types;
+    if (container) container.innerHTML = types.length
+      ? types.map(t => `
+          <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm" style="border-left:4px solid #ffc107!important;">
+            <h6 class="font-weight-bold text-dark mb-0">${t}</h6>
+            <span class="badge badge-warning badge-pill">Archivo</span>
+          </div>`).join("")
+      : `<div class="text-muted p-2">Sin tipologías registradas.</div>`;
+    loadKeywordsSection();
+  } else {
+    // RRHH: tipos agrupados por Parte
+    const tiposPorParte = state.choices.rrhh?.tipos_por_parte || {};
+    const parteColors   = { "Parte I": "#0056b3", "Parte II": "#28a745", "Parte III": "#e67e22", "Parte IV": "#dc3545" };
+    const parteEntries  = Object.entries(tiposPorParte);
+
+    if (container) {
+      if (parteEntries.length === 0) {
+        const types = state.choices.rrhh.doc_types;
+        container.innerHTML = types.map(t => `
+          <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm" style="border-left:4px solid #6c757d!important;">
+            <h6 class="font-weight-bold text-dark mb-0">${t}</h6>
+            <span class="badge badge-secondary badge-pill">RRHH</span>
+          </div>`).join("");
+      } else {
+        container.innerHTML = parteEntries.map(([parte, tipos]) => {
+          const color = parteColors[parte] || "#6c757d";
+          return `
+            <div class="mb-3">
+              <h6 class="px-2 py-1 rounded text-white font-weight-bold" style="background:${color};font-size:0.82rem;">${parte}</h6>
+              ${tipos.map(t => `
+                <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm py-1" style="border-left:4px solid ${color}!important;">
+                  <span style="font-size:0.82rem;font-weight:600;">${t}</span>
+                  <span class="badge badge-pill text-white" style="background:${color};font-size:0.7rem;">Activa</span>
+                </div>`).join("")}
+            </div>`;
+        }).join("");
+      }
+    }
+  }
+}
+
+async function loadKeywordsSection() {
+  const suf      = adminSuffixFromTab();
+  const catPane  = document.getElementById(`pane-admin-${suf}-categories`);
+  if (!catPane) return;
+
+  let kwSection = document.getElementById("admin-keywords-section");
+  if (!kwSection) {
+    kwSection = document.createElement("div");
+    kwSection.id = "admin-keywords-section";
+    kwSection.className = "mt-4";
+    catPane.appendChild(kwSection);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/keywords`);
+    if (!res.ok) throw new Error();
+    const keywords = await res.json();
+
+    kwSection.innerHTML = `
+      <div class="card card-info">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-key mr-2"></i>Palabras Clave (Descriptores Libres)</h3></div>
+        <div class="card-body p-3">
+          <div class="input-group mb-3" style="max-width:420px;">
+            <input type="text" id="new_keyword_input" class="form-control form-control-sm" placeholder="Ej: Gestión académica">
+            <div class="input-group-append">
+              <button class="btn btn-info btn-sm" onclick="handleAddKeyword()"><i class="fas fa-plus"></i> Agregar</button>
+            </div>
+          </div>
+          <div class="row">
+            ${keywords.length === 0
+              ? `<div class="col-12 text-muted small">Sin palabras clave registradas aún.</div>`
+              : keywords.map(kw => `
+                  <div class="col-md-4 col-sm-6 mb-2" id="kw-item-${kw.id}">
+                    <div class="d-flex align-items-center border rounded px-2 py-1 bg-white shadow-sm">
+                      <i class="fas fa-tag text-info mr-2" style="font-size:0.78rem;"></i>
+                      <span class="flex-grow-1 font-weight-600" style="font-size:0.82rem;" id="kw-label-${kw.id}">${kw.nombre}</span>
+                      <small class="text-muted mr-1">(${kw.uso_archivo})</small>
+                      <button class="btn btn-link btn-sm p-0 mr-1" onclick="handleEditKeyword(${kw.id})" title="Renombrar">
+                        <i class="fas fa-pen text-warning" style="font-size:0.72rem;"></i>
+                      </button>
+                      <button class="btn btn-link btn-sm p-0" onclick="handleDeleteKeyword(${kw.id},'${kw.nombre.replace(/'/g,"\\'")}')" title="Eliminar">
+                        <i class="fas fa-trash text-danger" style="font-size:0.72rem;"></i>
+                      </button>
+                    </div>
+                  </div>`).join("")}
+          </div>
+        </div>
+      </div>`;
+  } catch (e) {
+    console.error("Error cargando palabras clave:", e);
+    if (kwSection) kwSection.innerHTML = `<div class="alert alert-warning">No se pudo cargar las palabras clave.</div>`;
+  }
+}
+
+async function handleAddKeyword() {
+  const input  = document.getElementById("new_keyword_input");
+  const nombre = (input?.value || "").trim();
+  if (!nombre) { alert("Ingrese una palabra clave."); return; }
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/keywords`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "Error");
+    }
+    if (input) input.value = "";
+    loadKeywordsSection();
+  } catch (err) {
+    alert(err.message || "Error al agregar palabra clave.");
+  }
+}
+
+async function handleEditKeyword(id) {
+  const labelEl     = document.getElementById(`kw-label-${id}`);
+  const currentName = labelEl?.innerText || "";
+  const newName     = prompt("Nuevo nombre para la palabra clave:", currentName);
+  if (!newName || newName.trim() === currentName) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre: newName.trim() }),
+    });
+    if (!res.ok) throw new Error();
+    loadKeywordsSection();
+  } catch {
+    alert("Error al renombrar la palabra clave.");
+  }
+}
+
+async function handleDeleteKeyword(id, nombre) {
+  if (!confirm(`¿Eliminar la palabra clave "${nombre}"?\nSe desvinculará de todos los documentos que la usen.`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    loadKeywordsSection();
+  } catch {
+    alert("Error al eliminar la palabra clave.");
+  }
 }
 
 async function handleAddCategory() {
-  const suf  = adminSuffixFromTab();
-  const name  = document.getElementById(`new_tax_name-${suf}`)?.value.trim()  || "";
-  const desc  = document.getElementById(`new_tax_desc-${suf}`)?.value.trim()  || "";
-  const scope = document.getElementById(`new_tax_scope-${suf}`)?.value        || "";
+  const suf   = adminSuffixFromTab();
+  const name  = document.getElementById(`new_tax_name-${suf}`)?.value.trim() || "";
+  const desc  = document.getElementById(`new_tax_desc-${suf}`)?.value.trim() || "";
+  const scope = isArchivoModule() ? "Archivo" : "RRHH";
+  const parte = document.getElementById(`new_tax_parte-${suf}`)?.value || "";
   if (!name) { alert("Por favor, ingrese el nombre de la tipología."); return; }
   try {
     const res = await fetch(`${API_BASE}/api/admin/add_category`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, desc, scope, usuario: state.user.username })
+      body: JSON.stringify({ name, desc, scope, parte, usuario: state.user.username }),
     });
     if (!res.ok) throw new Error();
-    alert("¡Nueva taxonomía tipológica guardada con éxito!");
-    document.getElementById(`new_tax_name-${suf}`) && (document.getElementById(`new_tax_name-${suf}`).value = "");
-    document.getElementById(`new_tax_desc-${suf}`) && (document.getElementById(`new_tax_desc-${suf}`).value = "");
-    loadDynamicChoices();
+    alert("¡Nueva tipología guardada con éxito!");
+    if (document.getElementById(`new_tax_name-${suf}`)) document.getElementById(`new_tax_name-${suf}`).value = "";
+    if (document.getElementById(`new_tax_desc-${suf}`)) document.getElementById(`new_tax_desc-${suf}`).value = "";
+    await loadDynamicChoices();
     loadAdminTab("categories");
   } catch {
-    alert("Error al guardar categoría.");
+    alert("Error al guardar tipología.");
   }
 }
 
