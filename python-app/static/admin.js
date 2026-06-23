@@ -345,15 +345,21 @@ async function handleNewSubmission(e) {
 
 // --- MONITOR ---
 async function loadMonitorTable() {
-  const mod  = state.user.modulo;
-  const suf  = adminSuffixFromTab();
-  const q    = document.getElementById(`admin_search-${suf}`)?.value      || "";
-  const type = document.getElementById(`admin_filter_type-${suf}`)?.value || "";
+  const mod     = state.user.modulo;
+  const suf     = adminSuffixFromTab();
+  const q       = document.getElementById(`admin_search-${suf}`)?.value      || "";
+  const type    = document.getElementById(`admin_filter_type-${suf}`)?.value || "";
+  const page    = state.adminTable.page    || 1;
+  const perPage = state.adminTable.perPage || 25;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/list_all?modulo=${mod}&search=${q}&type_filter=${type}`);
+    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&page=${page}&per_page=${perPage}`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error();
-    state.adminTable.results = await res.json();
+    const data = await res.json();
+
+    state.adminTable.results = data.records;
+    state.adminTable.total   = data.total;
 
     const typeSelector = document.getElementById(`admin_filter_type-${suf}`);
     if (typeSelector && typeSelector.options.length <= 1 && state.choices) {
@@ -363,41 +369,35 @@ async function loadMonitorTable() {
     }
     renderMonitorTable();
   } catch (e) {
-    console.error("Error al cargar monitor local:", e);
+    console.error("Error al cargar monitor:", e);
   }
 }
 
 function renderMonitorTable() {
-  const suf     = adminSuffixFromTab();
-  const results = state.adminTable.results;
-  const isArch  = isArchivoModule();
+  const suf       = adminSuffixFromTab();
+  const records   = state.adminTable.results || [];
+  const total     = state.adminTable.total   || records.length;
+  const isArch    = isArchivoModule();
   const container = document.getElementById(`admin_control_table-${suf}`);
   const summaryEl = document.getElementById(`admin_table_summary-${suf}`);
-  if (summaryEl) summaryEl.innerText = `Total: ${results.length} registros en el módulo ${state.user.modulo}`;
+  if (summaryEl) summaryEl.innerText = `Total: ${total} registros en el módulo ${state.user.modulo}`;
 
-  if (results.length === 0) {
-    container.innerHTML = `<tr><td colspan="${isArch ? 6 : 7}" class="text-muted text-center p-3">Ningún archivo coincide con los criterios de búsqueda local.</td></tr>`;
-    document.getElementById(`admin_page_info-${suf}`)?.innerText && (document.getElementById(`admin_page_info-${suf}`).innerText = "Pág 1 de 1");
-    const prevBtn = document.getElementById(`admin_prev-${suf}`);
-    const nextBtn = document.getElementById(`admin_next-${suf}`);
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
-    return;
-  }
-
-  const totalPages = Math.ceil(results.length / state.adminTable.perPage);
-  if (state.adminTable.page > totalPages) state.adminTable.page = totalPages;
-  const start     = (state.adminTable.page - 1) * state.adminTable.perPage;
-  const pageItems = results.slice(start, start + state.adminTable.perPage);
-  const pageInfo  = document.getElementById(`admin_page_info-${suf}`);
+  const perPage    = state.adminTable.perPage || 25;
+  const totalPages = Math.ceil(total / perPage) || 1;
+  const pageInfo   = document.getElementById(`admin_page_info-${suf}`);
   if (pageInfo) pageInfo.innerText = `Pág ${state.adminTable.page} de ${totalPages}`;
   const prevBtnAdm = document.getElementById(`admin_prev-${suf}`);
   const nextBtnAdm = document.getElementById(`admin_next-${suf}`);
   if (prevBtnAdm) prevBtnAdm.disabled = state.adminTable.page <= 1;
   if (nextBtnAdm) nextBtnAdm.disabled = state.adminTable.page >= totalPages;
 
+  if (records.length === 0) {
+    container.innerHTML = `<tr><td colspan="${isArch ? 6 : 7}" class="text-muted text-center p-3">Ningún archivo coincide con los criterios de búsqueda.</td></tr>`;
+    return;
+  }
+
   if (isArch) {
-    container.innerHTML = pageItems.map(f => `
+    container.innerHTML = records.map(f => `
       <tr>
         <td class="font-weight-bold text-dark">${f.titulo}</td>
         <td>${f.autor}</td>
@@ -408,17 +408,17 @@ function renderMonitorTable() {
       </tr>
     `).join("");
   } else {
-    container.innerHTML = pageItems.map(f => {
+    container.innerHTML = records.map(f => {
       const c = getStatusColor(f.estado);
       return `
         <tr>
           <td class="font-weight-bold text-dark">${f.empleado}</td>
           <td>${f.cedula}</td>
-          <td style="font-size:0.82rem;color:#6c757d;">${f.personas_relacionadas}</td>
           <td>${f.departamento}</td>
           <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado}</span></td>
           <td><span class="badge badge-secondary" style="padding:3px 6px;">${f.doc_type}</span></td>
-          <td><button class="btn btn-sm btn-outline-secondary" onclick="openDocMetadataModal('${f.__idx}')" title="Ver"><i class="fas fa-eye"></i></button></td>
+          <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
+          <td><button class="btn btn-sm btn-outline-secondary" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver"><i class="fas fa-eye"></i></button></td>
         </tr>
       `;
     }).join("");

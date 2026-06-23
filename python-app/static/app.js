@@ -31,10 +31,11 @@ const state = {
   },
   adminTable: {
     results: [],
+    total: 0,
     search: "",
     typeFilter: "",
     page: 1,
-    perPage: 8
+    perPage: 25
   },
   activePersonProfile: null,
   innerDossierSearch: "",
@@ -546,8 +547,8 @@ function setupEventListeners() {
     document.getElementById(`admin_filter_type-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`btn_refresh_table-${suf}`)?.addEventListener("click",  loadMonitorTable);
     document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click",     () => alert("Exportando reporte CSV...\nGenerado con éxito."));
-    document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; renderMonitorTable(); } });
-    document.getElementById(`admin_next-${suf}`)?.addEventListener("click", () => { const t = Math.ceil(state.adminTable.results.length / state.adminTable.perPage); if (state.adminTable.page < t) { state.adminTable.page++; renderMonitorTable(); } });
+    document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; loadMonitorTable(); } });
+    document.getElementById(`admin_next-${suf}`)?.addEventListener("click", () => { const totalPages = Math.ceil((state.adminTable.total || 0) / (state.adminTable.perPage || 25)); if (state.adminTable.page < totalPages) { state.adminTable.page++; loadMonitorTable(); } });
     document.getElementById(`add_tax_btn-${suf}`)?.addEventListener("click",  handleAddCategory);
     document.getElementById(`btn_add_user-${suf}`)?.addEventListener("click", handleAddUser);
   });

@@ -150,10 +150,44 @@ function openArchivoModal(idxReal) {
   document.getElementById("modal-doc-abstract").innerText =
     doc.resumen || "No se ha registrado un resumen descriptivo abstracto (dc.description.abstract) para este folio.";
 
-  document.getElementById("btn-modal-view").onclick = () =>
-    alert(`Visualizando documento: ${doc.titulo}\nUbicado físicamente en: ${doc.ubicacion}`);
+  closeDocViewer();
+  const fileUrl = doc.file_url || "";
+  const viewBtn = document.getElementById("btn-modal-view");
+  if (fileUrl) {
+    viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i>Ver PDF';
+    viewBtn.onclick = () => toggleDocViewer(fileUrl);
+  } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
+    viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
+    viewBtn.onclick = () => alert("Este documento está registrado como digitalizado pero aún no tiene URL de archivo asignada.\nContacte al administrador para vincular el archivo digital.");
+  } else {
+    viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
+    viewBtn.onclick = () => alert(`Documento físico disponible en:\n${doc.ubicacion}`);
+  }
   document.getElementById("btn-modal-download").classList.add("d-none");
   document.getElementById("btn-modal-edit").classList.add("d-none");
 
   $("#doc-modal").modal("show");
+}
+
+// ==========================================================================
+// VISOR DE DOCUMENTO DIGITALIZADO
+// ==========================================================================
+function toggleDocViewer(fileUrl) {
+  const section = document.getElementById("modal-doc-viewer-section");
+  const iframe  = document.getElementById("modal-doc-iframe");
+  if (!section || !iframe) return;
+  if (section.classList.contains("d-none")) {
+    iframe.src = fileUrl;
+    section.classList.remove("d-none");
+    section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } else {
+    closeDocViewer();
+  }
+}
+
+function closeDocViewer() {
+  const section = document.getElementById("modal-doc-viewer-section");
+  const iframe  = document.getElementById("modal-doc-iframe");
+  if (section) section.classList.add("d-none");
+  if (iframe)  iframe.src = "";
 }

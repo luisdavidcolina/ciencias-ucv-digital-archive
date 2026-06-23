@@ -1,10 +1,19 @@
 <!DOCTYPE html>
+<!--
+  ⚠️  PÁGINA LEGADO — DEPRECADA
+  Esta SPA unificada fue reemplazada por páginas dedicadas:
+    /archivo       → Módulo de Archivo Institucional
+    /rrhh          → Módulo de RRHH
+    /admin/archivo → Panel de Administración de Archivo
+    /admin/rrhh    → Panel de Administración de RRHH
+  Mantenida solo para referencia. No agregar funcionalidades aquí.
+-->
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="/">
-  <title>Archivo Digital - Ciencias UCV</title>
+  <title>[LEGADO] Archivo Digital - Ciencias UCV</title>
   
   <!-- Tipografía Nunito (DSpace Original) -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
@@ -28,6 +37,16 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body class="hold-transition sidebar-mini">
+
+  <!-- Banner de deprecación -->
+  <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#fff3cd;color:#856404;padding:8px 20px;text-align:center;font-size:0.82rem;border-bottom:2px solid #ffc107;font-family:sans-serif;">
+    <strong>&#9888; Página legada.</strong>
+    Usa el portal actualizado:
+    <a href="/archivo" style="color:#533f03;font-weight:bold;">Archivo</a> ·
+    <a href="/rrhh"    style="color:#533f03;font-weight:bold;">RRHH</a> ·
+    <a href="/login"   style="color:#533f03;font-weight:bold;">Login</a>
+  </div>
+  <div style="height:38px;"></div>
 
   <!-- ==========================================================================
        1. PANTALLA DE LOGIN (Visible por defecto hasta autenticación exitosa)

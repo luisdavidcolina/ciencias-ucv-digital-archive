@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 from fastapi import APIRouter
@@ -9,10 +10,23 @@ from .rrhh import fetch_rrhh_dataframe
 
 router = APIRouter(tags=["choices"])
 
+_cache: dict = {}
+_cache_ts: float = 0.0
+_TTL = 300.0  # 5 minutos
+
+
+def invalidate_choices_cache() -> None:
+    global _cache
+    _cache = {}
+
 
 @router.get("/api/choices")
 def get_choices():
-    """Retorna las opciones disponibles para los filtros del UI (tipologías, tesauro, fechas, etc.)."""
+    """Retorna las opciones disponibles para los filtros del UI. Cacheado 5 min."""
+    global _cache, _cache_ts
+    if _cache and time.monotonic() - _cache_ts < _TTL:
+        return _cache
+
     df_arch = fetch_archivo_dataframe()
     df_rh   = fetch_rrhh_dataframe()
 
@@ -49,7 +63,7 @@ def get_choices():
     min_rh = rh_dates.min().strftime("%Y-%m-%d") if not rh_dates.empty else "2000-01-01"
     max_rh = rh_dates.max().strftime("%Y-%m-%d") if not rh_dates.empty else datetime.now().strftime("%Y-%m-%d")
 
-    return {
+    result = {
         "archivo": {
             "doc_types": arch_doc_types,
             "tesauro":   arch_tesauro,
@@ -64,3 +78,7 @@ def get_choices():
             "max_date":  max_rh,
         },
     }
+
+    _cache    = result
+    _cache_ts = time.monotonic()
+    return result

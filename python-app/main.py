@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from database import ensure_audit_table
+from database import ensure_audit_table, db_query, logger
 from utils import populate_missing_slugs
 from routes.auth    import router as auth_router
 from routes.archivo import router as archivo_router
@@ -40,10 +40,55 @@ async def add_no_cache_header(request, call_next):
 # STARTUP
 # =============================================================================
 
+def run_migrations():
+    """Migraciones idempotentes que se ejecutan al iniciar la app."""
+    migrations = [
+        ("file_url en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS file_url TEXT"),
+        ("file_url en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS file_url TEXT"),
+        ("VIEW vw_rrhh_persona_index", """
+            CREATE OR REPLACE VIEW public.vw_rrhh_persona_index AS
+            SELECT
+                e.id                                            AS empleado_id,
+                e.cedula,
+                e.rif,
+                e.nombres || ' ' || e.apellidos                 AS persona_raw,
+                COALESCE(c.nombre,  'Sin cargo asignado')       AS cargo,
+                COALESCE(d.nombre,  '')                         AS departamento,
+                COALESCE(el.estados,'Sin estado')               AS estado,
+                TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD')       AS fecha_ingreso,
+                TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')       AS fecha_jubilacion,
+                TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')       AS fecha_pension,
+                COALESCE(e.foto_url, '')                        AS foto_url,
+                COUNT(dr.id_rrhh)                               AS doc_count,
+                COALESCE(
+                    STRING_AGG(DISTINCT COALESCE(td.nombre_corto, td.nombre, ''), '; ')
+                    FILTER (WHERE td.nombre IS NOT NULL AND td.nombre <> ''),
+                    ''
+                )                                               AS tipos
+            FROM public.empleados e
+            LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
+            LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
+            LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
+            LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id
+            LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
+            GROUP BY e.id, c.nombre, d.nombre, el.estados
+        """),
+    ]
+    for label, sql in migrations:
+        try:
+            db_query(sql.strip(), fetch="none", commit=True)
+            logger.info(f"Migración OK: {label}")
+        except Exception as e:
+            logger.warning(f"Migración omitida ({label}): {e}")
+
+
 @app.on_event("startup")
 def on_startup():
     ensure_audit_table()
     populate_missing_slugs()
+    run_migrations()
 
 
 # =============================================================================

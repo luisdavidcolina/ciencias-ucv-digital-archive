@@ -16,6 +16,7 @@ from models import (
 from utils import generate_unique_slug
 from .archivo import fetch_archivo_dataframe
 from .rrhh import fetch_rrhh_dataframe
+from .choices import invalidate_choices_cache
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -200,6 +201,7 @@ def admin_submit(req: DocumentSubmitRequest):
                     commit=True,
                 )
 
+        invalidate_choices_cache()
         return {"success": True, "id": str(new_row["id_archivo"])}
 
     # ── Módulo RRHH ──────────────────────────────────────────────────────────
@@ -278,36 +280,122 @@ def admin_submit(req: DocumentSubmitRequest):
                 commit=True,
             )
 
+    invalidate_choices_cache()
     return {"success": True, "id": str(new_row["id_rrhh"])}
 
 
 @router.get("/list_all")
-def list_all_files(modulo: str, search: Optional[str] = "", type_filter: Optional[str] = ""):
-    if modulo == "Archivo":
-        df = fetch_archivo_dataframe()
-        if search:
-            s = search.lower().strip()
-            df = df[
-                df["titulo"].astype(str).str.lower().str.contains(s, na=False)
-                | df["autor"].astype(str).str.lower().str.contains(s, na=False)
-            ]
-        if type_filter:
-            df = df[df["doc_type"] == type_filter]
-    else:
-        df = fetch_rrhh_dataframe()
-        if search:
-            s = search.lower().strip()
-            df = df[
-                df["empleado"].astype(str).str.lower().str.contains(s, na=False)
-                | df["cedula"].astype(str).str.lower().str.contains(s, na=False)
-            ]
-        if type_filter:
-            df = df[df["doc_type"] == type_filter]
+def list_all_files(
+    modulo: str,
+    search: Optional[str] = "",
+    type_filter: Optional[str] = "",
+    page: int = 1,
+    per_page: int = 25,
+):
+    page     = max(1, page)
+    per_page = max(1, min(per_page, 100))
+    offset   = (page - 1) * per_page
 
-    records = df.to_dict(orient="records")
-    for idx, r in enumerate(records):
-        r["__idx"] = idx + 1
-    return records
+    if modulo == "Archivo":
+        conditions, params = [], []
+        if search:
+            conditions.append(
+                "(unaccent(da.titulo) ILIKE unaccent(%s) OR unaccent(da.autor) ILIKE unaccent(%s))"
+            )
+            params.extend([f"%{search}%", f"%{search}%"])
+        if type_filter:
+            conditions.append("da.tesauro_primario = %s")
+            params.append(type_filter)
+
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+        count_row = db_query(
+            f"SELECT COUNT(*) AS total FROM public.datos_archivo da {where}",
+            params or None, fetch="one",
+        )
+        total = int(count_row["total"]) if count_row else 0
+
+        rows = db_query(
+            f"""
+            SELECT
+                da.id_archivo AS id,
+                da.titulo,
+                COALESCE(da.autor, '') AS autor,
+                TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
+                COALESCE(da.tesauro_primario, '') AS doc_type,
+                COALESCE(da.ubicacion, '') AS ubicacion
+            FROM public.datos_archivo da
+            {where}
+            ORDER BY da.fecha_documento DESC NULLS LAST
+            LIMIT %s OFFSET %s
+            """,
+            (params + [per_page, offset]) if params else [per_page, offset],
+            fetch="all",
+        ) or []
+
+        records = [dict(r) for r in rows]
+        for idx, r in enumerate(records):
+            r["__idx"] = offset + idx + 1
+
+    else:
+        conditions, params = [], []
+        if search:
+            conditions.append(
+                """(unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)
+                   OR e.cedula ILIKE %s)"""
+            )
+            params.extend([f"%{search}%", f"%{search}%"])
+        if type_filter:
+            conditions.append("COALESCE(td.nombre_corto, td.nombre) = %s")
+            params.append(type_filter)
+
+        join = """
+            FROM public.empleados e
+            LEFT JOIN public.cargos c ON e.cargo_id = c.id
+            LEFT JOIN public.departamentos d ON e.departamento_id = d.id
+            LEFT JOIN public.estados_laborales el ON e.estado_id = el.id
+            LEFT JOIN public.datos_rrhh dr ON dr.empleado_id = e.id
+            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+        """
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+        count_row = db_query(
+            f"SELECT COUNT(DISTINCT e.id) AS total {join} {where}",
+            params or None, fetch="one",
+        )
+        total = int(count_row["total"]) if count_row else 0
+
+        rows = db_query(
+            f"""
+            SELECT DISTINCT
+                e.id AS empleado_id,
+                e.cedula,
+                e.nombres || ' ' || e.apellidos AS empleado,
+                COALESCE(d.nombre, '') AS departamento,
+                COALESCE(el.estados, '') AS estado,
+                COALESCE(c.nombre, '') AS cargo,
+                TO_CHAR(e.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
+                COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
+                COALESCE(dr.ubicacion, '') AS ubicacion
+            {join}
+            {where}
+            ORDER BY e.nombres ASC
+            LIMIT %s OFFSET %s
+            """,
+            (params + [per_page, offset]) if params else [per_page, offset],
+            fetch="all",
+        ) or []
+
+        records = [dict(r) for r in rows]
+        for idx, r in enumerate(records):
+            r["__idx"] = offset + idx + 1
+
+    return {
+        "total":    total,
+        "page":     page,
+        "per_page": per_page,
+        "records":  records,
+    }
 
 
 @router.post("/add_category")

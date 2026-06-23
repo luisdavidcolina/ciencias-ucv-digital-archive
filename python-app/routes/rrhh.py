@@ -43,16 +43,11 @@ def first_non_empty_value(values) -> str:
 
 
 # =============================================================================
-# DATAFRAME FETCHER
+# DATAFRAME FETCHER (usado por admin stats y person/profile)
 # =============================================================================
 
 def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
-    """Retorna el expediente completo de RRHH como DataFrame.
-
-    Args:
-        filters_sql:   Cláusula WHERE sin la palabra 'WHERE' (opcional).
-        filter_params: Parámetros para la cláusula WHERE.
-    """
+    """Retorna el expediente completo de RRHH como DataFrame."""
     base_sql = """
         SELECT
             e.id                                      AS empleado_id,
@@ -102,147 +97,116 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
 
 
 # =============================================================================
-# ÍNDICE DE PERSONAS
-# =============================================================================
-
-def build_rrhh_person_index(df: pd.DataFrame) -> List[Dict[str, Any]]:
-    """Agrega el DataFrame por persona y retorna una lista de perfiles."""
-    if df.empty:
-        return []
-
-    all_persons: set = set()
-    for _, row in df.iterrows():
-        emp = str(row.get("empleado", "")).strip()
-        if emp:
-            all_persons.add(emp)
-        all_persons.update(split_terms(str(row.get("personas_relacionadas", ""))))
-
-    profiles = []
-    for p in sorted(all_persons):
-        p_rows, p_indices = [], []
-        for idx, row in df.iterrows():
-            emp = str(row.get("empleado", "")).strip()
-            rel = split_terms(str(row.get("personas_relacionadas", "")))
-            if p == emp or p in rel:
-                p_rows.append(row)
-                p_indices.append(idx)
-        if not p_rows:
-            continue
-
-        p_df = pd.DataFrame(p_rows)
-        doc_count = (
-            int((p_df["id_archivo"].astype(str).str.strip() != "").sum())
-            if "id_archivo" in p_df.columns else len(p_df)
-        )
-        primary_rows = p_df[p_df["empleado"] == p]
-
-        cedula = str(primary_rows["cedula"].iloc[0]) if not primary_rows.empty else str(p_df["cedula"].iloc[0])
-        rif    = str(primary_rows["rif"].iloc[0])    if not primary_rows.empty and "rif"   in primary_rows.columns else ""
-        cargo  = str(primary_rows["cargo"].iloc[0])  if not primary_rows.empty and "cargo" in primary_rows.columns else ""
-
-        profiles.append({
-            "persona_raw":   p,
-            "persona":       format_rrhh_person_name(p),
-            "doc_count":     doc_count,
-            "primary_count": int((p_df["empleado"] == p).sum()),
-            "cedulas":       cedula,
-            "rifs":          rif,
-            "departamentos": "; ".join(sorted(set(p_df["departamento"].dropna().astype(str).tolist()))),
-            "cargos":        cargo or "Sin cargo asignado",
-            "estatuses":     "; ".join(sorted(set(primary_rows["estado"].dropna().astype(str).tolist()))) if not primary_rows.empty else "; ".join(sorted(set(p_df["estado"].dropna().astype(str).tolist()))) or "Sin estado",
-            "tipos":         "; ".join(sorted(set([t for t in p_df["doc_type"].dropna().astype(str).tolist() if t.strip()]))),
-            "fecha_ingreso": "; ".join(sorted(set([f for f in p_df["fecha_ingreso"].dropna().astype(str).tolist() if f.strip()]))),
-            "foto_url":      first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else []),
-            "row_indices":   p_indices,
-        })
-    return profiles
-
-
-# =============================================================================
 # ENDPOINTS
 # =============================================================================
 
 @router.post("/buscar")
 def search_rrhh(req: RrhhSearchRequest):
-    df = fetch_rrhh_dataframe()
+    """Busca personas en el índice RRHH usando la VIEW vw_rrhh_persona_index."""
+    conditions: list[str] = []
+    params: list = []
+
+    if req.estados:
+        conditions.append("v.estado = ANY(%s)")
+        params.append(req.estados)
 
     if req.doc_types:
-        df = df[df["doc_type"].isin(req.doc_types)]
-    if req.estados:
-        df = df[df["estado"].isin(req.estados)]
-    if req.date_start and req.date_end:
-        df = df[(df["fecha_ingreso"] >= req.date_start) & (df["fecha_ingreso"] <= req.date_end)]
-    if req.people_terms:
-        keep = []
-        for idx, row in df.iterrows():
-            row_people = {str(row.get("empleado", "")).strip()}
-            row_people.update(split_terms(str(row.get("personas_relacionadas", ""))))
-            if any(p in row_people for p in req.people_terms):
-                keep.append(idx)
-        df = df.loc[keep]
+        conditions.append("""
+            v.empleado_id IN (
+                SELECT DISTINCT dr.empleado_id
+                FROM public.datos_rrhh dr
+                JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+                WHERE COALESCE(td.nombre_corto, td.nombre) = ANY(%s)
+            )
+        """)
+        params.append(req.doc_types)
 
-    profiles = build_rrhh_person_index(df)
+    if req.date_start and req.date_end:
+        conditions.append("v.fecha_ingreso BETWEEN %s AND %s")
+        params.extend([req.date_start, req.date_end])
 
     if req.search_term:
-        term = req.search_term.lower().strip()
-        profiles = [
-            p for p in profiles
-            if (
-                term in p["persona"].lower()
-                or term in p["persona_raw"].lower()
-                or term in p["cedulas"].lower()
-                or term in p["departamentos"].lower()
-                or term in p["cargos"].lower()
-                or term in p["estatuses"].lower()
-                or term in p["tipos"].lower()
-            )
-        ]
+        term = f"%{req.search_term}%"
+        conditions.append("""(
+            unaccent(v.persona_raw) ILIKE unaccent(%s)
+            OR v.cedula ILIKE %s
+            OR unaccent(v.departamento) ILIKE unaccent(%s)
+            OR unaccent(v.cargo) ILIKE unaccent(%s)
+            OR unaccent(v.tipos) ILIKE unaccent(%s)
+        )""")
+        params.extend([term, term, term, term, term])
 
-    if req.sort_mode == "Alfabético (A-Z)":
-        profiles = sorted(profiles, key=lambda x: x["persona"].lower())
-    elif req.sort_mode == "Alfabético (Z-A)":
-        profiles = sorted(profiles, key=lambda x: x["persona"].lower(), reverse=True)
-    elif req.sort_mode == "Más recientes primero":
-        profiles = sorted(profiles, key=lambda x: x["fecha_ingreso"], reverse=True)
-    elif req.sort_mode == "Más antiguos primero":
-        profiles = sorted(profiles, key=lambda x: x["fecha_ingreso"])
+    if req.people_terms:
+        clauses = ["unaccent(v.persona_raw) ILIKE unaccent(%s)" for _ in req.people_terms]
+        conditions.append("(" + " OR ".join(clauses) + ")")
+        params.extend([f"%{p}%" for p in req.people_terms])
 
-    return profiles
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+    sort_map = {
+        "Alfabético (A-Z)":      "v.persona_raw ASC",
+        "Alfabético (Z-A)":      "v.persona_raw DESC",
+        "Más recientes primero": "v.fecha_ingreso DESC NULLS LAST",
+        "Más antiguos primero":  "v.fecha_ingreso ASC NULLS LAST",
+    }
+    order = sort_map.get(req.sort_mode, "v.persona_raw ASC")
+
+    rows = db_query(
+        f"SELECT * FROM public.vw_rrhh_persona_index v {where} ORDER BY {order}",
+        params or None,
+        fetch="all",
+    ) or []
+
+    return [
+        {
+            "persona_raw":   r["persona_raw"],
+            "persona":       format_rrhh_person_name(r["persona_raw"]),
+            "doc_count":     int(r["doc_count"]),
+            "cedulas":       r["cedula"] or "",
+            "rifs":          r["rif"]    or "",
+            "departamentos": r["departamento"] or "",
+            "cargos":        r["cargo"]  or "Sin cargo asignado",
+            "estatuses":     r["estado"] or "Sin estado",
+            "tipos":         r["tipos"]  or "",
+            "fecha_ingreso": r["fecha_ingreso"] or "",
+            "foto_url":      r["foto_url"] or "",
+        }
+        for r in rows
+    ]
 
 
 @router.post("/person/profile")
 def get_rrhh_person_profile(req: RrhhProfileRequest):
-    df = fetch_rrhh_dataframe()
-    p = req.persona
+    df = fetch_rrhh_dataframe(
+        "e.nombres || ' ' || e.apellidos = %s",
+        (req.persona,),
+    )
+
+    if df.empty:
+        raise HTTPException(status_code=404, detail="Persona no encontrada en expedientes")
 
     row_list = []
     for idx, row in df.iterrows():
-        emp = str(row.get("empleado", "")).strip()
-        rel = split_terms(str(row.get("personas_relacionadas", "")))
-        if p == emp or p in rel:
-            row_dict = row.to_dict()
-            row_dict["__idx"] = int(idx) + 1
-            row_list.append(row_dict)
-
-    if not row_list:
-        raise HTTPException(status_code=404, detail="Persona no encontrada en expedientes")
+        row_dict = row.to_dict()
+        row_dict["__idx"] = int(idx) + 1
+        row_list.append(row_dict)
 
     p_df = pd.DataFrame(row_list)
 
-    def _join_unique(series_or_col):
-        col = p_df.get(series_or_col, pd.Series([], dtype=str)) if isinstance(series_or_col, str) else series_or_col
+    def _join_unique(col_name: str) -> str:
+        col = p_df.get(col_name, pd.Series([], dtype=str))
         return "; ".join(sorted(set([x for x in col.dropna().astype(str).tolist() if x.strip()])))
 
     return {
-        "persona_raw":      p,
-        "persona":          format_rrhh_person_name(p),
+        "persona_raw":      req.persona,
+        "persona":          format_rrhh_person_name(req.persona),
         "foto_url":         first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else []),
-        "cedulas":          _join_unique(p_df["cedula"]),
+        "cedulas":          _join_unique("cedula"),
         "rifs":             _join_unique("rif"),
-        "departamentos":    _join_unique(p_df["departamento"]),
+        "departamentos":    _join_unique("departamento"),
         "cargos":           _join_unique("cargo") or "Sin cargo asignado",
-        "statuses":         _join_unique(p_df["estado"]),
-        "fecha_ingreso":    _join_unique(p_df["fecha_ingreso"]),
+        "statuses":         _join_unique("estado"),
+        "fecha_ingreso":    _join_unique("fecha_ingreso"),
         "fecha_jubilacion": _join_unique("fecha_jubilacion"),
         "fecha_pension":    _join_unique("fecha_pension"),
         "categories":       sorted(set([x for x in p_df["categoria"].dropna().astype(str).tolist() if x.strip()])),

@@ -331,8 +331,19 @@ function openDocMetadataModal(idxReal) {
   document.getElementById("modal-doc-abstract").innerText =
     `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;
 
-  document.getElementById("btn-modal-view").onclick = () =>
-    alert(`Abriendo archivo digitalizado de: ${doc.doc_type}\nUbicado en: ${doc.ubicacion}`);
+  closeDocViewer();
+  const fileUrl = doc.file_url || "";
+  const viewBtn = document.getElementById("btn-modal-view");
+  if (fileUrl) {
+    viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i>Ver PDF';
+    viewBtn.onclick = () => toggleDocViewer(fileUrl);
+  } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
+    viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
+    viewBtn.onclick = () => alert("Documento registrado como digitalizado pero sin URL de archivo asignada.\nContacte al administrador para vincular el archivo digital.");
+  } else {
+    viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
+    viewBtn.onclick = () => alert(`Archivo físico disponible en:\n${doc.ubicacion}`);
+  }
 
   $("#doc-modal").modal("show");
 }

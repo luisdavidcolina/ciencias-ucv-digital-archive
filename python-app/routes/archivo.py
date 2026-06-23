@@ -30,7 +30,8 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
             COALESCE(da.tesauro_primario, '')   AS tesauro_primario,
             COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
             COALESCE(STRING_AGG(dl.nombre, '; '), '') AS descriptores_libres,
-            COALESCE(da.abstract, '')           AS resumen
+            COALESCE(da.abstract, '')           AS resumen,
+            COALESCE(da.file_url, '')           AS file_url
         FROM public.datos_archivo da
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
         LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
@@ -44,7 +45,7 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
     if not rows:
         return pd.DataFrame(columns=[
             "id", "titulo", "autor", "fecha", "doc_type", "categoria", "ubicacion",
-            "tesauro_primario", "tesauro_secundario", "descriptores_libres", "resumen",
+            "tesauro_primario", "tesauro_secundario", "descriptores_libres", "resumen", "file_url",
         ])
 
     df = pd.DataFrame([dict(r) for r in rows]).fillna("")

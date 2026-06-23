@@ -464,5 +464,44 @@ CREATE INDEX idx_datos_rrhh_titulo_trgm         ON public.datos_rrhh USING GIN (
 CREATE INDEX idx_empleados_nombres_trgm         ON public.empleados USING GIN (unaccent(nombres || ' ' || apellidos) gin_trgm_ops);
 
 -- =============================================================================
+-- 9. VISTA AGREGADA DE ÍNDICE DE PERSONAS (RRHH)
+-- Simplifica la lógica de búsqueda y listado de personal evitando Pandas.
+-- =============================================================================
+
+CREATE OR REPLACE VIEW public.vw_rrhh_persona_index AS
+SELECT
+    e.id                                            AS empleado_id,
+    e.cedula,
+    e.rif,
+    e.nombres || ' ' || e.apellidos                 AS persona_raw,
+    COALESCE(c.nombre,  'Sin cargo asignado')       AS cargo,
+    COALESCE(d.nombre,  '')                         AS departamento,
+    COALESCE(el.estados,'Sin estado')               AS estado,
+    TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD')       AS fecha_ingreso,
+    TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')       AS fecha_jubilacion,
+    TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')       AS fecha_pension,
+    COALESCE(e.foto_url, '')                        AS foto_url,
+    COUNT(dr.id_rrhh)                               AS doc_count,
+    COALESCE(
+        STRING_AGG(DISTINCT COALESCE(td.nombre_corto, td.nombre, ''), '; ')
+        FILTER (WHERE td.nombre IS NOT NULL AND td.nombre <> ''),
+        ''
+    )                                               AS tipos
+FROM public.empleados e
+LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
+LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
+LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
+LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id
+LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
+GROUP BY e.id, c.nombre, d.nombre, el.estados;
+
+-- =============================================================================
+-- 10. COLUMNA file_url PARA VISOR DE DOCUMENTOS DIGITALIZADOS
+-- Ejecutar en instancias existentes si el esquema ya fue creado sin esta columna.
+-- ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS file_url TEXT;
+-- ALTER TABLE public.datos_rrhh    ADD COLUMN IF NOT EXISTS file_url TEXT;
+-- =============================================================================
+
+-- =============================================================================
 -- Fin del Script. Base de datos e inicio de sesión integrados correctamente.
 -- =============================================================================
