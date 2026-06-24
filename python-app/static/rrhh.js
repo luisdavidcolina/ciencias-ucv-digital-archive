@@ -295,6 +295,18 @@ function renderRrhhDossierModal() {
               ${renderQuickDocLinks(profile)}
             </div>
           </div>
+          <div class="border-top pt-3 mt-2">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="font-weight-bold text-secondary text-uppercase mb-0" style="font-size:0.78rem;">
+                <i class="fas fa-briefcase mr-2"></i>Historial de Cargos
+              </h6>
+              <button class="btn btn-xs btn-outline-secondary"
+                onclick="_toggleHistorialCargos(${profile.rows && profile.rows[0]?.empleado_id || 0})">
+                <i class="fas fa-history mr-1"></i>Ver historial
+              </button>
+            </div>
+            <div id="historial-cargos-inline" class="bg-light rounded p-2" style="display:none;font-size:0.82rem;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -443,4 +455,63 @@ function openDocMetadataModal(idxReal) {
   }
 
   $("#doc-modal").modal("show");
+}
+
+// =============================================================================
+// HISTORIAL DE CARGOS — sección del dossier
+// =============================================================================
+
+async function _toggleHistorialCargos(empleadoId) {
+  const container = document.getElementById("historial-cargos-inline");
+  if (!container) return;
+
+  if (container.style.display !== "none") {
+    container.style.display = "none";
+    return;
+  }
+
+  if (!empleadoId) {
+    container.innerHTML = '<span class="text-muted">ID de empleado no disponible.</span>';
+    container.style.display = "block";
+    return;
+  }
+
+  container.innerHTML = '<span class="spinner-border spinner-border-sm mr-2 text-secondary"></span>Cargando historial...';
+  container.style.display = "block";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empleadoId}/historial_cargos`);
+    const data = await res.json();
+    const historial = data.historial || [];
+
+    if (!historial.length) {
+      container.innerHTML = '<span class="text-muted"><i class="fas fa-info-circle mr-1"></i>No hay movimientos de cargo registrados.</span>';
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="table table-sm mb-0" style="font-size:0.8rem;">
+        <thead class="bg-white">
+          <tr>
+            <th>Cargo</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${historial.map((h, i) => `
+            <tr ${i === 0 ? 'class="font-weight-bold"' : ''}>
+              <td>${h.cargo || "—"}</td>
+              <td>${formatISOToSpanish(h.fecha_inicio) || h.fecha_inicio || "—"}</td>
+              <td>${h.fecha_fin ? formatISOToSpanish(h.fecha_fin) || h.fecha_fin : '<span class="badge badge-success">Actual</span>'}</td>
+              <td class="text-muted">${h.motivo || "—"}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } catch {
+    container.innerHTML = '<span class="text-danger">Error al cargar el historial de cargos.</span>';
+  }
 }
