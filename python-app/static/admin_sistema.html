@@ -534,9 +534,11 @@ async function handleExportBackup() {
     a.href = url; a.download = fn; document.body.appendChild(a); a.click();
     URL.revokeObjectURL(url); document.body.removeChild(a);
     statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Backup descargado: ${fn}</div>`;
+    showToast(`Backup generado: ${fn}`, "success");
     loadBackupHistory();
   } catch(e) {
     statusEl.innerHTML = `<div class="alert alert-danger">Error al exportar: ${e.message}</div>`;
+    showToast("Error al exportar backup.", "error");
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar Backup Ahora';
@@ -574,14 +576,17 @@ async function handleRestoreBackup() {  // async para confirmModal
     const data = await res.json();
     if (data.success) {
       const totalInserted = Object.values(data.results).reduce((sum, r) => sum + (r.inserted||0), 0);
-      statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Restauracion completada. ${totalInserted} filas insertadas.</div>`;
+      statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Restauración completada. ${totalInserted} filas insertadas.</div>`;
+      showToast(`Restauración OK — ${totalInserted} filas importadas.`, "success");
     } else {
       const errList = data.errors.map(e => `<li>${e}</li>`).join("");
-      statusEl.innerHTML = `<div class="alert alert-warning">Restauracion con advertencias:<ul>${errList}</ul></div>`;
+      statusEl.innerHTML = `<div class="alert alert-warning">Restauración con advertencias:<ul>${errList}</ul></div>`;
+      showToast("Restauración completada con advertencias.", "warning");
     }
     loadBackupHistory();
   } catch(e) {
     statusEl.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+    showToast("Error al restaurar backup.", "error");
   }
 }
 
