@@ -7,13 +7,14 @@ from fastapi.staticfiles import StaticFiles
 
 from database import ensure_audit_table, db_query, logger
 from utils import populate_missing_slugs, generate_unique_slug
-from routes.auth    import router as auth_router
-from routes.archivo import router as archivo_router
-from routes.rrhh    import router as rrhh_router
-from routes.admin   import router as admin_router
-from routes.choices import router as choices_router
-from routes.pages   import router as pages_router
-from routes.backup  import router as backup_router
+from routes.auth         import router as auth_router
+from routes.archivo      import router as archivo_router
+from routes.rrhh         import router as rrhh_router
+from routes.rrhh_alertas import router as rrhh_alertas_router
+from routes.admin        import router as admin_router
+from routes.choices      import router as choices_router
+from routes.pages        import router as pages_router
+from routes.backup       import router as backup_router
 
 # =============================================================================
 # APLICACION
@@ -187,6 +188,53 @@ def run_migrations():
          "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'aprobado'"),
         ("idx status datos_archivo",
          "CREATE INDEX IF NOT EXISTS idx_datos_archivo_status ON public.datos_archivo(status)"),
+
+        # ── ISAD(G) / ISO 15489: enriquecimiento documental ──────────────────
+        ("numero_folio en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS numero_folio VARCHAR(50)"),
+        ("soporte en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS soporte VARCHAR(20) DEFAULT 'Físico'"),
+        ("numero_paginas en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS numero_paginas INTEGER"),
+        ("idioma en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS idioma VARCHAR(10) DEFAULT 'es'"),
+        ("numero_folio en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS numero_folio VARCHAR(50)"),
+        ("soporte en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS soporte VARCHAR(20) DEFAULT 'Físico'"),
+        ("numero_paginas en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS numero_paginas INTEGER"),
+        ("plazo_retencion_anios en tipo_documento",
+         "ALTER TABLE public.tipo_documento ADD COLUMN IF NOT EXISTS plazo_retencion_anios INTEGER DEFAULT 5"),
+        ("idx soporte datos_archivo",
+         "CREATE INDEX IF NOT EXISTS idx_datos_archivo_soporte ON public.datos_archivo(soporte)"),
+
+        # ── LOTTT Venezuela: campos empleados ─────────────────────────────────
+        ("fecha_nacimiento en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS fecha_nacimiento DATE"),
+        ("nivel_educativo en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS nivel_educativo VARCHAR(60)"),
+        ("sexo en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS sexo CHAR(1)"),
+        ("updated_at en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"),
+        ("updated_by en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS updated_by TEXT"),
+
+        # ── Historial de cargos: habilitar tabla del schema ───────────────────
+        ("historial_cargos tabla",
+         """CREATE TABLE IF NOT EXISTS public.historial_cargos (
+             id           INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             empleado_id  INTEGER NOT NULL REFERENCES public.empleados(id) ON DELETE CASCADE,
+             cargo_id     INTEGER NOT NULL REFERENCES public.cargos(id),
+             fecha_inicio DATE NOT NULL,
+             fecha_fin    DATE,
+             motivo       TEXT,
+             registrado_por TEXT,
+             created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+         )"""),
+        ("idx historial_cargos_empleado",
+         "CREATE INDEX IF NOT EXISTS idx_historial_cargos_emp ON public.historial_cargos(empleado_id)"),
     ]
     for label, sql in migrations:
         try:
@@ -265,6 +313,7 @@ def on_startup():
 app.include_router(auth_router)
 app.include_router(archivo_router)
 app.include_router(rrhh_router)
+app.include_router(rrhh_alertas_router)
 app.include_router(admin_router)
 app.include_router(choices_router)
 app.include_router(pages_router)

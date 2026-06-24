@@ -103,6 +103,39 @@ def get_choices():
         "SELECT estados FROM public.estados_laborales ORDER BY estados", fetch="all",
     ) or []
 
+    # Palabras clave del archivo para autocompletar
+    keywords_rows = db_query(
+        "SELECT nombre FROM public.descriptores_libres ORDER BY nombre LIMIT 500", fetch="all",
+    ) or []
+
+    # Tipos de documento con plazos de retención (para admin de retención)
+    retencion_rows = db_query(
+        """SELECT td.id, td.nombre_corto, COALESCE(td.plazo_retencion_anios, 5) AS plazo,
+                  c.slug AS cat_slug
+           FROM public.tipo_documento td
+           JOIN public.categoria c ON td.id_categoria = c.id
+           ORDER BY c.id, td.nombre_corto""",
+        fetch="all",
+    ) or []
+
+    # Valores estáticos de catálogo (ISAD(G) / Dublin Core)
+    soportes = ["Físico", "Digital", "Digitalizado"]
+    niveles_educativos = [
+        "Bachiller", "TSU", "Universitario", "Especialización",
+        "Maestría", "Doctorado", "Postdoctorado"
+    ]
+    sexos = [
+        {"value": "M", "label": "Masculino"},
+        {"value": "F", "label": "Femenino"},
+        {"value": "O", "label": "Otro / No especificado"},
+    ]
+    idiomas = [
+        {"value": "es", "label": "Español"},
+        {"value": "en", "label": "Inglés"},
+        {"value": "fr", "label": "Francés"},
+        {"value": "pt", "label": "Portugués"},
+    ]
+
     result = {
         "archivo": {
             "doc_types": arch_tipos_catalog,
@@ -110,6 +143,9 @@ def get_choices():
             "min_date":  min_arch,
             "max_date":  max_arch,
             "years":     arch_years,
+            "keywords":  [r["nombre"] for r in keywords_rows],
+            "soportes":  soportes,
+            "idiomas":   idiomas,
         },
         "rrhh": {
             "doc_types":       rh_doc_types,
@@ -122,6 +158,12 @@ def get_choices():
             "departamentos":   [r["nombre"] for r in departamentos_rows],
             "cargos":          [r["nombre"] for r in cargos_rows],
             "estados_catalog": [r["estados"] for r in estados_rows],
+            "niveles_educativos": niveles_educativos,
+            "sexos":           sexos,
+            "soportes":        soportes,
+        },
+        "catalogo": {
+            "retencion":       [dict(r) for r in retencion_rows],
         },
     }
 
