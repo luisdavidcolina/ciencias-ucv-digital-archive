@@ -31,13 +31,24 @@ def list_all_files(
     per_page = max(1, min(per_page, 100))
     offset   = (page - 1) * per_page
 
+    import re as _re
     if modulo == "Archivo":
         conditions, params = [], []
         if search:
-            conditions.append(
-                "(unaccent(da.titulo) ILIKE unaccent(%s) OR unaccent(da.autor) ILIKE unaccent(%s))"
-            )
-            params.extend([f"%{search}%", f"%{search}%"])
+            _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', search))
+            if _has_letters:
+                conditions.append(
+                    "(to_tsvector('spanish', coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'')) "
+                    "@@ plainto_tsquery('spanish', %s)"
+                    " OR unaccent(da.titulo) ILIKE unaccent(%s)"
+                    " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+                )
+                params.extend([search, f"%{search}%", f"%{search}%"])
+            else:
+                conditions.append(
+                    "(unaccent(da.titulo) ILIKE unaccent(%s) OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+                )
+                params.extend([f"%{search}%", f"%{search}%"])
         if type_filter:
             conditions.append("da.tesauro_primario = %s")
             params.append(type_filter)
@@ -82,11 +93,20 @@ def list_all_files(
     else:
         conditions, params = [], []
         if search:
-            conditions.append(
-                """(unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)
-                   OR e.cedula ILIKE %s)"""
-            )
-            params.extend([f"%{search}%", f"%{search}%"])
+            _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', search))
+            if _has_letters:
+                conditions.append(
+                    "(to_tsvector('spanish', coalesce(e.nombres,'') || ' ' || coalesce(e.apellidos,'')) "
+                    "@@ plainto_tsquery('spanish', %s)"
+                    " OR unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)"
+                    " OR e.cedula ILIKE %s)"
+                )
+                params.extend([search, f"%{search}%", f"%{search}%"])
+            else:
+                conditions.append(
+                    "(unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s) OR e.cedula ILIKE %s)"
+                )
+                params.extend([f"%{search}%", f"%{search}%"])
         if type_filter:
             conditions.append("COALESCE(td.nombre_corto, td.nombre) = %s")
             params.append(type_filter)
