@@ -3,7 +3,7 @@ import platform
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 import pandas as pd
 
 from database import db_query, log_event, logger, hash_password
@@ -249,16 +249,17 @@ def admin_submit(req: DocumentSubmitRequest):
         """
         INSERT INTO public.datos_rrhh
             (titulo, autor, id_tipo_documento,
-             empleado_id, fecha_documento, ubicacion, creado_por, 
-             tesauro_primario, tesauro_secundario, abstract)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             empleado_id, fecha_documento, ubicacion, creado_por,
+             tesauro_primario, tesauro_secundario, abstract, personas_relacionadas)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id_rrhh
         """,
         (
             f"{req.doc_type} de {req.personas_relacionadas or req.empleado}",
             "Recursos Humanos",
-            tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por, 
+            tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por,
             req.doc_type, req.tesauro_secundario or "", req.resumen or "",
+            req.personas_relacionadas or "",
         ),
         fetch="one",
         commit=True,
@@ -510,7 +511,8 @@ def delete_keyword(kid: int):
 @router.get("/users")
 def get_users_list():
     rows = db_query(
-        "SELECT id, usuario, nombre_usuario, modulo, rol "
+        "SELECT id, usuario, nombre_usuario, modulo, rol, "
+        "COALESCE(is_active, TRUE) AS is_active, last_login "
         "FROM public.usuarios_sistema ORDER BY usuario",
         fetch="all",
     ) or []
@@ -520,6 +522,20 @@ def get_users_list():
         d["password"] = "••••••••"
         out.append(d)
     return out
+
+
+@router.patch("/users/{uid}/active")
+def toggle_user_active(uid: int, requester: str = ""):
+    row = db_query("SELECT is_active FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="one")
+    if not row:
+        raise HTTPException(404, "Usuario no encontrado")
+    new_state = not bool(row.get("is_active", True))
+    db_query(
+        "UPDATE public.usuarios_sistema SET is_active = %s WHERE id = %s",
+        (new_state, uid), fetch="none", commit=True,
+    )
+    log_event(requester, "Toggle User Active", "Admin", f"uid={uid} → is_active={new_state}")
+    return {"success": True, "is_active": new_state}
 
 
 @router.post("/users/create")
@@ -625,6 +641,8 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("tesauro_secundario = %s"); params.append(req.tesauro_secundario)
         if req.doc_type is not None:
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
+        if req.personas_relacionadas is not None:
+            set_clauses.append("personas_relacionadas = %s"); params.append(req.personas_relacionadas)
 
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)
@@ -737,3 +755,49 @@ def change_password(uid: int, req: PasswordChangeRequest):
     )
     log_event(req.requester, "Change Password", "Admin", f"Usuario ID: {uid}")
     return {"success": True}
+
+
+@router.get("/audit_log")
+def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
+    """Retorna el log de auditoría con paginación y búsqueda opcional."""
+    page     = max(1, page)
+    per_page = max(1, min(per_page, 100))
+    offset   = (page - 1) * per_page
+
+    conditions, params = [], []
+    if search:
+        conditions.append(
+            "(unaccent(accion) ILIKE unaccent(%s) OR unaccent(usuario) ILIKE unaccent(%s))"
+        )
+        params.extend([f"%{search}%", f"%{search}%"])
+
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+    count_row = db_query(
+        f"SELECT COUNT(*) AS total FROM public.audit_log {where}",
+        params or None, fetch="one",
+    )
+    total = int(count_row["total"]) if count_row else 0
+
+    rows = db_query(
+        f"""SELECT id, usuario, accion AS evento, modulo, detalle, status AS resultado,
+                   TO_CHAR(timestamp, 'YYYY-MM-DD HH24:MI:SS') AS timestamp
+            FROM public.audit_log
+            {where}
+            ORDER BY timestamp DESC
+            LIMIT %s OFFSET %s""",
+        (params + [per_page, offset]) if params else [per_page, offset],
+        fetch="all",
+    ) or []
+
+    return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
+
+
+@router.post("/documento/{doc_id}/upload")
+async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
+    """Stub para subida de archivos. Implementar cuando se elija proveedor de storage."""
+    return {
+        "success": False,
+        "detail": "Servicio de almacenamiento pendiente de configuración. Por favor ingrese la URL del archivo manualmente.",
+        "doc_id": doc_id,
+    }
