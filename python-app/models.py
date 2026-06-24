@@ -73,6 +73,8 @@ class DocumentSubmitRequest(BaseModel):
     ubicacion: str
     tesauro_secundario: Optional[str] = ""
     descriptores_libres: Optional[str] = ""
+    status: Optional[str] = "aprobado"
+    notas: Optional[str] = ""
 
 
 class StatsRequest(BaseModel):
@@ -120,6 +122,7 @@ class DocumentUpdateRequest(BaseModel):
     personas_relacionadas: Optional[str] = None
     file_url: Optional[str] = None
     status: Optional[str] = None  # draft | revision | aprobado | rechazado
+    notas: Optional[str] = None
     usuario: str
 
 

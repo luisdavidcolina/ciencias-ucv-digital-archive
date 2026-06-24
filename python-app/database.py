@@ -1,5 +1,6 @@
 import os
 import logging
+import time as _time
 from typing import List
 
 import psycopg2
@@ -48,14 +49,15 @@ def get_db_connection():
         return None
 
 
-def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False):
+def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _retries: int = 2):
     """Helper unificado para ejecutar queries en Neon usando ThreadedConnectionPool.
 
     Args:
-        sql:    Sentencia SQL a ejecutar.
-        params: Parámetros para la sentencia (tupla o lista).
-        fetch:  'all' | 'one' | 'none'
-        commit: Si True realiza commit al terminar.
+        sql:      Sentencia SQL a ejecutar.
+        params:   Parámetros para la sentencia (tupla o lista).
+        fetch:    'all' | 'one' | 'none'
+        commit:   Si True realiza commit al terminar.
+        _retries: Reintentos cuando el pool está agotado (PoolError).
 
     Returns:
         Lista de filas, una fila o None según `fetch`.
@@ -66,37 +68,49 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False):
             return []
         return None
 
-    conn = None
-    try:
-        conn = _get_pool().getconn()
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql, params or ())
-            result = None
-            if fetch == "all":
-                result = cur.fetchall()
-                if result is None:
-                    result = []
-            elif fetch == "one":
-                result = cur.fetchone()
-                # None is a valid return for fetchone (no row found)
-            # fetch == "none": no fetch needed
-        if commit:
-            conn.commit()
-        return result
-    except Exception as e:
-        if conn is not None:
-            try:
-                conn.rollback()
-            except Exception:
-                pass
-        logger.error(f"Error en query SQL: {e}\nSQL: {sql}")
-        raise HTTPException(status_code=500, detail=f"Error en base de datos: {e}")
-    finally:
-        if conn is not None:
-            try:
-                _get_pool().putconn(conn)
-            except Exception:
-                pass
+    for attempt in range(_retries + 1):
+        conn = None
+        try:
+            conn = _get_pool().getconn()
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(sql, params or ())
+                result = None
+                if fetch == "all":
+                    result = cur.fetchall()
+                    if result is None:
+                        result = []
+                elif fetch == "one":
+                    result = cur.fetchone()
+                    # None is a valid return for fetchone (no row found)
+                # fetch == "none": no fetch needed
+            if commit:
+                conn.commit()
+            return result
+        except pg_pool.PoolError:
+            if conn is not None:
+                try:
+                    _get_pool().putconn(conn)
+                    conn = None
+                except Exception:
+                    pass
+            if attempt < _retries:
+                _time.sleep(0.1 * (attempt + 1))
+                continue
+            raise HTTPException(503, "Base de datos temporalmente no disponible")
+        except Exception as e:
+            if conn is not None:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+            logger.error(f"Error en query SQL: {e}\nSQL: {sql}")
+            raise HTTPException(status_code=500, detail=f"Error en base de datos: {e}")
+        finally:
+            if conn is not None:
+                try:
+                    _get_pool().putconn(conn)
+                except Exception:
+                    pass
 
 
 # =============================================================================
