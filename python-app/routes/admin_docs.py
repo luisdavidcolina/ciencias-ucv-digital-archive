@@ -219,7 +219,7 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
 
 @router.post("/submit")
 def admin_submit(req: DocumentSubmitRequest):
-    log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}")
+    log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}, Titulo: {(req.titulo or req.empleado or '')[:60]}")
     creado_por = _resolve_user_id(req.usuario)
     fecha_doc  = req.fecha or datetime.now().strftime("%Y-%m-%d")
 
@@ -416,7 +416,7 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
                 )
 
         invalidate_choices_cache()
-        log_event(req.usuario, "Update Document", "Archivo", f"ID: {doc_id}")
+        log_event(req.usuario, "Update Document", "Archivo", f"ID: {doc_id}, Titulo: {(req.titulo or '')[:60]}, Status: {req.status or 'aprobado'}")
         return {"success": True}
 
     else:  # RRHH
@@ -458,7 +458,7 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             )
 
         invalidate_choices_cache()
-        log_event(req.usuario, "Update Document", "RRHH", f"ID: {doc_id}")
+        log_event(req.usuario, "Update Document", "RRHH", f"ID: {doc_id}, Status: {req.status or 'aprobado'}")
         return {"success": True}
 
 
