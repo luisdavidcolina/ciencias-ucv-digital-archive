@@ -203,14 +203,14 @@
           </div>
           <div class="ds-results-header">
             <h2 class="ds-results-title">Resultados de Búsqueda</h2>
-            <span id="count-rrhh-results" class="ds-pagination-info">0 Registros</span>
+            <span id="count-rrhh-results" class="ds-pagination-info" role="status" aria-live="polite">0 Registros</span>
           </div>
-          <div id="list_rrhh"></div>
+          <div id="list_rrhh" role="list"></div>
           <div id="rrhh-pagination"></div>
-          <div id="rrhh_pagination_controls" class="d-flex justify-content-between align-items-center mt-3">
-            <button id="btn-rrhh-prev" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-left"></i> Anterior</button>
-            <span id="info-rrhh-pagination" class="text-muted" style="font-size:0.85rem;">Pág 1 de 1</span>
-            <button id="btn-rrhh-next" class="btn btn-outline-secondary btn-sm">Siguiente <i class="fas fa-chevron-right"></i></button>
+          <div id="rrhh_pagination_controls" class="d-flex justify-content-between align-items-center mt-3" role="navigation" aria-label="Paginación de personas">
+            <button id="btn-rrhh-prev" class="btn btn-outline-secondary btn-sm" aria-label="Página anterior"><i class="fas fa-chevron-left"></i> Anterior</button>
+            <span id="info-rrhh-pagination" class="text-muted" style="font-size:0.85rem;" aria-live="polite">Pág 1 de 1</span>
+            <button id="btn-rrhh-next" class="btn btn-outline-secondary btn-sm" aria-label="Página siguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
           </div>
         </div>
       </div>
