@@ -194,6 +194,7 @@ def search_rrhh(req: RrhhSearchRequest):
             v.empleado_id, v.cedula, v.rif, v.persona_raw AS empleado,
             v.cargo, v.departamento, v.estado,
             v.fecha_ingreso, v.foto_url,
+            v.fecha_nacimiento, v.nivel_educativo, v.sexo,
             v.doc_count, v.tipos,
             ts_rank_cd(
               to_tsvector('spanish',
@@ -233,10 +234,13 @@ def search_rrhh(req: RrhhSearchRequest):
             "estado":        r["estado"] or "Sin estado",
             "estatuses":     r["estado"] or "Sin estado",
             "tipos":         tipos_str,
-            "fecha_ingreso": r["fecha_ingreso"] or "",
-            "foto_url":      r["foto_url"] or "",
-            "doc_type":      first_tipo,
-            "__idx":         offset + i + 1,
+            "fecha_ingreso":    r["fecha_ingreso"] or "",
+            "fecha_nacimiento": r["fecha_nacimiento"] or "",
+            "nivel_educativo":  r["nivel_educativo"] or "",
+            "sexo":             r["sexo"] or "",
+            "foto_url":         r["foto_url"] or "",
+            "doc_type":         first_tipo,
+            "__idx":            offset + i + 1,
         })
 
     return {
