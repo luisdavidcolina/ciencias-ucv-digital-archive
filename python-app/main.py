@@ -254,6 +254,25 @@ app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 
 
 # =============================================================================
+# HEALTH CHECK
+# =============================================================================
+
+@app.get("/api/health", tags=["system"])
+def health_check():
+    """Endpoint de salud para monitoreo básico."""
+    try:
+        row = db_query("SELECT 1 AS ok", fetch="one")
+        db_ok = row is not None
+    except Exception:
+        db_ok = False
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "db": "connected" if db_ok else "error",
+        "version": "3.0.0-Neon",
+    }
+
+
+# =============================================================================
 # ARCHIVOS ESTATICOS
 # =============================================================================
 

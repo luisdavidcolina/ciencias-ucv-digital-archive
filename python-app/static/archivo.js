@@ -123,7 +123,9 @@ function renderArchivoList() {
   const container = document.getElementById("list_archivo");
   const results   = state.archivo.results;
   const total     = state.archivo.total || results.length;
-  document.getElementById("count-archivo-results").innerText = `${total} Registros`;
+  const hasFilter = !!(state.archivo.search || (state.archivo.selectedTypes && state.archivo.selectedTypes.length) || (state.archivo.selectedTesauro && state.archivo.selectedTesauro.length));
+  document.getElementById("count-archivo-results").innerText =
+    hasFilter ? `${total} Resultados` : `${total} Registros`;
 
   if (results.length === 0) {
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">

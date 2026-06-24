@@ -64,21 +64,31 @@ function renderRrhhPagination() {
   const page    = state.rrhh.page    || 1;
   const pages   = Math.ceil(total / perPage) || 1;
   if (pages <= 1) { container.innerHTML = ""; return; }
+
+  const winSize   = 5;
+  const startPage = Math.max(1, Math.min(page - Math.floor(winSize / 2), pages - winSize + 1));
+  const endPage   = Math.min(pages, startPage + winSize - 1);
+  const pageNums  = [];
+  for (let i = startPage; i <= endPage; i++) pageNums.push(i);
+
   container.innerHTML = `
-    <nav class="mt-3 d-flex align-items-center justify-content-between">
-      <small class="text-muted">Mostrando pág. ${page} de ${pages} (${total} resultados)</small>
+    <nav class="mt-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:6px;">
+      <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
       <ul class="pagination pagination-sm mb-0">
+        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeRrhhPage(1)" title="Primera"><i class="fas fa-angle-double-left"></i></button>
+        </li>
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
           <button class="page-link" onclick="changeRrhhPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
         </li>
-        ${Array.from({length: Math.min(5, pages)}, (_, i) => {
-          const p = Math.max(1, Math.min(page - 2, pages - 4)) + i;
-          return `<li class="page-item ${p === page ? 'active' : ''}">
-            <button class="page-link" onclick="changeRrhhPage(${p})">${p}</button>
-          </li>`;
-        }).join("")}
+        ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
+          <button class="page-link" onclick="changeRrhhPage(${p})">${p}</button>
+        </li>`).join("")}
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
           <button class="page-link" onclick="changeRrhhPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+        </li>
+        <li class="page-item ${page >= pages ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeRrhhPage(${pages})" title="Última"><i class="fas fa-angle-double-right"></i></button>
         </li>
       </ul>
     </nav>`;
@@ -93,7 +103,8 @@ function renderRrhhList() {
   const container = document.getElementById("list_rrhh");
   const results   = state.rrhh.results;
   const total     = state.rrhh.total || results.length;
-  document.getElementById("count-rrhh-results").innerText = `${total} Registros`;
+  const hasFilter = !!(state.rrhh.search || (state.rrhh.selectedTypes && state.rrhh.selectedTypes.length) || (state.rrhh.selectedEstados && state.rrhh.selectedEstados.length));
+  document.getElementById("count-rrhh-results").innerText = hasFilter ? `${total} Resultados` : `${total} Registros`;
 
   if (results.length === 0) {
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">

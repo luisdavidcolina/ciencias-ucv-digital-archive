@@ -393,13 +393,18 @@ function initDateControls(module, data) {
     });
   }
 
-  const minYear = parseInt(data.min_date.substring(0, 4));
-  const maxYear = parseInt(data.max_date.substring(0, 4));
   const sy = document.getElementById(`year-select-${module}`);
   if (sy) {
+    // Usar lista exacta de años con datos si está disponible (más precisa)
+    const years = (data.years && data.years.length)
+      ? data.years
+      : (() => {
+          const minY = parseInt(data.min_date.substring(0, 4));
+          const maxY = parseInt(data.max_date.substring(0, 4));
+          return Array.from({ length: maxY - minY + 1 }, (_, i) => maxY - i);
+        })();
     sy.innerHTML = `<option value="">Seleccionar año…</option>` +
-      Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i)
-        .map(y => `<option value="${y}">${y}</option>`).join("");
+      years.map(y => `<option value="${y}">${y}</option>`).join("");
   }
 
   state[module].dateStart = data.min_date;
