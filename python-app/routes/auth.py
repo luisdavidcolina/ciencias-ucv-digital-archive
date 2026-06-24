@@ -63,10 +63,8 @@ def login(req: LoginRequest):
         fetch="all",
     )
     if rows:
-        # Verificar la contraseña con bcrypt (skip usuarios inactivos)
-        for row in rows:
-            if not row.get("is_active", True):
-                continue
+        active_rows = [r for r in rows if r.get("is_active", True)]
+        for row in active_rows:
             if verify_password(req.password.strip(), row["contrasena"]):
                 try:
                     db_query(
@@ -74,8 +72,9 @@ def login(req: LoginRequest):
                         (req.username.strip(),), fetch="none", commit=True,
                     )
                 except Exception:
-                    pass  # no bloquear el login por esto
-                payload = _build_user_response([row], req.username.strip())
+                    pass
+                # Recolecta todos los módulos activos del usuario
+                payload = _build_user_response(active_rows, req.username.strip())
                 modules = payload["user"]["modules"]
                 roles = payload["user"]["roles"]
                 log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")

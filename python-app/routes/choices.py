@@ -92,6 +92,17 @@ def get_choices():
     arch_years = sorted({d.year for d in arch_dates}, reverse=True) if not arch_dates.empty else []
     rh_years   = sorted({d.year for d in rh_dates},   reverse=True) if not rh_dates.empty else []
 
+    # Catálogos de RRHH para formularios de nuevo empleado
+    departamentos_rows = db_query(
+        "SELECT nombre FROM public.departamentos ORDER BY nombre", fetch="all",
+    ) or []
+    cargos_rows = db_query(
+        "SELECT nombre FROM public.cargos ORDER BY nombre", fetch="all",
+    ) or []
+    estados_rows = db_query(
+        "SELECT estados FROM public.estados_laborales ORDER BY estados", fetch="all",
+    ) or []
+
     result = {
         "archivo": {
             "doc_types": arch_tipos_catalog,
@@ -108,6 +119,9 @@ def get_choices():
             "max_date":        max_rh,
             "years":           rh_years,
             "tipos_por_parte": rrhh_tipos_por_parte,
+            "departamentos":   [r["nombre"] for r in departamentos_rows],
+            "cargos":          [r["nombre"] for r in cargos_rows],
+            "estados_catalog": [r["estados"] for r in estados_rows],
         },
     }
 

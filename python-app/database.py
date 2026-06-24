@@ -72,6 +72,10 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
         conn = None
         try:
             conn = _get_pool().getconn()
+            # Verifica que la conexión esté activa; la descarta si está cerrada
+            if conn.closed:
+                _get_pool().putconn(conn, close=True)
+                conn = _get_pool().getconn()
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute(sql, params or ())
                 result = None
@@ -81,7 +85,6 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                         result = []
                 elif fetch == "one":
                     result = cur.fetchone()
-                    # None is a valid return for fetchone (no row found)
                 # fetch == "none": no fetch needed
             if commit:
                 conn.commit()
@@ -94,9 +97,22 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                 except Exception:
                     pass
             if attempt < _retries:
-                _time.sleep(0.1 * (attempt + 1))
+                _time.sleep(0.15 * (attempt + 1))
                 continue
             raise HTTPException(503, "Base de datos temporalmente no disponible")
+        except psycopg2.OperationalError as e:
+            # Conexión rota — descarta del pool y reintenta
+            if conn is not None:
+                try:
+                    _get_pool().putconn(conn, close=True)
+                    conn = None
+                except Exception:
+                    pass
+            if attempt < _retries:
+                logger.warning(f"Conexión perdida, reintentando (intento {attempt+1}): {e}")
+                _time.sleep(0.2 * (attempt + 1))
+                continue
+            raise HTTPException(503, "Base de datos no disponible")
         except Exception as e:
             if conn is not None:
                 try:
