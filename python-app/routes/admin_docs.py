@@ -236,8 +236,9 @@ def admin_submit(req: DocumentSubmitRequest):
             INSERT INTO public.datos_archivo
                 (titulo, abstract, autor,
                  fecha_documento, ubicacion, creado_por, tesauro_primario,
-                 tesauro_secundario, id_tipo_documento)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 tesauro_secundario, id_tipo_documento,
+                 numero_folio, soporte, numero_paginas)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id_archivo
             """,
             (
@@ -246,6 +247,9 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.autor or "Anónimo",
                 fecha_doc, req.ubicacion, creado_por, req.doc_type,
                 req.tesauro_secundario or "", tipo_id,
+                req.numero_folio or None,
+                req.soporte or "Físico",
+                req.numero_paginas or None,
             ),
             fetch="one",
             commit=True,

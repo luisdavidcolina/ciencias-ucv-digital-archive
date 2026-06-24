@@ -32,6 +32,16 @@ Este proyecto usa [Semantic Versioning](https://semver.org/lang/es/).
 - `PATCH /api/admin/retencion/tipos/{id}`
 - `GET  /api/admin/retencion/vencimientos`
 
+### Añadido — v3.2.1 (parche incremental)
+- Reporte PDF del expediente incluye: `fecha_ingreso`, `fecha_nacimiento`, `nivel_educativo`, `sexo` — cumplimiento LOTTT
+- Sección "Historial de Cargos" en el reporte PDF (tabla cargo / desde / hasta / motivo)
+- Dashboard RRHH: dos nuevas gráficas LOTTT — "Nivel Educativo" y "Distribución por Sexo"
+- Dashboard RRHH: nueva tarjeta "Movimientos de Cargo" (total de `historial_cargos`)
+- Búsqueda pública Archivo: badge de soporte visible en cada tarjeta de resultado
+- Búsqueda pública Archivo: folio (`#`) y n° de páginas junto a la ubicación en tarjetas
+- Modal de detalle Archivo: filas "Soporte", "N° de Folio/Signatura" y "N° de Páginas"
+- Query FTS de Archivo expone `numero_folio`, `soporte` y `numero_paginas` en resultados paginados
+
 ### Mejorado — choices.py
 - Expone: `keywords` (palabras clave para autocompletar), `soportes`, `idiomas`, `niveles_educativos`, `sexos`, `catalogo.retencion`
 

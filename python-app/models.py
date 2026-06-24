@@ -75,6 +75,9 @@ class DocumentSubmitRequest(BaseModel):
     descriptores_libres: Optional[str] = ""
     status: Optional[str] = "aprobado"
     notas: Optional[str] = ""
+    numero_folio: Optional[str] = None
+    soporte: Optional[str] = "Físico"
+    numero_paginas: Optional[int] = None
 
     @validator("modulo")
     def modulo_must_be_valid(cls, v):

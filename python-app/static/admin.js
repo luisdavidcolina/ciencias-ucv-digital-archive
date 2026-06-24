@@ -223,6 +223,22 @@ function renderDynamicSubmitFields() {
         <label class="font-weight-bold text-muted">Ubicación Física (Estante, Gaveta o Caja) *</label>
         <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Mapoteca - Gaveta 1 o Digitalizado Exclusivo" required>
       </div>
+      <div class="row mt-2">
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">N° de Folio / Signatura</label>
+          <input type="text" id="reg-folio-${suf}" class="form-control" placeholder="Ej: F-023, Carp-A-12">
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Soporte</label>
+          <select id="reg-soporte-${suf}" class="form-control">
+            ${(state.choices?.archivo?.soportes || ["Físico","Digital","Digitalizado"]).map(s => `<option value="${s}">${s}</option>`).join("")}
+          </select>
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">N° de Páginas</label>
+          <input type="number" id="reg-paginas-${suf}" class="form-control" min="1" placeholder="Ej: 12">
+        </div>
+      </div>
     `;
   } else {
     container.innerHTML = `
@@ -401,6 +417,10 @@ async function handleNewSubmission(e) {
     payload.resumen             = val(`reg-resumen-${suf}`);
     payload.tesauro_secundario  = val(`reg-secundario-${suf}`);
     payload.descriptores_libres = val(`reg-descriptores-${suf}`);
+    payload.numero_folio        = val(`reg-folio-${suf}`) || null;
+    payload.soporte             = val(`reg-soporte-${suf}`) || "Físico";
+    const pags = parseInt(document.getElementById(`reg-paginas-${suf}`)?.value || "");
+    if (!isNaN(pags) && pags > 0) payload.numero_paginas = pags;
   } else {
     const nombres   = val(`reg-nombres-${suf}`);
     const apellidos = val(`reg-apellidos-${suf}`);
