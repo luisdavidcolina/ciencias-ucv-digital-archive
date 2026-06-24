@@ -341,7 +341,22 @@ async function handleNewSubmission(e) {
   const suf       = adminSuffixFromTab();
   const isArchivo = isArchivoModule();
 
-  function val(id) { return document.getElementById(id)?.value || ""; }
+  function val(id) { return (document.getElementById(id)?.value || "").trim(); }
+
+  // Validación en el borde del sistema (entrada del usuario)
+  if (isArchivo) {
+    if (!val(`reg-title-${suf}`))    { showToast("El título del documento es requerido.", "warning"); return; }
+    if (!val(`reg-doc-type-${suf}`)) { showToast("Selecciona el tipo de documento.", "warning"); return; }
+    if (!val(`reg-location-${suf}`)) { showToast("La ubicación física es requerida.", "warning"); return; }
+  } else {
+    if (!val(`reg-nombres-${suf}`))  { showToast("El nombre del empleado es requerido.", "warning"); return; }
+    if (!val(`reg-cedula-${suf}`))   { showToast("La cédula del empleado es requerida.", "warning"); return; }
+    if (!val(`reg-location-${suf}`)) { showToast("La retención física es requerida.", "warning"); return; }
+  }
+
+  const submitBtn = document.getElementById(`btn_submit_workspace-${suf}`);
+  const origLabel = submitBtn?.innerHTML;
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...'; }
 
   const payload = {
     modulo:    state.user.modulo,
@@ -358,8 +373,8 @@ async function handleNewSubmission(e) {
     payload.tesauro_secundario  = val(`reg-secundario-${suf}`);
     payload.descriptores_libres = val(`reg-descriptores-${suf}`);
   } else {
-    const nombres   = val(`reg-nombres-${suf}`).trim();
-    const apellidos = val(`reg-apellidos-${suf}`).trim();
+    const nombres   = val(`reg-nombres-${suf}`);
+    const apellidos = val(`reg-apellidos-${suf}`);
     payload.nombres               = nombres;
     payload.apellidos             = apellidos;
     payload.empleado              = `${nombres} ${apellidos}`.trim();
@@ -380,7 +395,11 @@ async function handleNewSubmission(e) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error();
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      showToast(errData.detail || "Error al registrar el folio.", "error");
+      return;
+    }
     showToast("Ingreso guardado con éxito.", "success");
     const form = document.getElementById(`admin-submit-form-${suf}`);
     if (form) form.reset();
@@ -390,7 +409,9 @@ async function handleNewSubmission(e) {
     if (isArchivo) triggerArchivoSearch(); else triggerRrhhSearch();
     loadAdminTab("stats");
   } catch {
-    showToast("Error al intentar registrar el nuevo folio.", "error");
+    showToast("Error de conexión al registrar el folio.", "error");
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origLabel; }
   }
 }
 
