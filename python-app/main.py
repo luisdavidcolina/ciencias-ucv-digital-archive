@@ -22,7 +22,7 @@ from routes.backup       import router as backup_router
 
 app = FastAPI(
     title="Archivo Institucional Digital — Facultad de Ciencias, UCV",
-    version="3.2.0-Neon",
+    version="3.2.1-Neon",
     description="""
 Sistema de gestión documental e inventario de RRHH de la Facultad de Ciencias,
 Universidad Central de Venezuela.
@@ -361,8 +361,11 @@ def health_check():
     try:
         counts = db_query(
             """SELECT
-                (SELECT COUNT(*) FROM public.datos_archivo) AS archivo,
-                (SELECT COUNT(*) FROM public.empleados)     AS empleados,
+                (SELECT COUNT(*) FROM public.datos_archivo)    AS archivo,
+                (SELECT COUNT(*) FROM public.datos_rrhh)       AS docs_rrhh,
+                (SELECT COUNT(*) FROM public.empleados)        AS empleados,
+                (SELECT COUNT(*) FROM public.historial_cargos) AS historial_cargos,
+                (SELECT COUNT(*) FROM public.descriptores_libres) AS palabras_clave,
                 (SELECT COUNT(*) FROM public.usuarios_sistema) AS usuarios""",
             fetch="one",
         )
@@ -374,11 +377,7 @@ def health_check():
         "status": "ok" if db_ok else "degraded",
         "db": "connected" if db_ok else "error",
         "version": settings.app_version,
-        "counts": {
-            "archivo":   int(counts["archivo"])   if counts else None,
-            "empleados": int(counts["empleados"]) if counts else None,
-            "usuarios":  int(counts["usuarios"])  if counts else None,
-        } if db_ok else None,
+        "counts": {k: int(v) for k, v in dict(counts).items()} if db_ok and counts else None,
     }
 
 

@@ -36,6 +36,7 @@ async function triggerArchivoSearch() {
         date_start:    state.archivo.dateStart,
         date_end:      state.archivo.dateEnd,
         sort_mode:     state.archivo.sortMode,
+        soporte:       document.getElementById("soporte_archivo")?.value || "",
         page:          state.archivo.page,
         per_page:      state.archivo.perPage
       })

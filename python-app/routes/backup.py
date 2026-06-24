@@ -13,14 +13,23 @@ router = APIRouter()
 
 # Tablas exportables, en orden de dependencias (sin FK issues)
 EXPORTABLE_TABLES = [
+    # Catálogos (sin FK)
     "categoria",
+    "cargos",
+    "departamentos",
+    "estados_laborales",
     "tipo_documento",
     "descriptores_libres",
+    # Personal
     "empleados",
+    "historial_cargos",
+    # Documentos RRHH
     "datos_rrhh",
     "rrhh_descriptores",
+    # Documentos Archivo
     "datos_archivo",
     "archivo_descriptores",
+    # Sistema
     "usuarios_sistema",
 ]
 

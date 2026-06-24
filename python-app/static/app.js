@@ -567,6 +567,7 @@ function setupEventListeners() {
   safeOn("download_archivo_xls","click",() => _exportResultsCSV("archivo"));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("soporte_archivo",   "change", () => { state.archivo.page = 1; triggerArchivoSearch(); });
 
   // Buscador RRHH — debounce 420ms en input
   safeOn("search_rrhh",       "input",  e => {

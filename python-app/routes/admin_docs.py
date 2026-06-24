@@ -194,6 +194,7 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
                       COALESCE(numero_folio,'')         AS numero_folio,
                       COALESCE(soporte,'Físico')        AS soporte,
                       numero_paginas,
+                      COALESCE(idioma,'es')             AS idioma,
                       updated_at, updated_by
                FROM public.datos_archivo WHERE id_archivo = %s""",
             [doc_id], fetch="one"
@@ -305,8 +306,9 @@ def admin_submit(req: DocumentSubmitRequest):
             """
             INSERT INTO public.empleados
                 (cedula, nombres, apellidos, rif, cargo_id, departamento_id,
-                 estado_id, fecha_ingreso, fecha_jubilacion, fecha_pension, foto_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 estado_id, fecha_ingreso, fecha_jubilacion, fecha_pension, foto_url,
+                 fecha_nacimiento, nivel_educativo, sexo)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
             """,
             (
@@ -316,6 +318,9 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.rif or None,
                 cargo_id, dept_id, estado_id, fecha_doc,
                 req.fecha_jubilacion or None, req.fecha_pension or None, req.foto_url or None,
+                getattr(req, "fecha_nacimiento", None) or None,
+                getattr(req, "nivel_educativo", None) or None,
+                getattr(req, "sexo", None) or None,
             ),
             fetch="one",
             commit=True,
@@ -403,6 +408,10 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
         if req.status is not None and req.status in VALID_STATUS:
             set_clauses.append("status = %s"); params.append(req.status)
 
+        # Personas relacionadas
+        if req.personas_relacionadas is not None:
+            set_clauses.append("personas_relacionadas = %s"); params.append(req.personas_relacionadas or None)
+
         # Campos ISAD(G) / ISO 15489
         if req.numero_folio is not None:
             set_clauses.append("numero_folio = %s"); params.append(req.numero_folio or None)
@@ -410,6 +419,8 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("soporte = %s"); params.append(req.soporte)
         if req.numero_paginas is not None:
             set_clauses.append("numero_paginas = %s"); params.append(req.numero_paginas or None)
+        if req.idioma is not None and req.idioma in ("es", "en", "fr", "pt"):
+            set_clauses.append("idioma = %s"); params.append(req.idioma)
 
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)

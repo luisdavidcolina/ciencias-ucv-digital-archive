@@ -785,6 +785,37 @@
             <label class="font-weight-bold text-muted">URL Foto Avatar</label>
             <input type="text" id="edit-emp-foto" class="form-control" placeholder="https://...">
           </div>
+          <!-- Historial de Cargos (gestión desde el admin) -->
+          <hr>
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="font-weight-bold text-muted mb-0">
+                <i class="fas fa-exchange-alt mr-1"></i>Historial de Cargos
+              </h6>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-toggle-historial-admin"
+                      onclick="_adminToggleHistorial()">
+                <i class="fas fa-chevron-down mr-1"></i>Ver historial
+              </button>
+            </div>
+            <div id="admin-historial-container" style="display:none;">
+              <div id="admin-historial-body" class="mb-2" style="max-height:200px;overflow-y:auto;">
+                <p class="text-muted small text-center py-2">Cargando...</p>
+              </div>
+              <div class="input-group input-group-sm mt-2">
+                <input type="text" id="admin-historial-cargo-input" class="form-control"
+                       placeholder="Cargo (Ej: Profesor Asociado)" list="dl-cargos" autocomplete="off">
+                <input type="date" id="admin-historial-desde-input" class="form-control" style="max-width:140px;">
+                <input type="text" id="admin-historial-motivo-input" class="form-control"
+                       placeholder="Motivo (Ej: Ascenso por concurso)">
+                <div class="input-group-append">
+                  <button class="btn btn-success btn-sm" type="button" onclick="_adminAddCargo()">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <small class="text-muted">El cargo anterior se cerrará automáticamente en la fecha indicada.</small>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>

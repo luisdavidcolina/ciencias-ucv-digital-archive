@@ -26,6 +26,7 @@ class ArchivoSearchRequest(BaseModel):
     date_start: Optional[str] = ""
     date_end: Optional[str] = ""
     sort_mode: Optional[str] = "Alfabético (A-Z)"
+    soporte: Optional[str] = ""   # Físico | Digital | Digitalizado | ""
     page: int = 1
     per_page: int = 10
 
@@ -78,6 +79,10 @@ class DocumentSubmitRequest(BaseModel):
     numero_folio: Optional[str] = None
     soporte: Optional[str] = "Físico"
     numero_paginas: Optional[int] = None
+    # Campos LOTTT para nuevo empleado vía submit
+    fecha_nacimiento: Optional[str] = None
+    nivel_educativo: Optional[str] = None
+    sexo: Optional[str] = None
 
     @validator("modulo")
     def modulo_must_be_valid(cls, v):
@@ -155,6 +160,7 @@ class DocumentUpdateRequest(BaseModel):
     numero_folio: Optional[str] = None
     soporte: Optional[str] = None   # Físico | Digital | Digitalizado
     numero_paginas: Optional[int] = None
+    idioma: Optional[str] = None    # es | en | fr | pt
     usuario: str
 
 

@@ -330,6 +330,29 @@ function renderDynamicSubmitFields() {
           <input type="text" id="reg-foto-${suf}" class="form-control" placeholder="https://...">
         </div>
       </div>
+      <!-- Datos personales LOTTT -->
+      <div class="row mt-2">
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Fecha de Nacimiento <span class="badge badge-secondary badge-sm">LOTTT</span></label>
+          <input type="date" id="reg-nacimiento-${suf}" class="form-control">
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Sexo <span class="badge badge-secondary badge-sm">LOTTT</span></label>
+          <select id="reg-sexo-${suf}" class="form-control">
+            <option value="">No especificado</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Otro</option>
+          </select>
+        </div>
+        <div class="col-md-4 form-group">
+          <label class="font-weight-bold text-muted">Nivel Educativo <span class="badge badge-secondary badge-sm">LOTTT</span></label>
+          <select id="reg-nivel-${suf}" class="form-control">
+            <option value="">No especificado</option>
+            ${(state.choices?.rrhh?.niveles_educativos || ["Bachiller","TSU","Universitario","Especialización","Maestría","Doctorado","Postdoctorado"]).map(n => `<option value="${n}">${n}</option>`).join("")}
+          </select>
+        </div>
+      </div>
     `;
   }
 }
@@ -436,6 +459,9 @@ async function handleNewSubmission(e) {
     payload.fecha_jubilacion      = val(`reg-jubilacion-${suf}`);
     payload.fecha_pension         = val(`reg-pension-${suf}`);
     payload.foto_url              = val(`reg-foto-${suf}`);
+    payload.fecha_nacimiento      = val(`reg-nacimiento-${suf}`) || null;
+    payload.sexo                  = val(`reg-sexo-${suf}`) || null;
+    payload.nivel_educativo       = val(`reg-nivel-${suf}`) || null;
   }
 
   try {
@@ -700,6 +726,10 @@ async function openEditDocModal(id) {
   const statusSel = document.getElementById("edit-doc-status");
   if (statusSel) statusSel.value = rec.status || "aprobado";
 
+  // Personas relacionadas
+  const personasEl = document.getElementById("edit-doc-personas");
+  if (personasEl) personasEl.value = rec.personas_relacionadas || "";
+
   // Campos ISAD(G)
   const folioEl = document.getElementById("edit-doc-folio");
   if (folioEl) folioEl.value = rec.numero_folio || "";
@@ -707,6 +737,8 @@ async function openEditDocModal(id) {
   if (soporteEl) soporteEl.value = rec.soporte || "Físico";
   const paginasEl = document.getElementById("edit-doc-paginas");
   if (paginasEl) paginasEl.value = rec.numero_paginas || "";
+  const idiomaEl = document.getElementById("edit-doc-idioma");
+  if (idiomaEl) idiomaEl.value = rec.idioma || "es";
 
   $("#editArchivoModal").modal("show");
 }
@@ -777,9 +809,11 @@ async function handleSaveEditDoc() {
     ubicacion:          document.getElementById("edit-doc-ubicacion")?.value || null,
     file_url:           document.getElementById("edit-doc-file-url")?.value.trim() || "",
     status:             document.getElementById("edit-doc-status")?.value || "aprobado",
+    personas_relacionadas: document.getElementById("edit-doc-personas")?.value.trim() || null,
     numero_folio:       document.getElementById("edit-doc-folio")?.value.trim() || null,
     soporte:            document.getElementById("edit-doc-soporte")?.value || null,
     numero_paginas:     parseInt(document.getElementById("edit-doc-paginas")?.value) || null,
+    idioma:             document.getElementById("edit-doc-idioma")?.value || "es",
     usuario:            state.user.username,
   };
 
@@ -851,6 +885,13 @@ async function openEditEmpleadoModal(empId) {
   document.getElementById("edit-emp-jubilacion").value  = rec.fecha_jubilacion || "";
   document.getElementById("edit-emp-pension").value     = rec.fecha_pension || "";
   document.getElementById("edit-emp-foto").value        = rec.foto_url || "";
+
+  // Resetear historial admin al abrir el modal
+  const histContainer = document.getElementById("admin-historial-container");
+  const histBtn = document.getElementById("btn-toggle-historial-admin");
+  if (histContainer) { histContainer.style.display = "none"; }
+  if (histBtn) { histBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Ver historial'; }
+  window._adminHistorialEmpId = rec.empleado_id || rec.id;
 
   $("#editEmpleadoModal").modal("show");
 }
@@ -1009,4 +1050,87 @@ function initDropZone(suf) {
   fileInput.addEventListener("change", () => {
     if (fileInput.files?.[0]) updateLabel(fileInput.files[0].name);
   });
+}
+// =============================================================================
+// HISTORIAL DE CARGOS — gestión desde el admin panel
+// =============================================================================
+
+async function _adminToggleHistorial() {
+  const container = document.getElementById("admin-historial-container");
+  const btn = document.getElementById("btn-toggle-historial-admin");
+  if (!container) return;
+
+  const isHidden = container.style.display === "none";
+  container.style.display = isHidden ? "block" : "none";
+  if (btn) btn.innerHTML = isHidden
+    ? '<i class="fas fa-chevron-up mr-1"></i>Ocultar historial'
+    : '<i class="fas fa-chevron-down mr-1"></i>Ver historial';
+
+  if (isHidden) await _adminLoadHistorial();
+}
+
+async function _adminLoadHistorial() {
+  const empId = window._adminHistorialEmpId;
+  const body = document.getElementById("admin-historial-body");
+  if (!empId || !body) return;
+
+  body.innerHTML = '<p class="text-muted small text-center py-2"><i class="fas fa-spinner fa-spin"></i></p>';
+  try {
+    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`);
+    const data = await res.json();
+    if (!data.length) {
+      body.innerHTML = '<p class="text-muted small text-center py-2">Sin historial registrado.</p>';
+      return;
+    }
+    body.innerHTML = `
+      <table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">
+        <thead class="thead-light"><tr><th>Cargo</th><th>Desde</th><th>Hasta</th><th>Motivo</th><th></th></tr></thead>
+        <tbody>
+          ${data.map(h => `
+            <tr>
+              <td>${h.cargo_nombre}</td>
+              <td>${h.fecha_inicio || "—"}</td>
+              <td>${h.fecha_fin || '<span class="text-success font-weight-bold">Actual</span>'}</td>
+              <td class="text-muted">${h.motivo || "—"}</td>
+              <td><button class="btn btn-xs btn-outline-danger" onclick="_adminDeleteCargo(${empId}, ${h.id})"><i class="fas fa-trash"></i></button></td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  } catch {
+    body.innerHTML = '<p class="text-danger small text-center py-2">Error al cargar historial.</p>';
+  }
+}
+
+async function _adminAddCargo() {
+  const empId  = window._adminHistorialEmpId;
+  const cargo  = document.getElementById("admin-historial-cargo-input")?.value.trim();
+  const desde  = document.getElementById("admin-historial-desde-input")?.value;
+  const motivo = document.getElementById("admin-historial-motivo-input")?.value.trim();
+
+  if (!cargo || !desde) { showToast("Cargo y fecha de inicio son requeridos.", "warning"); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cargo_nombre: cargo, fecha_inicio: desde, motivo: motivo || null, registrado_por: state.user?.username || "" }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Error"); }
+    document.getElementById("admin-historial-cargo-input").value = "";
+    document.getElementById("admin-historial-desde-input").value = "";
+    document.getElementById("admin-historial-motivo-input").value = "";
+    showToast("Cargo registrado en el historial.", "success");
+    await _adminLoadHistorial();
+  } catch (e) { showToast(`Error: ${e.message}`, "error"); }
+}
+
+async function _adminDeleteCargo(empId, histId) {
+  const ok = await confirmModal("Eliminar entrada", "¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
+  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    showToast("Entrada eliminada.", "success");
+    await _adminLoadHistorial();
+  } catch { showToast("Error al eliminar.", "error"); }
 }

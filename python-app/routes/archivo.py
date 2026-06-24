@@ -138,6 +138,10 @@ def search_archivo(req: ArchivoSearchRequest):
         conditions.append("da.fecha_documento <= %s::date")
         params.append(req.date_end)
 
+    if getattr(req, "soporte", None) and req.soporte in ("Físico", "Digital", "Digitalizado"):
+        conditions.append("COALESCE(da.soporte,'Físico') = %s")
+        params.append(req.soporte)
+
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
     sort_map = {
