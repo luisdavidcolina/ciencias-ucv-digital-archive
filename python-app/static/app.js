@@ -704,7 +704,12 @@ const THEMES = [
 
 function initTheme() {
   const saved = localStorage.getItem("ds_theme");
-  if (saved && saved !== "default") document.body.classList.add(saved);
+  if (saved) {
+    if (saved !== "default") document.body.classList.add(saved);
+  } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
+    document.body.classList.add("theme-dark");
+    localStorage.setItem("ds_theme", "theme-dark");
+  }
 }
 
 function openThemePanel() {
