@@ -52,6 +52,23 @@ const fpInstances = {};
 // ==========================================================================
 // HELPERS COMPARTIDOS
 // ==========================================================================
+
+/** Resalta términos de búsqueda en un texto HTML-safe. */
+function highlightTerms(text, terms) {
+  if (!text || !terms || !terms.length) return text || "";
+  const escaped = terms
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .filter(Boolean)
+    .join("|");
+  if (!escaped) return text;
+  try {
+    return String(text).replace(
+      new RegExp(`(${escaped})`, "gi"),
+      '<mark style="background:#fff176;border-radius:2px;padding:0 1px;">$1</mark>'
+    );
+  } catch { return text; }
+}
+
 function formatISOToSpanish(iso) {
   if (!iso) return "";
   const parts = iso.split("-");
@@ -507,21 +524,31 @@ function setupEventListeners() {
   safeOn("menu-btn-admin-rrhh",    "click", e => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "RRHH";    switchTab("admin-rrhh"); });
   safeOn("module_switch_btn",      "click", handleModuleSwitch);
 
-  // Buscador Archivo
-  safeOn("search_archivo",    "input",  e => { state.archivo.search = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
-  safeOn("btn_s_archivo",     "click",  (typeof triggerArchivoSearch === 'function') ? triggerArchivoSearch : (()=>{}));
-  safeOn("btn_update_archivo","click",  (typeof triggerArchivoSearch === 'function') ? triggerArchivoSearch : (()=>{}));
-  safeOn("btn_clear_archivo", "click",  () => resetDateFilters("archivo"));
-  safeOn("download_archivo_xls","click",() => alert("Exportando reporte XLS de folios académicos...\nDescargado con éxito."));
+  // Buscador Archivo — debounce 420ms en input, inmediato en botón/enter
+  safeOn("search_archivo",    "input",  e => {
+    state.archivo.search = e.target.value; state.archivo.page = 1;
+    if (typeof _debouncedArchivoSearch === "function") _debouncedArchivoSearch();
+    else triggerArchivoSearch();
+  });
+  safeOn("search_archivo",    "keydown", e => { if (e.key === "Enter") { state.archivo.search = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); } });
+  safeOn("btn_s_archivo",     "click",  () => { state.archivo.search = document.getElementById("search_archivo")?.value || ""; state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("btn_update_archivo","click",  () => { state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("btn_clear_archivo", "click",  () => { resetDateFilters("archivo"); const inp = document.getElementById("search_archivo"); if (inp) { inp.value = ""; state.archivo.search = ""; } state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("download_archivo_xls","click",() => showToast("Exportación XLS disponible próximamente.", "info"));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
 
-  // Buscador RRHH
-  safeOn("search_rrhh",       "input",  e => { state.rrhh.search = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
-  safeOn("btn_s_rrhh",        "click",  (typeof triggerRrhhSearch === 'function') ? triggerRrhhSearch : (()=>{}));
-  safeOn("btn_update_rrhh",   "click",  (typeof triggerRrhhSearch === 'function') ? triggerRrhhSearch : (()=>{}));
-  safeOn("btn_clear_rrhh",    "click",  () => resetDateFilters("rrhh"));
-  safeOn("download_rrhh_xls", "click",  () => alert("Exportando reporte consolidado de personal RRHH...\nDescargado con éxito."));
+  // Buscador RRHH — debounce 420ms en input
+  safeOn("search_rrhh",       "input",  e => {
+    state.rrhh.search = e.target.value; state.rrhh.page = 1;
+    if (typeof _debouncedRrhhSearch === "function") _debouncedRrhhSearch();
+    else triggerRrhhSearch();
+  });
+  safeOn("search_rrhh",       "keydown", e => { if (e.key === "Enter") { state.rrhh.search = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); } });
+  safeOn("btn_s_rrhh",        "click",  () => { state.rrhh.search = document.getElementById("search_rrhh")?.value || ""; state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("btn_update_rrhh",   "click",  () => { state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("btn_clear_rrhh",    "click",  () => { resetDateFilters("rrhh"); const inp = document.getElementById("search_rrhh"); if (inp) { inp.value = ""; state.rrhh.search = ""; } state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("download_rrhh_xls", "click",  () => showToast("Exportación XLS disponible próximamente.", "info"));
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; triggerRrhhSearch(); });
 
@@ -570,18 +597,41 @@ function setupEventListeners() {
 async function performLogin() {
   const username = document.getElementById("login_user")?.value.trim();
   const password = document.getElementById("login_pass")?.value.trim();
-  if (!username || !password) { alert("Por favor, ingrese todos los campos requeridos."); return; }
+  const btn      = document.getElementById("login_btn");
+  if (!username || !password) {
+    showLoginError("Por favor, ingrese usuario y contraseña.");
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Verificando...'; }
   try {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
+    if (res.status === 403) { showLoginError("Tu cuenta está desactivada. Contacta al administrador."); return; }
     if (!res.ok) throw new Error();
     loginSuccess((await res.json()).user);
   } catch {
-    alert("Credenciales incorrectas de acceso institucional.");
+    showLoginError("Credenciales incorrectas de acceso institucional.");
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i>Ingresar'; }
   }
+}
+
+function showLoginError(msg) {
+  // Use toast if available, otherwise use a visible alert div inside login form
+  let errEl = document.getElementById("login-error-msg");
+  if (!errEl) {
+    errEl = document.createElement("div");
+    errEl.id = "login-error-msg";
+    errEl.className = "alert alert-danger mt-2 mb-0 py-2";
+    errEl.style.fontSize = "0.87rem";
+    document.getElementById("login_btn")?.parentElement?.insertAdjacentElement("afterend", errEl);
+  }
+  errEl.textContent = msg;
+  errEl.style.display = "block";
+  setTimeout(() => { if (errEl) errEl.style.display = "none"; }, 5000);
 }
 
 // ==========================================================================

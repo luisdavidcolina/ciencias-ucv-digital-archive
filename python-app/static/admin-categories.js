@@ -131,7 +131,9 @@ async function handleAddKeyword() {
 async function handleEditKeyword(id) {
   const labelEl     = document.getElementById(`kw-label-${id}`);
   const currentName = labelEl?.innerText || "";
-  const newName     = prompt("Nuevo nombre para la palabra clave:", currentName);
+  const newName     = typeof promptModal === "function"
+    ? await promptModal("Renombrar palabra clave", "Nuevo nombre", currentName, "Nombre de la palabra clave...")
+    : prompt("Nuevo nombre para la palabra clave:", currentName);
   if (!newName || newName.trim() === currentName) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {

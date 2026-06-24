@@ -64,7 +64,9 @@ async function handleToggleUserActive(uid, username) {
 }
 
 async function handleChangePassword(uid, username) {
-  const newPass = prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
+  const newPass = typeof promptModal === "function"
+    ? await promptModal(`Cambiar contraseña de "${username}"`, "Nueva contraseña (mín. 6 caracteres)", "", "Nueva contraseña...")
+    : prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
   if (!newPass || newPass.trim().length < 6) {
     if (newPass !== null) showToast("La contraseña debe tener al menos 6 caracteres.", "warning");
     return;

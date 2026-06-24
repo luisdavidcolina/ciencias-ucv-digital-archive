@@ -723,8 +723,55 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <!-- Modal de Confirmación Universal -->
+  <div class="modal fade" id="ds-confirm-modal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+        <div class="modal-header border-0 pb-0">
+          <h6 class="modal-title font-weight-bold ds-cm-title">Confirmar</h6>
+        </div>
+        <div class="modal-body pt-2 pb-2">
+          <p class="ds-cm-body mb-0 text-muted" style="font-size:0.9rem;"></p>
+        </div>
+        <div class="modal-footer border-0 pt-1">
+          <button type="button" class="btn btn-secondary btn-sm ds-cm-cancel">Cancelar</button>
+          <button type="button" class="btn btn-danger btn-sm ds-cm-ok">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Texto Universal -->
+  <div class="modal fade" id="ds-prompt-modal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+        <div class="modal-header border-0 pb-0">
+          <h6 class="modal-title font-weight-bold ds-pm-title">Ingrese un valor</h6>
+        </div>
+        <div class="modal-body pt-2 pb-2">
+          <label class="text-muted small ds-pm-label mb-1"></label>
+          <input type="text" class="form-control ds-pm-input" autocomplete="off">
+        </div>
+        <div class="modal-footer border-0 pt-1">
+          <button type="button" class="btn btn-secondary btn-sm ds-pm-cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary btn-sm ds-pm-ok">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .ds-skeleton { background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 50%,#e9ecef 75%); background-size:200% 100%; animation:ds-shimmer 1.4s infinite; border-radius:4px; height:14px; }
+    @keyframes ds-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .ds-status-btn { cursor:pointer; border:none; background:none; padding:0; }
+    .ds-quick-status-menu { border-radius:8px; border:1px solid #dee2e6; }
+    .ds-quick-status-menu .dropdown-item { padding:6px 12px; border-radius:4px; cursor:pointer; }
+    .ds-quick-status-menu .dropdown-item:hover { background:#f8f9fa; }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/static/rrhh.js"></script>
+  <script src="/static/admin-ui.js"></script>
   <script src="/static/admin.js"></script>
   <script src="/static/admin-categories.js"></script>
   <script src="/static/admin-users.js"></script>

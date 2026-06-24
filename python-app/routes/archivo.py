@@ -71,10 +71,9 @@ def search_archivo(req: ArchivoSearchRequest):
     conditions: list = []
     params: list = []
 
+    import re as _re
     if req.search_term:
         term = f"%{req.search_term}%"
-        # Usar FTS solo si el término contiene al menos una letra
-        import re as _re
         _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         if _has_letters:
             conditions.append(
@@ -84,19 +83,22 @@ def search_archivo(req: ArchivoSearchRequest):
                 "    coalesce(da.autor,'') || ' ' ||"
                 "    coalesce(da.abstract,'') || ' ' ||"
                 "    coalesce(da.tesauro_primario,'') || ' ' ||"
-                "    coalesce(da.tesauro_secundario,'')"
+                "    coalesce(da.tesauro_secundario,'') || ' ' ||"
+                "    coalesce(da.personas_relacionadas,'')"
                 "  ) @@ plainto_tsquery('spanish', %s)"
                 "  OR unaccent(da.titulo) ILIKE unaccent(%s)"
                 "  OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+                "  OR unaccent(COALESCE(da.personas_relacionadas,'')) ILIKE unaccent(%s)"
                 ")"
             )
-            params.extend([req.search_term, term, term])
+            params.extend([req.search_term, term, term, term])
         else:
             conditions.append(
                 "(unaccent(da.titulo) ILIKE unaccent(%s)"
-                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+                " OR unaccent(COALESCE(da.ubicacion,'')) ILIKE unaccent(%s))"
             )
-            params.extend([term, term])
+            params.extend([term, term, term])
 
     if req.doc_types:
         conditions.append("da.tesauro_primario = ANY(%s)")
@@ -158,7 +160,7 @@ def search_archivo(req: ArchivoSearchRequest):
               to_tsvector('spanish',
                 coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||
                 coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'') || ' ' ||
-                coalesce(da.tesauro_secundario,'')
+                coalesce(da.tesauro_secundario,'') || ' ' || coalesce(da.personas_relacionadas,'')
               ),
               plainto_tsquery('spanish', %s)
             ) AS relevance,

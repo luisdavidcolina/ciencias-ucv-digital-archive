@@ -404,6 +404,11 @@ async function loadMonitorTable() {
   const page    = state.adminTable.page    || 1;
   const perPage = state.adminTable.perPage || 25;
 
+  // Show skeleton while loading
+  if (typeof showTableSkeleton === "function") {
+    showTableSkeleton(`admin_control_table-${suf}`, isArchivoModule() ? 6 : 7, 6);
+  }
+
   try {
     const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&page=${page}&per_page=${perPage}`;
     const res = await fetch(url);
@@ -470,18 +475,32 @@ function renderMonitorTable() {
     rechazado:  '<span class="badge badge-danger" title="Rechazado">✗</span>',
   };
 
+  const searchTerms = (document.getElementById(`admin_search-${suf}`)?.value || "").trim().split(/\s+/).filter(Boolean);
+
   if (isArch) {
     container.innerHTML = records.map(f => {
       const statusBadge = STATUS_BADGES[f.status] || STATUS_BADGES["aprobado"];
       const fileIcon = f.file_url
         ? `<a href="${f.file_url}" target="_blank" class="btn btn-xs btn-outline-info mr-1" title="Ver archivo"><i class="fas fa-file"></i></a>`
         : "";
+      const titulo = typeof highlightTerms === "function"
+        ? highlightTerms(f.titulo || "", searchTerms)
+        : (f.titulo || "");
+      const autor = typeof highlightTerms === "function"
+        ? highlightTerms(f.autor || "—", searchTerms)
+        : (f.autor || "—");
+      const statusBtnTitle = { draft: "Borrador", revision: "En revisión", aprobado: "Aprobado", rechazado: "Rechazado" }[f.status] || "Aprobado";
       return `<tr>
-        <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.titulo||'').replace(/"/g,'&quot;')}">${f.titulo}</td>
-        <td class="text-muted small">${f.autor || '—'}</td>
+        <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.titulo||'').replace(/"/g,'&quot;')}">${titulo}</td>
+        <td class="text-muted small">${autor}</td>
         <td class="text-muted small">${formatISOToSpanish(f.fecha)}</td>
         <td><span class="badge badge-light border">${f.doc_type || '—'}</span></td>
-        <td>${statusBadge}</td>
+        <td>
+          <button class="btn btn-xs btn-link p-0 ds-status-btn" title="Cambiar estado: ${statusBtnTitle}"
+            onclick="openQuickStatusMenu(this,${f.id},'${f.status || 'aprobado'}','${state.user.modulo}')">
+            ${statusBadge}
+          </button>
+        </td>
         <td>
           ${fileIcon}
           <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button>
@@ -529,9 +548,13 @@ function openAdminDocById(id) {
 }
 
 // --- EDITAR / ELIMINAR DOCUMENTO (ARCHIVO) ---
-function openEditDocModal(id) {
-  const rec = state.adminTable.results.find(r => r.id == id);
-  if (!rec) return;
+async function openEditDocModal(id) {
+  // Fetch datos frescos del servidor (no depender solo de state cache)
+  let rec = state.adminTable.results.find(r => r.id == id) || { id };
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}`);
+    if (res.ok) rec = await res.json();
+  } catch { /* usa caché si falla el fetch */ }
 
   document.getElementById("edit-doc-id").value        = rec.id || "";
   document.getElementById("edit-doc-titulo").value    = rec.titulo || "";
@@ -540,7 +563,7 @@ function openEditDocModal(id) {
   document.getElementById("edit-doc-secundario").value = rec.tesauro_secundario || "";
   document.getElementById("edit-doc-resumen").value   = rec.resumen || "";
   document.getElementById("edit-doc-ubicacion").value = rec.ubicacion || "";
-  document.getElementById("edit-doc-palabras").value  = "";
+  document.getElementById("edit-doc-palabras").value  = rec.palabras_clave || "";
   document.getElementById("edit-doc-file-url").value  = rec.file_url || "";
 
   // Preview de archivo si hay URL
@@ -611,7 +634,12 @@ async function handleSaveEditDoc() {
 }
 
 async function handleDeleteDoc(id, nombre) {
-  if (!confirm(`¿Eliminar el documento "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+  const ok = await confirmModal(
+    "Eliminar documento",
+    `¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`,
+    "Sí, eliminar", "btn-danger"
+  );
+  if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}&usuario=${encodeURIComponent(state.user.username)}`, {
       method: "DELETE",
@@ -682,7 +710,12 @@ async function handleSaveEditEmpleado() {
 }
 
 async function handleDeleteEmpleado(empId, nombre) {
-  if (!confirm(`¿Eliminar el expediente de "${nombre}"?\nSe eliminarán todos sus documentos. Esta acción no se puede deshacer.`)) return;
+  const ok = await confirmModal(
+    "Eliminar expediente",
+    `¿Eliminar el expediente de "${nombre}"? Se eliminarán todos sus documentos. Esta acción no se puede deshacer.`,
+    "Sí, eliminar", "btn-danger"
+  );
+  if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}?usuario=${encodeURIComponent(state.user.username)}`, {
       method: "DELETE",

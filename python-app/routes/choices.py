@@ -88,12 +88,17 @@ def get_choices():
     ) or []
     arch_tipos_catalog = [r["nombre_corto"] for r in arch_tipo_rows] or arch_doc_types
 
+    # Años disponibles para selector de año
+    arch_years = sorted({d.year for d in arch_dates}, reverse=True) if not arch_dates.empty else []
+    rh_years   = sorted({d.year for d in rh_dates},   reverse=True) if not rh_dates.empty else []
+
     result = {
         "archivo": {
             "doc_types": arch_tipos_catalog,
             "tesauro":   arch_tesauro,
             "min_date":  min_arch,
             "max_date":  max_arch,
+            "years":     arch_years,
         },
         "rrhh": {
             "doc_types":       rh_doc_types,
@@ -101,6 +106,7 @@ def get_choices():
             "people":          rh_people,
             "min_date":        min_rh,
             "max_date":        max_rh,
+            "years":           rh_years,
             "tipos_por_parte": rrhh_tipos_por_parte,
         },
     }

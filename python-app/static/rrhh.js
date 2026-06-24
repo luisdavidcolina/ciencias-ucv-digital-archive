@@ -1,7 +1,28 @@
 // ==========================================================================
 // BÚSQUEDA Y RENDER — RRHH
 // ==========================================================================
+
+function showRrhhSkeleton() {
+  const container = document.getElementById("list_rrhh");
+  if (!container) return;
+  container.innerHTML = Array.from({ length: 4 }, () => `
+    <div class="ds-person-card" style="pointer-events:none;opacity:0.7;">
+      <div style="width:56px;height:56px;border-radius:50%;background:#e9ecef;flex-shrink:0;"></div>
+      <div style="flex-grow:1;padding-left:14px;">
+        <div class="ds-skeleton mb-2" style="width:60%;height:18px;"></div>
+        <div class="ds-skeleton mb-2" style="width:40%;height:13px;"></div>
+        <div class="ds-skeleton"      style="width:70%;height:13px;"></div>
+      </div>
+    </div>`).join("");
+}
+
+const _debouncedRrhhSearch = (() => {
+  let timer;
+  return () => { clearTimeout(timer); timer = setTimeout(triggerRrhhSearch, 420); };
+})();
+
 async function triggerRrhhSearch() {
+  showRrhhSkeleton();
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/buscar`, {
       method: "POST",
@@ -94,33 +115,38 @@ function renderRrhhList() {
   if (prevBtnR) prevBtnR.disabled = state.rrhh.page <= 1;
   if (nextBtnR) nextBtnR.disabled = state.rrhh.page >= totalPages;
 
+  const searchTerms = (state.rrhh.search || "").trim().split(/\s+/).filter(t => t.length > 1);
+  const hl = txt => typeof highlightTerms === "function" ? highlightTerms(txt, searchTerms) : (txt || "");
+
   container.innerHTML = results.map(p => {
     const initials   = getPersonInitials(p.persona_raw);
     const colorState = getStatusColor(p.estatuses);
+    const escapedRaw = (p.persona_raw || "").replace(/'/g, "\\'");
     return `
-      <div class="ds-item-card ds-person-card" onclick="openRrhhPersonDossier('${p.persona_raw}')" style="cursor:pointer;">
+      <div class="ds-item-card ds-person-card" onclick="openRrhhPersonDossier('${escapedRaw}')" style="cursor:pointer;border-left:3px solid ${colorState};">
         <div class="ds-item-thumbnail" style="align-items:center;padding-top:0;">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid #dee2e6;flex-shrink:0;">
+          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid ${colorState};flex-shrink:0;">
             ${p.foto_url
               ? `<img src="${p.foto_url}" style="width:100%;height:100%;object-fit:cover;display:block;">`
               : `<span style="width:100%;height:100%;background:#2b4e72;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">${initials}</span>`}
           </div>
         </div>
         <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
-          <h4 class="ds-item-title" style="font-size:1.1rem;font-weight:700;color:#2b4e72;margin:0 0 4px 0;">${p.persona}</h4>
-          <div style="font-size:0.82rem;color:#495057;line-height:1.4;">
-            <span class="mr-3"><i class="fas fa-id-card mr-1"></i> C.I: <strong>${p.cedulas}</strong></span>
-            <span class="mr-3"><i class="fas fa-sitemap mr-1"></i> Adscripción: <strong>${p.departamentos}</strong></span><br>
-            <span><i class="fas fa-user-tie mr-1"></i> Cargo: <strong>${p.cargos}</strong></span>
+          <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h4>
+          <div style="font-size:0.82rem;color:#495057;line-height:1.5;">
+            <span class="mr-3"><i class="fas fa-id-card mr-1 text-muted"></i> C.I: <strong>${hl(p.cedulas)}</strong></span>
+            <span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted"></i> <strong>${hl(p.departamentos)}</strong></span>
+            <span><i class="fas fa-user-tie mr-1 text-muted"></i> <strong>${hl(p.cargos)}</strong></span>
           </div>
-          <div class="mt-2 d-flex align-items-center gap-1">
-            <span class="badge" style="background-color:${colorState};color:white;padding:4px 8px;border-radius:4px;font-size:0.75rem;">${p.estatuses}</span>
-            <span class="badge badge-secondary ml-1" style="padding:4px 8px;border-radius:4px;font-size:0.75rem;">${p.doc_count} documentos en expediente</span>
+          <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
+            <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.73rem;">${p.estatuses}</span>
+            <span class="badge badge-light border" style="padding:3px 8px;border-radius:10px;font-size:0.73rem;"><i class="fas fa-file-alt mr-1"></i>${p.doc_count} docs</span>
+            ${(p.tipos||"").split(";").filter(Boolean).slice(0,3).map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${t.trim()}</span>`).join("")}
           </div>
         </div>
-        <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;">
-          <button class="btn btn-primary ds-action-btn" title="Ver"
-            onclick="event.stopPropagation();openRrhhPersonDossier('${p.persona_raw}')"
+        <div class="ds-item-actions" style="margin-left:12px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
+          <button class="btn btn-primary ds-action-btn" title="Ver expediente"
+            onclick="event.stopPropagation();openRrhhPersonDossier('${escapedRaw}')"
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
             <i class="fas fa-eye"></i>
           </button>

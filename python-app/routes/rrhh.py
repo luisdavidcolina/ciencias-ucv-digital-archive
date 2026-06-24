@@ -110,9 +110,9 @@ def search_rrhh(req: RrhhSearchRequest):
     conditions: list = []
     params: list = []
 
+    import re as _re
     if req.search_term:
         term = f"%{req.search_term}%"
-        import re as _re
         _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         if _has_letters:
             conditions.append(
@@ -121,18 +121,23 @@ def search_rrhh(req: RrhhSearchRequest):
                 "    coalesce(v.persona_raw,'') || ' ' ||"
                 "    coalesce(v.cargo,'') || ' ' ||"
                 "    coalesce(v.departamento,'') || ' ' ||"
-                "    coalesce(v.cedula,'')"
+                "    coalesce(v.cedula,'') || ' ' ||"
+                "    coalesce(v.rif,'')"
                 "  ) @@ plainto_tsquery('spanish', %s)"
                 "  OR unaccent(v.persona_raw) ILIKE unaccent(%s)"
                 "  OR v.cedula ILIKE %s"
+                "  OR unaccent(v.cargo) ILIKE unaccent(%s)"
+                "  OR unaccent(v.departamento) ILIKE unaccent(%s)"
                 ")"
             )
-            params.extend([req.search_term, term, term])
+            params.extend([req.search_term, term, term, term, term])
         else:
             conditions.append(
-                "(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)"
+                "(unaccent(v.persona_raw) ILIKE unaccent(%s)"
+                " OR v.cedula ILIKE %s"
+                " OR unaccent(v.departamento) ILIKE unaccent(%s))"
             )
-            params.extend([term, term])
+            params.extend([term, term, term])
 
     if req.doc_types:
         type_clauses = ["v.tipos ILIKE %s" for _ in req.doc_types]
