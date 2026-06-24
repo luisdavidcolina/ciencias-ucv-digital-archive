@@ -163,6 +163,12 @@ def run_migrations():
              notas       TEXT,
              created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
          )"""),
+        ("status en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'aprobado'"),
+        ("status en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'aprobado'"),
+        ("idx status datos_archivo",
+         "CREATE INDEX IF NOT EXISTS idx_datos_archivo_status ON public.datos_archivo(status)"),
     ]
     for label, sql in migrations:
         try:
