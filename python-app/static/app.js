@@ -211,6 +211,12 @@ function configureSidebarVisibilities(user) {
   if (rArch === "Admin" && linkAdminArchivo) linkAdminArchivo.style.display = "flex";
   if (rRrhh === "Admin" && linkAdminRrhh)   linkAdminRrhh.style.display = "flex";
 
+  const linkSistema = document.getElementById("menu-btn-admin-sistema");
+  // Mostrar si el usuario tiene AMBOS módulos (Global admin)
+  if (linkSistema && user.modules && user.modules.includes("Archivo") && user.modules.includes("RRHH")) {
+    linkSistema.style.display = "flex";
+  }
+
   // Acceso en páginas standalone
   const standalonePage = document.body.dataset.page;
   if (standalonePage) {

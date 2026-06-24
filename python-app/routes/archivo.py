@@ -73,12 +73,30 @@ def search_archivo(req: ArchivoSearchRequest):
 
     if req.search_term:
         term = f"%{req.search_term}%"
-        conditions.append(
-            "(unaccent(da.titulo) ILIKE unaccent(%s)"
-            " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
-            " OR unaccent(COALESCE(da.abstract,'')) ILIKE unaccent(%s))"
-        )
-        params.extend([term, term, term])
+        # Usar FTS solo si el término contiene al menos una letra
+        import re as _re
+        _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        if _has_letters:
+            conditions.append(
+                "("
+                "  to_tsvector('spanish',"
+                "    coalesce(da.titulo,'') || ' ' ||"
+                "    coalesce(da.autor,'') || ' ' ||"
+                "    coalesce(da.abstract,'') || ' ' ||"
+                "    coalesce(da.tesauro_primario,'') || ' ' ||"
+                "    coalesce(da.tesauro_secundario,'')"
+                "  ) @@ plainto_tsquery('spanish', %s)"
+                "  OR unaccent(da.titulo) ILIKE unaccent(%s)"
+                "  OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+                ")"
+            )
+            params.extend([req.search_term, term, term])
+        else:
+            conditions.append(
+                "(unaccent(da.titulo) ILIKE unaccent(%s)"
+                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+            )
+            params.extend([term, term])
 
     if req.doc_types:
         conditions.append("da.tesauro_primario = ANY(%s)")
@@ -112,7 +130,17 @@ def search_archivo(req: ArchivoSearchRequest):
         "Más antiguos primero":  "da.fecha_documento ASC NULLS LAST",
         "Alfabético (Z-A)":      "da.titulo DESC",
     }
-    order = sort_map.get(req.sort_mode, "da.titulo ASC")
+    base_order = sort_map.get(req.sort_mode, "da.titulo ASC")
+
+    import re as _re2
+    _search_has_letters = req.search_term and bool(_re2.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+
+    if _search_has_letters:
+        order = f"relevance DESC, da.titulo ASC"
+    else:
+        order = base_order
+
+    _fts_param = req.search_term if _search_has_letters else ""
 
     sql = f"""
         SELECT
@@ -126,6 +154,14 @@ def search_archivo(req: ArchivoSearchRequest):
             COALESCE(da.abstract, '')           AS resumen,
             COALESCE(da.file_url, '')           AS file_url,
             COALESCE(STRING_AGG(DISTINCT dl.nombre, '; ') FILTER (WHERE dl.nombre IS NOT NULL), '') AS descriptores_libres,
+            ts_rank_cd(
+              to_tsvector('spanish',
+                coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||
+                coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'') || ' ' ||
+                coalesce(da.tesauro_secundario,'')
+              ),
+              plainto_tsquery('spanish', %s)
+            ) AS relevance,
             COUNT(*) OVER() AS total_count
         FROM public.datos_archivo da
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
@@ -136,6 +172,7 @@ def search_archivo(req: ArchivoSearchRequest):
         ORDER BY {order}
         LIMIT %s OFFSET %s
     """
+    params = [_fts_param] + params
     params.extend([per_page, offset])
 
     rows = db_query(sql, params, fetch="all") or []
@@ -146,6 +183,7 @@ def search_archivo(req: ArchivoSearchRequest):
     for i, r in enumerate(rows):
         rec = dict(r)
         rec.pop("total_count", None)
+        rec.pop("relevance", None)
         rec["__idx"] = offset + i + 1
         badges = set(split_terms(rec.get("doc_type", "")))
         badges.update(split_terms(rec.get("tesauro_secundario", "")))

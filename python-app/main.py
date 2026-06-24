@@ -12,6 +12,7 @@ from routes.rrhh    import router as rrhh_router
 from routes.admin   import router as admin_router
 from routes.choices import router as choices_router
 from routes.pages   import router as pages_router
+from routes.backup  import router as backup_router
 
 # =============================================================================
 # APLICACION
@@ -126,6 +127,27 @@ def run_migrations():
          "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS personas_relacionadas TEXT"),
         ("personas_relacionadas en datos_archivo",
          "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS personas_relacionadas TEXT"),
+        ("GIN index FTS datos_archivo",
+         """CREATE INDEX IF NOT EXISTS idx_datos_archivo_fts
+            ON public.datos_archivo
+            USING GIN(to_tsvector('spanish',
+              coalesce(titulo,'') || ' ' || coalesce(autor,'') || ' ' ||
+              coalesce(abstract,'') || ' ' || coalesce(tesauro_primario,'') || ' ' ||
+              coalesce(tesauro_secundario,'')))"""),
+        ("GIN index FTS vw nombres empleados",
+         """CREATE INDEX IF NOT EXISTS idx_empleados_nombre_fts
+            ON public.empleados
+            USING GIN(to_tsvector('spanish', coalesce(nombres,'') || ' ' || coalesce(apellidos,'')))"""),
+        ("Tabla backup_history",
+         """CREATE TABLE IF NOT EXISTS public.backup_history (
+             id          SERIAL PRIMARY KEY,
+             usuario     TEXT NOT NULL DEFAULT 'sistema',
+             tipo        TEXT NOT NULL DEFAULT 'export',
+             tabla_count INTEGER DEFAULT 0,
+             total_rows  INTEGER DEFAULT 0,
+             notas       TEXT,
+             created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+         )"""),
     ]
     for label, sql in migrations:
         try:
@@ -207,6 +229,7 @@ app.include_router(rrhh_router)
 app.include_router(admin_router)
 app.include_router(choices_router)
 app.include_router(pages_router)
+app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 
 
 # =============================================================================

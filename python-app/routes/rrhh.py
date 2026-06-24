@@ -112,10 +112,27 @@ def search_rrhh(req: RrhhSearchRequest):
 
     if req.search_term:
         term = f"%{req.search_term}%"
-        conditions.append(
-            "(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)"
-        )
-        params.extend([term, term])
+        import re as _re
+        _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        if _has_letters:
+            conditions.append(
+                "("
+                "  to_tsvector('spanish',"
+                "    coalesce(v.persona_raw,'') || ' ' ||"
+                "    coalesce(v.cargo,'') || ' ' ||"
+                "    coalesce(v.departamento,'') || ' ' ||"
+                "    coalesce(v.cedula,'')"
+                "  ) @@ plainto_tsquery('spanish', %s)"
+                "  OR unaccent(v.persona_raw) ILIKE unaccent(%s)"
+                "  OR v.cedula ILIKE %s"
+                ")"
+            )
+            params.extend([req.search_term, term, term])
+        else:
+            conditions.append(
+                "(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)"
+            )
+            params.extend([term, term])
 
     if req.doc_types:
         type_clauses = ["v.tipos ILIKE %s" for _ in req.doc_types]
@@ -145,7 +162,17 @@ def search_rrhh(req: RrhhSearchRequest):
         "Más recientes primero": "v.fecha_ingreso DESC NULLS LAST",
         "Más antiguos primero":  "v.fecha_ingreso ASC NULLS LAST",
     }
-    order = sort_map.get(req.sort_mode, "v.persona_raw ASC")
+    base_order = sort_map.get(req.sort_mode, "v.persona_raw ASC")
+
+    import re as _re2
+    _search_has_letters = req.search_term and bool(_re2.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+
+    if _search_has_letters:
+        order = "relevance DESC, v.persona_raw ASC"
+    else:
+        order = base_order
+
+    _fts_param = req.search_term if _search_has_letters else ""
 
     sql = f"""
         SELECT
@@ -153,12 +180,20 @@ def search_rrhh(req: RrhhSearchRequest):
             v.cargo, v.departamento, v.estado,
             v.fecha_ingreso, v.foto_url,
             v.doc_count, v.tipos,
+            ts_rank_cd(
+              to_tsvector('spanish',
+                coalesce(v.persona_raw,'') || ' ' || coalesce(v.cargo,'') || ' ' ||
+                coalesce(v.departamento,'')
+              ),
+              plainto_tsquery('spanish', %s)
+            ) AS relevance,
             COUNT(*) OVER() AS total_count
         FROM public.vw_rrhh_persona_index v
         {where}
         ORDER BY {order}
         LIMIT %s OFFSET %s
     """
+    params = [_fts_param] + params
     params.extend([per_page, offset])
 
     rows = db_query(sql, params, fetch="all") or []

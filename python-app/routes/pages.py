@@ -41,3 +41,8 @@ async def serve_admin_archivo():
 @router.get("/admin/rrhh", include_in_schema=False)
 async def serve_admin_rrhh():
     return _page("admin_rrhh.html")
+
+
+@router.get("/admin/sistema", include_in_schema=False)
+async def serve_admin_sistema():
+    return _page("admin_sistema.html")
