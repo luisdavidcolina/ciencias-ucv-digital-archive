@@ -404,7 +404,14 @@ async function handleNewSubmission(e) {
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      showToast(errData.detail || "Error al registrar el folio.", "error");
+      let errMsg = "Error al registrar el folio.";
+      if (Array.isArray(errData.detail)) {
+        // Pydantic 422 validation errors
+        errMsg = errData.detail.map(e => e.msg || String(e)).join("; ");
+      } else if (typeof errData.detail === "string") {
+        errMsg = errData.detail;
+      }
+      showToast(errMsg, "error");
       return;
     }
     showToast("Ingreso guardado con éxito.", "success");
