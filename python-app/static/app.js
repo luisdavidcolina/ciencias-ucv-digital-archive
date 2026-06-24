@@ -551,7 +551,7 @@ function setupEventListeners() {
   safeOn("btn_s_archivo",     "click",  () => { state.archivo.search = document.getElementById("search_archivo")?.value || ""; state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("btn_update_archivo","click",  () => { state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("btn_clear_archivo", "click",  () => { resetDateFilters("archivo"); const inp = document.getElementById("search_archivo"); if (inp) { inp.value = ""; state.archivo.search = ""; } state.archivo.page = 1; triggerArchivoSearch(); });
-  safeOn("download_archivo_xls","click",() => showToast("Exportación XLS disponible próximamente.", "info"));
+  safeOn("download_archivo_xls","click",() => _exportResultsCSV("archivo"));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
 
@@ -565,7 +565,7 @@ function setupEventListeners() {
   safeOn("btn_s_rrhh",        "click",  () => { state.rrhh.search = document.getElementById("search_rrhh")?.value || ""; state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("btn_update_rrhh",   "click",  () => { state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("btn_clear_rrhh",    "click",  () => { resetDateFilters("rrhh"); const inp = document.getElementById("search_rrhh"); if (inp) { inp.value = ""; state.rrhh.search = ""; } state.rrhh.page = 1; triggerRrhhSearch(); });
-  safeOn("download_rrhh_xls", "click",  () => showToast("Exportación XLS disponible próximamente.", "info"));
+  safeOn("download_rrhh_xls", "click",  () => _exportResultsCSV("rrhh"));
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; triggerRrhhSearch(); });
 
@@ -636,6 +636,37 @@ async function performLogin() {
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i>Ingresar'; }
   }
+}
+
+function _exportResultsCSV(modulo) {
+  const data = modulo === "archivo" ? state.archivo.results : state.rrhh.results;
+  if (!data || data.length === 0) { showToast("No hay resultados para exportar.", "warning"); return; }
+
+  let headers, rows;
+  if (modulo === "archivo") {
+    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación", "Ubicación", "Resumen", "Palabras Clave", "Archivo Digital"];
+    rows = data.map(r => [
+      r.id_archivo || r.id, r.titulo, r.autor, r.fecha_documento || r.fecha,
+      r.tesauro_primario || r.doc_type, r.tesauro_secundario || r.clasificacion || "",
+      r.ubicacion, r.abstract || r.resumen || "", r.palabras_clave || "", r.file_url || ""
+    ].map(v => `"${String(v||"").replace(/"/g,'""')}"`).join(","));
+  } else {
+    headers = ["ID Empleado", "Nombre", "Cédula", "Departamento", "Estado", "Cargo", "Tipos de Documentos"];
+    rows = data.map(r => [
+      r.empleado_id, r.persona_raw || r.empleado, r.cedula,
+      r.departamento, r.estado, r.cargo || "", r.tipos || ""
+    ].map(v => `"${String(v||"").replace(/"/g,'""')}"`).join(","));
+  }
+
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${modulo}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exportando ${data.length} registro(s) a CSV.`, "success");
 }
 
 function showLoginError(msg) {
