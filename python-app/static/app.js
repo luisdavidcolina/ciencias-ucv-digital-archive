@@ -612,7 +612,8 @@ function setupEventListeners() {
     });
     document.getElementById(`btn-apply-stats-${suf}`)?.addEventListener("click", loadDynamicStats);
     document.getElementById(`admin-submit-form-${suf}`)?.addEventListener("submit", handleNewSubmission);
-    document.getElementById(`admin_search-${suf}`)?.addEventListener("input",  () => { state.adminTable.page = 1; loadMonitorTable(); });
+    document.getElementById(`admin_search-${suf}`)?.addEventListener("input",   () => { state.adminTable.page = 1; loadMonitorTable(); });
+    document.getElementById(`admin_search-${suf}`)?.addEventListener("keydown", e => { if (e.key === "Enter") { state.adminTable.page = 1; loadMonitorTable(); } });
     document.getElementById(`admin_filter_type-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_person-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_status-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });

@@ -894,23 +894,39 @@ function exportAdminCSV() {
   if (!records || records.length === 0) { showToast("No hay datos para exportar.", "warning"); return; }
   const isArch = isArchivoModule();
 
+  const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const today = new Date().toISOString().slice(0, 10);
+
   let headers, rows;
   if (isArch) {
-    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Ubicación", "Resumen"];
-    rows = records.map(r => [r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.ubicacion, r.resumen || ""].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","));
+    // Incluye campos ISAD(G): folio, soporte, páginas
+    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación",
+               "N° Folio", "Soporte", "N° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
+    rows = records.map(r => [
+      r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.tesauro_secundario || "",
+      r.numero_folio || "", r.soporte || "Físico", r.numero_paginas || "",
+      r.ubicacion, r.file_url || "", r.status || "aprobado", r.resumen || ""
+    ].map(esc).join(","));
   } else {
-    headers = ["ID", "Empleado", "Cédula", "Departamento", "Estado", "Cargo", "Fecha Ingreso", "Tipología", "Ubicación"];
-    rows = records.map(r => [r.empleado_id, r.empleado, r.cedula, r.departamento, r.estado, r.cargo, r.fecha_ingreso, r.doc_type, r.ubicacion].map(v => `"${String(v||"").replace(/"/g, '""')}"`).join(","));
+    headers = ["ID Empleado", "Empleado", "Cédula", "Cargo", "Departamento",
+               "Estado Laboral", "Fecha Ingreso", "Tipo Documento", "Ubicación"];
+    rows = records.map(r => [
+      r.empleado_id, r.empleado, r.cedula, r.cargo || r.departamento, r.departamento,
+      r.estado, r.fecha_ingreso, r.doc_type, r.ubicacion
+    ].map(esc).join(","));
   }
 
-  const csv  = [headers.join(","), ...rows].join("\n");
+  // Metadato: filtros aplicados como comentario CSV (fila especial)
+  const meta = `"# Exportado: ${today} | Módulo: ${state.user.modulo} | Pág: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
+  const csv  = [meta, headers.join(","), ...rows].join("\n");
   const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href = url;
-  a.download = `admin_${isArch ? "archivo" : "rrhh"}_pag${state.adminTable.page}.csv`;
+  a.download = `ciencias_ucv_${isArch ? "archivo" : "rrhh"}_${today}_p${state.adminTable.page}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+  showToast(`CSV exportado: ${records.length} registro(s).`, "success");
 }
 
 // ─── Drag & Drop en zona de carga ───────────────────────────────────────────
