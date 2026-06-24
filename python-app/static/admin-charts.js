@@ -187,25 +187,38 @@ async function handleImportCSV(tipo, suf) {
     if (resultEl) resultEl.innerHTML = '<div class="alert alert-warning p-2 mb-0">Selecciona un archivo CSV primero.</div>';
     return;
   }
-  if (resultEl) resultEl.innerHTML = '<div class="alert alert-info p-2 mb-0"><i class="fas fa-spinner fa-spin mr-1"></i>Importando...</div>';
+  if (resultEl) {
+    resultEl.innerHTML = "";
+    if (typeof showProgress === "function") showProgress(resultEl.id, "Importando CSV…");
+  }
   const fd = new FormData();
   fd.append("file", fileInput.files[0]);
   try {
     const res = await fetch(endpoint, { method: "POST", body: fd });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`Error del servidor (HTTP ${res.status})`);
     const data = await res.json();
     const errs     = (data.errors||[]).slice(0,5).map(e => `<li class="small">${e}</li>`).join("");
-    const moreErrs = (data.errors||[]).length > 5 ? `<li class="small text-muted">... y ${data.errors.length-5} más</li>` : "";
-    const summary  = (data.inserted !== undefined ? `${data.inserted} insertados, ` : '') +
-                     (data.updated  !== undefined ? `${data.updated} actualizados, ` : '') +
-                     (data.skipped  !== undefined ? `${data.skipped} omitidos.` : '');
-    if (resultEl) resultEl.innerHTML = `
-      <div class="alert alert-${data.errors?.length ? 'warning' : 'success'} p-2 mb-0">
-        <strong>Importación completada:</strong> ${summary}
-        ${errs ? `<ul class="mb-0 mt-1">${errs}${moreErrs}</ul>` : ''}
-      </div>`;
+    const moreErrs = (data.errors||[]).length > 5 ? `<li class="small text-muted">... y ${(data.errors.length-5)} más</li>` : "";
+    const summary  = [
+      data.inserted != null ? `${data.inserted} insertados` : null,
+      data.updated  != null ? `${data.updated} actualizados` : null,
+      data.skipped  != null ? `${data.skipped} omitidos` : null,
+    ].filter(Boolean).join(", ") + ".";
+    if (resultEl) {
+      if (typeof hideProgress === "function") hideProgress(resultEl.id);
+      resultEl.innerHTML = `
+        <div class="alert alert-${(data.errors||[]).length ? 'warning' : 'success'} p-2 mb-0">
+          <strong>Importación completada:</strong> ${summary}
+          ${errs ? `<ul class="mb-0 mt-1">${errs}${moreErrs}</ul>` : ''}
+        </div>`;
+    }
+    showToast(`CSV importado: ${summary}`, (data.errors||[]).length ? "warning" : "success");
   } catch(e) {
-    if (resultEl) resultEl.innerHTML = `<div class="alert alert-danger p-2 mb-0">Error: ${e.message}</div>`;
+    if (resultEl) {
+      if (typeof hideProgress === "function") hideProgress(resultEl.id);
+      resultEl.innerHTML = `<div class="alert alert-danger p-2 mb-0">Error: ${e.message}</div>`;
+    }
+    showToast("Error al importar el CSV.", "error");
   }
 }
 
