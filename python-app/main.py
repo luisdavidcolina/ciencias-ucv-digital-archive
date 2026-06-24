@@ -19,7 +19,7 @@ from routes.backup  import router as backup_router
 # APLICACION
 # =============================================================================
 
-app = FastAPI(title="Ciencias UCV Digital Archive", version="3.0.0-Neon")
+app = FastAPI(title="Ciencias UCV Digital Archive", version="3.1.0-Neon")
 
 # CORS
 app.add_middleware(
@@ -283,10 +283,11 @@ def health_check():
         db_ok = row is not None
     except Exception:
         db_ok = False
+    from core.config import settings
     return {
         "status": "ok" if db_ok else "degraded",
         "db": "connected" if db_ok else "error",
-        "version": "3.0.0-Neon",
+        "version": settings.app_version,
     }
 
 
