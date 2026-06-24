@@ -55,39 +55,53 @@ def _build_user_response(rows, username: str) -> dict:
 @router.post("/login")
 def login(req: LoginRequest):
     rows = db_query(
-        "SELECT usuario, nombre_usuario, contrasena, modulo, rol "
+        "SELECT usuario, nombre_usuario, contrasena, modulo, rol, "
+        "COALESCE(is_active, TRUE) AS is_active "
         "FROM public.usuarios_sistema "
         "WHERE TRIM(usuario) = %s",
         (req.username.strip(),),
         fetch="all",
     )
     if rows:
-        # Verificar la contraseña con bcrypt
+        # Verificar la contraseña con bcrypt (skip usuarios inactivos)
         for row in rows:
+            if not row.get("is_active", True):
+                continue
             if verify_password(req.password.strip(), row["contrasena"]):
+                try:
+                    db_query(
+                        "UPDATE public.usuarios_sistema SET last_login = NOW() WHERE TRIM(usuario) = %s",
+                        (req.username.strip(),), fetch="none", commit=True,
+                    )
+                except Exception:
+                    pass  # no bloquear el login por esto
                 payload = _build_user_response([row], req.username.strip())
                 modules = payload["user"]["modules"]
                 roles = payload["user"]["roles"]
                 log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
                 return payload
 
-    log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas", "Failure")
+    log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas o cuenta desactivada", "Failure")
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Credenciales incorrectas",
+        detail="Credenciales incorrectas o cuenta desactivada",
     )
 
 
 @router.post("/restore")
 def restore_session(req: RestoreSessionRequest):
     rows = db_query(
-        "SELECT usuario, nombre_usuario, modulo, rol "
+        "SELECT usuario, nombre_usuario, modulo, rol, "
+        "COALESCE(is_active, TRUE) AS is_active "
         "FROM public.usuarios_sistema "
         "WHERE TRIM(usuario) = %s",
         (req.username.strip(),),
         fetch="all",
     )
     if rows:
+        # Verificar que el usuario esté activo
+        if not rows[0].get("is_active", True):
+            raise HTTPException(status_code=403, detail="Cuenta desactivada")
         payload = _build_user_response(rows, req.username.strip())
         modules = payload["user"]["modules"]
         roles = payload["user"]["roles"]

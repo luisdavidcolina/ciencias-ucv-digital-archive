@@ -26,6 +26,8 @@ class ArchivoSearchRequest(BaseModel):
     date_start: Optional[str] = ""
     date_end: Optional[str] = ""
     sort_mode: Optional[str] = "Alfabético (A-Z)"
+    page: int = 1
+    per_page: int = 10
 
 
 class RrhhSearchRequest(BaseModel):
@@ -36,6 +38,8 @@ class RrhhSearchRequest(BaseModel):
     date_start: Optional[str] = ""
     date_end: Optional[str] = ""
     sort_mode: Optional[str] = "Alfabético (A-Z)"
+    page: int = 1
+    per_page: int = 10
 
 
 class RrhhProfileRequest(BaseModel):
@@ -113,6 +117,7 @@ class DocumentUpdateRequest(BaseModel):
     ubicacion: Optional[str] = None
     palabras_clave: Optional[str] = None  # comma-separated
     tesauro_secundario: Optional[str] = None
+    personas_relacionadas: Optional[str] = None
     usuario: str
 
 

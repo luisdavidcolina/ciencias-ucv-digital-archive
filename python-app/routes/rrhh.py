@@ -102,77 +102,96 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
 
 @router.post("/buscar")
 def search_rrhh(req: RrhhSearchRequest):
-    """Busca personas en el índice RRHH usando la VIEW vw_rrhh_persona_index."""
-    conditions: list[str] = []
+    """Busca personas en el índice RRHH usando la VIEW vw_rrhh_persona_index con paginación SQL."""
+    page     = max(1, req.page)
+    per_page = max(1, min(req.per_page, 50))
+    offset   = (page - 1) * per_page
+
+    conditions: list = []
     params: list = []
+
+    if req.search_term:
+        term = f"%{req.search_term}%"
+        conditions.append(
+            "(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)"
+        )
+        params.extend([term, term])
+
+    if req.doc_types:
+        type_clauses = ["v.tipos ILIKE %s" for _ in req.doc_types]
+        conditions.append("(" + " OR ".join(type_clauses) + ")")
+        params.extend([f"%{t}%" for t in req.doc_types])
 
     if req.estados:
         conditions.append("v.estado = ANY(%s)")
         params.append(req.estados)
 
-    if req.doc_types:
-        conditions.append("""
-            v.empleado_id IN (
-                SELECT DISTINCT dr.empleado_id
-                FROM public.datos_rrhh dr
-                JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
-                WHERE COALESCE(td.nombre_corto, td.nombre) = ANY(%s)
-            )
-        """)
-        params.append(req.doc_types)
-
-    if req.date_start and req.date_end:
-        conditions.append("v.fecha_ingreso BETWEEN %s AND %s")
-        params.extend([req.date_start, req.date_end])
-
-    if req.search_term:
-        term = f"%{req.search_term}%"
-        conditions.append("""(
-            unaccent(v.persona_raw) ILIKE unaccent(%s)
-            OR v.cedula ILIKE %s
-            OR unaccent(v.departamento) ILIKE unaccent(%s)
-            OR unaccent(v.cargo) ILIKE unaccent(%s)
-            OR unaccent(v.tipos) ILIKE unaccent(%s)
-        )""")
-        params.extend([term, term, term, term, term])
-
     if req.people_terms:
-        clauses = ["unaccent(v.persona_raw) ILIKE unaccent(%s)" for _ in req.people_terms]
-        conditions.append("(" + " OR ".join(clauses) + ")")
+        people_clauses = ["unaccent(v.persona_raw) ILIKE unaccent(%s)" for _ in req.people_terms]
+        conditions.append("(" + " OR ".join(people_clauses) + ")")
         params.extend([f"%{p}%" for p in req.people_terms])
+
+    if req.date_start:
+        conditions.append("v.fecha_ingreso >= %s")
+        params.append(req.date_start)
+
+    if req.date_end:
+        conditions.append("v.fecha_ingreso <= %s")
+        params.append(req.date_end)
 
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
     sort_map = {
-        "Alfabético (A-Z)":      "v.persona_raw ASC",
-        "Alfabético (Z-A)":      "v.persona_raw DESC",
         "Más recientes primero": "v.fecha_ingreso DESC NULLS LAST",
         "Más antiguos primero":  "v.fecha_ingreso ASC NULLS LAST",
     }
     order = sort_map.get(req.sort_mode, "v.persona_raw ASC")
 
-    rows = db_query(
-        f"SELECT * FROM public.vw_rrhh_persona_index v {where} ORDER BY {order}",
-        params or None,
-        fetch="all",
-    ) or []
+    sql = f"""
+        SELECT
+            v.empleado_id, v.cedula, v.rif, v.persona_raw AS empleado,
+            v.cargo, v.departamento, v.estado,
+            v.fecha_ingreso, v.foto_url,
+            v.doc_count, v.tipos,
+            COUNT(*) OVER() AS total_count
+        FROM public.vw_rrhh_persona_index v
+        {where}
+        ORDER BY {order}
+        LIMIT %s OFFSET %s
+    """
+    params.extend([per_page, offset])
 
-    return [
-        {
-            "persona_raw":   r["persona_raw"],
-            "persona":       format_rrhh_person_name(r["persona_raw"]),
+    rows = db_query(sql, params, fetch="all") or []
+
+    total = int(rows[0]["total_count"]) if rows else 0
+
+    records = []
+    for i, r in enumerate(rows):
+        tipos_str = r.get("tipos") or ""
+        first_tipo = split_terms(tipos_str)[0] if split_terms(tipos_str) else ""
+        records.append({
+            "empleado_id":   r["empleado_id"],
+            "persona_raw":   r["empleado"],
+            "persona":       format_rrhh_person_name(r["empleado"]),
             "doc_count":     int(r["doc_count"]),
             "cedulas":       r["cedula"] or "",
             "rifs":          r["rif"]    or "",
             "departamentos": r["departamento"] or "",
             "cargos":        r["cargo"]  or "Sin cargo asignado",
             "estatuses":     r["estado"] or "Sin estado",
-            "tipos":         r["tipos"]  or "",
+            "tipos":         tipos_str,
             "fecha_ingreso": r["fecha_ingreso"] or "",
             "foto_url":      r["foto_url"] or "",
-        }
-        for r in rows
-    ]
+            "doc_type":      first_tipo,
+            "__idx":         offset + i + 1,
+        })
+
+    return {
+        "records":  records,
+        "total":    total,
+        "page":     page,
+        "per_page": per_page,
+    }
 
 
 @router.post("/person/profile")

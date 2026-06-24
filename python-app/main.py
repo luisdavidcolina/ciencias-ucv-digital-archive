@@ -122,6 +122,10 @@ def run_migrations():
          "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS updated_by INTEGER"),
         ("idx_tipo_doc_nombre_lower",
          "CREATE INDEX IF NOT EXISTS idx_tipo_doc_nombre_lower ON public.tipo_documento (LOWER(nombre))"),
+        ("personas_relacionadas en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS personas_relacionadas TEXT"),
+        ("personas_relacionadas en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS personas_relacionadas TEXT"),
     ]
     for label, sql in migrations:
         try:

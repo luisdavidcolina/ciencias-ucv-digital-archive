@@ -64,57 +64,101 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
 
 @router.post("/buscar")
 def search_archivo(req: ArchivoSearchRequest):
-    df = fetch_archivo_dataframe()
+    page     = max(1, req.page)
+    per_page = max(1, min(req.per_page, 50))
+    offset   = (page - 1) * per_page
 
-    # Búsqueda de texto libre
+    conditions: list = []
+    params: list = []
+
     if req.search_term:
-        term = req.search_term.lower().strip()
-        df = df[
-            df["titulo"].astype(str).str.lower().str.contains(term, na=False)
-            | df["autor"].astype(str).str.lower().str.contains(term, na=False)
-            | df["resumen"].astype(str).str.lower().str.contains(term, na=False)
-            | df["ubicacion"].astype(str).str.lower().str.contains(term, na=False)
-        ]
+        term = f"%{req.search_term}%"
+        conditions.append(
+            "(unaccent(da.titulo) ILIKE unaccent(%s)"
+            " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+            " OR unaccent(COALESCE(da.abstract,'')) ILIKE unaccent(%s))"
+        )
+        params.extend([term, term, term])
 
-    # Tipología
     if req.doc_types:
-        df = df[df["doc_type"].isin(req.doc_types)]
+        conditions.append("da.tesauro_primario = ANY(%s)")
+        params.append(req.doc_types)
 
-    # Tesauro / descriptores
     if req.tesauro_terms:
-        keep = []
-        for idx, row in df.iterrows():
-            row_terms = set(split_terms(row.get("doc_type", "")))
-            for col in ["tesauro_primario", "tesauro_secundario", "descriptores_libres"]:
-                row_terms.update(split_terms(row.get(col, "")))
-            if any(t in row_terms for t in req.tesauro_terms):
-                keep.append(idx)
-        df = df.loc[keep]
+        conditions.append(
+            """da.id_archivo IN (
+                SELECT ad2.id_archivo FROM public.archivo_descriptores ad2
+                JOIN public.descriptores_libres dl2 ON ad2.id_descriptor = dl2.id_descriptor
+                WHERE dl2.nombre = ANY(%s)
+                UNION
+                SELECT da3.id_archivo FROM public.datos_archivo da3
+                WHERE da3.tesauro_primario = ANY(%s) OR da3.tesauro_secundario = ANY(%s)
+            )"""
+        )
+        params.extend([req.tesauro_terms, req.tesauro_terms, req.tesauro_terms])
 
-    # Rango de fechas
-    if req.date_start and req.date_end:
-        df = df[(df["fecha"] >= req.date_start) & (df["fecha"] <= req.date_end)]
+    if req.date_start:
+        conditions.append("da.fecha_documento >= %s::date")
+        params.append(req.date_start)
 
-    # Ordenamiento
-    if req.sort_mode == "Alfabético (A-Z)":
-        df = df.sort_values(by="titulo", key=lambda c: c.astype(str).str.lower())
-    elif req.sort_mode == "Alfabético (Z-A)":
-        df = df.sort_values(by="titulo", key=lambda c: c.astype(str).str.lower(), ascending=False)
-    elif req.sort_mode == "Más recientes primero":
-        df = df.sort_values(by="fecha", ascending=False)
-    elif req.sort_mode == "Más antiguos primero":
-        df = df.sort_values(by="fecha")
+    if req.date_end:
+        conditions.append("da.fecha_documento <= %s::date")
+        params.append(req.date_end)
 
-    records = df.to_dict(orient="records")
-    for idx, rec in enumerate(records):
-        rec["__idx"] = idx + 1
-        rec["tesauro_badges"] = sorted(set(
-            split_terms(rec.get("doc_type", ""))
-            + split_terms(rec.get("tesauro_primario", ""))
-            + split_terms(rec.get("tesauro_secundario", ""))
-            + split_terms(rec.get("descriptores_libres", ""))
-        ))
-    return records
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+
+    sort_map = {
+        "Más recientes primero": "da.fecha_documento DESC NULLS LAST",
+        "Más antiguos primero":  "da.fecha_documento ASC NULLS LAST",
+        "Alfabético (Z-A)":      "da.titulo DESC",
+    }
+    order = sort_map.get(req.sort_mode, "da.titulo ASC")
+
+    sql = f"""
+        SELECT
+            da.id_archivo AS id,
+            da.titulo,
+            COALESCE(da.autor, '')         AS autor,
+            TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
+            COALESCE(da.tesauro_primario, '')   AS doc_type,
+            COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
+            COALESCE(da.ubicacion, '')          AS ubicacion,
+            COALESCE(da.abstract, '')           AS resumen,
+            COALESCE(da.file_url, '')           AS file_url,
+            COALESCE(STRING_AGG(DISTINCT dl.nombre, '; ') FILTER (WHERE dl.nombre IS NOT NULL), '') AS descriptores_libres,
+            COUNT(*) OVER() AS total_count
+        FROM public.datos_archivo da
+        LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
+        LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
+        {where}
+        GROUP BY da.id_archivo, da.titulo, da.autor, da.fecha_documento,
+                 da.tesauro_primario, da.tesauro_secundario, da.ubicacion, da.abstract, da.file_url
+        ORDER BY {order}
+        LIMIT %s OFFSET %s
+    """
+    params.extend([per_page, offset])
+
+    rows = db_query(sql, params, fetch="all") or []
+
+    total = int(rows[0]["total_count"]) if rows else 0
+
+    records = []
+    for i, r in enumerate(rows):
+        rec = dict(r)
+        rec.pop("total_count", None)
+        rec["__idx"] = offset + i + 1
+        badges = set(split_terms(rec.get("doc_type", "")))
+        badges.update(split_terms(rec.get("tesauro_secundario", "")))
+        badges.update(split_terms(rec.get("descriptores_libres", "")))
+        rec["tesauro_badges"] = sorted(badges)
+        records.append(rec)
+
+    return {
+        "records":  records,
+        "total":    total,
+        "page":     page,
+        "per_page": per_page,
+    }
 
 
 @router.get("/documentos/buscar")
