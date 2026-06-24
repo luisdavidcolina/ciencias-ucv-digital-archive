@@ -247,7 +247,7 @@ function renderDynamicSubmitFields() {
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Cargo Asignado</label>
-          <input type="text" id="reg-cargo-${suf}" class="form-control" placeholder="Ej: Analista Contable">
+          <input type="text" id="reg-cargo-${suf}" class="form-control" placeholder="Ej: Analista Contable" list="dl-cargos" autocomplete="off">
         </div>
       </div>
       <div class="form-group mt-2">
@@ -271,15 +271,13 @@ function renderDynamicSubmitFields() {
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Departamento *</label>
-          <input type="text" id="reg-depto-${suf}" class="form-control" placeholder="Ej: Biología" required>
+          <input type="text" id="reg-depto-${suf}" class="form-control" placeholder="Ej: Biología" required list="dl-departamentos" autocomplete="off">
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Estado *</label>
           <select id="reg-estado-${suf}" class="form-control" required>
-            <option value="Activo">Activo</option>
-            <option value="Retirado">Retirado</option>
-            <option value="Jubilado">Jubilado</option>
-            <option value="Pensionado">Pensionado</option>
+            ${(state.choices?.rrhh?.estados_catalog || ["Activo","Retirado","Jubilado","Pensionado"])
+              .map(e => `<option value="${e}"${e==="Activo"?" selected":""}>${e}</option>`).join("")}
           </select>
         </div>
       </div>
