@@ -1,7 +1,8 @@
 ﻿import os
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import ensure_audit_table, db_query, logger
@@ -41,6 +42,23 @@ import time as _time
 import logging as _logging
 
 _req_logger = _logging.getLogger("app.requests")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail, "status_code": exc.status_code},
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception on {request.url}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Error interno del servidor. Intente nuevamente.", "status_code": 500},
+    )
+
 
 @app.middleware("http")
 async def _log_requests(request: Request, call_next):
