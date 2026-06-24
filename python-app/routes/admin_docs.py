@@ -605,6 +605,26 @@ def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
     return {"success": True}
 
 
+@router.get("/status_counts")
+def get_status_counts(modulo: str = "Archivo"):
+    """Retorna conteo de documentos por status para badges en el monitor."""
+    if modulo == "Archivo":
+        rows = db_query(
+            """SELECT COALESCE(status, 'aprobado') AS status, COUNT(*) AS cnt
+               FROM public.datos_archivo
+               GROUP BY COALESCE(status, 'aprobado')""",
+            fetch="all",
+        ) or []
+    else:
+        rows = db_query(
+            """SELECT COALESCE(status, 'aprobado') AS status, COUNT(*) AS cnt
+               FROM public.datos_rrhh
+               GROUP BY COALESCE(status, 'aprobado')""",
+            fetch="all",
+        ) or []
+    return {r["status"]: int(r["cnt"]) for r in rows}
+
+
 @router.delete("/empleado/{emp_id}")
 def delete_empleado(emp_id: int, usuario: str):
     db_query(

@@ -461,9 +461,36 @@ async function loadMonitorTable() {
     }
 
     renderMonitorTable();
+    _renderMonitorStatusBadges();
   } catch (e) {
     console.error("Error al cargar monitor:", e);
   }
+}
+
+async function _renderMonitorStatusBadges() {
+  const suf    = adminSuffixFromTab();
+  const mod    = state.user.modulo;
+  const badgesEl = document.getElementById(`monitor-status-badges-${suf}`);
+  if (!badgesEl) return;
+  if (!isArchivoModule()) { badgesEl.innerHTML = ""; return; }
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/status_counts?modulo=${mod}`);
+    if (!res.ok) return;
+    const counts = await res.json();
+    const defs = [
+      { key: "revision",  label: "En Revisión", cls: "badge-warning text-dark" },
+      { key: "draft",     label: "Borrador",     cls: "badge-secondary" },
+      { key: "rechazado", label: "Rechazados",   cls: "badge-danger" },
+    ];
+    badgesEl.innerHTML = defs
+      .filter(d => (counts[d.key] || 0) > 0)
+      .map(d => `
+        <button class="badge ${d.cls}" style="cursor:pointer;font-size:0.78rem;padding:5px 9px;border:none;"
+          onclick="document.getElementById('admin_filter_status-${suf}').value='${d.key}';state.adminTable.page=1;loadMonitorTable();">
+          ${d.label}: ${counts[d.key]}
+        </button>`)
+      .join("");
+  } catch {}
 }
 
 function renderMonitorTable() {
