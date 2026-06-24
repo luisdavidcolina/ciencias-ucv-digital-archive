@@ -72,3 +72,14 @@ def toggle_user_active(uid: int, requester: str = ""):
     )
     log_event(requester, "Toggle User Active", "Admin", f"uid={uid} → is_active={new_state}")
     return {"success": True, "is_active": new_state}
+
+
+@router.delete("/users/{uid}")
+def delete_user(uid: int, requester: str = ""):
+    row = db_query("SELECT usuario FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="one")
+    if not row:
+        raise HTTPException(404, "Usuario no encontrado")
+    username = row["usuario"]
+    db_query("DELETE FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="none", commit=True)
+    log_event(requester, "Delete User", "Admin", f"Eliminado: {username}")
+    return {"success": True}

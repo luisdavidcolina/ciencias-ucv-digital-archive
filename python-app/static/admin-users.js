@@ -34,9 +34,12 @@ async function loadUsersTab() {
                 </button>
               </td>
               <td class="text-muted small">${lastLogin}</td>
-              <td>
-                <button class="btn btn-xs btn-outline-secondary" onclick="handleChangePassword(${u.id},'${u.usuario}')">
-                  <i class="fas fa-key"></i> Cambiar clave
+              <td style="white-space:nowrap;">
+                <button class="btn btn-xs btn-outline-secondary mr-1" onclick="handleChangePassword(${u.id},'${u.usuario}')">
+                  <i class="fas fa-key"></i> Clave
+                </button>
+                <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteUser(${u.id},'${u.usuario}')">
+                  <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
             </tr>`;
@@ -60,6 +63,23 @@ async function handleToggleUserActive(uid, username) {
     loadUsersTab();
   } catch {
     showToast("Error al cambiar el estado del usuario.", "error");
+  }
+}
+
+async function handleDeleteUser(uid, username) {
+  const ok = typeof confirmModal === "function"
+    ? await confirmModal(`¿Eliminar al usuario "${username}"?`, "Esta acción es irreversible.", "Eliminar", "danger")
+    : confirm(`¿Eliminar al usuario "${username}"? Esta acción es irreversible.`);
+  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/${uid}?requester=${encodeURIComponent(state.user.username)}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Usuario "${username}" eliminado.`, "success");
+    loadUsersTab();
+  } catch {
+    showToast("Error al eliminar el usuario.", "error");
   }
 }
 

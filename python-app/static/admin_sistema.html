@@ -218,6 +218,38 @@
                 </div>
               </div>
 
+              <!-- Alertas de pendientes -->
+              <div class="row mt-2" id="sys-pending-alerts">
+                <div class="col-md-4">
+                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/archivo'">
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Archivo en Revisión</span>
+                      <span class="info-box-number" id="sys-arch-revision">—</span>
+                      <span class="info-box-text" style="font-size:0.72rem;opacity:0.8;">Click para gestionar</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/archivo'">
+                    <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-edit"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Borradores Archivo</span>
+                      <span class="info-box-number" id="sys-arch-draft">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/rrhh'">
+                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user-clock"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">RRHH en Revisión</span>
+                      <span class="info-box-number" id="sys-rrhh-revision">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Charts globales -->
               <div class="row mt-3">
                 <div class="col-md-6">
@@ -426,32 +458,33 @@ let _sysChartModulos = null;
 
 async function loadSystemStats() {
   try {
-    const [auditRow, usersRow, archCharts, rrhhCharts] = await Promise.all([
-      fetch(`${API_BASE}/api/admin/audit_log?page=1&per_page=1`).then(r=>r.json()).catch(()=>({})),
+    const [summary, usersRow] = await Promise.all([
+      fetch(`${API_BASE}/api/admin/global_summary`).then(r=>r.json()).catch(()=>({})),
       fetch(`${API_BASE}/api/admin/users`).then(r=>r.json()).catch(()=>[]),
-      fetch(`${API_BASE}/api/admin/charts?modulo=Archivo`).then(r=>r.json()).catch(()=>null),
-      fetch(`${API_BASE}/api/admin/charts?modulo=RRHH`).then(r=>r.json()).catch(()=>null),
     ]);
 
     const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
-    setEl("sys-total-audit", auditRow.total);
-    setEl("sys-total-users", Array.isArray(usersRow) ? usersRow.length : "—");
 
-    const archTotals = archCharts?.charts?.totals || {};
-    const rrhhTotals = rrhhCharts?.charts?.totals || {};
-    setEl("sys-docs-archivo", archTotals.total_docs);
-    setEl("sys-keywords", archTotals.total_keywords);
-    setEl("sys-empleados", rrhhTotals.total_employees);
-    setEl("sys-docs-rrhh", rrhhTotals.total_documents);
+    setEl("sys-total-docs",    (summary.total_docs || 0) + (summary.total_rrhh_docs || 0));
+    setEl("sys-total-emp",     summary.total_empleados);
+    setEl("sys-total-users",   summary.total_usuarios ?? (Array.isArray(usersRow) ? usersRow.length : "—"));
+    setEl("sys-total-audit",   summary.eventos_24h != null ? `${summary.eventos_24h} (24h)` : "—");
+    setEl("sys-docs-archivo",  summary.total_docs);
+    setEl("sys-empleados",     summary.total_empleados);
+    setEl("sys-docs-rrhh",     summary.total_rrhh_docs);
+    setEl("sys-keywords",      summary.total_keywords);
+    setEl("sys-arch-revision", summary.arch_en_revision || 0);
+    setEl("sys-arch-draft",    summary.arch_borradores  || 0);
+    setEl("sys-rrhh-revision", summary.rrhh_en_revision || 0);
 
-    const totalDocs = (archTotals.total_docs || 0) + (rrhhTotals.total_documents || 0);
-    const totalEmp  = rrhhTotals.total_employees || 0;
-    setEl("sys-total-docs", totalDocs);
-    setEl("sys-total-emp", totalEmp);
+    // Resaltar tarjeta si hay pendientes
+    if ((summary.arch_en_revision || 0) > 0) {
+      document.querySelector("#sys-arch-revision")?.closest(".info-box")?.classList.add("bg-warning");
+    }
 
     // Chart: distribución por módulo
-    const archDocs = archCharts?.charts?.totals?.total_docs || 0;
-    const rrhhDocs = rrhhCharts?.charts?.totals?.total_documents || 0;
+    const archDocs = summary.total_docs || 0;
+    const rrhhDocs = summary.total_rrhh_docs || 0;
     const ctx = document.getElementById("sys-chart-modulos")?.getContext("2d");
     if (ctx) {
       if (_sysChartModulos) { _sysChartModulos.destroy(); }

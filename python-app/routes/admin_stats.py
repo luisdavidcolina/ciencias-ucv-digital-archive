@@ -160,3 +160,35 @@ def get_charts_data(modulo: str = "Archivo"):
                 "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},
             }
         }
+
+
+@router.get("/global_summary")
+def get_global_summary():
+    """Resumen global para el panel de sistema (Admin Global)."""
+    row = db_query("""
+        SELECT
+            (SELECT COUNT(*) FROM public.datos_archivo)           AS total_docs,
+            (SELECT COUNT(*) FROM public.empleados)               AS total_empleados,
+            (SELECT COUNT(*) FROM public.datos_rrhh)              AS total_rrhh_docs,
+            (SELECT COUNT(*) FROM public.descriptores_libres)     AS total_keywords,
+            (SELECT COUNT(*) FROM public.usuarios_sistema WHERE COALESCE(is_active,TRUE)) AS total_usuarios,
+            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'revision')  AS arch_en_revision,
+            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'draft')     AS arch_borradores,
+            (SELECT COUNT(*) FROM public.datos_rrhh WHERE COALESCE(status,'aprobado') = 'revision')     AS rrhh_en_revision,
+            (SELECT MAX(created_at) FROM public.audit_log)        AS ultima_actividad,
+            (SELECT COUNT(*) FROM public.audit_log WHERE created_at >= NOW() - INTERVAL '24 hours') AS eventos_24h
+    """, fetch="one")
+    if not row:
+        return {}
+    d = dict(row)
+    for k in d:
+        if hasattr(d[k], 'isoformat'):
+            d[k] = d[k].isoformat()
+        elif d[k] is None:
+            d[k] = 0 if k != "ultima_actividad" else None
+        else:
+            try:
+                d[k] = int(d[k])
+            except (TypeError, ValueError):
+                pass
+    return d
