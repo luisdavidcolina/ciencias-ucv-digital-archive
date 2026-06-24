@@ -266,3 +266,180 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
         "categories":       sorted(set([x for x in p_df["categoria"].dropna().astype(str).tolist() if x.strip()])),
         "rows":             row_list,
     }
+
+
+# =============================================================================
+# BÚSQUEDA DENTRO DEL EXPEDIENTE
+# =============================================================================
+
+@router.get("/empleado/{emp_id}/documentos")
+def get_empleado_documentos(
+    emp_id: int,
+    search: str = "",
+    parte: str = "",
+    page: int = 1,
+    per_page: int = 20,
+):
+    """Documentos de un empleado con filtro y paginación."""
+    page = max(1, page)
+    per_page = max(1, min(per_page, 100))
+    offset = (page - 1) * per_page
+    conditions = ["dr.empleado_id = %s"]
+    params: list = [emp_id]
+    if search:
+        conditions.append(
+            "(unaccent(td.nombre_corto) ILIKE unaccent(%s) OR unaccent(COALESCE(dr.notas,'')) ILIKE unaccent(%s))"
+        )
+        term = f"%{search}%"
+        params.extend([term, term])
+    if parte:
+        conditions.append("c.slug = %s")
+        params.append(parte)
+    where = "WHERE " + " AND ".join(conditions)
+    count_row = db_query(
+        f"""SELECT COUNT(*) AS total FROM public.datos_rrhh dr
+            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+            LEFT JOIN public.categoria c ON td.id_categoria=c.id
+            {where}""",
+        params, fetch="one"
+    )
+    total = int(count_row["total"]) if count_row else 0
+    rows = db_query(
+        f"""SELECT dr.id_rrhh,
+                   TO_CHAR(dr.fecha_documento,'YYYY-MM-DD') AS fecha,
+                   dr.notas, dr.ubicacion, dr.file_url, dr.personas_relacionadas,
+                   COALESCE(td.nombre_corto,'Sin tipo') AS tipo_nombre,
+                   COALESCE(c.nombre,'Sin clasificar') AS parte_nombre,
+                   COALESCE(c.slug,'') AS parte_slug
+            FROM public.datos_rrhh dr
+            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+            LEFT JOIN public.categoria c ON td.id_categoria=c.id
+            {where}
+            ORDER BY c.id NULLS LAST, dr.fecha_documento DESC
+            LIMIT %s OFFSET %s""",
+        params + [per_page, offset], fetch="all"
+    ) or []
+    return {
+        "total": total, "page": page, "per_page": per_page,
+        "records": [dict(r) for r in rows],
+    }
+
+
+# =============================================================================
+# REPORTE HTML IMPRIMIBLE DEL EXPEDIENTE
+# =============================================================================
+
+from fastapi.responses import HTMLResponse as _HTMLResponse
+
+
+@router.get("/report/{emp_id}", response_class=_HTMLResponse)
+def generate_rrhh_report(emp_id: int):
+    """Genera reporte HTML imprimible del expediente de un empleado."""
+    emp = db_query("""
+        SELECT e.id, e.cedula, e.nombres, e.apellidos, e.rif,
+               e.fecha_jubilacion, e.fecha_pension,
+               COALESCE(c.nombre,'—') AS cargo,
+               COALESCE(d.nombre,'—') AS departamento,
+               COALESCE(el.estados,'—') AS estado
+        FROM public.empleados e
+        LEFT JOIN public.cargos c ON e.cargo_id = c.id
+        LEFT JOIN public.departamentos d ON e.departamento_id = d.id
+        LEFT JOIN public.estados_laborales el ON e.estado_id = el.id
+        WHERE e.id=%s
+    """,[emp_id],fetch="one")
+    if not emp:
+        raise HTTPException(404,"Empleado no encontrado")
+    emp = dict(emp)
+    docs = db_query("""
+        SELECT dr.id_rrhh, dr.fecha_documento, dr.notas, dr.ubicacion, dr.file_url,
+               COALESCE(td.nombre_corto,'Sin tipo') AS tipo_nombre,
+               COALESCE(c.nombre,'Sin clasificar') AS parte_nombre,
+               COALESCE(c.id, 999) AS parte_orden
+        FROM public.datos_rrhh dr
+        LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+        LEFT JOIN public.categoria c ON td.id_categoria=c.id
+        WHERE dr.empleado_id=%s ORDER BY parte_orden, dr.fecha_documento DESC
+    """,[emp_id],fetch="all") or []
+    partes = {}
+    for d in docs:
+        k = d["parte_nombre"]
+        partes.setdefault(k,[]).append(dict(d))
+    def fd(v):
+        if not v: return "—"
+        return str(v)[:10]
+    colores = {
+        "Parte I — Ingreso y Contratación":"#0d6efd",
+        "Parte II — Escalafón y Desarrollo":"#198754",
+        "Parte III — Permisos y Formación":"#fd7e14",
+        "Parte IV — Documentos Personales":"#6f42c1",
+    }
+    nombre_completo = f"{emp.get('apellidos','')}, {emp.get('nombres','')}".strip(", ")
+    rows_html = ""
+    for pn, pdocs in partes.items():
+        col = colores.get(pn,"#6c757d")
+        rows_html += f'<tr style="background:{col}18"><td colspan="4" style="font-weight:700;color:{col};border-left:4px solid {col};padding:8px 14px">{pn} <span style="font-weight:normal;font-size:.8rem">({len(pdocs)} documentos)</span></td></tr>'
+        for d in pdocs:
+            rows_html += f'<tr><td style="padding:6px 14px;border-bottom:1px solid #eee">{d["tipo_nombre"]}</td><td style="padding:6px 14px;border-bottom:1px solid #eee">{fd(d["fecha_documento"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{d["notas"] or "—"}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{d["ubicacion"] or "—"}</td></tr>'
+    if not rows_html:
+        rows_html = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#999">Sin documentos registrados</td></tr>'
+    from datetime import datetime as _dt
+    now_str = _dt.now().strftime("%d/%m/%Y %H:%M")
+    html = f"""<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+<title>Expediente — {nombre_completo}</title>
+<style>
+@media print{{@page{{size:A4;margin:2cm}}button{{display:none!important}}}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:'Segoe UI',Arial,sans-serif;color:#222;background:#fff}}
+.header{{border-bottom:3px solid #003366;padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}}
+.logo h1{{color:#003366;font-size:1.3rem}}
+.logo p{{color:#666;font-size:.82rem;margin-top:2px}}
+.print-date{{font-size:.78rem;color:#999;text-align:right}}
+.emp-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:14px;margin-bottom:18px}}
+.ef label{{font-size:.7rem;text-transform:uppercase;color:#888;display:block}}
+.ef span{{font-weight:600;color:#222}}
+.stats{{display:flex;gap:16px;margin-bottom:18px}}
+.sbox{{background:#003366;color:#fff;border-radius:8px;padding:10px 18px;text-align:center}}
+.sbox .n{{font-size:1.7rem;font-weight:700}}
+.sbox .l{{font-size:.7rem;opacity:.8}}
+table{{width:100%;border-collapse:collapse;font-size:.88rem}}
+th{{background:#003366;color:#fff;padding:8px 14px;text-align:left;font-size:.82rem}}
+tr:nth-child(even) td{{background:#f9f9f9}}
+.pbtn{{position:fixed;top:14px;right:14px;background:#003366;color:#fff;border:none;padding:9px 18px;border-radius:6px;cursor:pointer;font-size:.88rem;z-index:999}}
+.badge{{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600}}
+.badge-activo{{background:#d1e7dd;color:#0f5132}}
+.badge-retirado{{background:#f8d7da;color:#842029}}
+.badge-jubilado,.badge-pensionado{{background:#e2d9f3;color:#432874}}
+</style></head><body>
+<button class="pbtn" onclick="window.print()">Imprimir / PDF</button>
+<div style="max-width:900px;margin:30px auto;padding:20px">
+<div class="header">
+<div class="logo">
+<h1>Universidad Central de Venezuela — Facultad de Ciencias</h1>
+<p>Dirección de Recursos Humanos · Archivo Institucional Digital</p>
+<p style="margin-top:6px;font-size:.95rem;font-weight:600;color:#003366">EXPEDIENTE DEL PERSONAL DOCENTE Y DE INVESTIGACIÓN</p>
+</div>
+<div class="print-date">Generado: {now_str}<br>N.° Expediente: {emp_id}</div>
+</div>
+<div class="emp-grid">
+<div class="ef"><label>Nombre Completo</label><span>{nombre_completo}</span></div>
+<div class="ef"><label>Cédula</label><span>{emp.get('cedula','—')}</span></div>
+<div class="ef"><label>Estado</label><span class="badge badge-{str(emp.get('estado','') or '').lower()}">{emp.get('estado','—')}</span></div>
+<div class="ef"><label>Cargo</label><span>{emp.get('cargo','—')}</span></div>
+<div class="ef"><label>Departamento</label><span>{emp.get('departamento','—')}</span></div>
+<div class="ef"><label>RIF</label><span>{emp.get('rif','—') or '—'}</span></div>
+<div class="ef"><label>Jubilación</label><span>{fd(emp.get('fecha_jubilacion'))}</span></div>
+<div class="ef"><label>Pensión</label><span>{fd(emp.get('fecha_pension'))}</span></div>
+</div>
+<div class="stats">
+<div class="sbox"><div class="n">{len(docs)}</div><div class="l">Documentos</div></div>
+<div class="sbox"><div class="n">{len(partes)}</div><div class="l">Secciones</div></div>
+</div>
+<table>
+<thead><tr><th>Tipo de Documento</th><th>Fecha</th><th>Notas / Descripción</th><th>Ubicación</th></tr></thead>
+<tbody>{rows_html}</tbody>
+</table>
+<p style="margin-top:20px;font-size:.72rem;color:#aaa;text-align:center">
+Documento generado automáticamente por el Sistema de Archivo Institucional — Ciencias UCV. Confidencial. Solo para uso oficial.
+</p>
+</div></body></html>"""
+    return _HTMLResponse(content=html)

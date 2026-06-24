@@ -1,6 +1,6 @@
 ﻿import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -34,6 +34,21 @@ app.add_middleware(
 async def add_no_cache_header(request, call_next):
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
+
+
+import time as _time
+import logging as _logging
+
+_req_logger = _logging.getLogger("app.requests")
+
+@app.middleware("http")
+async def _log_requests(request: Request, call_next):
+    t0 = _time.time()
+    response = await call_next(request)
+    ms = round((_time.time() - t0) * 1000)
+    if request.url.path.startswith("/api/"):
+        _req_logger.info(f"{request.method} {request.url.path} → {response.status_code} ({ms}ms)")
     return response
 
 
