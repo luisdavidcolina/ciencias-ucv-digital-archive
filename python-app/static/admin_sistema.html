@@ -476,10 +476,15 @@ async function loadSystemStats() {
     setEl("sys-arch-revision", summary.arch_en_revision || 0);
     setEl("sys-arch-draft",    summary.arch_borradores  || 0);
     setEl("sys-rrhh-revision", summary.rrhh_en_revision || 0);
+    setEl("sys-emp-activos",   summary.empleados_activos != null ? summary.empleados_activos : "—");
+    setEl("sys-total-backups", summary.total_backups != null ? summary.total_backups : "—");
 
     // Resaltar tarjeta si hay pendientes
     if ((summary.arch_en_revision || 0) > 0) {
       document.querySelector("#sys-arch-revision")?.closest(".info-box")?.classList.add("bg-warning");
+    }
+    if ((summary.rrhh_en_revision || 0) > 0) {
+      document.querySelector("#sys-rrhh-revision")?.closest(".info-box")?.classList.add("bg-warning");
     }
 
     // Chart: distribución por módulo
