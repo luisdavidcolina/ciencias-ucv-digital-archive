@@ -100,9 +100,19 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
 # ENDPOINTS
 # =============================================================================
 
-@router.post("/buscar")
+@router.post("/buscar", summary="Búsqueda de expedientes de personal")
 def search_rrhh(req: RrhhSearchRequest):
-    """Busca personas en el índice RRHH usando la VIEW vw_rrhh_persona_index con paginación SQL."""
+    """
+    Búsqueda de expedientes RRHH sobre la vista agregada `vw_rrhh_persona_index`.
+
+    La búsqueda es por persona (no por documento): agrupa todos los documentos
+    del expediente bajo un único resultado por empleado. Usa FTS español con
+    fallback a ILIKE para términos numéricos (cédulas, años).
+
+    Retorna paginación server-side: `{records, total, page, per_page}`.
+    Cada registro incluye el conteo de documentos (`doc_count`) y los tipos
+    de documento presentes en el expediente (`tipos`).
+    """
     page     = max(1, req.page)
     per_page = max(1, min(req.per_page, 50))
     offset   = (page - 1) * per_page

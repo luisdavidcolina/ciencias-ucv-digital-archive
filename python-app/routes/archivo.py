@@ -62,8 +62,17 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
 # ENDPOINTS
 # =============================================================================
 
-@router.post("/buscar")
+@router.post("/buscar", summary="Búsqueda de documentos institucionales")
 def search_archivo(req: ArchivoSearchRequest):
+    """
+    Búsqueda full-text de documentos en el Archivo Institucional.
+
+    Implementa `plainto_tsquery('spanish')` con ranking por `ts_rank_cd()`.
+    Cuando el término no contiene letras (e.g., años, números), hace fallback
+    a `unaccent(ILIKE)` para compatibilidad con búsquedas numéricas.
+
+    Retorna paginación server-side: `{records, total, page, per_page}`.
+    """
     page     = max(1, req.page)
     per_page = max(1, min(req.per_page, 50))
     offset   = (page - 1) * per_page

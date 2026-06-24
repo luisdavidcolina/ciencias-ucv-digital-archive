@@ -20,7 +20,34 @@ from routes.backup       import router as backup_router
 # APLICACION
 # =============================================================================
 
-app = FastAPI(title="Ciencias UCV Digital Archive", version="3.1.0-Neon")
+app = FastAPI(
+    title="Archivo Institucional Digital — Facultad de Ciencias, UCV",
+    version="3.2.0-Neon",
+    description="""
+Sistema de gestión documental e inventario de RRHH de la Facultad de Ciencias,
+Universidad Central de Venezuela.
+
+**Estándares aplicados:**
+- ISAD(G): Norma Internacional General de Descripción Archivística
+- ISO 15489-1:2016: Gestión de Documentos — Conceptos y principios
+- LOTTT (Venezuela): Campos de empleados conforme a legislación laboral vigente
+- Dublin Core Metadata Initiative (DC 1.1): Metadatos de documentos
+
+**Módulos:**
+- `/api/archivo` — Búsqueda del Archivo Institucional
+- `/api/rrhh` — Búsqueda de Expedientes de RRHH
+- `/api/admin` — Gestión, estadísticas, usuarios, backup, retención
+- `/api/auth` — Autenticación y sesiones
+- `/api/choices` — Catálogos para formularios (cacheado 5 min)
+""",
+    contact={
+        "name": "Facultad de Ciencias — UCV",
+        "url": "https://www.ciens.ucv.ve",
+    },
+    license_info={
+        "name": "Uso Institucional — Facultad de Ciencias UCV",
+    },
+)
 
 # CORS
 app.add_middleware(

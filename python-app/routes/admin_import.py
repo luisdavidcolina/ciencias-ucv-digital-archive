@@ -28,7 +28,17 @@ async def import_empleados_csv(
     file: UploadFile = File(...),
     requester: str = Query(default=""),
 ):
-    """Importa empleados desde CSV. Columnas: cedula,nombres,apellidos,cargo,departamento,estado,rif,fecha_jubilacion,fecha_pension"""
+    """
+    Importa o actualiza empleados desde CSV.
+
+    Columnas reconocidas (mínimo `cedula` requerida):
+    - `cedula`, `nombres`, `apellidos`, `cargo`, `departamento`, `estado`
+    - `rif`, `fecha_jubilacion`, `fecha_pension`, `foto_url`
+    - `fecha_nacimiento` (LOTTT), `nivel_educativo`, `sexo` (M/F/O)
+
+    Encodings soportados: UTF-8 (con o sin BOM), Latin-1, CP1252.
+    Si la cédula ya existe, actualiza el registro; si no, lo inserta.
+    """
     content = await file.read()
     for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
         try:
@@ -47,14 +57,19 @@ async def import_empleados_csv(
         if not cedula:
             results["skipped"] += 1
             continue
-        nombres   = str(row.get("nombres",   "") or "").strip()
-        apellidos = str(row.get("apellidos", "") or "").strip()
-        cargo     = str(row.get("cargo",     "") or "").strip()
-        depto     = str(row.get("departamento", "") or "").strip()
-        estado    = str(row.get("estado", "Activo") or "Activo").strip()
-        rif       = str(row.get("rif",       "") or "").strip()
-        fecha_jub = _parse_date(row.get("fecha_jubilacion"))
-        fecha_pen = _parse_date(row.get("fecha_pension"))
+        nombres         = str(row.get("nombres",   "") or "").strip()
+        apellidos       = str(row.get("apellidos", "") or "").strip()
+        cargo           = str(row.get("cargo",     "") or "").strip()
+        depto           = str(row.get("departamento", "") or "").strip()
+        estado          = str(row.get("estado", "Activo") or "Activo").strip()
+        rif             = str(row.get("rif",       "") or "").strip()
+        foto_url        = str(row.get("foto_url",  "") or "").strip() or None
+        fecha_jub       = _parse_date(row.get("fecha_jubilacion"))
+        fecha_pen       = _parse_date(row.get("fecha_pension"))
+        fecha_nac       = _parse_date(row.get("fecha_nacimiento"))
+        nivel_educativo = str(row.get("nivel_educativo", "") or "").strip() or None
+        sexo_raw        = str(row.get("sexo", "") or "").strip().upper()
+        sexo            = sexo_raw if sexo_raw in ("M", "F", "O") else None
         try:
             cargo_id  = _resolve_or_create_lookup("cargos", cargo, "Por Asignar") if cargo else None
             dept_id   = _resolve_or_create_lookup("departamentos", depto, "Por Asignar") if depto else None
@@ -63,9 +78,13 @@ async def import_empleados_csv(
             if existing:
                 set_clauses = ["nombres=%s", "apellidos=%s", "rif=%s", "fecha_jubilacion=%s", "fecha_pension=%s"]
                 set_params  = [nombres, apellidos, rif, fecha_jub, fecha_pen]
-                if cargo_id:  set_clauses.append("cargo_id=%s");       set_params.append(cargo_id)
-                if dept_id:   set_clauses.append("departamento_id=%s"); set_params.append(dept_id)
-                if estado_id: set_clauses.append("estado_id=%s");       set_params.append(estado_id)
+                if cargo_id:        set_clauses.append("cargo_id=%s");        set_params.append(cargo_id)
+                if dept_id:         set_clauses.append("departamento_id=%s"); set_params.append(dept_id)
+                if estado_id:       set_clauses.append("estado_id=%s");       set_params.append(estado_id)
+                if foto_url:        set_clauses.append("foto_url=%s");        set_params.append(foto_url)
+                if fecha_nac:       set_clauses.append("fecha_nacimiento=%s"); set_params.append(fecha_nac)
+                if nivel_educativo: set_clauses.append("nivel_educativo=%s"); set_params.append(nivel_educativo)
+                if sexo:            set_clauses.append("sexo=%s");            set_params.append(sexo)
                 set_params.append(cedula)
                 db_query(
                     f"UPDATE public.empleados SET {','.join(set_clauses)} WHERE cedula=%s",
@@ -74,9 +93,12 @@ async def import_empleados_csv(
                 results["updated"] += 1
             else:
                 db_query(
-                    """INSERT INTO public.empleados(cedula,nombres,apellidos,rif,cargo_id,departamento_id,estado_id,fecha_jubilacion,fecha_pension)
-                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    [cedula, nombres, apellidos, rif, cargo_id, dept_id, estado_id, fecha_jub, fecha_pen],
+                    """INSERT INTO public.empleados
+                       (cedula,nombres,apellidos,rif,cargo_id,departamento_id,estado_id,
+                        fecha_jubilacion,fecha_pension,foto_url,fecha_nacimiento,nivel_educativo,sexo)
+                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    [cedula, nombres, apellidos, rif, cargo_id, dept_id, estado_id,
+                     fecha_jub, fecha_pen, foto_url, fecha_nac, nivel_educativo, sexo],
                     fetch="none", commit=True,
                 )
                 results["inserted"] += 1
