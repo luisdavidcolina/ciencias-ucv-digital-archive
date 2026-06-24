@@ -118,8 +118,8 @@ async def import_documentos_csv(
     requester: str = Query(default=""),
 ):
     """
-    Archivo: columnas titulo,autor,fecha,tipo_documento,abstract,ubicacion,palabras_clave
-    RRHH:    columnas cedula_empleado,tipo_documento,fecha,notas,ubicacion
+    Archivo: columnas titulo,autor,fecha,tipo_documento,abstract,ubicacion,palabras_clave[,numero_folio,soporte,numero_paginas]
+    RRHH:    columnas cedula_empleado,tipo_documento,fecha,notas,ubicacion[,numero_folio,soporte,numero_paginas]
     """
     content = await file.read()
     for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
@@ -143,12 +143,21 @@ async def import_documentos_csv(
                     continue
                 tipo_nombre = str(row.get("tipo_documento", "") or "").strip()
                 tipo_id = _resolve_or_create_tipo_documento(tipo_nombre, "archivo") if tipo_nombre else None
+                _soporte = str(row.get("soporte", "") or "Físico").strip()
+                if _soporte not in ("Físico", "Digital", "Digitalizado"):
+                    _soporte = "Físico"
+                _paginas_raw = str(row.get("numero_paginas", "") or "").strip()
+                _paginas = int(_paginas_raw) if _paginas_raw.isdigit() and int(_paginas_raw) > 0 else None
                 doc_row = db_query(
-                    """INSERT INTO public.datos_archivo(titulo,autor,fecha_documento,tesauro_primario,id_tipo_documento,abstract,ubicacion,updated_by)
-                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_archivo""",
+                    """INSERT INTO public.datos_archivo
+                           (titulo,autor,fecha_documento,tesauro_primario,id_tipo_documento,
+                            abstract,ubicacion,updated_by,numero_folio,soporte,numero_paginas)
+                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_archivo""",
                     [
                         titulo, row.get("autor", ""), _parse_date(row.get("fecha")),
                         tipo_nombre, tipo_id, row.get("abstract", ""), row.get("ubicacion", ""), requester,
+                        str(row.get("numero_folio", "") or "").strip() or None,
+                        _soporte, _paginas,
                     ],
                     fetch="one", commit=True,
                 )
@@ -179,10 +188,18 @@ async def import_documentos_csv(
                 if not tipo_id:
                     results["errors"].append(f"Fila {i}: tipo_documento inválido")
                     continue
+                _soporte_r = str(row.get("soporte", "") or "Físico").strip()
+                if _soporte_r not in ("Físico", "Digital", "Digitalizado"):
+                    _soporte_r = "Físico"
+                _paginas_r_raw = str(row.get("numero_paginas", "") or "").strip()
+                _paginas_r = int(_paginas_r_raw) if _paginas_r_raw.isdigit() and int(_paginas_r_raw) > 0 else None
                 db_query(
-                    """INSERT INTO public.datos_rrhh(empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,updated_by)
-                       VALUES(%s,%s,%s,%s,%s,%s)""",
-                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""), row.get("ubicacion", ""), requester],
+                    """INSERT INTO public.datos_rrhh
+                           (empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,updated_by,
+                            numero_folio,soporte,numero_paginas)
+                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""), row.get("ubicacion", ""), requester,
+                     str(row.get("numero_folio", "") or "").strip() or None, _soporte_r, _paginas_r],
                     fetch="none", commit=True,
                 )
                 results["inserted"] += 1
