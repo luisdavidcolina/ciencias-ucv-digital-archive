@@ -76,6 +76,19 @@ class DocumentSubmitRequest(BaseModel):
     status: Optional[str] = "aprobado"
     notas: Optional[str] = ""
 
+    @validator("modulo")
+    def modulo_must_be_valid(cls, v):
+        if v not in ("Archivo", "RRHH"):
+            raise ValueError("modulo debe ser 'Archivo' o 'RRHH'")
+        return v
+
+    @validator("status")
+    def status_must_be_valid(cls, v):
+        allowed = ("draft", "revision", "aprobado", "rechazado")
+        if v and v not in allowed:
+            raise ValueError(f"status inválido, debe ser uno de: {', '.join(allowed)}")
+        return v or "aprobado"
+
 
 class StatsRequest(BaseModel):
     modulo: str
