@@ -119,8 +119,9 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                     conn.rollback()
                 except Exception:
                     pass
-            logger.error(f"Error en query SQL: {e}\nSQL: {sql}")
-            raise HTTPException(status_code=500, detail=f"Error en base de datos: {e}")
+            sql_preview = sql.strip()[:120].replace("\n", " ")
+            logger.error(f"Error SQL [{type(e).__name__}]: {e} | SQL: {sql_preview}…")
+            raise HTTPException(status_code=500, detail=f"Error en base de datos: {type(e).__name__}")
         finally:
             if conn is not None:
                 try:
