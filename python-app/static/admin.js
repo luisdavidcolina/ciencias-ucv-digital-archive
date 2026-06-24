@@ -599,12 +599,12 @@ function renderMonitorTable() {
       const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
       return `
         <tr>
-          <td class="font-weight-bold text-dark">${hlEmpleado}</td>
-          <td>${f.cedula}</td>
-          <td>${f.departamento}</td>
-          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado}</span></td>
-          <td><span class="badge badge-secondary" style="padding:3px 6px;">${f.doc_type}</span></td>
-          <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
+          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(f.empleado||'').replace(/"/g,'&quot;')}">${hlEmpleado}</td>
+          <td class="text-muted small">${f.cedula || "—"}</td>
+          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.cargo || f.departamento || "—"}</td>
+          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado || "—"}</span></td>
+          <td><span class="badge badge-light border" title="${f.tipos||''}" style="padding:3px 6px;">${(f.tipos||'').split(';')[0].trim() || '—'}</span></td>
+          <td class="text-muted small">${f.ubicacion || "—"}</td>
           <td>
             <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver Expediente"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar"><i class="fas fa-edit"></i></button>
