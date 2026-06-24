@@ -278,16 +278,28 @@ app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 @app.get("/api/health", tags=["system"])
 def health_check():
     """Endpoint de salud para monitoreo básico."""
+    from core.config import settings
     try:
-        row = db_query("SELECT 1 AS ok", fetch="one")
-        db_ok = row is not None
+        counts = db_query(
+            """SELECT
+                (SELECT COUNT(*) FROM public.datos_archivo) AS archivo,
+                (SELECT COUNT(*) FROM public.empleados)     AS empleados,
+                (SELECT COUNT(*) FROM public.usuarios_sistema) AS usuarios""",
+            fetch="one",
+        )
+        db_ok = counts is not None
     except Exception:
         db_ok = False
-    from core.config import settings
+        counts = None
     return {
         "status": "ok" if db_ok else "degraded",
         "db": "connected" if db_ok else "error",
         "version": settings.app_version,
+        "counts": {
+            "archivo":   int(counts["archivo"])   if counts else None,
+            "empleados": int(counts["empleados"]) if counts else None,
+            "usuarios":  int(counts["usuarios"])  if counts else None,
+        } if db_ok else None,
     }
 
 
