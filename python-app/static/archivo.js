@@ -12,15 +12,59 @@ async function triggerArchivoSearch() {
         tesauro_terms: state.archivo.selectedTesauro,
         date_start:    state.archivo.dateStart,
         date_end:      state.archivo.dateEnd,
-        sort_mode:     state.archivo.sortMode
+        sort_mode:     state.archivo.sortMode,
+        page:          state.archivo.page,
+        per_page:      state.archivo.perPage
       })
     });
     if (!res.ok) throw new Error();
-    state.archivo.results = await res.json();
+    const data = await res.json();
+    // Retrocompatibilidad: si la respuesta es un array (formato viejo), tratar como antes
+    if (Array.isArray(data)) {
+      state.archivo.results = data;
+      state.archivo.total   = data.length;
+    } else {
+      state.archivo.results = data.records || [];
+      state.archivo.total   = data.total   || state.archivo.results.length;
+    }
     renderArchivoList();
+    renderArchivoPagination();
   } catch (e) {
     console.error("Error buscando archivo:", e);
   }
+}
+
+function renderArchivoPagination() {
+  const container = document.getElementById("archivo-pagination");
+  if (!container) return;
+  const total   = state.archivo.total || state.archivo.results.length;
+  const perPage = state.archivo.perPage || 10;
+  const page    = state.archivo.page    || 1;
+  const pages   = Math.ceil(total / perPage) || 1;
+  if (pages <= 1) { container.innerHTML = ""; return; }
+  container.innerHTML = `
+    <nav class="mt-3 d-flex align-items-center justify-content-between">
+      <small class="text-muted">Mostrando pág. ${page} de ${pages} (${total} resultados)</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeArchivoPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
+        </li>
+        ${Array.from({length: Math.min(5, pages)}, (_, i) => {
+          const p = Math.max(1, Math.min(page - 2, pages - 4)) + i;
+          return `<li class="page-item ${p === page ? 'active' : ''}">
+            <button class="page-link" onclick="changeArchivoPage(${p})">${p}</button>
+          </li>`;
+        }).join("")}
+        <li class="page-item ${page >= pages ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeArchivoPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+        </li>
+      </ul>
+    </nav>`;
+}
+
+function changeArchivoPage(p) {
+  state.archivo.page = p;
+  triggerArchivoSearch();
 }
 
 function getDocumentIcon(docType) {
@@ -46,7 +90,8 @@ function getDocumentIcon(docType) {
 function renderArchivoList() {
   const container = document.getElementById("list_archivo");
   const results   = state.archivo.results;
-  document.getElementById("count-archivo-results").innerText = `${results.length} Registros`;
+  const total     = state.archivo.total || results.length;
+  document.getElementById("count-archivo-results").innerText = `${total} Registros`;
 
   if (results.length === 0) {
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
@@ -61,17 +106,14 @@ function renderArchivoList() {
     return;
   }
 
-  const totalPages = Math.ceil(results.length / state.archivo.perPage);
-  if (state.archivo.page > totalPages) state.archivo.page = totalPages;
-  const start     = (state.archivo.page - 1) * state.archivo.perPage;
-  const pageItems = results.slice(start, start + state.archivo.perPage);
+  const totalPages = Math.ceil(total / state.archivo.perPage) || 1;
   document.getElementById("info-archivo-pagination").innerText = `Pág ${state.archivo.page} de ${totalPages}`;
   const prevBtnA = document.getElementById("btn-archivo-prev");
   const nextBtnA = document.getElementById("btn-archivo-next");
   if (prevBtnA) prevBtnA.disabled = state.archivo.page <= 1;
   if (nextBtnA) nextBtnA.disabled = state.archivo.page >= totalPages;
 
-  container.innerHTML = pageItems.map(doc => {
+  container.innerHTML = results.map(doc => {
     const iconData = getDocumentIcon(doc.doc_type);
     return `
     <div class="ds-item-card" onclick="openArchivoModal('${doc.__idx}')" style="cursor:pointer;">
