@@ -244,3 +244,43 @@ function openQuickStatusMenu(btn, docId, currentStatus, modulo) {
   const closeMenu = e => { if (!menu.contains(e.target) && e.target !== btn) { menu.remove(); document.removeEventListener("click", closeMenu, true); } };
   setTimeout(() => document.addEventListener("click", closeMenu, true), 10);
 }
+
+// ─── Barra de progreso indeterminada para operaciones largas ──────────────────
+function showProgress(containerId, label = "Procesando…") {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const div = document.createElement("div");
+  div.id = `_prog_${containerId}`;
+  div.innerHTML = `
+    <div class="d-flex align-items-center mb-2">
+      <span class="text-muted small mr-2">${label}</span>
+      <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    </div>
+    <div class="progress" style="height:6px;">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width:100%;"></div>
+    </div>`;
+  el.prepend(div);
+}
+
+function hideProgress(containerId) {
+  document.getElementById(`_prog_${containerId}`)?.remove();
+}
+
+// ─── Tooltip simple para elementos con data-tip ───────────────────────────────
+document.addEventListener("mouseover", e => {
+  const target = e.target.closest("[data-tip]");
+  if (!target) return;
+  let tip = document.getElementById("_ds_tip");
+  if (!tip) {
+    tip = document.createElement("div");
+    tip.id = "_ds_tip";
+    tip.style.cssText = "position:fixed;background:#333;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;z-index:99999;pointer-events:none;max-width:200px;";
+    document.body.appendChild(tip);
+  }
+  tip.textContent = target.dataset.tip;
+  tip.style.display = "block";
+  const move = ev => { tip.style.left = `${ev.clientX + 10}px`; tip.style.top = `${ev.clientY - 28}px`; };
+  const leave = () => { tip.style.display = "none"; target.removeEventListener("mousemove", move); target.removeEventListener("mouseleave", leave); };
+  target.addEventListener("mousemove", move);
+  target.addEventListener("mouseleave", leave);
+});

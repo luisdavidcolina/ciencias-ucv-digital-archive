@@ -27,9 +27,10 @@ def _resolve_or_create_tipo_documento(nombre: str, cat_slug: str = None) -> int:
     nombre = (nombre or "").strip()
     if not nombre:
         raise HTTPException(status_code=400, detail="doc_type vacío")
+    # Busca por nombre o nombre_corto, insensible a mayúsculas
     row = db_query(
-        "SELECT id FROM public.tipo_documento WHERE LOWER(nombre) = LOWER(%s)",
-        (nombre,),
+        "SELECT id FROM public.tipo_documento WHERE LOWER(nombre) = LOWER(%s) OR LOWER(COALESCE(nombre_corto,'')) = LOWER(%s)",
+        (nombre, nombre),
         fetch="one",
     )
     if row:
