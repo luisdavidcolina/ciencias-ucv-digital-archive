@@ -30,11 +30,17 @@ async def import_empleados_csv(
 ):
     """Importa empleados desde CSV. Columnas: cedula,nombres,apellidos,cargo,departamento,estado,rif,fecha_jubilacion,fecha_pension"""
     content = await file.read()
-    try:
-        text = content.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        text = content.decode("latin-1")
+    for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
+        try:
+            text = content.decode(enc)
+            break
+        except (UnicodeDecodeError, LookupError):
+            continue
+    else:
+        return {"inserted": 0, "updated": 0, "skipped": 0, "errors": ["No se pudo decodificar el archivo. Use UTF-8 o Latin-1."]}
     reader = _csv_module.DictReader(_io_module.StringIO(text))
+    if reader.fieldnames is None:
+        return {"inserted": 0, "updated": 0, "skipped": 0, "errors": ["Archivo CSV vacío o sin encabezados."]}
     results = {"inserted": 0, "updated": 0, "skipped": 0, "errors": []}
     for i, row in enumerate(reader, 1):
         cedula = str(row.get("cedula", "") or "").strip()
@@ -94,11 +100,17 @@ async def import_documentos_csv(
     RRHH:    columnas cedula_empleado,tipo_documento,fecha,notas,ubicacion
     """
     content = await file.read()
-    try:
-        text = content.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        text = content.decode("latin-1")
+    for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
+        try:
+            text = content.decode(enc)
+            break
+        except (UnicodeDecodeError, LookupError):
+            continue
+    else:
+        return {"inserted": 0, "skipped": 0, "errors": ["No se pudo decodificar el archivo. Use UTF-8 o Latin-1."]}
     reader = _csv_module.DictReader(_io_module.StringIO(text))
+    if reader.fieldnames is None:
+        return {"inserted": 0, "skipped": 0, "errors": ["Archivo CSV vacío o sin encabezados."]}
     results = {"inserted": 0, "skipped": 0, "errors": []}
     for i, row in enumerate(reader, 1):
         try:
