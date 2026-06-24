@@ -1,8 +1,9 @@
 ﻿// ==========================================================================
 // TOAST SYSTEM
 // ==========================================================================
-function showToast(message, type) {
+function showToast(message, type, duration) {
   type = type || "info";
+  const ttl = duration ?? { success: 3000, error: 6000, warning: 4500, info: 3500 }[type] ?? 3500;
   const container = document.getElementById("ds-toast-container");
   if (!container) return;
 
@@ -15,14 +16,20 @@ function showToast(message, type) {
   const cfg = colors[type] || colors.info;
 
   const toast = document.createElement("div");
-  toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:6px;padding:10px 14px;margin-bottom:8px;min-width:260px;display:flex;align-items:center;box-shadow:0 3px 10px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s;`;
-  toast.innerHTML = `<i class="${cfg.icon}" style="margin-right:8px;font-size:1rem;"></i><span>${message}</span>`;
+  toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:8px;padding:10px 14px;margin-bottom:8px;min-width:260px;max-width:380px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s,transform 0.3s;transform:translateX(20px);`;
+  toast.innerHTML = `<i class="${cfg.icon}" style="font-size:1rem;flex-shrink:0;margin-top:2px;"></i><span style="flex:1;">${message}</span><button style="background:none;border:none;padding:0 0 0 8px;cursor:pointer;opacity:0.6;color:inherit;font-size:1rem;" onclick="this.closest('div').remove()">✕</button>`;
   container.appendChild(toast);
 
-  setTimeout(() => {
+  // Animate in
+  requestAnimationFrame(() => { toast.style.transform = "translateX(0)"; });
+
+  const dismiss = () => {
     toast.style.opacity = "0";
+    toast.style.transform = "translateX(20px)";
     setTimeout(() => toast.remove(), 400);
-  }, 3500);
+  };
+  const timer = setTimeout(dismiss, ttl);
+  toast.querySelector("button").addEventListener("click", () => clearTimeout(timer));
 }
 
 // ==========================================================================
