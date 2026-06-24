@@ -417,21 +417,21 @@ async function handleNewSubmission(e) {
 
 // --- MONITOR ---
 async function loadMonitorTable() {
-  const mod     = state.user.modulo;
-  const suf     = adminSuffixFromTab();
-  const q       = document.getElementById(`admin_search-${suf}`)?.value         || "";
-  const type    = document.getElementById(`admin_filter_type-${suf}`)?.value    || "";
-  const person  = document.getElementById(`admin_filter_person-${suf}`)?.value  || "";
+  const mod        = state.user.modulo;
+  const suf        = adminSuffixFromTab();
+  const q          = document.getElementById(`admin_search-${suf}`)?.value          || "";
+  const type       = document.getElementById(`admin_filter_type-${suf}`)?.value     || "";
+  const person     = document.getElementById(`admin_filter_person-${suf}`)?.value   || "";
+  const statusFilt = document.getElementById(`admin_filter_status-${suf}`)?.value   || "";
   const page    = state.adminTable.page    || 1;
   const perPage = state.adminTable.perPage || 25;
 
-  // Show skeleton while loading
   if (typeof showTableSkeleton === "function") {
     showTableSkeleton(`admin_control_table-${suf}`, isArchivoModule() ? 6 : 7, 6);
   }
 
   try {
-    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&page=${page}&per_page=${perPage}`;
+    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&status_filter=${encodeURIComponent(statusFilt)}&page=${page}&per_page=${perPage}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error();
     const data = await res.json();

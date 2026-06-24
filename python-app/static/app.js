@@ -590,6 +590,7 @@ function setupEventListeners() {
     document.getElementById(`admin_search-${suf}`)?.addEventListener("input",  () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_type-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_person-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
+    document.getElementById(`admin_filter_status-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`btn_refresh_table-${suf}`)?.addEventListener("click",  loadMonitorTable);
     document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click", exportAdminCSV);
     document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; loadMonitorTable(); } });

@@ -24,6 +24,7 @@ def list_all_files(
     search: Optional[str] = "",
     type_filter: Optional[str] = "",
     person_filter: Optional[str] = "",
+    status_filter: Optional[str] = "",
     page: int = 1,
     per_page: int = 25,
 ):
@@ -55,6 +56,9 @@ def list_all_files(
         if person_filter:
             conditions.append("unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)")
             params.append(f"%{person_filter}%")
+        if status_filter and status_filter in ("aprobado", "revision", "draft", "rechazado"):
+            conditions.append("COALESCE(da.status, 'aprobado') = %s")
+            params.append(status_filter)
 
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
@@ -113,6 +117,9 @@ def list_all_files(
         if person_filter:
             conditions.append("unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)")
             params.append(f"%{person_filter}%")
+        if status_filter:
+            conditions.append("COALESCE(el.estados, '') ILIKE %s")
+            params.append(f"%{status_filter}%")
 
         join = """
             FROM public.empleados e

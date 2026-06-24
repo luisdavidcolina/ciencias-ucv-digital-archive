@@ -442,9 +442,16 @@
                         <option value="">Filtrar por Persona...</option>
                       </select>
                     </div>
-                    <div class="col-md-3 text-right">
-                      <button id="btn_export_csv-rrhh" class="btn btn-outline-secondary btn-sm mr-1"><i class="fas fa-file-csv"></i> Exportar CSV</button>
-                      <button id="btn_refresh_table-rrhh" class="btn btn-outline-info btn-sm"><i class="fas fa-sync-alt"></i> Refrescar</button>
+                    <div class="col-md-3 text-right d-flex align-items-center justify-content-end" style="gap:6px;">
+                      <select id="admin_filter_status-rrhh" class="form-control form-control-sm" style="width:auto;" title="Filtrar por estado">
+                        <option value="">Todos los estados</option>
+                        <option value="Activo">Activos</option>
+                        <option value="Retirado">Retirados</option>
+                        <option value="Jubilado">Jubilados</option>
+                        <option value="Pensionado">Pensionados</option>
+                      </select>
+                      <button id="btn_export_csv-rrhh" class="btn btn-outline-secondary btn-sm" title="Exportar CSV"><i class="fas fa-file-csv"></i></button>
+                      <button id="btn_refresh_table-rrhh" class="btn btn-outline-info btn-sm" title="Refrescar"><i class="fas fa-sync-alt"></i></button>
                     </div>
                   </div>
                   <div class="table-responsive">
