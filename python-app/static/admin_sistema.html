@@ -628,15 +628,24 @@ async function loadAuditLog() {
     document.getElementById("audit-next-btn").disabled = auditState.page >= pages;
     tbody.innerHTML = data.records.length === 0
       ? '<tr><td colspan="6" class="text-center text-muted p-3">Sin eventos.</td></tr>'
-      : data.records.map(r => `
-          <tr>
-            <td class="text-muted small">${r.timestamp||""}</td>
+      : data.records.map(r => {
+          const res  = (r.resultado||"ok").toLowerCase();
+          const resBadge = res === "success" || res === "ok"
+            ? `<span class="badge badge-success">OK</span>`
+            : res === "failure" || res === "error"
+            ? `<span class="badge badge-danger">Error</span>`
+            : `<span class="badge badge-secondary">${r.resultado||"—"}</span>`;
+          const detEsc = (r.detalle||"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+          const tsShort = (r.timestamp||"").replace("T"," ").slice(0,19);
+          return `<tr style="cursor:pointer;" onclick="_showAuditDetail(${JSON.stringify(r)})" title="Clic para ver detalle completo">
+            <td class="text-muted small text-nowrap">${tsShort}</td>
             <td class="font-weight-bold">${r.usuario||""}</td>
             <td>${r.evento||""}</td>
             <td><span class="badge badge-secondary">${r.modulo||""}</span></td>
-            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(r.detalle||'').replace(/"/g,'&quot;')}">${r.detalle||""}</td>
-            <td class="${r.resultado==='Success'||r.resultado==='success'?'text-success':r.resultado==='Failure'?'text-danger':'text-muted'}">${r.resultado||"OK"}</td>
-          </tr>`).join("");
+            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${detEsc}</td>
+            <td>${resBadge}</td>
+          </tr>`;
+        }).join("");
   } catch(e) {
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-danger p-3">Error cargando auditoria.</td></tr>';
   }
@@ -646,6 +655,48 @@ function changeAuditPage(delta) {
   const pages = Math.ceil(auditState.total / auditState.perPage) || 1;
   auditState.page = Math.max(1, Math.min(auditState.page + delta, pages));
   loadAuditLog();
+}
+
+function _showAuditDetail(r) {
+  const existing = document.getElementById("audit-detail-modal");
+  if (existing) existing.remove();
+  const ts = (r.timestamp||"").replace("T"," ").slice(0,19);
+  const detEsc = (r.detalle||"—").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const res = (r.resultado||"ok").toLowerCase();
+  const resBadge = res === "success" || res === "ok"
+    ? `<span class="badge badge-success">OK</span>`
+    : res === "failure" || res === "error"
+    ? `<span class="badge badge-danger">Error</span>`
+    : `<span class="badge badge-secondary">${r.resultado||"—"}</span>`;
+  const html = `
+  <div class="modal fade" id="audit-detail-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-dark text-white py-2">
+          <h6 class="modal-title mb-0"><i class="fas fa-clipboard-list mr-2"></i>Detalle de Evento</h6>
+          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body p-3">
+          <table class="table table-sm table-borderless mb-0">
+            <tr><th class="text-muted" width="120">Fecha</th><td>${ts}</td></tr>
+            <tr><th class="text-muted">Usuario</th><td><strong>${r.usuario||"—"}</strong></td></tr>
+            <tr><th class="text-muted">Evento</th><td>${r.evento||"—"}</td></tr>
+            <tr><th class="text-muted">Módulo</th><td><span class="badge badge-secondary">${r.modulo||"—"}</span></td></tr>
+            <tr><th class="text-muted">Resultado</th><td>${resBadge}</td></tr>
+            <tr><th class="text-muted">Detalle</th><td class="text-break"><small>${detEsc}</small></td></tr>
+          </table>
+        </div>
+        <div class="modal-footer py-2">
+          <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", html);
+  $("#audit-detail-modal").modal("show");
+  document.getElementById("audit-detail-modal").addEventListener("hidden.bs.modal", () => {
+    document.getElementById("audit-detail-modal")?.remove();
+  });
 }
 
 // Theme panel support (from app.js)
