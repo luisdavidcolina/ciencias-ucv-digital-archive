@@ -65,21 +65,30 @@ function renderArchivoPagination() {
   const page    = state.archivo.page    || 1;
   const pages   = Math.ceil(total / perPage) || 1;
   if (pages <= 1) { container.innerHTML = ""; return; }
+  const winSize   = 5;
+  const startPage = Math.max(1, Math.min(page - Math.floor(winSize / 2), pages - winSize + 1));
+  const endPage   = Math.min(pages, startPage + winSize - 1);
+  const pageNums  = [];
+  for (let i = startPage; i <= endPage; i++) pageNums.push(i);
+
   container.innerHTML = `
-    <nav class="mt-3 d-flex align-items-center justify-content-between">
-      <small class="text-muted">Mostrando pág. ${page} de ${pages} (${total} resultados)</small>
+    <nav class="mt-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:6px;">
+      <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
       <ul class="pagination pagination-sm mb-0">
+        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeArchivoPage(1)" title="Primera"><i class="fas fa-angle-double-left"></i></button>
+        </li>
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
           <button class="page-link" onclick="changeArchivoPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
         </li>
-        ${Array.from({length: Math.min(5, pages)}, (_, i) => {
-          const p = Math.max(1, Math.min(page - 2, pages - 4)) + i;
-          return `<li class="page-item ${p === page ? 'active' : ''}">
-            <button class="page-link" onclick="changeArchivoPage(${p})">${p}</button>
-          </li>`;
-        }).join("")}
+        ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
+          <button class="page-link" onclick="changeArchivoPage(${p})">${p}</button>
+        </li>`).join("")}
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
           <button class="page-link" onclick="changeArchivoPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+        </li>
+        <li class="page-item ${page >= pages ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeArchivoPage(${pages})" title="Última"><i class="fas fa-angle-double-right"></i></button>
         </li>
       </ul>
     </nav>`;
@@ -224,6 +233,7 @@ function openDocModalWithRecord(doc) {
       <div class="ds-doc-meta-row"><span class="k">${dateLabel}</span><span class="v">${dateValue}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
+      ${doc.personas_relacionadas ? `<div class="ds-doc-meta-row"><span class="k">Personas Relacionadas</span><span class="v">${doc.personas_relacionadas}</span></div>` : ""}
       <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${badges.join("; ")}</span></div>
     `;
   }

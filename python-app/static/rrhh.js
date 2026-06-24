@@ -421,10 +421,10 @@ function openDocMetadataModal(idxReal) {
     viewBtn.onclick = () => toggleDocViewer(fileUrl);
   } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
     viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
-    viewBtn.onclick = () => alert("Documento registrado como digitalizado pero sin URL de archivo asignada.\nContacte al administrador para vincular el archivo digital.");
+    viewBtn.onclick = () => showToast("Documento digitalizado sin URL asignada. Contacte al administrador.", "warning");
   } else {
     viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
-    viewBtn.onclick = () => alert(`Archivo físico disponible en:\n${doc.ubicacion}`);
+    viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
   }
 
   $("#doc-modal").modal("show");

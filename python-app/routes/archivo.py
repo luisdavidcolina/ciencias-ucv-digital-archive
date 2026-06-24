@@ -148,13 +148,14 @@ def search_archivo(req: ArchivoSearchRequest):
         SELECT
             da.id_archivo AS id,
             da.titulo,
-            COALESCE(da.autor, '')         AS autor,
+            COALESCE(da.autor, '')               AS autor,
             TO_CHAR(da.fecha_documento, 'YYYY-MM-DD') AS fecha,
-            COALESCE(da.tesauro_primario, '')   AS doc_type,
-            COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
-            COALESCE(da.ubicacion, '')          AS ubicacion,
-            COALESCE(da.abstract, '')           AS resumen,
-            COALESCE(da.file_url, '')           AS file_url,
+            COALESCE(da.tesauro_primario, '')    AS doc_type,
+            COALESCE(da.tesauro_secundario, '')  AS tesauro_secundario,
+            COALESCE(da.ubicacion, '')           AS ubicacion,
+            COALESCE(da.abstract, '')            AS resumen,
+            COALESCE(da.file_url, '')            AS file_url,
+            COALESCE(da.personas_relacionadas, '') AS personas_relacionadas,
             COALESCE(STRING_AGG(DISTINCT dl.nombre, '; ') FILTER (WHERE dl.nombre IS NOT NULL), '') AS descriptores_libres,
             ts_rank_cd(
               to_tsvector('spanish',
@@ -170,7 +171,8 @@ def search_archivo(req: ArchivoSearchRequest):
         LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
         {where}
         GROUP BY da.id_archivo, da.titulo, da.autor, da.fecha_documento,
-                 da.tesauro_primario, da.tesauro_secundario, da.ubicacion, da.abstract, da.file_url
+                 da.tesauro_primario, da.tesauro_secundario, da.ubicacion, da.abstract,
+                 da.file_url, da.personas_relacionadas
         ORDER BY {order}
         LIMIT %s OFFSET %s
     """
