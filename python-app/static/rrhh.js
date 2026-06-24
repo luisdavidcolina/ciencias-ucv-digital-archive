@@ -13,21 +13,66 @@ async function triggerRrhhSearch() {
         people_terms: state.rrhh.selectedPeople,
         date_start:   state.rrhh.dateStart,
         date_end:     state.rrhh.dateEnd,
-        sort_mode:    state.rrhh.sortMode
+        sort_mode:    state.rrhh.sortMode,
+        page:         state.rrhh.page,
+        per_page:     state.rrhh.perPage
       })
     });
     if (!res.ok) throw new Error();
-    state.rrhh.results = await res.json();
+    const data = await res.json();
+    // Retrocompatibilidad: si la respuesta es un array (formato viejo), tratar como antes
+    if (Array.isArray(data)) {
+      state.rrhh.results = data;
+      state.rrhh.total   = data.length;
+    } else {
+      state.rrhh.results = data.records || [];
+      state.rrhh.total   = data.total   || state.rrhh.results.length;
+    }
     renderRrhhList();
+    renderRrhhPagination();
   } catch (e) {
     console.error("Error buscando RRHH:", e);
   }
 }
 
+function renderRrhhPagination() {
+  const container = document.getElementById("rrhh-pagination");
+  if (!container) return;
+  const total   = state.rrhh.total || state.rrhh.results.length;
+  const perPage = state.rrhh.perPage || 10;
+  const page    = state.rrhh.page    || 1;
+  const pages   = Math.ceil(total / perPage) || 1;
+  if (pages <= 1) { container.innerHTML = ""; return; }
+  container.innerHTML = `
+    <nav class="mt-3 d-flex align-items-center justify-content-between">
+      <small class="text-muted">Mostrando pág. ${page} de ${pages} (${total} resultados)</small>
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeRrhhPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
+        </li>
+        ${Array.from({length: Math.min(5, pages)}, (_, i) => {
+          const p = Math.max(1, Math.min(page - 2, pages - 4)) + i;
+          return `<li class="page-item ${p === page ? 'active' : ''}">
+            <button class="page-link" onclick="changeRrhhPage(${p})">${p}</button>
+          </li>`;
+        }).join("")}
+        <li class="page-item ${page >= pages ? 'disabled' : ''}">
+          <button class="page-link" onclick="changeRrhhPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+        </li>
+      </ul>
+    </nav>`;
+}
+
+function changeRrhhPage(p) {
+  state.rrhh.page = p;
+  triggerRrhhSearch();
+}
+
 function renderRrhhList() {
   const container = document.getElementById("list_rrhh");
   const results   = state.rrhh.results;
-  document.getElementById("count-rrhh-results").innerText = `${results.length} Registros`;
+  const total     = state.rrhh.total || results.length;
+  document.getElementById("count-rrhh-results").innerText = `${total} Registros`;
 
   if (results.length === 0) {
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
@@ -42,17 +87,14 @@ function renderRrhhList() {
     return;
   }
 
-  const totalPages = Math.ceil(results.length / state.rrhh.perPage);
-  if (state.rrhh.page > totalPages) state.rrhh.page = totalPages;
-  const start     = (state.rrhh.page - 1) * state.rrhh.perPage;
-  const pageItems = results.slice(start, start + state.rrhh.perPage);
+  const totalPages = Math.ceil(total / state.rrhh.perPage) || 1;
   document.getElementById("info-rrhh-pagination").innerText = `Pág ${state.rrhh.page} de ${totalPages}`;
   const prevBtnR = document.getElementById("btn-rrhh-prev");
   const nextBtnR = document.getElementById("btn-rrhh-next");
   if (prevBtnR) prevBtnR.disabled = state.rrhh.page <= 1;
   if (nextBtnR) nextBtnR.disabled = state.rrhh.page >= totalPages;
 
-  container.innerHTML = pageItems.map(p => {
+  container.innerHTML = results.map(p => {
     const initials   = getPersonInitials(p.persona_raw);
     const colorState = getStatusColor(p.estatuses);
     return `

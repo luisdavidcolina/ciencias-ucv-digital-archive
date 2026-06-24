@@ -8,6 +8,7 @@ const state = {
   activeAdminTab: "stats",
   archivo: {
     results: [],
+    total: 0,
     search: "",
     selectedTypes: [],
     selectedTesauro: [],
@@ -19,6 +20,7 @@ const state = {
   },
   rrhh: {
     results: [],
+    total: 0,
     search: "",
     selectedTypes: [],
     selectedEstados: [],
@@ -506,7 +508,7 @@ function setupEventListeners() {
   safeOn("btn_clear_archivo", "click",  () => resetDateFilters("archivo"));
   safeOn("download_archivo_xls","click",() => alert("Exportando reporte XLS de folios académicos...\nDescargado con éxito."));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
-  safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; renderArchivoList(); });
+  safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
 
   // Buscador RRHH
   safeOn("search_rrhh",       "input",  e => { state.rrhh.search = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
@@ -515,7 +517,7 @@ function setupEventListeners() {
   safeOn("btn_clear_rrhh",    "click",  () => resetDateFilters("rrhh"));
   safeOn("download_rrhh_xls", "click",  () => alert("Exportando reporte consolidado de personal RRHH...\nDescargado con éxito."));
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
-  safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; renderRrhhList(); });
+  safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; triggerRrhhSearch(); });
 
   // Chips de fecha (event delegation por módulo)
   ["archivo", "rrhh"].forEach(mod => {
@@ -529,17 +531,21 @@ function setupEventListeners() {
   safeOn("fp-rrhh-clear",   "click", () => applyDatePreset("rrhh",    "all"));
 
   // Paginación Archivo
-  safeOn("btn-archivo-prev", "click", () => { if (state.archivo.page > 1) { state.archivo.page--; renderArchivoList(); } });
-  safeOn("btn-archivo-next", "click", () => { const t = Math.ceil(state.archivo.results.length / state.archivo.perPage); if (state.archivo.page < t) { state.archivo.page++; renderArchivoList(); } });
+  safeOn("btn-archivo-prev", "click", () => { if (state.archivo.page > 1) { state.archivo.page--; triggerArchivoSearch(); } });
+  safeOn("btn-archivo-next", "click", () => { const t = Math.ceil((state.archivo.total || state.archivo.results.length) / state.archivo.perPage); if (state.archivo.page < t) { state.archivo.page++; triggerArchivoSearch(); } });
 
   // Paginación RRHH
-  safeOn("btn-rrhh-prev", "click", () => { if (state.rrhh.page > 1) { state.rrhh.page--; renderRrhhList(); } });
-  safeOn("btn-rrhh-next", "click", () => { const t = Math.ceil(state.rrhh.results.length / state.rrhh.perPage); if (state.rrhh.page < t) { state.rrhh.page++; renderRrhhList(); } });
+  safeOn("btn-rrhh-prev", "click", () => { if (state.rrhh.page > 1) { state.rrhh.page--; triggerRrhhSearch(); } });
+  safeOn("btn-rrhh-next", "click", () => { const t = Math.ceil((state.rrhh.total || state.rrhh.results.length) / state.rrhh.perPage); if (state.rrhh.page < t) { state.rrhh.page++; triggerRrhhSearch(); } });
 
   // Panel Admin (ambos namespaces)
   ["archivo", "rrhh"].forEach(suf => {
-    ["stats", "new", "monitor", "categories", "users"].forEach(t => {
+    ["stats", "new", "monitor", "categories", "users", "audit"].forEach(t => {
       document.getElementById(`tab-admin-${suf}-${t}`)?.addEventListener("click", e => { e.preventDefault(); loadAdminTab(t); });
+    });
+    document.getElementById(`audit_search-${suf}`)?.addEventListener("input", () => {
+      auditState.page = 1;
+      loadAuditTab();
     });
     document.getElementById(`btn-apply-stats-${suf}`)?.addEventListener("click", loadDynamicStats);
     document.getElementById(`admin-submit-form-${suf}`)?.addEventListener("submit", handleNewSubmission);

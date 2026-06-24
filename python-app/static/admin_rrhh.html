@@ -182,6 +182,11 @@
                 <i class="fas fa-users-cog"></i> Usuarios
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-audit" data-toggle="pill" href="#pane-admin-rrhh-audit" role="tab">
+                <i class="fas fa-history"></i> Auditoría
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -429,6 +434,41 @@
                   <button id="btn_add_user-rrhh" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
                     <i class="fas fa-user-plus"></i> Crear Usuario
                   </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. PESTAÑA: AUDITORÍA -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-audit" role="tabpanel">
+              <div class="card card-secondary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-history mr-2"></i>Registro de Auditoría</h3>
+                  <input type="text" id="audit_search-rrhh" class="form-control form-control-sm w-25" placeholder="Buscar evento o usuario...">
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-striped table-sm mb-0" style="font-size:0.82rem;">
+                      <thead class="bg-light">
+                        <tr>
+                          <th>Timestamp</th>
+                          <th>Usuario</th>
+                          <th>Evento</th>
+                          <th>Módulo</th>
+                          <th>Detalle</th>
+                          <th>Resultado</th>
+                        </tr>
+                      </thead>
+                      <tbody id="audit_table_body-rrhh"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                  <small id="audit_summary-rrhh" class="text-muted"></small>
+                  <div>
+                    <button id="audit_prev-rrhh" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="audit_page_info-rrhh" class="text-muted small"></span>
+                    <button id="audit_next-rrhh" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)"><i class="fas fa-chevron-right"></i></button>
+                  </div>
                 </div>
               </div>
             </div>
