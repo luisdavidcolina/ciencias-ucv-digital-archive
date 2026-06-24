@@ -105,3 +105,30 @@ def populate_missing_slugs():
         logger.info(f"Slugs generados para {len(rows)} tipo(s) de documento.")
     except Exception as e:
         logger.error(f"Error al poblar slugs: {e}")
+
+
+# =============================================================================
+# UTILIDADES DE TEXTO
+# =============================================================================
+
+def truncate_text(text: str, max_length: int = 200, suffix: str = "…") -> str:
+    """Trunca texto a max_length caracteres sin cortar palabras."""
+    if not text or len(text) <= max_length:
+        return text or ""
+    truncated = text[:max_length - len(suffix)].rsplit(" ", 1)[0]
+    return truncated + suffix
+
+
+def sanitize_filename(name: str) -> str:
+    """Limpia un nombre de archivo eliminando caracteres peligrosos."""
+    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name or "")
+    sanitized = sanitized.strip(". ")
+    return sanitized[:255] if sanitized else "archivo"
+
+
+def normalize_cedula(cedula: str) -> str:
+    """Normaliza una cédula venezolana: V-12345678 → 12345678 (solo dígitos)."""
+    if not cedula:
+        return ""
+    cleaned = re.sub(r"[^0-9]", "", cedula)
+    return cleaned
