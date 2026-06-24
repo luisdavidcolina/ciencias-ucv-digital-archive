@@ -118,6 +118,8 @@ class DocumentUpdateRequest(BaseModel):
     palabras_clave: Optional[str] = None  # comma-separated
     tesauro_secundario: Optional[str] = None
     personas_relacionadas: Optional[str] = None
+    file_url: Optional[str] = None
+    status: Optional[str] = None  # draft | revision | aprobado | rechazado
     usuario: str
 
 
