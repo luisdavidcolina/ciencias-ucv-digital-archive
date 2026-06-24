@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 # =============================================================================
@@ -107,6 +107,18 @@ class UserCreateRequest(BaseModel):
     rol: str
     creator: str
 
+    @validator("password")
+    def password_min_length(cls, v):
+        if len(v.strip()) < 6:
+            raise ValueError("La contraseña debe tener al menos 6 caracteres")
+        return v.strip()
+
+    @validator("usuario")
+    def usuario_not_empty(cls, v):
+        if not v.strip():
+            raise ValueError("El nombre de usuario no puede estar vacío")
+        return v.strip()
+
 
 class DocumentUpdateRequest(BaseModel):
     modulo: str
@@ -142,3 +154,21 @@ class EmpleadoUpdateRequest(BaseModel):
 class PasswordChangeRequest(BaseModel):
     new_password: str
     requester: str
+
+    @validator("new_password")
+    def password_min_length(cls, v):
+        if len(v.strip()) < 6:
+            raise ValueError("La contraseña debe tener al menos 6 caracteres")
+        return v.strip()
+
+
+class DocumentStatusUpdateRequest(BaseModel):
+    status: str
+    usuario: str
+
+    @validator("status")
+    def status_valid(cls, v):
+        allowed = ("draft", "revision", "aprobado", "rechazado")
+        if v not in allowed:
+            raise ValueError(f"status debe ser uno de: {', '.join(allowed)}")
+        return v

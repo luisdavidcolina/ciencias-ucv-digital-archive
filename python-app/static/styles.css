@@ -2125,3 +2125,83 @@ mark {
     border-radius: 0;
     border-left: 4px solid #dc3545;
 }
+
+/* ── Info-box clickable (cursor pointer) ── */
+.info-box[style*="cursor:pointer"] { transition: box-shadow 0.15s, transform 0.12s; }
+.info-box[style*="cursor:pointer"]:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13) !important;
+    transform: translateY(-2px);
+}
+
+/* ── Monitor admin table: compact ── */
+#admin_control_table-archivo,
+#admin_control_table-rrhh {
+    font-size: 0.82rem;
+}
+#admin_control_table-archivo td,
+#admin_control_table-rrhh td {
+    vertical-align: middle;
+    padding: 0.35rem 0.5rem;
+}
+
+/* ── Dossier RRHH ── */
+.ds-dossier-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e9ecef;
+}
+.ds-dossier-item {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    transition: box-shadow 0.12s;
+}
+.ds-dossier-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.ds-dossier-item-title { font-weight: 600; font-size: 0.85rem; }
+.ds-dossier-item-meta  { font-size: 0.75rem; color: #6c757d; }
+
+/* ── Responsive card grid for search results ── */
+@media (max-width: 576px) {
+    .ds-result-card { margin-bottom: 8px; }
+    .ds-result-card .card-body { padding: 0.75rem; }
+    .info-box .info-box-number { font-size: 1.2rem; }
+}
+
+/* ── Print styles (for PDF report) ── */
+@media print {
+    .main-header, #app-sidebar, .ds-breadcrumb-wrapper,
+    .nav-pills, .btn, .card-header .card-tools { display: none !important; }
+    .content-wrapper { margin: 0 !important; padding: 0 !important; }
+    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+}
+
+/* ── Quick status menu dropdown ── */
+.ds-quick-status-dropdown {
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    padding: 4px 0;
+    min-width: 160px;
+}
+.ds-quick-status-option {
+    display: block;
+    width: 100%;
+    padding: 7px 14px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 0.83rem;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.ds-quick-status-option:hover { background: #f8f9fa; }
