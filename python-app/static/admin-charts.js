@@ -162,6 +162,49 @@ function _renderRrhhCharts(data, suf) {
       options: { responsive: true, plugins: { legend: { position: "right" } } }
     });
   }
+
+  // Gráfico por nivel educativo (nuevo — LOTTT)
+  const byNivel = data.charts.by_nivel || [];
+  if (byNivel.length) {
+    _destroyChart(`by-nivel-${suf}`);
+    const ctx = document.getElementById(`chart-by-nivel-${suf}`)?.getContext("2d");
+    if (ctx) _chartInstances[`by-nivel-${suf}`] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: byNivel.map(r => r.label),
+        datasets: [{ label: "Empleados", data: byNivel.map(r => r.value),
+          backgroundColor: ["#4e73df","#1cc88a","#36b9cc","#f6c23e","#e74a3b","#6f42c1","#20c9a6"],
+          borderRadius: 4 }]
+      },
+      options: {
+        indexAxis: "y", responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  }
+
+  // Gráfico por sexo (nuevo — LOTTT)
+  const bySexo = data.charts.by_sexo || [];
+  if (bySexo.length) {
+    _destroyChart(`by-sexo-${suf}`);
+    const ctx = document.getElementById(`chart-by-sexo-${suf}`)?.getContext("2d");
+    if (ctx) _chartInstances[`by-sexo-${suf}`] = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: bySexo.map(r => r.label),
+        datasets: [{ data: bySexo.map(r => r.value),
+          backgroundColor: ["#4e73df","#e74a3b","#1cc88a","#858796"], borderWidth: 2 }]
+      },
+      options: { responsive: true, plugins: { legend: { position: "right" } } }
+    });
+  }
+
+  // Actualizar badge de movimientos de cargo si existe
+  const movBadge = document.getElementById(`chart-total-movimientos-${suf}`);
+  if (movBadge && t.total_movimientos_cargo !== undefined) {
+    movBadge.innerText = t.total_movimientos_cargo;
+  }
 }
 
 // =============================================================================

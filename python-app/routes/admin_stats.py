@@ -140,6 +140,23 @@ def get_charts_data(modulo: str = "Archivo"):
             WHERE c.slug LIKE 'parte-%%'
             GROUP BY c.nombre, c.id ORDER BY c.id
         """, fetch="all") or []
+        by_nivel = db_query("""
+            SELECT COALESCE(NULLIF(TRIM(nivel_educativo),''), 'Sin especificar') AS label,
+                   COUNT(*) AS value
+            FROM public.empleados
+            GROUP BY nivel_educativo ORDER BY value DESC
+        """, fetch="all") or []
+        by_sexo = db_query("""
+            SELECT CASE sexo
+                     WHEN 'M' THEN 'Masculino'
+                     WHEN 'F' THEN 'Femenino'
+                     WHEN 'O' THEN 'Otro'
+                     ELSE 'Sin especificar'
+                   END AS label,
+                   COUNT(*) AS value
+            FROM public.empleados
+            GROUP BY sexo ORDER BY value DESC
+        """, fetch="all") or []
         totals = db_query("""
             SELECT (SELECT COUNT(*) FROM public.empleados) AS total_employees,
                    (SELECT COUNT(*) FROM public.datos_rrhh) AS total_documents,
@@ -148,7 +165,8 @@ def get_charts_data(modulo: str = "Archivo"):
                     WHERE el.estados = 'Activo') AS total_activos,
                    (SELECT COUNT(*) FROM public.empleados e
                     JOIN public.estados_laborales el ON e.estado_id = el.id
-                    WHERE el.estados IN ('Jubilado','Pensionado')) AS total_jubilados
+                    WHERE el.estados IN ('Jubilado','Pensionado')) AS total_jubilados,
+                   (SELECT COUNT(*) FROM public.historial_cargos) AS total_movimientos_cargo
         """, fetch="one")
         return {
             "modulo": "RRHH",
@@ -157,6 +175,8 @@ def get_charts_data(modulo: str = "Archivo"):
                 "by_status":     [{"label": r["label"], "value": int(r["value"])} for r in by_status],
                 "by_doc_type":   [{"label": r["label"], "value": int(r["value"])} for r in by_doc_type],
                 "by_parte":      [{"label": r["label"], "value": int(r["value"])} for r in by_parte],
+                "by_nivel":      [{"label": r["label"], "value": int(r["value"])} for r in by_nivel],
+                "by_sexo":       [{"label": r["label"], "value": int(r["value"])} for r in by_sexo],
                 "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},
             }
         }
