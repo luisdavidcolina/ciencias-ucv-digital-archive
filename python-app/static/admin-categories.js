@@ -93,7 +93,7 @@ async function loadKeywordsSection() {
                       <button class="btn btn-link btn-sm p-0 mr-1" onclick="handleEditKeyword(${kw.id})" title="Renombrar">
                         <i class="fas fa-pen text-warning" style="font-size:0.72rem;"></i>
                       </button>
-                      <button class="btn btn-link btn-sm p-0" onclick="handleDeleteKeyword(${kw.id},'${kw.nombre.replace(/'/g,"\\'")}')" title="Eliminar">
+                      <button class="btn btn-link btn-sm p-0" onclick="handleDeleteKeyword(${kw.id},'${kw.nombre.replace(/'/g,"\\'")}',${kw.uso_archivo})" title="Eliminar">
                         <i class="fas fa-trash text-danger" style="font-size:0.72rem;"></i>
                       </button>
                     </div>
@@ -148,11 +148,24 @@ async function handleEditKeyword(id) {
   }
 }
 
-async function handleDeleteKeyword(id, nombre) {
-  if (!confirm(`¿Eliminar la palabra clave "${nombre}"?\nSe desvinculará de todos los documentos que la usen.`)) return;
+async function handleDeleteKeyword(id, nombre, usoCount) {
+  const msg = usoCount > 0
+    ? `La palabra clave "${nombre}" está en uso en ${usoCount} documento(s). ¿Eliminar y desvincular de todos?`
+    : `¿Eliminar la palabra clave "${nombre}"?`;
+  const btnClass = usoCount > 0 ? "btn-danger" : "btn-warning";
+  const confirmed = typeof confirmModal === "function"
+    ? await confirmModal("Eliminar Palabra Clave", msg, "Eliminar", btnClass)
+    : confirm(msg);
+  if (!confirmed) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
+    const force = usoCount > 0 ? "?force=true" : "";
+    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}${force}`, { method: "DELETE" });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      showToast(errData.detail || "Error al eliminar la palabra clave.", "error");
+      return;
+    }
+    showToast(`Palabra clave "${nombre}" eliminada.`, "success");
     loadKeywordsSection();
   } catch {
     showToast("Error al eliminar la palabra clave.", "error");

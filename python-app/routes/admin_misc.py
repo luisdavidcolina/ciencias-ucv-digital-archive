@@ -54,12 +54,28 @@ def update_keyword(kid: int, req: KeywordRequest):
 
 
 @router.delete("/keywords/{kid}")
-def delete_keyword(kid: int):
+def delete_keyword(kid: int, force: bool = False):
+    uso = db_query(
+        "SELECT COUNT(*) AS cnt FROM public.archivo_descriptores WHERE id_descriptor = %s",
+        (kid,), fetch="one",
+    )
+    uso_count = int((uso or {}).get("cnt", 0))
+    if uso_count > 0 and not force:
+        raise HTTPException(
+            400,
+            f"La palabra clave está en uso en {uso_count} documento(s). "
+            "Use force=true para eliminar de todas formas."
+        )
+    if uso_count > 0:
+        db_query(
+            "DELETE FROM public.archivo_descriptores WHERE id_descriptor = %s",
+            (kid,), fetch="none", commit=True,
+        )
     db_query(
         "DELETE FROM public.descriptores_libres WHERE id_descriptor = %s",
         (kid,), fetch="none", commit=True,
     )
-    return {"success": True}
+    return {"success": True, "removed_from_docs": uso_count}
 
 
 @router.post("/add_category")
