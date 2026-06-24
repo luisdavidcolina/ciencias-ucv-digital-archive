@@ -273,6 +273,32 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
     }
 
 
+@router.get("/empleado/por-cedula/{cedula}")
+def get_empleado_por_cedula(cedula: str):
+    """Retorna el expediente de un empleado dado su cédula."""
+    row = db_query(
+        """SELECT e.id AS empleado_id,
+                  e.nombres || ' ' || e.apellidos AS persona_raw,
+                  e.cedula, e.rif,
+                  COALESCE(c.nombre,'')   AS cargo,
+                  COALESCE(d.nombre,'')   AS departamento,
+                  COALESCE(el.estados,'') AS estado,
+                  TO_CHAR(e.fecha_ingreso,'YYYY-MM-DD')    AS fecha_ingreso,
+                  TO_CHAR(e.fecha_jubilacion,'YYYY-MM-DD') AS fecha_jubilacion,
+                  TO_CHAR(e.fecha_pension,'YYYY-MM-DD')    AS fecha_pension,
+                  COALESCE(e.foto_url,'') AS foto_url
+           FROM public.empleados e
+           LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
+           LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
+           LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
+           WHERE TRIM(e.cedula) = TRIM(%s)""",
+        (cedula.strip(),), fetch="one",
+    )
+    if not row:
+        raise HTTPException(404, "Empleado no encontrado")
+    return dict(row)
+
+
 # =============================================================================
 # BÚSQUEDA DENTRO DEL EXPEDIENTE
 # =============================================================================
