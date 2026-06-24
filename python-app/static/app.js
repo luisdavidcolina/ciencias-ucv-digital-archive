@@ -303,9 +303,21 @@ async function loadDynamicChoices() {
     initTomSelects();
     initDateControls("archivo", data.archivo);
     initDateControls("rrhh",    data.rrhh);
+    _populateDataLists(data.rrhh);
   } catch (e) {
     console.error("Error al cargar choices dinámicos:", e);
   }
+}
+
+function _populateDataLists(rrhh) {
+  if (!rrhh) return;
+  const fill = (id, items) => {
+    const dl = document.getElementById(id);
+    if (!dl || !Array.isArray(items)) return;
+    dl.innerHTML = items.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">`).join("");
+  };
+  fill("dl-cargos",       rrhh.cargos);
+  fill("dl-departamentos", rrhh.departamentos);
 }
 
 function initTomSelects() {
