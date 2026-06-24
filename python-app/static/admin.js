@@ -750,7 +750,11 @@ async function openEditEmpleadoModal(empId) {
   document.getElementById("edit-emp-departamento").value = rec.departamento || "";
   const estadoSel = document.getElementById("edit-emp-estado");
   if (estadoSel) {
-    Array.from(estadoSel.options).forEach(o => { o.selected = o.value === (rec.estado || "Activo"); });
+    const estadosCat = state.choices?.rrhh?.estados_catalog || [];
+    if (estadosCat.length) {
+      estadoSel.innerHTML = estadosCat.map(e => `<option value="${e}">${e}</option>`).join("");
+    }
+    estadoSel.value = rec.estado || "Activo";
   }
   document.getElementById("edit-emp-rif").value         = rec.rif || "";
   document.getElementById("edit-emp-jubilacion").value  = rec.fecha_jubilacion || "";
