@@ -226,7 +226,14 @@ function renderRrhhDossierModal() {
         <div class="ds-person-info flex-grow-1 w-100">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
             <h3 class="ds-person-name m-0 text-primary font-weight-bold">${profile.persona}</h3>
-            <span class="badge badge-info text-uppercase px-3 py-2">${profile.statuses || "Sin estado"}</span>
+            <div class="d-flex align-items-center">
+              <span class="badge badge-info text-uppercase px-3 py-2">${profile.statuses || "Sin estado"}</span>
+              ${profile.rows && profile.rows[0]?.empleado_id
+                ? `<a href="${API_BASE}/api/rrhh/report/${profile.rows[0].empleado_id}" target="_blank" class="btn btn-outline-secondary btn-sm ml-2" title="Generar reporte imprimible">
+                    <i class="fas fa-print mr-1"></i>Imprimir Expediente
+                  </a>`
+                : ''}
+            </div>
           </div>
           <h5 class="ds-person-cargo text-secondary mb-3 font-weight-bold">
             <i class="fas fa-user-tie mr-2"></i>${profile.cargos || "Cargo no especificado"}

@@ -13,6 +13,13 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/icons/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/icons/apple-touch-icon.png">
   <link rel="manifest" href="/static/assets/icons/site.webmanifest">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+.table-hover tbody tr:hover { background-color: #f0f4ff !important; cursor: pointer; }
+.nav-pills .nav-link.active { background: linear-gradient(135deg,#4e73df,#2e59d9) !important; }
+.card { border-radius: 0.5rem !important; }
+.info-box { border-radius: 0.5rem !important; }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini" data-page="admin-archivo"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
 
@@ -266,10 +273,97 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Stats cards rápidas (Chart.js) -->
+              <div class="row mb-3 mt-4" id="stats-cards-archivo">
+                <div class="col-sm-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-file-alt"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Total Documentos</span>
+                      <span class="info-box-number" id="chart-total-docs-archivo">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-tags"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Tipos de Documento</span>
+                      <span class="info-box-number" id="chart-total-types-archivo">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-key"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Palabras Clave</span>
+                      <span class="info-box-number" id="chart-total-keywords-archivo">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-user-edit"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Autores Únicos</span>
+                      <span class="info-box-number" id="chart-total-autores-archivo">—</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráficas Chart.js -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card card-outline card-primary shadow-sm">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Documentos por Tipo</h3></div>
+                    <div class="card-body"><canvas id="chart-by-type-archivo" height="220"></canvas></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card card-outline card-success shadow-sm">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Documentos por Año</h3></div>
+                    <div class="card-body"><canvas id="chart-by-year-archivo" height="220"></canvas></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12">
+                  <div class="card card-outline card-info shadow-sm">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Tendencia Mensual (24 meses)</h3></div>
+                    <div class="card-body"><canvas id="chart-by-month-archivo" height="100"></canvas></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- 2. PESTAÑA: NUEVO INGRESO -->
             <div class="tab-pane fade" id="pane-admin-archivo-new" role="tabpanel">
+              <!-- Import CSV section -->
+              <div class="card card-outline card-secondary mt-0 mb-4">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-file-csv mr-2"></i>Importación Masiva desde CSV</h3>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <h6 class="font-weight-bold">Importar Documentos de Archivo</h6>
+                  <p class="text-muted small">Columnas: <code>titulo, autor, fecha, tipo_documento, abstract, ubicacion, palabras_clave</code> (palabras clave separadas por <code>;</code>)</p>
+                  <div class="input-group mb-2">
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="csv-import-docs-archivo" accept=".csv">
+                      <label class="custom-file-label" for="csv-import-docs-archivo">Seleccionar CSV...</label>
+                    </div>
+                  </div>
+                  <button class="btn btn-primary btn-sm" onclick="handleImportCSV('documentos-archivo', 'archivo')">
+                    <i class="fas fa-upload mr-1"></i> Importar Documentos
+                  </button>
+                  <div id="csv-import-result-docs-archivo" class="mt-2"></div>
+                </div>
+              </div>
               <div class="row">
                 <div class="col-md-8">
                   <form id="admin-submit-form-archivo" class="card card-primary">
