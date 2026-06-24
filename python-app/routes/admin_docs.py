@@ -569,13 +569,16 @@ async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: s
 def get_empleado(emp_id: int):
     row = db_query(
         """SELECT e.id, e.cedula, e.rif, e.nombres, e.apellidos,
-                  COALESCE(c.nombre,'')  AS cargo,
-                  COALESCE(d.nombre,'')  AS departamento,
+                  COALESCE(c.nombre,'')   AS cargo,
+                  COALESCE(d.nombre,'')   AS departamento,
                   COALESCE(el.estados,'') AS estado,
-                  TO_CHAR(e.fecha_ingreso,'YYYY-MM-DD')    AS fecha_ingreso,
-                  TO_CHAR(e.fecha_jubilacion,'YYYY-MM-DD') AS fecha_jubilacion,
-                  TO_CHAR(e.fecha_pension,'YYYY-MM-DD')    AS fecha_pension,
-                  COALESCE(e.foto_url,'') AS foto_url
+                  TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD') AS fecha_ingreso,
+                  TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD') AS fecha_jubilacion,
+                  TO_CHAR(e.fecha_pension,    'YYYY-MM-DD') AS fecha_pension,
+                  TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD') AS fecha_nacimiento,
+                  COALESCE(e.nivel_educativo, '') AS nivel_educativo,
+                  COALESCE(e.sexo, '')            AS sexo,
+                  COALESCE(e.foto_url, '')        AS foto_url
            FROM public.empleados e
            LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
            LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
@@ -617,14 +620,25 @@ def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
         estado_id = _resolve_or_create_lookup("estados_laborales", req.estado)
         set_clauses.append("estado_id = %s"); params.append(estado_id)
 
+    # Campos LOTTT (nuevos)
+    if req.fecha_nacimiento is not None:
+        set_clauses.append("fecha_nacimiento = %s")
+        params.append(req.fecha_nacimiento if req.fecha_nacimiento else None)
+    if req.nivel_educativo is not None:
+        set_clauses.append("nivel_educativo = %s"); params.append(req.nivel_educativo or None)
+    if req.sexo is not None:
+        set_clauses.append("sexo = %s"); params.append(req.sexo or None)
+
     if set_clauses:
+        set_clauses.append("updated_at = NOW()")
+        set_clauses.append("updated_by = %s"); params.append(req.usuario)
         params.append(emp_id)
         db_query(
             f"UPDATE public.empleados SET {', '.join(set_clauses)} WHERE id = %s",
             params, fetch="none", commit=True,
         )
 
-    log_event(req.usuario, "Update Empleado", "RRHH", f"ID: {emp_id}")
+    log_event(req.usuario, "Update Empleado", "RRHH", f"ID: {emp_id} nombres={req.nombres}")
     return {"success": True}
 
 

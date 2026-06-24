@@ -159,9 +159,26 @@ class EmpleadoUpdateRequest(BaseModel):
     estado: Optional[str] = None
     fecha_jubilacion: Optional[str] = None
     fecha_pension: Optional[str] = None
+    fecha_nacimiento: Optional[str] = None
+    nivel_educativo: Optional[str] = None
+    sexo: Optional[str] = None
     foto_url: Optional[str] = None
     rif: Optional[str] = None
     usuario: str
+
+    @validator("sexo")
+    def sexo_valid(cls, v):
+        if v and v.upper() not in ("M", "F", "O", ""):
+            raise ValueError("sexo debe ser M, F u O")
+        return (v or "").upper() or None
+
+    @validator("nivel_educativo")
+    def nivel_educativo_valid(cls, v):
+        allowed = {"Bachiller", "TSU", "Universitario", "Especialización",
+                   "Maestría", "Doctorado", "Postdoctorado", ""}
+        if v and v not in allowed:
+            raise ValueError(f"nivel_educativo inválido: {v}")
+        return v or None
 
 
 class PasswordChangeRequest(BaseModel):

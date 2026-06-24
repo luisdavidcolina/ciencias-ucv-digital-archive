@@ -810,6 +810,12 @@ async function openEditEmpleadoModal(empId) {
     }
     estadoSel.value = rec.estado || "Activo";
   }
+  document.getElementById("edit-emp-nacimiento")?.value !== undefined &&
+    (document.getElementById("edit-emp-nacimiento").value = rec.fecha_nacimiento || "");
+  const sexoSel = document.getElementById("edit-emp-sexo");
+  if (sexoSel) sexoSel.value = rec.sexo || "";
+  const nivelSel = document.getElementById("edit-emp-nivel-educativo");
+  if (nivelSel) nivelSel.value = rec.nivel_educativo || "";
   document.getElementById("edit-emp-rif").value         = rec.rif || "";
   document.getElementById("edit-emp-jubilacion").value  = rec.fecha_jubilacion || "";
   document.getElementById("edit-emp-pension").value     = rec.fecha_pension || "";
@@ -823,16 +829,19 @@ async function handleSaveEditEmpleado() {
   if (!empId) return;
 
   const payload = {
-    nombres:         document.getElementById("edit-emp-nombres")?.value || null,
-    apellidos:       document.getElementById("edit-emp-apellidos")?.value || null,
-    cargo:           document.getElementById("edit-emp-cargo")?.value || null,
-    departamento:    document.getElementById("edit-emp-departamento")?.value || null,
-    estado:          document.getElementById("edit-emp-estado")?.value || null,
-    rif:             document.getElementById("edit-emp-rif")?.value || null,
+    nombres:          document.getElementById("edit-emp-nombres")?.value || null,
+    apellidos:        document.getElementById("edit-emp-apellidos")?.value || null,
+    cargo:            document.getElementById("edit-emp-cargo")?.value || null,
+    departamento:     document.getElementById("edit-emp-departamento")?.value || null,
+    estado:           document.getElementById("edit-emp-estado")?.value || null,
+    rif:              document.getElementById("edit-emp-rif")?.value || null,
     fecha_jubilacion: document.getElementById("edit-emp-jubilacion")?.value || null,
-    fecha_pension:   document.getElementById("edit-emp-pension")?.value || null,
-    foto_url:        document.getElementById("edit-emp-foto")?.value || null,
-    usuario:         state.user.username,
+    fecha_pension:    document.getElementById("edit-emp-pension")?.value || null,
+    foto_url:         document.getElementById("edit-emp-foto")?.value || null,
+    fecha_nacimiento: document.getElementById("edit-emp-nacimiento")?.value || null,
+    sexo:             document.getElementById("edit-emp-sexo")?.value || null,
+    nivel_educativo:  document.getElementById("edit-emp-nivel-educativo")?.value || null,
+    usuario:          state.user.username,
   };
 
   try {
