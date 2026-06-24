@@ -1027,3 +1027,77 @@ async def import_documentos_csv(
     log_event(requester,f"Import CSV Docs ({modulo})",modulo,
               f"inserted={results['inserted']} errors={len(results['errors'])}")
     return results
+
+
+# =============================================================================
+# WORKFLOW DE STATUS DE DOCUMENTOS
+# =============================================================================
+
+VALID_STATUS = ("draft", "revision", "aprobado", "rechazado")
+
+
+@router.patch("/documento/{doc_id}/status")
+def update_documento_status(
+    doc_id: int,
+    status: str = Query(...),
+    modulo: str = Query(default="Archivo"),
+    requester: str = Query(default=""),
+):
+    """Cambia el status de un documento: draft → revision → aprobado | rechazado."""
+    if status not in VALID_STATUS:
+        raise HTTPException(400, f"Status inválido. Válidos: {VALID_STATUS}")
+
+    table = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
+    pk    = "id_archivo"    if modulo == "Archivo" else "id_rrhh"
+
+    result = db_query(
+        f"UPDATE public.{table} SET status=%s, updated_at=NOW() WHERE {pk}=%s RETURNING {pk}",
+        [status, doc_id], fetch="one", commit=True,
+    )
+    if not result:
+        raise HTTPException(404, "Documento no encontrado")
+
+    log_event(requester, f"Status Documento", modulo, f"doc_id={doc_id} → {status}")
+    return {"success": True, "doc_id": doc_id, "status": status}
+
+
+@router.get("/documentos/pendientes")
+def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: int = 25):
+    """Lista documentos en estado draft o revision para revisión/aprobación."""
+    page = max(1, page)
+    per_page = max(1, min(per_page, 100))
+    offset = (page - 1) * per_page
+
+    if modulo == "Archivo":
+        count_row = db_query(
+            "SELECT COUNT(*) AS total FROM public.datos_archivo WHERE status IN ('draft','revision')",
+            fetch="one",
+        )
+        rows = db_query(
+            """SELECT id_archivo AS id, titulo, autor, tesauro_primario AS tipo,
+                      TO_CHAR(fecha_documento,'YYYY-MM-DD') AS fecha,
+                      COALESCE(status,'aprobado') AS status, updated_at, updated_by
+               FROM public.datos_archivo WHERE status IN ('draft','revision')
+               ORDER BY updated_at DESC NULLS LAST
+               LIMIT %s OFFSET %s""",
+            [per_page, offset], fetch="all",
+        ) or []
+    else:
+        count_row = db_query(
+            "SELECT COUNT(*) AS total FROM public.datos_rrhh WHERE status IN ('draft','revision')",
+            fetch="one",
+        )
+        rows = db_query(
+            """SELECT dr.id_rrhh AS id, td.nombre_corto AS titulo, dr.notas AS autor,
+                      td.nombre_corto AS tipo, TO_CHAR(dr.fecha_documento,'YYYY-MM-DD') AS fecha,
+                      COALESCE(dr.status,'aprobado') AS status, dr.updated_at, dr.updated_by
+               FROM public.datos_rrhh dr
+               LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+               WHERE dr.status IN ('draft','revision')
+               ORDER BY dr.updated_at DESC NULLS LAST
+               LIMIT %s OFFSET %s""",
+            [per_page, offset], fetch="all",
+        ) or []
+
+    total = int(count_row["total"]) if count_row else 0
+    return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
