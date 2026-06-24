@@ -174,9 +174,15 @@ def get_global_summary():
             (SELECT COUNT(*) FROM public.usuarios_sistema WHERE COALESCE(is_active,TRUE)) AS total_usuarios,
             (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'revision')  AS arch_en_revision,
             (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'draft')     AS arch_borradores,
+            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'rechazado') AS arch_rechazados,
             (SELECT COUNT(*) FROM public.datos_rrhh WHERE COALESCE(status,'aprobado') = 'revision')     AS rrhh_en_revision,
+            (SELECT COUNT(*) FROM public.datos_rrhh WHERE COALESCE(status,'aprobado') = 'draft')        AS rrhh_borradores,
+            (SELECT COUNT(*) FROM public.empleados e
+             JOIN public.estados_laborales el ON e.estado_id = el.id
+             WHERE LOWER(el.estados) LIKE '%activo%')             AS empleados_activos,
             (SELECT MAX(created_at) FROM public.audit_log)        AS ultima_actividad,
-            (SELECT COUNT(*) FROM public.audit_log WHERE created_at >= NOW() - INTERVAL '24 hours') AS eventos_24h
+            (SELECT COUNT(*) FROM public.audit_log WHERE created_at >= NOW() - INTERVAL '24 hours') AS eventos_24h,
+            (SELECT COUNT(*) FROM public.backup_history)          AS total_backups
     """, fetch="one")
     if not row:
         return {}
