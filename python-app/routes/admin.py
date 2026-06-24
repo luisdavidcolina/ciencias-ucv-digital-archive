@@ -344,7 +344,8 @@ def list_all_files(
                 COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
                 COALESCE(da.ubicacion, '') AS ubicacion,
                 COALESCE(da.abstract, '') AS resumen,
-                COALESCE(da.file_url, '') AS file_url
+                COALESCE(da.file_url, '') AS file_url,
+                COALESCE(da.status, 'aprobado') AS status
             FROM public.datos_archivo da
             {where}
             ORDER BY da.fecha_documento DESC NULLS LAST
@@ -594,6 +595,12 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("id_tipo_documento = %s"); params.append(tipo_id)
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
 
+        if req.file_url is not None:
+            set_clauses.append("file_url = %s"); params.append(req.file_url or None)
+
+        if req.status is not None and req.status in ("draft", "revision", "aprobado", "rechazado"):
+            set_clauses.append("status = %s"); params.append(req.status)
+
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)
 
@@ -645,6 +652,12 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
         if req.personas_relacionadas is not None:
             set_clauses.append("personas_relacionadas = %s"); params.append(req.personas_relacionadas)
+
+        if req.file_url is not None:
+            set_clauses.append("file_url = %s"); params.append(req.file_url or None)
+
+        if req.status is not None and req.status in ("draft", "revision", "aprobado", "rechazado"):
+            set_clauses.append("status = %s"); params.append(req.status)
 
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)

@@ -468,21 +468,33 @@ function renderMonitorTable() {
     return;
   }
 
+  const STATUS_BADGES = {
+    draft:      '<span class="badge badge-secondary" title="Borrador">Draft</span>',
+    revision:   '<span class="badge badge-warning text-dark" title="En revisión">Revisión</span>',
+    aprobado:   '<span class="badge badge-success" title="Aprobado">✓</span>',
+    rechazado:  '<span class="badge badge-danger" title="Rechazado">✗</span>',
+  };
+
   if (isArch) {
-    container.innerHTML = records.map(f => `
-      <tr>
-        <td class="font-weight-bold text-dark">${f.titulo}</td>
-        <td>${f.autor}</td>
-        <td>${formatISOToSpanish(f.fecha)}</td>
-        <td><span class="ds-badge">${f.doc_type}</span></td>
-        <td class="text-muted" style="font-size:0.82rem;">${f.ubicacion}</td>
+    container.innerHTML = records.map(f => {
+      const statusBadge = STATUS_BADGES[f.status] || STATUS_BADGES["aprobado"];
+      const fileIcon = f.file_url
+        ? `<a href="${f.file_url}" target="_blank" class="btn btn-xs btn-outline-info mr-1" title="Ver archivo"><i class="fas fa-file"></i></a>`
+        : "";
+      return `<tr>
+        <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.titulo||'').replace(/"/g,'&quot;')}">${f.titulo}</td>
+        <td class="text-muted small">${f.autor || '—'}</td>
+        <td class="text-muted small">${formatISOToSpanish(f.fecha)}</td>
+        <td><span class="badge badge-light border">${f.doc_type || '—'}</span></td>
+        <td>${statusBadge}</td>
         <td>
+          ${fileIcon}
           <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button>
           <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditDocModal(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
           <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},'${(f.titulo||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fas fa-trash"></i></button>
         </td>
-      </tr>
-    `).join("");
+      </tr>`;
+    }).join("");
   } else {
     container.innerHTML = records.map(f => {
       const c = getStatusColor(f.estado);
@@ -536,6 +548,21 @@ function openEditDocModal(id) {
   document.getElementById("edit-doc-palabras").value  = "";
   document.getElementById("edit-doc-file-url").value  = rec.file_url || "";
 
+  // Preview de archivo si hay URL
+  const previewContainer = document.getElementById("edit-doc-file-preview");
+  if (previewContainer) {
+    const url = rec.file_url || "";
+    if (!url) {
+      previewContainer.innerHTML = '<p class="text-muted small mb-0">Sin archivo adjunto.</p>';
+    } else if (/\.(pdf)$/i.test(url)) {
+      previewContainer.innerHTML = `<iframe src="${url}" style="width:100%;height:200px;border:1px solid #ddd;border-radius:4px;" title="Preview PDF"></iframe>`;
+    } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
+      previewContainer.innerHTML = `<img src="${url}" style="max-width:100%;max-height:200px;border:1px solid #ddd;border-radius:4px;object-fit:contain;" alt="Preview">`;
+    } else {
+      previewContainer.innerHTML = `<a href="${url}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-external-link-alt mr-1"></i>Abrir archivo</a>`;
+    }
+  }
+
   // Poblar select de tipos
   const sel = document.getElementById("edit-doc-type");
   if (sel) {
@@ -545,6 +572,10 @@ function openEditDocModal(id) {
       sel.innerHTML = `<option value="${rec.doc_type}" selected>${rec.doc_type}</option>` + sel.innerHTML;
     }
   }
+
+  // Status
+  const statusSel = document.getElementById("edit-doc-status");
+  if (statusSel) statusSel.value = rec.status || "aprobado";
 
   $("#editArchivoModal").modal("show");
 }
@@ -565,6 +596,7 @@ async function handleSaveEditDoc() {
     resumen:            document.getElementById("edit-doc-resumen")?.value || null,
     ubicacion:          document.getElementById("edit-doc-ubicacion")?.value || null,
     file_url:           document.getElementById("edit-doc-file-url")?.value.trim() || "",
+    status:             document.getElementById("edit-doc-status")?.value || "aprobado",
     usuario:            state.user.username,
   };
 

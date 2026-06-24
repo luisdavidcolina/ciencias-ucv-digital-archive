@@ -702,6 +702,23 @@
             </div>
             <small class="text-muted">Subida automática disponible próximamente. Por ahora ingrese la URL del archivo.</small>
           </div>
+          <!-- Preview del archivo actual -->
+          <div class="form-group">
+            <label class="font-weight-bold text-muted small">Vista previa</label>
+            <div id="edit-doc-file-preview" class="p-2 bg-light border rounded">
+              <p class="text-muted small mb-0">Sin archivo adjunto.</p>
+            </div>
+          </div>
+          <!-- Status del documento -->
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Estado del documento</label>
+            <select id="edit-doc-status" class="form-control form-control-sm w-50">
+              <option value="aprobado">✓ Aprobado</option>
+              <option value="revision">⏳ En revisión</option>
+              <option value="draft">✎ Borrador</option>
+              <option value="rechazado">✗ Rechazado</option>
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
