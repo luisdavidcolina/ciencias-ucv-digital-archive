@@ -31,7 +31,10 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
             COALESCE(da.tesauro_secundario, '') AS tesauro_secundario,
             COALESCE(STRING_AGG(dl.nombre, '; '), '') AS descriptores_libres,
             COALESCE(da.abstract, '')           AS resumen,
-            COALESCE(da.file_url, '')           AS file_url
+            COALESCE(da.file_url, '')           AS file_url,
+            COALESCE(da.numero_folio, '')       AS numero_folio,
+            COALESCE(da.soporte, 'Físico')      AS soporte,
+            da.numero_paginas
         FROM public.datos_archivo da
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
         LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
@@ -46,6 +49,7 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
         return pd.DataFrame(columns=[
             "id", "titulo", "autor", "fecha", "doc_type", "categoria", "ubicacion",
             "tesauro_primario", "tesauro_secundario", "descriptores_libres", "resumen", "file_url",
+            "numero_folio", "soporte", "numero_paginas",
         ])
 
     df = pd.DataFrame([dict(r) for r in rows]).fillna("")
@@ -165,6 +169,9 @@ def search_archivo(req: ArchivoSearchRequest):
             COALESCE(da.abstract, '')            AS resumen,
             COALESCE(da.file_url, '')            AS file_url,
             COALESCE(da.personas_relacionadas, '') AS personas_relacionadas,
+            COALESCE(da.numero_folio, '')           AS numero_folio,
+            COALESCE(da.soporte, 'Físico')          AS soporte,
+            da.numero_paginas,
             COALESCE(STRING_AGG(DISTINCT dl.nombre, '; ') FILTER (WHERE dl.nombre IS NOT NULL), '') AS descriptores_libres,
             ts_rank_cd(
               to_tsvector('spanish',
@@ -181,7 +188,7 @@ def search_archivo(req: ArchivoSearchRequest):
         {where}
         GROUP BY da.id_archivo, da.titulo, da.autor, da.fecha_documento,
                  da.tesauro_primario, da.tesauro_secundario, da.ubicacion, da.abstract,
-                 da.file_url, da.personas_relacionadas
+                 da.file_url, da.personas_relacionadas, da.numero_folio, da.soporte, da.numero_paginas
         ORDER BY {order}
         LIMIT %s OFFSET %s
     """
