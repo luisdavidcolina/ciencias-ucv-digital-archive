@@ -2182,6 +2182,13 @@ mark {
     .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
 }
 
+/* ── Shake animation (login error) ── */
+@keyframes ds-shake {
+    0%,100% { transform: translateX(0); }
+    15%,45%,75% { transform: translateX(-6px); }
+    30%,60%,90% { transform: translateX(6px); }
+}
+
 /* ── Quick status menu dropdown ── */
 .ds-quick-status-dropdown {
     position: absolute;
