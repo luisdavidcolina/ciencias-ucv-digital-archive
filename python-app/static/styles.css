@@ -2075,3 +2075,53 @@ span.flatpickr-weekday {
     min-height: 1.2em;
     margin-top: 6px;
 }
+
+/* ── Quick-Status Button ── */
+.ds-status-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s;
+}
+.ds-status-btn:hover { transform: scale(1.15); }
+.ds-status-btn:focus { outline: 2px solid #2b4e72; outline-offset: 2px; border-radius: 4px; }
+
+/* ── Skeleton Loader ── */
+.ds-skeleton {
+    background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+    background-size: 200% 100%;
+    animation: ds-shimmer 1.4s infinite;
+    border-radius: 4px;
+    display: block;
+}
+@keyframes ds-shimmer {
+    0%  { background-position: 200% 0; }
+    100%{ background-position: -200% 0; }
+}
+
+/* ── Focus visible para accesibilidad ── */
+:focus-visible {
+    outline: 2px solid #2b4e72;
+    outline-offset: 2px;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── Mark highlight de búsqueda ── */
+mark {
+    background: #fff176;
+    border-radius: 2px;
+    padding: 0 1px;
+    color: inherit;
+}
+
+/* ── Session warning banner ── */
+#session-warning-banner {
+    font-family: inherit;
+    font-size: 0.85rem;
+    border-radius: 0;
+    border-left: 4px solid #dc3545;
+}

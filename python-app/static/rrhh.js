@@ -330,9 +330,13 @@ function filterInnerDossier() {
     files = files.filter(f =>
       (f.doc_type || "").toLowerCase().includes(q) ||
       (f.ubicacion || "").toLowerCase().includes(q) ||
-      (f.personas_relacionadas || "").toLowerCase().includes(q)
+      (f.personas_relacionadas || "").toLowerCase().includes(q) ||
+      (f.notas || "").toLowerCase().includes(q)
     );
   }
+  const dossierTerms = state.innerDossierSearch
+    ? state.innerDossierSearch.trim().split(/\s+/).filter(t => t.length > 1)
+    : [];
   if (state.innerDossierClass) {
     files = files.filter(f => f.doc_type === state.innerDossierClass);
   }
@@ -365,11 +369,13 @@ function filterInnerDossier() {
       <h5 class="border-bottom pb-2 mb-3 ds-category-title">
         <i class="fas fa-folder-open mr-2"></i>${cat}
       </h5>
-      ${catFiles.map(f => `
+      ${catFiles.map(f => {
+        const hlD = txt => typeof highlightTerms === "function" ? highlightTerms(txt, dossierTerms) : (txt || "");
+        return `
         <div class="rrhh-person-file-item">
           <div class="rrhh-person-file-head">
             <div class="rrhh-person-file-main">
-              <strong>${f.doc_type}</strong>
+              <strong>${hlD(f.doc_type)}</strong>
               <span class="rrhh-person-file-sub">Fecha de ingreso: ${formatISOToSpanish(f.fecha_ingreso)}</span>
             </div>
             <a href="#" class="btn btn-sm btn-outline-info"
@@ -378,10 +384,11 @@ function filterInnerDossier() {
           <div class="rrhh-person-file-meta">
             <span>Dependencia o AP: <strong>${f.departamento || "N/A"}</strong></span>
             <span>Estatus: <strong>${f.estatus || f.estado || "N/A"}</strong></span>
-            <span>Ubicación: <strong>${f.ubicacion || "N/A"}</strong></span>
+            <span>Ubicación: <strong>${hlD(f.ubicacion) || "N/A"}</strong></span>
           </div>
         </div>
-      `).join("")}
+        `;
+      }).join("")}
     </div>
   `).join("");
 }

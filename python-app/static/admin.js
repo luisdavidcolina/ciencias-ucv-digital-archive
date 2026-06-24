@@ -512,9 +512,10 @@ function renderMonitorTable() {
   } else {
     container.innerHTML = records.map(f => {
       const c = getStatusColor(f.estado);
+      const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
       return `
         <tr>
-          <td class="font-weight-bold text-dark">${f.empleado}</td>
+          <td class="font-weight-bold text-dark">${hlEmpleado}</td>
           <td>${f.cedula}</td>
           <td>${f.departamento}</td>
           <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado}</span></td>

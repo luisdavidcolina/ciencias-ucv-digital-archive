@@ -347,9 +347,32 @@
   <!-- Toast Container -->
   <div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
 
+  <!-- Confirm Modal -->
+  <div class="modal fade" id="ds-confirm-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content" style="border-radius:12px;">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="ds-cm-title modal-title font-weight-bold">Confirmar</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body pt-2"><p class="ds-cm-body text-muted mb-0"></p></div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger btn-sm ds-cm-ok" data-dismiss="modal">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .ds-skeleton{background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 50%,#e9ecef 75%);background-size:200% 100%;animation:ds-shimmer 1.4s infinite;border-radius:4px;}
+    @keyframes ds-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/static/admin-ui.js"></script>
   <script src="/static/app.js"></script>
 
   <script>
@@ -414,16 +437,17 @@ async function loadSystemStats() {
     setEl("sys-total-audit", auditRow.total);
     setEl("sys-total-users", Array.isArray(usersRow) ? usersRow.length : "—");
 
-    if (archCharts?.charts?.totals) {
-      const t = archCharts.charts.totals;
-      setEl("sys-docs-archivo", t.total_docs);
-      setEl("sys-keywords", t.total_keywords);
-    }
-    if (rrhhCharts?.charts?.totals) {
-      const t = rrhhCharts.charts.totals;
-      setEl("sys-empleados", t.total_employees);
-      setEl("sys-docs-rrhh", t.total_documents);
-    }
+    const archTotals = archCharts?.charts?.totals || {};
+    const rrhhTotals = rrhhCharts?.charts?.totals || {};
+    setEl("sys-docs-archivo", archTotals.total_docs);
+    setEl("sys-keywords", archTotals.total_keywords);
+    setEl("sys-empleados", rrhhTotals.total_employees);
+    setEl("sys-docs-rrhh", rrhhTotals.total_documents);
+
+    const totalDocs = (archTotals.total_docs || 0) + (rrhhTotals.total_documents || 0);
+    const totalEmp  = rrhhTotals.total_employees || 0;
+    setEl("sys-total-docs", totalDocs);
+    setEl("sys-total-emp", totalEmp);
 
     // Chart: distribución por módulo
     const archDocs = archCharts?.charts?.totals?.total_docs || 0;
@@ -486,7 +510,7 @@ async function handleExportBackup() {
   }
 }
 
-async function handleRestoreBackup() {
+async function handleRestoreBackup() {  // async para confirmModal
   const fileInput = document.getElementById("restore-file-input");
   const mode = document.getElementById("restore-mode").value;
   const statusEl = document.getElementById("backup-restore-status");
@@ -497,10 +521,14 @@ async function handleRestoreBackup() {
     return;
   }
 
-  const confirmMsg = mode === "overwrite"
-    ? "PELIGROSO: Esto BORRARA y reemplazara datos existentes. Estas completamente seguro?"
-    : "Confirmar restauracion en modo merge? Los datos existentes no seran borrados.";
-  if (!confirm(confirmMsg)) return;
+  const confirmTitle = mode === "overwrite" ? "Restauración DESTRUCTIVA" : "Confirmar Restauración";
+  const confirmMsg   = mode === "overwrite"
+    ? "PELIGROSO: Esto borrará y reemplazará datos existentes. ¿Estás completamente seguro?"
+    : "¿Confirmar restauración en modo merge? Los datos existentes no serán borrados.";
+  const btnLabel = mode === "overwrite" ? "Sí, sobreescribir" : "Sí, restaurar";
+  const btnClass = mode === "overwrite" ? "btn-danger" : "btn-warning";
+  const confirmed = await confirmModal(confirmTitle, confirmMsg, btnLabel, btnClass);
+  if (!confirmed) return;
 
   const fd = new FormData();
   fd.append("file", fileInput.files[0]);

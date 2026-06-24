@@ -589,6 +589,7 @@ function setupEventListeners() {
     document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click", exportAdminCSV);
     document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; loadMonitorTable(); } });
     document.getElementById(`admin_next-${suf}`)?.addEventListener("click", () => { const totalPages = Math.ceil((state.adminTable.total || 0) / (state.adminTable.perPage || 25)); if (state.adminTable.page < totalPages) { state.adminTable.page++; loadMonitorTable(); } });
+    document.getElementById(`admin_per_page-${suf}`)?.addEventListener("change", e => { state.adminTable.perPage = parseInt(e.target.value) || 25; state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`add_tax_btn-${suf}`)?.addEventListener("click",  handleAddCategory);
     document.getElementById(`btn_add_user-${suf}`)?.addEventListener("click", handleAddUser);
   });
