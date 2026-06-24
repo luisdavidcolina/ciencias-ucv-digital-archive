@@ -661,6 +661,23 @@ async function openEditDocModal(id) {
   $("#editArchivoModal").modal("show");
 }
 
+function _refreshEditDocPreview() {
+  const url = (document.getElementById("edit-doc-file-url")?.value || "").trim();
+  const container = document.getElementById("edit-doc-file-preview");
+  if (!container) return;
+  if (!url) {
+    container.innerHTML = '<p class="text-muted small mb-0">Sin archivo adjunto.</p>';
+    return;
+  }
+  if (/\.(pdf)$/i.test(url)) {
+    container.innerHTML = `<iframe src="${url}" style="width:100%;height:220px;border:1px solid #ddd;border-radius:4px;" title="Preview PDF"></iframe>`;
+  } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
+    container.innerHTML = `<img src="${url}" style="max-width:100%;max-height:220px;border:1px solid #ddd;border-radius:4px;object-fit:contain;" alt="Preview">`;
+  } else {
+    container.innerHTML = `<a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt mr-1"></i>Abrir en nueva ventana</a>`;
+  }
+}
+
 async function handleSaveEditDoc() {
   const id = document.getElementById("edit-doc-id")?.value;
   if (!id) return;

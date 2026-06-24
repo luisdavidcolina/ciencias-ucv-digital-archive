@@ -707,19 +707,23 @@
             <div class="input-group">
               <input type="text" id="edit-doc-file-url" class="form-control" placeholder="https://... (ingrese URL directamente)">
               <div class="input-group-append">
+                <button class="btn btn-outline-info" type="button" title="Ver preview de la URL"
+                        onclick="_refreshEditDocPreview()">
+                  <i class="fas fa-eye"></i>
+                </button>
                 <button class="btn btn-outline-secondary" type="button"
-                        onclick="showToast('Servicio de archivos pendiente. Ingrese la URL manualmente.','info')"
+                        onclick="showToast('Subida automática próximamente. Ingrese la URL manualmente.','info')"
                         title="Subida automática próximamente">
-                  <i class="fas fa-cloud-upload-alt"></i> Subir
+                  <i class="fas fa-cloud-upload-alt"></i>
                 </button>
               </div>
             </div>
-            <small class="text-muted">Subida automática disponible próximamente. Por ahora ingrese la URL del archivo.</small>
+            <small class="text-muted">Ingrese la URL del archivo. Haga clic en <i class="fas fa-eye"></i> para ver el preview.</small>
           </div>
           <!-- Preview del archivo actual -->
           <div class="form-group">
             <label class="font-weight-bold text-muted small">Vista previa</label>
-            <div id="edit-doc-file-preview" class="p-2 bg-light border rounded">
+            <div id="edit-doc-file-preview" class="p-2 bg-light border rounded" style="min-height:40px;">
               <p class="text-muted small mb-0">Sin archivo adjunto.</p>
             </div>
           </div>
