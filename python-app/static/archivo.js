@@ -250,7 +250,11 @@ function openDocModalWithRecord(doc) {
   const fileUrl = doc.file_url || "";
   const viewBtn = document.getElementById("btn-modal-view");
   if (fileUrl) {
-    viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i>Ver PDF';
+    const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);
+    const isPdf = /\.pdf$/i.test(fileUrl);
+    const viewIcon = isImg ? "fas fa-image" : isPdf ? "fas fa-file-pdf" : "fas fa-external-link-alt";
+    const viewText = isImg ? "Ver Imagen" : isPdf ? "Ver PDF" : "Abrir Archivo";
+    viewBtn.innerHTML = `<i class="${viewIcon} mr-1"></i>${viewText}`;
     viewBtn.onclick = () => toggleDocViewer(fileUrl);
   } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
     viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
@@ -273,7 +277,19 @@ function toggleDocViewer(fileUrl) {
   const iframe  = document.getElementById("modal-doc-iframe");
   if (!section || !iframe) return;
   if (section.classList.contains("d-none")) {
-    iframe.src = fileUrl;
+    const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);
+    if (isImg) {
+      iframe.style.display = "none";
+      let img = section.querySelector("img.ds-viewer-img");
+      if (!img) { img = document.createElement("img"); img.className = "ds-viewer-img"; img.style.cssText = "max-width:100%;max-height:500px;display:block;margin:auto;border-radius:4px;"; section.appendChild(img); }
+      img.src = fileUrl;
+      img.style.display = "block";
+    } else {
+      const img = section.querySelector("img.ds-viewer-img");
+      if (img) img.style.display = "none";
+      iframe.style.display = "block";
+      iframe.src = fileUrl;
+    }
     section.classList.remove("d-none");
     section.scrollIntoView({ behavior: "smooth", block: "nearest" });
   } else {
