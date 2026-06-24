@@ -703,25 +703,28 @@ async function handleDeleteDoc(id, nombre) {
 }
 
 // --- EDITAR / ELIMINAR EMPLEADO (RRHH) ---
-function openEditEmpleadoModal(empId) {
-  const rec = state.adminTable.results.find(r => r.empleado_id == empId);
-  if (!rec) return;
+async function openEditEmpleadoModal(empId) {
+  let rec = state.adminTable.results.find(r => r.empleado_id == empId) || { empleado_id: empId };
 
-  document.getElementById("edit-emp-id").value          = rec.empleado_id || "";
-  // Split nombre completo into nombres/apellidos (best-effort)
-  const partes = (rec.empleado || "").split(" ");
-  document.getElementById("edit-emp-nombres").value     = partes.slice(0, Math.ceil(partes.length / 2)).join(" ");
-  document.getElementById("edit-emp-apellidos").value   = partes.slice(Math.ceil(partes.length / 2)).join(" ");
+  // Fetch datos frescos del servidor
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}`);
+    if (res.ok) rec = { ...rec, ...await res.json() };
+  } catch {}
+
+  document.getElementById("edit-emp-id").value          = rec.empleado_id || rec.id || "";
+  document.getElementById("edit-emp-nombres").value     = rec.nombres || "";
+  document.getElementById("edit-emp-apellidos").value   = rec.apellidos || "";
   document.getElementById("edit-emp-cargo").value       = rec.cargo || "";
   document.getElementById("edit-emp-departamento").value = rec.departamento || "";
   const estadoSel = document.getElementById("edit-emp-estado");
   if (estadoSel) {
-    Array.from(estadoSel.options).forEach(o => { o.selected = o.value === rec.estado; });
+    Array.from(estadoSel.options).forEach(o => { o.selected = o.value === (rec.estado || "Activo"); });
   }
-  document.getElementById("edit-emp-rif").value         = "";
-  document.getElementById("edit-emp-jubilacion").value  = "";
-  document.getElementById("edit-emp-pension").value     = "";
-  document.getElementById("edit-emp-foto").value        = "";
+  document.getElementById("edit-emp-rif").value         = rec.rif || "";
+  document.getElementById("edit-emp-jubilacion").value  = rec.fecha_jubilacion || "";
+  document.getElementById("edit-emp-pension").value     = rec.fecha_pension || "";
+  document.getElementById("edit-emp-foto").value        = rec.foto_url || "";
 
   $("#editEmpleadoModal").modal("show");
 }

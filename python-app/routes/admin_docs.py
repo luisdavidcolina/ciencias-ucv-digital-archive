@@ -565,6 +565,29 @@ async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: s
     }
 
 
+@router.get("/empleado/{emp_id}")
+def get_empleado(emp_id: int):
+    row = db_query(
+        """SELECT e.id, e.cedula, e.rif, e.nombres, e.apellidos,
+                  COALESCE(c.nombre,'')  AS cargo,
+                  COALESCE(d.nombre,'')  AS departamento,
+                  COALESCE(el.estados,'') AS estado,
+                  TO_CHAR(e.fecha_ingreso,'YYYY-MM-DD')    AS fecha_ingreso,
+                  TO_CHAR(e.fecha_jubilacion,'YYYY-MM-DD') AS fecha_jubilacion,
+                  TO_CHAR(e.fecha_pension,'YYYY-MM-DD')    AS fecha_pension,
+                  COALESCE(e.foto_url,'') AS foto_url
+           FROM public.empleados e
+           LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
+           LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
+           LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
+           WHERE e.id = %s""",
+        (emp_id,), fetch="one",
+    )
+    if not row:
+        raise HTTPException(404, "Empleado no encontrado")
+    return dict(row)
+
+
 @router.put("/empleado/{emp_id}")
 def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
     set_clauses, params = [], []
