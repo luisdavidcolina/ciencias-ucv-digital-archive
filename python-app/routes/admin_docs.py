@@ -145,16 +145,22 @@ def list_all_files(
             SELECT DISTINCT
                 e.id AS empleado_id,
                 e.cedula,
-                e.nombres || ' ' || e.apellidos AS empleado,
-                COALESCE(d.nombre, '') AS departamento,
-                COALESCE(el.estados, '') AS estado,
-                COALESCE(c.nombre, '') AS cargo,
+                e.apellidos || ', ' || e.nombres AS empleado,
+                COALESCE(e.rif, '')                    AS rif,
+                COALESCE(d.nombre, '')                 AS departamento,
+                COALESCE(el.estados, '')               AS estado,
+                COALESCE(c.nombre, '')                 AS cargo,
                 TO_CHAR(e.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
+                TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD') AS fecha_nacimiento,
+                COALESCE(e.nivel_educativo, '')        AS nivel_educativo,
+                COALESCE(e.sexo, '')                   AS sexo,
+                TO_CHAR(e.updated_at, 'YYYY-MM-DD')   AS updated_at,
+                (SELECT COUNT(*) FROM public.datos_rrhh dr2 WHERE dr2.empleado_id = e.id) AS doc_count,
                 COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
                 COALESCE(dr.ubicacion, '') AS ubicacion
             {join}
             {where}
-            ORDER BY e.nombres ASC
+            ORDER BY e.apellidos ASC
             LIMIT %s OFFSET %s
             """,
             (params + [per_page, offset]) if params else [per_page, offset],

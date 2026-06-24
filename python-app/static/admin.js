@@ -928,11 +928,24 @@ function exportAdminCSV() {
       r.ubicacion, r.file_url || "", r.status || "aprobado", r.resumen || ""
     ].map(esc).join(","));
   } else {
-    headers = ["ID Empleado", "Empleado", "Cédula", "Cargo", "Departamento",
-               "Estado Laboral", "Fecha Ingreso", "Tipo Documento", "Ubicación"];
+    headers = ["ID Empleado", "Apellidos y Nombres", "Cédula", "RIF", "Cargo", "Departamento",
+               "Estado Laboral", "Fecha Ingreso", "Fecha Nacimiento", "Nivel Educativo", "Sexo",
+               "N° Documentos", "Última Actualiz."];
+    const SEXO = { M: "Masculino", F: "Femenino", O: "Otro" };
     rows = records.map(r => [
-      r.empleado_id, r.empleado, r.cedula, r.cargo || r.departamento, r.departamento,
-      r.estado, r.fecha_ingreso, r.doc_type, r.ubicacion
+      r.empleado_id,
+      r.empleado,
+      r.cedula,
+      r.rif || "",
+      r.cargo || "",
+      r.departamento || "",
+      r.estado || "",
+      r.fecha_ingreso || "",
+      r.fecha_nacimiento || "",
+      r.nivel_educativo || "",
+      SEXO[r.sexo] || r.sexo || "",
+      r.doc_count ?? "",
+      r.updated_at ? r.updated_at.slice(0, 10) : ""
     ].map(esc).join(","));
   }
 
