@@ -71,9 +71,22 @@ function highlightTerms(text, terms) {
 
 function formatISOToSpanish(iso) {
   if (!iso) return "";
-  const parts = iso.split("-");
+  const datePart = String(iso).split("T")[0].split(" ")[0];
+  const parts = datePart.split("-");
   if (parts.length !== 3) return iso;
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function formatRelativeTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60)     return "hace un momento";
+  if (diff < 3600)   return `hace ${Math.floor(diff / 60)} min`;
+  if (diff < 86400)  return `hace ${Math.floor(diff / 3600)} h`;
+  if (diff < 604800) return `hace ${Math.floor(diff / 86400)} días`;
+  return formatISOToSpanish(iso);
 }
 
 function getPersonInitials(name) {
