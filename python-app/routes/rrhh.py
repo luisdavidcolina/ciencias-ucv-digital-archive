@@ -400,6 +400,8 @@ def generate_rrhh_report(emp_id: int):
     emp = db_query("""
         SELECT e.id, e.cedula, e.nombres, e.apellidos, e.rif,
                e.fecha_jubilacion, e.fecha_pension,
+               e.fecha_nacimiento, e.nivel_educativo, e.sexo,
+               TO_CHAR(e.fecha_ingreso, 'YYYY-MM-DD') AS fecha_ingreso,
                COALESCE(c.nombre,'—') AS cargo,
                COALESCE(d.nombre,'—') AS departamento,
                COALESCE(el.estados,'—') AS estado
@@ -426,6 +428,19 @@ def generate_rrhh_report(emp_id: int):
     for d in docs:
         k = d["parte_nombre"]
         partes.setdefault(k,[]).append(dict(d))
+
+    # Historial de cargos para la sección adicional del reporte
+    historial_cargos = db_query("""
+        SELECT c.nombre AS cargo,
+               TO_CHAR(hc.fecha_inicio,'YYYY-MM-DD') AS fecha_inicio,
+               TO_CHAR(hc.fecha_fin,'YYYY-MM-DD')    AS fecha_fin,
+               hc.motivo
+        FROM public.historial_cargos hc
+        JOIN public.cargos c ON hc.cargo_id = c.id
+        WHERE hc.empleado_id = %s
+        ORDER BY hc.fecha_inicio DESC
+    """, [emp_id], fetch="all") or []
+
     def fd(v):
         if not v: return "—"
         return str(v)[:10]
@@ -436,6 +451,7 @@ def generate_rrhh_report(emp_id: int):
         "Parte IV — Documentos Personales":"#6f42c1",
     }
     nombre_completo = f"{emp.get('apellidos','')}, {emp.get('nombres','')}".strip(", ")
+    _SEXO_MAP = {"M": "Masculino", "F": "Femenino", "O": "Otro"}
     rows_html = ""
     for pn, pdocs in partes.items():
         col = colores.get(pn,"#6c757d")
@@ -489,8 +505,12 @@ tr:nth-child(even) td{{background:#f9f9f9}}
 <div class="ef"><label>Cargo</label><span>{emp.get('cargo','—')}</span></div>
 <div class="ef"><label>Departamento</label><span>{emp.get('departamento','—')}</span></div>
 <div class="ef"><label>RIF</label><span>{emp.get('rif','—') or '—'}</span></div>
+<div class="ef"><label>Fecha de Ingreso</label><span>{fd(emp.get('fecha_ingreso'))}</span></div>
 <div class="ef"><label>Jubilación</label><span>{fd(emp.get('fecha_jubilacion'))}</span></div>
 <div class="ef"><label>Pensión</label><span>{fd(emp.get('fecha_pension'))}</span></div>
+<div class="ef"><label>Fecha de Nacimiento</label><span>{fd(emp.get('fecha_nacimiento'))}</span></div>
+<div class="ef"><label>Nivel Educativo</label><span>{emp.get('nivel_educativo') or '—'}</span></div>
+<div class="ef"><label>Sexo</label><span>{_SEXO_MAP.get(str(emp.get('sexo') or ''),'—')}</span></div>
 </div>
 <div class="stats">
 <div class="sbox"><div class="n">{len(docs)}</div><div class="l">Documentos</div></div>
@@ -500,6 +520,23 @@ tr:nth-child(even) td{{background:#f9f9f9}}
 <thead><tr><th>Tipo de Documento</th><th>Fecha</th><th>Notas / Descripción</th><th>Ubicación</th></tr></thead>
 <tbody>{rows_html}</tbody>
 </table>
+{f'''
+<h3 style="margin-top:24px;margin-bottom:10px;font-size:.95rem;color:#003366;border-bottom:2px solid #003366;padding-bottom:6px">
+  Historial de Cargos
+</h3>
+<table>
+  <thead><tr><th>Cargo</th><th>Desde</th><th>Hasta</th><th>Motivo</th></tr></thead>
+  <tbody>
+    {''.join(
+        f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['cargo']}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['fecha_inicio'] or '—'}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['fecha_fin'] or '<span style=\"color:#198754;font-weight:600\">Actual</span>'}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem'>{h['motivo'] or '—'}</td></tr>"
+        for h in historial_cargos
+    ) if historial_cargos else "<tr><td colspan='4' style='text-align:center;padding:14px;color:#999'>Sin historial registrado</td></tr>"}
+  </tbody>
+</table>
+''' if historial_cargos is not None else ''}
 <p style="margin-top:20px;font-size:.72rem;color:#aaa;text-align:center">
 Documento generado automáticamente por el Sistema de Archivo Institucional — Ciencias UCV. Confidencial. Solo para uso oficial.
 </p>
