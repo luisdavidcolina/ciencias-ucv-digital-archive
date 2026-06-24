@@ -107,9 +107,13 @@ function renderRrhhList() {
   document.getElementById("count-rrhh-results").innerText = hasFilter ? `${total} Resultados` : `${total} Registros`;
 
   if (results.length === 0) {
+    const emptyMsg = hasFilter
+      ? `No se encontraron expedientes con los filtros aplicados.
+         <br><small class="text-muted">Intente ampliar la búsqueda o limpiar los filtros.</small>`
+      : `No hay expedientes registrados en el sistema.`;
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
       <i class="fas fa-users fa-2x mb-2 text-muted"></i>
-      <p class="mb-0">No se encontraron expedientes coincidentes con los filtros seleccionados.</p>
+      <p class="mb-0">${emptyMsg}</p>
     </div>`;
     document.getElementById("info-rrhh-pagination").innerText = "Pág 1 de 1";
     const prevBtn = document.getElementById("btn-rrhh-prev");

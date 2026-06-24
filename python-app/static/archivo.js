@@ -128,9 +128,13 @@ function renderArchivoList() {
     hasFilter ? `${total} Resultados` : `${total} Registros`;
 
   if (results.length === 0) {
+    const emptyMsg = hasFilter
+      ? `No se encontraron documentos con los filtros aplicados.
+         <br><small class="text-muted">Intente ampliar la búsqueda o limpiar los filtros.</small>`
+      : `El archivo no contiene documentos registrados aún.`;
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
-      <i class="fas fa-search fa-2x mb-2 text-muted"></i>
-      <p class="mb-0">No se encontraron expedientes o ejemplares correspondientes a los criterios ingresados.</p>
+      <i class="fas fa-folder-open fa-2x mb-2 text-muted"></i>
+      <p class="mb-0">${emptyMsg}</p>
     </div>`;
     document.getElementById("info-archivo-pagination").innerText = "Pág 1 de 1";
     const prevBtn = document.getElementById("btn-archivo-prev");
