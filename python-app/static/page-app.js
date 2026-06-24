@@ -1,5 +1,6 @@
 const API_BASE   = window.location.origin;
 const SESSION_KEY = "archive_session";
+let _loginFailCount = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   initLoginPage();
@@ -75,9 +76,25 @@ async function performLogin() {
     saveSession(data.user);
     window.location.href = chooseLandingPage(data.user);
   } catch (e) {
-    showLoginError(e.message || "Error de conexión. Intente nuevamente.");
-    btn.disabled = false;
-    btn.innerHTML = origHTML;
+    _loginFailCount++;
+    let errMsg = e.message || "Error de conexión. Intente nuevamente.";
+    if (_loginFailCount >= 3) {
+      errMsg += ` (Intento ${_loginFailCount} — verifique sus credenciales)`;
+    }
+    showLoginError(errMsg);
+    if (_loginFailCount >= 5) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-lock mr-1"></i> Bloqueado (30s)';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        _loginFailCount = 0;
+        hideLoginError();
+      }, 30000);
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+    }
   }
 }
 
