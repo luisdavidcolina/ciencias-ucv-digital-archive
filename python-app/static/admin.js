@@ -237,7 +237,16 @@ function renderDynamicSubmitFields() {
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Cédula de Identidad *</label>
-          <input type="text" id="reg-cedula-${suf}" class="form-control" placeholder="Ej: V-12345678" required>
+          <div class="input-group">
+            <input type="text" id="reg-cedula-${suf}" class="form-control" placeholder="Ej: V-12345678" required>
+            <div class="input-group-append">
+              <button class="btn btn-outline-info btn-sm" type="button" title="Buscar empleado por cédula"
+                      onclick="_lookupByCedula('${suf}')">
+                <i class="fas fa-user-check"></i>
+              </button>
+            </div>
+          </div>
+          <small id="reg-cedula-hint-${suf}" class="text-muted"></small>
         </div>
       </div>
       <div class="row mt-2">
@@ -657,6 +666,38 @@ async function openEditDocModal(id) {
   if (statusSel) statusSel.value = rec.status || "aprobado";
 
   $("#editArchivoModal").modal("show");
+}
+
+async function _lookupByCedula(suf) {
+  const cedInput = document.getElementById(`reg-cedula-${suf}`);
+  const hintEl   = document.getElementById(`reg-cedula-hint-${suf}`);
+  const cedula   = (cedInput?.value || "").trim();
+  if (!cedula) { showToast("Ingrese una cédula primero.", "warning"); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/rrhh/empleado/por-cedula/${encodeURIComponent(cedula)}`);
+    if (res.status === 404) {
+      if (hintEl) hintEl.innerHTML = '<span class="text-info"><i class="fas fa-user-plus mr-1"></i>Empleado nuevo — complete los datos.</span>';
+      return;
+    }
+    if (!res.ok) throw new Error();
+    const emp = await res.json();
+
+    // Rellenar campos del formulario
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ""; };
+    setVal(`reg-nombres-${suf}`,  emp.nombres || "");
+    setVal(`reg-apellidos-${suf}`, emp.apellidos || "");
+    setVal(`reg-cargo-${suf}`,    emp.cargo || "");
+    setVal(`reg-depto-${suf}`,    emp.departamento || "");
+    setVal(`reg-rif-${suf}`,      emp.rif || "");
+    const estadoSel = document.getElementById(`reg-estado-${suf}`);
+    if (estadoSel && emp.estado) estadoSel.value = emp.estado;
+
+    if (hintEl) hintEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Empleado encontrado: ${emp.nombres} ${emp.apellidos}. Datos prellenados.</span>`;
+    showToast(`Datos de ${emp.nombres} ${emp.apellidos} cargados.`, "info");
+  } catch {
+    if (hintEl) hintEl.innerHTML = '<span class="text-danger">Error al buscar el empleado.</span>';
+  }
 }
 
 function _refreshEditDocPreview() {
