@@ -40,7 +40,7 @@ function loadAdminTab(adminTabId) {
   document.getElementById(`pane-admin-${suf}-${adminTabId}`)?.classList.add("show", "active");
 
   if      (adminTabId === "stats")      loadDynamicStats();
-  else if (adminTabId === "new")        { renderDynamicSubmitFields(); loadRecentSubmissions(); }
+  else if (adminTabId === "new")        { renderDynamicSubmitFields(); loadRecentSubmissions(); initDropZone(suf); }
   else if (adminTabId === "monitor")    { state.adminTable.page = 1; loadMonitorTable(); }
   else if (adminTabId === "categories") loadCategoriesTab();
   else if (adminTabId === "users")      loadUsersTab();
@@ -799,4 +799,53 @@ function exportAdminCSV() {
   a.download = `admin_${isArch ? "archivo" : "rrhh"}_pag${state.adminTable.page}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ─── Drag & Drop en zona de carga ───────────────────────────────────────────
+function initDropZone(suf) {
+  const zone = document.querySelector(`#pane-admin-${suf}-new [style*="dashed"]`);
+  const fileInput = document.getElementById(`file_upload-${suf}`);
+  if (!zone || !fileInput) return;
+
+  const updateLabel = (name) => {
+    const label = zone.querySelector(".ds-drop-label") || zone.querySelector("p.text-muted");
+    if (label) label.textContent = name ? `📄 ${name}` : "Arrastra aquí o selecciona archivos";
+    const icon = zone.querySelector(".fa-file-upload");
+    if (icon) {
+      icon.classList.toggle("fa-file-upload", !name);
+      icon.classList.toggle("fa-check-circle", !!name);
+      icon.classList.toggle("text-secondary", !name);
+      icon.classList.toggle("text-success", !!name);
+    }
+    // Rellenar campo file_url en el formulario
+    const fileUrlInput = document.querySelector(`#admin-submit-form-${suf} [id$="file_url"]`) ||
+                         document.getElementById(`field-file_url-${suf}`);
+    if (fileUrlInput && name) fileUrlInput.placeholder = `Archivo seleccionado: ${name}`;
+  };
+
+  zone.addEventListener("dragover", e => {
+    e.preventDefault();
+    zone.style.borderColor = "#0056b3";
+    zone.style.background  = "#e8f0fe";
+  });
+  zone.addEventListener("dragleave", () => {
+    zone.style.borderColor = "#adb5bd";
+    zone.style.background  = "#f8f9fa";
+  });
+  zone.addEventListener("drop", e => {
+    e.preventDefault();
+    zone.style.borderColor = "#adb5bd";
+    zone.style.background  = "#f8f9fa";
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      const dt = new DataTransfer();
+      dt.items.add(files[0]);
+      fileInput.files = dt.files;
+      updateLabel(files[0].name);
+      showToast(`Archivo listo: ${files[0].name}`, "info");
+    }
+  });
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files?.[0]) updateLabel(fileInput.files[0].name);
+  });
 }
