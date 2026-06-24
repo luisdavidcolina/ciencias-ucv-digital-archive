@@ -148,6 +148,10 @@ class DocumentUpdateRequest(BaseModel):
     file_url: Optional[str] = None
     status: Optional[str] = None  # draft | revision | aprobado | rechazado
     notas: Optional[str] = None
+    # Campos ISAD(G) / ISO 15489
+    numero_folio: Optional[str] = None
+    soporte: Optional[str] = None   # Físico | Digital | Digitalizado
+    numero_paginas: Optional[int] = None
     usuario: str
 
 

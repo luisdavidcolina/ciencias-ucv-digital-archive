@@ -702,6 +702,27 @@
             <label class="font-weight-bold text-muted">Ubicación Física</label>
             <input type="text" id="edit-doc-ubicacion" class="form-control">
           </div>
+          <!-- Campos ISAD(G) / ISO 15489 -->
+          <div class="row">
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">N° de Folio / Signatura</label>
+              <input type="text" id="edit-doc-folio" class="form-control form-control-sm" placeholder="Ej: F-023, Carp-A-12">
+              <small class="text-muted">Signatura topográfica física</small>
+            </div>
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">Soporte</label>
+              <select id="edit-doc-soporte" class="form-control form-control-sm">
+                <option value="Físico">Físico</option>
+                <option value="Digital">Digital (nativo)</option>
+                <option value="Digitalizado">Digitalizado (scan)</option>
+              </select>
+            </div>
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">N° de Páginas</label>
+              <input type="number" id="edit-doc-paginas" class="form-control form-control-sm" min="1" placeholder="Páginas">
+            </div>
+          </div>
+
           <div class="form-group mt-2">
             <label class="font-weight-bold text-muted">Archivo Digital (URL)</label>
             <div class="input-group">

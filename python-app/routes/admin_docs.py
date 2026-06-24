@@ -176,12 +176,15 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
         row = db_query(
             """SELECT id_archivo AS id, titulo, autor, abstract AS resumen,
                       TO_CHAR(fecha_documento,'YYYY-MM-DD') AS fecha,
-                      COALESCE(tesauro_primario,'') AS doc_type,
-                      COALESCE(tesauro_secundario,'') AS tesauro_secundario,
-                      COALESCE(ubicacion,'') AS ubicacion,
-                      COALESCE(file_url,'') AS file_url,
-                      COALESCE(status,'aprobado') AS status,
+                      COALESCE(tesauro_primario,'')     AS doc_type,
+                      COALESCE(tesauro_secundario,'')   AS tesauro_secundario,
+                      COALESCE(ubicacion,'')            AS ubicacion,
+                      COALESCE(file_url,'')             AS file_url,
+                      COALESCE(status,'aprobado')       AS status,
                       COALESCE(personas_relacionadas,'') AS personas_relacionadas,
+                      COALESCE(numero_folio,'')         AS numero_folio,
+                      COALESCE(soporte,'Físico')        AS soporte,
+                      numero_paginas,
                       updated_at, updated_by
                FROM public.datos_archivo WHERE id_archivo = %s""",
             [doc_id], fetch="one"
@@ -386,6 +389,14 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 
         if req.status is not None and req.status in VALID_STATUS:
             set_clauses.append("status = %s"); params.append(req.status)
+
+        # Campos ISAD(G) / ISO 15489
+        if req.numero_folio is not None:
+            set_clauses.append("numero_folio = %s"); params.append(req.numero_folio or None)
+        if req.soporte is not None and req.soporte in ("Físico", "Digital", "Digitalizado"):
+            set_clauses.append("soporte = %s"); params.append(req.soporte)
+        if req.numero_paginas is not None:
+            set_clauses.append("numero_paginas = %s"); params.append(req.numero_paginas or None)
 
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)

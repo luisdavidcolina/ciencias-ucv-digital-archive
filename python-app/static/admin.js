@@ -680,6 +680,14 @@ async function openEditDocModal(id) {
   const statusSel = document.getElementById("edit-doc-status");
   if (statusSel) statusSel.value = rec.status || "aprobado";
 
+  // Campos ISAD(G)
+  const folioEl = document.getElementById("edit-doc-folio");
+  if (folioEl) folioEl.value = rec.numero_folio || "";
+  const soporteEl = document.getElementById("edit-doc-soporte");
+  if (soporteEl) soporteEl.value = rec.soporte || "Físico";
+  const paginasEl = document.getElementById("edit-doc-paginas");
+  if (paginasEl) paginasEl.value = rec.numero_paginas || "";
+
   $("#editArchivoModal").modal("show");
 }
 
@@ -749,6 +757,9 @@ async function handleSaveEditDoc() {
     ubicacion:          document.getElementById("edit-doc-ubicacion")?.value || null,
     file_url:           document.getElementById("edit-doc-file-url")?.value.trim() || "",
     status:             document.getElementById("edit-doc-status")?.value || "aprobado",
+    numero_folio:       document.getElementById("edit-doc-folio")?.value.trim() || null,
+    soporte:            document.getElementById("edit-doc-soporte")?.value || null,
+    numero_paginas:     parseInt(document.getElementById("edit-doc-paginas")?.value) || null,
     usuario:            state.user.username,
   };
 

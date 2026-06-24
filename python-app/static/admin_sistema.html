@@ -132,6 +132,17 @@
                 <i class="fas fa-history"></i> Auditoría
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="pill" href="#pane-alertas" role="tab" onclick="loadAlertasJubilaciones()">
+                <i class="fas fa-bell text-warning"></i> Alertas
+                <span id="badge-alertas" class="badge badge-danger ml-1" style="display:none;font-size:0.65rem;"></span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="pill" href="#pane-retencion" role="tab" onclick="loadRetencionTipos()">
+                <i class="fas fa-clock"></i> Retención
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -365,6 +376,127 @@
                     <button id="audit-next-btn" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)">
                       <i class="fas fa-chevron-right"></i>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB: ALERTAS -->
+            <div class="tab-pane fade" id="pane-alertas" role="tabpanel">
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label class="font-weight-bold text-muted small">Horizonte de alerta</label>
+                  <select id="alertas-horizonte" class="form-control form-control-sm" onchange="loadAlertasJubilaciones()">
+                    <option value="90">Próximos 90 días</option>
+                    <option value="180">Próximos 6 meses</option>
+                    <option value="365" selected>Próximo año</option>
+                    <option value="730">Próximos 2 años</option>
+                  </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                  <button class="btn btn-sm btn-outline-secondary" onclick="loadAlertasJubilaciones()">
+                    <i class="fas fa-sync-alt mr-1"></i> Actualizar
+                  </button>
+                </div>
+              </div>
+
+              <!-- Jubilaciones / Pensiones -->
+              <div class="card card-warning card-outline mb-3">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-user-clock mr-2"></i>Jubilaciones y Pensiones Próximas</h3>
+                  <span id="alertas-jubilaciones-badge" class="badge badge-warning ml-2">—</span>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.82rem;">
+                      <thead class="bg-light">
+                        <tr>
+                          <th>Empleado</th>
+                          <th>Cédula</th>
+                          <th>Cargo</th>
+                          <th>Departamento</th>
+                          <th>Tipo Alerta</th>
+                          <th>Fecha</th>
+                          <th>Días Restantes</th>
+                          <th>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody id="alertas-jubilaciones-tbody">
+                        <tr><td colspan="8" class="text-center text-muted p-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Documentos vencidos -->
+              <div class="card card-danger card-outline">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-exclamation-triangle mr-2"></i>Documentos con Plazo de Retención Vencido</h3>
+                  <small class="text-muted ml-2">ISO 15489-1:2016 §8.5 — Disposición</small>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.82rem;">
+                      <thead class="bg-light">
+                        <tr>
+                          <th>Título</th>
+                          <th>Tipo</th>
+                          <th>Fecha Doc.</th>
+                          <th>Plazo (años)</th>
+                          <th>Venció</th>
+                          <th>Días Vencido</th>
+                          <th>Soporte</th>
+                          <th>Ubicación</th>
+                        </tr>
+                      </thead>
+                      <tbody id="alertas-vencidos-tbody">
+                        <tr><td colspan="8" class="text-center text-muted p-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB: RETENCIÓN DOCUMENTAL -->
+            <div class="tab-pane fade" id="pane-retencion" role="tabpanel">
+              <div class="alert alert-info mb-3" style="font-size:0.85rem;">
+                <i class="fas fa-info-circle mr-1"></i>
+                <strong>ISO 15489-1:2016 §8.3 — Calendario de Retención:</strong>
+                Cada tipo de documento debe tener un plazo mínimo de conservación
+                antes de poder ser transferido al archivo permanente o eliminado.
+                Haga clic en el plazo para editarlo.
+              </div>
+              <div class="row mb-2">
+                <div class="col-md-4">
+                  <select id="retencion-scope" class="form-control form-control-sm" onchange="loadRetencionTipos()">
+                    <option value="">Todos los módulos</option>
+                    <option value="archivo">Archivo Institucional</option>
+                    <option value="parte">RRHH (Partes I–IV)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card card-secondary card-outline">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Calendario de Retención por Tipo de Documento</h3>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.82rem;">
+                      <thead class="bg-light">
+                        <tr>
+                          <th>Tipo de Documento</th>
+                          <th>Categoría</th>
+                          <th>Plazo (años)</th>
+                          <th>En uso (Archivo)</th>
+                          <th>En uso (RRHH)</th>
+                        </tr>
+                      </thead>
+                      <tbody id="retencion-tbody">
+                        <tr><td colspan="5" class="text-center text-muted p-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -710,6 +842,145 @@ function openThemePanel() {
   if (!panel) { panel = createThemePanel(); document.body.appendChild(panel); }
   else { panel.remove(); panel = createThemePanel(); document.body.appendChild(panel); }
   requestAnimationFrame(() => panel.classList.add("open"));
+}
+
+// =============================================================================
+// ALERTAS (jubilaciones y documentos vencidos)
+// =============================================================================
+
+async function loadAlertasJubilaciones() {
+  const horizonte = document.getElementById("alertas-horizonte")?.value || 365;
+  const jubTbody    = document.getElementById("alertas-jubilaciones-tbody");
+  const vencTbody   = document.getElementById("alertas-vencidos-tbody");
+  const badge       = document.getElementById("alertas-jubilaciones-badge");
+  const badgeNav    = document.getElementById("badge-alertas");
+
+  if (jubTbody) jubTbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm text-warning mr-2"></span>Cargando alertas...</td></tr>`;
+  if (vencTbody) vencTbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm text-danger mr-2"></span>Cargando vencimientos...</td></tr>`;
+
+  try {
+    const [jubRes, vencRes] = await Promise.all([
+      fetch(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=${horizonte}`).then(r => r.json()),
+      fetch(`${API_BASE}/api/admin/retencion/vencimientos?limite=30`).then(r => r.json()),
+    ]);
+
+    // Jubilaciones
+    const alertas = jubRes.alertas || [];
+    if (badge) { badge.textContent = alertas.length; badge.style.display = alertas.length > 0 ? "" : "none"; }
+    if (badgeNav) { badgeNav.textContent = alertas.length; badgeNav.style.display = alertas.length > 0 ? "" : "none"; }
+
+    if (jubTbody) {
+      if (!alertas.length) {
+        jubTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted p-3"><i class="fas fa-check-circle text-success mr-2"></i>No hay jubilaciones o pensiones próximas en el horizonte seleccionado.</td></tr>`;
+      } else {
+        jubTbody.innerHTML = alertas.map(a => {
+          const dias = parseInt(a.dias_restantes) || 0;
+          const urgencia = dias <= 30 ? "danger" : dias <= 90 ? "warning" : "info";
+          const diasLabel = dias <= 0
+            ? `<span class="badge badge-danger">VENCIDA</span>`
+            : `<span class="badge badge-${urgencia}">${dias} días</span>`;
+          return `<tr>
+            <td class="font-weight-bold">${a.nombre_completo || "—"}</td>
+            <td>${a.cedula || "—"}</td>
+            <td class="text-muted small">${a.cargo || "—"}</td>
+            <td class="text-muted small">${a.departamento || "—"}</td>
+            <td><span class="badge badge-${urgencia === 'danger' ? 'danger' : 'warning'}">${a.tipo_alerta || "—"}</span></td>
+            <td>${a.fecha_jubilacion || a.fecha_pension || "—"}</td>
+            <td>${diasLabel}</td>
+            <td><span class="badge badge-secondary">${a.estado || "—"}</span></td>
+          </tr>`;
+        }).join("");
+      }
+    }
+
+    // Documentos vencidos
+    const vencidos = vencRes.vencimientos || [];
+    if (vencTbody) {
+      if (!vencidos.length) {
+        vencTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted p-3"><i class="fas fa-check-circle text-success mr-2"></i>No hay documentos con retención vencida.</td></tr>`;
+      } else {
+        vencTbody.innerHTML = vencidos.map(v => {
+          const diasV = parseInt(v.dias_vencido) || 0;
+          return `<tr>
+            <td class="font-weight-bold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.titulo||'').replace(/"/g,'&quot;')}">${v.titulo || "—"}</td>
+            <td><span class="badge badge-light border">${v.tipo_documento || "—"}</span></td>
+            <td class="text-muted small">${v.fecha_documento || "—"}</td>
+            <td class="text-center">${v.plazo_anios || 5}</td>
+            <td class="text-muted small">${v.fecha_vencimiento || "—"}</td>
+            <td><span class="badge badge-danger">${diasV} días</span></td>
+            <td><span class="badge ${v.soporte === 'Digital' || v.soporte === 'Digitalizado' ? 'badge-info' : 'badge-secondary'}">${v.soporte || 'Físico'}</span></td>
+            <td class="text-muted small">${v.ubicacion || "—"}</td>
+          </tr>`;
+        }).join("");
+      }
+    }
+  } catch (err) {
+    if (jubTbody) jubTbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger p-3">Error al cargar alertas. Intente nuevamente.</td></tr>`;
+  }
+}
+
+// =============================================================================
+// RETENCIÓN POR TIPO DE DOCUMENTO
+// =============================================================================
+
+async function loadRetencionTipos() {
+  const scope  = document.getElementById("retencion-scope")?.value || "";
+  const tbody  = document.getElementById("retencion-tbody");
+  if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando...</td></tr>`;
+
+  try {
+    const data = await fetch(`${API_BASE}/api/admin/retencion/tipos?scope=${encodeURIComponent(scope)}`).then(r => r.json());
+    const tipos = data.tipos || [];
+    if (!tbody) return;
+    if (!tipos.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted p-3">No hay tipos de documento.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = tipos.map(t => {
+      const badge = t.plazo_retencion_anios <= 3 ? "danger" : t.plazo_retencion_anios <= 7 ? "warning" : "success";
+      return `<tr>
+        <td class="font-weight-bold">${t.nombre_corto || t.nombre || "—"}</td>
+        <td><span class="badge badge-secondary">${t.categoria || "—"}</span></td>
+        <td>
+          <span class="badge badge-${badge} mr-1">${t.plazo_retencion_anios} año${t.plazo_retencion_anios !== 1 ? 's' : ''}</span>
+          <button class="btn btn-xs btn-link p-0 text-muted" title="Editar plazo"
+            onclick="_editRetencion(${t.id},'${(t.nombre_corto||t.nombre||'').replace(/'/g,"\\'")}',${t.plazo_retencion_anios})">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </td>
+        <td class="text-center"><span class="badge ${parseInt(t.uso_archivo) > 0 ? 'badge-info' : 'badge-light border'}">${t.uso_archivo || 0}</span></td>
+        <td class="text-center"><span class="badge ${parseInt(t.uso_rrhh) > 0 ? 'badge-primary' : 'badge-light border'}">${t.uso_rrhh || 0}</span></td>
+      </tr>`;
+    }).join("");
+  } catch {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger p-3">Error al cargar tipos.</td></tr>`;
+  }
+}
+
+async function _editRetencion(tipoId, nombre, actual) {
+  const nuevo = await promptModal(
+    `Plazo de retención — ${nombre}`,
+    `Años de conservación mínima (ISO 15489). Actual: ${actual} año(s):`,
+    String(actual)
+  );
+  if (nuevo === null) return;
+  const anios = parseInt(nuevo);
+  if (!anios || anios < 1 || anios > 100) {
+    showToast("El plazo debe estar entre 1 y 100 años.", "error");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plazo_retencion_anios: anios, requester: getCurrentUser()?.username || "admin" }),
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Plazo de retención actualizado a ${anios} año(s) para "${nombre}".`, "success");
+    loadRetencionTipos();
+  } catch {
+    showToast("Error al actualizar el plazo de retención.", "error");
+  }
 }
   </script>
 </body>
