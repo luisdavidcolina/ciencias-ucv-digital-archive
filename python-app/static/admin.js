@@ -318,36 +318,51 @@ function renderDynamicSubmitFields() {
   }
 }
 
-function loadRecentSubmissions() {
+async function loadRecentSubmissions() {
   const suf         = adminSuffixFromTab();
   const containerEl = document.getElementById(`recent_submissions-${suf}`);
   if (!containerEl) return;
   const isArchivo = isArchivoModule();
-  const list      = isArchivo ? state.archivo.results : state.rrhh.results;
 
-  if (list.length === 0) {
-    containerEl.innerHTML = `<li class="text-muted text-center p-2">Sin ingresos previos.</li>`;
-    return;
-  }
+  containerEl.innerHTML = `<li class="text-center p-2"><i class="fas fa-spinner fa-spin text-muted"></i></li>`;
 
-  const sorted = [...list].sort((a, b) => {
-    const fA = isArchivo ? a.fecha : a.fecha_ingreso;
-    const fB = isArchivo ? b.fecha : b.fecha_ingreso;
-    return (fB || "").localeCompare(fA || "");
-  }).slice(0, 3);
+  try {
+    const modulo = isArchivo ? "Archivo" : "RRHH";
+    const res = await fetch(`${API_BASE}/api/admin/list_all?modulo=${modulo}&page=1&per_page=5`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const records = data.records || [];
 
-  containerEl.innerHTML = sorted.map(item => {
-    const title = isArchivo ? item.titulo : item.empleado;
-    return `
-      <li class="d-flex align-items-center mb-2 p-2 border rounded bg-light">
-        <i class="fas fa-file-alt mr-2 text-primary" style="font-size:1.15rem;"></i>
-        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-grow:1;">
-          <strong style="font-size:0.82rem;" class="text-dark">${title}</strong><br>
-          <span class="text-muted" style="font-size:0.72rem;">${item.doc_type}</span>
+    if (records.length === 0) {
+      containerEl.innerHTML = `<li class="text-muted text-center p-2">Sin ingresos previos.</li>`;
+      return;
+    }
+
+    const statusBadge = s => {
+      const map = { aprobado: "badge-success", revision: "badge-warning", draft: "badge-secondary", rechazado: "badge-danger" };
+      const label = { aprobado: "Aprobado", revision: "En revisión", draft: "Borrador", rechazado: "Rechazado" };
+      const st = s || "aprobado";
+      return `<span class="badge ${map[st] || 'badge-secondary'}" style="font-size:0.65rem;">${label[st] || st}</span>`;
+    };
+
+    containerEl.innerHTML = records.map(item => {
+      const title = isArchivo ? item.titulo : item.empleado;
+      return `<li class="d-flex align-items-center mb-2 p-2 border rounded bg-light">
+        <i class="fas fa-file-alt mr-2 text-primary" style="font-size:1.15rem;flex-shrink:0;"></i>
+        <div style="overflow:hidden;flex-grow:1;">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            <strong style="font-size:0.82rem;" class="text-dark">${title || "Sin título"}</strong>
+          </div>
+          <div class="d-flex align-items-center gap-1">
+            <span class="text-muted" style="font-size:0.70rem;">${item.doc_type || ""}</span>
+            ${statusBadge(item.status)}
+          </div>
         </div>
-      </li>
-    `;
-  }).join("");
+      </li>`;
+    }).join("");
+  } catch {
+    containerEl.innerHTML = `<li class="text-muted text-center p-2">Error cargando ingresos recientes.</li>`;
+  }
 }
 
 async function handleNewSubmission(e) {
