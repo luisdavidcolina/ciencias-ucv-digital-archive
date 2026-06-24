@@ -122,6 +122,9 @@ def run_migrations():
                 TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD')       AS fecha_ingreso,
                 TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')       AS fecha_jubilacion,
                 TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')       AS fecha_pension,
+                TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD')       AS fecha_nacimiento,
+                COALESCE(e.nivel_educativo, '')                  AS nivel_educativo,
+                COALESCE(e.sexo, '')                             AS sexo,
                 COALESCE(e.foto_url, '')                        AS foto_url,
                 COUNT(dr.id_rrhh)                               AS doc_count,
                 COALESCE(

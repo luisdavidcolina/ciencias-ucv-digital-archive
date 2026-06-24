@@ -269,6 +269,21 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
         col = p_df.get(col_name, pd.Series([], dtype=str))
         return "; ".join(sorted(set([x for x in col.dropna().astype(str).tolist() if x.strip()])))
 
+    # Obtener datos adicionales del empleado (LOTTT) via SQL directo
+    emp_data = {}
+    first_row = row_list[0] if row_list else {}
+    if first_row.get("empleado_id"):
+        from database import db_query as _dq
+        emp_extra = _dq(
+            """SELECT TO_CHAR(fecha_nacimiento,'YYYY-MM-DD') AS fecha_nacimiento,
+                      COALESCE(nivel_educativo,'') AS nivel_educativo,
+                      COALESCE(sexo,'') AS sexo
+               FROM public.empleados WHERE id = %s""",
+            [first_row["empleado_id"]], fetch="one"
+        )
+        if emp_extra:
+            emp_data = dict(emp_extra)
+
     return {
         "persona_raw":      req.persona,
         "persona":          format_rrhh_person_name(req.persona),
@@ -281,6 +296,9 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
         "fecha_ingreso":    _join_unique("fecha_ingreso"),
         "fecha_jubilacion": _join_unique("fecha_jubilacion"),
         "fecha_pension":    _join_unique("fecha_pension"),
+        "fecha_nacimiento": emp_data.get("fecha_nacimiento") or "",
+        "nivel_educativo":  emp_data.get("nivel_educativo") or "",
+        "sexo":             emp_data.get("sexo") or "",
         "categories":       sorted(set([x for x in p_df["categoria"].dropna().astype(str).tolist() if x.strip()])),
         "rows":             row_list,
     }

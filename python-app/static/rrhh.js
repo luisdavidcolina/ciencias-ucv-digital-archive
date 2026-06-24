@@ -241,6 +241,17 @@ function renderQuickDocLinks(profile) {
   }).join("");
 }
 
+function _calcEdad(fechaNac) {
+  if (!fechaNac) return null;
+  const hoy = new Date();
+  const nac = new Date(fechaNac);
+  if (isNaN(nac)) return null;
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  return edad > 0 ? edad : null;
+}
+
 function renderRrhhDossierModal() {
   const profile = state.activePersonProfile;
   if (!profile) return;
@@ -284,6 +295,9 @@ function renderRrhhDossierModal() {
             <div class="col-6 mb-2"><strong>RIF:</strong> ${profile.rifs || "N/A"}</div>
             <div class="col-6 mb-2"><strong>Adscripción:</strong> ${profile.departamentos || "N/A"}</div>
             <div class="col-6 mb-2"><strong>Ingreso:</strong> ${formatISOToSpanish(profile.fecha_ingreso) || "No registrada"}</div>
+            ${profile.fecha_nacimiento ? `<div class="col-6 mb-2"><strong>Nacimiento:</strong> ${formatISOToSpanish(profile.fecha_nacimiento)}${_calcEdad(profile.fecha_nacimiento) ? ` <span class="text-muted small">(${_calcEdad(profile.fecha_nacimiento)} años)</span>` : ""}</div>` : ""}
+            ${profile.nivel_educativo  ? `<div class="col-6 mb-2"><strong>Nivel Educ.:</strong> <span class="badge badge-light border">${profile.nivel_educativo}</span></div>` : ""}
+            ${profile.sexo             ? `<div class="col-6 mb-2"><strong>Sexo:</strong> ${{ M: "Masculino", F: "Femenino", O: "Otro" }[profile.sexo] || profile.sexo}</div>` : ""}
             ${isRetirado   ? `<div class="col-6 mb-2"><strong>Jubilación:</strong> ${formatISOToSpanish(profile.fecha_jubilacion) || "No registrada"}</div>` : ""}
             ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong>    ${formatISOToSpanish(profile.fecha_pension)    || "No registrada"}</div>` : ""}
           </div>
