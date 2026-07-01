@@ -3,7 +3,9 @@
 -- PROYECTO: GESTIÓN DOCUMENTAL, EXPEDIENTES DE RRHH Y AUDITORÍA DE ARCHIVOS
 -- =============================================================================
 
--- 1. ACTIVAR EXTENSIONES PARA EL TRATAMIENTO DE TEXTO (Para quitar acentos en Slugs)
+-- 1. ACTIVAR EXTENSIONES PARA BÚSQUEDA DE TEXTO
+-- unaccent: permite buscar sin distinguir tildes.
+-- pg_trgm: habilita índices GIN de trigramas para búsquedas rápidas con ILIKE y similitud.
 CREATE EXTENSION IF NOT EXISTS unaccent;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -19,10 +21,11 @@ CREATE TABLE public.categoria (
 
 CREATE TABLE public.tipo_documento (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre TEXT NOT NULL UNIQUE,       -- Nombre completo/legal
-    nombre_corto TEXT NOT NULL,        -- Etiqueta corta para la UI
-    slug CHARACTER VARYING(250) UNIQUE,
-    id_categoria INTEGER NOT NULL
+    nombre TEXT NOT NULL UNIQUE,                    -- Nombre completo/legal
+    nombre_corto TEXT NOT NULL,                     -- Etiqueta corta para la UI
+    slug CHARACTER VARYING(250) UNIQUE,             -- Generado por Python en startup; NULL hasta ese momento
+    id_categoria INTEGER NOT NULL,
+    plazo_retencion_anios INTEGER DEFAULT 5         -- Años de retención documental (ISO 15489)
 );
 
 CREATE TABLE public.cargos (
@@ -46,8 +49,11 @@ CREATE TABLE public.usuarios_sistema (
     usuario CHARACTER VARYING(50) NOT NULL UNIQUE,
     nombre_usuario CHARACTER VARYING(100) NOT NULL,
     contrasena CHARACTER VARYING(255) NOT NULL,
-    modulo CHARACTER VARYING(50) NOT NULL, -- 'Archivo', 'RRHH' o 'Global'
-    rol CHARACTER VARYING(30) NOT NULL     -- 'Admin' o 'Normal'
+    modulo CHARACTER VARYING(50) NOT NULL,          -- 'Archivo', 'RRHH' o 'Global'
+    rol CHARACTER VARYING(30) NOT NULL,             -- 'Admin' o 'Normal'
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    last_login TIMESTAMP
 );
 
 -- =============================================================================
@@ -66,19 +72,36 @@ CREATE TABLE public.empleados (
     fecha_ingreso DATE NOT NULL,
     fecha_jubilacion DATE,
     fecha_pension DATE,
-    foto_url TEXT
+    foto_url TEXT,
+    -- Campos LOTTT Venezuela
+    fecha_nacimiento DATE,
+    nivel_educativo VARCHAR(60),
+    sexo CHAR(1),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_by TEXT
 );
 
 CREATE TABLE public.datos_archivo (
     id_archivo INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     titulo TEXT NOT NULL,
     abstract TEXT,
-    autor TEXT, -- Ente o departamento que emitió el documento
+    autor TEXT,                                     -- Ente o departamento que emitió el documento
+    id_tipo_documento INTEGER,                      -- FK a tipo_documento (categorización formal)
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
     tesauro_secundario TEXT,
-    ubicacion TEXT NOT NULL, -- Gaveta física, estante o 'Digitalizado Exclusivo'
-    creado_por INTEGER NOT NULL, -- Pista de Auditoría: ID del usuario del sistema
+    personas_relacionadas TEXT,
+    ubicacion TEXT NOT NULL,                        -- Gaveta física, estante o 'Digitalizado Exclusivo'
+    file_url TEXT,                                  -- URL al archivo digitalizado
+    soporte VARCHAR(20) DEFAULT 'Físico',           -- 'Físico' | 'Digital' | 'Digitalizado'
+    numero_folio VARCHAR(50),
+    numero_paginas INTEGER,
+    idioma VARCHAR(10) DEFAULT 'es',
+    status TEXT DEFAULT 'aprobado',                 -- 'draft' | 'revision' | 'aprobado' | 'rechazado'
+    notas TEXT,
+    creado_por INTEGER NOT NULL,                    -- Pista de auditoría: ID del usuario del sistema
+    updated_at TIMESTAMP,
+    updated_by INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -86,14 +109,23 @@ CREATE TABLE public.datos_rrhh (
     id_rrhh INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     titulo TEXT NOT NULL,
     abstract TEXT,
-    autor TEXT, -- Ente o departamento que emitió el documento
+    autor TEXT,                                     -- Ente o departamento que emitió el documento
     id_tipo_documento INTEGER NOT NULL,
-    empleado_id INTEGER, -- Vinculación con el empleado dueño del expediente
+    empleado_id INTEGER,                            -- Vinculación con el empleado dueño del expediente
     fecha_documento DATE DEFAULT CURRENT_DATE,
     tesauro_primario TEXT,
     tesauro_secundario TEXT,
-    ubicacion TEXT NOT NULL, -- Gaveta física, estante o 'Digitalizado Exclusivo'
-    creado_por INTEGER NOT NULL, -- Pista de Auditoría: ID del usuario del sistema
+    personas_relacionadas TEXT,
+    ubicacion TEXT NOT NULL,                        -- Gaveta física, estante o 'Digitalizado Exclusivo'
+    file_url TEXT,                                  -- URL al archivo digitalizado
+    soporte VARCHAR(20) DEFAULT 'Físico',           -- 'Físico' | 'Digital' | 'Digitalizado'
+    numero_folio VARCHAR(50),
+    numero_paginas INTEGER,
+    status TEXT DEFAULT 'aprobado',                 -- 'draft' | 'revision' | 'aprobado' | 'rechazado'
+    notas TEXT,
+    creado_por INTEGER NOT NULL,                    -- Pista de auditoría: ID del usuario del sistema
+    updated_at TIMESTAMP,
+    updated_by INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -126,14 +158,17 @@ CREATE TABLE public.historial_cargos (
     empleado_id INTEGER NOT NULL,
     cargo_id INTEGER NOT NULL,
     fecha_inicio DATE NOT NULL,
-    fecha_fin DATE
+    fecha_fin DATE,
+    motivo TEXT,
+    registrado_por TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- =============================================================================
 -- 4. POBLACIÓN DE DATA MAESTRA (MÓDULO DOCUMENTAL, SEGURIDAD Y FLAGS)
 -- =============================================================================
 
--- Inserción de Flags de Auditoría / Valores por defecto controlados
+-- Inserción de valores por defecto controlados
 INSERT INTO public.cargos (nombre) VALUES ('Por Asignar');
 INSERT INTO public.departamentos (nombre) VALUES ('Por Asignar');
 INSERT INTO public.estados_laborales (estados) VALUES
@@ -155,7 +190,7 @@ INSERT INTO public.categoria (nombre, slug) VALUES
 ('Parte III', 'parte-iii'),
 ('Parte IV', 'parte-iv');
 
--- Inserción en Tipo de Documento (Catálogo institucional)
+-- Catálogo institucional de tipos de documento por categoría
 INSERT INTO public.tipo_documento (nombre, nombre_corto, id_categoria) VALUES
 ('Concurso de oposicion/credenciales C.U.', 'Concurso de Oposición/Credenciales', 1),
 ('Contratos, renovaciones, prorrogas de contratos y suplencias', 'Contratos y Suplencias', 1),
@@ -223,7 +258,14 @@ INSERT INTO public.tipo_documento (nombre, nombre_corto, id_categoria) VALUES
 
 -- =============================================================================
 -- 5. CARGA Y PROCESAMIENTO AUTOMÁTICO DE EMPLEADOS DE NÓMINA INICIAL
--- (Los slugs de tipo_documento se generan en Python al iniciar la aplicación)
+-- =============================================================================
+-- NOTA SOBRE SLUGS:
+-- Los registros de tipo_documento se insertan aquí SIN slug (columna queda NULL).
+-- Al iniciar la aplicación, utils.populate_missing_slugs() detecta los NULL y
+-- genera cada slug con utils.generate_slug(), usando normalización Unicode pura
+-- en Python (sin depender de unaccent en SQL). Esto centraliza la lógica de
+-- slugs en un solo lugar y evita duplicados mediante generate_unique_slug().
+-- Los slugs de `categoria` son fijos y cortos, por eso se insertan directamente.
 -- =============================================================================
 
 CREATE TEMP TABLE tmp_rrhh_personas (
@@ -480,6 +522,9 @@ SELECT
     TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD')       AS fecha_ingreso,
     TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')       AS fecha_jubilacion,
     TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')       AS fecha_pension,
+    TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD')       AS fecha_nacimiento,
+    COALESCE(e.nivel_educativo, '')                  AS nivel_educativo,
+    COALESCE(e.sexo, '')                             AS sexo,
     COALESCE(e.foto_url, '')                        AS foto_url,
     COUNT(dr.id_rrhh)                               AS doc_count,
     COALESCE(
@@ -496,12 +541,7 @@ LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
 GROUP BY e.id, c.nombre, d.nombre, el.estados;
 
 -- =============================================================================
--- 10. COLUMNA file_url PARA VISOR DE DOCUMENTOS DIGITALIZADOS
--- Ejecutar en instancias existentes si el esquema ya fue creado sin esta columna.
--- ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS file_url TEXT;
--- ALTER TABLE public.datos_rrhh    ADD COLUMN IF NOT EXISTS file_url TEXT;
--- =============================================================================
-
--- =============================================================================
 -- Fin del Script. Base de datos e inicio de sesión integrados correctamente.
+-- NOTA: Columnas y migraciones adicionales (LOTTT, ISAD(G), auditoría)
+-- se aplican automáticamente en el startup de la aplicación (run_migrations).
 -- =============================================================================
