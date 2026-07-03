@@ -457,39 +457,81 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 
 ## Despliegue en Vercel
 
-El proyecto incluye soporte para despliegue serverless en [Vercel](https://vercel.com) a través del archivo `api/index.py`.
+El proyecto **Archivo Institucional: Ciencias UCV** soporta despliegue *serverless* en [Vercel](https://vercel.com). Este modo es ideal para entornos de producción, garantizando escalabilidad automática sin necesidad de gestionar servidores subyacentes.
 
-### Requisitos
-- Cuenta en Vercel.
-- CLI de Vercel instalado globalmente: `npm i -g vercel`.
+### Requisitos Previos
+- Cuenta activa en la plataforma Vercel.
+- Entorno de ejecución Node.js instalado en el sistema local (requerido para ejecutar la CLI de Vercel).
+- Base de datos relacional PostgreSQL accesible mediante una cadena de conexión estándar (URL). Se recomienda el uso de Neon o Supabase.
 
-### Instrucciones
+### Procedimiento de Despliegue
 
-1.  **Inicio de sesión** desde la raíz del repositorio:
-    ```bash
-    vercel login
-    ```
+#### Paso 1: Instalación de la herramienta de línea de comandos (CLI)
 
-2.  **Configuración del proyecto** (solo la primera vez):
-    ```bash
-    vercel
-    ```
-    El asistente guía el proceso para vincular el repositorio.
+Ejecutar en el terminal el siguiente comando para instalar la utilidad de Vercel a nivel global en el sistema:
 
-3.  **Despliegue** (para actualizaciones posteriores):
-    ```bash
-    vercel --prod
-    ```
+```bash
+npm install -g vercel
+```
 
-### Cómo funciona
-- Vercel detecta automáticamente el archivo `api/index.py` y lo expone como una función serverless.
-- `api/index.py` importa y expone el objeto `app` de FastAPI desde `python-app/main.py`.
-- Los archivos estáticos de `python-app/static/` se sirven a través del middleware de FastAPI.
+#### Paso 2: Autenticación en Vercel
 
-### Consideraciones
-- La capa de datos (PostgreSQL/Neon) debe estar accesible desde internet y su `DATABASE_URL` debe configurarse como variable de entorno en el panel de Vercel.
-- Las sesiones y el `audit_log` se mantienen en la base de datos, garantizando persistencia sin depender del sistema de archivos local del contenedor serverless.
-- Para el despliegue inicial, es necesario asegurarse de que la base de datos esté poblada ejecutando `schema.sql`.
+Desde la raíz del repositorio del proyecto, ejecutar la orden de inicio de sesión:
+
+```bash
+vercel login
+```
+
+Este comando desplegará las opciones de autenticación en el navegador web predeterminado. Se deben seguir las instrucciones en pantalla para culminar el proceso de verificación.
+
+#### Paso 3: Configuración Inicial del Proyecto (Primera vez)
+
+Ejecutar el comando base de Vercel en la raíz del repositorio para vincular el entorno local con la plataforma de despliegue:
+
+```bash
+vercel
+```
+
+Durante la inicialización, el asistente de configuración solicitará las siguientes directrices:
+
+- **Set up and deploy?** → Ingresar `Y` (Sí).
+- **Which scope do you want to deploy to?** → Seleccionar la cuenta personal o de equipo correspondiente.
+- **Link to existing project?** → Seleccionar `N` (No).
+- **What's your project's name?** → Ingresar `ciencias-ucv-digital-archive` (o presionar Enter para aceptar el valor predeterminado).
+- **In which directory is your code located?** → Presionar Enter para aceptar el directorio raíz (`./`).
+- **Auto-detected Project Settings (Python)** → Presionar Enter para confirmar y no sobreescribir ninguna configuración predeterminada.
+
+Al finalizar, la plataforma generará un archivo `.vercelignore` y proveerá un enlace de previsualización (URL provisoria).
+
+#### Paso 4: Configuración de Variables de Entorno
+
+En el panel de administración web de Vercel, navegar a la ruta del proyecto: **Settings → Environment Variables**, y registrar la variable de conexión a la base de datos:
+
+- **Key**: `DATABASE_URL`
+- **Value**: La cadena de conexión a PostgreSQL obtenida del proveedor de base de datos (por ejemplo, Neon).
+
+Esta variable es estrictamente necesaria para la comunicación entre la aplicación *serverless* y la capa de datos.
+
+#### Paso 5: Pase a Producción (Despliegue Definitivo)
+
+Para consolidar los cambios, integrar las variables de entorno previamente definidas y exponer la aplicación en la URL de producción (por ejemplo, `https://ciencias-ucv-digital-archive.vercel.app`), se debe ejecutar:
+
+```bash
+vercel --prod
+```
+
+Este comando fuerza la recompilación del código fuente y efectúa su publicación en los servidores globales de la plataforma. Para futuros despliegues o actualizaciones de código, bastará con repetir esta misma instrucción.
+
+### Arquitectura de la Integración
+
+- La plataforma de Vercel detecta automáticamente el archivo `api/index.py` ubicado en la raíz del proyecto y lo compila como una función *serverless*.
+- Dicho archivo importa y expone el objeto principal `app` del *framework* FastAPI (proveniente de `python-app/main.py`).
+- Los recursos estáticos alojados en la carpeta `python-app/static/` (scripts, hojas de estilo e imágenes) son provistos a través del *middleware* de FastAPI.
+
+### Consideraciones Críticas
+
+- **Base de Datos Inicial**: Previo a efectuar el primer despliegue, resulta imperativo garantizar la ejecución del *script* `schema.sql` en el motor de base de datos para asentar las tablas fundamentales y el catálogo institucional requerido.
+- **Persistencia y Volatilidad**: Al tratarse de un entorno *serverless*, las instancias de ejecución son efímeras. Por ende, tanto las sesiones de usuario como el registro de auditoría (`audit_log`) persisten directamente en la base de datos PostgreSQL, asegurando con esto la trazabilidad y la integridad de los registros sin depender del sistema de archivos local de los contenedores.
 
 ---
 
