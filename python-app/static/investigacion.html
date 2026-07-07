@@ -170,19 +170,7 @@
 
 <main class="container-fluid px-4 py-4 mb-5">
     
-    <div class="row justify-content-center mb-4">
-        <div class="col-xl-11">
-            <div class="scope-disclaimer d-flex align-items-start">
-                <i class="fas fa-info-circle text-info fs-3 me-4 mt-1"></i>
-                <div>
-                    <h4 class="text-info fw-bold mb-2">Aclaratoria Estratégica</h4>
-                    <p class="mb-0 text-light text-opacity-75" style="font-size: 1.05rem;">
-                        El módulo RRHH de la UCV es estrictamente un <strong>Sistema de Archivos y Expedientes de Personal</strong>, no un HRMS transaccional del 100%. Su núcleo arquitectónico está diseñado para la custodia legal, versionado e indexación profunda de documentos (DMS), adoptando estructuras normativas de Recursos Humanos (HRMS). Funciones operativas de alta transaccionalidad (procesamiento de nómina bancaria, reclutamiento masivo o evaluaciones de desempeño continuas) quedan fuera de su alcance por diseño y se consideran <em>No Aplicables (N/A)</em> en las comparativas de producto, asumiendo su delegación a sistemas paralelos de ERP.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- SECCIÓN DMS -->
     <div class="row justify-content-center">
@@ -627,6 +615,27 @@
                             <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
                             <td class="text-center na-feature col-ucv">N/A</td>
                         </tr>
+
+                        <!-- Funciones de Inteligencia Artificial -->
+                        <tr class="table-dark"><td colspan="7" class="py-2 text-muted fw-bold small"><i class="fas fa-robot me-2"></i> Inteligencia Artificial y Automatización</td></tr>
+                        <tr>
+                            <td>Integración con LLMs (Análisis Documental)</td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td>Asistente Virtual (Chatbot IA)</td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -678,7 +687,11 @@ document.addEventListener('DOMContentLoaded', function() {
         "Partes LOTTT": "Organización visual del expediente por pestañas (Parte I a IV) tal como lo exige estrictamente la Ley Orgánica del Trabajo de Venezuela para cumplir inspecciones.",
         "Self-Service ESS": "Portal de Autogestión. Interfaz web para delegar carga de trabajo: el profesor ingresa con su clave e imprime su propia constancia de trabajo o sube su reposo médico directamente.",
         "Pipeline ATS": "Applicant Tracking System. Módulo comercial dedicado a publicar ofertas, filtrar miles de CVs con inteligencia y agendar entrevistas (Ajeno al archivo documental).",
-        "Onboarding": "El intenso proceso burocrático de recopilar firmas, huellas, inducciones y creación de correos durante los primeros días de un empleado nuevo en la institución."
+        "Onboarding": "El intenso proceso burocrático de recopilar firmas, huellas, inducciones y creación de correos durante los primeros días de un empleado nuevo en la institución.",
+        
+        // AI & Automation
+        "Integración con LLMs": "Large Language Models. Modelos de inteligencia artificial (como GPT) capaces de leer documentos enteros, resumirlos y extraer datos clave automáticamente.",
+        "Asistente Virtual": "Chatbot conversacional inteligente que permite a los oficinistas pedir reportes o documentos hablando en lenguaje natural (Ej: 'Muéstrame los reposos de este mes')."
     };
 
     function applyExecutiveTooltips() {
@@ -724,7 +737,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Fallbacks específicos para términos compuestos que no actúan sobre word boundaries perfectos
-            const manualTerms = ["Co-authoring", "SaaS", "Open-Source", "NoSQL", "Microservicios", "In-Browser PDF", "Faceted Search", "Fuzzy Search"];
+            const manualTerms = ["Co-authoring", "SaaS", "Open-Source", "NoSQL", "Microservicios", "In-Browser PDF", "Faceted Search", "Fuzzy Search", "Integración con LLMs", "Asistente Virtual"];
             manualTerms.forEach(term => {
                 if (techTerms[term]) {
                      const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
