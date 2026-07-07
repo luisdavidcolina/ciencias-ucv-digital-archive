@@ -15,6 +15,7 @@ from routes.admin        import router as admin_router
 from routes.choices      import router as choices_router
 from routes.pages        import router as pages_router
 from routes.backup       import router as backup_router
+from routes.files        import router as files_router
 
 # =============================================================================
 # APLICACION
@@ -348,6 +349,7 @@ app.include_router(admin_router)
 app.include_router(choices_router)
 app.include_router(pages_router)
 app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
+app.include_router(files_router)
 
 
 # =============================================================================

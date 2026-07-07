@@ -244,8 +244,8 @@ def admin_submit(req: DocumentSubmitRequest):
                 (titulo, abstract, autor,
                  fecha_documento, ubicacion, creado_por, tesauro_primario,
                  tesauro_secundario, id_tipo_documento,
-                 numero_folio, soporte, numero_paginas)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 numero_folio, soporte, numero_paginas, file_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id_archivo
             """,
             (
@@ -257,6 +257,7 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.numero_folio or None,
                 req.soporte or "Físico",
                 req.numero_paginas or None,
+                req.file_url or None,
             ),
             fetch="one",
             commit=True,
@@ -331,8 +332,8 @@ def admin_submit(req: DocumentSubmitRequest):
         INSERT INTO public.datos_rrhh
             (titulo, autor, id_tipo_documento,
              empleado_id, fecha_documento, ubicacion, creado_por,
-             tesauro_primario, tesauro_secundario, abstract, personas_relacionadas)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             tesauro_primario, tesauro_secundario, abstract, personas_relacionadas, file_url)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id_rrhh
         """,
         (
@@ -341,6 +342,7 @@ def admin_submit(req: DocumentSubmitRequest):
             tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por,
             req.doc_type, req.tesauro_secundario or "", req.resumen or "",
             req.personas_relacionadas or "",
+            req.file_url or None,
         ),
         fetch="one",
         commit=True,

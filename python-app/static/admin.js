@@ -465,6 +465,26 @@ async function handleNewSubmission(e) {
   }
 
   try {
+    // Subir archivo digitalizado (si se seleccionó uno) antes de crear el registro
+    const fileInput = document.getElementById(`file_upload-${suf}`);
+    const file = fileInput?.files?.[0];
+    if (file) {
+      if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-cloud-upload-alt fa-fade mr-1"></i> Subiendo archivo...';
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("modulo", state.user.modulo.toLowerCase());
+      fd.append("usuario", state.user.username);
+      const upRes = await fetch(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
+      if (!upRes.ok) {
+        const upErr = await upRes.json().catch(() => ({}));
+        showToast(upErr.detail || "Error al subir el archivo digitalizado.", "error");
+        return;
+      }
+      const upData = await upRes.json();
+      payload.file_url = upData.file_url;
+      if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
+    }
+
     const res = await fetch(`${API_BASE}/api/admin/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

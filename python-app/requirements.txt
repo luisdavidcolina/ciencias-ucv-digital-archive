@@ -8,6 +8,7 @@ pydantic
 mangum>=0.17.0
 bcrypt==4.1.3
 psycopg2-binary==2.9.9
+boto3>=1.34.0
 # Dev / testing
 pytest>=8.0
 httpx>=0.27
