@@ -87,11 +87,11 @@ async function loadDynamicStats() {
     if (kpiDocs) kpiDocs.innerText = stats.total_docs;
     if (kpiCats) kpiCats.innerText = stats.categories_count;
 
-    const resUsers = await fetch(`${API_BASE}/api/admin/users`);
+    const resUsers = await fetch(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(state.user.modulo)}`);
     if (resUsers.ok) {
       const uList = await resUsers.json();
       const kpiUsers = document.getElementById(`kpi-total-users-${suf}`);
-      if (kpiUsers) kpiUsers.innerText = uList.filter(u => u.modulo === state.user.modulo).length;
+      if (kpiUsers) kpiUsers.innerText = uList.length;
     }
 
     const isArchivo  = state.user.modulo === "Archivo";

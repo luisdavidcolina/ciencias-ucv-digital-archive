@@ -8,8 +8,11 @@ let auditState = { page: 1, perPage: 50, total: 0 };
 async function loadUsersTab() {
   const suf       = adminSuffixFromTab();
   const container = document.getElementById(`admin_users_table-${suf}`);
+  // Cada panel de módulo solo administra sus propios usuarios;
+  // el panel Sistema Global (admin_sistema.html) los ve todos.
+  const moduloFiltro = suf === "rrhh" ? "RRHH" : "Archivo";
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users`);
+    const res = await fetch(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(moduloFiltro)}`);
     if (!res.ok) throw new Error();
     const users = await res.json();
     container.innerHTML = `

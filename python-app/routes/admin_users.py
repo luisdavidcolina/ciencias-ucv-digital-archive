@@ -8,13 +8,27 @@ router = APIRouter()
 
 
 @router.get("/users")
-def get_users_list():
-    rows = db_query(
+def get_users_list(modulo: str = ""):
+    """Lista usuarios del sistema.
+
+    Si se indica `modulo` ('Archivo' o 'RRHH'), devuelve solo los usuarios de
+    ese módulo. Sin filtro (panel de Sistema Global) devuelve todos, incluidos
+    los administradores globales.
+    """
+    base_sql = (
         "SELECT id, usuario, nombre_usuario, modulo, rol, "
         "COALESCE(is_active, TRUE) AS is_active, last_login "
-        "FROM public.usuarios_sistema ORDER BY usuario",
-        fetch="all",
-    ) or []
+        "FROM public.usuarios_sistema"
+    )
+    modulo = modulo.strip()
+    if modulo in ("Archivo", "RRHH"):
+        rows = db_query(
+            base_sql + " WHERE modulo = %s ORDER BY usuario",
+            (modulo,),
+            fetch="all",
+        ) or []
+    else:
+        rows = db_query(base_sql + " ORDER BY usuario", fetch="all") or []
     out = []
     for r in rows:
         d = dict(r)
