@@ -1,285 +1,475 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investigación DMS / HRMS — Archivo Digital Ciencias UCV</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <title>Dashboard Gerencial: Comparativa de Mercado DMS / HRMS</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tippy.js CSS for modern tooltips -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css" />
     <style>
-        body { background-color: #f8f9fa; color: #333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        .header-section { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 40px 0; margin-bottom: 30px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .card-system { margin-bottom: 20px; border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .card-system:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .badge-custom { font-size: 0.85em; padding: 5px 10px; margin-right: 5px; margin-bottom: 5px; }
-        .table-comparative th { background-color: #f1f3f5; }
-        .lesson-card { border-left: 4px solid #17a2b8; background-color: #fff; padding: 15px; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .tech-term { 
-            border-bottom: 1px dashed #17a2b8; 
-            color: #17a2b8; 
-            cursor: help; 
-            font-weight: 500;
+        :root {
+            --ucv-blue: #0b1f3c;
+            --ucv-accent: #2e6db4;
+            --card-bg: #1e293b;
+            --page-bg: #0f172a;
+            --text-main: #e2e8f0;
+            --table-border: #334155;
         }
-        .tech-term:hover { color: #117a8b; }
-        .section-title { margin-top: 40px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #e9ecef; }
+        body {
+            background-color: var(--page-bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .header-section {
+            background: linear-gradient(135deg, var(--ucv-blue) 0%, #1e3a8a 100%);
+            border-bottom: 2px solid var(--ucv-accent);
+            padding: 3rem 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .badge-executive {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            backdrop-filter: blur(5px);
+        }
+        .card-system {
+            background-color: var(--card-bg);
+            border: 1px solid var(--table-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .card-system:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-color: var(--ucv-accent);
+        }
+        .section-title {
+            color: #fff;
+            border-bottom: 2px solid var(--table-border);
+            padding-bottom: 10px;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .table-responsive {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--table-border);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+        }
+        table.table {
+            margin-bottom: 0;
+            color: var(--text-main);
+        }
+        .table thead th {
+            background-color: #0f172a !important;
+            color: #94a3b8;
+            border-bottom: 2px solid var(--table-border) !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .table tbody td, .table tbody th {
+            border-color: var(--table-border) !important;
+            vertical-align: middle;
+        }
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+        }
+        .status-icon { font-size: 1.1rem; }
+        .has-feature { color: #10b981; }
+        .partial-feature { color: #f59e0b; }
+        .no-feature { color: #475569; }
+        
+        .lesson-card {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--ucv-accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        .tech-term {
+            border-bottom: 1px dashed #38bdf8;
+            color: #38bdf8;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .tech-term:hover {
+            color: #7dd3fc;
+            border-bottom-color: #7dd3fc;
+        }
+        
+        /* Modificadores de columna final */
+        .col-ucv {
+            background-color: rgba(46, 109, 180, 0.1);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-<div class="header-section text-center">
+<header class="header-section text-center">
     <div class="container">
-        <h1 class="display-4 font-weight-bold">Investigación de Mercado</h1>
-        <h2>DMS + HRMS</h2>
-        <p class="lead mt-3">Sistemas de Gestión Documental y RRHH<br>Comparativa para el Archivo Digital UCV</p>
-        <div class="mt-4">
-            <span class="badge badge-light badge-custom text-dark"><i class="fas fa-folder"></i> Módulo Archivo — DMS institucional</span>
-            <span class="badge badge-light badge-custom text-dark"><i class="fas fa-users"></i> Módulo RRHH — DMS adaptado</span>
+        <h6 class="text-info text-uppercase tracking-wider mb-3"><i class="fas fa-chart-line me-2"></i>Informe Ejecutivo de Mercado</h6>
+        <h1 class="display-5 fw-bold mb-3">Sistemas de Gestión Documental y RRHH</h1>
+        <p class="lead mb-4 text-light opacity-75">Panorama corporativo y comparativa arquitectónica para el Archivo Digital UCV</p>
+        
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <span class="badge-executive"><i class="fas fa-folder me-2 text-info"></i> DMS Institucional</span>
+            <span class="badge-executive"><i class="fas fa-users me-2 text-warning"></i> HRMS Especializado</span>
+            <span class="badge-executive"><i class="fas fa-calendar-alt me-2 text-success"></i> Julio 2026</span>
         </div>
-        <p class="mt-3 mb-0 small opacity-75">Julio 2026</p>
     </div>
-</div>
+</header>
 
-<div class="container mb-5">
-    <p class="lead text-justify">El Archivo Digital Ciencias UCV opera dos módulos distintos en un mismo sistema: uno es un DMS institucional pleno (documentos, tipologías, FTS, ISAD(G)), y el otro es un DMS adaptado para RRHH (expediente por empleado, partes I–IV, alertas laborales, LOTTT). Esta comparativa cubre ambas familias de sistemas.</p>
-
-    <!-- DMS -->
-    <h3 class="section-title text-primary"><i class="fas fa-folder-open mr-2"></i> Sistemas DMS / ECM — Gestión Documental Institucional</h3>
+<main class="container py-4 mb-5">
     
-    <div class="row">
-        <div class="col-md-6">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card card-system border-0 p-4" style="background: linear-gradient(to right, #1e293b, #0f172a);">
+                <p class="lead mb-0" style="color: #cbd5e1;">El <strong>Archivo Digital Ciencias UCV</strong> consolida dos soluciones operativas bajo una misma arquitectura centralizada: un <strong>DMS (Sistema de Gestión Documental)</strong> integral de archivos institucionales, y un entorno adaptado que funciona como <strong>HRMS (Sistema de Gestión de RRHH)</strong>. Este análisis contrasta nuestro sistema con los estándares empresariales más robustos de la industria.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DMS -->
+    <h3 class="section-title"><i class="fas fa-server me-2 text-info"></i> Gestión Documental Empresarial (DMS / ECM)</h3>
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
             <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">Alfresco Community <span class="badge badge-success float-right">Más cercano</span></h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">ECM Open Source · Java · Apache Solr</h6>
-                    <p class="card-text text-justify small">El referente en ECM open-source empresarial. Ofrece repositorio de contenido, versionado, workflows BPMN, metadatos configurables, FTS con Solr y API REST. La edición Community es gratuita; Enterprise tiene soporte pagado.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Funcionalidad: 9.5</span>
-                        <span class="badge badge-secondary badge-custom">Facilidad deploy: 3.5</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Alta</span>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">Alfresco</h5>
+                        <span class="badge bg-success rounded-pill">Referente</span>
+                    </div>
+                    <h6 class="text-muted small mb-3">ECM Enterprise · Java</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Líder open-source corporativo. Soporte robusto de flujos de trabajo (Workflows BPMN), auditoría completa y FTS nativo.</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Costo:</span> <span class="text-warning">Alto (Enterprise)</span></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-3">
             <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">DSpace</h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">Repositorio Institucional · Java · Solr</h6>
-                    <p class="card-text text-justify small">El repositorio digital más extendido en universidades (MIT, Cambridge, UCV propia lo usa para tesis). Especializado en preservación a largo plazo, Dublin Core / MARC21, OAI-PMH para interoperabilidad. No es un DMS generalista.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Preservación: 9.5</span>
-                        <span class="badge badge-secondary badge-custom">Gestión doc: 5.5</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Media</span>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">SharePoint</h5>
+                    </div>
+                    <h6 class="text-muted small mb-3">SaaS · Microsoft 365</h6>
+                    <p class="card-text small mb-4 flex-grow-1">El más extendido mundialmente. Integración absoluta con Office, control documental corporativo cerrado (Vendor lock-in).</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Soberanía de Datos:</span> <span class="text-danger">Baja</span></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-3">
             <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">OpenKM Community</h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">DMS Open Source · Java · Hibernate</h6>
-                    <p class="card-text text-justify small">Orientado a PYMEs y administración pública. Incluye versionado, workflow simple, categorías, FTS con Lucene y control de acceso. Interfaz más ligera que Alfresco; administración más accesible para equipos pequeños.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Funcionalidad DMS: 7.5</span>
-                        <span class="badge badge-secondary badge-custom">Facilidad deploy: 6.0</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Media-Alta</span>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">DSpace</h5>
+                    </div>
+                    <h6 class="text-muted small mb-3">Repositorio Universitario</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Estándar en universidades para preservación a largo plazo y compatibilidad OAI-PMH. No es ideal como archivo dinámico.</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Usabilidad Dinámica:</span> <span class="text-warning">Baja</span></div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-3">
             <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">Paperless-ngx <span class="badge badge-info float-right">Inspira UX</span></h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">Open Source · Python/Django · PostgreSQL</h6>
-                    <p class="card-text text-justify small">DMS personal/pequeño equipo. Ingesta automática de PDFs (OCR con Tesseract), etiquetas, FTS, versionado. Stack Python + PostgreSQL — tecnológicamente muy cercano a la arquitectura UCV. Interfaz limpia y minimalista.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">UX/Usabilidad: 9.0</span>
-                        <span class="badge badge-secondary badge-custom">Escala inst.: 4.0</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Alta (Ref)</span>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">Paperless-ngx</h5>
+                        <span class="badge bg-info rounded-pill text-dark">UX</span>
+                    </div>
+                    <h6 class="text-muted small mb-3">DMS Personal · Python</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Orientado a pequeños equipos con un excelente OCR automático. Tecnológicamente comparte ADN (Python/PostgreSQL) con la UCV.</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Relevancia Arquitectura:</span> <span class="text-success">Alta</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- HRMS -->
-    <h3 class="section-title text-success mt-5"><i class="fas fa-users mr-2"></i> Sistemas HRMS / HRIS — Gestión Documental de RRHH</h3>
+    <!-- SECCIÓN HRMS -->
+    <h3 class="section-title"><i class="fas fa-user-tie me-2 text-warning"></i> Sistemas de Recursos Humanos (HRMS / HCM)</h3>
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card card-system">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">Workday</h5>
+                        <span class="badge bg-success rounded-pill">Global Leader</span>
+                    </div>
+                    <h6 class="text-muted small mb-3">SaaS · Enterprise HCM</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Referente absoluto global. Gestiona ciclo de vida total, nómina, y expediente en una UX insuperable pero a un costo inasumible (Pública).</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Costos y Licencia:</span> <span class="text-danger">Privativos</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card card-system">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">OrangeHRM</h5>
+                        <span class="badge bg-secondary rounded-pill">Open Source</span>
+                    </div>
+                    <h6 class="text-muted small mb-3">HRMS Comunitario</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Cubre el 80% de necesidades básicas. Su módulo de documentos de empleados maneja lógicas similares al expediente físico ("Partes").</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Alineación Documental:</span> <span class="text-success">Media-Alta</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card card-system">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">Odoo HR</h5>
+                    </div>
+                    <h6 class="text-muted small mb-3">ERP · Python</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Solución integral. Posee notificaciones automáticas para contratos a vencer, modelo de datos escalable e integración contable nativa.</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Módulo Alertas:</span> <span class="text-success">Excelente</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card card-system">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title fw-bold text-white mb-0">SIGEP</h5>
+                        <span class="badge bg-danger rounded-pill">Estado VE</span>
+                    </div>
+                    <h6 class="text-muted small mb-3">Sistema ONAT / Min. PP</h6>
+                    <p class="card-text small mb-4 flex-grow-1">Fija el marco normativo (datos de cargos, sanciones, títulos) exigible en Venezuela, aunque su tecnología esté severamente desactualizada.</p>
+                    <div class="border-top border-secondary pt-3 mt-auto">
+                        <div class="d-flex justify-content-between small"><span class="text-muted">Relevancia Legal:</span> <span class="text-warning">Alta (Auditoría)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MATRIZ COMPARATIVA -->
+    <h3 class="section-title"><i class="fas fa-table-cells me-2 text-light"></i> Matriz de Funcionalidades Estratégicas</h3>
+    <p class="text-muted mb-4">Esta tabla extiende la evaluación a capacidades corporativas premium para identificar nuestros puntos fuertes y las áreas críticas de evolución (Roadmap).</p>
     
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">OrangeHRM Open Source <span class="badge badge-success float-right">Más cercano</span></h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">HRMS Open Source · PHP · MySQL</h6>
-                    <p class="card-text text-justify small">HRMS completo de código abierto. La edición Community cubre el 80% de necesidades de una institución pública. Usado en universidades latinoamericanas. Módulo "Documents" maneja exactamente el concepto de "partes" de expediente.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Gestión exp.: 8.5</span>
-                        <span class="badge badge-secondary badge-custom">Legislación VE: Baja</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Alta</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">Odoo HR (v17)</h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">ERP Open Source · Python · PostgreSQL</h6>
-                    <p class="card-text text-justify small">Módulo de RRHH dentro del ERP Odoo. Stack Python + PostgreSQL idéntico al sistema UCV. Gestiona empleados, contratos, permisos, documentos. Versionado de contratos y alertas de vencimiento incluidos. Extensible.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Gestión doc: 7.0</span>
-                        <span class="badge badge-secondary badge-custom">Stack alignment: Alta</span>
-                        <span class="badge badge-secondary badge-custom">Alertas/Vencim: 8.5</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">SIGEP / SigePlus (Venezuela)</h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">Sistema público venezolano · ONAT</h6>
-                    <p class="card-text text-justify small">Sistema oficial del Estado venezolano. UCV como autónoma no está obligada a usarlo, pero define los campos estándar del expediente: datos personales, cargos, títulos, sanciones. Referente normativo para RRHH UCV.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">Relevancia normativa: Alta</span>
-                        <span class="badge badge-secondary badge-custom">Tecnología: Obsoleta</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card card-system">
-                <div class="card-body">
-                    <h5 class="card-title font-weight-bold">BambooHR <span class="badge badge-info float-right">Inspira UX</span></h5>
-                    <h6 class="card-subtitle mb-2 text-muted small">SaaS · HRIS para equipos medianos</h6>
-                    <p class="card-text text-justify small">Destaca por su UX para expedientes digitales: drag-and-drop de documentos, carpetas por categoría de documento (análogas a las Partes I–IV), versionado automático, alertas. Referente de experiencia de usuario.</p>
-                    <div class="d-flex flex-wrap">
-                        <span class="badge badge-secondary badge-custom">UX expediente: 9.0</span>
-                        <span class="badge badge-secondary badge-custom">Versionado docs: 8.5</span>
-                        <span class="badge badge-secondary badge-custom">Relevancia UCV: Ref. UX</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabla -->
-    <h3 class="section-title text-dark mt-5"><i class="fas fa-table mr-2"></i> Tabla de Funcionalidades</h3>
-    <div class="table-responsive bg-white rounded shadow-sm">
-        <table class="table table-bordered table-hover table-comparative mb-0">
+    <div class="table-responsive mb-5">
+        <table class="table table-hover align-middle">
             <thead>
                 <tr>
-                    <th>Funcionalidad</th>
+                    <th style="width: 30%">Característica / Capacidad</th>
                     <th class="text-center">Alfresco</th>
-                    <th class="text-center">DSpace</th>
-                    <th class="text-center">OrangeHRM</th>
+                    <th class="text-center">Workday / SAP</th>
                     <th class="text-center">Odoo HR</th>
-                    <th class="text-center">BambooHR</th>
-                    <th class="text-center bg-light font-weight-bold">UCV Actual</th>
+                    <th class="text-center col-ucv text-info"><i class="fas fa-laptop-code me-1"></i> UCV Actual</th>
                 </tr>
             </thead>
             <tbody>
-                <tr><td>Búsqueda FTS</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-muted">—</td><td class="text-center text-warning">~</td><td class="text-center text-muted">—</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Versionado de docs</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-warning">~</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-info font-weight-bold">~ nuevo</td></tr>
-                <tr><td>Papelera / soft-delete</td><td class="text-center text-success">✓</td><td class="text-center text-muted">—</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-info font-weight-bold">~ nuevo</td></tr>
-                <tr><td>Metadatos ISAD(G)</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Expediente RRHH (partes)</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Historial de cargos</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Alertas (vencimientos)</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Drag-and-drop upload</td><td class="text-center text-success">✓</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-info font-weight-bold">~ nuevo</td></tr>
-                <tr><td>Reporte PDF expediente</td><td class="text-center text-warning">~</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Backup JSON</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-muted">—</td><td class="text-center text-success">✓</td><td class="text-center text-success">✓</td><td class="text-center text-success font-weight-bold">✓</td></tr>
-                <tr><td>Workflow aprobación</td><td class="text-center text-success">✓</td><td class="text-center text-muted">—</td><td class="text-center text-warning">~</td><td class="text-center text-success">✓</td><td class="text-center text-warning">~</td><td class="text-center text-muted font-weight-bold">—</td></tr>
-                <tr><td>OCR automático</td><td class="text-center text-success">✓</td><td class="text-center text-warning">~</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted font-weight-bold">—</td></tr>
-                <tr><td>Serverless / Bajo costo</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-muted">—</td><td class="text-center text-success font-weight-bold">✓</td></tr>
+                <!-- Bloque Básico -->
+                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-hdd me-2"></i> Infraestructura y Búsqueda Básica</td></tr>
+                <tr>
+                    <td>Búsqueda Inteligente (FTS)</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Archivado Seguro (Soft-Delete) y Versionado</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Cloud Híbrido (SaaS / Serverless)</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                </tr>
+                
+                <!-- Bloque Avanzado DMS -->
+                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-shield-alt me-2"></i> Gobernanza, Seguridad y Documentos (DMS)</td></tr>
+                <tr>
+                    <td>Trazabilidad y Auditoría (Audit Trails)</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                    <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Básica</span></td>
+                </tr>
+                <tr>
+                    <td>Políticas de Retención y Expurgo (Ciclo de vida)</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Solo alertas</span></td>
+                </tr>
+                <tr>
+                    <td>Lectura de Textos Automática (OCR) / IA</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i> <span class="d-block small text-muted">A futuro</span></td>
+                </tr>
+                <tr>
+                    <td>Flujos de Aprobación Documental (Workflows)</td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Draft/Rev.</span></td>
+                </tr>
+                <tr>
+                    <td>Firma Electrónica Integrada</td>
+                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                </tr>
+
+                <!-- Bloque Avanzado RRHH -->
+                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-user-md me-2"></i> Gestión de Talento (HRMS)</td></tr>
+                <tr>
+                    <td>Estructura Organizativa e Historial de Cargos</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Expediente Digital por Categorías (Secciones/Partes)</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Portal de Autogestión del Empleado (Self-Service)</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Gestión de Ausencias, Reposos y Vacaciones</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Evaluaciones de Desempeño (Compliance Público)</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                </tr>
+                <tr>
+                    <td>Integración Nativa con Sistemas de Nómina</td>
+                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                </tr>
             </tbody>
         </table>
-        <div class="p-2 small text-muted text-center">✓ Soporte nativo · ~ Soporte parcial · — No incluido</div>
     </div>
 
-    <!-- Lecciones -->
-    <h3 class="section-title text-info mt-5"><i class="fas fa-lightbulb mr-2"></i> Lecciones Aplicables al Sistema UCV</h3>
-    
-    <div class="lesson-card">
-        <h5 class="text-info font-weight-bold">De Alfresco: Metadatos extensibles</h5>
-        <p class="mb-1">El sistema UCV hardcodea los campos ISAD(G). Un panel de admin para campos personalizados por tipo de documento daría mucha más flexibilidad.</p>
-        <small class="text-muted"><strong>Aplicabilidad:</strong> Módulo Archivo — media prioridad, requiere refactoring de modelo de datos.</small>
+    <!-- Lecciones / Roadmap -->
+    <h3 class="section-title"><i class="fas fa-map-signs me-2 text-success"></i> Oportunidades de Evolución (Roadmap Estratégico)</h3>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="lesson-card h-100">
+                <h5 class="text-white fw-bold mb-3"><i class="fas fa-envelope-open-text text-accent me-2"></i> Notificaciones de Vencimiento Proactivas</h5>
+                <p class="text-muted small"><strong>Inspiración: Odoo HR / BambooHR.</strong> El sistema UCV ya calcula cuándo vencen los documentos (según LOTTT y normas de archivo), pero requiere que el directivo ingrese al panel. El próximo paso es enviar correos automatizados semanales o crear un banner visible a los jefes de departamento.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="lesson-card h-100">
+                <h5 class="text-white fw-bold mb-3"><i class="fas fa-id-badge text-accent me-2"></i> Portal de Autogestión (Self-Service ESS)</h5>
+                <p class="text-muted small"><strong>Inspiración: Workday.</strong> Habilitar un acceso limitado donde cada empleado pueda entrar con su cédula para consultar sus propios recibos de pago o subir reposos médicos directamente a su expediente digital, aliviando la carga operativa de la gerencia de Recursos Humanos.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="lesson-card h-100">
+                <h5 class="text-white fw-bold mb-3"><i class="fas fa-gavel text-accent me-2"></i> Cumplimiento Normativo (Auditorías ONAT)</h5>
+                <p class="text-muted small"><strong>Inspiración: SIGEP.</strong> Expandir el modelo de la base de datos para registrar no solo los documentos, sino datos estructurados obligatorios en instituciones públicas: títulos académicos formales, sanciones disciplinarias y resultados de evaluaciones de desempeño.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="lesson-card h-100">
+                <h5 class="text-white fw-bold mb-3"><i class="fas fa-file-signature text-accent me-2"></i> Flujos con Firma Electrónica</h5>
+                <p class="text-muted small"><strong>Inspiración: SAP SuccessFactors.</strong> Incluir un flujo donde la gerencia de RRHH pueda cargar un acta, y el empleado deba ingresar y hacer clic en "Aceptar / Firmar", dejando un registro legal y de auditoría (Trazabilidad) de que el documento fue leído y aprobado por las partes.</p>
+            </div>
+        </div>
     </div>
+</main>
 
-    <div class="lesson-card">
-        <h5 class="text-info font-weight-bold">De Paperless-ngx: OCR automático</h5>
-        <p class="mb-1">Monitorea y procesa automáticamente PDFs escaneados: OCR, clasificación. Un worker similar podría procesar archivos subidos a R2 y extraer texto para FTS.</p>
-        <small class="text-muted"><strong>Aplicabilidad:</strong> Ambos módulos — alta prioridad para accesibilidad, requiere worker separado.</small>
-    </div>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Tippy.js Tooltips (Dependencies) -->
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tippy.js@6"></script>
 
-    <div class="lesson-card">
-        <h5 class="text-info font-weight-bold">De BambooHR: UX por categorías</h5>
-        <p class="mb-1">Organiza documentos en pestañas análogas a las Partes I–IV. Su UX de carga (drag-and-drop directo en la sección de la parte) es más intuitivo que el modal actual.</p>
-        <small class="text-muted"><strong>Aplicabilidad:</strong> Módulo RRHH — media prioridad. El dossier podría incluir subida directa por sección.</small>
-    </div>
-
-    <div class="lesson-card">
-        <h5 class="text-info font-weight-bold">De Odoo HR: Alertas de vencimiento activas</h5>
-        <p class="mb-1">Envía notificaciones cuando documentos están próximos a vencer. UCV tiene las fechas pero falta envío automático (email o banner al admin).</p>
-        <small class="text-muted"><strong>Aplicabilidad:</strong> Módulo RRHH — alta prioridad. Implementable como cron o banner en dashboard.</small>
-    </div>
-
-    <div class="lesson-card">
-        <h5 class="text-info font-weight-bold">De SIGEP: Campos normativos de expediente</h5>
-        <p class="mb-1">Define modelo de datos público venezolano. El sistema UCV cubre LOTTT básica pero aún no tiene títulos académicos o evaluaciones de desempeño (auditoría ONAT).</p>
-        <small class="text-muted"><strong>Aplicabilidad:</strong> Módulo RRHH — alta relevancia normativa. Agregar tabla titulos_empleados.</small>
-    </div>
-
-</div>
-
-<!-- Tooltip Script dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-
-<!-- Custom Script for Technical Terms Tooltips -->
+<!-- Script para el Glosario Gerencial -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Definición de términos técnicos y su explicación
+    // Definiciones traducidas a lenguaje gerencial (No código, solo negocio)
     const techTerms = {
-        "DMS": "Document Management System (Sistema de Gestión Documental). Software usado para rastrear, gestionar y almacenar documentos.",
-        "HRMS": "Human Resources Management System (Sistema de Gestión de RRHH).",
-        "HRIS": "Human Resources Information System. Similar a HRMS, enfocado en bases de datos de personal.",
-        "ECM": "Enterprise Content Management (Gestión de Contenido Empresarial). Una estrategia y conjunto de herramientas más amplias que un DMS.",
-        "FTS": "Full-Text Search (Búsqueda de Texto Completo). Motor de búsqueda que examina todas las palabras de cada documento.",
-        "ISAD(G)": "Norma Internacional General de Descripción Archivística (International Standard Archival Description).",
-        "OCR": "Reconocimiento Óptico de Caracteres. Extrae texto a partir de imágenes o PDFs escaneados.",
-        "OAI-PMH": "Open Archives Initiative Protocol for Metadata Harvesting. Protocolo para intercambiar metadatos entre repositorios.",
-        "LOTTT": "Ley Orgánica del Trabajo, los Trabajadores y las Trabajadoras (Legislación Venezolana).",
-        "Solr": "Motor de búsqueda empresarial de código abierto basado en Apache Lucene.",
-        "Lucene": "Biblioteca de software de recuperación de información de código abierto.",
-        "SaaS": "Software as a Service (Software como Servicio). Aplicaciones alojadas en la nube y ofrecidas por suscripción.",
-        "API REST": "Interfaz de Programación de Aplicaciones basada en la arquitectura REST (Representational State Transfer).",
-        "ERP": "Enterprise Resource Planning (Planificación de Recursos Empresariales).",
-        "HCM": "Human Capital Management (Gestión del Capital Humano). Software corporativo para RRHH.",
-        "Serverless": "Arquitectura donde el proveedor de la nube gestiona dinámicamente la asignación de recursos y servidores (ej. Vercel).",
-        "BPMN": "Business Process Model and Notation. Estándar gráfico para modelar procesos de negocio."
+        "DMS": "Sistema central diseñado para almacenar, clasificar y proteger de forma segura todos los archivos y documentos digitales de la institución.",
+        "HRMS": "Sistema de gestión del talento humano. Centraliza desde expedientes hasta nómina y desempeño.",
+        "HCM": "Plataforma integral estratégica de Recursos Humanos para grandes corporaciones.",
+        "ECM": "Solución tecnológica para administrar toda la información y documentos de una empresa (más amplio que un DMS).",
+        "FTS": "Búsqueda Profunda (Full-Text): Motor inteligente que no solo lee los títulos, sino que busca palabras dentro de los PDFs, similar a buscar en Google.",
+        "ISAD(G)": "Estándar internacional utilizado por archiveros profesionales para garantizar que los documentos históricos estén correctamente organizados.",
+        "OCR": "Tecnología de Inteligencia que 'lee' documentos escaneados y los convierte en texto digital editable y buscable.",
+        "OAI-PMH": "Protocolo técnico que permite que otras universidades o bibliotecas mundiales conecten y lean nuestros catálogos públicos.",
+        "LOTTT": "Ley Orgánica del Trabajo de Venezuela. Dicta las reglas sobre expedientes, liquidaciones y jubilaciones.",
+        "SaaS": "Servicio por suscripción (Alquiler en la nube). La institución no necesita comprar servidores físicos; todo funciona por internet.",
+        "Open Source": "Software de código abierto. Significa que la universidad puede usarlo y modificarlo gratuitamente sin pagar costosas licencias privadas.",
+        "ERP": "Sistema operativo central de una empresa que maneja finanzas, ventas, almacén y recursos humanos en un solo lugar.",
+        "Serverless": "Arquitectura de nube moderna donde solo se paga por los milisegundos que el sistema está en uso, reduciendo costos operativos a casi cero.",
+        "API REST": "Puente de comunicación seguro que permite conectar nuestro sistema con otros (Ej. Conectar el Archivo con el sistema de Contabilidad).",
+        "Vendor lock-in": "Trampa comercial donde una empresa depende tanto de una tecnología (ej. Microsoft) que le resulta carísimo cambiarse a otra alternativa.",
+        "Audit Trails": "Trazabilidad de Auditoría. Un libro de registro imborrable que anota quién vio, modificó o eliminó un documento y a qué hora.",
+        "Retention Policies": "Reglas de automatización que detectan cuando un documento legal expira (ej. 5 años) para archivarlo o destruirlo automáticamente."
     };
 
-    // Función para procesar y envolver los términos en tooltips
-    function applyTooltips() {
+    function applyExecutiveTooltips() {
         const textNodes = [];
-        
-        // Caminante de nodos DOM para encontrar textos (ignorando scripts, styles y enlaces)
         const walker = document.createTreeWalker(
             document.body,
             NodeFilter.SHOW_TEXT,
             {
                 acceptNode: function(node) {
                     const parent = node.parentNode.nodeName.toLowerCase();
-                    if (parent === 'script' || parent === 'style' || parent === 'a' || parent === 'span') {
+                    if (['script', 'style', 'a', 'span', 'h1', 'h2', 'title'].includes(parent)) {
                         return NodeFilter.FILTER_REJECT;
                     }
-                    // Omitir si ya está dentro de nuestro span tech-term
                     if (node.parentNode.classList && node.parentNode.classList.contains('tech-term')) {
                         return NodeFilter.FILTER_REJECT;
                     }
@@ -289,11 +479,9 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
         let node;
-        while ((node = walker.nextNode())) {
-            textNodes.push(node);
-        }
+        while ((node = walker.nextNode())) { textNodes.push(node); }
 
-        // Crear una expresión regular global con todos los términos (ignorando mayúsculas/minúsculas pero coincidiendo palabra entera)
+        // Regex para cazar las palabras de forma exacta
         const termsRegex = new RegExp('\\b(' + Object.keys(techTerms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'gi');
 
         textNodes.forEach(textNode => {
@@ -301,24 +489,29 @@ document.addEventListener('DOMContentLoaded', function() {
             if (termsRegex.test(originalText)) {
                 const spanWrapper = document.createElement('span');
                 
-                // Reemplazar ocurrencias con el span del tooltip
                 spanWrapper.innerHTML = originalText.replace(termsRegex, function(match) {
-                    // Obtener la key correcta (case-insensitive)
                     const termKey = Object.keys(techTerms).find(key => key.toLowerCase() === match.toLowerCase());
                     const tooltipText = techTerms[termKey];
-                    return `<span class="tech-term" data-toggle="tooltip" data-placement="top" title="${tooltipText}">${match}</span>`;
+                    // Reemplazo inyectando los atributos de Tippy
+                    return `<span class="tech-term" data-tippy-content="<strong>${termKey}:</strong><br/>${tooltipText}">${match}</span>`;
                 });
 
                 textNode.parentNode.replaceChild(spanWrapper, textNode);
             }
         });
 
-        // Inicializar tooltips de Bootstrap
-        $('[data-toggle="tooltip"]').tooltip();
+        // Inicializar Tippy.js (estilo elegante)
+        tippy('.tech-term', {
+            theme: 'light-border',
+            allowHTML: true,
+            arrow: true,
+            animation: 'scale',
+            placement: 'top'
+        });
     }
 
-    // Ejecutar inyección
-    applyTooltips();
+    // Correr inyección
+    applyExecutiveTooltips();
 });
 </script>
 
