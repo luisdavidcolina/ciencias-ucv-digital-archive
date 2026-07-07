@@ -75,12 +75,14 @@
             background: var(--card-bg);
             border-radius: 12px;
             border: 1px solid var(--table-border);
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+            margin-bottom: 3rem;
         }
         table.table {
             margin-bottom: 0;
             color: var(--text-main);
+            min-width: 1000px;
         }
         .table thead th {
             background-color: #0f172a !important;
@@ -88,12 +90,14 @@
             border-bottom: 2px solid var(--table-border) !important;
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         .table tbody td, .table tbody th {
             border-color: var(--table-border) !important;
             vertical-align: middle;
+            font-size: 0.85rem;
         }
         .table tbody tr:hover {
             background-color: rgba(255, 255, 255, 0.02) !important;
@@ -128,6 +132,10 @@
             background-color: rgba(46, 109, 180, 0.1);
             font-weight: 600;
         }
+        .col-ucv-header {
+            background-color: rgba(46, 109, 180, 0.2) !important;
+            color: #fff !important;
+        }
         .scope-disclaimer {
             background-color: rgba(56, 189, 248, 0.1);
             border: 1px solid rgba(56, 189, 248, 0.3);
@@ -153,286 +161,253 @@
     </div>
 </header>
 
-<main class="container py-4 mb-5">
+<main class="container-fluid px-4 py-4 mb-5">
     
-    <div class="row mb-4">
-        <div class="col-12">
+    <div class="row justify-content-center mb-4">
+        <div class="col-xl-10">
             <div class="scope-disclaimer d-flex align-items-start">
                 <i class="fas fa-info-circle text-info fs-4 me-3 mt-1"></i>
                 <div>
                     <h5 class="text-info fw-bold mb-1">Aclaratoria de Alcance (Scope) del Sistema UCV</h5>
-                    <p class="mb-0 text-light text-opacity-75 small">El módulo RRHH de la UCV es estrictamente un <strong>Sistema de Archivos y Expedientes de Personal</strong>, no un HRMS transaccional del 100%. Su objetivo es la custodia legal y documental. Funciones operativas pesadas (como procesamiento de nómina, reclutamiento activo o evaluaciones de desempeño) quedan fuera de su alcance por diseño arquitectónico y se consideran <em>No Aplicables (N/A)</em> en la comparativa de desarrollo interno, asumiendo su delegación a sistemas paralelos.</p>
+                    <p class="mb-0 text-light text-opacity-75 small">El módulo RRHH de la UCV es estrictamente un <strong>Sistema de Archivos y Expedientes de Personal</strong>, no un HRMS transaccional del 100%. Su objetivo es la custodia legal y documental. Funciones operativas pesadas (como procesamiento de nómina, reclutamiento activo o evaluaciones de desempeño) quedan fuera de su alcance por diseño arquitectónico y se consideran <em>No Aplicables (N/A)</em> en la comparativa de desarrollo interno.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- SECCIÓN DMS -->
-    <h3 class="section-title"><i class="fas fa-server me-2 text-info"></i> Gestión Documental Empresarial (DMS / ECM)</h3>
-    <p class="text-muted small mb-4">Análisis de alternativas y las brechas entre la publicidad comercial de los productos y la realidad operativa de implementarlos.</p>
-    <div class="row g-4 mb-5">
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">Alfresco</h5>
-                        <span class="badge bg-success rounded-pill">Referente</span>
-                    </div>
-                    <h6 class="text-muted small mb-3">ECM Enterprise · Java</h6>
-                    <p class="card-text small flex-grow-1">Líder open-source. Soporte robusto de flujos de trabajo (Workflows BPMN) y FTS nativo.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Extremadamente pesado. La versión comunitaria carece de soporte oficial y clúster escalable, volviéndose inestable en grandes volúmenes sin costosos consultores.
-                    </div>
-                </div>
+    <div class="row justify-content-center">
+        <div class="col-xl-12">
+            <h3 class="section-title"><i class="fas fa-server me-2 text-info"></i> Gestión Documental Empresarial (DMS / ECM)</h3>
+            <p class="text-muted small mb-4">La siguiente matriz contrasta nuestra arquitectura con 6 de los sistemas mundiales más relevantes de gestión de archivos.</p>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%; min-width: 250px;">Característica (Con Glosario)</th>
+                            <th class="text-center">Alfresco</th>
+                            <th class="text-center">SharePoint</th>
+                            <th class="text-center">DSpace</th>
+                            <th class="text-center">Paperless-ngx</th>
+                            <th class="text-center">OpenKM</th>
+                            <th class="text-center">Nuxeo</th>
+                            <th class="text-center">Nextcloud</th>
+                            <th class="text-center col-ucv-header"><i class="fas fa-laptop-code me-1"></i> Archivo UCV Actual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Bloque Básico -->
+                        <tr class="table-dark"><td colspan="9" class="py-2 text-muted fw-bold small"><i class="fas fa-hdd me-2"></i> Infraestructura y Custodia Básica</td></tr>
+                        <tr>
+                            <td><span class="tech-term">Búsqueda Inteligente (FTS)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Archivado Seguro (Soft-Delete)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Cloud Híbrido</span></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        
+                        <!-- Bloque Avanzado DMS -->
+                        <tr class="table-dark"><td colspan="9" class="py-2 text-muted fw-bold small"><i class="fas fa-shield-alt me-2"></i> Gobernanza, Seguridad y Documentos (DMS)</td></tr>
+                        <tr>
+                            <td><span class="tech-term">Trazabilidad y Auditoría (Audit Trails)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block text-muted" style="font-size:0.7rem;">Básica</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Control Granular de Permisos</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Políticas de Retención</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block text-muted" style="font-size:0.7rem;">Alertas</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Lectura automática (OCR)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i> <span class="d-block text-muted" style="font-size:0.7rem;">A futuro</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Edición Colaborativa en Tiempo Real</span></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">APIs Abiertas / Interoperabilidad</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">SharePoint</h5>
-                    </div>
-                    <h6 class="text-muted small mb-3">SaaS · Microsoft 365</h6>
-                    <p class="card-text small flex-grow-1">El más extendido mundialmente. Integración absoluta con Office corporativo.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Fuerte <em>vendor lock-in</em>. Costos ocultos masivos al exceder las cuotas básicas de almacenamiento y dependencia total de licenciamiento por usuario.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">DSpace</h5>
-                    </div>
-                    <h6 class="text-muted small mb-3">Repositorio Universitario</h6>
-                    <p class="card-text small flex-grow-1">Estándar para preservación a largo plazo y compatibilidad OAI-PMH.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Excelente biblioteca inerte, pero terrible como archivo dinámico u operativo del día a día por la rigidez de sus flujos.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">Paperless-ngx</h5>
-                        <span class="badge bg-info rounded-pill text-dark">UX</span>
-                    </div>
-                    <h6 class="text-muted small mb-3">DMS Personal · Python</h6>
-                    <p class="card-text small flex-grow-1">Excelente OCR automático. Tecnológicamente comparte ADN (Python/PostgreSQL) con la UCV.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> No escala para niveles corporativos (carece de control de accesos jerárquicos o metadatos complejos tipo ISAD-G).
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- SECCIÓN HRMS -->
-    <h3 class="section-title"><i class="fas fa-user-tie me-2 text-warning"></i> Sistemas de RRHH (HRMS / HCM)</h3>
-    <div class="row g-4 mb-5">
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">Workday / SAP</h5>
-                        <span class="badge bg-success rounded-pill">Global Leaders</span>
-                    </div>
-                    <h6 class="text-muted small mb-3">SaaS · Enterprise HCM</h6>
-                    <p class="card-text small flex-grow-1">Referentes absolutos. Gestionan el ciclo de vida total con una UX premium.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Licencias restrictivas de millones de dólares. Requieren años para ser implementados y adaptarlos a normativas latinas (LOTTT) es un proceso infernal.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">OrangeHRM</h5>
-                        <span class="badge bg-secondary rounded-pill">Open Source</span>
-                    </div>
-                    <h6 class="text-muted small mb-3">HRMS Comunitario</h6>
-                    <p class="card-text small flex-grow-1">Su módulo de documentos maneja lógicas muy similares al expediente físico ("Partes").</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> La interfaz gratuita suele sentirse anticuada y las características de auditoría avanzada están bloqueadas tras el "muro de pago" corporativo.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">Odoo HR</h5>
-                    </div>
-                    <h6 class="text-muted small mb-3">ERP · Python</h6>
-                    <p class="card-text small flex-grow-1">Posee notificaciones automáticas y un modelo de datos escalable con integración ERP.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Muchas funciones "gratuitas" en papel requieren costosos módulos de terceros. La curva de aprendizaje y parametrización técnica es muy empinada.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card card-system">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="card-title fw-bold text-white mb-0">SIGEP</h5>
-                        <span class="badge bg-danger rounded-pill">Estado VE</span>
-                    </div>
-                    <h6 class="text-muted small mb-3">Sistema ONAT / Min. PP</h6>
-                    <p class="card-text small flex-grow-1">Fija el marco normativo público (datos de cargos, sanciones, títulos) exigible en Venezuela.</p>
-                    <div class="caveat-box mt-auto">
-                        <strong><i class="fas fa-exclamation-triangle text-danger me-1"></i> Realidad:</strong> Tecnología severamente obsoleta, nula automatización moderna y sin soporte real para custodia masiva de PDFs o expedientes en la nube.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <!-- SECCIÓN HRMS -->
+            <h3 class="section-title mt-5"><i class="fas fa-user-tie me-2 text-warning"></i> Sistemas de RRHH (HRMS / HCM)</h3>
+            <p class="text-muted small mb-4">La segunda matriz posiciona al submódulo de recursos humanos frente a las 7 plataformas SaaS de capital humano más usadas.</p>
+            
+            <div class="table-responsive mb-5">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%; min-width: 250px;">Característica (Con Glosario)</th>
+                            <th class="text-center">Workday / SAP</th>
+                            <th class="text-center">OrangeHRM</th>
+                            <th class="text-center">Odoo HR</th>
+                            <th class="text-center">SIGEP</th>
+                            <th class="text-center">BambooHR</th>
+                            <th class="text-center">Factorial</th>
+                            <th class="text-center">Buk</th>
+                            <th class="text-center col-ucv-header"><i class="fas fa-laptop-code me-1"></i> Archivo UCV Actual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-dark"><td colspan="9" class="py-2 text-muted fw-bold small"><i class="fas fa-user-md me-2"></i> Gestión Documental y Perfiles</td></tr>
+                        <tr>
+                            <td><span class="tech-term">Expediente Digital por Categorías (Partes LOTTT)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Portal de Autogestión (Self-Service ESS)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i> <span class="d-block text-muted" style="font-size:0.7rem;">Planeado</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Adaptabilidad Legal Latinoamericana</span></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i> <span class="d-block text-muted" style="font-size:0.7rem;">Rígido</span></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Firma Electrónica de Contratos Nativos</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
+                        </tr>
 
-    <!-- MATRIZ COMPARATIVA -->
-    <h3 class="section-title"><i class="fas fa-table-cells me-2 text-light"></i> Matriz de Funcionalidades vs. Expectativa Real</h3>
-    <p class="text-muted mb-4">Esta tabla pondera la realidad de los sistemas Enterprise contra las necesidades exactas del Archivo Digital UCV.</p>
-    
-    <div class="table-responsive mb-5">
-        <table class="table table-hover align-middle">
-            <thead>
-                <tr>
-                    <th style="width: 30%">Característica / Capacidad</th>
-                    <th class="text-center">Alfresco</th>
-                    <th class="text-center">Workday / SAP</th>
-                    <th class="text-center">Odoo HR</th>
-                    <th class="text-center col-ucv text-info"><i class="fas fa-laptop-code me-1"></i> Archivo UCV Actual</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Bloque Básico -->
-                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-hdd me-2"></i> Infraestructura y Búsqueda Básica</td></tr>
-                <tr>
-                    <td>Búsqueda Inteligente (FTS)</td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
-                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
-                </tr>
-                <tr>
-                    <td>Archivado Seguro (Soft-Delete) y Versionado</td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
-                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
-                </tr>
-                <tr>
-                    <td>Cloud Híbrido (SaaS / Serverless)</td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i> <span class="d-block small text-muted">On-premise</span></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
-                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
-                </tr>
-                
-                <!-- Bloque Avanzado DMS -->
-                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-shield-alt me-2"></i> Gobernanza, Seguridad y Documentos (DMS)</td></tr>
-                <tr>
-                    <td>Trazabilidad y Auditoría (Audit Trails)</td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
-                    <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Básica</span></td>
-                </tr>
-                <tr>
-                    <td>Políticas de Retención y Expurgo (Ciclo de vida)</td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center partial-feature status-icon col-ucv"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Solo alertas</span></td>
-                </tr>
-                <tr>
-                    <td>Lectura automática (OCR) / IA</td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i> <span class="d-block small text-muted">A futuro</span></td>
-                </tr>
-                <tr>
-                    <td>Firma Electrónica Integrada</td>
-                    <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i> <span class="d-block small text-muted">Plug-in</span></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i></td>
-                </tr>
-
-                <!-- Bloque Avanzado RRHH -->
-                <tr class="table-dark"><td colspan="5" class="py-2 text-muted fw-bold small"><i class="fas fa-user-md me-2"></i> Gestión de Expedientes de Personal</td></tr>
-                <tr>
-                    <td>Expediente Digital por Categorías (Partes LOTTT)</td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon col-ucv"><i class="fas fa-check-circle"></i></td>
-                </tr>
-                <tr>
-                    <td>Portal de Autogestión del Empleado (Self-Service ESS)</td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center no-feature status-icon col-ucv"><i class="fas fa-times-circle"></i> <span class="d-block small text-muted">Planeado</span></td>
-                </tr>
-                <!-- Funciones fuera de alcance del UCV -->
-                <tr>
-                    <td><span class="opacity-75">Gestión transaccional de Ausencias y Reposos</span></td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center na-feature col-ucv">N/A <span class="d-block small text-muted" style="font-size:0.75rem;">Fuera de alcance documental</span></td>
-                </tr>
-                <tr>
-                    <td><span class="opacity-75">Evaluaciones de Desempeño (KPIs)</span></td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center na-feature col-ucv">N/A <span class="d-block small text-muted" style="font-size:0.75rem;">Fuera de alcance documental</span></td>
-                </tr>
-                <tr>
-                    <td><span class="opacity-75">Integración Nativa con Nómina</span></td>
-                    <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
-                    <td class="text-center na-feature col-ucv">N/A <span class="d-block small text-muted" style="font-size:0.75rem;">Fuera de alcance documental</span></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Lecciones / Roadmap -->
-    <h3 class="section-title"><i class="fas fa-map-signs me-2 text-success"></i> Oportunidades de Evolución (Roadmap del Archivo)</h3>
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="lesson-card h-100">
-                <h5 class="text-white fw-bold mb-3"><i class="fas fa-envelope-open-text text-accent me-2"></i> Notificaciones de Vencimiento Proactivas</h5>
-                <p class="text-muted small"><strong>Inspiración: Odoo HR / BambooHR.</strong> El sistema UCV ya calcula cuándo vencen los documentos, pero el próximo paso es crear <em>cron-jobs</em> que envíen alertas automatizadas por correo a RRHH antes de que un contrato expire.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="lesson-card h-100">
-                <h5 class="text-white fw-bold mb-3"><i class="fas fa-id-badge text-accent me-2"></i> Portal Documental del Empleado (ESS Básico)</h5>
-                <p class="text-muted small"><strong>Inspiración: Workday.</strong> Sin llegar a ser un portal de nómina completo, habilitar un entorno seguro para que el profesor/empleado pueda <em>subir por su cuenta</em> un comprobante médico a su expediente digital, delegando el peso operativo.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="lesson-card h-100">
-                <h5 class="text-white fw-bold mb-3"><i class="fas fa-gavel text-accent me-2"></i> Trazabilidad de Auditoría Estricta (Audit Trails)</h5>
-                <p class="text-muted small"><strong>Inspiración: Alfresco.</strong> Ya tenemos Soft-Delete. El siguiente escalón arquitectónico es tener un registro blindado en base de datos de <em>qué administrador descargó o editó qué documento y a qué milisegundo</em>, clave para auditorías estatales.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="lesson-card h-100">
-                <h5 class="text-white fw-bold mb-3"><i class="fas fa-robot text-accent me-2"></i> IA Básica para Extracción Documental</h5>
-                <p class="text-muted small"><strong>Inspiración: Paperless-ngx.</strong> Incorporar a largo plazo un microservicio de reconocimiento (OCR) que lea automáticamente el contenido de los oficios institucionales escaneados, indexándolos en el motor de búsqueda (FTS).</p>
+                        <!-- Funciones fuera de alcance del UCV -->
+                        <tr class="table-dark"><td colspan="9" class="py-2 text-muted fw-bold small"><i class="fas fa-cogs me-2"></i> Gestión Transaccional (Fuera de Alcance UCV)</td></tr>
+                        <tr>
+                            <td><span class="tech-term">Gestión de Reclutamiento (ATS)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center na-feature col-ucv">N/A</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Flujos Operativos (Ausencias y Reposos)</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center no-feature status-icon"><i class="fas fa-times-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center na-feature col-ucv">N/A</td>
+                        </tr>
+                        <tr>
+                            <td><span class="tech-term">Integración Nativa con Nómina</span></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center partial-feature status-icon"><i class="fas fa-minus-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center has-feature status-icon"><i class="fas fa-check-circle"></i></td>
+                            <td class="text-center na-feature col-ucv">N/A</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -448,24 +423,24 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const techTerms = {
-        "DMS": "Sistema central diseñado para almacenar, clasificar y proteger de forma segura todos los archivos y documentos digitales de la institución.",
-        "HRMS": "Sistema transaccional de Recursos Humanos (procesa nómina, permisos, selección). El de UCV es solo un módulo Archivo de Expedientes.",
-        "HCM": "Plataforma integral estratégica de Recursos Humanos para grandes corporaciones.",
-        "ECM": "Solución tecnológica para administrar toda la información y procesos documentales de una empresa (más amplio que un DMS).",
-        "FTS": "Búsqueda Profunda (Full-Text): Motor inteligente que no solo lee los títulos, sino que busca palabras dentro de los PDFs, similar a buscar en Google.",
-        "ISAD-G": "Estándar internacional utilizado por archiveros profesionales para garantizar que los documentos históricos estén correctamente catalogados.",
-        "OCR": "Tecnología de Inteligencia que 'lee' documentos escaneados y los convierte en texto digital editable y buscable.",
-        "OAI-PMH": "Protocolo técnico que permite que otras universidades o bibliotecas mundiales conecten y lean nuestros catálogos públicos.",
-        "LOTTT": "Ley Orgánica del Trabajo de Venezuela. Dicta las reglas normativas que un expediente debe cumplir.",
-        "SaaS": "Servicio por suscripción (Alquiler en la nube). La institución no necesita comprar servidores físicos; todo funciona por internet.",
-        "Open Source": "Software de código abierto. Significa que la universidad puede usar la base de código sin pagar costosas licencias privadas.",
-        "ERP": "Sistema operativo central de una empresa que maneja finanzas, ventas y recursos humanos en un solo lugar.",
-        "Serverless": "Arquitectura de nube moderna (como Vercel) donde solo se paga por el tiempo exacto que el sistema se usa, reduciendo costos.",
-        "API REST": "Puente de comunicación seguro que permite conectar nuestro sistema de Archivo con otros módulos externos (ej. la Intranet UCV).",
-        "Vendor lock-in": "Trampa comercial corporativa donde una empresa depende tanto de una marca que le resulta insostenible cambiar de tecnología.",
-        "Audit Trails": "Trazabilidad Inalterable. Registro automático de auditoría que guarda la identidad y la hora cada vez que un usuario interactúa con un archivo.",
-        "Soft-Delete": "Archivado de Seguridad. Cuando un usuario elimina algo, el sistema lo oculta pero lo preserva en base de datos para recuperación ante desastres.",
-        "Workflows BPMN": "Flujos de aprobación configurables paso a paso. (Ej: 'Este oficio primero debe ser aprobado por el Decano antes de publicarse')."
+        "Búsqueda Inteligente (FTS)": "Motor que lee el texto interno de los PDFs (no solo el título), como buscar en Google.",
+        "Archivado Seguro (Soft-Delete)": "Cuando alguien 'elimina' un documento, se oculta pero queda resguardado para emergencias o auditorías.",
+        "Cloud Híbrido": "Infraestructura moderna sin servidores físicos en la institución; todo alojado en la nube con altos estándares de seguridad.",
+        "Trazabilidad y Auditoría (Audit Trails)": "Libro de registro imborrable que anota quién vio, modificó o eliminó un archivo y en qué segundo exacto lo hizo.",
+        "Control Granular de Permisos": "Capacidad de decidir milimétricamente quién puede ver qué. Ej: Ocultar solo el salario pero mostrar el resto del expediente.",
+        "Políticas de Retención": "Reglas que dicen 'Destruye o archiva este documento automáticamente después de 5 años' (Expurgo legal).",
+        "Lectura automática (OCR)": "Inteligencia que transforma las fotos de documentos escaneados en texto digital que se puede copiar y buscar.",
+        "Edición Colaborativa en Tiempo Real": "Poder editar el mismo documento en Word/Excel entre varias personas al mismo tiempo sin salir del sistema.",
+        "APIs Abiertas / Interoperabilidad": "Puertas tecnológicas que permiten que nuestro sistema 'hable' y comparta datos con la intranet u otros sistemas de la UCV.",
+        
+        "Expediente Digital por Categorías (Partes LOTTT)": "Organización visual del expediente por pestañas (Parte I a IV) tal como lo exige la Ley Orgánica del Trabajo.",
+        "Portal de Autogestión (Self-Service ESS)": "Una ventana para que el empleado entre con su usuario y suba sus propios reposos o actualice su foto, ahorrando trabajo a RRHH.",
+        "Adaptabilidad Legal Latinoamericana": "Flexibilidad para cambiar reglas sin pagar consultores externos cuando el gobierno saca una nueva ley laboral (ej. bono de guerra).",
+        "Firma Electrónica de Contratos Nativos": "Poder enviar un memorándum y que el trabajador le dé click a 'Aceptar/Firmar', dejando un registro legal de lectura.",
+        
+        "Gestión de Reclutamiento (ATS)": "Sistema paralelo para publicar ofertas de trabajo, recibir currículos y hacer seguimiento a candidatos (Fuera de nuestro alcance).",
+        "Flujos Operativos (Ausencias y Reposos)": "Módulo que calcula si te quedan días de vacaciones o descuenta días por enfermedad (Fuera de nuestro alcance, se hace en Nómina).",
+        "Integración Nativa con Nómina": "Botón mágico que envía las inasistencias directamente al banco para el pago (Fuera de nuestro alcance documental)."
     };
 
     function applyExecutiveTooltips() {
@@ -476,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 acceptNode: function(node) {
                     const parent = node.parentNode.nodeName.toLowerCase();
-                    if (['script', 'style', 'a', 'span', 'h1', 'h2', 'title', 'strong', 'i'].includes(parent)) {
+                    if (['script', 'style', 'title', 'strong', 'i', 'h1', 'h3'].includes(parent)) {
                         return NodeFilter.FILTER_REJECT;
                     }
                     if (node.parentNode.classList && (node.parentNode.classList.contains('tech-term') || node.parentNode.classList.contains('caveat-box'))) {
@@ -490,19 +465,26 @@ document.addEventListener('DOMContentLoaded', function() {
         let node;
         while ((node = walker.nextNode())) { textNodes.push(node); }
 
-        const termsRegex = new RegExp('\\b(' + Object.keys(techTerms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b', 'gi');
-
+        // Mapeo inverso de las llaves del diccionario para reemplazar el texto
         textNodes.forEach(textNode => {
             const originalText = textNode.nodeValue;
-            if (termsRegex.test(originalText)) {
-                const spanWrapper = document.createElement('span');
-                
-                spanWrapper.innerHTML = originalText.replace(termsRegex, function(match) {
-                    const termKey = Object.keys(techTerms).find(key => key.toLowerCase() === match.toLowerCase());
-                    const tooltipText = techTerms[termKey];
-                    return `<span class="tech-term" data-tippy-content="<strong>${termKey}:</strong><br/>${tooltipText}">${match}</span>`;
-                });
+            let newHtml = originalText;
+            let replaced = false;
 
+            Object.keys(techTerms).forEach(term => {
+                // Reemplazamos si encontramos el término exacto en el texto (case-insensitive)
+                const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                if (regex.test(originalText)) {
+                    replaced = true;
+                    newHtml = newHtml.replace(regex, function(match) {
+                        return `<span class="tech-term" data-tippy-content="<strong>¿Para qué sirve?</strong><br/>${techTerms[term]}">${match}</span>`;
+                    });
+                }
+            });
+
+            if (replaced) {
+                const spanWrapper = document.createElement('span');
+                spanWrapper.innerHTML = newHtml;
                 textNode.parentNode.replaceChild(spanWrapper, textNode);
             }
         });
