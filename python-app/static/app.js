@@ -136,6 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function checkPersistedSession() {
+  // admin_sistema.html gestiona su propia sesión (checkSession) — no interferir
+  if (document.body.dataset.page === "admin-sistema") return;
   const raw = localStorage.getItem("archive_session");
   if (!raw) {
     if (document.body.dataset.page) window.location.href = "/";

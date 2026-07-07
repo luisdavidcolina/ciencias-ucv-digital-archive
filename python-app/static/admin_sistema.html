@@ -540,8 +540,13 @@
   <script src="/static/app.js"></script>
 
   <script>
-const API_BASE = window.location.origin;
+// API_BASE ya está definido globalmente por app.js — no redeclarar (causa SyntaxError)
 let auditState = { page: 1, perPage: 50, total: 0 };
+
+// Fallback: showToast se define en admin.js, que no se carga en esta página
+if (typeof window.showToast !== "function") {
+  window.showToast = function (message) { alert(message); };
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   checkSession();
