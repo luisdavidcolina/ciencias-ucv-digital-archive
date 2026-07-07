@@ -98,6 +98,21 @@
             color: var(--text-main);
             min-width: 1000px;
         }
+        
+        /* Sticky First Column for better mobile responsiveness */
+        .table thead th:first-child,
+        .table tbody td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: var(--card-bg) !important;
+            z-index: 1;
+            box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+        }
+        .table thead th:first-child {
+            background-color: #0f172a !important;
+            z-index: 2;
+        }
+
         .table thead th {
             background-color: #0f172a !important;
             color: #94a3b8;
