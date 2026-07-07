@@ -660,38 +660,39 @@ document.addEventListener('DOMContentLoaded', function() {
         "HRMS": "Software integral que automatiza desde el reclutamiento hasta los pagos y vacaciones. El módulo UCV actual es un DMS adaptado a HR, no un HRMS completo.",
         "SaaS": "Software as a Service (Alquiler en la Nube). La institución no es dueña del código ni de los servidores, pagando una renta perpetua (como Netflix).",
         "Open-Source": "Código Abierto. Otorga independencia tecnológica; la universidad puede acceder a los cimientos del código, auditarlo y modificarlo sin pagar licencias abusivas.",
-        "Vendor Lock-in": "Trampa financiera corporativa donde la migración de datos hacia otro competidor es deliberadamente costosa y técnicamente prohibitiva, encadenando a la institución.",
-        "On-Premise": "Infraestructura Física. Los servidores, cables y discos duros donde residen los datos están ubicados físicamente en las instalaciones de la universidad.",
-        
-        // Search & View Features
-        "FTS": "Full-Text Search (Búsqueda Inteligente Profunda). Algoritmo que lee y penetra el texto interno (palabra por palabra) de millones de PDFs, evitando depender solo de títulos.",
-        "Fuzzy Search": "Tolerancia a Errores Ortográficos. Si el usuario escribe 'Gonsales', el sistema es lo suficientemente inteligente para encontrar 'González' sin frustrar al oficinista.",
-        "Faceted Search": "Filtros de Búsqueda Avanzada. Permite ir acotando miles de resultados haciendo click en categorías (ej: 'Mostrar solo oficios de 2023', 'Solo Facultad de Ciencias').",
-        "In-Browser PDF": "Visor de Documentos Integrado. Permite previsualizar y leer los expedientes dentro del mismo sistema web, evitando descargar miles de archivos al disco duro local.",
+        "Vendor Lock-in": "Trampa financiera corporativa donde la migración de datos hacia otro competidor es deliberadamente costosa y técnicamente prohibitiva.",
         "Apache Solr": "Motor de búsqueda open-source de grado industrial, diseñado para devolver resultados precisos en volúmenes de Big Data en fracciones de segundo.",
-        
-        // Technical Architecture
         "Workflows BPMN": "Estándar visual para dibujar y automatizar flujos de aprobación administrativos (Ej: Oficio -> Aprobación Jefe -> Revisión Legal -> Firma Decano).",
-        "API REST": "Arquitectura que provee 'enchufes' de conexión para que el DMS de la UCV pueda comunicarse y transferir datos con el sistema contable o la intranet de forma automatizada.",
         "OAI-PMH": "Protocolo global de bibliotecología digital. Permite que investigadores de otras partes del mundo puedan conectar y consultar los catálogos públicos de la UCV.",
-        "OCR": "Optical Character Recognition (Lectura Automática). Motores de Inteligencia Artificial que toman una foto o escaneo viejo y extraen el texto mecanografiado convirtiéndolo en data viva.",
-        "Soft-Delete": "Archivado de Seguridad Inversible. Protocolo donde la eliminación de un expediente es solo visual; la base de datos lo cifra y oculta para protegerlo contra sabotajes y recuperarlo en auditorías.",
-        "Co-authoring": "Sincronización en tiempo real que permite a múltiples oficinistas abrir, escribir y corregir un mismo documento (Word/Excel) a la vez desde el navegador.",
-        "RBAC": "Role-Based Access Control (Control Granular de Permisos). Matriz de seguridad matemática para asegurar que un analista solo vea lo que su rango le permite.",
         "ISAD-G": "Estándar y norma internacional de archivística que dicta las reglas estrictas de cómo deben catalogarse los documentos institucionales.",
         "NoSQL": "Bases de datos ultra-flexibles que no usan tablas rígidas, ideales para manejar montañas de documentos donde cada uno tiene propiedades totalmente distintas.",
         "Microservicios": "Diseño de software donde el sistema se divide en piezas independientes (LEGO). Si el módulo de búsqueda se cae, el resto de la aplicación sigue funcionando intacta.",
         "Pipeline": "Tubería de automatización. Serie de pasos invisibles que el sistema ejecuta solo (Ej: recibe email -> extrae PDF -> lee PDF -> clasifica -> guarda).",
-        
-        // HR Specifics
-        "Partes LOTTT": "Organización visual del expediente por pestañas (Parte I a IV) tal como lo exige estrictamente la Ley Orgánica del Trabajo de Venezuela para cumplir inspecciones.",
-        "Self-Service ESS": "Portal de Autogestión. Interfaz web para delegar carga de trabajo: el profesor ingresa con su clave e imprime su propia constancia de trabajo o sube su reposo médico directamente.",
-        "Pipeline ATS": "Applicant Tracking System. Módulo comercial dedicado a publicar ofertas, filtrar miles de CVs con inteligencia y agendar entrevistas (Ajeno al archivo documental).",
         "Onboarding": "El intenso proceso burocrático de recopilar firmas, huellas, inducciones y creación de correos durante los primeros días de un empleado nuevo en la institución.",
         
-        // AI & Automation
-        "Integración con LLMs": "Large Language Models. Modelos de inteligencia artificial (como GPT) capaces de leer documentos enteros, resumirlos y extraer datos clave automáticamente.",
-        "Asistente Virtual": "Chatbot conversacional inteligente que permite a los oficinistas pedir reportes o documentos hablando en lenguaje natural (Ej: 'Muéstrame los reposos de este mes')."
+        // Exact Table Row Definitions (DMS)
+        "Búsqueda Inteligente (FTS)": "Full-Text Search. Algoritmo que penetra el texto interno de millones de PDFs, evitando depender solo del título del archivo.",
+        "Tolerancia a Errores (Fuzzy Search)": "Búsqueda tolerante. Si el usuario escribe 'Gonsales', el sistema es inteligente para encontrar 'González' sin fallar.",
+        "Filtros de Búsqueda Avanzada (Faceted Search)": "Filtros semánticos. Permite ir acotando miles de resultados haciendo click en categorías (ej: 'Solo oficios de 2023').",
+        "Visor de Documentos Integrado (In-Browser PDF)": "Visor nativo. Permite leer los expedientes web sin descargar miles de archivos al disco duro, previniendo fuga de datos locales.",
+        "Archivado Seguro (Soft-Delete)": "Papelera criptográfica. La eliminación es solo visual; la base de datos oculta el archivo para protegerlo de sabotajes y permitir auditorías.",
+        "Soberanía Cloud (On-Premise / Híbrido)": "Independencia de datos. Los servidores y discos duros donde residen los expedientes están controlados físicamente por la institución.",
+        "Trazabilidad y Auditoría (Audit Trails)": "Auditoría estricta. Registro inmutable e histórico de quién vio, descargó o editó un documento exacto y a qué hora precisa.",
+        "Control Granular de Permisos (RBAC/ABAC)": "Seguridad por roles. Matriz matemática para asegurar que un analista solo vea lo que su rango jerárquico permite, bloqueando el resto.",
+        "Políticas de Retención (Expurgo legal)": "Automatización legal. Reglas automáticas que eliminan o congelan archivos tras X años, cumpliendo la ley sin intervención humana.",
+        "Lectura Automática (Pipelines OCR)": "Optical Character Recognition. Motores IA que extraen texto mecanografiado de imágenes o fotos viejas convirtiéndolo en data viva.",
+        "Edición Colaborativa en línea (Co-authoring)": "Co-edición. Sincronización en tiempo real que permite a múltiples oficinistas editar un mismo documento a la vez desde el navegador.",
+        "APIs Abiertas / Interoperabilidad (REST/GraphQL)": "Conectividad. Arquitectura que provee 'enchufes' para que el sistema se comunique automáticamente con la nómina o intranet institucional.",
+        
+        // Exact Table Row Definitions (HRMS)
+        "Expediente por Pestañas (Partes LOTTT)": "Cumplimiento legal venezolano. Organización del expediente (Parte I a IV) tal como exige la Ley Orgánica del Trabajo para inspecciones.",
+        "Adaptabilidad Ágil a Leyes Nacionales": "Flexibilidad. Capacidad de modificar fórmulas salariales o campos documentales sin requerir reprogramación profunda, ideal para la volatilidad legal.",
+        "Portal de Autogestión (Self-Service ESS)": "Delegación de tareas. Interfaz web para que el empleado ingrese, imprima sus constancias o suba su reposo médico de forma autónoma.",
+        "Firma Electrónica de Contratos Nativos": "Firma remota. El empleado puede firmar digitalmente desde su celular un contrato generado por RRHH con total validez legal (eIDAS).",
+        "Gestión de Reclutamiento (Pipeline ATS)": "Applicant Tracking System. Módulo para publicar ofertas, filtrar CVs y agendar entrevistas (fuera del alcance de un archivo).",
+        "Integración Nativa con Nómina Bancaria": "Core Financiero. Conexión directa con los bancos (API) para depositar sueldos basados en el expediente (fuera del alcance del archivo).",
+        "Integración con LLMs (Análisis Documental)": "Inteligencia Artificial. Modelos de lenguaje integrados que leen documentos enteros, los resumen y extraen datos en segundos.",
+        "Asistente Virtual (Chatbot IA)": "Interacción natural. Chatbot conversacional que permite a RRHH pedir reportes hablando en lenguaje natural (Ej: 'Muéstrame los reposos de este mes')."
     };
 
     function applyExecutiveTooltips() {
@@ -737,7 +738,19 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Fallbacks específicos para términos compuestos que no actúan sobre word boundaries perfectos
-            const manualTerms = ["Co-authoring", "SaaS", "Open-Source", "NoSQL", "Microservicios", "In-Browser PDF", "Faceted Search", "Fuzzy Search", "Integración con LLMs", "Asistente Virtual"];
+            const manualTerms = [
+                "Búsqueda Inteligente (FTS)", "Tolerancia a Errores (Fuzzy Search)", 
+                "Filtros de Búsqueda Avanzada (Faceted Search)", "Visor de Documentos Integrado (In-Browser PDF)",
+                "Archivado Seguro (Soft-Delete)", "Soberanía Cloud (On-Premise / Híbrido)",
+                "Trazabilidad y Auditoría (Audit Trails)", "Control Granular de Permisos (RBAC/ABAC)",
+                "Políticas de Retención (Expurgo legal)", "Lectura Automática (Pipelines OCR)",
+                "Edición Colaborativa en línea (Co-authoring)", "APIs Abiertas / Interoperabilidad (REST/GraphQL)",
+                "Expediente por Pestañas (Partes LOTTT)", "Adaptabilidad Ágil a Leyes Nacionales",
+                "Portal de Autogestión (Self-Service ESS)", "Firma Electrónica de Contratos Nativos",
+                "Gestión de Reclutamiento (Pipeline ATS)", "Integración Nativa con Nómina Bancaria",
+                "Integración con LLMs (Análisis Documental)", "Asistente Virtual (Chatbot IA)",
+                "Co-authoring", "SaaS", "Open-Source", "NoSQL", "Microservicios"
+            ];
             manualTerms.forEach(term => {
                 if (techTerms[term]) {
                      const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
