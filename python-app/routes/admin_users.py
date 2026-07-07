@@ -11,9 +11,10 @@ router = APIRouter()
 def get_users_list(modulo: str = ""):
     """Lista usuarios del sistema.
 
-    Si se indica `modulo` ('Archivo' o 'RRHH'), devuelve solo los usuarios de
-    ese módulo. Sin filtro (panel de Sistema Global) devuelve todos, incluidos
-    los administradores globales.
+    Si se indica `modulo` ('Archivo' o 'RRHH'), devuelve los usuarios de ese
+    módulo más los administradores globales (visibles en ambos backoffices
+    para que puedan gestionar su propia cuenta). Sin filtro (panel de Sistema
+    Global) devuelve todos.
     """
     base_sql = (
         "SELECT id, usuario, nombre_usuario, modulo, rol, "
@@ -23,7 +24,7 @@ def get_users_list(modulo: str = ""):
     modulo = modulo.strip()
     if modulo in ("Archivo", "RRHH"):
         rows = db_query(
-            base_sql + " WHERE modulo = %s ORDER BY usuario",
+            base_sql + " WHERE modulo IN (%s, 'Global') ORDER BY usuario",
             (modulo,),
             fetch="all",
         ) or []

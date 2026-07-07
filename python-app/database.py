@@ -1,5 +1,6 @@
 import os
 import logging
+import threading
 import time as _time
 from typing import List
 
@@ -31,6 +32,13 @@ def _get_pool() -> pg_pool.ThreadedConnectionPool:
             minconn=1,
             maxconn=5,
             dsn=os.environ.get("DATABASE_URL", ""),
+            # Keepalives TCP: evita que Neon cierre conexiones inactivas del pool,
+            # eliminando el ciclo lento de "conexión rota → reintento" en la 1ra petición
+            keepalives=1,
+            keepalives_idle=30,
+            keepalives_interval=10,
+            keepalives_count=3,
+            connect_timeout=10,
         )
     return _pool
 
@@ -163,17 +171,23 @@ def log_event(
     detalle: str,
     status_str: str = "Success",
 ) -> None:
-    """Inserta un evento en audit_log. Falla silenciosamente."""
-    try:
-        db_query(
-            "INSERT INTO public.audit_log (usuario, accion, modulo, detalle, status) "
-            "VALUES (%s, %s, %s, %s, %s)",
-            (usuario, accion, modulo, detalle, status_str),
-            fetch="none",
-            commit=True,
-        )
-    except Exception as e:
-        logger.error(f"No se pudo registrar evento de auditoría: {e}")
+    """Inserta un evento en audit_log en segundo plano (no bloquea la respuesta).
+
+    Falla silenciosamente.
+    """
+    def _do_insert():
+        try:
+            db_query(
+                "INSERT INTO public.audit_log (usuario, accion, modulo, detalle, status) "
+                "VALUES (%s, %s, %s, %s, %s)",
+                (usuario, accion, modulo, detalle, status_str),
+                fetch="none",
+                commit=True,
+            )
+        except Exception as e:
+            logger.error(f"No se pudo registrar evento de auditoría: {e}")
+
+    threading.Thread(target=_do_insert, daemon=True).start()
 
 
 # =============================================================================
