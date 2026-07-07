@@ -39,8 +39,11 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
         LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
     """
+    base_condition = "da.deleted_at IS NULL"
     if filters_sql:
-        base_sql += " WHERE " + filters_sql
+        base_sql += f" WHERE {base_condition} AND ({filters_sql})"
+    else:
+        base_sql += f" WHERE {base_condition}"
 
     base_sql += " GROUP BY da.id_archivo"
 

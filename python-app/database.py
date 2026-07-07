@@ -187,7 +187,9 @@ def log_event(
         except Exception as e:
             logger.error(f"No se pudo registrar evento de auditoría: {e}")
 
-    threading.Thread(target=_do_insert, daemon=True).start()
+    # daemon=False: el proceso no termina hasta que el INSERT se complete,
+    # garantizando durabilidad en entornos serverless (Vercel).
+    threading.Thread(target=_do_insert, daemon=False).start()
 
 
 # =============================================================================

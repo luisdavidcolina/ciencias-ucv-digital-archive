@@ -34,7 +34,7 @@ def list_all_files(
 
     import re as _re
     if modulo == "Archivo":
-        conditions, params = [], []
+        conditions, params = ["da.deleted_at IS NULL"], []
         if search:
             _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', search))
             if _has_letters:
@@ -129,9 +129,10 @@ def list_all_files(
             LEFT JOIN public.cargos c ON e.cargo_id = c.id
             LEFT JOIN public.departamentos d ON e.departamento_id = d.id
             LEFT JOIN public.estados_laborales el ON e.estado_id = el.id
-            LEFT JOIN public.datos_rrhh dr ON dr.empleado_id = e.id
+            LEFT JOIN public.datos_rrhh dr ON dr.empleado_id = e.id AND dr.deleted_at IS NULL
             LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
         """
+        conditions.insert(0, "e.deleted_at IS NULL")
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
         count_row = db_query(
@@ -196,7 +197,7 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
                       numero_paginas,
                       COALESCE(idioma,'es')             AS idioma,
                       updated_at, updated_by
-               FROM public.datos_archivo WHERE id_archivo = %s""",
+               FROM public.datos_archivo WHERE id_archivo = %s AND deleted_at IS NULL""",
             [doc_id], fetch="one"
         )
         if row:
@@ -222,7 +223,7 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
                FROM public.datos_rrhh dr
                LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
                LEFT JOIN public.empleados e ON dr.empleado_id = e.id
-               WHERE dr.id_rrhh = %s""",
+               WHERE dr.id_rrhh = %s AND dr.deleted_at IS NULL""",
             [doc_id], fetch="one"
         )
     if not row:
@@ -501,27 +502,24 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 
 @router.delete("/documento/{doc_id}")
 def delete_documento(doc_id: int, modulo: str, usuario: str):
+    """Soft-delete: marca el documento como eliminado (papelera). No borra físicamente."""
+    now = datetime.utcnow().isoformat()
     if modulo == "Archivo":
-        db_query(
-            "DELETE FROM public.archivo_descriptores WHERE id_archivo = %s",
-            (doc_id,), fetch="none", commit=True,
-        )
-        db_query(
-            "DELETE FROM public.datos_archivo WHERE id_archivo = %s",
-            (doc_id,), fetch="none", commit=True,
+        result = db_query(
+            "UPDATE public.datos_archivo SET deleted_at=%s, deleted_by=%s WHERE id_archivo=%s AND deleted_at IS NULL RETURNING id_archivo",
+            [now, usuario, doc_id], fetch="one", commit=True,
         )
     else:
-        db_query(
-            "DELETE FROM public.rrhh_descriptores WHERE id_rrhh = %s",
-            (doc_id,), fetch="none", commit=True,
-        )
-        db_query(
-            "DELETE FROM public.datos_rrhh WHERE id_rrhh = %s",
-            (doc_id,), fetch="none", commit=True,
+        result = db_query(
+            "UPDATE public.datos_rrhh SET deleted_at=%s, deleted_by=%s WHERE id_rrhh=%s AND deleted_at IS NULL RETURNING id_rrhh",
+            [now, usuario, doc_id], fetch="one", commit=True,
         )
 
+    if not result:
+        raise HTTPException(404, "Documento no encontrado o ya eliminado")
+
     invalidate_choices_cache()
-    log_event(usuario, "Delete Document", modulo, f"ID: {doc_id}")
+    log_event(usuario, "Delete Document (soft)", modulo, f"ID: {doc_id}")
     return {"success": True}
 
 
@@ -559,21 +557,21 @@ def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: 
 
     if modulo == "Archivo":
         count_row = db_query(
-            "SELECT COUNT(*) AS total FROM public.datos_archivo WHERE status IN ('draft','revision')",
+            "SELECT COUNT(*) AS total FROM public.datos_archivo WHERE status IN ('draft','revision') AND deleted_at IS NULL",
             fetch="one",
         )
         rows = db_query(
             """SELECT id_archivo AS id, titulo, autor, tesauro_primario AS tipo,
                       TO_CHAR(fecha_documento,'YYYY-MM-DD') AS fecha,
                       COALESCE(status,'aprobado') AS status, updated_at, updated_by
-               FROM public.datos_archivo WHERE status IN ('draft','revision')
+               FROM public.datos_archivo WHERE status IN ('draft','revision') AND deleted_at IS NULL
                ORDER BY updated_at DESC NULLS LAST
                LIMIT %s OFFSET %s""",
             [per_page, offset], fetch="all",
         ) or []
     else:
         count_row = db_query(
-            "SELECT COUNT(*) AS total FROM public.datos_rrhh WHERE status IN ('draft','revision')",
+            "SELECT COUNT(*) AS total FROM public.datos_rrhh WHERE status IN ('draft','revision') AND deleted_at IS NULL",
             fetch="one",
         )
         rows = db_query(
@@ -582,7 +580,7 @@ def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: 
                       COALESCE(dr.status,'aprobado') AS status, dr.updated_at, dr.updated_by
                FROM public.datos_rrhh dr
                LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
-               WHERE dr.status IN ('draft','revision')
+               WHERE dr.status IN ('draft','revision') AND dr.deleted_at IS NULL
                ORDER BY dr.updated_at DESC NULLS LAST
                LIMIT %s OFFSET %s""",
             [per_page, offset], fetch="all",
@@ -701,18 +699,12 @@ def get_status_counts(modulo: str = "Archivo"):
 
 @router.delete("/empleado/{emp_id}")
 def delete_empleado(emp_id: int, usuario: str):
-    db_query(
-        """DELETE FROM public.rrhh_descriptores
-           WHERE id_rrhh IN (SELECT id_rrhh FROM public.datos_rrhh WHERE empleado_id = %s)""",
-        (emp_id,), fetch="none", commit=True,
+    """Soft-delete: envía el empleado a la papelera. No borra físicamente."""
+    result = db_query(
+        "UPDATE public.empleados SET deleted_at=%s, deleted_by=%s WHERE id=%s AND deleted_at IS NULL RETURNING id",
+        [datetime.utcnow().isoformat(), usuario, emp_id], fetch="one", commit=True,
     )
-    db_query(
-        "DELETE FROM public.datos_rrhh WHERE empleado_id = %s",
-        (emp_id,), fetch="none", commit=True,
-    )
-    db_query(
-        "DELETE FROM public.empleados WHERE id = %s",
-        (emp_id,), fetch="none", commit=True,
-    )
-    log_event(usuario, "Delete Empleado", "RRHH", f"ID: {emp_id}")
+    if not result:
+        raise HTTPException(404, "Empleado no encontrado o ya eliminado")
+    log_event(usuario, "Delete Empleado (soft)", "RRHH", f"ID: {emp_id}")
     return {"success": True}

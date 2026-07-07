@@ -511,6 +511,35 @@
   <!-- Toast Container -->
   <div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
 
+  <!-- Modal: Cambio de Contraseña (Sistema Global) -->
+  <div class="modal fade" id="sys-change-pw-modal" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content" style="border-radius:12px;">
+        <div class="modal-header bg-secondary text-white border-bottom-0">
+          <h5 class="modal-title font-weight-bold" id="sys-pw-modal-label"><i class="fas fa-key mr-1"></i>Cambiar Contraseña</h5>
+          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="sys-pw-uid">
+          <div class="form-group mb-2">
+            <label class="font-weight-bold small text-muted">Nueva contraseña</label>
+            <input type="password" id="sys-pw-input" class="form-control" placeholder="Mín. 6 caracteres" autocomplete="new-password">
+          </div>
+          <div class="form-group mb-0">
+            <label class="font-weight-bold small text-muted">Confirmar contraseña</label>
+            <input type="password" id="sys-pw-confirm" class="form-control" placeholder="Repetir contraseña" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0">
+          <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-warning btn-sm font-weight-bold" onclick="_submitSysChangePw()">
+            <i class="fas fa-save mr-1"></i>Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Confirm Modal -->
   <div class="modal fade" id="ds-confirm-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
@@ -545,7 +574,16 @@ let auditState = { page: 1, perPage: 50, total: 0 };
 
 // Fallback: showToast se define en admin.js, que no se carga en esta página
 if (typeof window.showToast !== "function") {
-  window.showToast = function (message) { alert(message); };
+  window.showToast = function(msg, type) {
+    const c = document.getElementById("ds-toast-container");
+    if (!c) return;
+    const colors = { success:"#198754", error:"#dc3545", warning:"#fd7e14", info:"#0dcaf0" };
+    const d = document.createElement("div");
+    d.style.cssText = `background:${colors[type]||"#333"};color:#fff;padding:10px 18px;border-radius:8px;margin-bottom:8px;font-size:.88rem;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:fadeIn .2s`;
+    d.textContent = msg;
+    c.appendChild(d);
+    setTimeout(() => d.remove(), 4000);
+  };
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -653,7 +691,9 @@ async function loadSystemStats() {
           <td class="text-muted small">${lastLogin}</td>
           <td><span class="badge badge-${active?"success":"secondary"}">${active?"Activo":"Inactivo"}</span></td>
           <td>
-            <button class="btn btn-xs btn-outline-secondary" onclick="handleSysChangePassword(${u.id},'${u.usuario}')" title="Cambiar contraseña">
+            <button class="btn btn-xs btn-outline-secondary sys-change-pw-btn"
+                    data-uid="${u.id}" data-uname="${u.usuario.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+                    title="Cambiar contraseña">
               <i class="fas fa-key"></i> Clave
             </button>
           </td>
@@ -663,21 +703,38 @@ async function loadSystemStats() {
   } catch(e) { console.error("System stats error:", e); }
 }
 
-async function handleSysChangePassword(uid, username) {
-  const newPass = prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
-  if (newPass === null) return;
-  if (newPass.trim().length < 6) {
-    showToast("La contraseña debe tener al menos 6 caracteres.", "warning");
-    return;
-  }
+// Delegación de evento: evita XSS por interpolación directa en onclick
+document.addEventListener("click", function(e) {
+  const btn = e.target.closest(".sys-change-pw-btn");
+  if (!btn) return;
+  const uid   = parseInt(btn.dataset.uid, 10);
+  const uname = btn.dataset.uname || "";
+  _openSysChangePwModal(uid, uname);
+});
+
+function _openSysChangePwModal(uid, username) {
+  document.getElementById("sys-pw-modal-label").textContent = `Cambiar clave: ${username}`;
+  document.getElementById("sys-pw-input").value = "";
+  document.getElementById("sys-pw-confirm").value = "";
+  document.getElementById("sys-pw-uid").value = uid;
+  $("#sys-change-pw-modal").modal("show");
+}
+
+async function _submitSysChangePw() {
+  const uid     = parseInt(document.getElementById("sys-pw-uid").value, 10);
+  const newPass = document.getElementById("sys-pw-input").value.trim();
+  const confirm = document.getElementById("sys-pw-confirm").value.trim();
+  if (newPass.length < 6) { showToast("Mínimo 6 caracteres.", "warning"); return; }
+  if (newPass !== confirm) { showToast("Las contraseñas no coinciden.", "warning"); return; }
   try {
     const res = await fetch(`${API_BASE}/api/admin/users/${uid}/password`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ new_password: newPass.trim(), requester: getCurrentUser()?.username || "admin" }),
+      body: JSON.stringify({ new_password: newPass, requester: getCurrentUser()?.username || "sistema" }),
     });
     if (!res.ok) throw new Error();
-    showToast(`Contraseña de "${username}" actualizada.`, "success");
+    $("#sys-change-pw-modal").modal("hide");
+    showToast("Contraseña actualizada correctamente.", "success");
   } catch {
     showToast("Error al cambiar la contraseña.", "error");
   }

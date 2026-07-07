@@ -257,7 +257,7 @@ function openDocModalWithRecord(doc) {
     doc.resumen || "No se ha registrado un resumen descriptivo abstracto (dc.description.abstract) para este folio.";
 
   closeDocViewer();
-  const fileUrl = doc.file_url || "";
+  const fileUrl = _secureFileUrl(doc.file_url || "");
   const viewBtn = document.getElementById("btn-modal-view");
   if (fileUrl) {
     const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);

@@ -455,7 +455,7 @@ function openDocMetadataModal(idxReal) {
     `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;
 
   closeDocViewer();
-  const fileUrl = doc.file_url || "";
+  const fileUrl = _secureFileUrl(doc.file_url || "");
   const viewBtn = document.getElementById("btn-modal-view");
   if (fileUrl) {
     viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i>Ver PDF';

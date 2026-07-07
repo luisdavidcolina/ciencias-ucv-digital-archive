@@ -53,6 +53,17 @@ const fpInstances = {};
 // HELPERS COMPARTIDOS
 // ==========================================================================
 
+/**
+ * Devuelve una URL de archivo con el parámetro de autenticación `?u=username`.
+ * Aplica solo a URLs internas del tipo /api/files/...
+ */
+function _secureFileUrl(url) {
+  if (!url || !url.startsWith("/api/files/")) return url;
+  const username = state.user?.username || "";
+  if (!username) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}u=${encodeURIComponent(username)}`;
+}
+
 /** Resalta términos de búsqueda en un texto HTML-safe. */
 function highlightTerms(text, terms) {
   if (!text || !terms || !terms.length) return text || "";

@@ -198,6 +198,12 @@
                 <i class="fas fa-history"></i> Auditoría
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-rrhh-papelera" data-toggle="pill" href="#pane-admin-rrhh-papelera" role="tab"
+                 onclick="loadPapelera('rrhh')">
+                <i class="fas fa-trash-alt"></i> Papelera
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -637,6 +643,61 @@
               </div>
             </div>
 
+            <!-- PESTAÑA: PAPELERA -->
+            <div class="tab-pane fade" id="pane-admin-rrhh-papelera" role="tabpanel">
+              <div class="card card-danger mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-trash-alt mr-2"></i>Papelera — Documentos RRHH</h3>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                      <thead class="thead-light">
+                        <tr><th>#</th><th>Tipo</th><th>Empleado</th><th>Fecha</th><th>Eliminado por</th><th>Eliminado el</th><th style="width:100px;">Acciones</th></tr>
+                      </thead>
+                      <tbody id="papelera-body-rrhh">
+                        <tr><td colspan="7" class="text-center text-muted py-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                  <small id="papelera-summary-rrhh" class="text-muted">— documentos</small>
+                  <div>
+                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="changePapeleraPage(-1,'rrhh')"><i class="fas fa-chevron-left"></i></button>
+                    <span id="papelera-page-info-rrhh" class="text-muted small"></span>
+                    <button class="btn btn-sm btn-outline-secondary ml-1" onclick="changePapeleraPage(1,'rrhh')"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card-secondary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-user-slash mr-2"></i>Papelera — Empleados</h3>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                      <thead class="thead-light">
+                        <tr><th>#</th><th>Nombre</th><th>Cédula</th><th>Eliminado por</th><th>Eliminado el</th><th style="width:100px;">Acciones</th></tr>
+                      </thead>
+                      <tbody id="papelera-body-empleados">
+                        <tr><td colspan="6" class="text-center text-muted py-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                  <small id="papelera-summary-empleados" class="text-muted">— empleados</small>
+                  <div>
+                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="changePapeleraPage(-1,'empleados')"><i class="fas fa-chevron-left"></i></button>
+                    <span id="papelera-page-info-empleados" class="text-muted small"></span>
+                    <button class="btn btn-sm btn-outline-secondary ml-1" onclick="changePapeleraPage(1,'empleados')"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -696,6 +757,156 @@
 
   <!-- Toast Container -->
   <div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
+
+  <!-- Modal: Editar Documento RRHH (mismo ID que Archivo — admin.js lo comparte) -->
+  <div class="modal fade" id="editArchivoModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title text-dark font-weight-bold" id="editArchivoModalLabel">
+            <i class="fas fa-edit mr-2"></i>Editar Documento
+          </h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="edit-doc-id">
+          <div class="row">
+            <div class="col-md-8 form-group">
+              <label class="font-weight-bold text-muted">Título</label>
+              <input type="text" id="edit-doc-titulo" class="form-control">
+            </div>
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">Tipo de Documento</label>
+              <select id="edit-doc-type" class="form-control"></select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label class="font-weight-bold text-muted">Autor / Ente Emisor</label>
+              <input type="text" id="edit-doc-autor" class="form-control">
+            </div>
+            <div class="col-md-3 form-group">
+              <label class="font-weight-bold text-muted">Fecha de Emisión</label>
+              <input type="date" id="edit-doc-fecha" class="form-control">
+            </div>
+            <div class="col-md-3 form-group">
+              <label class="font-weight-bold text-muted">Clasificación</label>
+              <input type="text" id="edit-doc-secundario" class="form-control" placeholder="Ej: Parte I">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Personas Relacionadas</label>
+            <input type="text" id="edit-doc-personas" class="form-control" placeholder="Ej: Juan Pérez; Comisión de Estudios">
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Notas</label>
+            <textarea id="edit-doc-resumen" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Ubicación Física</label>
+            <input type="text" id="edit-doc-ubicacion" class="form-control">
+          </div>
+          <div class="row">
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">N° de Folio / Signatura</label>
+              <input type="text" id="edit-doc-folio" class="form-control form-control-sm" placeholder="Ej: F-023">
+            </div>
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">Soporte</label>
+              <select id="edit-doc-soporte" class="form-control form-control-sm">
+                <option value="Físico">Físico</option>
+                <option value="Digital">Digital (nativo)</option>
+                <option value="Digitalizado">Digitalizado (scan)</option>
+              </select>
+            </div>
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">N° de Páginas</label>
+              <input type="number" id="edit-doc-paginas" class="form-control form-control-sm" min="1">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 form-group">
+              <label class="font-weight-bold text-muted">Idioma</label>
+              <select id="edit-doc-idioma" class="form-control form-control-sm">
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+                <option value="fr">Francés</option>
+                <option value="pt">Portugués</option>
+              </select>
+            </div>
+            <div class="col-md-4 form-group d-none">
+              <label class="font-weight-bold text-muted">Palabras Clave</label>
+              <input type="text" id="edit-doc-palabras" class="form-control">
+            </div>
+          </div>
+          <div class="form-group mt-2">
+            <label class="font-weight-bold text-muted">Archivo Digital</label>
+            <div id="edit-doc-dropzone"
+                 style="border:2px dashed #adb5bd;border-radius:8px;padding:18px;text-align:center;background:#f8f9fa;cursor:pointer;transition:border-color .2s,background .2s;"
+                 ondragover="event.preventDefault();this.style.borderColor='#007bff';this.style.background='#e8f0fe';"
+                 ondragleave="this.style.borderColor='#adb5bd';this.style.background='#f8f9fa';"
+                 ondrop="_handleEditDocDrop(event)"
+                 onclick="document.getElementById('edit-doc-file-input').click()">
+              <i class="fas fa-cloud-upload-alt fa-2x text-secondary mb-1" style="display:block;"></i>
+              <span class="text-muted small">Arrastra un archivo aquí o <strong>haz clic para buscar</strong></span><br>
+              <small class="text-muted" style="font-size:0.75rem;">PDF · PNG · JPG · TIFF · WEBP — máx. 25 MB</small>
+              <input type="file" id="edit-doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.webp" style="display:none;" onchange="_handleEditDocFileSelect(event)">
+              <div id="edit-doc-upload-status" style="margin-top:6px;font-size:0.82rem;min-height:1.2em;"></div>
+            </div>
+            <div class="input-group mt-2">
+              <input type="text" id="edit-doc-file-url" class="form-control form-control-sm" placeholder="/api/files/... o URL externa">
+              <div class="input-group-append">
+                <button class="btn btn-outline-info btn-sm" type="button" title="Ver preview" onclick="_refreshEditDocPreview()">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <small class="text-muted">La URL se completa automáticamente tras la subida. También puede editarla manualmente.</small>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold text-muted small">Vista previa</label>
+            <div id="edit-doc-file-preview" class="p-2 bg-light border rounded" style="min-height:40px;">
+              <p class="text-muted small mb-0">Sin archivo adjunto.</p>
+            </div>
+          </div>
+          <hr class="my-2">
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <h6 class="font-weight-bold text-muted mb-0 small"><i class="fas fa-code-branch mr-1"></i>Historial de Versiones</h6>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-toggle-versiones"
+                      onclick="_toggleVersiones()">
+                <i class="fas fa-chevron-down mr-1"></i>Ver historial
+              </button>
+            </div>
+            <div id="edit-doc-versiones-container" style="display:none;">
+              <div id="edit-doc-versiones-body" style="max-height:180px;overflow-y:auto;" class="mb-2">
+                <p class="text-muted small text-center py-2">Cargando...</p>
+              </div>
+            </div>
+          </div>
+          <hr class="my-2">
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Estado del documento</label>
+            <select id="edit-doc-status" class="form-control form-control-sm w-50">
+              <option value="aprobado">✓ Aprobado</option>
+              <option value="revision">⏳ En revisión</option>
+              <option value="draft">✎ Borrador</option>
+              <option value="rechazado">✗ Rechazado</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
+          <button type="button" class="btn btn-outline-info btn-sm mr-auto" onclick="_guardarComoVersion()" title="Guarda el archivo actual en el historial antes de reemplazarlo">
+            <i class="fas fa-code-branch mr-1"></i>Guardar versión
+          </button>
+          <button type="button" class="btn btn-warning font-weight-bold btn-save-modal" onclick="handleSaveEditDoc()">
+            <i class="fas fa-save mr-1"></i>Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: Editar Empleado RRHH -->
   <div class="modal fade" id="editEmpleadoModal" tabindex="-1" role="dialog">

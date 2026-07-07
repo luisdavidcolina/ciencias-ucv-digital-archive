@@ -760,6 +760,20 @@ async function openEditDocModal(id) {
   const idiomaEl = document.getElementById("edit-doc-idioma");
   if (idiomaEl) idiomaEl.value = rec.idioma || "es";
 
+  // Reset drop zone state from a previous upload
+  const dz = document.getElementById("edit-doc-dropzone");
+  if (dz) { dz.style.borderColor = "#adb5bd"; dz.style.background = "#f8f9fa"; }
+  const dzStatus = document.getElementById("edit-doc-upload-status");
+  if (dzStatus) dzStatus.innerHTML = "";
+
+  // Reset versiones container
+  const verContainer = document.getElementById("edit-doc-versiones-container");
+  if (verContainer) verContainer.style.display = "none";
+  const verBtn = document.getElementById("btn-toggle-versiones");
+  if (verBtn) verBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Ver historial';
+  const verBody = document.getElementById("edit-doc-versiones-body");
+  if (verBody) verBody.innerHTML = '<p class="text-muted small text-center py-2">Cargando...</p>';
+
   $("#editArchivoModal").modal("show");
 }
 
@@ -812,6 +826,56 @@ function _refreshEditDocPreview() {
   }
 }
 
+// --- DRAG-AND-DROP UPLOAD EN MODAL DE EDICIÓN ---
+
+async function _uploadEditDocFile(file) {
+  const ALLOWED = ["pdf","png","jpg","jpeg","tiff","tif","webp"];
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  if (!ALLOWED.includes(ext)) { showToast("Tipo de archivo no permitido.", "warning"); return; }
+  if (file.size > 25 * 1024 * 1024) { showToast("El archivo excede el límite de 25 MB.", "warning"); return; }
+
+  const status = document.getElementById("edit-doc-upload-status");
+  const zone   = document.getElementById("edit-doc-dropzone");
+  const urlField = document.getElementById("edit-doc-file-url");
+
+  if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Subiendo…';
+  if (zone)   { zone.style.borderColor = "#fd7e14"; zone.style.background = "#fff8f0"; }
+
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("modulo", isArchivoModule() ? "archivo" : "rrhh");
+  fd.append("usuario", state.user?.username || "");
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Error al subir");
+    if (urlField) urlField.value = data.file_url;
+    if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${file.name} subido</span>`;
+    if (zone)   { zone.style.borderColor = "#28a745"; zone.style.background = "#f0fff4"; }
+    _refreshEditDocPreview();
+    showToast("Archivo subido correctamente.", "success");
+  } catch (e) {
+    if (status) status.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle mr-1"></i>${e.message}</span>`;
+    if (zone)   { zone.style.borderColor = "#dc3545"; zone.style.background = "#fff5f5"; }
+    showToast(`Error al subir: ${e.message}`, "error");
+  }
+}
+
+function _handleEditDocDrop(event) {
+  event.preventDefault();
+  const zone = document.getElementById("edit-doc-dropzone");
+  if (zone) { zone.style.borderColor = "#adb5bd"; zone.style.background = "#f8f9fa"; }
+  const file = event.dataTransfer?.files?.[0];
+  if (file) _uploadEditDocFile(file);
+}
+
+function _handleEditDocFileSelect(event) {
+  const file = event.target.files?.[0];
+  if (file) _uploadEditDocFile(file);
+  event.target.value = "";
+}
+
 async function handleSaveEditDoc() {
   const id = document.getElementById("edit-doc-id")?.value;
   if (!id) return;
@@ -854,9 +918,9 @@ async function handleSaveEditDoc() {
 
 async function handleDeleteDoc(id, nombre) {
   const ok = await confirmModal(
-    "Eliminar documento",
-    `¿Eliminar "${nombre}"? Esta acción no se puede deshacer.`,
-    "Sí, eliminar", "btn-danger"
+    "Mover a la papelera",
+    `¿Enviar "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
   try {
@@ -864,12 +928,239 @@ async function handleDeleteDoc(id, nombre) {
       method: "DELETE",
     });
     if (!res.ok) throw new Error();
-    showToast("Documento eliminado.", "success");
+    showToast("Documento movido a la papelera.", "success");
     state.adminTable.page = 1;
     loadMonitorTable();
   } catch {
-    showToast("Error al eliminar el documento.", "error");
+    showToast("Error al mover a la papelera.", "error");
   }
+}
+
+// --- PAPELERA DE RECICLAJE ---
+
+const _papeleraState = { archivo: { page: 1, total: 0 }, rrhh: { page: 1, total: 0 }, empleados: { page: 1, total: 0 } };
+
+async function loadPapelera(suf) {
+  if (suf === "archivo") {
+    await _loadPapeleraDocumentos("Archivo", "archivo");
+  } else {
+    await _loadPapeleraDocumentos("RRHH", "rrhh");
+    await _loadPapeleraEmpleados();
+  }
+}
+
+async function _loadPapeleraDocumentos(modulo, suf) {
+  const page = _papeleraState[suf].page;
+  const body = document.getElementById(`papelera-body-${suf}`);
+  const summary = document.getElementById(`papelera-summary-${suf}`);
+  const pageInfo = document.getElementById(`papelera-page-info-${suf}`);
+  if (!body) return;
+
+  body.innerHTML = '<tr><td colspan="7" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=${page}&per_page=20`);
+    const data = await res.json();
+    _papeleraState[suf].total = data.total;
+    if (!data.records?.length) {
+      body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">La papelera está vacía.</td></tr>';
+    } else {
+      body.innerHTML = data.records.map((r, i) => `
+        <tr>
+          <td>${(page - 1) * 20 + i + 1}</td>
+          <td>${r.titulo || "—"}</td>
+          <td><small>${r.doc_type || "—"}</small></td>
+          <td><small>${r.fecha || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
+          <td>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},'${modulo}')" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},'${modulo}')" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+          </td>
+        </tr>`).join("");
+    }
+    if (summary) summary.textContent = `${data.total} documento(s) en papelera`;
+    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+  } catch {
+    body.innerHTML = '<tr><td colspan="7" class="text-danger text-center py-2">Error al cargar la papelera.</td></tr>';
+  }
+}
+
+async function _loadPapeleraEmpleados() {
+  const page = _papeleraState.empleados.page;
+  const body = document.getElementById("papelera-body-empleados");
+  const summary = document.getElementById("papelera-summary-empleados");
+  const pageInfo = document.getElementById("papelera-page-info-empleados");
+  if (!body) return;
+
+  body.innerHTML = '<tr><td colspan="6" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados?page=${page}&per_page=20`);
+    const data = await res.json();
+    _papeleraState.empleados.total = data.total;
+    if (!data.records?.length) {
+      body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay empleados en la papelera.</td></tr>';
+    } else {
+      body.innerHTML = data.records.map((r, i) => `
+        <tr>
+          <td>${(page - 1) * 20 + i + 1}</td>
+          <td>${r.nombre || "—"}</td>
+          <td><small>${r.cedula || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
+          <td>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id})" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+          </td>
+        </tr>`).join("");
+    }
+    if (summary) summary.textContent = `${data.total} empleado(s) en papelera`;
+    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+  } catch {
+    body.innerHTML = '<tr><td colspan="6" class="text-danger text-center py-2">Error al cargar.</td></tr>';
+  }
+}
+
+async function changePapeleraPage(dir, suf) {
+  _papeleraState[suf].page = Math.max(1, _papeleraState[suf].page + dir);
+  if (suf === "empleados") await _loadPapeleraEmpleados();
+  else await _loadPapeleraDocumentos(suf === "archivo" ? "Archivo" : "RRHH", suf);
+}
+
+async function _restaurarDoc(id, modulo) {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera/${id}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
+    if (!res.ok) throw new Error();
+    showToast("Documento restaurado.", "success");
+    loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
+  } catch { showToast("Error al restaurar.", "error"); }
+}
+
+async function _purgarDoc(id, modulo) {
+  const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. ¿Continuar?", "Sí, eliminar", "btn-danger");
+  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    showToast("Documento eliminado permanentemente.", "success");
+    loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
+  } catch { showToast("Error al purgar.", "error"); }
+}
+
+async function _restaurarEmpleado(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados/${id}/restaurar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
+    if (!res.ok) throw new Error();
+    showToast("Empleado restaurado.", "success");
+    _loadPapeleraEmpleados();
+  } catch { showToast("Error al restaurar empleado.", "error"); }
+}
+
+async function _purgarEmpleado(id) {
+  const ok = await confirmModal("Eliminar empleado permanentemente", "Se eliminarán también todos sus documentos. Esta acción es irreversible.", "Sí, eliminar", "btn-danger");
+  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados/${id}/purgar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    showToast("Empleado eliminado permanentemente.", "success");
+    _loadPapeleraEmpleados();
+  } catch { showToast("Error al purgar empleado.", "error"); }
+}
+
+// --- VERSIONES DE ARCHIVOS DIGITALES ---
+
+async function loadDocVersiones(docId, modulo) {
+  const container = document.getElementById("edit-doc-versiones-body");
+  if (!container) return;
+  container.innerHTML = '<p class="text-muted small text-center py-2"><i class="fas fa-spinner fa-spin"></i></p>';
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}`);
+    const data = await res.json();
+    if (!data.versiones?.length) {
+      container.innerHTML = '<p class="text-muted small text-center py-2">Sin versiones anteriores.</p>';
+      return;
+    }
+    container.innerHTML = `
+      <table class="table table-sm table-bordered mb-0" style="font-size:0.8rem;">
+        <thead class="thead-light"><tr><th>Ver.</th><th>Comentario</th><th>Subido por</th><th>Fecha</th><th></th></tr></thead>
+        <tbody>
+          ${data.versiones.map(v => `
+            <tr>
+              <td><span class="badge badge-secondary">v${v.version_num}</span></td>
+              <td>${v.comentario || "—"}</td>
+              <td>${v.subido_por || "—"}</td>
+              <td>${v.created_at || "—"}</td>
+              <td>
+                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},'${modulo}')" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
+                <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},'${modulo}')" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>`).join("")}
+        </tbody>
+      </table>`;
+  } catch {
+    container.innerHTML = '<p class="text-danger small text-center py-2">Error al cargar versiones.</p>';
+  }
+}
+
+async function _restaurarVersion(docId, verId, modulo) {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
+    if (!res.ok) throw new Error();
+    showToast("Versión restaurada como archivo actual.", "success");
+    const row = await (await fetch(`${API_BASE}/api/admin/documento/${docId}?modulo=${encodeURIComponent(modulo)}`)).json();
+    if (row?.file_url) {
+      const urlEl = document.getElementById("edit-doc-file-url");
+      if (urlEl) { urlEl.value = row.file_url; _refreshEditDocPreview(); }
+    }
+    loadDocVersiones(docId, modulo);
+  } catch { showToast("Error al restaurar versión.", "error"); }
+}
+
+async function _deleteVersion(docId, verId, modulo) {
+  const ok = await confirmModal("Eliminar versión", "¿Eliminar esta versión del historial? No afecta al archivo actual.", "Sí, eliminar", "btn-danger");
+  if (!ok) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
+    if (!res.ok) throw new Error();
+    showToast("Versión eliminada.", "success");
+    loadDocVersiones(docId, modulo);
+  } catch { showToast("Error al eliminar versión.", "error"); }
+}
+
+function _toggleVersiones() {
+  const container = document.getElementById("edit-doc-versiones-container");
+  const btn = document.getElementById("btn-toggle-versiones");
+  const isHidden = container?.style.display === "none";
+  if (container) container.style.display = isHidden ? "" : "none";
+  if (btn) btn.innerHTML = isHidden
+    ? '<i class="fas fa-chevron-up mr-1"></i>Ocultar historial'
+    : '<i class="fas fa-chevron-down mr-1"></i>Ver historial';
+  if (isHidden) {
+    const docId = document.getElementById("edit-doc-id")?.value;
+    const modulo = isArchivoModule() ? "Archivo" : "RRHH";
+    if (docId) loadDocVersiones(parseInt(docId), modulo);
+  }
+}
+
+async function _guardarComoVersion() {
+  const docId = document.getElementById("edit-doc-id")?.value;
+  const currentUrl = (document.getElementById("edit-doc-file-url")?.value || "").trim();
+  if (!docId) return;
+  if (!currentUrl) { showToast("No hay archivo actual que guardar como versión.", "warning"); return; }
+
+  const modulo = isArchivoModule() ? "Archivo" : "RRHH";
+  const comentario = await promptModal("Comentario de versión", "Describe brevemente el cambio (opcional):");
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}&file_url=${encodeURIComponent(currentUrl)}&comentario=${encodeURIComponent(comentario || "")}&usuario=${encodeURIComponent(state.user?.username || "")}`,
+      { method: "POST" }
+    );
+    if (!res.ok) throw new Error();
+    showToast("Versión guardada en el historial.", "success");
+    if (document.getElementById("edit-doc-versiones-container")?.style.display !== "none") {
+      loadDocVersiones(parseInt(docId), modulo);
+    }
+  } catch { showToast("Error al guardar versión.", "error"); }
 }
 
 // --- EDITAR / ELIMINAR EMPLEADO (RRHH) ---
@@ -953,9 +1244,9 @@ async function handleSaveEditEmpleado() {
 
 async function handleDeleteEmpleado(empId, nombre) {
   const ok = await confirmModal(
-    "Eliminar expediente",
-    `¿Eliminar el expediente de "${nombre}"? Se eliminarán todos sus documentos. Esta acción no se puede deshacer.`,
-    "Sí, eliminar", "btn-danger"
+    "Mover a la papelera",
+    `¿Enviar el expediente de "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
   try {
@@ -963,10 +1254,10 @@ async function handleDeleteEmpleado(empId, nombre) {
       method: "DELETE",
     });
     if (!res.ok) throw new Error();
-    showToast("Expediente eliminado.", "success");
+    showToast("Expediente movido a la papelera.", "success");
     loadMonitorTable();
   } catch {
-    showToast("Error al eliminar el expediente.", "error");
+    showToast("Error al mover a la papelera.", "error");
   }
 }
 
@@ -1098,7 +1389,7 @@ async function _adminLoadHistorial() {
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`);
     const data = await res.json();
-    if (!data.length) {
+    if (!data.historial?.length) {
       body.innerHTML = '<p class="text-muted small text-center py-2">Sin historial registrado.</p>';
       return;
     }
@@ -1106,9 +1397,9 @@ async function _adminLoadHistorial() {
       <table class="table table-sm table-bordered mb-0" style="font-size:0.82rem;">
         <thead class="thead-light"><tr><th>Cargo</th><th>Desde</th><th>Hasta</th><th>Motivo</th><th></th></tr></thead>
         <tbody>
-          ${data.map(h => `
+          ${data.historial.map(h => `
             <tr>
-              <td>${h.cargo_nombre}</td>
+              <td>${h.cargo}</td>
               <td>${h.fecha_inicio || "—"}</td>
               <td>${h.fecha_fin || '<span class="text-success font-weight-bold">Actual</span>'}</td>
               <td class="text-muted">${h.motivo || "—"}</td>

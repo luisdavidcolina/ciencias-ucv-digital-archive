@@ -28,6 +28,12 @@ R2_SECRET_KEY = "40f52439b69b4cdfee3b4a37805ea7bf203fd707067bf1baa146f21c4c2566d
 R2_BUCKET     = "ciencias-ucv-archivo"
 
 _client = None
+_client_lock = None  # inicializado bajo demanda para evitar import-time threading
+
+
+class StorageNotFoundError(Exception):
+    """El objeto solicitado no existe en el bucket."""
+
 
 # Extensiones permitidas para el archivo digitalizado
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".tiff", ".tif", ".webp"}
@@ -81,8 +87,20 @@ def upload_fileobj(fileobj, key: str, content_type: str = "application/octet-str
 
 
 def presigned_get_url(key: str, expires_seconds: int = 3600) -> str:
-    """Genera una URL prefirmada de lectura con expiración (1 h por defecto)."""
-    return _get_client().generate_presigned_url(
+    """Genera una URL prefirmada de lectura con expiración (1 h por defecto).
+
+    Raises StorageNotFoundError si el objeto no existe en el bucket.
+    """
+    from botocore.exceptions import ClientError
+    client = _get_client()
+    try:
+        client.head_object(Bucket=R2_BUCKET, Key=key)
+    except ClientError as ce:
+        code = ce.response.get("Error", {}).get("Code", "")
+        if code in ("404", "NoSuchKey"):
+            raise StorageNotFoundError(key)
+        raise
+    return client.generate_presigned_url(
         "get_object",
         Params={"Bucket": R2_BUCKET, "Key": key},
         ExpiresIn=expires_seconds,

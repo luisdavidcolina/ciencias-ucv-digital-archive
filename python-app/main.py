@@ -16,6 +16,7 @@ from routes.choices      import router as choices_router
 from routes.pages        import router as pages_router
 from routes.backup       import router as backup_router
 from routes.files        import router as files_router
+from routes.papelera     import router as papelera_router
 
 # =============================================================================
 # APLICACION
@@ -266,6 +267,76 @@ def run_migrations():
          )"""),
         ("idx historial_cargos_empleado",
          "CREATE INDEX IF NOT EXISTS idx_historial_cargos_emp ON public.historial_cargos(empleado_id)"),
+
+        # ── Versioning de archivos digitales ──────────────────────────────────
+        ("tabla documento_versiones",
+         """CREATE TABLE IF NOT EXISTS public.documento_versiones (
+             id             INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             tabla          TEXT NOT NULL,
+             documento_id   INTEGER NOT NULL,
+             version_num    INTEGER NOT NULL DEFAULT 1,
+             file_url       TEXT,
+             file_key       TEXT,
+             comentario     TEXT,
+             subido_por     TEXT,
+             created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+         )"""),
+        ("idx versiones_documento",
+         "CREATE INDEX IF NOT EXISTS idx_doc_versiones ON public.documento_versiones(tabla, documento_id)"),
+
+        # ── Soft-delete: papelera de reciclaje ────────────────────────────────
+        ("deleted_at en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ"),
+        ("deleted_by en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS deleted_by TEXT"),
+        ("deleted_at en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ"),
+        ("deleted_by en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS deleted_by TEXT"),
+        ("deleted_at en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ"),
+        ("deleted_by en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS deleted_by TEXT"),
+        ("idx deleted_at datos_archivo",
+         "CREATE INDEX IF NOT EXISTS idx_datos_archivo_deleted ON public.datos_archivo(deleted_at) WHERE deleted_at IS NULL"),
+        ("idx deleted_at datos_rrhh",
+         "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_deleted ON public.datos_rrhh(deleted_at) WHERE deleted_at IS NULL"),
+        ("idx deleted_at empleados",
+         "CREATE INDEX IF NOT EXISTS idx_empleados_deleted ON public.empleados(deleted_at) WHERE deleted_at IS NULL"),
+
+        # ── Actualizar vista para excluir soft-deleted ────────────────────────
+        ("VIEW vw_rrhh_persona_index v2 (excluye soft-deleted)", """
+            CREATE OR REPLACE VIEW public.vw_rrhh_persona_index AS
+            SELECT
+                e.id                                            AS empleado_id,
+                e.cedula,
+                e.rif,
+                e.nombres || ' ' || e.apellidos                 AS persona_raw,
+                COALESCE(c.nombre,  'Sin cargo asignado')       AS cargo,
+                COALESCE(d.nombre,  '')                         AS departamento,
+                COALESCE(el.estados,'Sin estado')               AS estado,
+                TO_CHAR(e.fecha_ingreso,    'YYYY-MM-DD')       AS fecha_ingreso,
+                TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')       AS fecha_jubilacion,
+                TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')       AS fecha_pension,
+                TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD')       AS fecha_nacimiento,
+                COALESCE(e.nivel_educativo, '')                  AS nivel_educativo,
+                COALESCE(e.sexo, '')                             AS sexo,
+                COALESCE(e.foto_url, '')                        AS foto_url,
+                COUNT(dr.id_rrhh)                               AS doc_count,
+                COALESCE(
+                    STRING_AGG(DISTINCT COALESCE(td.nombre_corto, td.nombre, ''), '; ')
+                    FILTER (WHERE td.nombre IS NOT NULL AND td.nombre <> ''),
+                    ''
+                )                                               AS tipos
+            FROM public.empleados e
+            LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
+            LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
+            LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
+            LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id AND dr.deleted_at IS NULL
+            LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
+            WHERE e.deleted_at IS NULL
+            GROUP BY e.id, c.nombre, d.nombre, el.estados
+        """),
     ]
     for label, sql in migrations:
         try:
@@ -350,6 +421,7 @@ app.include_router(choices_router)
 app.include_router(pages_router)
 app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 app.include_router(files_router)
+app.include_router(papelera_router)
 
 
 # =============================================================================
