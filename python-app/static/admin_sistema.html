@@ -274,7 +274,7 @@
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-users mr-2"></i>Usuarios del Sistema</h3></div>
                     <div class="card-body p-0">
                       <table class="table table-sm mb-0" style="font-size:.83rem">
-                        <thead class="bg-light"><tr><th>Usuario</th><th>Módulo</th><th>Rol</th><th>Último Acceso</th><th>Estado</th></tr></thead>
+                        <thead class="bg-light"><tr><th>Usuario</th><th>Módulo</th><th>Rol</th><th>Último Acceso</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody id="sys-users-tbody"></tbody>
                       </table>
                     </div>
@@ -652,10 +652,35 @@ async function loadSystemStats() {
           <td>${u.rol||"—"}</td>
           <td class="text-muted small">${lastLogin}</td>
           <td><span class="badge badge-${active?"success":"secondary"}">${active?"Activo":"Inactivo"}</span></td>
+          <td>
+            <button class="btn btn-xs btn-outline-secondary" onclick="handleSysChangePassword(${u.id},'${u.usuario}')" title="Cambiar contraseña">
+              <i class="fas fa-key"></i> Clave
+            </button>
+          </td>
         </tr>`;
       }).join("");
     }
   } catch(e) { console.error("System stats error:", e); }
+}
+
+async function handleSysChangePassword(uid, username) {
+  const newPass = prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
+  if (newPass === null) return;
+  if (newPass.trim().length < 6) {
+    showToast("La contraseña debe tener al menos 6 caracteres.", "warning");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/users/${uid}/password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_password: newPass.trim(), requester: getCurrentUser()?.username || "admin" }),
+    });
+    if (!res.ok) throw new Error();
+    showToast(`Contraseña de "${username}" actualizada.`, "success");
+  } catch {
+    showToast("Error al cambiar la contraseña.", "error");
+  }
 }
 
 async function handleExportBackup() {
