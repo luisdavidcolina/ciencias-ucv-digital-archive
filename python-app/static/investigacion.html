@@ -167,7 +167,30 @@
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
-    </style>
+    
+        .custom-accordion .accordion-item {
+            background-color: var(--card-bg) !important;
+            border-radius: 12px !important;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--table-border);
+        }
+        .custom-accordion .accordion-item:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-color: var(--ucv-accent) !important;
+        }
+        .custom-accordion .accordion-button {
+            color: #fff !important;
+        }
+        .custom-accordion .accordion-button:not(.collapsed) {
+            background-color: rgba(46, 109, 180, 0.2) !important;
+            box-shadow: none;
+            border-bottom: 1px solid var(--table-border);
+        }
+        .custom-accordion .accordion-button::after {
+            filter: invert(1);
+        }
+</style>
 </head>
 <body>
 
@@ -195,109 +218,152 @@
             <h2 class="section-title"><i class="fas fa-server me-3 text-info"></i> I. Arquitecturas de Gestión Documental (DMS / ECM)</h2>
             <p class="text-muted mb-5 fs-5">Análisis de profundidad sobre los sistemas y plataformas (Enterprise Content Management) dedicados a la clasificación semántica y preservación de millones de documentos.</p>
             
-            <div class="row g-4 mb-5">
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.hyland.com/en/products/alfresco-platform" target="_blank" class="sys-link">Alfresco Community <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-primary fs-6">Java / Spring</span>
-                        </div>
-                        <h5 class="text-info mb-4">El referente absoluto en ECM Open-Source</h5>
-                        <p class="text-light opacity-75">Alfresco es mucho más que un repositorio; es un motor de procesos documentales masivos estructurado sobre arquitectura Java. A nivel técnico, su fortaleza radica en la integración nativa del motor de búsqueda Apache Solr, lo que permite realizar Full-Text Search (FTS) sobre volúmenes de millones de PDFs en milisegundos. Soporta un modelo de metadatos dinámicos mediante XML que se adapta perfectamente a normativas archivísticas complejas como ISAD-G.</p>
-                        <p class="text-light opacity-75">Comercialmente, incluye un motor de automatización (Activiti) para configurar Workflows BPMN altamente complejos (rutas de aprobación jerárquica) y expone una API REST exhaustiva (CMIS) que facilita su conexión con cualquier intranet o ERP universitario.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Infraestructura):</strong> Su monolito en Java exige altísimos recursos de servidor (CPU y RAM). La versión <em>Community</em> (Open Source) carece de soporte oficial, carece de clusterización nativa para alta disponibilidad y sufre severas penalizaciones de rendimiento si el volumen documental crece exponencialmente sin una optimización profunda de bases de datos, requiriendo un equipo dedicado de ingenieros backend para mantenerlo estable.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.microsoft.com/microsoft-365/sharepoint/" target="_blank" class="sys-link">SharePoint Online <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-success fs-6">SaaS / Microsoft 365</span>
-                        </div>
-                        <h5 class="text-info mb-4">El gigante corporativo y la hiper-integración</h5>
-                        <p class="text-light opacity-75">SharePoint es, por cuota de mercado, el DMS y portal de intranet más utilizado en el ecosistema privado. Su propuesta de valor se basa en la cero fricción: al ser un modelo SaaS nativo del ecosistema Microsoft, se integra a nivel de kernel con Azure Active Directory, Office 365 (Word, Excel), Outlook y Teams.</p>
-                        <p class="text-light opacity-75">Técnicamente, su característica más brillante es el Co-authoring (edición colaborativa síncrona), control de versiones automático, etiquetas de retención inteligentes y prevención de pérdida de datos (DLP). Su búsqueda está impulsada por Microsoft Graph, permitiendo descubrir documentos basados en la relación semántica de los usuarios de una institución.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Vendor Lock-in):</strong> Atrapa a la institución en el ecosistema privativo de Microsoft. Además de las costosas licencias nominales (pagas por cada empleado mes a mes), impone límites estrictos de almacenamiento (Tenant Storage). Cuando una universidad excede los Terabytes de la cuota base debido a expedientes masivos, Microsoft cobra tarifas exhorbitantes por gigabyte adicional de almacenamiento. La extracción de datos para migrar a un sistema propio es un proceso técnicamente complejo y restrictivo.
+                        <div class="accordion mb-5 custom-accordion" id="accordionDMS">
+                <!-- Alfresco -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingAlfresco">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAlfresco">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Alfresco Community</h4>
+                                <span class="badge bg-primary fs-6">Java / Spring</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseAlfresco" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El referente absoluto en ECM Open-Source <a href="https://www.hyland.com/en/products/alfresco-platform" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Alfresco es mucho más que un repositorio; es un motor de procesos documentales masivos estructurado sobre arquitectura Java. A nivel técnico, su fortaleza radica en la integración nativa del motor de búsqueda Apache Solr, lo que permite realizar Full-Text Search (FTS) sobre volúmenes de millones de PDFs en milisegundos. Soporta un modelo de metadatos dinámicos mediante XML que se adapta perfectamente a normativas archivísticas complejas como ISAD-G.</p>
+                            <p class="text-light opacity-75">Comercialmente, incluye un motor de automatización (Activiti) para configurar Workflows BPMN altamente complejos (rutas de aprobación jerárquica) y expone una API REST exhaustiva (CMIS) que facilita su conexión con cualquier intranet o ERP universitario.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Infraestructura):</strong> Su monolito en Java exige altísimos recursos de servidor (CPU y RAM). La versión <em>Community</em> (Open Source) carece de soporte oficial, carece de clusterización nativa para alta disponibilidad y sufre severas penalizaciones de rendimiento si el volumen documental crece exponencialmente sin una optimización profunda de bases de datos, requiriendo un equipo dedicado de ingenieros backend para mantenerlo estable.
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://dspace.lyrasis.org/" target="_blank" class="sys-link">DSpace <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-secondary fs-6">Java / PostgreSQL</span>
-                        </div>
-                        <h5 class="text-info mb-4">El estándar inamovible de la preservación académica</h5>
-                        <p class="text-light opacity-75">Desarrollado conjuntamente por el MIT y HP, DSpace es la espina dorsal de los repositorios académicos y bibliotecas digitales mundiales. La propia UCV lo utiliza actualmente en su instancia de Saber UCV. Su arquitectura está obsesivamente diseñada alrededor de esquemas de metadatos estandarizados (Dublin Core) y su compatibilidad nativa e implacable con el protocolo OAI-PMH.</p>
-                        <p class="text-light opacity-75">Esta última característica garantiza la interoperabilidad con cosechadores internacionales, permitiendo que un documento institucional alojado localmente sea inmediatamente indexado por redes globales de investigación. Además, asegura la asignación de identificadores persistentes (Handles/DOIs), previniendo la degradación de enlaces a largo plazo.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Rigidez Operativa):</strong> DSpace es una fenomenal "bóveda inerte" para la exhibición final de documentos estáticos e históricos. Sin embargo, carece de la agilidad, gestión de estados y UI reactiva necesarias para operar un archivo administrativo vivo (como recursos humanos). Sus flujos de ingesta de documentos son lentos, engorrosos y están pensados para bibliotecólogos, no para analistas de RRHH que necesitan velocidad y edición.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://docs.paperless-ngx.com/" target="_blank" class="sys-link">Paperless-ngx <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-warning text-dark fs-6">Python / Django / Redis</span>
-                        </div>
-                        <h5 class="text-info mb-4">Inteligencia y automatización para pequeñas escalas</h5>
-                        <p class="text-light opacity-75">Paperless-ngx es un DMS moderno, extremadamente veloz y ágil, construido bajo el mismo stack tecnológico central del Archivo UCV (Python, Redis, PostgreSQL). Su enfoque no es el almacenamiento jerárquico tradicional, sino la automatización absoluta de la ingesta: incorpora un potente pipeline de OCR (Optical Character Recognition) potenciado por Tesseract y clasificadores de Machine Learning.</p>
-                        <p class="text-light opacity-75">Esto significa que puede monitorear bandejas de correo o escáneres en red, tomar la imagen de un documento físico, leer todo su contenido, deducir de qué tipo de documento se trata (ej. "Constancia Médica"), asignarle etiquetas y guardarlo automáticamente en formato PDF/A archivístico, todo indexado en un motor de búsqueda asombrosamente rápido.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Inviabilidad Enterprise):</strong> Aunque tecnológicamente brillante, está diseñado para uso de individuos u oficinas muy pequeñas. Carece completamente del modelo de seguridad corporativa necesario: no posee control de acceso basado en roles (RBAC) sofisticado, no soporta jerarquías organizacionales, ni permite replicar normativas legales complejas sobre el acceso a los datos, lo que lo descarta para el núcleo central de una universidad masiva.
+                <!-- SharePoint -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingSharepoint">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSharepoint">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">SharePoint Online</h4>
+                                <span class="badge bg-success fs-6">SaaS / Microsoft 365</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseSharepoint" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El gigante corporativo y la hiper-integración <a href="https://www.microsoft.com/microsoft-365/sharepoint/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">SharePoint es, por cuota de mercado, el DMS y portal de intranet más utilizado en el ecosistema privado. Su propuesta de valor se basa en la cero fricción: al ser un modelo SaaS nativo del ecosistema Microsoft, se integra a nivel de kernel con Azure Active Directory, Office 365 (Word, Excel), Outlook y Teams.</p>
+                            <p class="text-light opacity-75">Técnicamente, su característica más brillante es el Co-authoring (edición colaborativa síncrona), control de versiones automático, etiquetas de retención inteligentes y prevención de pérdida de datos (DLP). Su búsqueda está impulsada por Microsoft Graph, permitiendo descubrir documentos basados en la relación semántica de los usuarios de una institución.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Vendor Lock-in):</strong> Atrapa a la institución en el ecosistema privativo de Microsoft. Además de las costosas licencias nominales (pagas por cada empleado mes a mes), impone límites estrictos de almacenamiento (Tenant Storage). Cuando una universidad excede los Terabytes de la cuota base debido a expedientes masivos, Microsoft cobra tarifas exhorbitantes por gigabyte adicional de almacenamiento. La extracción de datos para migrar a un sistema propio es un proceso técnicamente complejo y restrictivo.
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://www.openkm.com/" target="_blank" class="sys-link">OpenKM Community <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">El equilibrio para PYMEs y Administración Pública</h5>
-                        <p class="text-light opacity-75 mb-3">OpenKM se perfila como la alternativa directa a Alfresco, compartiendo su ADN en Java. Su penetración en ministerios y gobiernos latinoamericanos se debe a que exige menos recursos de hardware y provee interfaces de administración ligeramente más directas.</p>
-                        <p class="text-light opacity-75 mb-0">Entre sus funciones core destacan el control estricto de auditoría, motor de OCR zonal (para leer datos en coordenadas específicas de una planilla), trazabilidad de acciones, y conectores pre-empaquetados para escaners TWAIN, además de módulos para firmas digitales nativas y criptografía.</p>
+                <!-- DSpace -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingDspace">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDspace">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">DSpace</h4>
+                                <span class="badge bg-secondary fs-6">Java / PostgreSQL</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseDspace" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El estándar inamovible de la preservación académica <a href="https://dspace.lyrasis.org/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Desarrollado conjuntamente por el MIT y HP, DSpace es la espina dorsal de los repositorios académicos y bibliotecas digitales mundiales. La propia UCV lo utiliza actualmente en su instancia de Saber UCV. Su arquitectura está obsesivamente diseñada alrededor de esquemas de metadatos estandarizados (Dublin Core) y su compatibilidad nativa e implacable con el protocolo OAI-PMH.</p>
+                            <p class="text-light opacity-75">Esta última característica garantiza la interoperabilidad con cosechadores internacionales, permitiendo que un documento institucional alojado localmente sea inmediatamente indexado por redes globales de investigación. Además, asegura la asignación de identificadores persistentes (Handles/DOIs), previniendo la degradación de enlaces a largo plazo.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Rigidez Operativa):</strong> DSpace es una fenomenal "bóveda inerte" para la exhibición final de documentos estáticos e históricos. Sin embargo, carece de la agilidad, gestión de estados y UI reactiva necesarias para operar un archivo administrativo vivo (como recursos humanos). Sus flujos de ingesta de documentos son lentos, engorrosos y están pensados para bibliotecólogos, no para analistas de RRHH que necesitan velocidad y edición.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://www.nuxeo.com/" target="_blank" class="sys-link">Nuxeo Platform <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">ECM de altísima gama y Microservicios</h5>
-                        <p class="text-light opacity-75 mb-3">Nuxeo representa la evolución moderna del ECM tradicional hacia las plataformas de servicios de contenido (CSP). En lugar de un monolito, su arquitectura está diseñada modularmente para la nube pública (AWS/GCP), lo que le permite escalar lateralmente sin límites teóricos.</p>
-                        <p class="text-light opacity-75 mb-0">Es capaz de ingerir y procesar terabytes de datos visuales, expedientes y multimedia. Soporta modelado de datos NoSQL complejos, permitiendo crear relaciones semánticas entre documentos, empleados y departamentos de manera dinámica. Sus políticas de ciclo de vida (retención, archivado en capas frías de almacenamiento y expurgo legal) son las más avanzadas del mercado, a un costo empresarial premium.</p>
+                <!-- Paperless-ngx -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingPaperless">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePaperless">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Paperless-ngx</h4>
+                                <span class="badge bg-warning text-dark fs-6">Python / Django / Redis</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapsePaperless" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">Inteligencia y automatización para pequeñas escalas <a href="https://docs.paperless-ngx.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Paperless-ngx es un DMS moderno, extremadamente veloz y ágil, construido bajo el mismo stack tecnológico central del Archivo UCV (Python, Redis, PostgreSQL). Su enfoque no es el almacenamiento jerárquico tradicional, sino la automatización absoluta de la ingesta: incorpora un potente pipeline de OCR (Optical Character Recognition) potenciado por Tesseract y clasificadores de Machine Learning.</p>
+                            <p class="text-light opacity-75">Esto significa que puede monitorear bandejas de correo o escáneres en red, tomar la imagen de un documento físico, leer todo su contenido, deducir de qué tipo de documento se trata (ej. "Constancia Médica"), asignarle etiquetas y guardarlo automáticamente en formato PDF/A archivístico, todo indexado en un motor de búsqueda asombrosamente rápido.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Inviabilidad Enterprise):</strong> Aunque tecnológicamente brillante, está diseñado para uso de individuos u oficinas muy pequeñas. Carece completamente del modelo de seguridad corporativa necesario: no posee control de acceso basado en roles (RBAC) sofisticado, no soporta jerarquías organizacionales, ni permite replicar normativas legales complejas sobre el acceso a los datos, lo que lo descarta para el núcleo central de una universidad masiva.
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-12">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://nextcloud.com/" target="_blank" class="sys-link">Nextcloud Enterprise <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">Soberanía de Datos (EFSS) · La nube privada</h5>
-                        <p class="text-light opacity-75 mb-3">En el contexto del espionaje corporativo y las leyes de protección de datos europeas (GDPR), Nextcloud emergió como la solución de soberanía de datos definitiva. A nivel arquitectónico (PHP/LAMP), es esencialmente un ecosistema "Google Workspace" que la institución puede instalar y controlar al 100% en sus propios servidores físicos.</p>
-                        <p class="text-light opacity-75 mb-0">Más allá de solo guardar archivos, integra suite ofimática en línea (Nextcloud Office via Collabora o OnlyOffice), permitiendo Co-Authoring, chat encriptado, calendarios y flujos de aprobación. Para el ámbito universitario que recela del cloud público estadounidense, Nextcloud representa la autonomía total, integrando almacenamiento federado (poder compartir archivos directamente de un servidor Nextcloud de la UCV al de otra universidad sin pasar por internet público).</p>
+                <!-- OpenKM -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingOpenkm">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOpenkm">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">OpenKM Community</h4>
+                                <span class="badge bg-secondary fs-6">Java / Tomcat</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseOpenkm" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El equilibrio para PYMEs y Administración Pública <a href="https://www.openkm.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">OpenKM se perfila como la alternativa directa a Alfresco, compartiendo su ADN en Java. Su penetración en ministerios y gobiernos latinoamericanos se debe a que exige menos recursos de hardware y provee interfaces de administración ligeramente más directas.</p>
+                            <p class="text-light opacity-75 mb-0">Entre sus funciones core destacan el control estricto de auditoría, motor de OCR zonal (para leer datos en coordenadas específicas de una planilla), trazabilidad de acciones, y conectores pre-empaquetados para escaners TWAIN, además de módulos para firmas digitales nativas y criptografía.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nuxeo -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingNuxeo">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNuxeo">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Nuxeo Platform</h4>
+                                <span class="badge bg-info text-dark fs-6">NoSQL / Microservicios</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseNuxeo" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">ECM de altísima gama y Microservicios <a href="https://www.nuxeo.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">Nuxeo representa la evolución moderna del ECM tradicional hacia las plataformas de servicios de contenido (CSP). En lugar de un monolito, su arquitectura está diseñada modularmente para la nube pública (AWS/GCP), lo que le permite escalar lateralmente sin límites teóricos.</p>
+                            <p class="text-light opacity-75 mb-0">Es capaz de ingerir y procesar terabytes de datos visuales, expedientes y multimedia. Soporta modelado de datos NoSQL complejos, permitiendo crear relaciones semánticas entre documentos, empleados y departamentos de manera dinámica. Sus políticas de ciclo de vida (retención, archivado en capas frías de almacenamiento y expurgo legal) son las más avanzadas del mercado, a un costo empresarial premium.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nextcloud -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingNextcloud">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNextcloud">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Nextcloud Enterprise</h4>
+                                <span class="badge bg-light text-dark fs-6">PHP / LAMP</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseNextcloud" class="accordion-collapse collapse" data-bs-parent="#accordionDMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">Soberanía de Datos (EFSS) · La nube privada <a href="https://nextcloud.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">En el contexto del espionaje corporativo y las leyes de protección de datos europeas (GDPR), Nextcloud emergió como la solución de soberanía de datos definitiva. A nivel arquitectónico (PHP/LAMP), es esencialmente un ecosistema "Google Workspace" que la institución puede instalar y controlar al 100% en sus propios servidores físicos.</p>
+                            <p class="text-light opacity-75 mb-0">Más allá de solo guardar archivos, integra suite ofimática en línea (Nextcloud Office via Collabora o OnlyOffice), permitiendo Co-Authoring, chat encriptado, calendarios y flujos de aprobación. Para el ámbito universitario que recela del cloud público estadounidense, Nextcloud representa la autonomía total, integrando almacenamiento federado (poder compartir archivos directamente de un servidor Nextcloud de la UCV al de otra universidad sin pasar por internet público).</p>
+                        </div>
                     </div>
                 </div>
             </div>
-
             <!-- Tabla DMS -->
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
@@ -527,106 +593,105 @@
             <h2 class="section-title mt-5"><i class="fas fa-user-tie me-3 text-warning"></i> II. Sistemas de RRHH (Expedientes y HRMS)</h2>
             <p class="text-muted mb-5 fs-5">Evaluación arquitectónica y de modelo de datos de las plataformas de Capital Humano, contrastando con el requerimiento normativo del archivo universitario.</p>
             
-            <div class="row g-4 mb-5">
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.workday.com/" target="_blank" class="sys-link">Workday</a> / <a href="https://www.sap.com/products/hcm.html" target="_blank" class="sys-link">SAP <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-danger fs-6">Enterprise HCM SaaS</span>
-                        </div>
-                        <h5 class="text-info mb-4">Los titanes indiscutibles del Capital Humano Global</h5>
-                        <p class="text-light opacity-75">Workday y SAP representan el estrato más alto (Tier 1) del software de recursos humanos mundial. No son simples repositorios documentales, sino suites HCM (Human Capital Management) integrales. Su arquitectura de datos permite modelar corporaciones multinacionales, gestionando desde la nómina multimonedas, beneficios financieros, algoritmos de reclutamiento predictivo hasta planes de sucesión y evaluaciones 360 continuas de desempeño.</p>
-                        <p class="text-light opacity-75">Su UX de altísimo nivel está respaldada por una infraestructura en la nube elástica que procesa millones de transacciones transcontinentales en tiempo real, impulsados por potentes motores de IA para predecir fugas de talento.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Inflexibilidad Latina):</strong> A pesar de su grandeza, sus licencias base cuestan millones de dólares (imposible para una universidad pública latina). Peor aún, su modelo de datos core es extremadamente rígido y estandarizado al mercado norteamericano o europeo. Adaptarlos a las aberraciones legales latinoamericanas (fideicomisos, múltiples bonos no salariales variables, cajas de ahorro forzosas y normativas de la LOTTT) es un proceso infernal que demanda implementaciones de varios años y firmas consultoras de alto costo (Deloitte, Accenture).
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.rippling.com/" target="_blank" class="sys-link">Rippling <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-info text-dark fs-6">HR + IT Automation Cloud</span>
-                        </div>
-                        <h5 class="text-info mb-4">La unificación del hardware, software y recursos humanos</h5>
-                        <p class="text-light opacity-75">Rippling rompió el paradigma del mercado SaaS al fusionar el departamento de Recursos Humanos con el de TI. A nivel arquitectónico, su magia no reside en guardar PDFs, sino en la "hiper-automatización" de identidades. Al registrar a un empleado nuevo, Rippling no solo genera el contrato; a través de profundas APIs, aprovisiona automáticamente su cuenta de correo corporativo (Google Workspace/Office 365), le compra una computadora virtual, le otorga acceso a Slack y lo afilia al seguro médico, todo en un solo click.</p>
-                        <p class="text-light opacity-75">De igual manera, al ser despedido, el sistema revoca criptográficamente todos los accesos digitales de la persona en todos los softwares de la empresa en menos de un segundo, reduciendo a cero las fugas de datos y simplificando el off-boarding masivo.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Dependencia Ecosistémica):</strong> El gigantesco valor de Rippling asume que la institución cuenta con un ecosistema tecnológico 100% centralizado, moderno y en la nube. Si la universidad maneja sistemas internos antiguos, correos institucionales auto-alojados (legacy) sin APIs abiertas o procesos burocráticos físicos ineludibles, Rippling pierde por completo su poder de automatización, convirtiéndose en un HRMS exageradamente costoso y subutilizado.
+                        <div class="accordion mb-5 custom-accordion" id="accordionHRMS">
+                <!-- Workday/SAP -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingWorkday">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWorkday">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Workday / SAP</h4>
+                                <span class="badge bg-danger fs-6">Enterprise HCM SaaS</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseWorkday" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">Los titanes indiscutibles del Capital Humano Global <a href="https://www.workday.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Workday y SAP representan el estrato más alto (Tier 1) del software de recursos humanos mundial. No son simples repositorios documentales, sino suites HCM (Human Capital Management) integrales. Su arquitectura de datos permite modelar corporaciones multinacionales, gestionando desde la nómina multimonedas, beneficios financieros, algoritmos de reclutamiento predictivo hasta planes de sucesión y evaluaciones 360 continuas de desempeño.</p>
+                            <p class="text-light opacity-75">Su UX de altísimo nivel está respaldada por una infraestructura en la nube elástica que procesa millones de transacciones transcontinentales en tiempo real, impulsados por potentes motores de IA para predecir fugas de talento.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Inflexibilidad Latina):</strong> A pesar de su grandeza, sus licencias base cuestan millones de dólares (imposible para una universidad pública latina). Peor aún, su modelo de datos core es extremadamente rígido y estandarizado al mercado norteamericano o europeo. Adaptarlos a las aberraciones legales latinoamericanas (fideicomisos, múltiples bonos no salariales variables, cajas de ahorro forzosas y normativas de la LOTTT) es un proceso infernal que demanda implementaciones de varios años y firmas consultoras de alto costo (Deloitte, Accenture).
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.odoo.com/app/employees" target="_blank" class="sys-link">Odoo HR <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-warning text-dark fs-6">ERP Python / PostgreSQL</span>
+                <!-- OrangeHRM -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingOrangehrm">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrangehrm">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">OrangeHRM</h4>
+                                <span class="badge bg-success fs-6">HRMS Open Source (PHP)</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseOrangehrm" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El modelo de datos afín al Archivo Tradicional <a href="https://www.orangehrm.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Uno de los HRMS independientes (no atados a un ERP) más completos del ecosistema open-source. A nivel de arquitectura de la información, el módulo documental (PIM - Personal Information Management) de OrangeHRM es nuestra mayor referencia técnica.</p>
+                            <p class="text-light opacity-75">¿La razón? Modela los perfiles de empleados a través de anexos documentales categorizados estrictamente, un patrón relacional que guarda una equivalencia casi matemática con nuestra necesidad de separar los expedientes físicos universitarios en "Partes" (Parte I, Parte II, Parte III, correspondientes a contratos, currículo y sanciones de la Ley Orgánica del Trabajo LOTTT).</p>
                         </div>
-                        <h5 class="text-info mb-4">La flexibilidad del módulo dentro del ERP</h5>
-                        <p class="text-light opacity-75">Odoo no es un HRMS puro, es un ERP completo. Sin embargo, su submódulo de Recursos Humanos es técnicamente fascinante. Al compartir el mismo lenguaje (Python) y base de datos (PostgreSQL) que nuestro desarrollo en la UCV, nos ofrece valiosas lecciones arquitectónicas. Su modelo relacional integra la gestión de ausentismo directamente con la facturación y la contabilidad analítica en una misma transacción ACID.</p>
-                        <p class="text-light opacity-75">Destaca además su sistema de automatización de eventos impulsado por Cron-jobs: envía alertas proactivas a los supervisores cuando los contratos (o permisos médicos temporales) están por caducar.</p>
-                        <div class="caveat-box">
-                            <strong><i class="fas fa-exclamation-triangle text-danger me-2"></i> Realidad Práctica (Modelo Freemium Tramposo):</strong> Odoo se comercializa bajo un esquema Open Core muy agresivo. Si bien el módulo base de HR es open-source, casi todas las funcionalidades verdaderamente automatizadas, generadores de reportes complejos (Studio) y auditoría profunda, están bloqueados por muros de pago en su versión Enterprise privativa, requiriendo comprar caros módulos de terceros en su Marketplace.
+                    </div>
+                </div>
+
+                <!-- BambooHR -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingBamboohr">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBamboohr">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">BambooHR</h4>
+                                <span class="badge bg-primary fs-6">SaaS</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseBamboohr" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">La excelencia en UI / UX para PYMEs <a href="https://www.bamboohr.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">Si Workday domina el mercado corporativo, BambooHR domina a las medianas empresas. A nivel de ingeniería de sistemas no es el más complejo, pero su aporte radica en la Interfaz de Usuario (UI) y la Experiencia (UX).</p>
+                            <p class="text-light opacity-75 mb-0">BambooHR logró convertir los densos y aburridos procesos burocráticos de HR (evaluaciones, firmas, subida de reposos) en interfaces fluidas, limpias, hermosas y autoexplicativas. Es nuestra principal meta de diseño en la UCV: que el software no se sienta como un viejo sistema gubernamental burocrático, sino como una app ágil moderna.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-6">
-                    <div class="card card-system">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="fw-bold mb-0">
-                                <a href="https://www.orangehrm.com/" target="_blank" class="sys-link">OrangeHRM <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                            </h3>
-                            <span class="badge bg-success fs-6">HRMS Open Source (PHP)</span>
+                <!-- Factorial -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingFactorial">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFactorial">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Factorial</h4>
+                                <span class="badge bg-secondary fs-6">SaaS</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseFactorial" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El unicornio español del Onboarding <a href="https://factorialhr.com/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">Sistema SaaS de vertiginoso crecimiento en Iberoamérica. Se diseñó desde cero para resolver el infierno burocrático del "papeleo de ingreso" (Onboarding). Todo es digital, móvil first y descentralizado.</p>
+                            <p class="text-light opacity-75 mb-0">Aporta a nuestro análisis su flujo impecable de Firma Electrónica masiva: RRHH carga 50 contratos PDF, el sistema los parsea y los empuja a la app móvil de cada empleado para que firmen desde la pantalla del celular con validez legal europea (eIDAS), cerrando el ciclo documental sin imprimir una sola hoja.</p>
                         </div>
-                        <h5 class="text-info mb-4">El modelo de datos afín al Archivo Tradicional</h5>
-                        <p class="text-light opacity-75">Uno de los HRMS independientes (no atados a un ERP) más completos del ecosistema open-source. A nivel de arquitectura de la información, el módulo documental (PIM - Personal Information Management) de OrangeHRM es nuestra mayor referencia técnica.</p>
-                        <p class="text-light opacity-75">¿La razón? Modela los perfiles de empleados a través de anexos documentales categorizados estrictamente, un patrón relacional que guarda una equivalencia casi matemática con nuestra necesidad de separar los expedientes físicos universitarios en "Partes" (Parte I, Parte II, Parte III, correspondientes a contratos, currículo y sanciones de la Ley Orgánica del Trabajo LOTTT).</p>
                     </div>
                 </div>
 
-                <div class="col-12 col-xxl-4">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://www.bamboohr.com/" target="_blank" class="sys-link">BambooHR <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">La excelencia en UI / UX para PYMEs</h5>
-                        <p class="text-light opacity-75 mb-3">Si Workday domina el mercado corporativo, BambooHR domina a las medianas empresas. A nivel de ingeniería de sistemas no es el más complejo, pero su aporte radica en la Interfaz de Usuario (UI) y la Experiencia (UX).</p>
-                        <p class="text-light opacity-75 mb-0">BambooHR logró convertir los densos y aburridos procesos burocráticos de HR (evaluaciones, firmas, subida de reposos) en interfaces fluidas, limpias, hermosas y autoexplicativas. Es nuestra principal meta de diseño en la UCV: que el software no se sienta como un viejo sistema gubernamental burocrático, sino como una app ágil moderna.</p>
-                    </div>
-                </div>
-
-                <div class="col-12 col-xxl-4">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://factorialhr.com/" target="_blank" class="sys-link">Factorial <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">El unicornio español del Onboarding</h5>
-                        <p class="text-light opacity-75 mb-3">Sistema SaaS de vertiginoso crecimiento en Iberoamérica. Se diseñó desde cero para resolver el infierno burocrático del "papeleo de ingreso" (Onboarding). Todo es digital, móvil first y descentralizado.</p>
-                        <p class="text-light opacity-75 mb-0">Aporta a nuestro análisis su flujo impecable de Firma Electrónica masiva: RRHH carga 50 contratos PDF, el sistema los parsea y los empuja a la app móvil de cada empleado para que firmen desde la pantalla del celular con validez legal europea (eIDAS), cerrando el ciclo documental sin imprimir una sola hoja.</p>
-                    </div>
-                </div>
-
-                <div class="col-12 col-xxl-4">
-                    <div class="card card-system">
-                        <h3 class="fw-bold mb-1">
-                            <a href="https://www.buk.cl/" target="_blank" class="sys-link">Buk <i class="fas fa-external-link-alt ms-2 fs-6 text-info"></i></a>
-                        </h3>
-                        <h5 class="text-info mb-4">Hiper-adaptabilidad a la Ley Latina</h5>
-                        <p class="text-light opacity-75 mb-3">Startup chilena que barrió con los sistemas legados en Sudamérica. Su gran secreto arquitectónico es un "Motor de Reglas de Negocio" (Business Rule Engine) expuesto al usuario final.</p>
-                        <p class="text-light opacity-75 mb-0">Mientras SAP o Workday requieren codificación profunda para adaptar un bono nuevo o una reforma fiscal repentina (común en Chile, Perú, Colombia), Buk permite a los administradores de RRHH crear fórmulas lógicas y modificar la estructura salarial o documental de manera visual, demostrando que la adaptabilidad extrema es el único camino en Latinoamérica.</p>
+                <!-- Buk -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingBuk">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBuk">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Buk</h4>
+                                <span class="badge bg-info text-dark fs-6">SaaS / Latam</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseBuk" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">Hiper-adaptabilidad a la Ley Latina <a href="https://www.buk.cl/" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75 mb-3">Startup chilena que barrió con los sistemas legados en Sudamérica. Su gran secreto arquitectónico es un "Motor de Reglas de Negocio" (Business Rule Engine) expuesto al usuario final.</p>
+                            <p class="text-light opacity-75 mb-0">Mientras SAP o Workday requieren codificación profunda para adaptar un bono nuevo o una reforma fiscal repentina (común en Chile, Perú, Colombia), Buk permite a los administradores de RRHH crear fórmulas lógicas y modificar la estructura salarial o documental de manera visual, demostrando que la adaptabilidad extrema es el único camino en Latinoamérica.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
             <div class="table-responsive mb-5">
                 <table class="table table-hover align-middle">
                     <thead>
