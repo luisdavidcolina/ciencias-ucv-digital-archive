@@ -648,6 +648,18 @@
                   </div>
                 </div>
               </div>
+              <div class="card card-info mt-3">
+                <div class="card-header py-2">
+                  <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-download mr-1"></i> Exportar datos del módulo RRHH</h3>
+                </div>
+                <div class="card-body py-2 px-3">
+                  <p class="text-muted small mb-2">Descarga un JSON con empleados, documentos y tipos del módulo RRHH. Útil como respaldo local.</p>
+                  <button class="btn btn-info btn-sm" onclick="handleModuleExport('rrhh')">
+                    <i class="fas fa-download mr-1"></i>Descargar backup RRHH (.json)
+                  </button>
+                  <div id="ds-export-status-rrhh" class="mt-2 small"></div>
+                </div>
+              </div>
             </div>
 
             <!-- PESTAÑA: PAPELERA -->
