@@ -2369,6 +2369,19 @@ body.dark-mode a:hover               { color:#8bbce8 !important; }
 
 body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
 
+/* Status badges */
+.ds-status-badge { font-size: 0.72rem !important; letter-spacing: 0.01em; }
+@keyframes ds-pulse-warning {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0); }
+}
+.ds-status-revision {
+  animation: ds-pulse-warning 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-status-revision { animation: none; }
+}
+
 /* Dark mode adjustments for the panel itself */
 body.dark-mode .ds-theme-panel         { background:#1e222b !important; }
 body.dark-mode .ds-panel-section       { border-color:#2e3342 !important; }

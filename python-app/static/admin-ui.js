@@ -203,10 +203,10 @@ function openQuickStatusMenu(btn, docId, currentStatus, modulo) {
   document.querySelectorAll(".ds-quick-status-menu").forEach(m => m.remove());
 
   const options = [
-    { val: "aprobado",  label: "✓ Aprobado",  cls: "text-success" },
-    { val: "revision",  label: "⏳ Revisión",  cls: "text-warning" },
-    { val: "draft",     label: "✎ Borrador",   cls: "text-secondary" },
-    { val: "rechazado", label: "✗ Rechazado",  cls: "text-danger" },
+    { val: "aprobado",  label: '<i class="fas fa-check mr-1"></i>Aprobado',           cls: "text-success" },
+    { val: "revision",  label: '<i class="fas fa-clock mr-1"></i>Pendiente revisión', cls: "text-warning" },
+    { val: "draft",     label: '<i class="fas fa-pencil-alt mr-1"></i>Borrador',      cls: "text-secondary" },
+    { val: "rechazado", label: '<i class="fas fa-times mr-1"></i>Rechazado',          cls: "text-danger" },
   ];
 
   const menu = document.createElement("div");

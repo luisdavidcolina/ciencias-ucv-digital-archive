@@ -378,10 +378,11 @@ async function loadRecentSubmissions() {
     }
 
     const statusBadge = s => {
-      const map = { aprobado: "badge-success", revision: "badge-warning", draft: "badge-secondary", rechazado: "badge-danger" };
-      const label = { aprobado: "Aprobado", revision: "En revisión", draft: "Borrador", rechazado: "Rechazado" };
+      const icons = { aprobado: "fa-check", revision: "fa-clock", draft: "fa-pencil-alt", rechazado: "fa-times" };
+      const cls   = { aprobado: "badge-success", revision: "badge-warning text-dark", draft: "badge-secondary", rechazado: "badge-danger" };
+      const label = { aprobado: "Aprobado", revision: "Revisión", draft: "Borrador", rechazado: "Rechazado" };
       const st = s || "aprobado";
-      return `<span class="badge ${map[st] || 'badge-secondary'}" style="font-size:0.65rem;">${label[st] || st}</span>`;
+      return `<span class="badge ${cls[st] || 'badge-secondary'} ds-status-badge" style="font-size:0.65rem;" title="${label[st] || st}"><i class="fas ${icons[st] || 'fa-circle'} mr-1"></i>${label[st] || st}</span>`;
     };
 
     containerEl.innerHTML = records.map(item => {
@@ -580,16 +581,17 @@ async function _renderMonitorStatusBadges() {
     if (!res.ok) return;
     const counts = await res.json();
     const defs = [
-      { key: "revision",  label: "En Revisión", cls: "badge-warning text-dark" },
-      { key: "draft",     label: "Borrador",     cls: "badge-secondary" },
-      { key: "rechazado", label: "Rechazados",   cls: "badge-danger" },
+      { key: "revision",  label: "Pendientes revisión", cls: "badge-warning text-dark", icon: "fa-clock" },
+      { key: "draft",     label: "Borrador",            cls: "badge-secondary",         icon: "fa-pencil-alt" },
+      { key: "rechazado", label: "Rechazados",          cls: "badge-danger",            icon: "fa-times-circle" },
     ];
     badgesEl.innerHTML = defs
       .filter(d => (counts[d.key] || 0) > 0)
       .map(d => `
-        <button class="badge ${d.cls}" style="cursor:pointer;font-size:0.78rem;padding:5px 9px;border:none;"
+        <button class="badge ${d.cls} ds-status-badge" style="cursor:pointer;font-size:0.78rem;padding:5px 9px;border:none;"
+          title="Filtrar por: ${d.label}"
           onclick="document.getElementById('admin_filter_status-${suf}').value='${d.key}';state.adminTable.page=1;loadMonitorTable();">
-          ${d.label}: ${counts[d.key]}
+          <i class="fas ${d.icon} mr-1"></i>${d.label}: <strong>${counts[d.key]}</strong>
         </button>`)
       .join("");
   } catch {}
@@ -619,10 +621,10 @@ function renderMonitorTable() {
   }
 
   const STATUS_BADGES = {
-    draft:      '<span class="badge badge-secondary" title="Borrador">Draft</span>',
-    revision:   '<span class="badge badge-warning text-dark" title="En revisión">Revisión</span>',
-    aprobado:   '<span class="badge badge-success" title="Aprobado">✓</span>',
-    rechazado:  '<span class="badge badge-danger" title="Rechazado">✗</span>',
+    draft:      '<span class="badge badge-secondary ds-status-badge" title="Borrador — sin publicar"><i class="fas fa-pencil-alt mr-1"></i>Borrador</span>',
+    revision:   '<span class="badge badge-warning text-dark ds-status-badge ds-status-revision" title="Pendiente de revisión"><i class="fas fa-clock mr-1"></i>Revisión</span>',
+    aprobado:   '<span class="badge badge-success ds-status-badge" title="Aprobado y publicado"><i class="fas fa-check mr-1"></i>OK</span>',
+    rechazado:  '<span class="badge badge-danger ds-status-badge" title="Rechazado"><i class="fas fa-times mr-1"></i>Rechazado</span>',
   };
 
   const searchTerms = (document.getElementById(`admin_search-${suf}`)?.value || "").trim().split(/\s+/).filter(Boolean);
