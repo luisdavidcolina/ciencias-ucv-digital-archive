@@ -215,6 +215,22 @@ function loginSuccess(user) {
       switchBtn.style.display = "none";
     }
   }
+
+  // Auto-open edit modal when navigating from public search (?docId= / ?empId=)
+  const _page = document.body.dataset.page;
+  if (_page === "admin-archivo" || _page === "admin-rrhh") {
+    const _params = new URLSearchParams(window.location.search);
+    const _docId = _params.get("docId");
+    const _empId = _params.get("empId");
+    if (_docId || _empId) {
+      setTimeout(() => {
+        if (_docId && typeof openEditDocModal === "function") openEditDocModal(parseInt(_docId));
+        else if (_empId && typeof openEditEmpleadoModal === "function") openEditEmpleadoModal(parseInt(_empId));
+        // Clean URL without reload
+        history.replaceState({}, "", window.location.pathname);
+      }, 800);
+    }
+  }
 }
 
 function logout() {

@@ -202,6 +202,11 @@ function renderArchivoList() {
           style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
           <i class="fas fa-file-pdf" style="font-size:0.8rem;"></i>
         </a>` : ""}
+        ${state.user ? `<a href="/static/admin_archivo.html?docId=${doc.id}" class="btn btn-outline-warning ds-action-btn" title="Editar documento (Admin)"
+          onclick="event.stopPropagation()"
+          style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
+          <i class="fas fa-pen" style="font-size:0.8rem;"></i>
+        </a>` : ""}
       </div>
     </div>
     `;
@@ -274,7 +279,13 @@ function openDocModalWithRecord(doc) {
     viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
   }
   document.getElementById("btn-modal-download").classList.add("d-none");
-  document.getElementById("btn-modal-edit").classList.add("d-none");
+  const editBtn = document.getElementById("btn-modal-edit");
+  if (state.user && doc.id) {
+    editBtn.classList.remove("d-none");
+    editBtn.onclick = () => { window.location.href = `/static/admin_archivo.html?docId=${doc.id}`; };
+  } else {
+    editBtn.classList.add("d-none");
+  }
 
   $("#doc-modal").modal("show");
 }

@@ -165,6 +165,11 @@ function renderRrhhList() {
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
             <i class="fas fa-eye"></i>
           </button>
+          ${state.user ? `<a href="/static/admin_rrhh.html?empId=${p.empleado_id}" class="btn btn-outline-warning ds-action-btn" title="Editar expediente (Admin)"
+            onclick="event.stopPropagation()"
+            style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
+            <i class="fas fa-pen" style="font-size:0.8rem;"></i>
+          </a>` : ""}
         </div>
       </div>
     `;
@@ -283,6 +288,11 @@ function renderRrhhDossierModal() {
               ${profile.rows && profile.rows[0]?.empleado_id
                 ? `<a href="${API_BASE}/api/rrhh/report/${profile.rows[0].empleado_id}" target="_blank" class="btn btn-outline-secondary btn-sm ml-2" title="Generar reporte imprimible">
                     <i class="fas fa-print mr-1"></i>Imprimir Expediente
+                  </a>`
+                : ''}
+              ${state.user && profile.rows && profile.rows[0]?.empleado_id
+                ? `<a href="/static/admin_rrhh.html?empId=${profile.rows[0].empleado_id}" class="btn btn-outline-warning btn-sm ml-2" title="Editar expediente en panel de administración">
+                    <i class="fas fa-pen mr-1"></i>Editar
                   </a>`
                 : ''}
             </div>
