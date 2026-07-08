@@ -138,7 +138,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-backup" role="tab" onclick="loadBackupHistory()">
+              <a class="nav-link" data-toggle="pill" href="#pane-backup" role="tab" onclick="loadBackupHistory(); loadBackupGroups();">
                 <i class="fas fa-database"></i> Backup
               </a>
             </li>
@@ -304,13 +304,25 @@
             <div class="tab-pane fade" id="pane-backup" role="tabpanel">
 
               <div class="card card-warning">
-                <div class="card-header">
-                  <h3 class="card-title"><i class="fas fa-download mr-2"></i>Exportar Backup</h3>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h3 class="card-title mb-0"><i class="fas fa-download mr-2"></i>Exportar Backup</h3>
+                  <div>
+                    <button class="btn btn-sm btn-outline-light mr-1" onclick="backupSelectAll(true)" title="Seleccionar todo">
+                      <i class="fas fa-check-square mr-1"></i>Todo
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="backupSelectAll(false)" title="Deseleccionar todo">
+                      <i class="fas fa-square mr-1"></i>Ninguno
+                    </button>
+                  </div>
                 </div>
                 <div class="card-body">
-                  <p class="text-muted">Descarga un JSON con todos los datos del sistema (documentos, empleados, usuarios, taxonomías).</p>
+                  <p class="text-muted mb-2">Selecciona qué grupos de datos incluir en el archivo de backup:</p>
+                  <div id="backup-groups-container" class="row mb-3">
+                    <!-- grupos cargados dinámicamente -->
+                    <div class="col-12 text-muted"><i class="fas fa-spinner fa-spin mr-1"></i> Cargando grupos...</div>
+                  </div>
                   <button id="btn-export-backup" class="btn btn-warning btn-lg" onclick="handleExportBackup()">
-                    <i class="fas fa-download mr-2"></i> Descargar Backup Ahora
+                    <i class="fas fa-download mr-2"></i> Descargar Backup
                   </button>
                   <div id="backup-export-status" class="mt-3"></div>
                 </div>
@@ -755,15 +767,61 @@ async function _submitSysChangePw() {
   }
 }
 
+// ── BACKUP GROUPS ────────────────────────────────────────────────────────────
+let _backupGroups = {};  // { groupKey: { label, tables } }
+
+async function loadBackupGroups() {
+  const container = document.getElementById("backup-groups-container");
+  if (!container) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/backup/groups`);
+    _backupGroups = await res.json();
+    container.innerHTML = Object.entries(_backupGroups).map(([key, g]) => `
+      <div class="col-sm-6 col-lg-4 mb-2">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input backup-group-cb" id="bg-${key}"
+                 data-tables="${g.tables.join(",")}" checked>
+          <label class="custom-control-label font-weight-600" for="bg-${key}">
+            ${g.label}
+            <small class="d-block text-muted font-weight-normal" style="font-size:0.73rem">
+              ${g.tables.join(", ")}
+            </small>
+          </label>
+        </div>
+      </div>`).join("");
+  } catch {
+    container.innerHTML = '<div class="col-12 text-warning">No se pudieron cargar los grupos.</div>';
+  }
+}
+
+function backupSelectAll(checked) {
+  document.querySelectorAll(".backup-group-cb").forEach(cb => { cb.checked = checked; });
+}
+
 async function handleExportBackup() {
   const btn = document.getElementById("btn-export-backup");
   const statusEl = document.getElementById("backup-export-status");
   const user = getCurrentUser();
+
+  // Recopilar tablas seleccionadas
+  const selectedTables = [];
+  document.querySelectorAll(".backup-group-cb:checked").forEach(cb => {
+    selectedTables.push(...cb.dataset.tables.split(","));
+  });
+  if (selectedTables.length === 0) {
+    statusEl.innerHTML = '<div class="alert alert-warning">Selecciona al menos un grupo para exportar.</div>';
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generando backup...';
   statusEl.innerHTML = '<div class="alert alert-info">Exportando datos, esto puede tardar unos segundos...</div>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/backup/export?requester=${encodeURIComponent(user.username||'')}`, {method:"GET"});
+    const params = new URLSearchParams({
+      requester: user.username || "",
+      tables: selectedTables.join(","),
+    });
+    const res = await fetch(`${API_BASE}/api/admin/backup/export?${params}`, { method: "GET" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
     const cd = res.headers.get("Content-Disposition") || "";
@@ -772,7 +830,7 @@ async function handleExportBackup() {
     const a = document.createElement("a");
     a.href = url; a.download = fn; document.body.appendChild(a); a.click();
     URL.revokeObjectURL(url); document.body.removeChild(a);
-    statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Backup descargado: ${fn}</div>`;
+    statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Backup descargado: <strong>${fn}</strong></div>`;
     showToast(`Backup generado: ${fn}`, "success");
     loadBackupHistory();
   } catch(e) {
@@ -780,7 +838,7 @@ async function handleExportBackup() {
     showToast("Error al exportar backup.", "error");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar Backup Ahora';
+    btn.innerHTML = '<i class="fas fa-download mr-2"></i> Descargar Backup';
   }
 }
 

@@ -8,6 +8,7 @@ from database import db_query
 import json
 import io
 from datetime import datetime, date
+from typing import Optional
 
 router = APIRouter()
 
@@ -33,6 +34,15 @@ EXPORTABLE_TABLES = [
     "usuarios_sistema",
 ]
 
+# Grupos para la UI de selección
+TABLE_GROUPS = {
+    "catalogos":    {"label": "Catálogos", "tables": ["categoria", "cargos", "departamentos", "estados_laborales", "tipo_documento", "descriptores_libres"]},
+    "personal":     {"label": "Personal RRHH", "tables": ["empleados", "historial_cargos"]},
+    "docs_rrhh":    {"label": "Documentos RRHH", "tables": ["datos_rrhh", "rrhh_descriptores"]},
+    "docs_archivo": {"label": "Documentos Archivo", "tables": ["datos_archivo", "archivo_descriptores"]},
+    "sistema":      {"label": "Sistema", "tables": ["usuarios_sistema"]},
+}
+
 
 def _serialize_value(v):
     """Convierte tipos no-JSON a string."""
@@ -41,21 +51,41 @@ def _serialize_value(v):
     return v
 
 
+@router.get("/groups")
+def get_table_groups():
+    """Devuelve los grupos de tablas disponibles para selección en el export."""
+    return TABLE_GROUPS
+
+
 @router.get("/export")
-def export_backup(requester: str = Query(default="")):
+def export_backup(
+    requester: str = Query(default=""),
+    tables: Optional[str] = Query(default=None, description="Tablas separadas por coma; omitir = todas"),
+):
     """
-    Exporta todas las tablas como un JSON descargable.
-    Puede tardar varios segundos en bases de datos grandes.
+    Exporta tablas seleccionadas como JSON descargable.
+    El parámetro `tables` acepta nombres separados por coma; si se omite se exporta todo.
+    Solo se permiten tablas del conjunto EXPORTABLE_TABLES.
     """
+    if tables:
+        requested = [t.strip() for t in tables.split(",") if t.strip()]
+        # whitelist estricta — nunca ejecutar tabla arbitraria
+        selected = [t for t in EXPORTABLE_TABLES if t in requested]
+        if not selected:
+            raise HTTPException(400, "Ninguna tabla válida seleccionada.")
+    else:
+        selected = EXPORTABLE_TABLES
+
     backup = {
         "_metadata": {
             "created_at": datetime.utcnow().isoformat(),
-            "version": "1.0",
-            "tables": EXPORTABLE_TABLES,
+            "version": "1.1",
+            "tables": selected,
+            "partial": len(selected) < len(EXPORTABLE_TABLES),
         }
     }
     total_rows = 0
-    for table in EXPORTABLE_TABLES:
+    for table in selected:
         try:
             rows = db_query(f"SELECT * FROM public.{table} ORDER BY 1", fetch="all")
             serialized = []
@@ -67,19 +97,20 @@ def export_backup(requester: str = Query(default="")):
             backup[table] = []
             backup[f"_error_{table}"] = str(e)
 
-    # Registrar en historial
+    notas = f"Export {'parcial' if len(selected) < len(EXPORTABLE_TABLES) else 'completo'} via UI ({len(selected)} tablas)"
     try:
         db_query(
             """INSERT INTO public.backup_history(usuario, tipo, tabla_count, total_rows, notas)
-               VALUES(%s, 'export', %s, %s, 'Export completo via UI')""",
-            (requester or "sistema", len(EXPORTABLE_TABLES), total_rows),
+               VALUES(%s, 'export', %s, %s, %s)""",
+            (requester or "sistema", len(selected), total_rows, notas),
             fetch="none", commit=True,
         )
     except Exception:
-        pass  # no bloquear si la tabla no existe aún
+        pass
 
     json_str = json.dumps(backup, ensure_ascii=False, indent=2)
-    filename = f"backup_ciencias_ucv_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+    suffix = "parcial" if len(selected) < len(EXPORTABLE_TABLES) else "completo"
+    filename = f"backup_{suffix}_ciencias_ucv_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
     return StreamingResponse(
         io.BytesIO(json_str.encode("utf-8")),
         media_type="application/json",
