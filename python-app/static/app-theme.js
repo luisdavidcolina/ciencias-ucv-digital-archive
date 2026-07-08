@@ -17,10 +17,22 @@ const THEMES = [
 ];
 
 const FONT_SCALES = [
-  { value: 0.82, label: "PequeÃ±o" },
+  { value: 0.82, label: "Pequeño" },
   { value: 0.93, label: "Normal"  },
   { value: 1.08, label: "Grande"  },
   { value: 1.22, label: "Muy Grande" },
+];
+
+const FONT_FAMILIES = [
+  { id: "ff-system",  label: "Sistema",    stack: "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif" },
+  { id: "ff-inter",   label: "Inter",      stack: "'Inter','Segoe UI',sans-serif" },
+  { id: "ff-serif",   label: "Serif",      stack: "Georgia,'Times New Roman',serif" },
+  { id: "ff-mono",    label: "Mono",       stack: "'Consolas','Courier New',monospace" },
+];
+
+const DENSITIES = [
+  { id: "comfortable", label: "Cómodo",   icon: "fas fa-expand-arrows-alt" },
+  { id: "compact",     label: "Compacto", icon: "fas fa-compress-arrows-alt" },
 ];
 
 // â”€â”€ init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -34,6 +46,10 @@ function initTheme() {
 
   const darkPref = localStorage.getItem("ds_dark_mode") || "auto";
   _applyDarkModeDOM(darkPref);
+
+  _applyDensityDOM(localStorage.getItem("ds_density") || "comfortable");
+  _applyFontFamilyDOM(localStorage.getItem("ds_font_family") || "ff-system");
+  _applyAnimDOM(localStorage.getItem("ds_anim") !== "off");
 
   window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if ((localStorage.getItem("ds_dark_mode") || "auto") === "auto") {
@@ -70,7 +86,43 @@ function applyFontScale(scale) {
   _applyFontScaleDOM(scale);
 }
 
-// â”€â”€ color theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── density ───────────────────────────────────────────────────────────────
+
+function _applyDensityDOM(density) {
+  document.body.classList.toggle(“ds-density-compact”, density === “compact”);
+}
+
+function applyDensity(density) {
+  localStorage.setItem(“ds_density”, density);
+  _applyDensityDOM(density);
+}
+
+// ── font family ───────────────────────────────────────────────────────────
+
+function _applyFontFamilyDOM(ffId) {
+  const ff = FONT_FAMILIES.find(f => f.id === ffId) || FONT_FAMILIES[0];
+  document.documentElement.style.setProperty(“--ds-font-family”, ff.stack);
+}
+
+function applyFontFamily(ffId) {
+  localStorage.setItem(“ds_font_family”, ffId);
+  _applyFontFamilyDOM(ffId);
+  _rebuildPanel();
+}
+
+// ── animations ────────────────────────────────────────────────────────────
+
+function _applyAnimDOM(enabled) {
+  document.body.classList.toggle(“ds-no-anim”, !enabled);
+}
+
+function applyAnim(enabled) {
+  localStorage.setItem(“ds_anim”, enabled ? “on” : “off”);
+  _applyAnimDOM(enabled);
+  _rebuildPanel();
+}
+
+// ── color theme ──────────────────────────────────────────────────────────
 
 function applyTheme(themeId) {
   document.body.className = document.body.className.replace(/\btheme-[\w-]+\b/g, "").trim();
@@ -100,23 +152,29 @@ function _rebuildPanel() {
 }
 
 function resetPersonalization() {
-  ["ds_theme","ds_dark_mode","ds_font_scale"].forEach(k => localStorage.removeItem(k));
-  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b|\bdark-mode\b/g, "").trim();
+  ["ds_theme","ds_dark_mode","ds_font_scale","ds_density","ds_font_family","ds_anim"].forEach(k => localStorage.removeItem(k));
+  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b|\bdark-mode\b|\bds-density-compact\b|\bds-no-anim\b/g, "").trim();
   _applyFontScaleDOM(0.93);
   _applyDarkModeDOM("auto");
+  _applyDensityDOM("comfortable");
+  _applyFontFamilyDOM("ff-system");
+  _applyAnimDOM(true);
   _rebuildPanel();
 }
 
 function _createThemePanel() {
-  const cTheme = localStorage.getItem("ds_theme") || "default";
-  const cDark  = localStorage.getItem("ds_dark_mode") || "auto";
-  const cScale = parseFloat(localStorage.getItem("ds_font_scale")) || 0.93;
+  const cTheme   = localStorage.getItem("ds_theme") || "default";
+  const cDark    = localStorage.getItem("ds_dark_mode") || "auto";
+  const cScale   = parseFloat(localStorage.getItem("ds_font_scale")) || 0.93;
+  const cDensity = localStorage.getItem("ds_density") || "comfortable";
+  const cFfId    = localStorage.getItem("ds_font_family") || "ff-system";
+  const cAnim    = localStorage.getItem("ds_anim") !== "off";
   const cScaleLabel = FONT_SCALES.find(s => s.value === cScale)?.label || "Normal";
 
   const darkModes = [
-    { id:"light", icon:"fas fa-sun",              label:"Claro"  },
-    { id:"auto",  icon:"fas fa-circle-half-stroke",label:"Auto"  },
-    { id:"dark",  icon:"fas fa-moon",             label:"Oscuro" },
+    { id:"light", icon:"fas fa-sun",               label:"Claro"  },
+    { id:"auto",  icon:"fas fa-circle-half-stroke", label:"Auto"  },
+    { id:"dark",  icon:"fas fa-moon",              label:"Oscuro" },
   ];
 
   const panel = document.createElement("div");
@@ -124,7 +182,7 @@ function _createThemePanel() {
   panel.className = "ds-theme-panel";
   panel.innerHTML = `
     <div class="ds-theme-panel-header">
-      <h6><i class="fas fa-sliders-h mr-2"></i>PersonalizaciÃ³n</h6>
+      <h6><i class="fas fa-sliders-h mr-2"></i>Personalización</h6>
       <button class="ds-theme-panel-close" onclick="closeThemePanel()" title="Cerrar"><i class="fas fa-times"></i></button>
     </div>
     <div class="ds-theme-panel-body">
@@ -141,13 +199,47 @@ function _createThemePanel() {
       </div>
 
       <div class="ds-panel-section">
-        <div class="ds-panel-label"><i class="fas fa-text-height mr-1"></i> TamaÃ±o de Texto <span class="ds-font-current">${cScaleLabel}</span></div>
+        <div class="ds-panel-label"><i class="fas fa-text-height mr-1"></i> Tamaño de Texto <span class="ds-font-current">${cScaleLabel}</span></div>
         <div class="ds-font-row">
           ${FONT_SCALES.map((s, i) => `
             <button class="ds-font-btn${s.value === cScale ? ' active' : ''}"
               onclick="applyFontScale(${s.value}); _rebuildPanel()" title="${s.label}">
               <span style="font-size:${0.72 + i * 0.12}rem;font-weight:600;line-height:1">A</span>
             </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-grip-horizontal mr-1"></i> Densidad</div>
+        <div class="ds-dark-toggle">
+          ${DENSITIES.map(d => `
+            <button class="ds-dark-btn${cDensity === d.id ? ' active' : ''}"
+              onclick="applyDensity('${d.id}'); _rebuildPanel()" title="${d.label}">
+              <i class="${d.icon}"></i><span>${d.label}</span>
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-font mr-1"></i> Tipografía</div>
+        <div class="ds-ff-row">
+          ${FONT_FAMILIES.map(f => `
+            <button class="ds-ff-btn${cFfId === f.id ? ' active' : ''}"
+              style="font-family:${f.stack}" onclick="applyFontFamily('${f.id}')" title="${f.label}">
+              ${f.label}
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-magic mr-1"></i> Animaciones</div>
+        <div class="ds-dark-toggle">
+          <button class="ds-dark-btn${cAnim ? ' active' : ''}" onclick="applyAnim(true)" title="Con animaciones">
+            <i class="fas fa-play"></i><span>Activadas</span>
+          </button>
+          <button class="ds-dark-btn${!cAnim ? ' active' : ''}" onclick="applyAnim(false)" title="Sin animaciones">
+            <i class="fas fa-ban"></i><span>Reducidas</span>
+          </button>
         </div>
       </div>
 

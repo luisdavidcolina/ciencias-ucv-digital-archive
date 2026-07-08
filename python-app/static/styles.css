@@ -2772,6 +2772,57 @@ body.dark-mode .ds-dropzone-compact { background: #1e222b; border-color: #3c4257
 body.dark-mode .ds-dropzone-compact.drag-over { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
 
 /* ==========================================================================
+   PERSONALIZACIÓN — DENSITY, FONT FAMILY, ANIMATIONS
+   ========================================================================== */
+
+/* CSS custom property for font family (set via JS) */
+:root { --ds-font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+body { font-family: var(--ds-font-family); }
+
+/* Compact density mode */
+body.ds-density-compact .card-body     { padding: 0.5rem !important; }
+body.ds-density-compact .card-header   { padding: 0.4rem 0.75rem !important; }
+body.ds-density-compact .form-group    { margin-bottom: 0.5rem; }
+body.ds-density-compact .table td,
+body.ds-density-compact .table th      { padding: 0.25rem 0.5rem !important; font-size: 0.8rem; }
+body.ds-density-compact .btn-sm        { padding: 0.15rem 0.5rem !important; font-size: 0.78rem; }
+body.ds-density-compact .ds-item-card  { padding: 0.5rem !important; }
+body.ds-density-compact .modal-body    { padding: 0.75rem !important; }
+body.ds-density-compact .ds-kpi-mini   { padding: 6px 10px !important; }
+body.ds-density-compact .ds-panel-section { padding: 0.5rem 0.75rem !important; }
+
+/* No-animation mode */
+body.ds-no-anim *,
+body.ds-no-anim *::before,
+body.ds-no-anim *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Theme panel: font family row */
+.ds-ff-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ds-ff-btn {
+  padding: 4px 10px;
+  border: 1.5px solid #dee2e6;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #495057;
+  transition: border-color 0.15s, background 0.15s;
+}
+.ds-ff-btn:hover  { border-color: #0056b3; }
+.ds-ff-btn.active { border-color: #0056b3; background: #e8f0fe; color: #0056b3; font-weight: 600; }
+
+body.dark-mode .ds-ff-btn { background: #2a2e3a; border-color: #3c4257; color: #b8c0d0; }
+body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color: #6fa3d8; color: #6fa3d8; }
+
+/* ==========================================================================
    RESPONSIVE ADMIN PANELS
    ========================================================================== */
 
