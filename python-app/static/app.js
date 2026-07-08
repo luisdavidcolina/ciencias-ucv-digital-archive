@@ -713,37 +713,87 @@ function showLoginError(msg) {
 }
 
 // ==========================================================================
-// SISTEMA DE TEMAS
+// SISTEMA DE PERSONALIZACIÓN
 // ==========================================================================
 const THEMES = [
-  { id:"default",           name:"Clásico UCV",          sidebar:"#2b4e72", content:"#f8f9fa", bar:"#2b4e72" },
-  { id:"theme-azul-profundo",name:"Azul Profundo",        sidebar:"#0f3460", content:"#e8f3ff", bar:"#1a5fa0" },
-  { id:"theme-dorado",      name:"Dorado Académico",     sidebar:"#9a7017", content:"#fffdf0", bar:"#B8860B" },
-  { id:"theme-manila",      name:"Manila / Cartón",      sidebar:"#8B7355", content:"#f5ead0", bar:"#A0856A" },
-  { id:"theme-esmeralda",   name:"Verde Esmeralda",      sidebar:"#2d6a4f", content:"#f0faf2", bar:"#40916c" },
-  { id:"theme-cian",        name:"Cian Institucional",   sidebar:"#0d6e7c", content:"#e8fafc", bar:"#13a0b4" },
-  { id:"theme-lavanda",     name:"Lavanda",              sidebar:"#4a3570", content:"#f5f0ff", bar:"#7c5cbf" },
-  { id:"theme-granate",     name:"Granate Académico",    sidebar:"#7c2d3c", content:"#fff5f7", bar:"#a03048" },
-  { id:"theme-terracota",   name:"Terracota",            sidebar:"#b5451b", content:"#fff8f5", bar:"#d4623a" },
-  { id:"theme-noche",       name:"Medianoche",           sidebar:"#0d1b2a", content:"#f0f4f8", bar:"#4a90d9" },
-  { id:"theme-carbon",      name:"Gris Carbón",          sidebar:"#2c2c2c", content:"#f8f8f8", bar:"#555555" },
-  { id:"theme-oliva",       name:"Verde Oliva",          sidebar:"#5a6b2a", content:"#f5fae0", bar:"#7a9040" },
+  { id:"default",            name:"Clásico UCV",         sidebar:"#2b4e72", content:"#f8f9fa", bar:"#2b4e72" },
+  { id:"theme-azul-profundo",name:"Azul Profundo",       sidebar:"#0f3460", content:"#e8f3ff", bar:"#1a5fa0" },
+  { id:"theme-dorado",       name:"Dorado Académico",    sidebar:"#9a7017", content:"#fffdf0", bar:"#B8860B" },
+  { id:"theme-manila",       name:"Manila / Cartón",     sidebar:"#8B7355", content:"#f5ead0", bar:"#A0856A" },
+  { id:"theme-esmeralda",    name:"Verde Esmeralda",     sidebar:"#2d6a4f", content:"#f0faf2", bar:"#40916c" },
+  { id:"theme-cian",         name:"Cian Institucional",  sidebar:"#0d6e7c", content:"#e8fafc", bar:"#13a0b4" },
+  { id:"theme-lavanda",      name:"Lavanda",             sidebar:"#4a3570", content:"#f5f0ff", bar:"#7c5cbf" },
+  { id:"theme-granate",      name:"Granate Académico",   sidebar:"#7c2d3c", content:"#fff5f7", bar:"#a03048" },
+  { id:"theme-terracota",    name:"Terracota",           sidebar:"#b5451b", content:"#fff8f5", bar:"#d4623a" },
+  { id:"theme-noche",        name:"Medianoche",          sidebar:"#0d1b2a", content:"#f0f4f8", bar:"#4a90d9" },
+  { id:"theme-carbon",       name:"Gris Carbón",         sidebar:"#2c2c2c", content:"#f8f8f8", bar:"#555555" },
+  { id:"theme-oliva",        name:"Verde Oliva",         sidebar:"#5a6b2a", content:"#f5fae0", bar:"#7a9040" },
 ];
 
+const FONT_SCALES = [
+  { value: 0.82, label: "Pequeño" },
+  { value: 0.93, label: "Normal"  },
+  { value: 1.08, label: "Grande"  },
+  { value: 1.22, label: "Muy Grande" },
+];
+
+// ── init ──────────────────────────────────────────────────────────────────────
+
 function initTheme() {
-  const saved = localStorage.getItem("ds_theme");
-  if (saved) {
-    if (saved !== "default") document.body.classList.add(saved);
-  } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-    document.body.classList.add("theme-dark");
-    localStorage.setItem("ds_theme", "theme-dark");
-  }
+  const savedTheme = localStorage.getItem("ds_theme");
+  if (savedTheme && savedTheme !== "default") document.body.classList.add(savedTheme);
+
+  const savedScale = parseFloat(localStorage.getItem("ds_font_scale"));
+  _applyFontScaleDOM(isNaN(savedScale) ? 0.93 : savedScale);
+
+  const darkPref = localStorage.getItem("ds_dark_mode") || "auto";
+  _applyDarkModeDOM(darkPref);
+
+  window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if ((localStorage.getItem("ds_dark_mode") || "auto") === "auto") {
+      _applyDarkModeDOM("auto");
+    }
+  });
 }
+
+// ── dark mode ─────────────────────────────────────────────────────────────────
+
+function _applyDarkModeDOM(mode) {
+  const isDark = mode === "dark" ||
+    (mode === "auto" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+  document.body.classList.toggle("dark-mode", isDark);
+}
+
+function applyDarkMode(mode) {
+  localStorage.setItem("ds_dark_mode", mode);
+  _applyDarkModeDOM(mode);
+}
+
+// ── font scale ────────────────────────────────────────────────────────────────
+
+function _applyFontScaleDOM(scale) {
+  document.documentElement.style.setProperty("--ds-font-scale", scale);
+}
+
+function applyFontScale(scale) {
+  localStorage.setItem("ds_font_scale", scale);
+  _applyFontScaleDOM(scale);
+}
+
+// ── color theme ───────────────────────────────────────────────────────────────
+
+function applyTheme(themeId) {
+  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b/g, "").trim();
+  if (themeId !== "default") document.body.classList.add(themeId);
+  localStorage.setItem("ds_theme", themeId);
+  _rebuildPanel();
+}
+
+// ── panel ─────────────────────────────────────────────────────────────────────
 
 function openThemePanel() {
   let panel = document.getElementById("ds-theme-panel");
-  if (!panel) { panel = createThemePanel(); document.body.appendChild(panel); }
-  else { panel.remove(); panel = createThemePanel(); document.body.appendChild(panel); }
+  if (!panel) { panel = _createThemePanel(); document.body.appendChild(panel); }
   requestAnimationFrame(() => panel.classList.add("open"));
 }
 
@@ -751,37 +801,90 @@ function closeThemePanel() {
   document.getElementById("ds-theme-panel")?.classList.remove("open");
 }
 
-function createThemePanel() {
-  const current = localStorage.getItem("ds_theme") || "default";
+function _rebuildPanel() {
+  const old = document.getElementById("ds-theme-panel");
+  if (!old) return;
+  const fresh = _createThemePanel();
+  old.replaceWith(fresh);
+  requestAnimationFrame(() => fresh.classList.add("open"));
+}
+
+function resetPersonalization() {
+  ["ds_theme","ds_dark_mode","ds_font_scale"].forEach(k => localStorage.removeItem(k));
+  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b|\bdark-mode\b/g, "").trim();
+  _applyFontScaleDOM(0.93);
+  _applyDarkModeDOM("auto");
+  _rebuildPanel();
+}
+
+function _createThemePanel() {
+  const cTheme = localStorage.getItem("ds_theme") || "default";
+  const cDark  = localStorage.getItem("ds_dark_mode") || "auto";
+  const cScale = parseFloat(localStorage.getItem("ds_font_scale")) || 0.93;
+  const cScaleLabel = FONT_SCALES.find(s => s.value === cScale)?.label || "Normal";
+
+  const darkModes = [
+    { id:"light", icon:"fas fa-sun",              label:"Claro"  },
+    { id:"auto",  icon:"fas fa-circle-half-stroke",label:"Auto"  },
+    { id:"dark",  icon:"fas fa-moon",             label:"Oscuro" },
+  ];
+
   const panel = document.createElement("div");
   panel.id = "ds-theme-panel";
   panel.className = "ds-theme-panel";
   panel.innerHTML = `
     <div class="ds-theme-panel-header">
-      <h6><i class="fas fa-palette mr-2"></i>Personalización</h6>
-      <button class="ds-theme-panel-close" onclick="closeThemePanel()"><i class="fas fa-times"></i></button>
+      <h6><i class="fas fa-sliders-h mr-2"></i>Personalización</h6>
+      <button class="ds-theme-panel-close" onclick="closeThemePanel()" title="Cerrar"><i class="fas fa-times"></i></button>
     </div>
     <div class="ds-theme-panel-body">
-      ${THEMES.map(t => `
-        <div class="ds-theme-card${current === t.id ? " active" : ""}" onclick="applyTheme('${t.id}')">
-          <div class="ds-theme-preview">
-            <div class="ds-theme-preview-sidebar" style="background:${t.sidebar};"></div>
-            <div class="ds-theme-preview-content" style="background:${t.content};">
-              <div class="ds-theme-preview-bar" style="background:${t.bar};opacity:0.75;height:7px;width:80%;"></div>
-              <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:90%;"></div>
-              <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:65%;"></div>
-            </div>
-          </div>
-          <div class="ds-theme-name">${t.name}</div>
-        </div>`).join("")}
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-adjust mr-1"></i> Modo Oscuro</div>
+        <div class="ds-dark-toggle">
+          ${darkModes.map(m => `
+            <button class="ds-dark-btn${cDark === m.id ? ' active' : ''}"
+              onclick="applyDarkMode('${m.id}'); _rebuildPanel()" title="${m.label}">
+              <i class="${m.icon}"></i><span>${m.label}</span>
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-text-height mr-1"></i> Tamaño de Texto <span class="ds-font-current">${cScaleLabel}</span></div>
+        <div class="ds-font-row">
+          ${FONT_SCALES.map((s, i) => `
+            <button class="ds-font-btn${s.value === cScale ? ' active' : ''}"
+              onclick="applyFontScale(${s.value}); _rebuildPanel()" title="${s.label}">
+              <span style="font-size:${0.72 + i * 0.12}rem;font-weight:600;line-height:1">A</span>
+            </button>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-palette mr-1"></i> Color del Sistema</div>
+        <div class="ds-theme-grid">
+          ${THEMES.map(t => `
+            <div class="ds-theme-card${cTheme === t.id ? ' active' : ''}" onclick="applyTheme('${t.id}')" title="${t.name}">
+              <div class="ds-theme-preview">
+                <div class="ds-theme-preview-sidebar" style="background:${t.sidebar};"></div>
+                <div class="ds-theme-preview-content" style="background:${t.content};">
+                  <div class="ds-theme-preview-bar" style="background:${t.bar};opacity:0.75;height:7px;width:80%;"></div>
+                  <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:90%;"></div>
+                  <div class="ds-theme-preview-bar" style="background:#dee2e6;height:4px;width:65%;"></div>
+                </div>
+              </div>
+              <div class="ds-theme-name">${t.name}</div>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section ds-panel-reset">
+        <button class="ds-reset-btn" onclick="resetPersonalization()">
+          <i class="fas fa-undo mr-1"></i> Restablecer valores predeterminados
+        </button>
+      </div>
+
     </div>`;
   return panel;
-}
-
-function applyTheme(themeId) {
-  document.body.className = document.body.className.replace(/\btheme-[\w-]+\b/g, "").trim();
-  if (themeId !== "default") document.body.classList.add(themeId);
-  localStorage.setItem("ds_theme", themeId);
-  closeThemePanel();
-  setTimeout(() => openThemePanel(), 50);
 }
