@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayuda y Tutoriales — Archivo Digital Ciencias UCV</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .help-hero {
+      background: linear-gradient(135deg, #2b4e72 0%, #1a3a5c 100%);
+      color: #fff;
+      padding: 3rem 2rem;
+      border-radius: 0 0 16px 16px;
+      margin-bottom: 2rem;
+    }
+    .help-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .help-hero p  { opacity: 0.85; font-size: 1rem; margin: 0; }
+
+    .help-search-wrap {
+      max-width: 520px; margin: 1.5rem auto 0;
+      position: relative;
+    }
+    .help-search-wrap input {
+      border-radius: 50px; padding: 0.65rem 1.2rem 0.65rem 3rem;
+      border: none; font-size: 0.95rem; width: 100%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .help-search-wrap i {
+      position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%);
+      color: #6c757d;
+    }
+
+    .help-category-card {
+      border: 1px solid #dee2e6; border-radius: 12px;
+      padding: 1.5rem; background: #fff;
+      transition: box-shadow 0.2s, transform 0.2s;
+      height: 100%; cursor: pointer;
+      text-decoration: none !important; color: inherit;
+      display: flex; flex-direction: column;
+    }
+    .help-category-card:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+      border-color: #2b4e72;
+    }
+    .help-category-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1rem; flex-shrink: 0;
+    }
+    .help-category-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: #212529; }
+    .help-category-desc  { font-size: 0.83rem; color: #6c757d; line-height: 1.5; flex-grow: 1; }
+    .help-category-count { font-size: 0.72rem; color: #adb5bd; margin-top: 0.8rem; }
+
+    .help-coming-soon {
+      background: #f8f9fa; border: 1px dashed #dee2e6;
+      border-radius: 12px; padding: 3rem; text-align: center;
+    }
+    .help-coming-soon i { font-size: 3rem; color: #dee2e6; margin-bottom: 1rem; }
+    .help-coming-soon h4 { color: #6c757d; font-weight: 600; }
+    .help-coming-soon p  { color: #adb5bd; font-size: 0.85rem; }
+
+    /* Article list placeholder */
+    .help-article-list { list-style: none; padding: 0; margin: 0; }
+    .help-article-list li {
+      border-bottom: 1px solid #f0f0f0; padding: 0.75rem 0;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .help-article-list li:last-child { border-bottom: none; }
+    .help-article-list i { color: #2b4e72; width: 18px; text-align: center; flex-shrink: 0; }
+    .help-article-list a { color: #212529; font-size: 0.88rem; text-decoration: none; }
+    .help-article-list a:hover { color: #2b4e72; text-decoration: underline; }
+    .help-article-list .badge-new {
+      font-size: 0.62rem; background: #28a745; color: #fff;
+      border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle;
+    }
+
+    .help-faq-item { border-bottom: 1px solid #eee; }
+    .help-faq-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 0; cursor: pointer; font-weight: 600;
+      font-size: 0.9rem; color: #212529; background: none; border: none;
+      width: 100%; text-align: left;
+    }
+    .help-faq-toggle:hover { color: #2b4e72; }
+    .help-faq-body { padding: 0 0 1rem; font-size: 0.87rem; color: #495057; line-height: 1.65; display: none; }
+    .help-faq-body.open { display: block; }
+
+    /* Dark mode */
+    body.dark-mode .help-category-card { background: #23272f; border-color: #2e3342; color: #e0e4ee; }
+    body.dark-mode .help-category-title { color: #e0e4ee; }
+    body.dark-mode .help-article-list li { border-color: #2e3342; }
+    body.dark-mode .help-article-list a  { color: #d0d6e8; }
+    body.dark-mode .help-coming-soon     { background: #1e222b; border-color: #2e3342; }
+    body.dark-mode .help-faq-toggle      { color: #e0e4ee; }
+    body.dark-mode .help-faq-item        { border-color: #2e3342; }
+    body.dark-mode .help-faq-body        { color: #b8c0d0; }
+  </style>
+</head>
+<body>
+<div class="help-hero text-center">
+  <h1><i class="fas fa-life-ring mr-2"></i>Centro de Ayuda</h1>
+  <p>Tutoriales, preguntas frecuentes y guías de uso del Archivo Digital de la Facultad de Ciencias</p>
+  <div class="help-search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" id="help-search" placeholder="Buscar en la ayuda…" autocomplete="off">
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Categorías -->
+  <div class="row g-3 mb-5">
+    <div class="col-sm-6 col-lg-3">
+      <a href="#sec-primeros-pasos" class="help-category-card">
+        <div class="help-category-icon" style="background:#eef4fb;color:#2b4e72">
+          <i class="fas fa-play-circle"></i>
+        </div>
+        <div class="help-category-title">Primeros Pasos</div>
+        <div class="help-category-desc">Cómo acceder, navegar y configurar tu cuenta por primera vez.</div>
+        <div class="help-category-count"><i class="fas fa-lock mr-1"></i>Próximamente</div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <a href="#sec-archivo" class="help-category-card">
+        <div class="help-category-icon" style="background:#e8f5e9;color:#2d6a4f">
+          <i class="fas fa-folder-open"></i>
+        </div>
+        <div class="help-category-title">Módulo Archivo</div>
+        <div class="help-category-desc">Búsqueda, filtros, visualización de documentos institucionales.</div>
+        <div class="help-category-count"><i class="fas fa-lock mr-1"></i>Próximamente</div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <a href="#sec-rrhh" class="help-category-card">
+        <div class="help-category-icon" style="background:#fff8e1;color:#856b00">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="help-category-title">Módulo RRHH</div>
+        <div class="help-category-desc">Expedientes de docentes, partes LOTTT, dossier y reportes.</div>
+        <div class="help-category-count"><i class="fas fa-lock mr-1"></i>Próximamente</div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <a href="#sec-admin" class="help-category-card">
+        <div class="help-category-icon" style="background:#fce4ec;color:#7c2d3c">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="help-category-title">Administración</div>
+        <div class="help-category-desc">Gestión de documentos, usuarios, backup y configuración.</div>
+        <div class="help-category-count"><i class="fas fa-lock mr-1"></i>Próximamente</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Preguntas frecuentes (FAQ) — base vacía lista para llenarse -->
+  <div class="row">
+    <div class="col-lg-7">
+      <h5 class="font-weight-bold mb-3"><i class="fas fa-question-circle mr-2 text-primary"></i>Preguntas Frecuentes</h5>
+
+      <div class="help-coming-soon" id="faq-empty">
+        <i class="fas fa-comment-dots"></i>
+        <h4>Preguntas frecuentes próximamente</h4>
+        <p>Estamos recopilando las consultas más comunes para publicarlas aquí.<br>
+          Por ahora, consulte directamente al equipo de soporte.</p>
+      </div>
+
+      <!-- Los FAQ se agregarán aquí como .help-faq-item -->
+      <div id="faq-list" class="mt-2"></div>
+    </div>
+
+    <div class="col-lg-5 mt-4 mt-lg-0">
+      <h5 class="font-weight-bold mb-3"><i class="fas fa-book mr-2 text-success"></i>Artículos Recientes</h5>
+      <div class="help-coming-soon">
+        <i class="fas fa-file-alt"></i>
+        <h4>Tutoriales próximamente</h4>
+        <p>Los tutoriales paso a paso aparecerán aquí una vez que el sistema esté completamente estable.</p>
+      </div>
+
+      <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="font-weight-bold text-muted text-uppercase" style="font-size:0.72rem;letter-spacing:0.1em">
+            <i class="fas fa-envelope mr-1"></i> ¿No encontraste lo que buscas?
+          </h6>
+          <p class="mb-2" style="font-size:0.85rem;color:#495057;">Contacta al equipo de soporte técnico de la Facultad de Ciencias:</p>
+          <a href="mailto:informatica@ciens.ucv.ve" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-envelope mr-1"></i>informatica@ciens.ucv.ve
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// FAQ toggle — reutilizable cuando se agreguen preguntas
+document.querySelectorAll(".help-faq-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const body = btn.nextElementSibling;
+    const isOpen = body.classList.contains("open");
+    document.querySelectorAll(".help-faq-body.open").forEach(b => b.classList.remove("open"));
+    if (!isOpen) body.classList.add("open");
+    const icon = btn.querySelector(".fa-chevron-down, .fa-chevron-up");
+    if (icon) icon.classList.toggle("fa-chevron-up", !isOpen);
+  });
+});
+
+// Search placeholder — filtrar artículos y FAQ cuando existan
+document.getElementById("help-search")?.addEventListener("input", function() {
+  const q = this.value.trim().toLowerCase();
+  document.querySelectorAll(".help-faq-item").forEach(item => {
+    item.style.display = !q || item.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+});
+</script>
+</body>
+</html>
