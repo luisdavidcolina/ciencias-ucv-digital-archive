@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from database import db_query, log_event
 from models import DocumentSubmitRequest, DocumentUpdateRequest, EmpleadoUpdateRequest
-from .admin_helpers import (
+from .helpers import (
     _resolve_or_create_lookup,
     _resolve_or_create_tipo_documento,
     _resolve_user_id,

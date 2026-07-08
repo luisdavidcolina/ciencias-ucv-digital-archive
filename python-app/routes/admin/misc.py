@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from database import db_query, log_event
 from models import CategoryCreateRequest, KeywordRequest
 from utils import generate_unique_slug
-from .choices import invalidate_choices_cache
+from ..choices import invalidate_choices_cache
 
 router = APIRouter()
 

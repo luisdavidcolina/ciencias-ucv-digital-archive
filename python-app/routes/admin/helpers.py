@@ -3,7 +3,7 @@ from fastapi import HTTPException
 
 from database import db_query, log_event, logger, hash_password
 from utils import generate_unique_slug
-from .choices import invalidate_choices_cache
+from ..choices import invalidate_choices_cache
 
 
 def _resolve_or_create_lookup(table: str, nombre: str, default_name: str = "Por Asignar") -> int:

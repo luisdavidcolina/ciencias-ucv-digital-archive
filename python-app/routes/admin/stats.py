@@ -9,8 +9,8 @@ import pandas as pd
 
 from database import db_query
 from models import StatsRequest
-from .archivo import fetch_archivo_dataframe
-from .rrhh import fetch_rrhh_dataframe
+from ..archivo import fetch_archivo_dataframe
+from ..rrhh import fetch_rrhh_dataframe
 
 router = APIRouter()
 

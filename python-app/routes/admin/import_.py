@@ -6,7 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Query
 
 from database import db_query, log_event
-from .admin_helpers import _resolve_or_create_lookup, _resolve_or_create_tipo_documento
+from .helpers import _resolve_or_create_lookup, _resolve_or_create_tipo_documento
 
 router = APIRouter()
 

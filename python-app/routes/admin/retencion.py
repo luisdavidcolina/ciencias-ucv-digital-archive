@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, validator
 
 from database import db_query, log_event
-from .choices import invalidate_choices_cache
+from ..choices import invalidate_choices_cache
 
 router = APIRouter()
 
