@@ -181,21 +181,7 @@ function extendSession() {
   } catch {}
 }
 
-// ─── Highlight de términos de búsqueda en texto ───────────────────────────────
-function highlightTerms(text, terms) {
-  if (!text || !terms || !terms.length) return text || "";
-  const escaped = terms
-    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .filter(Boolean)
-    .join("|");
-  if (!escaped) return text;
-  try {
-    return text.replace(new RegExp(`(${escaped})`, "gi"),
-      '<mark style="background:#fff176;border-radius:2px;padding:0 1px;">$1</mark>');
-  } catch {
-    return text;
-  }
-}
+// highlightTerms está en app-core.js
 
 // ─── Inline quick-status change (dropdown en tabla) ───────────────────────────
 function openQuickStatusMenu(btn, docId, currentStatus, modulo) {

@@ -1,37 +1,3 @@
-﻿// ==========================================================================
-// TOAST SYSTEM
-// ==========================================================================
-function showToast(message, type, duration) {
-  type = type || "info";
-  const ttl = duration ?? { success: 3000, error: 6000, warning: 4500, info: 3500 }[type] ?? 3500;
-  const container = document.getElementById("ds-toast-container");
-  if (!container) return;
-
-  const colors = {
-    success: { bg: "#d4edda", color: "#155724", border: "#c3e6cb", icon: "fas fa-check-circle" },
-    error:   { bg: "#f8d7da", color: "#721c24", border: "#f5c6cb", icon: "fas fa-times-circle" },
-    warning: { bg: "#fff3cd", color: "#856404", border: "#ffeeba", icon: "fas fa-exclamation-triangle" },
-    info:    { bg: "#d1ecf1", color: "#0c5460", border: "#bee5eb", icon: "fas fa-info-circle" },
-  };
-  const cfg = colors[type] || colors.info;
-
-  const toast = document.createElement("div");
-  toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:8px;padding:10px 14px;margin-bottom:8px;min-width:260px;max-width:380px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s,transform 0.3s;transform:translateX(20px);`;
-  toast.innerHTML = `<i class="${cfg.icon}" style="font-size:1rem;flex-shrink:0;margin-top:2px;"></i><span style="flex:1;">${message}</span><button style="background:none;border:none;padding:0 0 0 8px;cursor:pointer;opacity:0.6;color:inherit;font-size:1rem;" onclick="this.closest('div').remove()">✕</button>`;
-  container.appendChild(toast);
-
-  // Animate in
-  requestAnimationFrame(() => { toast.style.transform = "translateX(0)"; });
-
-  const dismiss = () => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateX(20px)";
-    setTimeout(() => toast.remove(), 400);
-  };
-  const timer = setTimeout(dismiss, ttl);
-  toast.querySelector("button").addEventListener("click", () => clearTimeout(timer));
-}
-
 // ==========================================================================
 // PANEL DE CONTROL ADMINISTRATIVO
 // ==========================================================================
