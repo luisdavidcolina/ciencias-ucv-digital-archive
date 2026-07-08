@@ -1,5 +1,6 @@
 """Categorías, palabras clave y audit log."""
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
+from typing import Optional
 
 from database import db_query, log_event
 from models import CategoryCreateRequest, KeywordRequest
@@ -146,3 +147,52 @@ def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
     ) or []
 
     return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
+
+
+@router.get("/notifications")
+def get_notifications(modulo: Optional[str] = Query(default="")):
+    """
+    Devuelve un resumen de pendientes para el panel de notificaciones.
+    Incluye docs en revisión y borradores del módulo solicitado.
+    """
+    items = []
+    total = 0
+
+    # Archivo pendientes
+    if not modulo or modulo in ("Archivo", "Global"):
+        arch_rows = db_query(
+            """SELECT da.id, da.titulo AS label, da.status, 'Archivo' AS modulo,
+                      TO_CHAR(da.updated_at, 'YYYY-MM-DD HH24:MI') AS ts
+               FROM public.datos_archivo da
+               WHERE da.status IN ('revision','draft') AND da.deleted_at IS NULL
+               ORDER BY da.updated_at DESC LIMIT 20""",
+            fetch="all",
+        ) or []
+        for r in arch_rows:
+            items.append(dict(r))
+        total += len(arch_rows)
+
+    # RRHH pendientes
+    if not modulo or modulo in ("RRHH", "Global"):
+        rrhh_rows = db_query(
+            """SELECT dr.id, COALESCE(e.nombres||' '||e.apellidos, 'Sin nombre') AS label,
+                      dr.status, 'RRHH' AS modulo,
+                      TO_CHAR(dr.updated_at, 'YYYY-MM-DD HH24:MI') AS ts
+               FROM public.datos_rrhh dr
+               LEFT JOIN public.empleados e ON e.id = dr.id_empleado
+               WHERE dr.status IN ('revision','draft') AND dr.deleted_at IS NULL
+               ORDER BY dr.updated_at DESC LIMIT 20""",
+            fetch="all",
+        ) or []
+        for r in rrhh_rows:
+            items.append(dict(r))
+        total += len(rrhh_rows)
+
+    # Contar por tipo de estado
+    counts = {"revision": 0, "draft": 0}
+    for it in items:
+        st = it.get("status", "")
+        if st in counts:
+            counts[st] += 1
+
+    return {"total": total, "counts": counts, "items": items[:30]}

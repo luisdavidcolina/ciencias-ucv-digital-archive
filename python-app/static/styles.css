@@ -2382,6 +2382,76 @@ body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
   .ds-status-revision { animation: none; }
 }
 
+/* ── Notification panel ────────────────────────────────────────────────── */
+.ds-notif-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -8px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  z-index: 1050;
+  overflow: hidden;
+}
+.ds-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 0.88rem;
+}
+.ds-notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.ds-notif-empty {
+  padding: 20px;
+  text-align: center;
+  color: #adb5bd;
+  font-size: 0.83rem;
+}
+.ds-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid #f8f9fa;
+  text-decoration: none !important;
+  color: inherit;
+  transition: background 0.1s;
+}
+.ds-notif-item:hover { background: #f8f9fa; }
+.ds-notif-item-body  { flex-grow: 1; min-width: 0; }
+.ds-notif-item-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #212529;
+}
+.ds-notif-item-meta {
+  font-size: 0.70rem;
+  color: #adb5bd;
+  margin-top: 1px;
+}
+.ds-notif-footer {
+  padding: 8px 14px;
+  border-top: 1px solid #f0f2f5;
+  text-align: right;
+  background: #f8f9fa;
+}
+
+body.dark-mode .ds-notif-panel      { background:#1e222b; border-color:#2e3342; }
+body.dark-mode .ds-notif-header     { border-color:#2e3342; color:#c0cce0; }
+body.dark-mode .ds-notif-item       { border-color:#252b35; color:#c0cce0; }
+body.dark-mode .ds-notif-item:hover { background:#252b35; }
+body.dark-mode .ds-notif-item-label { color:#d8e0f0; }
+body.dark-mode .ds-notif-footer     { background:#1a1d23; border-color:#2e3342; }
+
 /* Dark mode adjustments for the panel itself */
 body.dark-mode .ds-theme-panel         { background:#1e222b !important; }
 body.dark-mode .ds-panel-section       { border-color:#2e3342 !important; }

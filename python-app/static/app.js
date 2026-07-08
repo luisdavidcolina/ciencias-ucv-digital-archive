@@ -205,6 +205,7 @@ function loginSuccess(user) {
 
   loadDynamicChoices();
   configureSidebarVisibilities(user);
+  _initNotificationBell(user);
 
   const switchBtn = document.getElementById("module_switch_btn");
   if (switchBtn) {
@@ -911,4 +912,108 @@ function _createThemePanel() {
 
     </div>`;
   return panel;
+}
+
+// ── NOTIFICACIONES Y PENDIENTES ──────────────────────────────────────────────
+let _notifInterval = null;
+
+function _initNotificationBell(user) {
+  // Solo mostrar a usuarios con rol admin
+  const isAdmin = user.roles && (user.roles["Archivo"] === "Admin" || user.roles["RRHH"] === "Admin");
+  if (!isAdmin) return;
+
+  // Inyectar el botón de campana antes del usuario en la barra
+  const navUser = document.querySelector(".ds-nav-user");
+  if (!navUser || document.getElementById("ds-notif-btn")) return;
+
+  const li = document.createElement("li");
+  li.className = "nav-item mr-2";
+  li.style.position = "relative";
+  li.innerHTML = `
+    <button id="ds-notif-btn" class="btn btn-link nav-link p-0 px-2" title="Notificaciones y pendientes"
+      style="font-size:1.2rem;color:#2b4e72;position:relative;" onclick="toggleNotifPanel()">
+      <i class="fas fa-bell"></i>
+      <span id="ds-notif-badge" class="badge badge-danger"
+        style="position:absolute;top:2px;right:2px;font-size:0.6rem;padding:2px 4px;min-width:16px;display:none;">0</span>
+    </button>
+    <div id="ds-notif-panel" class="ds-notif-panel" style="display:none;">
+      <div class="ds-notif-header">
+        <strong><i class="fas fa-bell mr-1"></i>Pendientes</strong>
+        <button class="btn btn-xs btn-link text-muted" onclick="loadNotifications()" title="Actualizar">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+      <div id="ds-notif-list" class="ds-notif-list">
+        <div class="ds-notif-empty">Cargando...</div>
+      </div>
+      <div class="ds-notif-footer">
+        <a href="/admin/archivo" class="btn btn-xs btn-outline-primary mr-1">Archivo</a>
+        <a href="/admin/rrhh"    class="btn btn-xs btn-outline-warning">RRHH</a>
+      </div>
+    </div>`;
+  navUser.before(li);
+
+  // Cerrar al hacer clic fuera
+  document.addEventListener("click", e => {
+    const panel = document.getElementById("ds-notif-panel");
+    if (panel && !panel.contains(e.target) && e.target.id !== "ds-notif-btn" && !e.target.closest("#ds-notif-btn")) {
+      panel.style.display = "none";
+    }
+  });
+
+  loadNotifications();
+  if (_notifInterval) clearInterval(_notifInterval);
+  _notifInterval = setInterval(loadNotifications, 90000);  // poll cada 90s
+}
+
+function toggleNotifPanel() {
+  const panel = document.getElementById("ds-notif-panel");
+  if (!panel) return;
+  const visible = panel.style.display !== "none";
+  panel.style.display = visible ? "none" : "block";
+  if (!visible) loadNotifications();
+}
+
+async function loadNotifications() {
+  const badge = document.getElementById("ds-notif-badge");
+  const list  = document.getElementById("ds-notif-list");
+  if (!badge || !list || !state.user) return;
+
+  const modulo = state.user.modules?.includes("Archivo") && state.user.modules?.includes("RRHH")
+    ? "Global"
+    : (state.user.modulo || "");
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/notifications?modulo=${encodeURIComponent(modulo)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const total = data.total || 0;
+
+    // Badge
+    badge.textContent = total > 99 ? "99+" : total;
+    badge.style.display = total > 0 ? "inline-block" : "none";
+
+    // Panel list
+    if (total === 0) {
+      list.innerHTML = '<div class="ds-notif-empty"><i class="fas fa-check-circle mr-1 text-success"></i>Sin pendientes</div>';
+      return;
+    }
+
+    const STATUS_ICON = { revision: "fas fa-clock text-warning", draft: "fas fa-pencil-alt text-secondary" };
+    const STATUS_LBL  = { revision: "Revisión", draft: "Borrador" };
+
+    list.innerHTML = (data.items || []).slice(0, 15).map(it => {
+      const icon = STATUS_ICON[it.status] || "fas fa-file";
+      const lbl  = STATUS_LBL[it.status]  || it.status;
+      const href = it.modulo === "Archivo"
+        ? `/admin/archivo?docId=${it.id}`
+        : `/admin/rrhh?empId=${it.id}`;
+      return `<a class="ds-notif-item" href="${href}" onclick="document.getElementById('ds-notif-panel').style.display='none'">
+        <i class="${icon}" style="width:14px;flex-shrink:0;"></i>
+        <div class="ds-notif-item-body">
+          <div class="ds-notif-item-label">${it.label || '—'}</div>
+          <div class="ds-notif-item-meta">${it.modulo} · ${lbl} · ${it.ts || ''}</div>
+        </div>
+      </a>`;
+    }).join("");
+  } catch { /* silencioso */ }
 }
