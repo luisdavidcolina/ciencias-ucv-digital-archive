@@ -1,11 +1,11 @@
-﻿// --- EDITAR / ELIMINAR DOCUMENTO (ARCHIVO) ---
+// --- EDITAR / ELIMINAR DOCUMENTO (ARCHIVO) ---
 async function openEditDocModal(id) {
   // Fetch datos frescos del servidor (no depender solo de state cache)
   let rec = state.adminTable.results.find(r => r.id == id) || { id };
   try {
     const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}`);
     if (res.ok) rec = await res.json();
-  } catch { /* usa cachÃ© si falla el fetch */ }
+  } catch { /* usa caché si falla el fetch */ }
 
   document.getElementById("edit-doc-id").value        = rec.id || "";
   document.getElementById("edit-doc-titulo").value    = rec.titulo || "";
@@ -54,7 +54,7 @@ async function openEditDocModal(id) {
   const folioEl = document.getElementById("edit-doc-folio");
   if (folioEl) folioEl.value = rec.numero_folio || "";
   const soporteEl = document.getElementById("edit-doc-soporte");
-  if (soporteEl) soporteEl.value = rec.soporte || "FÃ­sico";
+  if (soporteEl) soporteEl.value = rec.soporte || "Físico";
   const paginasEl = document.getElementById("edit-doc-paginas");
   if (paginasEl) paginasEl.value = rec.numero_paginas || "";
   const idiomaEl = document.getElementById("edit-doc-idioma");
@@ -81,7 +81,7 @@ async function _lookupByCedula(suf) {
   const cedInput = document.getElementById(`reg-cedula-${suf}`);
   const hintEl   = document.getElementById(`reg-cedula-hint-${suf}`);
   const cedula   = (cedInput?.value || "").trim();
-  if (!cedula) { showToast("Ingrese una cÃ©dula primero.", "warning"); return; }
+  if (!cedula) { showToast("Ingrese una cédula primero.", "warning"); return; }
 
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/empleado/por-cedula/${encodeURIComponent(cedula)}`);
@@ -126,13 +126,13 @@ function _refreshEditDocPreview() {
   }
 }
 
-// --- DRAG-AND-DROP UPLOAD EN MODAL DE EDICIÃ“N ---
+// --- DRAG-AND-DROP UPLOAD EN MODAL DE EDICIÓN ---
 
 async function _uploadEditDocFile(file) {
   const ALLOWED = ["pdf","png","jpg","jpeg","tiff","tif","webp"];
   const ext = (file.name.split(".").pop() || "").toLowerCase();
   if (!ALLOWED.includes(ext)) { showToast("Tipo de archivo no permitido.", "warning"); return; }
-  if (file.size > 25 * 1024 * 1024) { showToast("El archivo excede el lÃ­mite de 25 MB.", "warning"); return; }
+  if (file.size > 25 * 1024 * 1024) { showToast("El archivo excede el límite de 25 MB.", "warning"); return; }
 
   const status = document.getElementById("edit-doc-upload-status");
   const zone   = document.getElementById("edit-doc-dropzone");
@@ -219,8 +219,8 @@ async function handleSaveEditDoc() {
 async function handleDeleteDoc(id, nombre) {
   const ok = await confirmModal(
     "Mover a la papelera",
-    `Â¿Enviar "${nombre}" a la papelera? PodrÃ¡s restaurarlo desde la pestaÃ±a Papelera.`,
-    "SÃ­, mover a papelera", "btn-danger"
+    `Â¿Enviar "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
   try {
@@ -262,7 +262,7 @@ async function _loadPapeleraDocumentos(modulo, suf) {
     const data = await res.json();
     _papeleraState[suf].total = data.total;
     if (!data.records?.length) {
-      body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">La papelera estÃ¡ vacÃ­a.</td></tr>';
+      body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">La papelera está vacía.</td></tr>';
     } else {
       body.innerHTML = data.records.map((r, i) => `
         <tr>
@@ -279,7 +279,7 @@ async function _loadPapeleraDocumentos(modulo, suf) {
         </tr>`).join("");
     }
     if (summary) summary.textContent = `${data.total} documento(s) en papelera`;
-    if (pageInfo) pageInfo.textContent = `PÃ¡g. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
   } catch {
     body.innerHTML = '<tr><td colspan="7" class="text-danger text-center py-2">Error al cargar la papelera.</td></tr>';
   }
@@ -314,7 +314,7 @@ async function _loadPapeleraEmpleados() {
         </tr>`).join("");
     }
     if (summary) summary.textContent = `${data.total} empleado(s) en papelera`;
-    if (pageInfo) pageInfo.textContent = `PÃ¡g. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
   } catch {
     body.innerHTML = '<tr><td colspan="6" class="text-danger text-center py-2">Error al cargar.</td></tr>';
   }
@@ -336,7 +336,7 @@ async function _restaurarDoc(id, modulo) {
 }
 
 async function _purgarDoc(id, modulo) {
-  const ok = await confirmModal("Eliminar permanentemente", "Esta acciÃ³n es irreversible. Â¿Continuar?", "SÃ­, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. Â¿Continuar?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
@@ -356,7 +356,7 @@ async function _restaurarEmpleado(id) {
 }
 
 async function _purgarEmpleado(id) {
-  const ok = await confirmModal("Eliminar empleado permanentemente", "Se eliminarÃ¡n tambiÃ©n todos sus documentos. Esta acciÃ³n es irreversible.", "SÃ­, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar empleado permanentemente", "Se eliminarán también todos sus documentos. Esta acción es irreversible.", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/papelera/empleados/${id}/purgar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
@@ -390,7 +390,7 @@ async function loadDocVersiones(docId, modulo) {
               <td>${v.subido_por || "â€”"}</td>
               <td>${v.created_at || "â€”"}</td>
               <td>
-                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},'${modulo}')" title="Restaurar esta versiÃ³n"><i class="fas fa-undo"></i></button>
+                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},'${modulo}')" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
                 <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},'${modulo}')" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
               </td>
             </tr>`).join("")}
@@ -405,25 +405,25 @@ async function _restaurarVersion(docId, verId, modulo) {
   try {
     const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
     if (!res.ok) throw new Error();
-    showToast("VersiÃ³n restaurada como archivo actual.", "success");
+    showToast("Versión restaurada como archivo actual.", "success");
     const row = await (await fetch(`${API_BASE}/api/admin/documento/${docId}?modulo=${encodeURIComponent(modulo)}`)).json();
     if (row?.file_url) {
       const urlEl = document.getElementById("edit-doc-file-url");
       if (urlEl) { urlEl.value = row.file_url; _refreshEditDocPreview(); }
     }
     loadDocVersiones(docId, modulo);
-  } catch { showToast("Error al restaurar versiÃ³n.", "error"); }
+  } catch { showToast("Error al restaurar versión.", "error"); }
 }
 
 async function _deleteVersion(docId, verId, modulo) {
-  const ok = await confirmModal("Eliminar versiÃ³n", "Â¿Eliminar esta versiÃ³n del historial? No afecta al archivo actual.", "SÃ­, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar versión", "Â¿Eliminar esta versión del historial? No afecta al archivo actual.", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     if (!res.ok) throw new Error();
-    showToast("VersiÃ³n eliminada.", "success");
+    showToast("Versión eliminada.", "success");
     loadDocVersiones(docId, modulo);
-  } catch { showToast("Error al eliminar versiÃ³n.", "error"); }
+  } catch { showToast("Error al eliminar versión.", "error"); }
 }
 
 function _toggleVersiones() {
@@ -445,10 +445,10 @@ async function _guardarComoVersion() {
   const docId = document.getElementById("edit-doc-id")?.value;
   const currentUrl = (document.getElementById("edit-doc-file-url")?.value || "").trim();
   if (!docId) return;
-  if (!currentUrl) { showToast("No hay archivo actual que guardar como versiÃ³n.", "warning"); return; }
+  if (!currentUrl) { showToast("No hay archivo actual que guardar como versión.", "warning"); return; }
 
   const modulo = isArchivoModule() ? "Archivo" : "RRHH";
-  const comentario = await promptModal("Comentario de versiÃ³n", "Describe brevemente el cambio (opcional):");
+  const comentario = await promptModal("Comentario de versión", "Describe brevemente el cambio (opcional):");
 
   try {
     const res = await fetch(
@@ -456,9 +456,9 @@ async function _guardarComoVersion() {
       { method: "POST" }
     );
     if (!res.ok) throw new Error();
-    showToast("VersiÃ³n guardada en el historial.", "success");
+    showToast("Versión guardada en el historial.", "success");
     if (document.getElementById("edit-doc-versiones-container")?.style.display !== "none") {
       loadDocVersiones(parseInt(docId), modulo);
     }
-  } catch { showToast("Error al guardar versiÃ³n.", "error"); }
+  } catch { showToast("Error al guardar versión.", "error"); }
 }

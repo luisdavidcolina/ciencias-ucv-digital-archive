@@ -1,4 +1,4 @@
-﻿
+
 // --- EDITAR / ELIMINAR EMPLEADO (RRHH) ---
 async function openEditEmpleadoModal(empId) {
   let rec = state.adminTable.results.find(r => r.empleado_id == empId) || { empleado_id: empId };
@@ -81,8 +81,8 @@ async function handleSaveEditEmpleado() {
 async function handleDeleteEmpleado(empId, nombre) {
   const ok = await confirmModal(
     "Mover a la papelera",
-    `Â¿Enviar el expediente de "${nombre}" a la papelera? PodrÃ¡s restaurarlo desde la pestaÃ±a Papelera.`,
-    "SÃ­, mover a papelera", "btn-danger"
+    `Â¿Enviar el expediente de "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
   try {
@@ -107,18 +107,18 @@ function exportAdminCSV() {
 
   let headers, rows;
   if (isArch) {
-    // Incluye campos ISAD(G): folio, soporte, pÃ¡ginas
-    headers = ["ID", "TÃ­tulo", "Autor", "Fecha", "TipologÃ­a", "ClasificaciÃ³n",
-               "NÂ° Folio", "Soporte", "NÂ° PÃ¡ginas", "UbicaciÃ³n", "Archivo Digital", "Estado", "Resumen"];
+    // Incluye campos ISAD(G): folio, soporte, páginas
+    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación",
+               "NÂ° Folio", "Soporte", "NÂ° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
     rows = records.map(r => [
       r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.tesauro_secundario || "",
-      r.numero_folio || "", r.soporte || "FÃ­sico", r.numero_paginas || "",
+      r.numero_folio || "", r.soporte || "Físico", r.numero_paginas || "",
       r.ubicacion, r.file_url || "", r.status || "aprobado", r.resumen || ""
     ].map(esc).join(","));
   } else {
-    headers = ["ID Empleado", "Apellidos y Nombres", "CÃ©dula", "RIF", "Cargo", "Departamento",
+    headers = ["ID Empleado", "Apellidos y Nombres", "Cédula", "RIF", "Cargo", "Departamento",
                "Estado Laboral", "Fecha Ingreso", "Fecha Nacimiento", "Nivel Educativo", "Sexo",
-               "NÂ° Documentos", "Ãšltima Actualiz."];
+               "NÂ° Documentos", "Última Actualiz."];
     const SEXO = { M: "Masculino", F: "Femenino", O: "Otro" };
     rows = records.map(r => [
       r.empleado_id,
@@ -138,7 +138,7 @@ function exportAdminCSV() {
   }
 
   // Metadato: filtros aplicados como comentario CSV (fila especial)
-  const meta = `"# Exportado: ${today} | MÃ³dulo: ${state.user.modulo} | PÃ¡g: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
+  const meta = `"# Exportado: ${today} | Módulo: ${state.user.modulo} | Pág: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
   const csv  = [meta, headers.join(","), ...rows].join("\n");
   const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
@@ -158,7 +158,7 @@ function initDropZone(suf) {
 
   const updateLabel = (name) => {
     const label = zone.querySelector(".ds-drop-label") || zone.querySelector("p.text-muted");
-    if (label) label.textContent = name ? `ðŸ“„ ${name}` : "Arrastra aquÃ­ o selecciona archivos";
+    if (label) label.textContent = name ? `ðŸ“„ ${name}` : "Arrastra aquí o selecciona archivos";
     const icon = zone.querySelector(".fa-file-upload");
     if (icon) {
       icon.classList.toggle("fa-file-upload", !name);
@@ -199,7 +199,7 @@ function initDropZone(suf) {
   });
 }
 // =============================================================================
-// HISTORIAL DE CARGOS â€” gestiÃ³n desde el admin panel
+// HISTORIAL DE CARGOS â€” gestión desde el admin panel
 // =============================================================================
 
 async function _adminToggleHistorial() {
@@ -272,7 +272,7 @@ async function _adminAddCargo() {
 }
 
 async function _adminDeleteCargo(empId, histId) {
-  const ok = await confirmModal("Eliminar entrada", "Â¿Eliminar esta entrada del historial de cargos?", "SÃ­, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar entrada", "Â¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });

@@ -1,4 +1,4 @@
-﻿// --- NUEVO INGRESO ---
+// --- NUEVO INGRESO ---
 function renderDynamicSubmitFields() {
   const suf       = adminSuffixFromTab();
   const container = document.getElementById(`dynamic-submit-fields-${suf}`);
@@ -8,8 +8,8 @@ function renderDynamicSubmitFields() {
     container.innerHTML = `
       <div class="row">
         <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">TÃ­tulo del Documento *</label>
-          <input type="text" id="reg-title-${suf}" class="form-control" placeholder="Ej: Plan Regulador de Ãreas Verdes" required>
+          <label class="font-weight-bold text-muted">Título del Documento *</label>
+          <input type="text" id="reg-title-${suf}" class="form-control" placeholder="Ej: Plan Regulador de Áreas Verdes" required>
         </div>
         <div class="col-md-6 form-group">
           <label class="font-weight-bold text-muted">Autor / Ente Emisor *</label>
@@ -20,11 +20,11 @@ function renderDynamicSubmitFields() {
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Tipo de Documento *</label>
           <select id="reg-doc-type-${suf}" class="form-control" required>
-            ${(state.choices?.archivo?.doc_types || ["Proyecto de InvestigaciÃ³n","Informe","Plano ArquitectÃ³nico","Acta de SesiÃ³n","ResoluciÃ³n","Reglamento"]).map(t => `<option value="${t}">${t}</option>`).join("")}
+            ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe","Plano Arquitectónico","Acta de Sesión","Resolución","Reglamento"]).map(t => `<option value="${t}">${t}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">ClasificaciÃ³n *</label>
+          <label class="font-weight-bold text-muted">Clasificación *</label>
           <select id="reg-secundario-${suf}" class="form-control" required>
             <option value="Parte I">Parte I</option>
             <option value="Parte II">Parte II</option>
@@ -33,20 +33,20 @@ function renderDynamicSubmitFields() {
           </select>
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Fecha de EmisiÃ³n *</label>
+          <label class="font-weight-bold text-muted">Fecha de Emisión *</label>
           <input type="date" id="reg-fecha-${suf}" class="form-control" required value="${new Date().toISOString().substring(0,10)}">
         </div>
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">Palabras Clave (separadas por coma) *</label>
-        <input type="text" id="reg-descriptores-${suf}" class="form-control" placeholder="Ej: PlanificaciÃ³n acadÃ©mica, GestiÃ³n institucional" required>
+        <input type="text" id="reg-descriptores-${suf}" class="form-control" placeholder="Ej: Planificación académica, Gestión institucional" required>
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">Resumen Descriptivo (Abstract)</label>
-        <textarea id="reg-resumen-${suf}" class="form-control" rows="3" placeholder="Breve sÃ­ntesis o abstract del documento..."></textarea>
+        <textarea id="reg-resumen-${suf}" class="form-control" rows="3" placeholder="Breve síntesis o abstract del documento..."></textarea>
       </div>
       <div class="form-group mt-2">
-        <label class="font-weight-bold text-muted">UbicaciÃ³n FÃ­sica (Estante, Gaveta o Caja) *</label>
+        <label class="font-weight-bold text-muted">Ubicación Física (Estante, Gaveta o Caja) *</label>
         <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Mapoteca - Gaveta 1 o Digitalizado Exclusivo" required>
       </div>
       <div class="row mt-2">
@@ -57,11 +57,11 @@ function renderDynamicSubmitFields() {
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Soporte</label>
           <select id="reg-soporte-${suf}" class="form-control">
-            ${(state.choices?.archivo?.soportes || ["FÃ­sico","Digital","Digitalizado"]).map(s => `<option value="${s}">${s}</option>`).join("")}
+            ${(state.choices?.archivo?.soportes || ["Físico","Digital","Digitalizado"]).map(s => `<option value="${s}">${s}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">NÂ° de PÃ¡ginas</label>
+          <label class="font-weight-bold text-muted">NÂ° de Páginas</label>
           <input type="number" id="reg-paginas-${suf}" class="form-control" min="1" placeholder="Ej: 12">
         </div>
       </div>
@@ -71,18 +71,18 @@ function renderDynamicSubmitFields() {
       <div class="row">
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Nombres *</label>
-          <input type="text" id="reg-nombres-${suf}" class="form-control" placeholder="Ej: Susana MarÃ­a" required>
+          <input type="text" id="reg-nombres-${suf}" class="form-control" placeholder="Ej: Susana María" required>
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Apellidos *</label>
-          <input type="text" id="reg-apellidos-${suf}" class="form-control" placeholder="Ej: PÃ©rez GonzÃ¡lez" required>
+          <input type="text" id="reg-apellidos-${suf}" class="form-control" placeholder="Ej: Pérez González" required>
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">CÃ©dula de Identidad *</label>
+          <label class="font-weight-bold text-muted">Cédula de Identidad *</label>
           <div class="input-group">
             <input type="text" id="reg-cedula-${suf}" class="form-control" placeholder="Ej: V-12345678" required>
             <div class="input-group-append">
-              <button class="btn btn-outline-info btn-sm" type="button" title="Buscar empleado por cÃ©dula"
+              <button class="btn btn-outline-info btn-sm" type="button" title="Buscar empleado por cédula"
                       onclick="_lookupByCedula('${suf}')">
                 <i class="fas fa-user-check"></i>
               </button>
@@ -103,7 +103,7 @@ function renderDynamicSubmitFields() {
       </div>
       <div class="form-group mt-2">
         <label class="font-weight-bold text-muted">Personas / Dependencias Relacionadas</label>
-        <input type="text" id="reg-personas-${suf}" class="form-control" placeholder="Ej: Susana PÃ©rez; DirecciÃ³n RRHH">
+        <input type="text" id="reg-personas-${suf}" class="form-control" placeholder="Ej: Susana Pérez; Dirección RRHH">
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
@@ -122,7 +122,7 @@ function renderDynamicSubmitFields() {
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Departamento *</label>
-          <input type="text" id="reg-depto-${suf}" class="form-control" placeholder="Ej: BiologÃ­a" required list="dl-departamentos" autocomplete="off">
+          <input type="text" id="reg-depto-${suf}" class="form-control" placeholder="Ej: Biología" required list="dl-departamentos" autocomplete="off">
         </div>
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Estado *</label>
@@ -138,17 +138,17 @@ function renderDynamicSubmitFields() {
           <input type="date" id="reg-fecha-${suf}" class="form-control" required value="${new Date().toISOString().substring(0,10)}">
         </div>
         <div class="col-md-6 form-group">
-          <label class="font-weight-bold text-muted">RetenciÃ³n FÃ­sica *</label>
+          <label class="font-weight-bold text-muted">Retención Física *</label>
           <input type="text" id="reg-location-${suf}" class="form-control" placeholder="Ej: Archivo Central - Caja J-02" required>
         </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Fecha de JubilaciÃ³n (Opcional)</label>
+          <label class="font-weight-bold text-muted">Fecha de Jubilación (Opcional)</label>
           <input type="date" id="reg-jubilacion-${suf}" class="form-control">
         </div>
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">Fecha de PensiÃ³n (Opcional)</label>
+          <label class="font-weight-bold text-muted">Fecha de Pensión (Opcional)</label>
           <input type="date" id="reg-pension-${suf}" class="form-control">
         </div>
         <div class="col-md-4 form-group">
@@ -175,7 +175,7 @@ function renderDynamicSubmitFields() {
           <label class="font-weight-bold text-muted">Nivel Educativo <span class="badge badge-secondary badge-sm">LOTTT</span></label>
           <select id="reg-nivel-${suf}" class="form-control">
             <option value="">No especificado</option>
-            ${(state.choices?.rrhh?.niveles_educativos || ["Bachiller","TSU","Universitario","EspecializaciÃ³n","MaestrÃ­a","Doctorado","Postdoctorado"]).map(n => `<option value="${n}">${n}</option>`).join("")}
+            ${(state.choices?.rrhh?.niveles_educativos || ["Bachiller","TSU","Universitario","Especialización","Maestría","Doctorado","Postdoctorado"]).map(n => `<option value="${n}">${n}</option>`).join("")}
           </select>
         </div>
       </div>
@@ -206,7 +206,7 @@ async function loadRecentSubmissions() {
     const statusBadge = s => {
       const icons = { aprobado: "fa-check", revision: "fa-clock", draft: "fa-pencil-alt", rechazado: "fa-times" };
       const cls   = { aprobado: "badge-success", revision: "badge-warning text-dark", draft: "badge-secondary", rechazado: "badge-danger" };
-      const label = { aprobado: "Aprobado", revision: "RevisiÃ³n", draft: "Borrador", rechazado: "Rechazado" };
+      const label = { aprobado: "Aprobado", revision: "Revisión", draft: "Borrador", rechazado: "Rechazado" };
       const st = s || "aprobado";
       return `<span class="badge ${cls[st] || 'badge-secondary'} ds-status-badge" style="font-size:0.65rem;" title="${label[st] || st}"><i class="fas ${icons[st] || 'fa-circle'} mr-1"></i>${label[st] || st}</span>`;
     };
@@ -217,7 +217,7 @@ async function loadRecentSubmissions() {
         <i class="fas fa-file-alt mr-2 text-primary" style="font-size:1.15rem;flex-shrink:0;"></i>
         <div style="overflow:hidden;flex-grow:1;">
           <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            <strong style="font-size:0.82rem;" class="text-dark">${title || "Sin tÃ­tulo"}</strong>
+            <strong style="font-size:0.82rem;" class="text-dark">${title || "Sin título"}</strong>
           </div>
           <div class="d-flex align-items-center gap-1">
             <span class="text-muted" style="font-size:0.70rem;">${item.doc_type || ""}</span>
@@ -238,15 +238,15 @@ async function handleNewSubmission(e) {
 
   function val(id) { return (document.getElementById(id)?.value || "").trim(); }
 
-  // ValidaciÃ³n en el borde del sistema (entrada del usuario)
+  // Validación en el borde del sistema (entrada del usuario)
   if (isArchivo) {
-    if (!val(`reg-title-${suf}`))    { showToast("El tÃ­tulo del documento es requerido.", "warning"); return; }
+    if (!val(`reg-title-${suf}`))    { showToast("El título del documento es requerido.", "warning"); return; }
     if (!val(`reg-doc-type-${suf}`)) { showToast("Selecciona el tipo de documento.", "warning"); return; }
-    if (!val(`reg-location-${suf}`)) { showToast("La ubicaciÃ³n fÃ­sica es requerida.", "warning"); return; }
+    if (!val(`reg-location-${suf}`)) { showToast("La ubicación física es requerida.", "warning"); return; }
   } else {
     if (!val(`reg-nombres-${suf}`))  { showToast("El nombre del empleado es requerido.", "warning"); return; }
-    if (!val(`reg-cedula-${suf}`))   { showToast("La cÃ©dula del empleado es requerida.", "warning"); return; }
-    if (!val(`reg-location-${suf}`)) { showToast("La retenciÃ³n fÃ­sica es requerida.", "warning"); return; }
+    if (!val(`reg-cedula-${suf}`))   { showToast("La cédula del empleado es requerida.", "warning"); return; }
+    if (!val(`reg-location-${suf}`)) { showToast("La retención física es requerida.", "warning"); return; }
   }
 
   const submitBtn = document.getElementById(`btn_submit_workspace-${suf}`);
@@ -268,7 +268,7 @@ async function handleNewSubmission(e) {
     payload.tesauro_secundario  = val(`reg-secundario-${suf}`);
     payload.descriptores_libres = val(`reg-descriptores-${suf}`);
     payload.numero_folio        = val(`reg-folio-${suf}`) || null;
-    payload.soporte             = val(`reg-soporte-${suf}`) || "FÃ­sico";
+    payload.soporte             = val(`reg-soporte-${suf}`) || "Físico";
     const pags = parseInt(document.getElementById(`reg-paginas-${suf}`)?.value || "");
     if (!isNaN(pags) && pags > 0) payload.numero_paginas = pags;
   } else {
@@ -292,7 +292,7 @@ async function handleNewSubmission(e) {
   }
 
   try {
-    // Subir archivo digitalizado (si se seleccionÃ³ uno) antes de crear el registro
+    // Subir archivo digitalizado (si se seleccionó uno) antes de crear el registro
     const fileInput = document.getElementById(`file_upload-${suf}`);
     const file = fileInput?.files?.[0];
     if (file) {
@@ -329,7 +329,7 @@ async function handleNewSubmission(e) {
       showToast(errMsg, "error");
       return;
     }
-    showToast("Ingreso guardado con Ã©xito.", "success");
+    showToast("Ingreso guardado con éxito.", "success");
     const form = document.getElementById(`admin-submit-form-${suf}`);
     if (form) form.reset();
     renderDynamicSubmitFields();
@@ -338,7 +338,7 @@ async function handleNewSubmission(e) {
     if (isArchivo) triggerArchivoSearch(); else triggerRrhhSearch();
     loadAdminTab("stats");
   } catch {
-    showToast("Error de conexiÃ³n al registrar el folio.", "error");
+    showToast("Error de conexión al registrar el folio.", "error");
   } finally {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = origLabel; }
   }

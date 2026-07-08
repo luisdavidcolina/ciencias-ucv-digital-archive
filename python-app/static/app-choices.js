@@ -1,4 +1,4 @@
-﻿// ==========================================================================
+// ==========================================================================
 // CHOICES, TOM SELECT, FECHAS
 // ==========================================================================
 async function loadDynamicChoices() {
@@ -16,7 +16,7 @@ async function loadDynamicChoices() {
     initDateControls("rrhh",    data.rrhh);
     _populateDataLists(data.rrhh);
   } catch (e) {
-    console.error("Error al cargar choices dinÃ¡micos:", e);
+    console.error("Error al cargar choices dinámicos:", e);
   }
 }
 
@@ -94,8 +94,8 @@ function initDateControls(module, data) {
         rangeSeparator: " â†’ ",
         firstDayOfWeek: 1,
         weekdays: {
-          shorthand: ["Dom", "Lun", "Mar", "MiÃ©", "Jue", "Vie", "SÃ¡b"],
-          longhand:  ["Domingo", "Lunes", "Martes", "MiÃ©rcoles", "Jueves", "Viernes", "SÃ¡bado"]
+          shorthand: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+          longhand:  ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
         },
         months: {
           shorthand: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
@@ -118,7 +118,7 @@ function initDateControls(module, data) {
 
   const sy = document.getElementById(`year-select-${module}`);
   if (sy) {
-    // Usar lista exacta de aÃ±os con datos si estÃ¡ disponible (mÃ¡s precisa)
+    // Usar lista exacta de años con datos si está disponible (más precisa)
     const years = (data.years && data.years.length)
       ? data.years
       : (() => {
@@ -126,7 +126,7 @@ function initDateControls(module, data) {
           const maxY = parseInt(data.max_date.substring(0, 4));
           return Array.from({ length: maxY - minY + 1 }, (_, i) => maxY - i);
         })();
-    sy.innerHTML = `<option value="">Seleccionar aÃ±oâ€¦</option>` +
+    sy.innerHTML = `<option value="">Seleccionar añoâ€¦</option>` +
       years.map(y => `<option value="${y}">${y}</option>`).join("");
   }
 
@@ -190,7 +190,7 @@ function handleYearSelect(module) {
   state[module].dateEnd   = `${y}-12-31`;
   state[module].page = 1;
   const lbl = document.getElementById(`fp-${module}-label`);
-  if (lbl) lbl.innerText = `AÃ±o ${y}`;
+  if (lbl) lbl.innerText = `Año ${y}`;
   if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
 }
 

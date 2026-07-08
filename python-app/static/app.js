@@ -1,5 +1,5 @@
-﻿// ==========================================================================
-// CICLO DE VIDA DE SESIÃ“N
+// ==========================================================================
+// CICLO DE VIDA DE SESIÓN
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function checkPersistedSession() {
-  // admin_sistema.html gestiona su propia sesiÃ³n (checkSession) â€” no interferir
+  // admin_sistema.html gestiona su propia sesión (checkSession) â€” no interferir
   if (document.body.dataset.page === "admin-sistema") return;
   const raw = localStorage.getItem("archive_session");
   if (!raw) {
@@ -133,12 +133,12 @@ function configureSidebarVisibilities(user) {
   if (rRrhh === "Admin" && linkAdminRrhh)   linkAdminRrhh.style.display = "flex";
 
   const linkSistema = document.getElementById("menu-btn-admin-sistema");
-  // Mostrar si el usuario tiene AMBOS mÃ³dulos (Global admin)
+  // Mostrar si el usuario tiene AMBOS módulos (Global admin)
   if (linkSistema && user.modules && user.modules.includes("Archivo") && user.modules.includes("RRHH")) {
     linkSistema.style.display = "flex";
   }
 
-  // Mostrar el grupo "AdministraciÃ³n" si al menos un panel es accesible
+  // Mostrar el grupo "Administración" si al menos un panel es accesible
   const adminGroup = document.getElementById("sidebar-admin-group");
   if (adminGroup) {
     const hasAdmin = (rArch === "Admin") || (rRrhh === "Admin") ||
@@ -146,7 +146,7 @@ function configureSidebarVisibilities(user) {
     adminGroup.style.display = hasAdmin ? "block" : "none";
   }
 
-  // Acceso en pÃ¡ginas standalone
+  // Acceso en páginas standalone
   const standalonePage = document.body.dataset.page;
   if (standalonePage) {
     let allowed = false;
@@ -226,7 +226,7 @@ function setupEventListeners() {
   safeOn("sidebar-close-btn", "click", closeSidebar);
   safeOn("sidebar-overlay",   "click", closeSidebar);
 
-  // Tabs (SPA Ãºnicamente; en standalone las <a href> navegan normalmente)
+  // Tabs (SPA únicamente; en standalone las <a href> navegan normalmente)
   const isSPA = !!document.getElementById("app-portal");
   safeOn("menu-btn-archivo",       "click", e => { if (!isSPA) return; e.preventDefault(); switchTab("archivo"); });
   safeOn("menu-btn-rrhh",          "click", e => { if (!isSPA) return; e.preventDefault(); switchTab("rrhh"); });
@@ -234,7 +234,7 @@ function setupEventListeners() {
   safeOn("menu-btn-admin-rrhh",    "click", e => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "RRHH";    switchTab("admin-rrhh"); });
   safeOn("module_switch_btn",      "click", handleModuleSwitch);
 
-  // Buscador Archivo â€” debounce 420ms en input, inmediato en botÃ³n/enter
+  // Buscador Archivo â€” debounce 420ms en input, inmediato en botón/enter
   safeOn("search_archivo",    "input",  e => {
     state.archivo.search = e.target.value; state.archivo.page = 1;
     if (typeof _debouncedArchivoSearch === "function") _debouncedArchivoSearch();
@@ -263,22 +263,22 @@ function setupEventListeners() {
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; triggerRrhhSearch(); });
 
-  // Chips de fecha (event delegation por mÃ³dulo)
+  // Chips de fecha (event delegation por módulo)
   ["archivo", "rrhh"].forEach(mod => {
     document.querySelectorAll(`.ds-date-chip[data-module="${mod}"]`).forEach(btn => {
       btn.addEventListener("click", () => applyDatePreset(mod, btn.dataset.preset));
     });
     safeOn(`year-select-${mod}`, "change", () => handleYearSelect(mod));
   });
-  // BotÃ³n Ã— del rango vuelve a Todo
+  // Botón × del rango vuelve a Todo
   safeOn("fp-archivo-clear", "click", () => applyDatePreset("archivo", "all"));
   safeOn("fp-rrhh-clear",   "click", () => applyDatePreset("rrhh",    "all"));
 
-  // PaginaciÃ³n Archivo
+  // Paginación Archivo
   safeOn("btn-archivo-prev", "click", () => { if (state.archivo.page > 1) { state.archivo.page--; triggerArchivoSearch(); } });
   safeOn("btn-archivo-next", "click", () => { const t = Math.ceil((state.archivo.total || state.archivo.results.length) / state.archivo.perPage); if (state.archivo.page < t) { state.archivo.page++; triggerArchivoSearch(); } });
 
-  // PaginaciÃ³n RRHH
+  // Paginación RRHH
   safeOn("btn-rrhh-prev", "click", () => { if (state.rrhh.page > 1) { state.rrhh.page--; triggerRrhhSearch(); } });
   safeOn("btn-rrhh-next", "click", () => { const t = Math.ceil((state.rrhh.total || state.rrhh.results.length) / state.rrhh.perPage); if (state.rrhh.page < t) { state.rrhh.page++; triggerRrhhSearch(); } });
 
@@ -313,7 +313,7 @@ async function performLogin() {
   const password = document.getElementById("login_pass")?.value.trim();
   const btn      = document.getElementById("login_btn");
   if (!username || !password) {
-    showLoginError("Por favor, ingrese usuario y contraseÃ±a.");
+    showLoginError("Por favor, ingrese usuario y contraseña.");
     return;
   }
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Verificando...'; }
@@ -323,7 +323,7 @@ async function performLogin() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
-    if (res.status === 403) { showLoginError("Tu cuenta estÃ¡ desactivada. Contacta al administrador."); return; }
+    if (res.status === 403) { showLoginError("Tu cuenta está desactivada. Contacta al administrador."); return; }
     if (!res.ok) throw new Error();
     loginSuccess((await res.json()).user);
   } catch {
@@ -339,14 +339,14 @@ function _exportResultsCSV(modulo) {
 
   let headers, rows;
   if (modulo === "archivo") {
-    headers = ["ID", "TÃ­tulo", "Autor", "Fecha", "TipologÃ­a", "ClasificaciÃ³n", "UbicaciÃ³n", "Resumen", "Palabras Clave", "Archivo Digital"];
+    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación", "Ubicación", "Resumen", "Palabras Clave", "Archivo Digital"];
     rows = data.map(r => [
       r.id_archivo || r.id, r.titulo, r.autor, r.fecha_documento || r.fecha,
       r.tesauro_primario || r.doc_type, r.tesauro_secundario || r.clasificacion || "",
       r.ubicacion, r.abstract || r.resumen || "", r.palabras_clave || "", r.file_url || ""
     ].map(v => `"${String(v||"").replace(/"/g,'""')}"`).join(","));
   } else {
-    headers = ["ID Empleado", "Nombre", "CÃ©dula", "Departamento", "Estado", "Cargo", "Tipos de Documentos"];
+    headers = ["ID Empleado", "Nombre", "Cédula", "Departamento", "Estado", "Cargo", "Tipos de Documentos"];
     rows = data.map(r => [
       r.empleado_id, r.persona_raw || r.empleado, r.cedula,
       r.departamento, r.estado, r.cargo || "", r.tipos || ""

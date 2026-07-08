@@ -1,4 +1,4 @@
-﻿// --- ESTADÃSTICAS ---
+// --- ESTADÍSTICAS ---
 async function loadDynamicStats() {
   const suf = adminSuffixFromTab();
   try {
@@ -38,7 +38,7 @@ async function loadDynamicStats() {
       }
     }
 
-    // DistribuciÃ³n por tipo
+    // Distribución por tipo
     const typeContainer = document.getElementById(`stats_by_type-${suf}`);
     if (typeContainer) {
       if (stats.by_type.length === 0) {
@@ -61,11 +61,11 @@ async function loadDynamicStats() {
       }
     }
 
-    // LÃ­nea de tiempo
+    // Línea de tiempo
     const timelineContainer = document.getElementById(`stats_timeline-${suf}`);
     if (timelineContainer) {
       if (stats.timeline.length === 0) {
-        timelineContainer.innerHTML = `<div class="text-muted">Sin datos de lÃ­nea de tiempo.</div>`;
+        timelineContainer.innerHTML = `<div class="text-muted">Sin datos de línea de tiempo.</div>`;
       } else {
         timelineContainer.innerHTML = `<div class="w-100" style="padding:15px 10px;">
           ${stats.timeline.map(y => `
@@ -91,16 +91,16 @@ async function loadDynamicStats() {
       sysContainer.innerHTML = `
         <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-server fa-2x text-primary mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.status}</h5><span class="text-muted" style="font-size:0.8rem;">Estado Global</span></div>
         <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-memory fa-2x text-success mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.ram}</h5><span class="text-muted" style="font-size:0.8rem;">Consumo RAM</span></div>
-        <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-microchip fa-2x text-warning mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.cpu} NÃºcleos</h5><span class="text-muted" style="font-size:0.8rem;">Procesamiento</span></div>
+        <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-microchip fa-2x text-warning mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.cpu} Núcleos</h5><span class="text-muted" style="font-size:0.8rem;">Procesamiento</span></div>
         <div class="col-md-3 text-center p-3"><i class="fas fa-laptop-code fa-2x text-danger mb-2"></i><h5 class="font-weight-bold m-0" style="font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${stats.system.os}</h5><span class="text-muted" style="font-size:0.8rem;">Plataforma</span></div>
       `;
     }
 
-    // Cargar grÃ¡ficas Chart.js
+    // Cargar gráficas Chart.js
     loadChartsData();
 
   } catch (e) {
-    console.error("Error al cargar analÃ­ticas dinÃ¡micas:", e);
+    console.error("Error al cargar analíticas dinámicas:", e);
   }
 }
 

@@ -1,18 +1,18 @@
-﻿// ==========================================================================
-// SISTEMA DE PERSONALIZACIÃ“N
+// ==========================================================================
+// SISTEMA DE PERSONALIZACIÓN
 // ==========================================================================
 const THEMES = [
-  { id:"default",            name:"ClÃ¡sico UCV",         sidebar:"#2b4e72", content:"#f8f9fa", bar:"#2b4e72" },
+  { id:"default",            name:"Clásico UCV",         sidebar:"#2b4e72", content:"#f8f9fa", bar:"#2b4e72" },
   { id:"theme-azul-profundo",name:"Azul Profundo",       sidebar:"#0f3460", content:"#e8f3ff", bar:"#1a5fa0" },
-  { id:"theme-dorado",       name:"Dorado AcadÃ©mico",    sidebar:"#9a7017", content:"#fffdf0", bar:"#B8860B" },
-  { id:"theme-manila",       name:"Manila / CartÃ³n",     sidebar:"#8B7355", content:"#f5ead0", bar:"#A0856A" },
+  { id:"theme-dorado",       name:"Dorado Académico",    sidebar:"#9a7017", content:"#fffdf0", bar:"#B8860B" },
+  { id:"theme-manila",       name:"Manila / Cartón",     sidebar:"#8B7355", content:"#f5ead0", bar:"#A0856A" },
   { id:"theme-esmeralda",    name:"Verde Esmeralda",     sidebar:"#2d6a4f", content:"#f0faf2", bar:"#40916c" },
   { id:"theme-cian",         name:"Cian Institucional",  sidebar:"#0d6e7c", content:"#e8fafc", bar:"#13a0b4" },
   { id:"theme-lavanda",      name:"Lavanda",             sidebar:"#4a3570", content:"#f5f0ff", bar:"#7c5cbf" },
-  { id:"theme-granate",      name:"Granate AcadÃ©mico",   sidebar:"#7c2d3c", content:"#fff5f7", bar:"#a03048" },
+  { id:"theme-granate",      name:"Granate Académico",   sidebar:"#7c2d3c", content:"#fff5f7", bar:"#a03048" },
   { id:"theme-terracota",    name:"Terracota",           sidebar:"#b5451b", content:"#fff8f5", bar:"#d4623a" },
   { id:"theme-noche",        name:"Medianoche",          sidebar:"#0d1b2a", content:"#f0f4f8", bar:"#4a90d9" },
-  { id:"theme-carbon",       name:"Gris CarbÃ³n",         sidebar:"#2c2c2c", content:"#f8f8f8", bar:"#555555" },
+  { id:"theme-carbon",       name:"Gris Carbón",         sidebar:"#2c2c2c", content:"#f8f8f8", bar:"#555555" },
   { id:"theme-oliva",        name:"Verde Oliva",         sidebar:"#5a6b2a", content:"#f5fae0", bar:"#7a9040" },
 ];
 
@@ -89,11 +89,11 @@ function applyFontScale(scale) {
 // ── density ───────────────────────────────────────────────────────────────
 
 function _applyDensityDOM(density) {
-  document.body.classList.toggle(“ds-density-compact”, density === “compact”);
+  document.body.classList.toggle("ds-density-compact", density === "compact");
 }
 
 function applyDensity(density) {
-  localStorage.setItem(“ds_density”, density);
+  localStorage.setItem("ds_density", density);
   _applyDensityDOM(density);
 }
 
@@ -101,11 +101,11 @@ function applyDensity(density) {
 
 function _applyFontFamilyDOM(ffId) {
   const ff = FONT_FAMILIES.find(f => f.id === ffId) || FONT_FAMILIES[0];
-  document.documentElement.style.setProperty(“--ds-font-family”, ff.stack);
+  document.documentElement.style.setProperty("--ds-font-family", ff.stack);
 }
 
 function applyFontFamily(ffId) {
-  localStorage.setItem(“ds_font_family”, ffId);
+  localStorage.setItem("ds_font_family", ffId);
   _applyFontFamilyDOM(ffId);
   _rebuildPanel();
 }
@@ -113,11 +113,11 @@ function applyFontFamily(ffId) {
 // ── animations ────────────────────────────────────────────────────────────
 
 function _applyAnimDOM(enabled) {
-  document.body.classList.toggle(“ds-no-anim”, !enabled);
+  document.body.classList.toggle("ds-no-anim", !enabled);
 }
 
 function applyAnim(enabled) {
-  localStorage.setItem(“ds_anim”, enabled ? “on” : “off”);
+  localStorage.setItem("ds_anim", enabled ? "on" : "off");
   _applyAnimDOM(enabled);
   _rebuildPanel();
 }
@@ -279,7 +279,7 @@ function _initNotificationBell(user) {
   const isAdmin = user.roles && (user.roles["Archivo"] === "Admin" || user.roles["RRHH"] === "Admin");
   if (!isAdmin) return;
 
-  // Inyectar el botÃ³n de campana antes del usuario en la barra
+  // Inyectar el botón de campana antes del usuario en la barra
   const navUser = document.querySelector(".ds-nav-user");
   if (!navUser || document.getElementById("ds-notif-btn")) return;
 
@@ -356,7 +356,7 @@ async function loadNotifications() {
     }
 
     const STATUS_ICON = { revision: "fas fa-clock text-warning", draft: "fas fa-pencil-alt text-secondary" };
-    const STATUS_LBL  = { revision: "RevisiÃ³n", draft: "Borrador" };
+    const STATUS_LBL  = { revision: "Revisión", draft: "Borrador" };
 
     list.innerHTML = (data.items || []).slice(0, 15).map(it => {
       const icon = STATUS_ICON[it.status] || "fas fa-file";
