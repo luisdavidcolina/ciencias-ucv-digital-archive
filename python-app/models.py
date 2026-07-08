@@ -80,6 +80,7 @@ class DocumentSubmitRequest(BaseModel):
     soporte: Optional[str] = "Físico"
     numero_paginas: Optional[int] = None
     file_url: Optional[str] = None
+    fecha_vencimiento: Optional[str] = None   # sobreescribe el plazo de retención del tipo
     # Campos LOTTT para nuevo empleado vía submit
     fecha_nacimiento: Optional[str] = None
     nivel_educativo: Optional[str] = None
@@ -162,6 +163,7 @@ class DocumentUpdateRequest(BaseModel):
     soporte: Optional[str] = None   # Físico | Digital | Digitalizado
     numero_paginas: Optional[int] = None
     idioma: Optional[str] = None    # es | en | fr | pt
+    fecha_vencimiento: Optional[str] = None
     usuario: str
 
 

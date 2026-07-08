@@ -602,6 +602,11 @@ a:hover {
     margin-left: 0.75rem;
 }
 
+.ds-facet-row { transition: background .15s; }
+.ds-facet-row:hover { background: #e8f0fb; }
+.ds-facet-active { background: #d0e4f7; font-weight: 600; }
+.ds-facet-active .badge { background: #2b4e72 !important; }
+
 .ds-action-btn {
     width: 34px;
     height: 34px;

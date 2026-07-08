@@ -245,6 +245,9 @@
 
             <!-- 1. PESTAÑA: ESTADÍSTICAS -->
             <div class="tab-pane fade show active" id="pane-admin-archivo-stats" role="tabpanel">
+              <!-- Banner de alertas de vencimiento -->
+              <div id="alertas-vencimiento-banner" style="display:none;" class="mb-3"></div>
+
               <div class="card card-info mb-3">
                 <div class="card-header p-3">
                   <h5 class="card-title m-0"><i class="fas fa-filter mr-2"></i> Filtros Analíticos</h5>
@@ -793,6 +796,10 @@
                 <option value="fr">Francés</option>
                 <option value="pt">Portugués</option>
               </select>
+            </div>
+            <div class="col-md-5 form-group">
+              <label class="font-weight-bold text-muted">Vencimiento <span class="badge badge-warning text-dark" style="font-size:0.68rem;">Retención</span></label>
+              <input type="date" id="edit-doc-vencimiento" class="form-control form-control-sm" title="Fecha explícita de vencimiento — sobreescribe el plazo del tipo">
             </div>
           </div>
 

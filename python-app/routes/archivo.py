@@ -218,11 +218,64 @@ def search_archivo(req: ArchivoSearchRequest):
         rec["tesauro_badges"] = sorted(badges)
         records.append(rec)
 
+    # ── Facetas: conteos por tipo y año (sin filtro de tipo para mostrar todos) ──
+    # Reconstruye el WHERE sin el filtro de tipo para que los conteos sean correctos
+    # incluso cuando el usuario ya tiene un tipo seleccionado.
+    import re as _ref
+    facet_conds: list = ["da.deleted_at IS NULL"]
+    facet_params: list = []
+    if req.search_term:
+        _has_l = bool(_ref.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        if _has_l:
+            facet_conds.append(
+                "(to_tsvector('spanish',"
+                "  coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||"
+                "  coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'')"
+                " ) @@ plainto_tsquery('spanish', %s)"
+                " OR unaccent(da.titulo) ILIKE unaccent(%s)"
+                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+            )
+            facet_params.extend([req.search_term, f"%{req.search_term}%", f"%{req.search_term}%"])
+        else:
+            t = f"%{req.search_term}%"
+            facet_conds.append("(unaccent(da.titulo) ILIKE unaccent(%s) OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))")
+            facet_params.extend([t, t])
+    if req.date_start:
+        facet_conds.append("da.fecha_documento >= %s::date")
+        facet_params.append(req.date_start)
+    if req.date_end:
+        facet_conds.append("da.fecha_documento <= %s::date")
+        facet_params.append(req.date_end)
+    if getattr(req, "soporte", None) and req.soporte in ("Físico", "Digital", "Digitalizado"):
+        facet_conds.append("COALESCE(da.soporte,'Físico') = %s")
+        facet_params.append(req.soporte)
+
+    facet_where = "WHERE " + " AND ".join(facet_conds)
+
+    facet_type_rows = db_query(
+        f"""SELECT COALESCE(NULLIF(da.tesauro_primario,''),'Sin tipo') AS name, COUNT(*) AS cnt
+            FROM public.datos_archivo da {facet_where}
+            GROUP BY da.tesauro_primario ORDER BY cnt DESC LIMIT 20""",
+        facet_params or None, fetch="all"
+    ) or []
+
+    facet_year_rows = db_query(
+        f"""SELECT EXTRACT(YEAR FROM da.fecha_documento)::INT AS yr, COUNT(*) AS cnt
+            FROM public.datos_archivo da {facet_where}
+              AND da.fecha_documento IS NOT NULL
+            GROUP BY yr ORDER BY yr DESC LIMIT 15""",
+        facet_params or None, fetch="all"
+    ) or []
+
     return {
         "records":  records,
         "total":    total,
         "page":     page,
         "per_page": per_page,
+        "facets": {
+            "by_type": [{"name": r["name"], "count": int(r["cnt"])} for r in facet_type_rows],
+            "by_year": [{"year": r["yr"], "count": int(r["cnt"])} for r in facet_year_rows],
+        },
     }
 
 

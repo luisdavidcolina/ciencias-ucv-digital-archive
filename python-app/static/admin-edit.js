@@ -59,6 +59,8 @@ async function openEditDocModal(id) {
   if (paginasEl) paginasEl.value = rec.numero_paginas || "";
   const idiomaEl = document.getElementById("edit-doc-idioma");
   if (idiomaEl) idiomaEl.value = rec.idioma || "es";
+  const vencEl = document.getElementById("edit-doc-vencimiento");
+  if (vencEl) vencEl.value = rec.fecha_vencimiento || "";
 
   // Reset drop zone state from a previous upload
   const dz = document.getElementById("edit-doc-dropzone");
@@ -198,6 +200,7 @@ async function handleSaveEditDoc() {
     soporte:            document.getElementById("edit-doc-soporte")?.value || null,
     numero_paginas:     parseInt(document.getElementById("edit-doc-paginas")?.value) || null,
     idioma:             document.getElementById("edit-doc-idioma")?.value || "es",
+    fecha_vencimiento:  document.getElementById("edit-doc-vencimiento")?.value || null,
     usuario:            state.user.username,
   };
 

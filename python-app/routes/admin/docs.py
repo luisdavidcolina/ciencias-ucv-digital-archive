@@ -185,17 +185,18 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
     if modulo == "Archivo":
         row = db_query(
             """SELECT id_archivo AS id, titulo, autor, abstract AS resumen,
-                      TO_CHAR(fecha_documento,'YYYY-MM-DD') AS fecha,
-                      COALESCE(tesauro_primario,'')     AS doc_type,
-                      COALESCE(tesauro_secundario,'')   AS tesauro_secundario,
-                      COALESCE(ubicacion,'')            AS ubicacion,
-                      COALESCE(file_url,'')             AS file_url,
-                      COALESCE(status,'aprobado')       AS status,
-                      COALESCE(personas_relacionadas,'') AS personas_relacionadas,
-                      COALESCE(numero_folio,'')         AS numero_folio,
-                      COALESCE(soporte,'Físico')        AS soporte,
+                      TO_CHAR(fecha_documento,'YYYY-MM-DD')    AS fecha,
+                      COALESCE(tesauro_primario,'')            AS doc_type,
+                      COALESCE(tesauro_secundario,'')          AS tesauro_secundario,
+                      COALESCE(ubicacion,'')                   AS ubicacion,
+                      COALESCE(file_url,'')                    AS file_url,
+                      COALESCE(status,'aprobado')              AS status,
+                      COALESCE(personas_relacionadas,'')       AS personas_relacionadas,
+                      COALESCE(numero_folio,'')                AS numero_folio,
+                      COALESCE(soporte,'Físico')               AS soporte,
                       numero_paginas,
-                      COALESCE(idioma,'es')             AS idioma,
+                      COALESCE(idioma,'es')                    AS idioma,
+                      TO_CHAR(fecha_vencimiento,'YYYY-MM-DD')  AS fecha_vencimiento,
                       updated_at, updated_by
                FROM public.datos_archivo WHERE id_archivo = %s AND deleted_at IS NULL""",
             [doc_id], fetch="one"
@@ -245,8 +246,8 @@ def admin_submit(req: DocumentSubmitRequest):
                 (titulo, abstract, autor,
                  fecha_documento, ubicacion, creado_por, tesauro_primario,
                  tesauro_secundario, id_tipo_documento,
-                 numero_folio, soporte, numero_paginas, file_url)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 numero_folio, soporte, numero_paginas, file_url, fecha_vencimiento)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id_archivo
             """,
             (
@@ -259,6 +260,7 @@ def admin_submit(req: DocumentSubmitRequest):
                 req.soporte or "Físico",
                 req.numero_paginas or None,
                 req.file_url or None,
+                getattr(req, "fecha_vencimiento", None) or None,
             ),
             fetch="one",
             commit=True,
@@ -424,6 +426,8 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("numero_paginas = %s"); params.append(req.numero_paginas or None)
         if req.idioma is not None and req.idioma in ("es", "en", "fr", "pt"):
             set_clauses.append("idioma = %s"); params.append(req.idioma)
+        if req.fecha_vencimiento is not None:
+            set_clauses.append("fecha_vencimiento = %s"); params.append(req.fecha_vencimiento or None)
 
         set_clauses.append("updated_at = %s"); params.append(updated_at)
         set_clauses.append("updated_by = %s"); params.append(updated_by)

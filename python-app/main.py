@@ -337,6 +337,16 @@ def run_migrations():
             WHERE e.deleted_at IS NULL
             GROUP BY e.id, c.nombre, d.nombre, el.estados
         """),
+
+        # ── Fecha de vencimiento explícita por documento ──────────────────────
+        ("fecha_vencimiento en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS fecha_vencimiento DATE"),
+        ("fecha_vencimiento en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS fecha_vencimiento DATE"),
+        ("idx fecha_vencimiento datos_archivo",
+         "CREATE INDEX IF NOT EXISTS idx_datos_archivo_vencimiento ON public.datos_archivo(fecha_vencimiento) WHERE fecha_vencimiento IS NOT NULL AND deleted_at IS NULL"),
+        ("idx fecha_vencimiento datos_rrhh",
+         "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_vencimiento ON public.datos_rrhh(fecha_vencimiento) WHERE fecha_vencimiento IS NOT NULL AND deleted_at IS NULL"),
     ]
     for label, sql in migrations:
         try:

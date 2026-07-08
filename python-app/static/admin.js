@@ -12,7 +12,7 @@ function loadAdminTab(adminTabId) {
   document.querySelectorAll(`${root} .tab-pane`).forEach(p => p.classList.remove("show", "active"));
   document.getElementById(`pane-admin-${suf}-${adminTabId}`)?.classList.add("show", "active");
 
-  if      (adminTabId === "stats")      loadDynamicStats();
+  if      (adminTabId === "stats")      { loadDynamicStats(); _loadAlertasBanner(); }
   else if (adminTabId === "new")        { renderDynamicSubmitFields(); loadRecentSubmissions(); initDropZone(suf); }
   else if (adminTabId === "monitor")    { state.adminTable.page = 1; loadMonitorTable(); }
   else if (adminTabId === "categories") loadCategoriesTab();
@@ -29,6 +29,58 @@ function loadAdminTab(adminTabId) {
     if (monitorTitle) monitorTitle.innerHTML = `<i class="fas fa-database"></i> Monitor de ${mod === "RRHH" ? "RRHH" : "Archivos"}`;
   } catch (e) {
     console.error("Error actualizando etiquetas del panel:", e);
+  }
+}
+
+// ==========================================================================
+// ALERTAS DE VENCIMIENTO / JUBILACIÓN
+// ==========================================================================
+async function _loadAlertasBanner() {
+  const suf = adminSuffixFromTab();
+  if (suf === "archivo") {
+    const el = document.getElementById("alertas-vencimiento-banner");
+    if (!el) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const total = data.total || 0;
+      if (total === 0) { el.style.display = "none"; return; }
+      const muestra = (data.vencimientos || []).slice(0, 3).map(v =>
+        `<li class="small"><strong>${v.titulo || "(sin título)"}</strong> — ${v.tipo_documento || "?"} — venció ${v.dias_vencido} días</li>`
+      ).join("");
+      el.innerHTML = `
+        <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          <strong>${total} documento${total !== 1 ? "s" : ""} con plazo de retención vencido.</strong>
+          <ul class="mb-1 mt-1 pl-3">${muestra}</ul>
+          ${total > 3 ? `<small>…y ${total - 3} más. Ver <em>Auditoría → Vencimientos</em>.</small>` : ""}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar"><span>&times;</span></button>
+        </div>`;
+      el.style.display = "";
+    } catch {}
+  } else {
+    const el = document.getElementById("alertas-jubilacion-banner");
+    if (!el) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=90`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const total = data.total || 0;
+      if (total === 0) { el.style.display = "none"; return; }
+      const muestra = (data.alertas || []).slice(0, 3).map(a =>
+        `<li class="small"><strong>${a.nombre_completo}</strong> — ${a.tipo_alerta} (${a.dias_restantes} días)</li>`
+      ).join("");
+      el.innerHTML = `
+        <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert">
+          <i class="fas fa-user-clock mr-2"></i>
+          <strong>${total} empleado${total !== 1 ? "s" : ""} con jubilación/pensión próxima (próximos 90 días).</strong>
+          <ul class="mb-1 mt-1 pl-3">${muestra}</ul>
+          ${total > 3 ? `<small>…y ${total - 3} más.</small>` : ""}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar"><span>&times;</span></button>
+        </div>`;
+      el.style.display = "";
+    } catch {}
   }
 }
 

@@ -53,6 +53,7 @@ async function triggerArchivoSearch() {
     }
     renderArchivoList();
     renderArchivoPagination();
+    _renderArchivoFacets(data.facets || null);
   } catch (e) {
     console.error("Error buscando archivo:", e);
   }
@@ -323,4 +324,76 @@ function closeDocViewer() {
   const iframe  = document.getElementById("modal-doc-iframe");
   if (section) section.classList.add("d-none");
   if (iframe)  iframe.src = "";
+}
+
+// ==========================================================================
+// FACETAS DE BÚSQUEDA — conteos por tipo y por año
+// ==========================================================================
+function _renderArchivoFacets(facets) {
+  const el = document.getElementById("archivo-facets-panel");
+  if (!el) return;
+  if (!facets || (!facets.by_type?.length && !facets.by_year?.length)) {
+    el.innerHTML = "";
+    return;
+  }
+  const byType = (facets.by_type || []).slice(0, 10);
+  const byYear = (facets.by_year || []).slice(0, 8);
+  const selectedTypes = state.archivo.selectedTypes || [];
+
+  const typeRows = byType.map(f => {
+    const active = selectedTypes.includes(f.name);
+    return `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row${active ? " ds-facet-active" : ""}"
+                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetTypeClick('${f.name.replace(/'/g, "\\'")}')">
+      <span class="text-truncate" style="max-width:140px;" title="${f.name}">${f.name}</span>
+      <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
+    </div>`;
+  }).join("");
+
+  const yearRows = byYear.map(f =>
+    `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row"
+          style="cursor:pointer;font-size:0.78rem;" onclick="_facetYearClick(${f.year})">
+      <span>${f.year}</span>
+      <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
+    </div>`
+  ).join("");
+
+  el.innerHTML = `
+    <div class="card card-secondary mt-2" style="font-size:0.82rem;">
+      <div class="card-header py-1 px-2" style="background:#f4f9ff;">
+        <span class="font-weight-bold text-primary" style="font-size:0.8rem;"><i class="fas fa-chart-bar mr-1"></i>Distribución</span>
+      </div>
+      <div class="card-body p-2">
+        ${byType.length ? `<p class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">Por Tipo</p>${typeRows}` : ""}
+        ${byYear.length ? `<p class="text-muted mb-1 mt-2" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">Por Año</p>${yearRows}` : ""}
+      </div>
+    </div>`;
+}
+
+function _facetTypeClick(name) {
+  if (!state.archivo.selectedTypes) state.archivo.selectedTypes = [];
+  const idx = state.archivo.selectedTypes.indexOf(name);
+  if (idx >= 0) state.archivo.selectedTypes.splice(idx, 1);
+  else state.archivo.selectedTypes.push(name);
+  // Sync Choices.js control if present
+  try {
+    const choiceEl = document.getElementById("choice-archivo-doc-type");
+    if (choiceEl && choiceEl._choices) {
+      state.archivo.selectedTypes.length
+        ? choiceEl._choices.setChoiceByValue(state.archivo.selectedTypes)
+        : choiceEl._choices.removeActiveItems();
+    }
+  } catch {}
+  state.archivo.page = 1;
+  triggerArchivoSearch();
+}
+
+function _facetYearClick(year) {
+  const y = String(year);
+  state.archivo.dateStart = y + "-01-01";
+  state.archivo.dateEnd   = y + "-12-31";
+  // Sync year-select control if present
+  const ys = document.getElementById("year-select-archivo");
+  if (ys) ys.value = y;
+  state.archivo.page = 1;
+  triggerArchivoSearch();
 }
