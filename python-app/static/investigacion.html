@@ -691,6 +691,50 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Odoo HR -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingOdoo">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOdoo">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">Odoo HR</h4>
+                                <span class="badge bg-warning text-dark fs-6">Python / PostgreSQL — Stack idéntico a UCV</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseOdoo" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El gemelo arquitectónico Open-Source <a href="https://www.odoo.com/es_ES/app/employees" target="_blank" class="sys-link ms-2"><i class="fas fa-external-link-alt fs-6 text-info"></i></a></h5>
+                            <p class="text-light opacity-75">Odoo HR es el módulo de gestión de personal dentro del ERP Odoo, desarrollado en <strong>Python sobre PostgreSQL</strong> — el mismo stack tecnológico exacto del Archivo Digital UCV. Esta alineación no es trivial: significa que cada decisión de arquitectura que tomó el equipo de Odoo para escalabilidad, modelo de datos y rendimiento son lecciones directamente aplicables al sistema actual sin traducción tecnológica.</p>
+                            <p class="text-light opacity-75">Su módulo de Empleados gestiona contratos con versionado de documentos adjuntos por categoría, alertas automáticas de vencimiento de contratos y beneficios, y un tablero de actividades pendientes que funciona como notificaciones nativas. La edición Community es completamente gratuita y puede instalarse on-premise. Su modelo de datos para empleados es el referente más cercano tecnológicamente al módulo RRHH de UCV.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-lightbulb text-warning me-2"></i> Lección directa para UCV:</strong> Odoo gestiona alertas de vencimiento de documentos enviando notificaciones push al dashboard del admin cuando un contrato o certificado está próximo a vencer. Esta funcionalidad es directamente implementable en el módulo RRHH de UCV usando la tabla <code>rrhh_alertas</code> existente y un banner de alerta en el dashboard del admin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIGEP Venezuela -->
+                <div class="accordion-item card-system mb-3 p-0">
+                    <h2 class="accordion-header" id="headingSIGEP">
+                        <button class="accordion-button collapsed bg-transparent text-light shadow-none py-4 px-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSIGEP">
+                            <div class="d-flex justify-content-between align-items-center w-100 pe-3">
+                                <h4 class="fw-bold mb-0">SIGEP / SigePlus <span class="badge bg-danger ms-2 fs-6">Venezuela</span></h4>
+                                <span class="badge bg-secondary fs-6">Sistema Público Nacional</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapseSIGEP" class="accordion-collapse collapse" data-bs-parent="#accordionHRMS">
+                        <div class="accordion-body px-4 pb-4 pt-1">
+                            <h5 class="text-info mb-4">El referente normativo venezolano — el modelo de expediente que el Estado exige</h5>
+                            <p class="text-light opacity-75">SIGEP (Sistema Integrado de Gestión y Control de Empleo Público) es el sistema oficial del Estado venezolano para la gestión de personal de la administración pública, regulado por el Decreto N° 6.264. Aunque la UCV como institución autónoma no está obligada jurídicamente a usarlo, SIGEP define los campos estándar del expediente venezolano que <strong>cualquier auditoría de la ONAT o la Contraloría esperará encontrar</strong>: datos personales, historial de cargos y escalafón, títulos académicos obtenidos, sanciones disciplinarias, y evaluaciones de desempeño.</p>
+                            <p class="text-light opacity-75">El módulo RRHH del Archivo UCV ya cubre los campos LOTTT básicos y el historial de cargos. Sin embargo, <strong>las tablas de títulos académicos por empleado y evaluaciones de desempeño están ausentes</strong>, y serían las primeras que un inspector solicitaría en una auditoría formal. La ficha SIGEP de un docente incluye exactamente: grado universitario, universidad de graduación, año, número de titulo y número de colegio si aplica.</p>
+                            <div class="caveat-box">
+                                <strong><i class="fas fa-gavel text-warning me-2"></i> Implicación Legal para UCV:</strong> Considerar agregar a futuro las tablas <code>titulos_empleados</code> (cédula, grado, institución, año, nro. título) y <code>evaluaciones_desempeno</code> (período, calificación, evaluador). Estos campos alinean el expediente digital con lo que SIGEP y la normativa ONAT esperan de una institución educativa pública venezolana.
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="table-responsive mb-5">
                 <table class="table table-hover align-middle">
@@ -835,6 +879,163 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN III: LECCIONES APLICABLES -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-xl-11">
+            <h2 class="section-title"><i class="fas fa-lightbulb me-3 text-success"></i> III. Lecciones Aplicables al Sistema UCV</h2>
+            <p class="text-muted mb-4 fs-5">Funcionalidades concretas que cada sistema referente aporta y que son directamente implementables en el Archivo Digital Ciencias UCV, priorizadas por impacto y viabilidad técnica.</p>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-robot text-info fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De Paperless-ngx</div>
+                                <h5 class="fw-bold mb-0">OCR Automático en Ingesta</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">Paperless-ngx procesa PDFs escaneados con Tesseract al momento de la subida, extrayendo texto para FTS sin intervención del usuario. Un worker similar en UCV procesaría archivos subidos a R2 y actualizaría los campos de texto para búsqueda, especialmente útil para documentos físicos digitalizados del archivo histórico.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-success">Alta prioridad</span>
+                            <span class="badge bg-secondary ms-1">Ambos módulos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-bell text-warning fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De Odoo HR</div>
+                                <h5 class="fw-bold mb-0">Alertas de Vencimiento Automáticas</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">Odoo envía notificaciones al dashboard del admin cuando contratos o certificados están próximos a vencer. La tabla <code style="color:#38bdf8">rrhh_alertas</code> ya existe en UCV pero no dispara notificaciones. Un banner en el panel admin al iniciar sesión que muestre alertas activas sería el primer paso inmediato.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-warning text-dark">Media-Alta prioridad</span>
+                            <span class="badge bg-secondary ms-1">Módulo RRHH</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-stream text-primary fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De SAP SuccessFactors</div>
+                                <h5 class="fw-bold mb-0">Timeline Visual de Cargos</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">SuccessFactors muestra el historial de posiciones como una línea de tiempo horizontal con duraciones. La tabla <code style="color:#38bdf8">historial_cargos</code> existe. Reemplazar la tabla simple del dossier por un timeline CSS/HTML haría el expediente del docente mucho más legible sin dependencias nuevas.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-info text-dark">Media prioridad</span>
+                            <span class="badge bg-secondary ms-1">Módulo RRHH</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-upload text-success fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De BambooHR</div>
+                                <h5 class="fw-bold mb-0">Upload Directo por Sección</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">BambooHR permite subir documentos directamente dentro de la pestaña de la categoría del expediente (Parte I, II, III, IV), sin abrir un modal separado. En UCV, agregar un botón de carga inline dentro de cada sección de la vista de expediente sería más intuitivo que el flujo actual de modal → editar.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-info text-dark">Media prioridad</span>
+                            <span class="badge bg-secondary ms-1">Módulo RRHH</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-network-wired text-danger fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De DSpace</div>
+                                <h5 class="fw-bold mb-0">OAI-PMH para Interoperabilidad</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">DSpace expone un endpoint OAI-PMH que permite a redes como LA Referencia indexar documentos institucionales. Un endpoint simple en el Archivo UCV que sirva metadatos en Dublin Core permitiría que otras IES venezolanas o la propia red Saber UCV cosecheran el catálogo del Archivo Ciencias.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-secondary">Baja-Media prioridad</span>
+                            <span class="badge bg-secondary ms-1">Módulo Archivo</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-system h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-gavel text-warning fa-2x me-3"></i>
+                            <div>
+                                <div class="text-muted small text-uppercase" style="letter-spacing:0.08em">De SIGEP Venezuela</div>
+                                <h5 class="fw-bold mb-0">Campos Normativos Venezolanos</h5>
+                            </div>
+                        </div>
+                        <p class="text-light opacity-75 small">SIGEP define el expediente que cualquier auditoría ONAT espera: títulos académicos (grado, institución, año, N° título), evaluaciones de desempeño periódicas, y número de colegio profesional. Agregar la tabla <code style="color:#38bdf8">titulos_empleados</code> alinea el sistema con la normativa pública venezolana vigente.</p>
+                        <div class="mt-auto pt-3 border-top border-secondary">
+                            <span class="badge bg-warning text-dark">Alta relevancia legal</span>
+                            <span class="badge bg-secondary ms-1">Módulo RRHH</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IV: POSICIONAMIENTO -->
+            <h2 class="section-title"><i class="fas fa-crosshairs me-3 text-info"></i> IV. Posicionamiento del Sistema UCV en el Ecosistema</h2>
+            <p class="text-muted mb-4 fs-5">El sistema UCV ocupa un nicho singular: funcionalidad de clase media-alta a costo de operación prácticamente nulo, con soberanía total sobre los datos.</p>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card-system" style="border-left: 3px solid #22c55e">
+                        <h6 class="text-success text-uppercase mb-3" style="letter-spacing:0.08em;font-size:0.75rem"><i class="fas fa-plus me-2"></i> Alta funcionalidad · Alta accesibilidad Venezuela</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span><strong class="text-white">Archivo Digital UCV ← aquí</strong></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span><span class="text-light opacity-75">Odoo HR Community</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span><span class="text-light opacity-75">Alfresco Community (con servidor propio)</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span><span class="text-light opacity-75">OrangeHRM Open Source</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-system" style="border-left: 3px solid #ef4444">
+                        <h6 class="text-danger text-uppercase mb-3" style="letter-spacing:0.08em;font-size:0.75rem"><i class="fas fa-lock me-2"></i> Alta funcionalidad · Sin acceso real en Venezuela</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span><span class="text-light opacity-75">Workday HCM / SAP SuccessFactors</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span><span class="text-light opacity-75">Nuxeo Platform (Hyland)</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span><span class="text-light opacity-75">SharePoint Online (costos + dependencia)</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span><span class="text-light opacity-75">BambooHR, Factorial, Rippling</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-system" style="border-left: 3px solid #fbbf24">
+                        <h6 class="text-warning text-uppercase mb-3" style="letter-spacing:0.08em;font-size:0.75rem"><i class="fas fa-minus me-2"></i> Funcionalidad limitada · Accesibles localmente</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#fbbf24;display:inline-block"></span><span class="text-light opacity-75">Paperless-ngx (solo uso personal)</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#fbbf24;display:inline-block"></span><span class="text-light opacity-75">DSpace (solo repositorio estático)</span></div>
+                            <div class="d-flex align-items-center gap-2"><span style="width:10px;height:10px;border-radius:50%;background:#fbbf24;display:inline-block"></span><span class="text-light opacity-75">SIGEP (tecnología obsoleta)</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card-system" style="border-left: 3px solid #2e6db4">
+                        <h6 class="text-info text-uppercase mb-3" style="letter-spacing:0.08em;font-size:0.75rem"><i class="fas fa-star me-2"></i> Ventaja competitiva exclusiva del sistema UCV</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="d-flex align-items-center gap-2"><i class="fas fa-check text-success"></i><span class="text-light opacity-75">Costo operativo ~$0/mes (Vercel + Neon free tier)</span></div>
+                            <div class="d-flex align-items-center gap-2"><i class="fas fa-check text-success"></i><span class="text-light opacity-75">Soberanía total — datos en cuenta institucional</span></div>
+                            <div class="d-flex align-items-center gap-2"><i class="fas fa-check text-success"></i><span class="text-light opacity-75">Módulo Archivo (DMS pleno) + RRHH en un sistema</span></div>
+                            <div class="d-flex align-items-center gap-2"><i class="fas fa-check text-success"></i><span class="text-light opacity-75">Normativa venezolana (LOTTT) como ciudadano de primera clase</span></div>
+                            <div class="d-flex align-items-center gap-2"><i class="fas fa-check text-success"></i><span class="text-light opacity-75">Personalizable sin licencias ni contratos</span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
