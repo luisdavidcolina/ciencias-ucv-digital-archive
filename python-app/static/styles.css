@@ -2604,3 +2604,95 @@ body.dark-mode .ds-theme-card          { border-color:#2e3342 !important; backgr
 body.dark-mode .ds-theme-card:hover    { border-color:#5b7bbf !important; }
 body.dark-mode .ds-theme-card.active   { border-color:#4a90d9 !important; background:#1a2744 !important; }
 body.dark-mode .ds-theme-name          { color:#b8c0d0 !important; }
+
+/* ============================================================
+   ADMIN PANEL — navegación compacta y flujos mejorados
+   ============================================================ */
+
+/* Tab nav compacta para paneles admin */
+.ds-admin-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 2px;
+  padding-bottom: 0;
+}
+.ds-admin-tabs::-webkit-scrollbar { display: none; }
+
+.ds-admin-tabs .nav-link {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  border-radius: 6px;
+  color: #5a6478;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ds-admin-tabs .nav-link i { font-size: 0.85rem; }
+.ds-admin-tabs .nav-link:hover { background: #e9ecef; color: #343a40; }
+.ds-admin-tabs .nav-link.active {
+  background: #2b4e72 !important;
+  color: #fff !important;
+}
+
+/* Separador visual entre grupos de tabs */
+.ds-tab-sep {
+  width: 1px;
+  background: #dee2e6;
+  margin: 4px 8px;
+  flex-shrink: 0;
+}
+
+/* Cabecera de la card admin — más compacta */
+.ds-admin-card-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 8px 14px;
+}
+
+/* KPI mini-cards — más compactas */
+.ds-kpi-mini {
+  padding: 10px 14px !important;
+}
+.ds-kpi-mini h3 { font-size: 1.3rem !important; }
+.ds-kpi-mini h6 { font-size: 0.68rem !important; }
+
+/* Filtros del monitor en una sola línea */
+.ds-monitor-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.ds-monitor-filters .form-control-sm { min-width: 120px; flex: 1; }
+
+/* Botones de acción en tabla: más pequeños y coherentes */
+.ds-tbl-btn {
+  padding: 2px 7px !important;
+  font-size: 0.75rem !important;
+  border-radius: 4px !important;
+  line-height: 1.5 !important;
+}
+
+/* Formulario de nuevo ingreso — más denso */
+.ds-submit-form .form-group { margin-bottom: 0.6rem !important; }
+.ds-submit-form label { margin-bottom: 2px !important; font-size: 0.8rem !important; }
+.ds-submit-form .form-control { font-size: 0.85rem !important; }
+
+/* Dark mode para el admin nav */
+body.dark-mode .ds-admin-tabs .nav-link { color: #9aa0b8; }
+body.dark-mode .ds-admin-tabs .nav-link:hover { background: #2e3342 !important; color: #e0e4ee; }
+body.dark-mode .ds-admin-tabs .nav-link.active { background: #2b4e72 !important; color: #fff !important; }
+body.dark-mode .ds-tab-sep { background: #2e3342; }
+body.dark-mode .ds-admin-card-header { background: #1e222b; border-color: #2e3342; }
+
+/* Responsive: ocultar label de tab en pantallas pequeñas */
+@media (max-width: 576px) {
+  .ds-admin-tabs .nav-link span { display: none; }
+  .ds-admin-tabs .nav-link i { margin: 0; font-size: 1rem; }
+  .ds-admin-tabs .nav-link { padding: 8px 10px; }
+}

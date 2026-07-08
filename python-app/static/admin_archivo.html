@@ -147,48 +147,48 @@
       </div>
 
       <!-- KPI METRICS -->
-      <div class="row mb-4">
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #0056b3;">
+      <div class="row mb-3 g-2">
+        <div class="col-6 col-md-3">
+          <div class="card ds-kpi-mini shadow-sm bg-white" style="border-left: 4px solid #0056b3;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Total Documentos</h6>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Documentos</h6>
                 <h3 id="kpi-total-docs-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
-              <i class="fas fa-file-invoice fa-2x text-primary opacity-50"></i>
+              <i class="fas fa-file-invoice fa-lg text-primary opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #28a745;">
+        <div class="col-6 col-md-3">
+          <div class="card ds-kpi-mini shadow-sm bg-white" style="border-left: 4px solid #28a745;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Categorías Activas</h6>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Tipologías</h6>
                 <h3 id="kpi-total-cats-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
-              <i class="fas fa-tags fa-2x text-success opacity-50"></i>
+              <i class="fas fa-tags fa-lg text-success opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #ffc107;">
+        <div class="col-6 col-md-3">
+          <div class="card ds-kpi-mini shadow-sm bg-white" style="border-left: 4px solid #ffc107;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Usuarios Módulo</h6>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Usuarios</h6>
                 <h3 id="kpi-total-users-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
-              <i class="fas fa-users-cog fa-2x text-warning opacity-50"></i>
+              <i class="fas fa-users-cog fa-lg text-warning opacity-50"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card p-3 shadow-sm bg-white" style="border-left: 4px solid #dc3545;">
+        <div class="col-6 col-md-3">
+          <div class="card ds-kpi-mini shadow-sm bg-white" style="border-left: 4px solid #dc3545;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.75rem;">Último Ingreso</h6>
-                <h3 id="kpi-latest-entry-archivo" class="font-weight-bold text-dark mb-0" style="font-size: 1.15rem; line-height: 1.8;">N/A</h3>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Último Ingreso</h6>
+                <h3 id="kpi-latest-entry-archivo" class="font-weight-bold text-dark mb-0" style="font-size: 1rem;">N/A</h3>
               </div>
-              <i class="fas fa-history fa-2x text-danger opacity-50"></i>
+              <i class="fas fa-history fa-lg text-danger opacity-50"></i>
             </div>
           </div>
         </div>
@@ -196,48 +196,51 @@
 
       <!-- TABS DE ADMINISTRACIÓN -->
       <div class="card">
-        <div class="card-header p-2 bg-light">
-          <ul id="admin_workspace_tabs-archivo" class="nav nav-pills" role="tablist">
+        <div class="ds-admin-card-header">
+          <ul id="admin_workspace_tabs-archivo" class="nav ds-admin-tabs" role="tablist">
+            <!-- Principales -->
             <li class="nav-item">
-              <a class="nav-link active" id="tab-admin-archivo-stats" data-toggle="pill" href="#pane-admin-archivo-stats" role="tab">
-                <i class="fas fa-chart-bar"></i> Estadísticas
+              <a class="nav-link active" id="tab-admin-archivo-stats" data-toggle="pill" href="#pane-admin-archivo-stats" role="tab" onclick="loadAdminTab('stats')">
+                <i class="fas fa-chart-bar"></i><span>Análisis</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-new" data-toggle="pill" href="#pane-admin-archivo-new" role="tab">
-                <i class="fas fa-plus-circle"></i> Nuevo Ingreso
+              <a class="nav-link" id="tab-admin-archivo-monitor" data-toggle="pill" href="#pane-admin-archivo-monitor" role="tab" onclick="loadAdminTab('monitor')">
+                <i class="fas fa-table"></i><span>Monitor</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-monitor" data-toggle="pill" href="#pane-admin-archivo-monitor" role="tab">
-                <i class="fas fa-table"></i> Monitor de Archivos
+              <a class="nav-link" id="tab-admin-archivo-new" data-toggle="pill" href="#pane-admin-archivo-new" role="tab" onclick="loadAdminTab('new')">
+                <i class="fas fa-plus-circle"></i><span>Nuevo</span>
+              </a>
+            </li>
+            <!-- Separador -->
+            <li class="ds-tab-sep"></li>
+            <!-- Configuración -->
+            <li class="nav-item">
+              <a class="nav-link" id="tab-admin-archivo-categories" data-toggle="pill" href="#pane-admin-archivo-categories" role="tab" onclick="loadAdminTab('categories')">
+                <i class="fas fa-sitemap"></i><span>Tipos</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-categories" data-toggle="pill" href="#pane-admin-archivo-categories" role="tab">
-                <i class="fas fa-sitemap"></i> Categorías
+              <a class="nav-link" id="tab-admin-archivo-users" data-toggle="pill" href="#pane-admin-archivo-users" role="tab" onclick="loadAdminTab('users')">
+                <i class="fas fa-users-cog"></i><span>Acceso</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-users" data-toggle="pill" href="#pane-admin-archivo-users" role="tab">
-                <i class="fas fa-users-cog"></i> Usuarios
+              <a class="nav-link" id="tab-admin-archivo-audit" data-toggle="pill" href="#pane-admin-archivo-audit" role="tab" onclick="loadAdminTab('audit')">
+                <i class="fas fa-history"></i><span>Log</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-audit" data-toggle="pill" href="#pane-admin-archivo-audit" role="tab">
-                <i class="fas fa-history"></i> Auditoría
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="tab-admin-archivo-papelera" data-toggle="pill" href="#pane-admin-archivo-papelera" role="tab"
-                 onclick="loadPapelera('archivo')">
-                <i class="fas fa-trash-alt"></i> Papelera
+              <a class="nav-link" id="tab-admin-archivo-papelera" data-toggle="pill" href="#pane-admin-archivo-papelera" role="tab" onclick="loadAdminTab('papelera')">
+                <i class="fas fa-trash-alt"></i><span>Papelera</span>
               </a>
             </li>
           </ul>
         </div>
 
-        <div class="card-body">
+        <div class="card-body p-3">
           <div class="tab-content">
 
             <!-- 1. PESTAÑA: ESTADÍSTICAS -->
@@ -445,31 +448,23 @@
                   <div id="monitor-status-badges-archivo" class="d-flex" style="gap:6px;"></div>
                 </div>
                 <div class="card-body p-4">
-                  <div class="row mb-3 align-items-center">
-                    <div class="col-md-3">
-                      <input type="text" id="admin_search-archivo" class="form-control form-control-sm" placeholder="Buscar en tabla...">
-                    </div>
-                    <div class="col-md-3">
-                      <select id="admin_filter_type-archivo" class="form-control form-control-sm">
-                        <option value="">Filtrar por Tipología...</option>
-                      </select>
-                    </div>
-                    <div class="col-md-3">
-                      <select id="admin_filter_person-archivo" class="form-control form-control-sm">
-                        <option value="">Filtrar por Persona...</option>
-                      </select>
-                    </div>
-                    <div class="col-md-3 text-right d-flex align-items-center justify-content-end" style="gap:6px;">
-                      <select id="admin_filter_status-archivo" class="form-control form-control-sm" style="width:auto;" title="Filtrar por estado">
-                        <option value="">Todos los estados</option>
-                        <option value="aprobado">✓ Aprobados</option>
-                        <option value="revision">⏳ En Revisión</option>
-                        <option value="draft">✎ Borradores</option>
-                        <option value="rechazado">✗ Rechazados</option>
-                      </select>
-                      <button id="btn_export_csv-archivo" class="btn btn-outline-secondary btn-sm" title="Exportar CSV"><i class="fas fa-file-csv"></i></button>
-                      <button id="btn_refresh_table-archivo" class="btn btn-outline-info btn-sm" title="Refrescar"><i class="fas fa-sync-alt"></i></button>
-                    </div>
+                  <div class="ds-monitor-filters mb-3">
+                    <input type="text" id="admin_search-archivo" class="form-control form-control-sm" placeholder="Buscar...">
+                    <select id="admin_filter_type-archivo" class="form-control form-control-sm">
+                      <option value="">Tipo...</option>
+                    </select>
+                    <select id="admin_filter_person-archivo" class="form-control form-control-sm">
+                      <option value="">Persona...</option>
+                    </select>
+                    <select id="admin_filter_status-archivo" class="form-control form-control-sm" style="max-width:130px;" title="Filtrar por estado">
+                      <option value="">Todos</option>
+                      <option value="aprobado">✓ Aprobados</option>
+                      <option value="revision">⏳ Revisión</option>
+                      <option value="draft">✎ Borradores</option>
+                      <option value="rechazado">✗ Rechazados</option>
+                    </select>
+                    <button id="btn_export_csv-archivo" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="Exportar CSV"><i class="fas fa-file-csv"></i></button>
+                    <button id="btn_refresh_table-archivo" class="btn btn-outline-info btn-sm flex-shrink-0" title="Refrescar"><i class="fas fa-sync-alt"></i></button>
                   </div>
                   <div class="table-responsive">
                     <table class="table table-bordered table-striped" style="font-size:0.85rem;">
