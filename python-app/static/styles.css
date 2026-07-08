@@ -221,6 +221,16 @@ a:hover {
     margin: 0;
 }
 
+.ds-sidebar-section-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #adb5bd;
+    padding: 14px 24px 4px;
+    user-select: none;
+}
+
 .ds-sidebar-nav {
     flex-grow: 1;
     padding: 12px 0;
@@ -2356,6 +2366,8 @@ body.dark-mode a:hover               { color:#8bbce8 !important; }
   font-weight:600; transition:all 0.18s ease; display:flex; align-items:center; justify-content:center; gap:6px;
 }
 .ds-reset-btn:hover { border-color:#c0392b; color:#c0392b; background:#fff5f5; }
+
+body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
 
 /* Dark mode adjustments for the panel itself */
 body.dark-mode .ds-theme-panel         { background:#1e222b !important; }

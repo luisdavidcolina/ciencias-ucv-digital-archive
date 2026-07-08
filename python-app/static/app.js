@@ -276,6 +276,14 @@ function configureSidebarVisibilities(user) {
     linkSistema.style.display = "flex";
   }
 
+  // Mostrar el grupo "Administración" si al menos un panel es accesible
+  const adminGroup = document.getElementById("sidebar-admin-group");
+  if (adminGroup) {
+    const hasAdmin = (rArch === "Admin") || (rRrhh === "Admin") ||
+      (user.modules?.includes("Archivo") && user.modules?.includes("RRHH"));
+    adminGroup.style.display = hasAdmin ? "block" : "none";
+  }
+
   // Acceso en páginas standalone
   const standalonePage = document.body.dataset.page;
   if (standalonePage) {
