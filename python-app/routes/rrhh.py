@@ -243,11 +243,55 @@ def search_rrhh(req: RrhhSearchRequest):
             "__idx":            offset + i + 1,
         })
 
+    # ── Facetas: conteos por departamento y por estado ──────────────────────
+    import re as _ref
+    facet_conds: list = []
+    facet_params: list = []
+    if req.search_term:
+        _has_l = bool(_ref.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        term_f = f"%{req.search_term}%"
+        if _has_l:
+            facet_conds.append(
+                "(to_tsvector('spanish',"
+                "  coalesce(v.persona_raw,'') || ' ' || coalesce(v.cargo,'') || ' ' || coalesce(v.departamento,'')"
+                " ) @@ plainto_tsquery('spanish', %s)"
+                " OR unaccent(v.persona_raw) ILIKE unaccent(%s)"
+                " OR v.cedula ILIKE %s)"
+            )
+            facet_params.extend([req.search_term, term_f, term_f])
+        else:
+            facet_conds.append("(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)")
+            facet_params.extend([term_f, term_f])
+    if req.date_start:
+        facet_conds.append("v.fecha_ingreso >= %s"); facet_params.append(req.date_start)
+    if req.date_end:
+        facet_conds.append("v.fecha_ingreso <= %s"); facet_params.append(req.date_end)
+
+    facet_where = ("WHERE " + " AND ".join(facet_conds)) if facet_conds else ""
+
+    facet_dept_rows = db_query(
+        f"""SELECT COALESCE(NULLIF(v.departamento,''), 'Sin departamento') AS name, COUNT(*) AS cnt
+            FROM public.vw_rrhh_persona_index v {facet_where}
+            GROUP BY v.departamento ORDER BY cnt DESC LIMIT 15""",
+        facet_params or None, fetch="all"
+    ) or []
+
+    facet_estado_rows = db_query(
+        f"""SELECT COALESCE(NULLIF(v.estado,''), 'Sin estado') AS name, COUNT(*) AS cnt
+            FROM public.vw_rrhh_persona_index v {facet_where}
+            GROUP BY v.estado ORDER BY cnt DESC LIMIT 10""",
+        facet_params or None, fetch="all"
+    ) or []
+
     return {
         "records":  records,
         "total":    total,
         "page":     page,
         "per_page": per_page,
+        "facets": {
+            "by_dept":   [{"name": r["name"], "count": int(r["cnt"])} for r in facet_dept_rows],
+            "by_estado": [{"name": r["name"], "count": int(r["cnt"])} for r in facet_estado_rows],
+        },
     }
 
 

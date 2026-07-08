@@ -540,6 +540,26 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Plazos de retención por tipo -->
+              <div class="card card-secondary mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-calendar-check mr-2"></i>Plazos de Retención (ISO 15489)</h3>
+                  <small class="text-muted">Años antes de revisión/disposición</small>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm mb-0" style="font-size:0.82rem;">
+                      <thead class="thead-light">
+                        <tr><th>Tipo de Documento</th><th style="width:140px;">Plazo (años)</th><th style="width:80px;"></th></tr>
+                      </thead>
+                      <tbody id="retencion-tipos-body-archivo">
+                        <tr><td colspan="3" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- 5. PESTAÑA: USUARIOS -->
@@ -611,6 +631,29 @@
                   </div>
                 </div>
               </div>
+              <!-- Tabla de vencimientos por retención -->
+              <div class="card card-warning mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-hourglass-end mr-2"></i>Documentos con Retención Vencida</h3>
+                  <button class="btn btn-sm btn-outline-light" onclick="loadVencimientosTable()"><i class="fas fa-sync-alt mr-1"></i>Actualizar</button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                      <thead class="thead-light">
+                        <tr><th>#</th><th>Título</th><th>Tipo</th><th>Fecha Doc.</th><th>Plazo</th><th>Vencido</th><th>Ubicación</th></tr>
+                      </thead>
+                      <tbody id="vencimientos-table-body">
+                        <tr><td colspan="7" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <small id="vencimientos-summary" class="text-muted">—</small>
+                </div>
+              </div>
+
               <div class="card card-info mt-3">
                 <div class="card-header py-2">
                   <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-download mr-1"></i> Exportar datos del módulo Archivo</h3>
