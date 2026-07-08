@@ -365,61 +365,62 @@
 
             <!-- 2. PESTAÑA: NUEVO INGRESO -->
             <div class="tab-pane fade" id="pane-admin-archivo-new" role="tabpanel">
-              <!-- Import CSV section -->
-              <div class="card card-outline card-secondary mt-0 mb-4">
-                <div class="card-header">
-                  <h3 class="card-title"><i class="fas fa-file-csv mr-2"></i>Importación Masiva desde CSV</h3>
-                  <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <h6 class="font-weight-bold">Importar Documentos de Archivo</h6>
-                  <p class="text-muted small">Columnas: <code>titulo, autor, fecha, tipo_documento, abstract, ubicacion, palabras_clave[, numero_folio, soporte, numero_paginas]</code> — palabras clave separadas por <code>;</code>, soporte: <code>Físico | Digital | Digitalizado</code></p>
-                  <div class="input-group mb-2">
-                    <div class="custom-file">
-                      <input type="file" class="custom-file-input" id="csv-import-docs-archivo" accept=".csv">
-                      <label class="custom-file-label" for="csv-import-docs-archivo">Seleccionar CSV...</label>
-                    </div>
-                  </div>
-                  <button class="btn btn-primary btn-sm" onclick="handleImportCSV('documentos-archivo', 'archivo')">
-                    <i class="fas fa-upload mr-1"></i> Importar Documentos
-                  </button>
-                  <div id="csv-import-result-docs-archivo" class="mt-2"></div>
-                </div>
+              <!-- Import CSV compacto -->
+              <div class="ds-import-bar mb-3">
+                <span class="ds-import-bar-label">
+                  <i class="fas fa-file-csv text-secondary mr-1"></i>
+                  Importar CSV
+                </span>
+                <input type="file" id="csv-import-docs-archivo" accept=".csv" class="ds-import-file-input" title="titulo,autor,fecha,tipo_documento,ubicacion[,palabras_clave,abstract,numero_folio,soporte,numero_paginas]">
+                <label for="csv-import-docs-archivo" class="ds-import-file-label">
+                  <i class="fas fa-paperclip mr-1"></i><span id="csv-label-docs-archivo">Elegir archivo…</span>
+                </label>
+                <button class="btn btn-outline-primary btn-sm ds-import-btn" onclick="handleImportCSV('documentos-archivo','archivo')">
+                  <i class="fas fa-upload mr-1"></i>Importar
+                </button>
+                <a href="#" class="ds-import-hint" tabindex="-1" data-toggle="tooltip" data-html="true"
+                   title="<b>Columnas:</b> titulo, autor, fecha, tipo_documento, ubicacion<br><small>Opcionales: palabras_clave (sep. ;), abstract, numero_folio, soporte, numero_paginas</small>">
+                  <i class="fas fa-question-circle text-muted"></i>
+                </a>
+                <div id="csv-import-result-docs-archivo" class="ds-import-result"></div>
               </div>
+
               <div class="row">
-                <div class="col-md-8">
+                <div class="col-12">
                   <form id="admin-submit-form-archivo" class="card card-primary">
-                    <div class="card-header">
-                      <h3 class="card-title"><i class="fas fa-pen-fancy"></i> Formulario de Metadatos Dublin Core</h3>
+                    <div class="card-header py-2">
+                      <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-plus-circle mr-1"></i> Nuevo Documento de Archivo</h3>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-3 ds-submit-form">
                       <div id="dynamic-submit-fields-archivo"></div>
-                      <hr>
+                      <!-- Zona de carga compacta -->
+                      <div class="ds-dropzone-compact mt-3" id="dropzone-archivo">
+                        <i class="fas fa-file-upload text-secondary"></i>
+                        <span class="ds-drop-label text-muted">Arrastra el archivo digital aquí o</span>
+                        <input type="file" id="file_upload-archivo" style="display:none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo').click()">
+                          Explorar
+                        </button>
+                        <span class="text-muted" style="font-size:0.75rem;">PDF, DOC, ZIP, PNG — máx 200 MB</span>
+                      </div>
                       <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted" style="font-size:0.85rem;">
-                          <i class="fas fa-info-circle"></i> Los campos marcados con * son obligatorios
-                        </span>
-                        <button type="submit" id="btn_submit_workspace-archivo" class="btn btn-success" style="border-radius: 8px; font-weight: bold; padding: 10px 30px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);">
-                          <i class="fas fa-cloud-upload-alt"></i> Guardar en Archivo
+                        <span class="text-muted" style="font-size:0.8rem;"><i class="fas fa-asterisk text-danger" style="font-size:0.6rem;"></i> campos obligatorios</span>
+                        <button type="submit" id="btn_submit_workspace-archivo" class="btn btn-success btn-sm px-4">
+                          <i class="fas fa-cloud-upload-alt mr-1"></i> Guardar en Archivo
                         </button>
                       </div>
                     </div>
                   </form>
                 </div>
-                <div class="col-md-4">
-                  <div class="card card-secondary">
-                    <div class="card-header">
-                      <h3 class="card-title"><i class="fas fa-cloud-upload-alt"></i> Zona de Carga</h3>
-                    </div>
+                <div class="col-md-4" style="display:none;"><!-- drop zone placeholder para initDropZone() -->
+                  <div class="card card-secondary" style="display:none;">
                     <div class="card-body p-4 text-center">
                       <div style="border: 2px dashed #adb5bd; border-radius: 10px; padding: 30px; background-color: #f8f9fa; margin-bottom: 15px;">
                         <i class="fas fa-file-upload fa-3x text-secondary mb-2"></i>
                         <h5 class="font-weight-bold text-dark">ZONA DROP</h5>
                         <p class="text-muted mb-3" style="font-size:0.85rem;">Arrastra aquí o selecciona archivos</p>
-                        <input type="file" id="file_upload-archivo" class="form-control-file" style="display: none;">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo').click()">Explorar...</button>
+                        <input type="file" id="file_upload-archivo-legacy" class="form-control-file" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo-legacy').click()">Explorar...</button>
                       </div>
                       <div class="text-left mt-3" style="font-size:0.85rem; color:#6c757d;">
                         <p class="mb-1"><i class="fas fa-check-circle text-success"></i> Formatos: PDF, DOC, ZIP, PNG</p>

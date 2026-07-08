@@ -233,51 +233,41 @@ function exportAdminCSV() {
   showToast(`CSV exportado: ${records.length} registro(s).`, "success");
 }
 
-// â”€â”€â”€ Drag & Drop en zona de carga â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Drag & Drop en zona de carga ───────────────────────────────────────────
 function initDropZone(suf) {
-  const zone = document.querySelector(`#pane-admin-${suf}-new [style*="dashed"]`);
+  const zone = document.getElementById(`dropzone-${suf}`) ||
+               document.querySelector(`#pane-admin-${suf}-new .ds-dropzone-compact`);
   const fileInput = document.getElementById(`file_upload-${suf}`);
   if (!zone || !fileInput) return;
 
   const updateLabel = (name) => {
-    const label = zone.querySelector(".ds-drop-label") || zone.querySelector("p.text-muted");
-    if (label) label.textContent = name ? `ðŸ“„ ${name}` : "Arrastra aquÃ­ o selecciona archivos";
-    const icon = zone.querySelector(".fa-file-upload");
+    const label = zone.querySelector(“.ds-drop-label”);
+    if (label) label.textContent = name ? `Archivo: ${name}` : “Arrastra el archivo digital aqui o”;
+    zone.classList.toggle(“has-file”, !!name);
+    const icon = zone.querySelector(“i”);
     if (icon) {
-      icon.classList.toggle("fa-file-upload", !name);
-      icon.classList.toggle("fa-check-circle", !!name);
-      icon.classList.toggle("text-secondary", !name);
-      icon.classList.toggle("text-success", !!name);
+      icon.classList.toggle(“fa-file-upload”, !name);
+      icon.classList.toggle(“fa-check-circle”, !!name);
+      icon.classList.toggle(“text-secondary”, !name);
+      icon.classList.toggle(“text-success”, !!name);
     }
-    // Rellenar campo file_url en el formulario
-    const fileUrlInput = document.querySelector(`#admin-submit-form-${suf} [id$="file_url"]`) ||
-                         document.getElementById(`field-file_url-${suf}`);
-    if (fileUrlInput && name) fileUrlInput.placeholder = `Archivo seleccionado: ${name}`;
   };
 
-  zone.addEventListener("dragover", e => {
+  zone.addEventListener(“dragover”, e => { e.preventDefault(); zone.classList.add(“drag-over”); });
+  zone.addEventListener(“dragleave”, () => zone.classList.remove(“drag-over”));
+  zone.addEventListener(“drop”, e => {
     e.preventDefault();
-    zone.style.borderColor = "#0056b3";
-    zone.style.background  = "#e8f0fe";
-  });
-  zone.addEventListener("dragleave", () => {
-    zone.style.borderColor = "#adb5bd";
-    zone.style.background  = "#f8f9fa";
-  });
-  zone.addEventListener("drop", e => {
-    e.preventDefault();
-    zone.style.borderColor = "#adb5bd";
-    zone.style.background  = "#f8f9fa";
+    zone.classList.remove(“drag-over”);
     const files = e.dataTransfer?.files;
-    if (files && files.length > 0) {
+    if (files?.[0]) {
       const dt = new DataTransfer();
       dt.items.add(files[0]);
       fileInput.files = dt.files;
       updateLabel(files[0].name);
-      showToast(`Archivo listo: ${files[0].name}`, "info");
+      showToast(`Archivo listo: ${files[0].name}`, “info”);
     }
   });
-  fileInput.addEventListener("change", () => {
+  fileInput.addEventListener(“change”, () => {
     if (fileInput.files?.[0]) updateLabel(fileInput.files[0].name);
   });
 }
