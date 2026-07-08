@@ -2770,3 +2770,79 @@ body.dark-mode .ds-import-file-label { background: #2a2e3a; border-color: #3c425
 body.dark-mode .ds-import-file-label:hover { border-color: #6fa3d8; color: #6fa3d8; }
 body.dark-mode .ds-dropzone-compact { background: #1e222b; border-color: #3c4257; }
 body.dark-mode .ds-dropzone-compact.drag-over { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+
+/* ==========================================================================
+   RESPONSIVE ADMIN PANELS
+   ========================================================================== */
+
+/* Tables in monitor/papelera/audit get a scrollable wrapper */
+.ds-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Edit/view modals become full-screen on phones */
+@media (max-width: 575px) {
+  .modal-xl, .modal-lg { max-width: 100% !important; margin: 0; }
+  .modal-xl .modal-content, .modal-lg .modal-content {
+    border-radius: 0;
+    min-height: 100dvh;
+  }
+  /* Submit form: all col-md-* become full-width */
+  .ds-submit-form .col-md-6,
+  .ds-submit-form .col-md-4,
+  .ds-submit-form .col-md-8 { flex: 0 0 100%; max-width: 100%; }
+
+  /* Monitor filter bar: stack vertically */
+  .ds-monitor-filters { flex-direction: column; align-items: stretch; }
+  .ds-monitor-filters .form-control,
+  .ds-monitor-filters .btn { width: 100%; }
+
+  /* Import bar: stack on very small screens */
+  .ds-import-bar { flex-direction: column; align-items: stretch; }
+  .ds-import-file-label { max-width: 100%; }
+
+  /* KPI mini: 2 per row on phones (already 50% via col-6 col-md-3) */
+  .ds-kpi-mini { min-height: 0; }
+
+  /* Papelera / audit: hide less important cols */
+  .ds-hide-xs { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  /* Modal footers with many buttons: wrap and stack */
+  .modal-footer { flex-wrap: wrap; gap: 6px; }
+  .modal-footer .btn { flex: 1 1 auto; }
+
+  /* Admin submit form two-col → single col */
+  .ds-submit-form .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+
+  /* Papelera/audit row: hide secondary cols */
+  .ds-hide-sm { display: none !important; }
+
+  /* Dossier RRHH parts header: stack */
+  .ds-dossier-part-header { flex-direction: column; gap: 4px; }
+}
+
+/* Sticky first column in wide tables */
+@media (max-width: 767px) {
+  .ds-table-sticky-col { overflow-x: auto; }
+  .ds-table-sticky-col th:first-child,
+  .ds-table-sticky-col td:first-child {
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 1;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.06);
+  }
+}
+
+/* Make monitor table controls inline on medium screens */
+@media (min-width: 576px) and (max-width: 991px) {
+  .ds-monitor-filters { gap: 5px; }
+  .ds-monitor-filters .form-control { width: auto; flex: 1; }
+}
+
+/* Content wrapper padding on mobile */
+@media (max-width: 575px) {
+  .content-wrapper { padding: 10px !important; }
+  .content-header { padding: 10px 10px 0 !important; }
+  .card-body { padding: 0.75rem !important; }
+}
