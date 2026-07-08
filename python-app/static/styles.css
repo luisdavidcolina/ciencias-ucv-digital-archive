@@ -400,20 +400,51 @@ a:hover {
 }
 
 .ds-search-action-btn {
-    width: 46px !important;
-    min-width: 46px !important;
+    width: 44px !important;
+    min-width: 44px !important;
     height: calc(1.5em + 1rem + 2px) !important;
     padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
-.ds-btn-export {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: #ffffff !important;
+/* Search button: filled primary, slight shadow on hover */
+#btn_s_archivo,
+#btn_s_rrhh {
     border-radius: 0 !important;
+    font-size: 1rem !important;
+}
+#btn_s_archivo:hover,
+#btn_s_rrhh:hover {
+    box-shadow: 0 3px 8px rgba(0,86,179,0.35) !important;
+    transform: translateY(-1px);
+}
+
+/* Clear button: subtle ghost style */
+#btn_clear_archivo,
+#btn_clear_rrhh {
+    color: #6c757d !important;
+    border-color: #ced4da !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    font-size: 0.9rem !important;
+}
+#btn_clear_archivo:hover,
+#btn_clear_rrhh:hover {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    background: rgba(220,53,69,0.06) !important;
+}
+
+/* Export button: teal/info instead of loud green, compact */
+.ds-btn-export {
+    background-color: #17a2b8 !important;
+    border-color: #17a2b8 !important;
+    color: #ffffff !important;
+    border-radius: 0 4px 4px 0 !important;
+    font-size: 0.85rem !important;
 }
 
 .ds-btn-export i,
@@ -425,24 +456,18 @@ a:hover {
 .ds-btn-export:hover,
 .ds-btn-export:focus,
 .ds-btn-export:active {
-    background-color: #218838 !important;
-    border-color: #1e7e34 !important;
+    background-color: #138496 !important;
+    border-color: #117a8b !important;
     color: #ffffff !important;
+    box-shadow: 0 3px 8px rgba(23,162,184,0.3) !important;
 }
 
-/* Force search/export action buttons in both modules to look identical in size. */
-#btn_s_ext,
-#btn_s_rrhh,
-#download_ext_xls,
-#download_rrhh_xls {
-    width: 46px !important;
-    min-width: 46px !important;
-    height: calc(1.5em + 1rem + 2px) !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+/* Pagination buttons: consistent outline style */
+#btn-archivo-prev, #btn-archivo-next,
+#btn-rrhh-prev, #btn-rrhh-next {
+    border-radius: 4px !important;
+    font-size: 0.82rem;
+    padding: 0.25rem 0.6rem;
 }
 
 .ds-search-bar .input-group .input-group-append {
