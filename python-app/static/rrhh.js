@@ -274,7 +274,22 @@ function renderRrhhDossierModal() {
     ? `${profile.cedulas}${cedulaDoc ? ` <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="openDocMetadataModal('${cedulaDoc.__idx}');return false;"><i class="fas fa-id-card"></i> Ver</a>` : ""}`
     : "N/A";
 
-  const docTypes = profile.categories || [];
+  // Derivar categorías visibles desde los documentos (usa slug→parte canónica como fallback)
+  const docCatSet = new Set();
+  for (const row of (profile.rows || [])) {
+    if (row.categoria_slug) {
+      const p = RRHH_PARTES.find(x => x.slug === row.categoria_slug);
+      docCatSet.add(p ? p.nombre : (row.categoria || row.doc_type || "Sin clasificar"));
+    } else if (row.categoria) {
+      docCatSet.add(row.categoria);
+    } else if (row.doc_type) {
+      docCatSet.add(row.doc_type);
+    }
+  }
+  const docTypes = [...docCatSet].sort((a, b) => {
+    const po = Object.fromEntries(RRHH_PARTES.map((p, i) => [p.nombre, i]));
+    return (po[a] ?? 99) - (po[b] ?? 99) || a.localeCompare(b);
+  });
   document.getElementById("rrhh-person-modal-content").innerHTML = `
     <div class="ds-person-profile-header mb-4 p-3 bg-white rounded shadow-sm border">
       <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
@@ -371,6 +386,18 @@ function renderRrhhDossierModal() {
   filterInnerDossier();
 }
 
+// Orden canónico de las 4 partes del expediente RRHH
+const RRHH_PARTES = [
+  { slug: "parte-i",   nombre: "Parte I — Ingreso y Contratación",   icon: "fas fa-file-signature", color: "#0d6efd" },
+  { slug: "parte-ii",  nombre: "Parte II — Escalafón y Desarrollo",  icon: "fas fa-chart-line",     color: "#198754" },
+  { slug: "parte-iii", nombre: "Parte III — Permisos y Formación",   icon: "fas fa-calendar-check", color: "#fd7e14" },
+  { slug: "parte-iv",  nombre: "Parte IV — Documentos Personales",   icon: "fas fa-id-card",        color: "#6f42c1" },
+];
+
+function _docLabel(f) {
+  return f.doc_type || f.titulo_doc || f.notas?.split("\n")[0] || "Documento sin tipo";
+}
+
 function filterInnerDossier() {
   const profile = state.activePersonProfile;
   if (!profile) return;
@@ -380,7 +407,9 @@ function filterInnerDossier() {
   if (state.innerDossierSearch) {
     const q = state.innerDossierSearch.toLowerCase().trim();
     files = files.filter(f =>
+      (_docLabel(f)).toLowerCase().includes(q) ||
       (f.doc_type || "").toLowerCase().includes(q) ||
+      (f.titulo_doc || "").toLowerCase().includes(q) ||
       (f.ubicacion || "").toLowerCase().includes(q) ||
       (f.personas_relacionadas || "").toLowerCase().includes(q) ||
       (f.notas || "").toLowerCase().includes(q)
@@ -390,14 +419,14 @@ function filterInnerDossier() {
     ? state.innerDossierSearch.trim().split(/\s+/).filter(t => t.length > 1)
     : [];
   if (state.innerDossierClass) {
-    files = files.filter(f => f.doc_type === state.innerDossierClass);
+    files = files.filter(f => (f.categoria || f.doc_type || "") === state.innerDossierClass);
   }
 
   const sortKey = state.innerDossierSort;
-  if      (sortKey === "Alfabético (A-Z)")      files.sort((a, b) => (a.doc_type || "").localeCompare(b.doc_type || ""));
-  else if (sortKey === "Alfabético (Z-A)")      files.sort((a, b) => (b.doc_type || "").localeCompare(a.doc_type || ""));
-  else if (sortKey === "Más recientes primero") files.sort((a, b) => (b.fecha_ingreso || "").localeCompare(a.fecha_ingreso || ""));
-  else if (sortKey === "Más antiguos primero")  files.sort((a, b) => (a.fecha_ingreso || "").localeCompare(b.fecha_ingreso || ""));
+  if      (sortKey === "Alfabético (A-Z)")      files.sort((a, b) => _docLabel(a).localeCompare(_docLabel(b)));
+  else if (sortKey === "Alfabético (Z-A)")      files.sort((a, b) => _docLabel(b).localeCompare(_docLabel(a)));
+  else if (sortKey === "Más recientes primero") files.sort((a, b) => (b.fecha_documento || b.fecha_ingreso || "").localeCompare(a.fecha_documento || a.fecha_ingreso || ""));
+  else if (sortKey === "Más antiguos primero")  files.sort((a, b) => (a.fecha_documento || a.fecha_ingreso || "").localeCompare(b.fecha_documento || b.fecha_ingreso || ""));
 
   const countBadge = document.getElementById("inner-dossier-folio-count");
   if (countBadge) countBadge.textContent = `${files.length} folios visibles`;
@@ -408,41 +437,82 @@ function filterInnerDossier() {
     return;
   }
 
-  // Agrupar por categoría
+  // Agrupar por parte (categoria_slug → parte canónica) o por categoria/doc_type
   const grouped = {};
   for (const f of files) {
-    const cat = f.categoria || f.doc_type || "Sin categoría";
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push(f);
+    let key;
+    if (f.categoria_slug) {
+      const parte = RRHH_PARTES.find(p => p.slug === f.categoria_slug);
+      key = parte ? parte.nombre : (f.categoria || f.doc_type || "Sin clasificar");
+    } else {
+      key = f.categoria || f.doc_type || "Sin clasificar";
+    }
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(f);
   }
 
-  container.innerHTML = Object.entries(grouped).map(([cat, catFiles]) => `
-    <div class="rrhh-person-category-section mb-4">
-      <h5 class="border-bottom pb-2 mb-3 ds-category-title">
-        <i class="fas fa-folder-open mr-2"></i>${cat}
-      </h5>
-      ${catFiles.map(f => {
-        const hlD = txt => typeof highlightTerms === "function" ? highlightTerms(txt, dossierTerms) : (txt || "");
-        return `
-        <div class="rrhh-person-file-item">
-          <div class="rrhh-person-file-head">
-            <div class="rrhh-person-file-main">
-              <strong>${hlD(f.doc_type)}</strong>
-              <span class="rrhh-person-file-sub">Fecha de ingreso: ${formatISOToSpanish(f.fecha_ingreso)}</span>
-            </div>
-            <a href="#" class="btn btn-sm btn-outline-info"
-              onclick="openDocMetadataModal('${f.__idx}');return false;">Abrir archivo</a>
-          </div>
-          <div class="rrhh-person-file-meta">
-            <span>Dependencia o AP: <strong>${f.departamento || "N/A"}</strong></span>
-            <span>Estatus: <strong>${f.estatus || f.estado || "N/A"}</strong></span>
-            <span>Ubicación: <strong>${hlD(f.ubicacion) || "N/A"}</strong></span>
-          </div>
+  // Ordenar grupos según el orden canónico de las partes
+  const parteOrder = Object.fromEntries(RRHH_PARTES.map((p, i) => [p.nombre, i]));
+  const sortedGroups = Object.entries(grouped).sort(([a], [b]) => {
+    const oa = parteOrder[a] ?? 99;
+    const ob = parteOrder[b] ?? 99;
+    return oa !== ob ? oa - ob : a.localeCompare(b);
+  });
+
+  // Renderizar como tabs si hay múltiples grupos, secciones si solo hay uno
+  if (sortedGroups.length > 1) {
+    const tabId = "dossier-partes-tabs";
+    const tabsHtml = sortedGroups.map(([cat], i) => {
+      const parte = RRHH_PARTES.find(p => p.nombre === cat);
+      const icon = parte ? `<i class="${parte.icon} mr-1" style="color:${parte.color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
+      const count = grouped[cat].length;
+      return `<li class="nav-item">
+        <a class="nav-link${i === 0 ? " active" : ""}" data-toggle="tab" href="#dossier-tab-${i}"
+           style="font-size:0.82rem;padding:6px 12px;">
+          ${icon}${cat.replace(/ — .+/, "")} <span class="badge badge-secondary ml-1">${count}</span>
+        </a>
+      </li>`;
+    }).join("");
+
+    const panelsHtml = sortedGroups.map(([cat, catFiles], i) =>
+      `<div class="tab-pane fade${i === 0 ? " show active" : ""}" id="dossier-tab-${i}">
+        ${_renderDossierFileList(catFiles, dossierTerms)}
+      </div>`
+    ).join("");
+
+    container.innerHTML = `
+      <ul class="nav nav-tabs mb-3" id="${tabId}" role="tablist">${tabsHtml}</ul>
+      <div class="tab-content">${panelsHtml}</div>`;
+  } else {
+    // Un solo grupo: sin tabs
+    const [cat, catFiles] = sortedGroups[0];
+    container.innerHTML = _renderDossierFileList(catFiles, dossierTerms);
+  }
+}
+
+function _renderDossierFileList(catFiles, dossierTerms) {
+  return catFiles.map(f => {
+    const hlD = txt => typeof highlightTerms === "function" ? highlightTerms(txt, dossierTerms) : (txt || "");
+    const label = _docLabel(f);
+    return `
+    <div class="rrhh-person-file-item">
+      <div class="rrhh-person-file-head">
+        <div class="rrhh-person-file-main">
+          <strong>${hlD(label)}</strong>
+          ${f.titulo_doc && f.titulo_doc !== label ? `<span class="text-muted small ml-2">${hlD(f.titulo_doc)}</span>` : ""}
+          <span class="rrhh-person-file-sub">Fecha: ${formatISOToSpanish(f.fecha_documento || f.fecha_ingreso)}</span>
         </div>
-        `;
-      }).join("")}
-    </div>
-  `).join("");
+        <a href="#" class="btn btn-sm btn-outline-info"
+          onclick="openDocMetadataModal('${f.__idx}');return false;">Abrir archivo</a>
+      </div>
+      <div class="rrhh-person-file-meta">
+        <span>Dependencia: <strong>${f.departamento || "N/A"}</strong></span>
+        <span>Estatus: <strong>${f.estatus || f.estado || "N/A"}</strong></span>
+        <span>Ubicación: <strong>${hlD(f.ubicacion) || "N/A"}</strong></span>
+        ${f.notas ? `<span>Notas: <em>${hlD(f.notas)}</em></span>` : ""}
+      </div>
+    </div>`;
+  }).join("");
 }
 
 function openDocMetadataModal(idxReal) {
@@ -450,20 +520,25 @@ function openDocMetadataModal(idxReal) {
   const doc = state.activePersonProfile.rows.find(d => d.__idx == idxReal);
   if (!doc) return;
 
-  document.getElementById("modal-doc-title").innerText       = `${doc.doc_type} - ${doc.empleado}`;
+  const _lbl = _docLabel(doc);
+  document.getElementById("modal-doc-title").innerText       = `${_lbl} - ${doc.empleado}`;
   document.getElementById("modal-doc-thumb-icon").className  = "fas fa-id-card";
-  document.getElementById("modal-doc-thumb-badge").innerText = doc.doc_type;
+  document.getElementById("modal-doc-thumb-badge").innerText = _lbl;
 
+  const docLbl = _docLabel(doc);
   document.getElementById("modal-doc-meta-container").innerHTML = `
     <div class="ds-doc-meta-row"><span class="k">Titular</span><span class="v">${doc.empleado}</span></div>
     <div class="ds-doc-meta-row"><span class="k">Cédula</span><span class="v">${doc.cedula}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Tipo de Documento</span><span class="v">${docLbl}</span></div>
+    ${doc.titulo_doc && doc.titulo_doc !== docLbl ? `<div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo_doc}</span></div>` : ""}
+    ${doc.categoria ? `<div class="ds-doc-meta-row"><span class="k">Clasificación</span><span class="v">${doc.categoria}</span></div>` : ""}
     <div class="ds-doc-meta-row"><span class="k">Personas vinculadas</span><span class="v">${doc.personas_relacionadas || "N/A"}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Tipo de Archivo</span><span class="v">${doc.doc_type}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Fecha de Ingreso</span><span class="v">${formatISOToSpanish(doc.fecha_ingreso)}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion || "N/A"}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Fecha del Documento</span><span class="v">${formatISOToSpanish(doc.fecha_documento || doc.fecha_ingreso)}</span></div>
+    ${doc.notas ? `<div class="ds-doc-meta-row"><span class="k">Notas</span><span class="v">${doc.notas}</span></div>` : ""}
   `;
   document.getElementById("modal-doc-abstract").innerText =
-    `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;
+    doc.notas || `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;
 
   closeDocViewer();
   const fileUrl = _secureFileUrl(doc.file_url || "");

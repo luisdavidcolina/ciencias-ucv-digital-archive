@@ -347,6 +347,14 @@ def run_migrations():
          "CREATE INDEX IF NOT EXISTS idx_datos_archivo_vencimiento ON public.datos_archivo(fecha_vencimiento) WHERE fecha_vencimiento IS NOT NULL AND deleted_at IS NULL"),
         ("idx fecha_vencimiento datos_rrhh",
          "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_vencimiento ON public.datos_rrhh(fecha_vencimiento) WHERE fecha_vencimiento IS NOT NULL AND deleted_at IS NULL"),
+
+        # ── Tipo "Sin clasificar" de emergencia para documentos RRHH huérfanos ─
+        ("tipo Sin clasificar RRHH",
+         """INSERT INTO public.tipo_documento (nombre, nombre_corto, slug, id_categoria)
+            SELECT 'Sin clasificar', 'Sin clasificar', 'sin-clasificar-rrhh',
+                   (SELECT id FROM public.categoria WHERE slug = 'parte-iv' LIMIT 1)
+            WHERE NOT EXISTS (SELECT 1 FROM public.tipo_documento WHERE slug = 'sin-clasificar-rrhh')
+              AND EXISTS (SELECT 1 FROM public.categoria WHERE slug = 'parte-iv')"""),
     ]
     for label, sql in migrations:
         try:
@@ -406,9 +414,31 @@ def _backfill_archivo_tipo_fk():
                  AND LOWER(TRIM(da.tesauro_primario)) = LOWER(TRIM(td.nombre))""",
             fetch="none", commit=True,
         )
-        logger.info("Backfill id_tipo_documento OK")
+        logger.info("Backfill id_tipo_documento Archivo OK")
     except Exception as exc:
-        logger.warning(f"Backfill id_tipo_documento omitido: {exc}")
+        logger.warning(f"Backfill id_tipo_documento Archivo omitido: {exc}")
+
+
+def _backfill_rrhh_tipo_fk():
+    """Rellena id_tipo_documento en datos_rrhh donde el valor actual sea inválido (no existe en tipo_documento)."""
+    try:
+        fallback = db_query(
+            "SELECT id FROM public.tipo_documento WHERE slug = 'sin-clasificar-rrhh' LIMIT 1",
+            fetch="one",
+        )
+        if not fallback:
+            return
+        db_query(
+            """UPDATE public.datos_rrhh dr
+               SET id_tipo_documento = %s
+               WHERE NOT EXISTS (
+                 SELECT 1 FROM public.tipo_documento td WHERE td.id = dr.id_tipo_documento
+               )""",
+            [fallback["id"]], fetch="none", commit=True,
+        )
+        logger.info("Backfill id_tipo_documento RRHH OK")
+    except Exception as exc:
+        logger.warning(f"Backfill id_tipo_documento RRHH omitido: {exc}")
 
 
 @app.on_event("startup")
@@ -416,6 +446,7 @@ def on_startup():
     ensure_audit_table()
     populate_missing_slugs()
     run_migrations()
+    _backfill_rrhh_tipo_fk()
 
 
 # =============================================================================

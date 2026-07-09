@@ -64,9 +64,11 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
             dr.id_rrhh,
             COALESCE(td.nombre_corto, td.nombre, '') AS doc_type,
             COALESCE(cat.nombre, '')               AS categoria,
+            COALESCE(cat.slug, '')                 AS categoria_slug,
             COALESCE(dr.ubicacion, '')                AS ubicacion,
             COALESCE(dr.titulo, '')                   AS titulo_doc,
             COALESCE(dr.autor, '')                    AS autor,
+            COALESCE(dr.notas, '')                    AS notas,
             COALESCE(dr.abstract, '')                 AS abstract,
             TO_CHAR(dr.fecha_documento, 'YYYY-MM-DD') AS fecha_documento,
             e.nombres || ' ' || e.apellidos           AS personas_relacionadas,
@@ -90,8 +92,9 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
     if not rows:
         return pd.DataFrame(columns=[
             "cedula", "empleado", "personas_relacionadas", "departamento", "estado",
-            "doc_type", "categoria", "fecha_ingreso", "ubicacion", "foto_url",
-            "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo", "descriptores_libres"
+            "doc_type", "categoria", "categoria_slug", "fecha_ingreso", "ubicacion", "foto_url",
+            "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo",
+            "descriptores_libres", "titulo_doc", "notas"
         ])
     return pd.DataFrame([dict(r) for r in rows]).fillna("")
 
@@ -408,7 +411,7 @@ def get_empleado_documentos(
     where = "WHERE " + " AND ".join(conditions)
     count_row = db_query(
         f"""SELECT COUNT(*) AS total FROM public.datos_rrhh dr
-            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id
             LEFT JOIN public.categoria c ON td.id_categoria=c.id
             {where}""",
         params, fetch="one"
@@ -422,7 +425,7 @@ def get_empleado_documentos(
                    COALESCE(c.nombre,'Sin clasificar') AS parte_nombre,
                    COALESCE(c.slug,'') AS parte_slug
             FROM public.datos_rrhh dr
-            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+            LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id
             LEFT JOIN public.categoria c ON td.id_categoria=c.id
             {where}
             ORDER BY c.id NULLS LAST, dr.fecha_documento DESC
@@ -468,7 +471,7 @@ def generate_rrhh_report(emp_id: int):
                COALESCE(c.nombre,'Sin clasificar') AS parte_nombre,
                COALESCE(c.id, 999) AS parte_orden
         FROM public.datos_rrhh dr
-        LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id_tipo_documento
+        LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id
         LEFT JOIN public.categoria c ON td.id_categoria=c.id
         WHERE dr.empleado_id=%s ORDER BY parte_orden, dr.fecha_documento DESC
     """,[emp_id],fetch="all") or []
