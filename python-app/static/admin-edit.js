@@ -221,7 +221,7 @@ async function handleSaveEditDoc() {
 async function handleDeleteDoc(id, nombre) {
   const ok = await confirmModal(
     "Mover a la papelera",
-    `Â¿Enviar "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    `¿Enviar "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
     "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
@@ -334,7 +334,7 @@ async function _restaurarDoc(id, modulo) {
 }
 
 async function _purgarDoc(id, modulo) {
-  const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. Â¿Continuar?", "Sí, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. ¿Continuar?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
@@ -409,7 +409,7 @@ async function _restaurarVersion(docId, verId, modulo) {
 }
 
 async function _deleteVersion(docId, verId, modulo) {
-  const ok = await confirmModal("Eliminar versión", "Â¿Eliminar esta versión del historial? No afecta al archivo actual.", "Sí, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar versión", "¿Eliminar esta versión del historial? No afecta al archivo actual.", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     await apiFetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });

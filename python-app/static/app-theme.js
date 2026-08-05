@@ -441,7 +441,7 @@ async function loadNotifications() {
         <i class="${icon}" style="width:14px;flex-shrink:0;"></i>
         <div class="ds-notif-item-body">
           <div class="ds-notif-item-label">${it.label || '—'}</div>
-          <div class="ds-notif-item-meta">${it.modulo} Â· ${lbl} Â· ${it.ts || ''}</div>
+          <div class="ds-notif-item-meta">${it.modulo} · ${lbl} · ${it.ts || ''}</div>
         </div>
       </a>`;
     }).join("");

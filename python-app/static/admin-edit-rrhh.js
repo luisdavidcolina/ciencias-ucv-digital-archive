@@ -79,7 +79,7 @@ async function handleSaveEditEmpleado() {
 async function handleDeleteEmpleado(empId, nombre) {
   const ok = await confirmModal(
     "Mover a la papelera",
-    `Â¿Enviar el expediente de "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
+    `¿Enviar el expediente de "${nombre}" a la papelera? Podrás restaurarlo desde la pestaña Papelera.`,
     "Sí, mover a papelera", "btn-danger"
   );
   if (!ok) return;
@@ -267,7 +267,7 @@ async function _adminAddCargo() {
 }
 
 async function _adminDeleteCargo(empId, histId) {
-  const ok = await confirmModal("Eliminar entrada", "Â¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
+  const ok = await confirmModal("Eliminar entrada", "¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
     await apiFetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });
