@@ -668,8 +668,8 @@ let _sysChartModulos = null;
 async function loadSystemStats() {
   try {
     const [summary, usersRow] = await Promise.all([
-      fetch(`${API_BASE}/api/admin/global_summary`).then(r=>r.json()).catch(()=>({})),
-      fetch(`${API_BASE}/api/admin/users`).then(r=>r.json()).catch(()=>[]),
+      apiFetchJSON(`${API_BASE}/api/admin/global_summary`).catch(()=>({})),
+      apiFetchJSON(`${API_BASE}/api/admin/users`).catch(()=>[]),
     ]);
 
     const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
@@ -761,16 +761,15 @@ async function _submitSysChangePw() {
   if (newPass.length < 6) { showToast("Mínimo 6 caracteres.", "warning"); return; }
   if (newPass !== confirm) { showToast("Las contraseñas no coinciden.", "warning"); return; }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users/${uid}/password`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/users/${uid}/password`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_password: newPass, requester: getCurrentUser()?.username || "sistema" }),
     });
-    if (!res.ok) throw new Error();
     $("#sys-change-pw-modal").modal("hide");
     showToast("Contraseña actualizada correctamente.", "success");
-  } catch {
-    showToast("Error al cambiar la contraseña.", "error");
+  } catch (e) {
+    showToast(e.message || "Error al cambiar la contraseña.", "error");
   }
 }
 
@@ -781,8 +780,7 @@ async function loadBackupGroups() {
   const container = document.getElementById("backup-groups-container");
   if (!container) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/backup/groups`);
-    _backupGroups = await res.json();
+    _backupGroups = await apiFetchJSON(`${API_BASE}/api/admin/backup/groups`);
     container.innerHTML = Object.entries(_backupGroups).map(([key, g]) => `
       <div class="col-sm-6 col-lg-4 mb-2">
         <div class="custom-control custom-checkbox">
@@ -828,8 +826,7 @@ async function handleExportBackup() {
       requester: user.username || "",
       tables: selectedTables.join(","),
     });
-    const res = await fetch(`${API_BASE}/api/admin/backup/export?${params}`, { method: "GET" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await apiFetch(`${API_BASE}/api/admin/backup/export?${params}`, { method: "GET" });
     const blob = await res.blob();
     const cd = res.headers.get("Content-Disposition") || "";
     const fn = cd.match(/filename="(.+?)"/)?.[1] || "backup.json";
@@ -874,10 +871,9 @@ async function handleRestoreBackup() {  // async para confirmModal
   statusEl.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin mr-2"></i>Restaurando...</div>';
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/backup/restore?requester=${encodeURIComponent(user.username||'')}&mode=${mode}`, {
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/backup/restore?requester=${encodeURIComponent(user.username||'')}&mode=${mode}`, {
       method: "POST", body: fd,
     });
-    const data = await res.json();
     if (data.success) {
       const totalInserted = Object.values(data.results).reduce((sum, r) => sum + (r.inserted||0), 0);
       statusEl.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle mr-2"></i>Restauración completada. ${totalInserted} filas insertadas.</div>`;
@@ -898,8 +894,7 @@ async function loadBackupHistory() {
   const tbody = document.getElementById("backup-history-body");
   if (!tbody) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/backup/history`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/backup/history`);
     if (!data.records || !data.records.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted p-3">Sin historial de backups.</td></tr>';
       return;
@@ -923,8 +918,7 @@ async function loadAuditLog() {
   const search = document.getElementById("audit-search-input")?.value || "";
   if (!tbody) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/audit_log?page=${auditState.page}&per_page=${auditState.perPage}&search=${encodeURIComponent(search)}`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/audit_log?page=${auditState.page}&per_page=${auditState.perPage}&search=${encodeURIComponent(search)}`);
     auditState.total = data.total;
     const pages = Math.ceil(data.total / auditState.perPage) || 1;
     document.getElementById("audit-page-info").innerText = `Pag ${auditState.page} / ${pages} (${data.total} eventos)`;
@@ -1027,8 +1021,8 @@ async function loadAlertasJubilaciones() {
 
   try {
     const [jubRes, vencRes] = await Promise.all([
-      fetch(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=${horizonte}`).then(r => r.json()),
-      fetch(`${API_BASE}/api/admin/retencion/vencimientos?limite=30`).then(r => r.json()),
+      apiFetchJSON(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=${horizonte}`),
+      apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=30`),
     ]);
 
     // Jubilaciones
@@ -1096,7 +1090,7 @@ async function loadRetencionTipos() {
   if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="text-center py-3"><span class="spinner-border spinner-border-sm mr-2"></span>Cargando...</td></tr>`;
 
   try {
-    const data = await fetch(`${API_BASE}/api/admin/retencion/tipos?scope=${encodeURIComponent(scope)}`).then(r => r.json());
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/tipos?scope=${encodeURIComponent(scope)}`);
     const tipos = data.tipos || [];
     if (!tbody) return;
     if (!tipos.length) {
@@ -1137,12 +1131,11 @@ async function _editRetencion(tipoId, nombre, actual) {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
+    await apiFetch(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ plazo_retencion_anios: anios, requester: getCurrentUser()?.username || "admin" }),
     });
-    if (!res.ok) throw new Error();
     showToast(`Plazo de retención actualizado a ${anios} año(s) para "${nombre}".`, "success");
     loadRetencionTipos();
   } catch {
