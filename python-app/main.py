@@ -166,8 +166,9 @@ def run_migrations():
             LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
             LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
             LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
-            LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id
+            LEFT JOIN public.datos_rrhh        dr ON dr.empleado_id    = e.id AND dr.deleted_at IS NULL
             LEFT JOIN public.tipo_documento    td ON dr.id_tipo_documento = td.id
+            WHERE e.deleted_at IS NULL
             GROUP BY e.id, c.nombre, d.nombre, el.estados
         """),
         ("categoria Archivo",

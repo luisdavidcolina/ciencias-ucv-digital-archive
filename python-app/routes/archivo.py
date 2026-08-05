@@ -84,7 +84,7 @@ def search_archivo(req: ArchivoSearchRequest):
     per_page = max(1, min(req.per_page, 50))
     offset   = (page - 1) * per_page
 
-    conditions: list = []
+    conditions: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
     params: list = []
 
     import re as _re
@@ -222,7 +222,7 @@ def search_archivo(req: ArchivoSearchRequest):
     # Reconstruye el WHERE sin el filtro de tipo para que los conteos sean correctos
     # incluso cuando el usuario ya tiene un tipo seleccionado.
     import re as _ref
-    facet_conds: list = ["da.deleted_at IS NULL"]
+    facet_conds: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
     facet_params: list = []
     if req.search_term:
         _has_l = bool(_ref.search(r'[A-Za-zÀ-ÿ]', req.search_term))
