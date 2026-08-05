@@ -5,8 +5,7 @@ async function openEditEmpleadoModal(empId) {
 
   // Fetch datos frescos del servidor
   try {
-    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}`);
-    if (res.ok) rec = { ...rec, ...await res.json() };
+    rec = { ...rec, ...await apiFetchJSON(`${API_BASE}/api/admin/empleado/${empId}`) };
   } catch {}
 
   document.getElementById("edit-emp-id").value          = rec.empleado_id || rec.id || "";
@@ -64,17 +63,16 @@ async function handleSaveEditEmpleado() {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/empleado/${empId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error();
     $("#editEmpleadoModal").modal("hide");
     showToast("Empleado actualizado.", "success");
     loadMonitorTable();
-  } catch {
-    showToast("Error al actualizar el empleado.", "error");
+  } catch (e) {
+    showToast(e.message || "Error al actualizar el empleado.", "error");
   }
 }
 
@@ -86,14 +84,13 @@ async function handleDeleteEmpleado(empId, nombre) {
   );
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/empleado/${empId}?usuario=${encodeURIComponent(state.user.username)}`, {
+    await apiFetch(`${API_BASE}/api/admin/empleado/${empId}?usuario=${encodeURIComponent(state.user.username)}`, {
       method: "DELETE",
     });
-    if (!res.ok) throw new Error();
     showToast("Expediente movido a la papelera.", "success");
     loadMonitorTable();
-  } catch {
-    showToast("Error al mover a la papelera.", "error");
+  } catch (e) {
+    showToast(e.message || "Error al mover a la papelera.", "error");
   }
 }
 
@@ -223,8 +220,7 @@ async function _adminLoadHistorial() {
 
   body.innerHTML = '<p class="text-muted small text-center py-2"><i class="fas fa-spinner fa-spin"></i></p>';
   try {
-    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`);
     if (!data.historial?.length) {
       body.innerHTML = '<p class="text-muted small text-center py-2">Sin historial registrado.</p>';
       return;
@@ -257,27 +253,25 @@ async function _adminAddCargo() {
   if (!cargo || !desde) { showToast("Cargo y fecha de inicio son requeridos.", "warning"); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`, {
+    await apiFetchJSON(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ cargo_nombre: cargo, fecha_inicio: desde, motivo: motivo || null, registrado_por: state.user?.username || "" }),
     });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || "Error"); }
     document.getElementById("admin-historial-cargo-input").value = "";
     document.getElementById("admin-historial-desde-input").value = "";
     document.getElementById("admin-historial-motivo-input").value = "";
     showToast("Cargo registrado en el historial.", "success");
     await _adminLoadHistorial();
-  } catch (e) { showToast(`Error: ${e.message}`, "error"); }
+  } catch (e) { showToast(e.message || "Error al registrar cargo.", "error"); }
 }
 
 async function _adminDeleteCargo(empId, histId) {
   const ok = await confirmModal("Eliminar entrada", "Â¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });
     showToast("Entrada eliminada.", "success");
     await _adminLoadHistorial();
-  } catch { showToast("Error al eliminar.", "error"); }
+  } catch (e) { showToast(e.message || "Error al eliminar.", "error"); }
 }

@@ -23,9 +23,7 @@ async function loadChartsData() {
   const suf    = adminSuffixFromTab();
   const modulo = suf === "archivo" ? "Archivo" : "RRHH";
   try {
-    const res = await fetch(`${API_BASE}/api/admin/charts?modulo=${modulo}`);
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/charts?modulo=${modulo}`);
     if (modulo === "Archivo") {
       _renderArchivoCharts(data, suf);
     } else {
@@ -237,9 +235,7 @@ async function handleImportCSV(tipo, suf) {
   const fd = new FormData();
   fd.append("file", fileInput.files[0]);
   try {
-    const res = await fetch(endpoint, { method: "POST", body: fd });
-    if (!res.ok) throw new Error(`Error del servidor (HTTP ${res.status})`);
-    const data = await res.json();
+    const data = await apiFetchJSON(endpoint, { method: "POST", body: fd });
     const errs     = (data.errors||[]).slice(0,5).map(e => `<li class="small">${e}</li>`).join("");
     const moreErrs = (data.errors||[]).length > 5 ? `<li class="small text-muted">... y ${(data.errors.length-5)} más</li>` : "";
     const summary  = [

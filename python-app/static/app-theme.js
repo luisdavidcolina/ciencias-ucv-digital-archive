@@ -415,9 +415,7 @@ async function loadNotifications() {
     ? "Global"
     : (state.user.modulo || "");
   try {
-    const res = await fetch(`${API_BASE}/api/admin/notifications?modulo=${encodeURIComponent(modulo)}`);
-    if (!res.ok) return;
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/notifications?modulo=${encodeURIComponent(modulo)}`);
     const total = data.total || 0;
 
     // Badge

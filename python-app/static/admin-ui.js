@@ -214,14 +214,13 @@ function openQuickStatusMenu(btn, docId, currentStatus, modulo) {
       menu.remove();
       if (newStatus === currentStatus) return;
       try {
-        const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/status?status=${newStatus}&modulo=${encodeURIComponent(modulo)}&requester=${encodeURIComponent(state.user.username)}`, {
+        await apiFetch(`${API_BASE}/api/admin/documento/${docId}/status?status=${newStatus}&modulo=${encodeURIComponent(modulo)}&requester=${encodeURIComponent(state.user.username)}`, {
           method: "PATCH"
         });
-        if (!res.ok) throw new Error();
         showToast(`Estado cambiado a "${newStatus}".`, "success");
         loadMonitorTable();
-      } catch {
-        showToast("Error al cambiar el estado.", "error");
+      } catch (e) {
+        showToast(e.message || "Error al cambiar el estado.", "error");
       }
     });
   });

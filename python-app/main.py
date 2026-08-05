@@ -114,6 +114,27 @@ async def _log_requests(request: Request, call_next):
 def run_migrations():
     """Migraciones idempotentes que se ejecutan al iniciar la app."""
     migrations = [
+        ("tabla cargos",
+         """CREATE TABLE IF NOT EXISTS public.cargos (
+             id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             nombre VARCHAR(200) NOT NULL UNIQUE
+         )"""),
+        ("tabla departamentos",
+         """CREATE TABLE IF NOT EXISTS public.departamentos (
+             id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             nombre VARCHAR(200) NOT NULL UNIQUE
+         )"""),
+        ("tabla estados_laborales",
+         """CREATE TABLE IF NOT EXISTS public.estados_laborales (
+             id     INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             estados VARCHAR(100) NOT NULL UNIQUE
+         )"""),
+        ("fila por defecto cargos",
+         "INSERT INTO public.cargos(nombre) VALUES('Por Asignar') ON CONFLICT(nombre) DO NOTHING"),
+        ("fila por defecto departamentos",
+         "INSERT INTO public.departamentos(nombre) VALUES('Por Asignar') ON CONFLICT(nombre) DO NOTHING"),
+        ("fila por defecto estados_laborales",
+         "INSERT INTO public.estados_laborales(estados) VALUES('Activo') ON CONFLICT(estados) DO NOTHING"),
         ("file_url en datos_archivo",
          "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS file_url TEXT"),
         ("file_url en datos_rrhh",
