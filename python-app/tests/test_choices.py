@@ -27,8 +27,9 @@ def _archivo_df():
 class TestChoices:
     def test_estructura_correcta(self, client):
         with (
-            patch("routes.archivo.fetch_archivo_dataframe", return_value=_archivo_df()),
-            patch("routes.rrhh.fetch_rrhh_dataframe",      return_value=_empty_rrhh_df()),
+            patch("routes.choices.fetch_archivo_dataframe", return_value=_archivo_df()),
+            patch("routes.rrhh.fetch_rrhh_dataframe",       return_value=_empty_rrhh_df()),
+            patch("routes.choices.db_query",                return_value=[]),
         ):
             # Limpiar caché antes del test
             import routes.choices as ch

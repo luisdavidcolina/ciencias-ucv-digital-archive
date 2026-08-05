@@ -25,7 +25,7 @@ class TestListAll:
                 return count_row
             return [data_row]
 
-        with patch("database.db_query", side_effect=mock_query):
+        with patch("routes.admin.docs.db_query", side_effect=mock_query):
             res = client.get("/api/admin/list_all?modulo=Archivo&page=1&per_page=10")
 
         assert res.status_code == 200
@@ -47,7 +47,7 @@ class TestListAll:
                 return count_row
             return []
 
-        with patch("database.db_query", side_effect=mock_query):
+        with patch("routes.admin.docs.db_query", side_effect=mock_query):
             res = client.get("/api/admin/list_all?modulo=Archivo&page=2&per_page=25")
 
         assert res.status_code == 200
@@ -63,7 +63,7 @@ class TestListAll:
                 return count_row
             return []
 
-        with patch("database.db_query", side_effect=mock_query):
+        with patch("routes.admin.docs.db_query", side_effect=mock_query):
             res = client.get("/api/admin/list_all?modulo=Archivo&per_page=9999")
 
         assert res.status_code == 200
@@ -77,7 +77,7 @@ class TestListAll:
                 return count_row
             return []
 
-        with patch("database.db_query", side_effect=mock_query):
+        with patch("routes.admin.docs.db_query", side_effect=mock_query):
             res = client.get("/api/admin/list_all?modulo=Archivo")
 
         assert res.status_code == 200
@@ -103,7 +103,7 @@ class TestGetUsers:
             id=1, usuario="archivero", nombre_usuario="Test",
             modulo="Archivo", rol="Normal",
         )
-        with patch("database.db_query", return_value=[user_row]):
+        with patch("routes.admin.users.db_query", return_value=[user_row]):
             res = client.get("/api/admin/users")
 
         assert res.status_code == 200
