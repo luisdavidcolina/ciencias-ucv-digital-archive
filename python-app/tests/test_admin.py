@@ -1,6 +1,7 @@
 """Tests para el panel de administración: list_all, stats y users."""
 import pytest
 from unittest.mock import patch, MagicMock
+from fastapi.testclient import TestClient
 
 
 def _mock_row(**data):
@@ -83,6 +84,17 @@ class TestListAll:
         body = res.json()
         assert body["total"]   == 0
         assert body["records"] == []
+
+
+class TestAuthGuard:
+    def test_admin_sin_sesion_retorna_401(self, app):
+        """Sin cookie ds_session, los endpoints admin deben retornar 401."""
+        from routes.admin.deps import require_session
+        app.dependency_overrides.pop(require_session, None)
+        with TestClient(app) as c:
+            res = c.get("/api/admin/list_all?modulo=Archivo")
+        app.dependency_overrides[require_session] = lambda: "test_user"
+        assert res.status_code == 401
 
 
 class TestGetUsers:

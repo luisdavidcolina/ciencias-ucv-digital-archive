@@ -21,8 +21,12 @@ def app():
 
 @pytest.fixture
 def client(app):
+    """Cliente de tests con require_session desactivado (retorna usuario ficticio)."""
+    from routes.admin.deps import require_session
+    app.dependency_overrides[require_session] = lambda: "test_user"
     with TestClient(app) as c:
         yield c
+    app.dependency_overrides.pop(require_session, None)
 
 
 # ─── Filas de prueba reutilizables ────────────────────────────────────────────

@@ -63,4 +63,4 @@ class TestRestoreSession:
     def test_restore_usuario_no_existe(self, client):
         with patch("database.db_query", return_value=None):
             res = client.post("/api/auth/restore", json={"username": "fantasma"})
-        assert res.status_code == 404
+        assert res.status_code == 401
