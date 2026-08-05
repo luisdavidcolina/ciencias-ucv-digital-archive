@@ -1,0 +1,161 @@
+/* Asistente IA — estilos de la burbuja flotante.
+   Todo va prefijado con #ia-* para no colisionar con AdminLTE ni Bootstrap. */
+
+#ia-burbuja {
+  position: fixed; right: 22px; bottom: 22px; z-index: 3000;
+  width: 56px; height: 56px; border: none; border-radius: 50%;
+  background: #0b3d2c; color: #fff; font-size: 22px; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .28);
+  transition: transform .15s ease, background .15s ease;
+}
+#ia-burbuja:hover { transform: scale(1.07); background: #12583f; }
+
+#ia-panel {
+  position: fixed; right: 22px; bottom: 90px; z-index: 3000;
+  width: 380px; max-width: calc(100vw - 32px);
+  height: 540px; max-height: calc(100vh - 130px);
+  background: #fff; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+  display: none; flex-direction: column;
+  font-family: inherit; font-size: 14px;
+}
+#ia-panel.ia-abierto { display: flex; }
+
+.ia-cab {
+  background: #0b3d2c; color: #fff; padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between; font-weight: 600;
+}
+.ia-cab button {
+  background: none; border: none; color: #fff; opacity: .8;
+  cursor: pointer; font-size: 14px; padding: 4px 6px;
+}
+.ia-cab button:hover { opacity: 1; }
+
+#ia-aviso {
+  display: none; background: #fff3cd; color: #856404;
+  padding: 6px 12px; font-size: 12px; border-bottom: 1px solid #ffeeba;
+}
+
+#ia-mensajes { flex: 1; overflow-y: auto; padding: 14px; background: #f6f7f9; }
+
+/* Historial: se despliega sobre los mensajes en vez de al lado. El panel mide 380px y una
+   barra lateral dejaría el chat en 240 — ilegible. */
+#ia-historial {
+  display: none; position: absolute; top: 46px; bottom: 0; left: 0; right: 0;
+  background: #fff; z-index: 5; overflow-y: auto;
+}
+#ia-historial.ia-hist-abierto { display: block; }
+.ia-hist-cab {
+  padding: 10px 14px; font-size: 12px; font-weight: 600; color: #6c757d;
+  text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e3e6ea;
+}
+.ia-hist-item {
+  position: relative; padding: 10px 40px 10px 14px;
+  border-bottom: 1px solid #f0f2f4; cursor: pointer;
+}
+.ia-hist-item:hover { background: #f0f7f4; }
+.ia-hist-activa { background: #e6f2ed; border-left: 3px solid #0b3d2c; }
+.ia-hist-titulo {
+  font-size: 13px; color: #222; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.ia-hist-meta { font-size: 11px; color: #8a9099; margin-top: 2px; }
+.ia-hist-borrar {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: #c0c5cc; cursor: pointer; padding: 6px;
+}
+.ia-hist-borrar:hover { color: #dc3545; }
+.ia-hist-vacio { padding: 24px 14px; text-align: center; color: #8a9099; font-size: 13px; }
+
+.ia-msg {
+  max-width: 88%; padding: 9px 12px; border-radius: 12px;
+  margin-bottom: 8px; line-height: 1.45; word-wrap: break-word;
+}
+.ia-msg-user { background: #0b3d2c; color: #fff; margin-left: auto; border-bottom-right-radius: 3px; }
+.ia-msg-bot  { background: #fff; color: #222; border: 1px solid #e3e6ea; border-bottom-left-radius: 3px; }
+.ia-msg-bot a { color: #0b6b4a; text-decoration: underline; word-break: break-all; }
+
+/* La traza de herramientas: lo que separa una respuesta verificable de una inventada. */
+.ia-traza {
+  font-size: 11px; color: #7a8290; margin: -4px 0 10px 4px; font-style: italic;
+}
+
+.ia-escribiendo { display: flex; gap: 4px; width: 52px; }
+.ia-escribiendo span {
+  width: 7px; height: 7px; border-radius: 50%; background: #b3b9c2;
+  animation: ia-latido 1.2s infinite;
+}
+.ia-escribiendo span:nth-child(2) { animation-delay: .2s; }
+.ia-escribiendo span:nth-child(3) { animation-delay: .4s; }
+@keyframes ia-latido { 0%, 60%, 100% { opacity: .3 } 30% { opacity: 1 } }
+
+/* Propuestas: el único punto donde el asistente cambia algo, y siempre con una persona
+   apretando el botón. Se marca en ámbar para que no se confunda con una respuesta. */
+.ia-propuesta {
+  background: #fff8e6; border: 1px solid #f0d68a; border-left: 4px solid #e0a800;
+  border-radius: 8px; padding: 10px 12px; margin: 4px 0 12px;
+}
+.ia-prop-ocupada { opacity: .5; pointer-events: none; }
+.ia-prop-cab { font-weight: 600; font-size: 12px; color: #8a6d00; margin-bottom: 4px; }
+.ia-prop-txt { font-size: 13px; color: #333; line-height: 1.4; }
+.ia-prop-btns { display: flex; gap: 8px; margin-top: 10px; }
+.ia-prop-btns button {
+  flex: 1; border: none; border-radius: 6px; padding: 7px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.ia-aprobar { background: #28a745; color: #fff; }
+.ia-aprobar:hover { background: #218838; }
+.ia-rechazar { background: #e9ecef; color: #495057; }
+.ia-rechazar:hover { background: #dde1e5; }
+
+/* Avisos del propio widget (subidas, resultados de aprobación): ni del usuario ni del
+   modelo, así que no llevan burbuja. */
+.ia-sistema {
+  text-align: center; font-size: 12px; color: #6c757d;
+  margin: 6px 0 10px; font-style: italic;
+}
+
+#ia-clip {
+  width: 34px; height: 38px; border: none; background: none;
+  color: #6c757d; cursor: pointer; font-size: 16px;
+}
+#ia-clip:hover { color: #0b3d2c; }
+
+.ia-perfil { font-size: 12px; color: #0b6b4a; }
+
+.ia-vacio { text-align: center; color: #6c757d; padding: 24px 8px; }
+.ia-vacio i { font-size: 34px; color: #0b3d2c; margin-bottom: 10px; display: block; }
+.ia-vacio p { margin: 0 0 6px; }
+.ia-sug-titulo { margin-top: 16px !important; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+.ia-sug {
+  display: block; width: 100%; margin: 6px 0; padding: 8px 10px;
+  background: #fff; border: 1px solid #d8dce2; border-radius: 8px;
+  font-size: 13px; color: #333; text-align: left; cursor: pointer;
+}
+.ia-sug:hover { border-color: #0b3d2c; background: #f0f7f4; }
+
+#ia-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e3e6ea; background: #fff; }
+#ia-input {
+  flex: 1; border: 1px solid #d8dce2; border-radius: 20px;
+  padding: 8px 14px; font-size: 14px; outline: none;
+}
+#ia-input:focus { border-color: #0b3d2c; }
+#ia-form button[type="submit"] {
+  width: 38px; height: 38px; border: none; border-radius: 50%;
+  background: #0b3d2c; color: #fff; cursor: pointer;
+}
+
+/* Tema oscuro: el sistema ya lo alterna con data-theme en <html>. */
+html[data-theme="dark"] #ia-panel { background: #1e2227; }
+html[data-theme="dark"] #ia-mensajes { background: #15181c; }
+html[data-theme="dark"] .ia-msg-bot { background: #262b31; color: #e6e8ea; border-color: #343a41; }
+html[data-theme="dark"] #ia-form { background: #1e2227; border-color: #343a41; }
+html[data-theme="dark"] #ia-input { background: #262b31; border-color: #343a41; color: #e6e8ea; }
+html[data-theme="dark"] .ia-sug { background: #262b31; border-color: #343a41; color: #e6e8ea; }
+html[data-theme="dark"] .ia-propuesta { background: #332d16; border-color: #6b5720; }
+html[data-theme="dark"] .ia-prop-txt { color: #e6e8ea; }
+html[data-theme="dark"] .ia-rechazar { background: #3a4049; color: #e6e8ea; }
+
+@media (max-width: 480px) {
+  #ia-panel { right: 8px; left: 8px; width: auto; bottom: 80px; }
+}

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistente IA — Archivo Institucional Ciencias UCV</title>
+  <link rel="icon" href="/static/logo.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body { background:#f4f6f9; font-size:14px; }
+    .card { border:none; box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:20px; }
+    .card-header { background:#0b3d2c; color:#fff; font-weight:600; }
+    .modelo-fila { cursor:pointer; }
+    .modelo-fila:hover { background:#eef6f2; }
+    .modelo-fila.activo { background:#d4edda; }
+    .badge-si { background:#28a745; color:#fff; }
+    .badge-no { background:#dc3545; color:#fff; }
+    code { font-size:12px; }
+    #modelos-tabla { max-height:520px; overflow-y:auto; }
+  </style>
+</head>
+<body>
+<div class="container-fluid py-4" style="max-width:1200px">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="fas fa-robot text-success"></i> Asistente IA</h4>
+    <a href="/admin/sistema" class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-arrow-left"></i> Admin Global
+    </a>
+  </div>
+
+  <div id="estado-alerta"></div>
+
+  <div class="row">
+    <!-- ============ CEREBRO ============ -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header"><i class="fas fa-brain"></i> Cerebro del asistente</div>
+        <div class="card-body">
+          <p class="text-muted small">
+            Todo esto se inyecta en el prompt de sistema. Lo que escribas aquí, el asistente lo
+            da por cierto: es la diferencia entre que responda con datos de la Facultad o que
+            deje un hueco — y <strong>todo hueco es una invitación a rellenarlo</strong>.
+          </p>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Nombre del asistente</label>
+              <input id="cfg-nombre" class="form-control" maxlength="60">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Tono</label>
+              <select id="cfg-tono" class="form-control">
+                <option value="institucional">Institucional</option>
+                <option value="cercano">Cercano</option>
+                <option value="directo">Directo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Información institucional</label>
+            <textarea id="cfg-conocimiento" class="form-control" rows="10"
+              placeholder="Horarios de atención del archivo, ubicación de las gavetas, a quién dirigirse para solicitar un documento, políticas de consulta, contacto de la Facultad…"></textarea>
+            <small class="form-text text-muted">
+              Datos <strong>estáticos</strong>. Lo que cambia (qué documentos hay, cuántos son)
+              no va aquí: eso lo consulta el asistente en la base con sus herramientas.
+            </small>
+          </div>
+
+          <div class="form-group">
+            <label>Reglas adicionales</label>
+            <textarea id="cfg-reglas" class="form-control" rows="4"
+              placeholder="Una regla por línea. Ej: 'Nunca des el número de cédula completo, solo los últimos 4 dígitos.'"></textarea>
+          </div>
+
+          <hr>
+          <h6 class="text-muted"><i class="fas fa-shield-halved"></i> Límites de gasto</h6>
+          <p class="text-muted small">
+            Viven en la base de datos, no en variables de entorno: en Vercel cambiar una
+            variable obliga a redesplegar, y nadie hace un deploy para subir el tope un día
+            de mucho uso. Aquí es inmediato.
+          </p>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Tope de gasto diario (USD)</label>
+              <input id="cfg-tope" type="number" step="0.05" min="0" max="1000" class="form-control">
+              <small class="form-text text-muted">
+                Corta <em>antes</em> de llamar al modelo. Se restablece a medianoche.
+              </small>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Tope de tokens por respuesta</label>
+              <input id="cfg-maxtok" type="number" step="100" min="100" max="8000" class="form-control">
+              <small class="form-text text-muted">
+                La salida es el grueso del costo de un mensaje.
+              </small>
+            </div>
+          </div>
+
+          <button id="btn-guardar" class="btn btn-success">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+          <span id="guardar-msg" class="ml-2 text-muted small"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ GASTO ============ -->
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header"><i class="fas fa-coins"></i> Gasto</div>
+        <div class="card-body">
+          <div id="gasto-resumen"></div>
+          <hr>
+          <h6 class="text-muted">Últimos días</h6>
+          <div style="max-height:240px;overflow-y:auto">
+            <table class="table table-sm mb-0">
+              <thead><tr><th>Día</th><th class="text-right">Msgs</th>
+                         <th class="text-right">Tokens</th><th class="text-right">Costo</th></tr></thead>
+              <tbody id="gasto-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><i class="fas fa-comments"></i> Conversaciones</div>
+        <div class="card-body p-0">
+          <div style="max-height:300px;overflow-y:auto">
+            <table class="table table-sm table-hover mb-0">
+              <tbody id="conv-tabla"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PROPUESTAS ============ -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-clipboard-check"></i> Cambios propuestos por el asistente</span>
+      <select id="prop-estado" class="form-control form-control-sm" style="max-width:180px">
+        <option value="pendiente">Pendientes</option>
+        <option value="aprobada">Aprobadas</option>
+        <option value="rechazada">Rechazadas</option>
+      </select>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-2">
+        El asistente nunca modifica el archivo por su cuenta: deja una propuesta que una
+        persona aprueba desde el chat. Aquí queda el registro de qué se pidió, quién lo
+        resolvió y cuándo.
+      </p>
+      <div id="prop-tabla" style="max-height:320px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- ============ MODELOS ============ -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-microchip"></i> Modelo</span>
+      <input id="modelo-filtro" class="form-control form-control-sm" style="max-width:260px"
+             placeholder="Filtrar por nombre o empresa…">
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-2">
+        La columna que importa es <strong>$ / 1000 mensajes</strong>: los $/millón engañan,
+        porque en este uso la salida pesa el grueso del costo y un modelo con caché le gana a
+        otro con precio de lista más bajo. Un modelo <span class="badge badge-no">sin
+        herramientas</span> <strong>no puede consultar el archivo</strong> — queda reducido a
+        conversar.
+      </p>
+      <div id="modelos-tabla"><div class="text-muted">Cargando catálogo…</div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "";
+let modelosCache = [];
+let modeloActual = "";
+
+// Todos los endpoints de /api/ia exigen la cookie de sesión firmada. No hay ningún campo
+// `usuario` en los cuerpos: quién eres lo decide el servidor a partir de la cookie, no algo
+// que esta página pueda escribir.
+function api(url, opts) {
+  return fetch(API + url, Object.assign({ credentials: "same-origin" }, opts || {}));
+}
+
+function esc(t) {
+  return String(t == null ? "" : t).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// --- estado ---------------------------------------------------------------
+api("/api/ia/disponible").then(r => r.json()).then(d => {
+  const el = document.getElementById("estado-alerta");
+  if (!d.disponible) {
+    el.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ' +
+      esc(d.motivo) + ' El asistente está apagado y la burbuja de chat no aparece en el sistema.</div>';
+  }
+});
+
+// --- config ---------------------------------------------------------------
+api("/api/ia/config").then(r => r.json()).then(c => {
+  document.getElementById("cfg-nombre").value = c.nombre || "";
+  document.getElementById("cfg-tono").value = c.tono || "institucional";
+  document.getElementById("cfg-conocimiento").value = c.conocimiento || "";
+  document.getElementById("cfg-reglas").value = c.reglas || "";
+  document.getElementById("cfg-tope").value = c.tope_diario;
+  document.getElementById("cfg-maxtok").value = c.max_tokens;
+  modeloActual = c.modelo || "";
+});
+
+document.getElementById("btn-guardar").addEventListener("click", () => {
+  const msg = document.getElementById("guardar-msg");
+  msg.textContent = "Guardando…";
+  api("/api/ia/config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nombre: document.getElementById("cfg-nombre").value,
+      tono: document.getElementById("cfg-tono").value,
+      conocimiento: document.getElementById("cfg-conocimiento").value,
+      reglas: document.getElementById("cfg-reglas").value,
+      tope_diario: document.getElementById("cfg-tope").value,
+      max_tokens: document.getElementById("cfg-maxtok").value
+    })
+  }).then(r => r.json().then(d => { if (!r.ok) throw new Error(d.detail); }))
+    .then(() => { msg.textContent = "Guardado."; setTimeout(() => msg.textContent = "", 2500); })
+    .catch(e => msg.textContent = e.message || "Error al guardar.");
+});
+
+// --- gasto ----------------------------------------------------------------
+api("/api/ia/gastos?dias=30").then(r => r.json()).then(d => {
+  const pct = d.tope_diario ? Math.min(100, (d.hoy / d.tope_diario) * 100) : 0;
+  document.getElementById("gasto-resumen").innerHTML =
+    '<div class="d-flex justify-content-between"><span>Hoy</span>' +
+    '<strong>$' + Number(d.hoy).toFixed(4) + ' / $' + Number(d.tope_diario).toFixed(2) + '</strong></div>' +
+    '<div class="progress my-2" style="height:8px"><div class="progress-bar ' +
+      (pct > 80 ? "bg-danger" : "bg-success") + '" style="width:' + pct + '%"></div></div>' +
+    '<div class="d-flex justify-content-between text-muted small">' +
+      '<span>Histórico</span><span>' + (d.historico.mensajes || 0) + ' respuestas · ' +
+      (d.historico.tokens || 0).toLocaleString() + ' tokens · $' +
+      Number(d.historico.costo || 0).toFixed(4) + '</span></div>';
+
+  document.getElementById("gasto-tabla").innerHTML = (d.por_dia || []).map(f =>
+    '<tr><td>' + esc(f.dia) + '</td><td class="text-right">' + f.mensajes +
+    '</td><td class="text-right">' + (f.tokens || 0).toLocaleString() +
+    '</td><td class="text-right">$' + Number(f.costo || 0).toFixed(4) + '</td></tr>'
+  ).join("") || '<tr><td colspan="4" class="text-muted">Sin actividad todavía.</td></tr>';
+});
+
+// --- conversaciones -------------------------------------------------------
+api("/api/ia/conversaciones?limite=40").then(r => r.json()).then(d => {
+  document.getElementById("conv-tabla").innerHTML = (d.conversaciones || []).map(c =>
+    '<tr><td><div class="text-truncate" style="max-width:230px">' + esc(c.titulo || "(sin título)") +
+    '</div><small class="text-muted">' + esc(c.ultima || "") + ' · ' + esc(c.perfil) + ' · ' +
+    esc(c.usuario || "público") + ' · ' + c.mensajes + ' msgs · $' +
+    Number(c.costo || 0).toFixed(4) + '</small></td>' +
+    '<td class="text-right align-middle"><button class="btn btn-sm btn-link text-danger" ' +
+    'onclick="borrarConv(' + c.id + ')"><i class="fas fa-trash"></i></button></td></tr>'
+  ).join("") || '<tr><td class="text-muted p-3">Sin conversaciones.</td></tr>';
+});
+
+function borrarConv(id) {
+  if (!confirm("¿Borrar esta conversación y todos sus mensajes?")) return;
+  api("/api/ia/conversacion/" + id, { method: "DELETE" }).then(() => location.reload());
+}
+
+// --- propuestas -----------------------------------------------------------
+function cargarPropuestas() {
+  const estado = document.getElementById("prop-estado").value;
+  api("/api/ia/propuestas?estado=" + encodeURIComponent(estado)).then(r => r.json()).then(d => {
+    const filas = d.propuestas || [];
+    document.getElementById("prop-tabla").innerHTML = filas.length
+      ? '<table class="table table-sm"><thead class="thead-light"><tr>' +
+        '<th>Qué</th><th>Módulo</th><th>Pidió</th><th>Resolvió</th><th>Fecha</th>' +
+        '</tr></thead><tbody>' +
+        filas.map(p =>
+          '<tr><td>' + esc(p.resumen || p.accion) + '</td>' +
+          '<td><span class="badge badge-secondary">' + esc(p.modulo) + '</span></td>' +
+          '<td>' + esc(p.usuario || "—") + '</td>' +
+          '<td>' + esc(p.resuelto_por || "—") + '</td>' +
+          '<td><small>' + esc(p.resuelta || p.creada || "") + '</small></td></tr>'
+        ).join("") + '</tbody></table>'
+      : '<div class="text-muted">Sin propuestas en este estado.</div>';
+  });
+}
+document.getElementById("prop-estado").addEventListener("change", cargarPropuestas);
+cargarPropuestas();
+
+// --- modelos --------------------------------------------------------------
+api("/api/ia/modelos").then(r => {
+  if (!r.ok) throw new Error();
+  return r.json();
+}).then(d => {
+  modelosCache = d.modelos || [];
+  modeloActual = d.actual;
+  pintarModelos("");
+}).catch(() => {
+  document.getElementById("modelos-tabla").innerHTML =
+    '<div class="text-danger">No se pudo consultar el catálogo de OpenRouter.</div>';
+});
+
+document.getElementById("modelo-filtro").addEventListener("input", e => pintarModelos(e.target.value));
+
+function pintarModelos(filtro) {
+  const f = (filtro || "").toLowerCase();
+  const lista = modelosCache.filter(m =>
+    !f || m.nombre.toLowerCase().includes(f) || m.empresa.toLowerCase().includes(f) ||
+    m.id.toLowerCase().includes(f)
+  ).slice(0, 250);
+
+  document.getElementById("modelos-tabla").innerHTML =
+    '<table class="table table-sm table-hover"><thead class="thead-light"><tr>' +
+    '<th>Modelo</th><th>Herram.</th><th>Caché</th>' +
+    '<th class="text-right">$/M in</th><th class="text-right">$/M out</th>' +
+    '<th class="text-right">$ / 1000 msgs</th></tr></thead><tbody>' +
+    lista.map(m =>
+      '<tr class="modelo-fila' + (m.id === modeloActual ? ' activo' : '') +
+      '" onclick="elegirModelo(\'' + esc(m.id) + '\')">' +
+      '<td><strong>' + esc(m.nombre) + '</strong> <small class="text-muted">' + esc(m.empresa) +
+        '</small><br><code>' + esc(m.id) + '</code>' +
+        (m.id === modeloActual ? ' <span class="badge badge-success">en uso</span>' : '') + '</td>' +
+      '<td><span class="badge ' + (m.herramientas ? 'badge-si">sí' : 'badge-no">no') + '</span></td>' +
+      '<td>' + (m.cache ? '<span class="badge badge-si">sí</span>' : '<span class="text-muted">—</span>') + '</td>' +
+      '<td class="text-right">' + (m.precio_in != null ? m.precio_in : "—") + '</td>' +
+      '<td class="text-right">' + (m.precio_out != null ? m.precio_out : "—") + '</td>' +
+      '<td class="text-right"><strong>' + (m.costo_mil != null ? "$" + m.costo_mil : "—") + '</strong></td>' +
+      '</tr>').join("") +
+    '</tbody></table>';
+}
+
+function elegirModelo(id) {
+  const m = modelosCache.find(x => x.id === id);
+  if (m && !m.herramientas &&
+      !confirm("Este modelo NO soporta herramientas: el asistente no podrá consultar el archivo " +
+               "y solo podrá conversar. ¿Usarlo igual?")) return;
+  api("/api/ia/config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ modelo: id })
+  }).then(() => { modeloActual = id; pintarModelos(document.getElementById("modelo-filtro").value); });
+}
+</script>
+</body>
+</html>
