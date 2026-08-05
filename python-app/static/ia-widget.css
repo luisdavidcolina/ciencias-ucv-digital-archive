@@ -155,6 +155,12 @@ html[data-theme="dark"] .ia-sug { background: #262b31; border-color: #343a41; co
 html[data-theme="dark"] .ia-propuesta { background: #332d16; border-color: #6b5720; }
 html[data-theme="dark"] .ia-prop-txt { color: #e6e8ea; }
 html[data-theme="dark"] .ia-rechazar { background: #3a4049; color: #e6e8ea; }
+html[data-theme="dark"] #ia-historial { background: #1e2227; }
+html[data-theme="dark"] .ia-hist-cab { border-color: #343a41; }
+html[data-theme="dark"] .ia-hist-item { border-color: #2a2f35; }
+html[data-theme="dark"] .ia-hist-item:hover { background: #262b31; }
+html[data-theme="dark"] .ia-hist-activa { background: #1c3a2e; }
+html[data-theme="dark"] .ia-hist-titulo { color: #e6e8ea; }
 
 @media (max-width: 480px) {
   #ia-panel { right: 8px; left: 8px; width: auto; bottom: 80px; }

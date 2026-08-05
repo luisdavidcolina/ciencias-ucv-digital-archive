@@ -141,6 +141,27 @@ pueden consultar el archivo, solo conversar.
 El costo no se estima — OpenRouter devuelve el real de cada llamada y se guarda en
 `ia_mensajes.costo`.
 
+### El modelo se cambia desde el panel, no desde el código
+
+`/admin/ia` lista el catálogo real de OpenRouter (~350 modelos, cacheado 6 h) y basta un
+clic para cambiarlo. **Se valida contra el catálogo antes de guardar**: un slug mal escrito
+—el id nativo `claude-haiku-4-5` en vez del de OpenRouter `anthropic/claude-haiku-4.5`— se
+guardaría sin quejarse y el chat empezaría a fallar en cada mensaje, con el error apareciendo
+lejos de donde se cometió. Si el catálogo no se puede consultar se deja pasar: mejor confiar
+en quien administra que bloquear un cambio legítimo porque OpenRouter esté caído.
+
+Por defecto **`anthropic/claude-haiku-4.5`** ($1/$5 por millón, la mitad que Sonnet 5) — el
+mismo default que Diamond, y por el mismo motivo: el grueso del tráfico son preguntas que se
+resuelven con una búsqueda y un párrafo.
+
+### Los topes viven en la base, no en el entorno
+
+`tope_diario` y `max_tokens` se editan desde `/admin/ia`; las variables de entorno quedan
+solo como respaldo. En Vercel, cambiar una variable obliga a redesplegar — y nadie hace un
+deploy para subir el tope un día de mucho uso, así que en la práctica el asistente quedaría
+cortado hasta el día siguiente. (En Diamond el mismo problema era peor: la config estaba
+cacheada y había que parchearla por SSH.)
+
 ## Configuración
 
 Variables de entorno (en Vercel, o en el `.env` local):
@@ -176,6 +197,30 @@ con eso completemos la información institucional o ajustemos el prompt. El apre
 hace una persona leyendo esto. Y sirve para lo que se siente enseguida: ver el gasto real y
 **auditar qué herramienta llamó**, que es lo único que distingue una respuesta correcta de
 una inventada.
+
+## Control de conversaciones
+
+Traído de Diary ("persistencia estilo Gemini"), con una regla de privacidad añadida.
+
+Desde el chat, con sesión: el botón del reloj abre el historial, un clic **restaura** la
+conversación completa —mensajes, traza de herramientas y propuestas que quedaran sin
+resolver—, la papelera **borra** una sola, y el `+` **abre una nueva** dejando la anterior
+guardada. Sin sesión no hay historial: las conversaciones del público no tienen dueño y no
+se pueden retomar, a propósito.
+
+**Tu conversación es tuya.** Solo un administrador Global ve las ajenas. Un admin de módulo
+que pudiera abrir el hilo de un compañero convertiría el asistente en una herramienta de
+vigilancia, y la gente dejaría de usarlo — que es la peor forma de perder la función. El
+Global sí puede, porque responde por el gasto y por lo que el asistente contesta, y sin leer
+los hilos donde falla no hay forma de mejorarlo.
+
+A quien no debe ver una conversación se le devuelve **404, no 403**: tampoco se le confirma
+que existe.
+
+Borrar un hilo se lleva sus mensajes y adjuntos en cascada, pero **no borra los objetos de
+R2**: pueden estar ya enganchados a un documento por una propuesta aprobada, y borrarlos
+dejaría la ficha apuntando al vacío. Limpiar huérfanos es una tarea aparte, no un efecto
+secundario de vaciar un chat.
 
 ### Esto son datos personales
 
