@@ -51,7 +51,7 @@ function renderDynamicSubmitFields() {
       </div>
       <div class="row mt-2">
         <div class="col-md-4 form-group">
-          <label class="font-weight-bold text-muted">NÂ° de Folio / Signatura</label>
+          <label class="font-weight-bold text-muted">N° de Folio / Signatura</label>
           <input type="text" id="reg-folio-${suf}" class="form-control" placeholder="Ej: F-023, Carp-A-12">
         </div>
         <div class="col-md-4 form-group">

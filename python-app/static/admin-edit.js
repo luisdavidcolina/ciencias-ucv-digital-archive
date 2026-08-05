@@ -267,11 +267,11 @@ async function _loadPapeleraDocumentos(modulo, suf) {
       body.innerHTML = data.records.map((r, i) => `
         <tr>
           <td>${(page - 1) * 20 + i + 1}</td>
-          <td>${r.titulo || "â€”"}</td>
-          <td><small>${r.doc_type || "â€”"}</small></td>
-          <td><small>${r.fecha || "â€”"}</small></td>
-          <td><small class="text-muted">${r.deleted_by || "â€”"}</small></td>
-          <td><small class="text-muted">${r.deleted_at || "â€”"}</small></td>
+          <td>${r.titulo || "—"}</td>
+          <td><small>${r.doc_type || "—"}</small></td>
+          <td><small>${r.fecha || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},'${modulo}')" title="Restaurar"><i class="fas fa-undo"></i></button>
             <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},'${modulo}')" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
@@ -302,10 +302,10 @@ async function _loadPapeleraEmpleados() {
       body.innerHTML = data.records.map((r, i) => `
         <tr>
           <td>${(page - 1) * 20 + i + 1}</td>
-          <td>${r.nombre || "â€”"}</td>
-          <td><small>${r.cedula || "â€”"}</small></td>
-          <td><small class="text-muted">${r.deleted_by || "â€”"}</small></td>
-          <td><small class="text-muted">${r.deleted_at || "â€”"}</small></td>
+          <td>${r.nombre || "—"}</td>
+          <td><small>${r.cedula || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
+          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id})" title="Restaurar"><i class="fas fa-undo"></i></button>
             <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
@@ -380,9 +380,9 @@ async function loadDocVersiones(docId, modulo) {
           ${data.versiones.map(v => `
             <tr>
               <td><span class="badge badge-secondary">v${v.version_num}</span></td>
-              <td>${v.comentario || "â€”"}</td>
-              <td>${v.subido_por || "â€”"}</td>
-              <td>${v.created_at || "â€”"}</td>
+              <td>${v.comentario || "—"}</td>
+              <td>${v.subido_por || "—"}</td>
+              <td>${v.created_at || "—"}</td>
               <td>
                 <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},'${modulo}')" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
                 <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},'${modulo}')" title="Eliminar del historial"><i class="fas fa-trash"></i></button>

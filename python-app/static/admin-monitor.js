@@ -97,7 +97,7 @@ function renderMonitorTable() {
   }
 
   const STATUS_BADGES = {
-    draft:      '<span class="badge badge-secondary ds-status-badge" title="Borrador â€” sin publicar"><i class="fas fa-pencil-alt mr-1"></i>Borrador</span>',
+    draft:      '<span class="badge badge-secondary ds-status-badge" title="Borrador — sin publicar"><i class="fas fa-pencil-alt mr-1"></i>Borrador</span>',
     revision:   '<span class="badge badge-warning text-dark ds-status-badge ds-status-revision" title="Pendiente de revisión"><i class="fas fa-clock mr-1"></i>Revisión</span>',
     aprobado:   '<span class="badge badge-success ds-status-badge" title="Aprobado y publicado"><i class="fas fa-check mr-1"></i>OK</span>',
     rechazado:  '<span class="badge badge-danger ds-status-badge" title="Rechazado"><i class="fas fa-times mr-1"></i>Rechazado</span>',
@@ -115,14 +115,14 @@ function renderMonitorTable() {
         ? highlightTerms(f.titulo || "", searchTerms)
         : (f.titulo || "");
       const autor = typeof highlightTerms === "function"
-        ? highlightTerms(f.autor || "â€”", searchTerms)
-        : (f.autor || "â€”");
+        ? highlightTerms(f.autor || "—", searchTerms)
+        : (f.autor || "—");
       const statusBtnTitle = { draft: "Borrador", revision: "En revisión", aprobado: "Aprobado", rechazado: "Rechazado" }[f.status] || "Aprobado";
       return `<tr>
         <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.titulo||'').replace(/"/g,'&quot;')}">${titulo}</td>
         <td class="text-muted small">${autor}</td>
         <td class="text-muted small">${formatISOToSpanish(f.fecha)}</td>
-        <td><span class="badge badge-light border">${f.doc_type || 'â€”'}</span></td>
+        <td><span class="badge badge-light border">${f.doc_type || '—'}</span></td>
         <td>
           <button class="btn btn-xs btn-link p-0 ds-status-btn" title="Cambiar estado: ${statusBtnTitle}"
             onclick="openQuickStatusMenu(this,${f.id},'${f.status || 'aprobado'}','${state.user.modulo}')">
@@ -144,11 +144,11 @@ function renderMonitorTable() {
       return `
         <tr>
           <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(f.empleado||'').replace(/"/g,'&quot;')}">${hlEmpleado}</td>
-          <td class="text-muted small">${f.cedula || "â€”"}</td>
-          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.cargo || f.departamento || "â€”"}</td>
-          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado || "â€”"}</span></td>
-          <td><span class="badge badge-light border" title="${f.tipos||''}" style="padding:3px 6px;">${(f.tipos||'').split(';')[0].trim() || 'â€”'}</span></td>
-          <td class="text-muted small">${f.ubicacion || "â€”"}</td>
+          <td class="text-muted small">${f.cedula || "—"}</td>
+          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.cargo || f.departamento || "—"}</td>
+          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado || "—"}</span></td>
+          <td><span class="badge badge-light border" title="${f.tipos||''}" style="padding:3px 6px;">${(f.tipos||'').split(';')[0].trim() || '—'}</span></td>
+          <td class="text-muted small">${f.ubicacion || "—"}</td>
           <td>
             <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver Expediente"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar"><i class="fas fa-edit"></i></button>
@@ -188,7 +188,7 @@ function exportAdminCSV() {
   if (isArch) {
     // Incluye campos ISAD(G): folio, soporte, páginas
     headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación",
-               "NÂ° Folio", "Soporte", "NÂ° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
+               "N° Folio", "Soporte", "N° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
     rows = records.map(r => [
       r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.tesauro_secundario || "",
       r.numero_folio || "", r.soporte || "Físico", r.numero_paginas || "",
@@ -197,7 +197,7 @@ function exportAdminCSV() {
   } else {
     headers = ["ID Empleado", "Apellidos y Nombres", "Cédula", "RIF", "Cargo", "Departamento",
                "Estado Laboral", "Fecha Ingreso", "Fecha Nacimiento", "Nivel Educativo", "Sexo",
-               "NÂ° Documentos", "Última Actualiz."];
+               "N° Documentos", "Última Actualiz."];
     const SEXO = { M: "Masculino", F: "Femenino", O: "Otro" };
     rows = records.map(r => [
       r.empleado_id,
@@ -219,7 +219,7 @@ function exportAdminCSV() {
   // Metadato: filtros aplicados como comentario CSV (fila especial)
   const meta = `"# Exportado: ${today} | Módulo: ${state.user.modulo} | Pág: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
   const csv  = [meta, headers.join(","), ...rows].join("\n");
-  const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["" + csv], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href = url;

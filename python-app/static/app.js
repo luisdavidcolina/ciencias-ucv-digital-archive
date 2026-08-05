@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function checkPersistedSession() {
-  // admin_sistema.html gestiona su propia sesión (checkSession) â€” no interferir
+  // admin_sistema.html gestiona su propia sesión (checkSession) — no interferir
   if (document.body.dataset.page === "admin-sistema") return;
   const raw = localStorage.getItem("archive_session");
   if (!raw) {
@@ -19,7 +19,7 @@ async function checkPersistedSession() {
     const saved = JSON.parse(raw);
     const ttlMs = 12 * 60 * 60 * 1000;
     if (saved && saved.username && saved.ts && (Date.now() - saved.ts) < ttlMs) {
-      // Restore immediately from cache â€” no flash, no redirect delay
+      // Restore immediately from cache — no flash, no redirect delay
       loginSuccess(saved);
       // Validate with server in the background; log out only if session is revoked
       fetch(`${API_BASE}/api/auth/restore`, {
@@ -244,7 +244,7 @@ function setupEventListeners() {
   safeOn("menu-btn-admin-rrhh",    "click", e => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "RRHH";    switchTab("admin-rrhh"); });
   safeOn("module_switch_btn",      "click", handleModuleSwitch);
 
-  // Buscador Archivo â€” debounce 420ms en input, inmediato en botón/enter
+  // Buscador Archivo — debounce 420ms en input, inmediato en botón/enter
   safeOn("search_archivo",    "input",  e => {
     state.archivo.search = e.target.value; state.archivo.page = 1;
     if (typeof _debouncedArchivoSearch === "function") _debouncedArchivoSearch();
@@ -259,7 +259,7 @@ function setupEventListeners() {
   safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("soporte_archivo",   "change", () => { state.archivo.page = 1; triggerArchivoSearch(); });
 
-  // Buscador RRHH â€” debounce 420ms en input
+  // Buscador RRHH — debounce 420ms en input
   safeOn("search_rrhh",       "input",  e => {
     state.rrhh.search = e.target.value; state.rrhh.page = 1;
     if (typeof _debouncedRrhhSearch === "function") _debouncedRrhhSearch();
@@ -401,7 +401,7 @@ function _exportResultsCSV(modulo) {
   }
 
   const csv = [headers.join(","), ...rows].join("\n");
-  const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

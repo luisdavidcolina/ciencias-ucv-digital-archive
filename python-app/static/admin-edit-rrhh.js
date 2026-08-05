@@ -109,7 +109,7 @@ function exportAdminCSV() {
   if (isArch) {
     // Incluye campos ISAD(G): folio, soporte, páginas
     headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación",
-               "NÂ° Folio", "Soporte", "NÂ° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
+               "N° Folio", "Soporte", "N° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
     rows = records.map(r => [
       r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.tesauro_secundario || "",
       r.numero_folio || "", r.soporte || "Físico", r.numero_paginas || "",
@@ -118,7 +118,7 @@ function exportAdminCSV() {
   } else {
     headers = ["ID Empleado", "Apellidos y Nombres", "Cédula", "RIF", "Cargo", "Departamento",
                "Estado Laboral", "Fecha Ingreso", "Fecha Nacimiento", "Nivel Educativo", "Sexo",
-               "NÂ° Documentos", "Última Actualiz."];
+               "N° Documentos", "Última Actualiz."];
     const SEXO = { M: "Masculino", F: "Femenino", O: "Otro" };
     rows = records.map(r => [
       r.empleado_id,
@@ -140,7 +140,7 @@ function exportAdminCSV() {
   // Metadato: filtros aplicados como comentario CSV (fila especial)
   const meta = `"# Exportado: ${today} | Módulo: ${state.user.modulo} | Pág: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
   const csv  = [meta, headers.join(","), ...rows].join("\n");
-  const blob = new Blob(["ï»¿" + csv], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob(["" + csv], { type: "text/csv;charset=utf-8;" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href = url;
@@ -199,7 +199,7 @@ function initDropZone(suf) {
   });
 }
 // =============================================================================
-// HISTORIAL DE CARGOS â€” gestión desde el admin panel
+// HISTORIAL DE CARGOS — gestión desde el admin panel
 // =============================================================================
 
 async function _adminToggleHistorial() {
@@ -236,9 +236,9 @@ async function _adminLoadHistorial() {
           ${data.historial.map(h => `
             <tr>
               <td>${h.cargo}</td>
-              <td>${h.fecha_inicio || "â€”"}</td>
+              <td>${h.fecha_inicio || "—"}</td>
               <td>${h.fecha_fin || '<span class="text-success font-weight-bold">Actual</span>'}</td>
-              <td class="text-muted">${h.motivo || "â€”"}</td>
+              <td class="text-muted">${h.motivo || "—"}</td>
               <td><button class="btn btn-xs btn-outline-danger" onclick="_adminDeleteCargo(${empId}, ${h.id})"><i class="fas fa-trash"></i></button></td>
             </tr>`).join("")}
         </tbody>

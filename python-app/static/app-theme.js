@@ -442,7 +442,7 @@ async function loadNotifications() {
       return `<a class="ds-notif-item" href="${href}" onclick="document.getElementById('ds-notif-panel').style.display='none'">
         <i class="${icon}" style="width:14px;flex-shrink:0;"></i>
         <div class="ds-notif-item-body">
-          <div class="ds-notif-item-label">${it.label || 'â€”'}</div>
+          <div class="ds-notif-item-label">${it.label || '—'}</div>
           <div class="ds-notif-item-meta">${it.modulo} Â· ${lbl} Â· ${it.ts || ''}</div>
         </div>
       </a>`;
