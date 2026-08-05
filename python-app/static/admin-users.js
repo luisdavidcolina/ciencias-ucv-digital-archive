@@ -8,13 +8,9 @@ let auditState = { page: 1, perPage: 50, total: 0 };
 async function loadUsersTab() {
   const suf       = adminSuffixFromTab();
   const container = document.getElementById(`admin_users_table-${suf}`);
-  // Cada panel de módulo solo administra sus propios usuarios;
-  // el panel Sistema Global (admin_sistema.html) los ve todos.
   const moduloFiltro = suf === "rrhh" ? "RRHH" : "Archivo";
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(moduloFiltro)}`);
-    if (!res.ok) throw new Error();
-    const users = await res.json();
+    const users = await apiFetchJSON(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(moduloFiltro)}`);
     container.innerHTML = `
       <table class="table table-striped table-bordered" style="font-size:0.85rem;">
         <thead><tr class="bg-light"><th>Usuario</th><th>Contraseña</th><th>Módulo</th><th>Rol</th><th>Estado</th><th>Último Acceso</th><th>Acciones</th></tr></thead>
@@ -57,11 +53,9 @@ async function loadUsersTab() {
 
 async function handleToggleUserActive(uid, username) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users/${uid}/active?requester=${encodeURIComponent(state.user.username)}`, {
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/users/${uid}/active?requester=${encodeURIComponent(state.user.username)}`, {
       method: "PATCH",
     });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
     showToast(`Usuario "${username}" ${data.is_active ? 'activado' : 'desactivado'}.`, data.is_active ? "success" : "warning");
     loadUsersTab();
   } catch {
@@ -75,10 +69,9 @@ async function handleDeleteUser(uid, username) {
     : confirm(`¿Eliminar al usuario "${username}"? Esta acción es irreversible.`);
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users/${uid}?requester=${encodeURIComponent(state.user.username)}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/users/${uid}?requester=${encodeURIComponent(state.user.username)}`, {
       method: "DELETE",
     });
-    if (!res.ok) throw new Error();
     showToast(`Usuario "${username}" eliminado.`, "success");
     loadUsersTab();
   } catch {
@@ -95,12 +88,11 @@ async function handleChangePassword(uid, username) {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users/${uid}/password`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/users/${uid}/password`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ new_password: newPass.trim(), requester: state.user.username }),
     });
-    if (!res.ok) throw new Error();
     showToast(`Contraseña de "${username}" actualizada.`, "success");
   } catch {
     showToast("Error al cambiar la contraseña.", "error");
@@ -114,9 +106,7 @@ async function loadAuditTab() {
   if (!body) return;
   try {
     const url = `${API_BASE}/api/admin/audit_log?page=${auditState.page}&per_page=${auditState.perPage}&search=${encodeURIComponent(search)}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    const data = await apiFetchJSON(url);
     auditState.total = data.total;
 
     const totalPages = Math.ceil(data.total / auditState.perPage) || 1;
@@ -161,15 +151,11 @@ async function handleAddUser() {
   const rol      = document.getElementById(`new_user_rol-${suf}`)?.value          || "";
   if (!username || !pass) { showToast("Por favor, ingrese todos los datos requeridos.", "warning"); return; }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/users/create`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/users/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usuario: username, password: pass, modulo, rol, creator: state.user.username })
     });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || "Error");
-    }
     showToast(`¡Usuario ${username} registrado con éxito!`, "success");
     document.getElementById(`new_user_name-${suf}`) && (document.getElementById(`new_user_name-${suf}`).value = "");
     document.getElementById(`new_user_pass-${suf}`) && (document.getElementById(`new_user_pass-${suf}`).value = "");

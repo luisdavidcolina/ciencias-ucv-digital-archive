@@ -33,6 +33,8 @@ htmlcov/
 # Environment files
 .env
 .env.*
+# La plantilla sin secretos sí se versiona: `.env.*` de arriba la atrapaba.
+!.env.example
 
 # Logs
 *.log

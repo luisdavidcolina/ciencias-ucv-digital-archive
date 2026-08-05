@@ -2,7 +2,7 @@
 async function loadDynamicStats() {
   const suf = adminSuffixFromTab();
   try {
-    const res = await fetch(`${API_BASE}/api/admin/stats`, {
+    const stats = await apiFetchJSON(`${API_BASE}/api/admin/stats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -11,20 +11,17 @@ async function loadDynamicStats() {
         date_end:   document.getElementById(`stats-date-end-${suf}`)?.value   || ""
       })
     });
-    if (!res.ok) throw new Error();
-    const stats = await res.json();
 
     const kpiDocs = document.getElementById(`kpi-total-docs-${suf}`);
     const kpiCats = document.getElementById(`kpi-total-cats-${suf}`);
     if (kpiDocs) kpiDocs.innerText = stats.total_docs;
     if (kpiCats) kpiCats.innerText = stats.categories_count;
 
-    const resUsers = await fetch(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(state.user.modulo)}`);
-    if (resUsers.ok) {
-      const uList = await resUsers.json();
+    try {
+      const uList = await apiFetchJSON(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(state.user.modulo)}`);
       const kpiUsers = document.getElementById(`kpi-total-users-${suf}`);
       if (kpiUsers) kpiUsers.innerText = uList.length;
-    }
+    } catch {}
 
     const isArchivo  = state.user.modulo === "Archivo";
     const db_list    = isArchivo ? state.archivo.results : state.rrhh.results;

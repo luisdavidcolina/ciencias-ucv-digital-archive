@@ -110,8 +110,11 @@
             <img src="/assets/icons/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
           </span>
         </li>
+        <li class="nav-item d-none d-md-flex align-items-center ml-2">
+          <span id="nav-section-breadcrumb" class="text-muted small" style="border-left:2px solid #dee2e6; padding-left:10px; line-height:1.2;"></span>
+        </li>
       </ul>
-      
+
       <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown ds-nav-user">
           <span style="padding-top:10px; display:inline-block; margin-right:8px; font-weight:bold; color:#dc3545;">
@@ -177,9 +180,10 @@
           <span>Panel RRHH</span>
           <span class="ds-sidebar-badge">R</span>
         </a>
-        <a class="nav-link-system" id="menu-btn-admin-sistema" href="/admin/sistema" style="display:none; align-items:center; padding:8px 16px; color:#c2c7d0;">
-          <i class="nav-icon fas fa-server" style="margin-right:8px;"></i>
+        <a class="nav-link-system ds-sidebar-link ds-sidebar-sistema" id="menu-btn-admin-sistema" href="/admin/sistema" style="display:none;">
+          <i class="fas fa-server"></i>
           <span>Sistema Global</span>
+          <span class="ds-sidebar-badge" style="background:#e74c3c;">G</span>
         </a>
         <button class="ds-sidebar-theme-btn" onclick="openThemePanel()">
           <i class="fas fa-palette"></i>
@@ -572,7 +576,7 @@
           <div class="card-header p-2 bg-light">
             <ul id="admin_workspace_tabs-archivo" class="nav nav-pills" role="tablist">
               <li class="nav-item">
-                <a class="nav-link active" id="tab-admin-archivo-stats" data-toggle="pill" href="#pane-admin-archivo-stats" role="tab">
+                <a class="nav-link" id="tab-admin-archivo-stats" data-toggle="pill" href="#pane-admin-archivo-stats" role="tab">
                   <i class="fas fa-chart-bar"></i> Estadísticas
                 </a>
               </li>
@@ -582,8 +586,8 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="tab-admin-archivo-monitor" data-toggle="pill" href="#pane-admin-archivo-monitor" role="tab">
-                  <i class="fas fa-table"></i> Monitor de Archivos
+                <a class="nav-link active" id="tab-admin-archivo-monitor" data-toggle="pill" href="#pane-admin-archivo-monitor" role="tab">
+                  <i class="fas fa-table"></i> Monitor
                 </a>
               </li>
               <li class="nav-item">
@@ -603,7 +607,7 @@
             <div class="tab-content">
               
               <!-- 1. PESTAÑA: ESTADÍSTICAS -->
-              <div class="tab-pane fade show active" id="pane-admin-archivo-stats" role="tabpanel">
+              <div class="tab-pane fade" id="pane-admin-archivo-stats" role="tabpanel">
                 <!-- Filtros Analíticos -->
                 <div class="card card-info mb-3">
                   <div class="card-header p-3">
@@ -729,7 +733,7 @@
               </div>
               
               <!-- 3. PESTAÑA: MONITOR DE ARCHIVOS -->
-              <div class="tab-pane fade" id="pane-admin-archivo-monitor" role="tabpanel">
+              <div class="tab-pane fade show active" id="pane-admin-archivo-monitor" role="tabpanel">
                 <div class="card card-info">
                   <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-database"></i> Directorio Activo Local</h3>
@@ -943,7 +947,7 @@
           <div class="card-header p-2 bg-light">
             <ul id="admin_workspace_tabs-rrhh" class="nav nav-pills" role="tablist">
               <li class="nav-item">
-                <a class="nav-link active" id="tab-admin-rrhh-stats" data-toggle="pill" href="#pane-admin-rrhh-stats" role="tab">
+                <a class="nav-link" id="tab-admin-rrhh-stats" data-toggle="pill" href="#pane-admin-rrhh-stats" role="tab">
                   <i class="fas fa-chart-bar"></i> Estadísticas
                 </a>
               </li>
@@ -953,8 +957,8 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="tab-admin-rrhh-monitor" data-toggle="pill" href="#pane-admin-rrhh-monitor" role="tab">
-                  <i class="fas fa-table"></i> Monitor RRHH
+                <a class="nav-link active" id="tab-admin-rrhh-monitor" data-toggle="pill" href="#pane-admin-rrhh-monitor" role="tab">
+                  <i class="fas fa-table"></i> Monitor
                 </a>
               </li>
               <li class="nav-item">
@@ -971,7 +975,7 @@
           </div>
           <div class="card-body">
             <div class="tab-content">
-              <div class="tab-pane fade show active" id="pane-admin-rrhh-stats" role="tabpanel">
+              <div class="tab-pane fade" id="pane-admin-rrhh-stats" role="tabpanel">
                 <div class="card card-info mb-3">
                   <div class="card-header p-3">
                     <h5 class="card-title m-0"><i class="fas fa-filter mr-2"></i> Filtros Analíticos</h5>
@@ -1083,7 +1087,7 @@
                   </div>
                 </div>
               </div>
-              <div class="tab-pane fade" id="pane-admin-rrhh-monitor" role="tabpanel">
+              <div class="tab-pane fade show active" id="pane-admin-rrhh-monitor" role="tabpanel">
                 <div class="card card-info">
                   <div class="card-header">
                     <h3 class="card-title"><i class="fas fa-database"></i> Directorio Activo RRHH</h3>
@@ -1318,5 +1322,7 @@
   <script src="/static/app-choices.js"></script>
   <script src="/static/app-theme.js"></script>
   <script src="/static/app.js"></script>
+  <link rel="stylesheet" href="/static/ia-widget.css">
+  <script src="/static/ia-widget.js" defer></script>
 </body>
 </html>

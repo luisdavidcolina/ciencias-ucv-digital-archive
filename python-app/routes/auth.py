@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 
+from core.security import generate_session_token, verify_session_token
 from database import db_query, log_event, verify_password
 from models import LoginRequest, RestoreSessionRequest
 
@@ -52,8 +53,20 @@ def _build_user_response(rows, username: str) -> dict:
 # ENDPOINTS
 # =============================================================================
 
+def _set_session_cookie(response: Response, username: str) -> None:
+    token = generate_session_token(username)
+    response.set_cookie(
+        key="ds_session",
+        value=token,
+        max_age=43200,       # 12 horas
+        httponly=True,
+        samesite="lax",
+        secure=False,        # Vercel sirve HTTPS; en dev puede ser HTTP
+    )
+
+
 @router.post("/login")
-def login(req: LoginRequest):
+def login(req: LoginRequest, response: Response):
     rows = db_query(
         "SELECT usuario, nombre_usuario, contrasena, modulo, rol, "
         "COALESCE(is_active, TRUE) AS is_active "
@@ -73,11 +86,11 @@ def login(req: LoginRequest):
                     )
                 except Exception:
                     pass
-                # Recolecta todos los módulos activos del usuario
                 payload = _build_user_response(active_rows, req.username.strip())
                 modules = payload["user"]["modules"]
                 roles = payload["user"]["roles"]
                 log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
+                _set_session_cookie(response, req.username.strip())
                 return payload
 
     log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas o cuenta desactivada", "Failure")
@@ -88,7 +101,7 @@ def login(req: LoginRequest):
 
 
 @router.post("/restore")
-def restore_session(req: RestoreSessionRequest):
+def restore_session(req: RestoreSessionRequest, response: Response):
     rows = db_query(
         "SELECT usuario, nombre_usuario, modulo, rol, "
         "COALESCE(is_active, TRUE) AS is_active "
@@ -98,16 +111,31 @@ def restore_session(req: RestoreSessionRequest):
         fetch="all",
     )
     if rows:
-        # Verificar que el usuario esté activo
         if not rows[0].get("is_active", True):
             raise HTTPException(status_code=403, detail="Cuenta desactivada")
         payload = _build_user_response(rows, req.username.strip())
         modules = payload["user"]["modules"]
         roles = payload["user"]["roles"]
         log_event(req.username, "Session Restored", ";".join(modules), f"Roles: {roles}")
+        _set_session_cookie(response, req.username.strip())
         return payload
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Sesión no encontrada",
     )
+
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("ds_session")
+    return {"ok": True}
+
+
+@router.get("/verify")
+def verify_session_endpoint(ds_session: str | None = None):
+    """Verifica si el token de sesión enviado como parámetro es válido (para debugging)."""
+    username = verify_session_token(ds_session)
+    if not username:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+    return {"username": username}

@@ -67,9 +67,7 @@ async function loadKeywordsSection() {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/keywords`);
-    if (!res.ok) throw new Error();
-    const keywords = await res.json();
+    const keywords = await apiFetchJSON(`${API_BASE}/api/admin/keywords`);
 
     kwSection.innerHTML = `
       <div class="card card-info">
@@ -112,15 +110,11 @@ async function handleAddKeyword() {
   const nombre = (input?.value || "").trim();
   if (!nombre) { showToast("Ingrese una palabra clave.", "warning"); return; }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/keywords`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/keywords`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre }),
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || "Error");
-    }
     if (input) input.value = "";
     loadKeywordsSection();
   } catch (err) {
@@ -136,12 +130,11 @@ async function handleEditKeyword(id) {
     : prompt("Nuevo nombre para la palabra clave:", currentName);
   if (!newName || newName.trim() === currentName) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/keywords/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nombre: newName.trim() }),
     });
-    if (!res.ok) throw new Error();
     loadKeywordsSection();
   } catch {
     showToast("Error al renombrar la palabra clave.", "error");
@@ -159,12 +152,7 @@ async function handleDeleteKeyword(id, nombre, usoCount) {
   if (!confirmed) return;
   try {
     const force = usoCount > 0 ? "?force=true" : "";
-    const res = await fetch(`${API_BASE}/api/admin/keywords/${id}${force}`, { method: "DELETE" });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      showToast(errData.detail || "Error al eliminar la palabra clave.", "error");
-      return;
-    }
+    await apiFetchJSON(`${API_BASE}/api/admin/keywords/${id}${force}`, { method: "DELETE" });
     showToast(`Palabra clave "${nombre}" eliminada.`, "success");
     loadKeywordsSection();
   } catch {
@@ -180,12 +168,11 @@ async function handleAddCategory() {
   const parte = document.getElementById(`new_tax_parte-${suf}`)?.value || "";
   if (!name) { showToast("Por favor, ingrese el nombre de la tipología.", "warning"); return; }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/add_category`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/add_category`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, desc, scope, parte, usuario: state.user.username }),
     });
-    if (!res.ok) throw new Error();
     showToast("¡Nueva tipología guardada con éxito!", "success");
     if (document.getElementById(`new_tax_name-${suf}`)) document.getElementById(`new_tax_name-${suf}`).value = "";
     if (document.getElementById(`new_tax_desc-${suf}`)) document.getElementById(`new_tax_desc-${suf}`).value = "";

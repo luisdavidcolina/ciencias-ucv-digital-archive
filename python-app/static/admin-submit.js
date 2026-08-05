@@ -204,9 +204,7 @@ async function loadRecentSubmissions() {
 
   try {
     const modulo = isArchivo ? "Archivo" : "RRHH";
-    const res = await fetch(`${API_BASE}/api/admin/list_all?modulo=${modulo}&page=1&per_page=5`);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/list_all?modulo=${modulo}&page=1&per_page=5`);
     const records = data.records || [];
 
     if (records.length === 0) {
@@ -315,34 +313,16 @@ async function handleNewSubmission(e) {
       fd.append("file", file);
       fd.append("modulo", state.user.modulo.toLowerCase());
       fd.append("usuario", state.user.username);
-      const upRes = await fetch(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
-      if (!upRes.ok) {
-        const upErr = await upRes.json().catch(() => ({}));
-        showToast(upErr.detail || "Error al subir el archivo digitalizado.", "error");
-        return;
-      }
-      const upData = await upRes.json();
+      const upData = await apiFetchJSON(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
       payload.file_url = upData.file_url;
       if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
     }
 
-    const res = await fetch(`${API_BASE}/api/admin/submit`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      let errMsg = "Error al registrar el folio.";
-      if (Array.isArray(errData.detail)) {
-        // Pydantic 422 validation errors
-        errMsg = errData.detail.map(e => e.msg || String(e)).join("; ");
-      } else if (typeof errData.detail === "string") {
-        errMsg = errData.detail;
-      }
-      showToast(errMsg, "error");
-      return;
-    }
     showToast("Ingreso guardado con éxito.", "success");
     const form = document.getElementById(`admin-submit-form-${suf}`);
     if (form) form.reset();

@@ -2,7 +2,7 @@
 Backup y restauración de datos del sistema.
 Solo accesible para el administrador máximo (Global).
 """
-from fastapi import APIRouter, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from fastapi.responses import StreamingResponse
 from database import db_query
 import json
@@ -10,7 +10,9 @@ import io
 from datetime import datetime, date
 from typing import Optional
 
-router = APIRouter()
+from routes.admin.deps import require_session
+
+router = APIRouter(dependencies=[Depends(require_session)])
 
 # Tablas exportables, en orden de dependencias (sin FK issues)
 EXPORTABLE_TABLES = [

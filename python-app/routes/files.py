@@ -1,13 +1,14 @@
 """Subida y descarga de archivos digitalizados (Cloudflare R2)."""
 import os
 
-from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import RedirectResponse
 
 import storage
 from database import db_query, log_event
+from routes.admin.deps import require_session
 
-router = APIRouter(tags=["files"])
+router = APIRouter(tags=["files"], dependencies=[Depends(require_session)])
 
 
 def _validate_user(usuario: str) -> None:

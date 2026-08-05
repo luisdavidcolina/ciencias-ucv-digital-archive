@@ -41,9 +41,7 @@ async function _loadAlertasBanner() {
     const el = document.getElementById("alertas-vencimiento-banner");
     if (!el) return;
     try {
-      const res = await fetch(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.vencimientos || []).slice(0, 3).map(v =>
@@ -63,9 +61,7 @@ async function _loadAlertasBanner() {
     const el = document.getElementById("alertas-jubilacion-banner");
     if (!el) return;
     try {
-      const res = await fetch(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=90`);
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await apiFetchJSON(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=90`);
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.alertas || []).slice(0, 3).map(a =>
@@ -91,7 +87,7 @@ async function handleModuleExport(modulo) {
   const statusEl = document.getElementById(`ds-export-status-${modulo}`);
   if (statusEl) statusEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin mr-1"></i>Generando backup...</span>';
   try {
-    const res = await fetch(`/api/admin/backup/export?tables=${tables}&requester=${encodeURIComponent(state.user?.usuario || "")}`, {
+    const res = await apiFetch(`/api/admin/backup/export?tables=${tables}&requester=${encodeURIComponent(state.user?.usuario || "")}`, {
       headers: { "X-User": state.user?.usuario || "" }
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -117,9 +113,7 @@ async function loadVencimientosTable() {
   if (!tbody) return;
   tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   try {
-    const res  = await fetch(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
     const rows = data.vencimientos || [];
     if (summary) summary.textContent = `${rows.length} documento${rows.length !== 1 ? "s" : ""} con retención vencida`;
     if (rows.length === 0) {
@@ -153,9 +147,7 @@ async function loadRetentionConfig() {
   if (!tbody) return;
   tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   try {
-    const res  = await fetch(`${API_BASE}/api/admin/retencion/tipos?scope=${scope}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/tipos?scope=${scope}`);
     const tipos = data.tipos || [];
     if (tipos.length === 0) {
       tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Sin tipos configurados.</td></tr>`;
@@ -193,12 +185,11 @@ async function _saveRetentionPlazo(tipoId) {
     showToast("El plazo debe estar entre 1 y 100 años.", "warning"); return;
   }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ plazo_retencion_anios: plazo, requester: state.user?.username || "" }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     showToast("Plazo actualizado.", "success");
     if (inputEl) { inputEl.classList.add("is-valid"); setTimeout(() => inputEl.classList.remove("is-valid"), 2000); }
   } catch (e) {

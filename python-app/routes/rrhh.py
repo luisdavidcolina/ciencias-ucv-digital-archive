@@ -1,12 +1,15 @@
 from typing import List, Dict, Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 import pandas as pd
 
 from database import db_query, split_terms
 from models import RrhhSearchRequest, RrhhProfileRequest
+from routes.admin.deps import require_session
 
 router = APIRouter(prefix="/api/rrhh", tags=["rrhh"])
+
+_auth = [Depends(require_session)]
 
 
 # =============================================================================
@@ -385,7 +388,7 @@ def get_empleado_por_cedula(cedula: str):
 # BÚSQUEDA DENTRO DEL EXPEDIENTE
 # =============================================================================
 
-@router.get("/empleado/{emp_id}/documentos")
+@router.get("/empleado/{emp_id}/documentos", dependencies=_auth)
 def get_empleado_documentos(
     emp_id: int,
     search: str = "",
@@ -445,7 +448,7 @@ def get_empleado_documentos(
 from fastapi.responses import HTMLResponse as _HTMLResponse
 
 
-@router.get("/report/{emp_id}", response_class=_HTMLResponse)
+@router.get("/report/{emp_id}", response_class=_HTMLResponse, dependencies=_auth)
 def generate_rrhh_report(emp_id: int):
     """Genera reporte HTML imprimible del expediente de un empleado."""
     emp = db_query("""

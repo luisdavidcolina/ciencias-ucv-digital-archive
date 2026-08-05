@@ -17,6 +17,7 @@ from routes.pages        import router as pages_router
 from routes.backup       import router as backup_router
 from routes.files        import router as files_router
 from routes.papelera     import router as papelera_router
+from routes.ia           import router as ia_router
 
 # =============================================================================
 # APLICACION
@@ -60,11 +61,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Sin cacheo de estaticos en el cliente
 @app.middleware("http")
 async def add_no_cache_header(request, call_next):
     response = await call_next(request)
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    path = request.url.path
+    # Assets estáticos (imágenes, fuentes, íconos) pueden cachearse; JS/CSS/HTML no.
+    if path.startswith("/static/") and not path.endswith((".js", ".css", ".html")):
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+    elif path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    else:
+        response.headers["Cache-Control"] = "no-cache, must-revalidate, max-age=0"
     return response
 
 
@@ -169,6 +176,17 @@ def run_migrations():
                 ) THEN
                     ALTER TABLE public.datos_archivo
                     ADD CONSTRAINT fk_datos_archivo_tipo
+                    FOREIGN KEY (id_tipo_documento) REFERENCES public.tipo_documento(id) ON DELETE SET NULL;
+                END IF;
+            END $$
+        """),
+        ("FK fk_datos_rrhh_tipo", """
+            DO $$ BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'fk_datos_rrhh_tipo'
+                ) THEN
+                    ALTER TABLE public.datos_rrhh
+                    ADD CONSTRAINT fk_datos_rrhh_tipo
                     FOREIGN KEY (id_tipo_documento) REFERENCES public.tipo_documento(id) ON DELETE SET NULL;
                 END IF;
             END $$
@@ -348,6 +366,14 @@ def run_migrations():
         ("idx fecha_vencimiento datos_rrhh",
          "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_vencimiento ON public.datos_rrhh(fecha_vencimiento) WHERE fecha_vencimiento IS NOT NULL AND deleted_at IS NULL"),
 
+        # ── Índices de búsqueda en datos_rrhh ─────────────────────────────────
+        ("idx datos_rrhh notas trgm",
+         "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_notas ON public.datos_rrhh USING gin(to_tsvector('spanish', COALESCE(notas,'') || ' ' || COALESCE(titulo,''))) WHERE deleted_at IS NULL"),
+        ("idx datos_rrhh titulo gin",
+         "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_titulo ON public.datos_rrhh(LOWER(titulo)) WHERE deleted_at IS NULL"),
+        ("idx datos_rrhh id_tipo",
+         "CREATE INDEX IF NOT EXISTS idx_datos_rrhh_tipo_doc ON public.datos_rrhh(id_tipo_documento) WHERE deleted_at IS NULL"),
+
         # ── Tipo "Sin clasificar" de emergencia para documentos RRHH huérfanos ─
         ("tipo Sin clasificar RRHH",
          """INSERT INTO public.tipo_documento (nombre, nombre_corto, slug, id_categoria)
@@ -355,13 +381,130 @@ def run_migrations():
                    (SELECT id FROM public.categoria WHERE slug = 'parte-iv' LIMIT 1)
             WHERE NOT EXISTS (SELECT 1 FROM public.tipo_documento WHERE slug = 'sin-clasificar-rrhh')
               AND EXISTS (SELECT 1 FROM public.categoria WHERE slug = 'parte-iv')"""),
+
+        # ── Asistente IA ──────────────────────────────────────────────────────
+        # Guardar las conversaciones NO hace que el modelo "aprenda solo": no reentrena nada.
+        # Lo que compra es que NOSOTROS veamos dónde falla —sobre todo cuando contesta "no
+        # encontré nada"— y con eso completemos el conocimiento institucional o ajustemos el
+        # prompt. El aprendizaje lo hace una persona leyendo esto. Y sirve para lo que se
+        # siente enseguida: ver el gasto real y auditar qué herramienta llamó el asistente.
+        ("tabla ia_conversaciones", """
+            CREATE TABLE IF NOT EXISTS public.ia_conversaciones (
+                id         SERIAL PRIMARY KEY,
+                canal      VARCHAR(20)   NOT NULL DEFAULT 'web',
+                modo       VARCHAR(20)   NOT NULL DEFAULT 'publico',  -- staff | publico
+                usuario    VARCHAR(50)   NULL,      -- solo en modo staff
+                titulo     VARCHAR(160)  NULL,      -- la primera pregunta, para la lista
+                modelo     VARCHAR(120)  NULL,
+                -- Contadores acumulados: la pantalla que lista conversaciones los necesita en
+                -- cada fila. Sin esto, listar 50 conversaciones son 50 sumas.
+                mensajes   INTEGER       NOT NULL DEFAULT 0,
+                tokens     INTEGER       NOT NULL DEFAULT 0,
+                -- 6 decimales porque una respuesta cuesta del orden de $0.002: con 2 sería 0.
+                costo      NUMERIC(12,6) NOT NULL DEFAULT 0,
+                ultima_at  TIMESTAMP     NULL,
+                created_at TIMESTAMP     NULL
+            )"""),
+        ("tabla ia_mensajes", """
+            CREATE TABLE IF NOT EXISTS public.ia_mensajes (
+                id              SERIAL PRIMARY KEY,
+                conversacion_id INTEGER NOT NULL
+                    REFERENCES public.ia_conversaciones(id) ON DELETE CASCADE,
+                rol          VARCHAR(20)   NOT NULL,   -- user | assistant
+                contenido    TEXT          NOT NULL,
+                -- Qué herramientas llamó y con qué argumentos (JSON). Es la auditoría: sin
+                -- esto no se puede saber si una respuesta salió del archivo o se la inventó.
+                herramientas TEXT          NULL,
+                modelo       VARCHAR(120)  NULL,
+                tokens       INTEGER       NULL,
+                costo        NUMERIC(12,6) NULL,
+                ms           INTEGER       NULL,
+                created_at   TIMESTAMP     NULL
+            )"""),
+        ("idx ia_conversaciones",
+         "CREATE INDEX IF NOT EXISTS idx_ia_conv_ultima ON public.ia_conversaciones(ultima_at DESC)"),
+        ("idx ia_conversaciones usuario",
+         "CREATE INDEX IF NOT EXISTS idx_ia_conv_usuario ON public.ia_conversaciones(usuario)"),
+        ("idx ia_mensajes conv",
+         "CREATE INDEX IF NOT EXISTS idx_ia_msj_conv ON public.ia_mensajes(conversacion_id, id)"),
+        # El tope de gasto diario se calcula sumando el costo de hoy en cada mensaje enviado:
+        # sin este índice esa suma recorre la tabla entera y se paga en cada pregunta.
+        ("idx ia_mensajes fecha",
+         "CREATE INDEX IF NOT EXISTS idx_ia_msj_fecha ON public.ia_mensajes((created_at::date))"),
+        # Identidad, tono, conocimiento institucional y modelo: editables desde el panel.
+        # Viven en la base y no en variables de entorno porque cambiar cómo se presenta el
+        # asistente no debería requerir un redespliegue ni un desarrollador.
+        ("tabla ia_config", """
+            CREATE TABLE IF NOT EXISTS public.ia_config (
+                clave      VARCHAR(40) PRIMARY KEY,
+                valor      TEXT        NULL,
+                updated_at TIMESTAMP   NULL,
+                updated_by VARCHAR(50) NULL
+            )"""),
+
+        # ── Bandeja de aprobación ─────────────────────────────────────────────
+        # El asistente no escribe en el archivo: propone. Cada propuesta espera aquí a que
+        # una persona la apruebe. `datos` lleva los campos a aplicar Y el estado anterior,
+        # porque quien aprueba necesita ver de qué a qué cambia — un "titulo -> X" suelto
+        # no se puede juzgar. Y al quedar la fila, el archivo puede demostrar quién aprobó
+        # cada cambio y cuándo, que es justo lo que un archivo institucional debe poder
+        # demostrar.
+        ("tabla ia_propuestas", """
+            CREATE TABLE IF NOT EXISTS public.ia_propuestas (
+                id              SERIAL PRIMARY KEY,
+                conversacion_id INTEGER NULL
+                    REFERENCES public.ia_conversaciones(id) ON DELETE SET NULL,
+                usuario     VARCHAR(50)  NULL,      -- quién lo pidió
+                accion      VARCHAR(30)  NOT NULL,  -- crear | actualizar | palabras_clave
+                modulo      VARCHAR(20)  NOT NULL,  -- archivo | rrhh
+                objetivo_id INTEGER      NULL,      -- NULL cuando la acción es crear
+                datos       TEXT         NOT NULL,  -- JSON: campos a aplicar + estado anterior
+                resumen     VARCHAR(400) NULL,      -- lo que se le muestra a quien aprueba
+                estado      VARCHAR(20)  NOT NULL DEFAULT 'pendiente',
+                resuelto_por VARCHAR(50) NULL,
+                resuelto_at  TIMESTAMP   NULL,
+                created_at   TIMESTAMP   NULL
+            )"""),
+        ("idx ia_propuestas pendientes",
+         "CREATE INDEX IF NOT EXISTS idx_ia_prop_pend ON public.ia_propuestas(estado, id DESC)"),
+        ("idx ia_propuestas conv",
+         "CREATE INDEX IF NOT EXISTS idx_ia_prop_conv ON public.ia_propuestas(conversacion_id)"),
+
+        # ── Archivos que el usuario suelta en el chat ─────────────────────────
+        # Suben a R2 como cualquier digitalizado, pero todavía no cuelgan de ningún
+        # documento: engancharlos exige una propuesta aprobada. Se anclan a la conversación
+        # a propósito — es lo que impide que el asistente alcance el adjunto de otro hilo
+        # adivinando un id.
+        ("tabla ia_adjuntos", """
+            CREATE TABLE IF NOT EXISTS public.ia_adjuntos (
+                id              SERIAL PRIMARY KEY,
+                conversacion_id INTEGER NOT NULL
+                    REFERENCES public.ia_conversaciones(id) ON DELETE CASCADE,
+                usuario        VARCHAR(50)  NULL,
+                nombre_archivo VARCHAR(200) NOT NULL,
+                file_url       TEXT         NOT NULL,
+                tamano_bytes   INTEGER      NULL,
+                created_at     TIMESTAMP    NULL
+            )"""),
+        ("idx ia_adjuntos conv",
+         "CREATE INDEX IF NOT EXISTS idx_ia_adj_conv ON public.ia_adjuntos(conversacion_id, id DESC)"),
     ]
+    t_total = _time.time()
+    slow_threshold_ms = 500
     for label, sql in migrations:
         try:
+            t0 = _time.time()
             db_query(sql.strip(), fetch="none", commit=True)
-            logger.info(f"Migración OK: {label}")
+            elapsed = round((_time.time() - t0) * 1000)
+            if elapsed > slow_threshold_ms:
+                logger.warning(f"Migración LENTA ({elapsed}ms): {label}")
+            else:
+                logger.info(f"Migración OK ({elapsed}ms): {label}")
         except Exception as e:
             logger.warning(f"Migración omitida ({label}): {e}")
+
+    total_ms = round((_time.time() - t_total) * 1000)
+    logger.info(f"Migrations completadas en {total_ms}ms ({len(migrations)} pasos)")
 
     _migrate_archivo_tipos()
     _backfill_archivo_tipo_fk()
@@ -463,6 +606,7 @@ app.include_router(pages_router)
 app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 app.include_router(files_router)
 app.include_router(papelera_router)
+app.include_router(ia_router)
 
 
 # =============================================================================

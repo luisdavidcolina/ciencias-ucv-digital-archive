@@ -464,12 +464,14 @@ function filterInnerDossier() {
     const tabId = "dossier-partes-tabs";
     const tabsHtml = sortedGroups.map(([cat], i) => {
       const parte = RRHH_PARTES.find(p => p.nombre === cat);
-      const icon = parte ? `<i class="${parte.icon} mr-1" style="color:${parte.color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
+      const icon  = parte ? `<i class="${parte.icon} mr-1" style="color:${parte.color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
+      const color = parte?.color || "#6c757d";
       const count = grouped[cat].length;
       return `<li class="nav-item">
         <a class="nav-link${i === 0 ? " active" : ""}" data-toggle="tab" href="#dossier-tab-${i}"
            style="font-size:0.82rem;padding:6px 12px;">
-          ${icon}${cat.replace(/ — .+/, "")} <span class="badge badge-secondary ml-1">${count}</span>
+          ${icon}${cat.replace(/ — .+/, "")}
+          <span class="badge ml-1" style="background:${color};color:#fff;font-size:0.68rem;">${count}</span>
         </a>
       </li>`;
     }).join("");

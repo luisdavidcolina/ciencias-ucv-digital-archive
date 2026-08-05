@@ -3,8 +3,7 @@ async function openEditDocModal(id) {
   // Fetch datos frescos del servidor (no depender solo de state cache)
   let rec = state.adminTable.results.find(r => r.id == id) || { id };
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}`);
-    if (res.ok) rec = await res.json();
+    rec = await apiFetchJSON(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}`);
   } catch { /* usa caché si falla el fetch */ }
 
   document.getElementById("edit-doc-id").value        = rec.id || "";
@@ -86,13 +85,16 @@ async function _lookupByCedula(suf) {
   if (!cedula) { showToast("Ingrese una cédula primero.", "warning"); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/rrhh/empleado/por-cedula/${encodeURIComponent(cedula)}`);
-    if (res.status === 404) {
-      if (hintEl) hintEl.innerHTML = '<span class="text-info"><i class="fas fa-user-plus mr-1"></i>Empleado nuevo â€” complete los datos.</span>';
-      return;
+    let emp;
+    try {
+      emp = await apiFetchJSON(`${API_BASE}/api/rrhh/empleado/por-cedula/${encodeURIComponent(cedula)}`);
+    } catch (err) {
+      if (err.message?.includes(“404”) || err.message?.includes(“422”)) {
+        if (hintEl) hintEl.innerHTML = '<span class=”text-info”><i class=”fas fa-user-plus mr-1”></i>Empleado nuevo — complete los datos.</span>';
+        return;
+      }
+      throw err;
     }
-    if (!res.ok) throw new Error();
-    const emp = await res.json();
 
     // Rellenar campos del formulario
     const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ""; };
@@ -149,9 +151,7 @@ async function _uploadEditDocFile(file) {
   fd.append("usuario", state.user?.username || "");
 
   try {
-    const res  = await fetch(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Error al subir");
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
     if (urlField) urlField.value = data.file_url;
     if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${file.name} subido</span>`;
     if (zone)   { zone.style.borderColor = "#28a745"; zone.style.background = "#f0fff4"; }
@@ -205,12 +205,11 @@ async function handleSaveEditDoc() {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${id}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/documento/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error();
     $("#editArchivoModal").modal("hide");
     showToast("Documento actualizado.", "success");
     loadMonitorTable();
@@ -227,10 +226,9 @@ async function handleDeleteDoc(id, nombre) {
   );
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}&usuario=${encodeURIComponent(state.user.username)}`, {
+    await apiFetchJSON(`${API_BASE}/api/admin/documento/${id}?modulo=${encodeURIComponent(state.user.modulo)}&usuario=${encodeURIComponent(state.user.username)}`, {
       method: "DELETE",
     });
-    if (!res.ok) throw new Error();
     showToast("Documento movido a la papelera.", "success");
     state.adminTable.page = 1;
     loadMonitorTable();
@@ -261,8 +259,7 @@ async function _loadPapeleraDocumentos(modulo, suf) {
 
   body.innerHTML = '<tr><td colspan="7" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=${page}&per_page=20`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=${page}&per_page=20`);
     _papeleraState[suf].total = data.total;
     if (!data.records?.length) {
       body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">La papelera está vacía.</td></tr>';
@@ -297,8 +294,7 @@ async function _loadPapeleraEmpleados() {
 
   body.innerHTML = '<tr><td colspan="6" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados?page=${page}&per_page=20`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera/empleados?page=${page}&per_page=20`);
     _papeleraState.empleados.total = data.total;
     if (!data.records?.length) {
       body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay empleados en la papelera.</td></tr>';
@@ -331,8 +327,7 @@ async function changePapeleraPage(dir, suf) {
 
 async function _restaurarDoc(id, modulo) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera/${id}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/papelera/${id}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
     showToast("Documento restaurado.", "success");
     loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
   } catch { showToast("Error al restaurar.", "error"); }
@@ -342,8 +337,7 @@ async function _purgarDoc(id, modulo) {
   const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. Â¿Continuar?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Documento eliminado permanentemente.", "success");
     loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
   } catch { showToast("Error al purgar.", "error"); }
@@ -351,8 +345,7 @@ async function _purgarDoc(id, modulo) {
 
 async function _restaurarEmpleado(id) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados/${id}/restaurar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/papelera/empleados/${id}/restaurar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
     showToast("Empleado restaurado.", "success");
     _loadPapeleraEmpleados();
   } catch { showToast("Error al restaurar empleado.", "error"); }
@@ -362,8 +355,7 @@ async function _purgarEmpleado(id) {
   const ok = await confirmModal("Eliminar empleado permanentemente", "Se eliminarán también todos sus documentos. Esta acción es irreversible.", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/papelera/empleados/${id}/purgar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/papelera/empleados/${id}/purgar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Empleado eliminado permanentemente.", "success");
     _loadPapeleraEmpleados();
   } catch { showToast("Error al purgar empleado.", "error"); }
@@ -376,8 +368,7 @@ async function loadDocVersiones(docId, modulo) {
   if (!container) return;
   container.innerHTML = '<p class="text-muted small text-center py-2"><i class="fas fa-spinner fa-spin"></i></p>';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}`);
-    const data = await res.json();
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}`);
     if (!data.versiones?.length) {
       container.innerHTML = '<p class="text-muted small text-center py-2">Sin versiones anteriores.</p>';
       return;
@@ -406,10 +397,9 @@ async function loadDocVersiones(docId, modulo) {
 
 async function _restaurarVersion(docId, verId, modulo) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
     showToast("Versión restaurada como archivo actual.", "success");
-    const row = await (await fetch(`${API_BASE}/api/admin/documento/${docId}?modulo=${encodeURIComponent(modulo)}`)).json();
+    const row = await apiFetchJSON(`${API_BASE}/api/admin/documento/${docId}?modulo=${encodeURIComponent(modulo)}`);
     if (row?.file_url) {
       const urlEl = document.getElementById("edit-doc-file-url");
       if (urlEl) { urlEl.value = row.file_url; _refreshEditDocPreview(); }
@@ -422,8 +412,7 @@ async function _deleteVersion(docId, verId, modulo) {
   const ok = await confirmModal("Eliminar versión", "Â¿Eliminar esta versión del historial? No afecta al archivo actual.", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
-    if (!res.ok) throw new Error();
+    await apiFetch(`${API_BASE}/api/admin/documento/${docId}/versiones/${verId}?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Versión eliminada.", "success");
     loadDocVersiones(docId, modulo);
   } catch { showToast("Error al eliminar versión.", "error"); }
@@ -454,11 +443,10 @@ async function _guardarComoVersion() {
   const comentario = await promptModal("Comentario de versión", "Describe brevemente el cambio (opcional):");
 
   try {
-    const res = await fetch(
+    await apiFetch(
       `${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}&file_url=${encodeURIComponent(currentUrl)}&comentario=${encodeURIComponent(comentario || "")}&usuario=${encodeURIComponent(state.user?.username || "")}`,
       { method: "POST" }
     );
-    if (!res.ok) throw new Error();
     showToast("Versión guardada en el historial.", "success");
     if (document.getElementById("edit-doc-versiones-container")?.style.display !== "none") {
       loadDocVersiones(parseInt(docId), modulo);

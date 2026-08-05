@@ -31,11 +31,32 @@ const FONT_FAMILIES = [
 ];
 
 const DENSITIES = [
-  { id: "comfortable", label: "Cómodo",   icon: "fas fa-expand-arrows-alt" },
-  { id: "compact",     label: "Compacto", icon: "fas fa-compress-arrows-alt" },
+  { id: “comfortable”, label: “Cómodo”,   icon: “fas fa-expand-arrows-alt” },
+  { id: “compact”,     label: “Compacto”, icon: “fas fa-compress-arrows-alt” },
 ];
 
-// â”€â”€ init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const STYLE_THEMES = [
+  { id: “default”,       name: “Estándar”,      preview: `<div style=”width:24px;height:24px;border-radius:6px;background:#f0f4f8;border:2px solid #2b4e72;”></div>` },
+  { id: “glassmorphism”, name: “Vidrio”,         preview: `<div style=”width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,rgba(255,255,255,0.5),rgba(255,255,255,0.1));backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 8px rgba(0,0,0,0.18);”></div>` },
+  { id: “claymorphism”,  name: “Clay”,           preview: `<div style=”width:24px;height:24px;border-radius:12px;background:#e0e8f0;box-shadow:4px 4px 8px rgba(163,177,198,0.5),-3px -3px 6px rgba(255,255,255,0.9);”></div>` },
+  { id: “minimalism”,    name: “Minimalismo”,    preview: `<div style=”width:24px;height:24px;border-radius:3px;background:#fff;border:1.5px solid rgba(0,0,0,0.12);”></div>` },
+  { id: “maximalism”,    name: “Maximalismo”,    preview: `<div style=”width:24px;height:24px;border-radius:8px;background:#f8f9fa;border:2.5px solid #2b4e72;box-shadow:4px 4px 0 #2b4e72;”></div>` },
+  { id: “brutalism”,     name: “Brutalismo”,     preview: `<div style=”width:24px;height:24px;border-radius:0;background:#fff;border:3px solid #111;box-shadow:4px 4px 0 #111;”></div>` },
+  { id: “liquid-glass”,  name: “Liquid Glass”,   preview: `<div style=”width:24px;height:24px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.1));border:1px solid rgba(255,255,255,0.5);box-shadow:0 0 0 1px rgba(255,255,255,0.1),0 4px 16px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.4);”></div>` },
+];
+
+const ACCENT_COLORS = [
+  { id: “default”,        color: “#2b4e72”, name: “UCV Azul”   },
+  { id: “accent-teal”,    color: “#0d7377”, name: “Teal”       },
+  { id: “accent-emerald”, color: “#1a7f4b”, name: “Esmeralda”  },
+  { id: “accent-crimson”, color: “#c62828”, name: “Carmesí”    },
+  { id: “accent-amber”,   color: “#b7791f”, name: “Ámbar”      },
+  { id: “accent-purple”,  color: “#7c3aed”, name: “Violeta”    },
+  { id: “accent-rose”,    color: “#be185d”, name: “Rosa”       },
+  { id: “accent-slate”,   color: “#475569”, name: “Slate”      },
+];
+
+// -- init --â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function initTheme() {
   const savedTheme = localStorage.getItem("ds_theme");
@@ -50,6 +71,8 @@ function initTheme() {
   _applyDensityDOM(localStorage.getItem("ds_density") || "comfortable");
   _applyFontFamilyDOM(localStorage.getItem("ds_font_family") || "ff-system");
   _applyAnimDOM(localStorage.getItem("ds_anim") !== "off");
+  _applyStyleThemeDOM(localStorage.getItem("ds_style_theme") || "default");
+  _applyAccentColorDOM(localStorage.getItem("ds_accent_color") || "default");
 
   window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if ((localStorage.getItem("ds_dark_mode") || "auto") === "auto") {
@@ -131,6 +154,32 @@ function applyTheme(themeId) {
   _rebuildPanel();
 }
 
+// ── style theme ───────────────────────────────────────────────────────────
+
+function _applyStyleThemeDOM(styleId) {
+  document.body.dataset.style = styleId === "default" ? "" : styleId;
+  if (styleId === "default") delete document.body.dataset.style;
+}
+
+function applyStyleTheme(styleId) {
+  localStorage.setItem("ds_style_theme", styleId);
+  _applyStyleThemeDOM(styleId);
+  _rebuildPanel();
+}
+
+// ── accent color ─────────────────────────────────────────────────────────
+
+function _applyAccentColorDOM(accentId) {
+  document.body.dataset.accent = accentId === "default" ? "" : accentId;
+  if (accentId === "default") delete document.body.dataset.accent;
+}
+
+function applyAccentColor(accentId) {
+  localStorage.setItem("ds_accent_color", accentId);
+  _applyAccentColorDOM(accentId);
+  _rebuildPanel();
+}
+
 // â”€â”€ panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function openThemePanel() {
@@ -152,8 +201,10 @@ function _rebuildPanel() {
 }
 
 function resetPersonalization() {
-  ["ds_theme","ds_dark_mode","ds_font_scale","ds_density","ds_font_family","ds_anim"].forEach(k => localStorage.removeItem(k));
+  ["ds_theme","ds_dark_mode","ds_font_scale","ds_density","ds_font_family","ds_anim","ds_style_theme","ds_accent_color"].forEach(k => localStorage.removeItem(k));
   document.body.className = document.body.className.replace(/\btheme-[\w-]+\b|\bdark-mode\b|\bds-density-compact\b|\bds-no-anim\b/g, "").trim();
+  delete document.body.dataset.style;
+  delete document.body.dataset.accent;
   _applyFontScaleDOM(0.93);
   _applyDarkModeDOM("auto");
   _applyDensityDOM("comfortable");
@@ -169,6 +220,8 @@ function _createThemePanel() {
   const cDensity = localStorage.getItem("ds_density") || "comfortable";
   const cFfId    = localStorage.getItem("ds_font_family") || "ff-system";
   const cAnim    = localStorage.getItem("ds_anim") !== "off";
+  const cStyle   = localStorage.getItem("ds_style_theme") || "default";
+  const cAccent  = localStorage.getItem("ds_accent_color") || "default";
   const cScaleLabel = FONT_SCALES.find(s => s.value === cScale)?.label || "Normal";
 
   const darkModes = [
@@ -257,6 +310,28 @@ function _createThemePanel() {
                 </div>
               </div>
               <div class="ds-theme-name">${t.name}</div>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-circle mr-1"></i> Color de Acento</div>
+        <div class="ds-accent-row">
+          ${ACCENT_COLORS.map(a => `
+            <div class="ds-accent-swatch${cAccent === a.id ? ' active' : ''}"
+              style="background:${a.color};"
+              onclick="applyAccentColor('${a.id}')"
+              title="${a.name}"></div>`).join("")}
+        </div>
+      </div>
+
+      <div class="ds-panel-section">
+        <div class="ds-panel-label"><i class="fas fa-layer-group mr-1"></i> Estilo Visual</div>
+        <div class="ds-style-grid">
+          ${STYLE_THEMES.map(s => `
+            <div class="ds-style-card${cStyle === s.id ? ' active' : ''}" onclick="applyStyleTheme('${s.id}')" title="${s.name}">
+              <div class="ds-style-card-preview">${s.preview}</div>
+              <div class="ds-style-name">${s.name}</div>
             </div>`).join("")}
         </div>
       </div>

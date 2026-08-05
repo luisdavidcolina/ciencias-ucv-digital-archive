@@ -96,6 +96,7 @@ function loginSuccess(user) {
 }
 
 function logout() {
+  fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
   state.user = null;
   localStorage.removeItem("archive_session");
   const appPortal = document.getElementById("app-portal");
@@ -174,10 +175,19 @@ function handleModuleSwitch() {
   switchTab(state.user.modulo === "RRHH" ? "rrhh" : "archivo");
 }
 
+const _BREADCRUMBS = {
+  "archivo":       "Archivo / Búsqueda",
+  "rrhh":          "RRHH / Búsqueda",
+  "admin-archivo": "Archivo / Administración",
+  "admin-rrhh":    "RRHH / Administración",
+};
+
 function switchTab(tabId) {
   state.activeTab = tabId;
   document.querySelectorAll(".ds-sidebar-link").forEach(l => l.classList.remove("active"));
   document.getElementById(`menu-btn-${tabId}`)?.classList.add("active");
+  const bc = document.getElementById("nav-section-breadcrumb");
+  if (bc) bc.textContent = _BREADCRUMBS[tabId] || "";
   closeSidebar();
   document.querySelectorAll(".app-tab-section").forEach(s => s.style.display = "none");
   const tabArchivo      = document.getElementById("tab-archivo");
@@ -186,8 +196,8 @@ function switchTab(tabId) {
   const tabAdminRrhh    = document.getElementById("tab-admin-rrhh");
   if      (tabId === "archivo"       && tabArchivo)      { tabArchivo.style.display = "block"; triggerArchivoSearch(); }
   else if (tabId === "rrhh"          && tabRrhh)         { tabRrhh.style.display = "block"; triggerRrhhSearch(); }
-  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("stats"); }
-  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("stats"); }
+  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("monitor"); }
+  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("monitor"); }
 }
 
 function openSidebar() {
@@ -306,6 +316,43 @@ function setupEventListeners() {
     document.getElementById(`add_tax_btn-${suf}`)?.addEventListener("click",  handleAddCategory);
     document.getElementById(`btn_add_user-${suf}`)?.addEventListener("click", handleAddUser);
   });
+}
+
+// ==========================================================================
+// HELPER CENTRAL DE FETCH — maneja 401/403/red uniformemente
+// ==========================================================================
+
+/**
+ * Fetch con manejo automático de errores de sesión y red.
+ * Opts es igual a los init de fetch(); retorna la Response o lanza Error.
+ * En 401/403 muestra toast y redirige al login.
+ */
+async function apiFetch(url, opts = {}) {
+  let res;
+  try {
+    res = await fetch(url, opts);
+  } catch {
+    throw new Error("Sin conexión con el servidor.");
+  }
+  if (res.status === 401 || res.status === 403) {
+    showToast("Sesión expirada. Redirigiendo al inicio de sesión…", "warning");
+    setTimeout(() => { logout(); }, 1800);
+    throw new Error("Sesión no autorizada.");
+  }
+  return res;
+}
+
+/**
+ * apiFetch + parse JSON. Lanza Error si !res.ok con el detalle del servidor.
+ */
+async function apiFetchJSON(url, opts = {}) {
+  const res = await apiFetch(url, opts);
+  if (!res.ok) {
+    let detail = `Error ${res.status}`;
+    try { const body = await res.json(); detail = body.detail || detail; } catch {}
+    throw new Error(detail);
+  }
+  return res.json();
 }
 
 async function performLogin() {

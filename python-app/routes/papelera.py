@@ -2,11 +2,12 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from database import db_query, log_event
+from routes.admin.deps import require_session
 
-router = APIRouter(prefix="/api/admin", tags=["papelera"])
+router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends(require_session)])
 
 
 # =============================================================================

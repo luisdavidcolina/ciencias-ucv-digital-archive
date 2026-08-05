@@ -48,6 +48,11 @@ async def serve_admin_sistema():
     return _page("admin_sistema.html")
 
 
+@router.get("/admin/ia", include_in_schema=False)
+async def serve_admin_ia():
+    return _page("admin_ia.html")
+
+
 @router.get("/investigacion", include_in_schema=False)
 async def serve_investigacion():
     return _page("investigacion.html")

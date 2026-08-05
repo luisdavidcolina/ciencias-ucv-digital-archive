@@ -8,12 +8,13 @@ Estándares aplicados:
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, validator
 
 from database import db_query, log_event
+from routes.admin.deps import require_session
 
-router = APIRouter(prefix="/api/rrhh", tags=["rrhh-alertas"])
+router = APIRouter(prefix="/api/rrhh", tags=["rrhh-alertas"], dependencies=[Depends(require_session)])
 
 
 # =============================================================================

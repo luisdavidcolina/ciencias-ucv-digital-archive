@@ -15,9 +15,7 @@ async function loadMonitorTable() {
 
   try {
     const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&status_filter=${encodeURIComponent(statusFilt)}&page=${page}&per_page=${perPage}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    const data = await apiFetchJSON(url);
 
     state.adminTable.results = data.records;
     state.adminTable.total   = data.total;
@@ -57,9 +55,7 @@ async function _renderMonitorStatusBadges() {
   if (!badgesEl) return;
   if (!isArchivoModule()) { badgesEl.innerHTML = ""; return; }
   try {
-    const res = await fetch(`${API_BASE}/api/admin/status_counts?modulo=${mod}`);
-    if (!res.ok) return;
-    const counts = await res.json();
+    const counts = await apiFetchJSON(`${API_BASE}/api/admin/status_counts?modulo=${mod}`);
     const defs = [
       { key: "revision",  label: "Pendientes revisión", cls: "badge-warning text-dark", icon: "fa-clock" },
       { key: "draft",     label: "Borrador",            cls: "badge-secondary",         icon: "fa-pencil-alt" },
