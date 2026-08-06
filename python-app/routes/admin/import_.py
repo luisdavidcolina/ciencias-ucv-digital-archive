@@ -121,6 +121,8 @@ async def import_documentos_csv(
     Archivo: columnas titulo,autor,fecha,tipo_documento,abstract,ubicacion,palabras_clave[,numero_folio,soporte,numero_paginas]
     RRHH:    columnas cedula_empleado,tipo_documento,fecha,notas,ubicacion[,numero_folio,soporte,numero_paginas]
     """
+    from .helpers import _require_modulo
+    _require_modulo(modulo)
     content = await file.read()
     for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
         try:

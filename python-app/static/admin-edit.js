@@ -273,8 +273,8 @@ async function _loadPapeleraDocumentos(modulo, suf) {
           <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
-            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},'${modulo}')" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},'${modulo}')" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${JSON.stringify(modulo)})" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
@@ -379,13 +379,13 @@ async function loadDocVersiones(docId, modulo) {
         <tbody>
           ${data.versiones.map(v => `
             <tr>
-              <td><span class="badge badge-secondary">v${v.version_num}</span></td>
-              <td>${v.comentario || "—"}</td>
-              <td>${v.subido_por || "—"}</td>
-              <td>${v.created_at || "—"}</td>
+              <td><span class="badge badge-secondary">v${Number(v.version_num)}</span></td>
+              <td>${escHtml(v.comentario || "—")}</td>
+              <td>${escHtml(v.subido_por || "—")}</td>
+              <td>${escHtml(v.created_at || "—")}</td>
               <td>
-                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},'${modulo}')" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
-                <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},'${modulo}')" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},${JSON.stringify(modulo)})" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
+                <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},${JSON.stringify(modulo)})" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
               </td>
             </tr>`).join("")}
         </tbody>

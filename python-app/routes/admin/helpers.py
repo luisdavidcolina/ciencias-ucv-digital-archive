@@ -1,6 +1,15 @@
 """Helpers privados compartidos entre los sub-módulos de admin."""
 from fastapi import HTTPException
 
+VALID_MODULOS = ("Archivo", "RRHH")
+
+
+def _require_modulo(modulo: str) -> str:
+    """Valida que modulo sea 'Archivo' o 'RRHH', lanza 400 si no."""
+    if modulo not in VALID_MODULOS:
+        raise HTTPException(400, f"modulo debe ser uno de: {', '.join(VALID_MODULOS)}")
+    return modulo
+
 from database import db_query, log_event, logger, hash_password
 from utils import generate_unique_slug
 from ..choices import invalidate_choices_cache

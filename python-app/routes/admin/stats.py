@@ -80,6 +80,8 @@ def get_admin_stats(req: StatsRequest):
 
 @router.get("/charts")
 def get_charts_data(modulo: str = "Archivo"):
+    from .helpers import _require_modulo
+    _require_modulo(modulo)
     if modulo == "Archivo":
         by_type = db_query("""
             SELECT COALESCE(tesauro_primario, 'Sin tipo') AS label, COUNT(*) AS value

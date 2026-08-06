@@ -11,20 +11,13 @@ from .helpers import (
     _resolve_or_create_lookup,
     _resolve_or_create_tipo_documento,
     _resolve_user_id,
+    _require_modulo,
     invalidate_choices_cache,
 )
 
 router = APIRouter()
 
-VALID_STATUS  = ("draft", "revision", "aprobado", "rechazado")
-VALID_MODULOS = ("Archivo", "RRHH")
-
-
-def _require_modulo(modulo: str) -> str:
-    """Valida que modulo sea 'Archivo' o 'RRHH', lanza 400 si no."""
-    if modulo not in VALID_MODULOS:
-        raise HTTPException(400, f"modulo debe ser uno de: {', '.join(VALID_MODULOS)}")
-    return modulo
+VALID_STATUS = ("draft", "revision", "aprobado", "rechazado")
 
 
 @router.get("/list_all")
