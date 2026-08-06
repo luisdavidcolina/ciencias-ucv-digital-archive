@@ -86,8 +86,8 @@ async function loadKeywordsSection() {
                   <div class="col-md-4 col-sm-6 mb-2" id="kw-item-${kw.id}">
                     <div class="d-flex align-items-center border rounded px-2 py-1 bg-white shadow-sm">
                       <i class="fas fa-tag text-info mr-2" style="font-size:0.78rem;"></i>
-                      <span class="flex-grow-1 font-weight-600" style="font-size:0.82rem;" id="kw-label-${kw.id}">${kw.nombre}</span>
-                      <small class="text-muted mr-1">(${kw.uso_archivo})</small>
+                      <span class="flex-grow-1 font-weight-600" style="font-size:0.82rem;" id="kw-label-${kw.id}">${escHtml(kw.nombre)}</span>
+                      <small class="text-muted mr-1">(${Number(kw.uso_archivo)})</small>
                       <button class="btn btn-link btn-sm p-0 mr-1" onclick="handleEditKeyword(${kw.id})" title="Renombrar">
                         <i class="fas fa-pen text-warning" style="font-size:0.72rem;"></i>
                       </button>

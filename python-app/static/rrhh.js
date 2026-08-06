@@ -604,10 +604,10 @@ async function _toggleHistorialCargos(empleadoId) {
         <tbody>
           ${historial.map((h, i) => `
             <tr ${i === 0 ? 'class="font-weight-bold"' : ''}>
-              <td>${h.cargo || "—"}</td>
-              <td>${formatISOToSpanish(h.fecha_inicio) || h.fecha_inicio || "—"}</td>
-              <td>${h.fecha_fin ? formatISOToSpanish(h.fecha_fin) || h.fecha_fin : '<span class="badge badge-success">Actual</span>'}</td>
-              <td class="text-muted">${h.motivo || "—"}</td>
+              <td>${escHtml(h.cargo || "—")}</td>
+              <td>${formatISOToSpanish(h.fecha_inicio) || escHtml(h.fecha_inicio) || "—"}</td>
+              <td>${h.fecha_fin ? (formatISOToSpanish(h.fecha_fin) || escHtml(h.fecha_fin)) : '<span class="badge badge-success">Actual</span>'}</td>
+              <td class="text-muted">${escHtml(h.motivo || "—")}</td>
             </tr>
           `).join("")}
         </tbody>
