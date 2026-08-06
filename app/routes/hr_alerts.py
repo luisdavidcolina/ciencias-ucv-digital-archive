@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/rrhh", tags=["rrhh-alertas"], dependencies=[Depe
 # =============================================================================
 
 @router.get("/alertas/jubilaciones")
-def get_alertas_jubilaciones(horizonte_dias: int = Query(default=365, ge=30, le=730)):
+def get_retirement_alerts(horizonte_dias: int = Query(default=365, ge=30, le=730)):
     """
     Empleados cuya fecha_jubilacion o fecha_pension cae dentro del horizonte
     indicado (default: 365 días). Útil para planificación de recursos.
@@ -86,7 +86,7 @@ def get_alertas_jubilaciones(horizonte_dias: int = Query(default=365, ge=30, le=
 
 
 @router.get("/alertas/documentos_vencidos")
-def get_documentos_vencidos(limite: int = Query(default=50, ge=1, le=200)):
+def get_expired_documents(limite: int = Query(default=50, ge=1, le=200)):
     """
     Documentos cuyo plazo de retención (tipo_documento.plazo_retencion_anios)
     ya expiró según la fecha del documento. Basado en ISO 15489-1:2016 §8.
@@ -148,7 +148,7 @@ class HistorialCargoIn(BaseModel):
 
 
 @router.get("/empleado/{empleado_id}/historial_cargos")
-def get_historial_cargos(empleado_id: int):
+def get_position_history(empleado_id: int):
     """Lista el historial de cargos de un empleado, del más reciente al más antiguo."""
     emp = db_query("SELECT id FROM public.empleados WHERE id = %s", [empleado_id], fetch="one")
     if not emp:
@@ -173,7 +173,7 @@ def get_historial_cargos(empleado_id: int):
 
 
 @router.post("/empleado/{empleado_id}/historial_cargos")
-def add_historial_cargo(empleado_id: int, data: HistorialCargoIn):
+def add_position_history(empleado_id: int, data: HistorialCargoIn):
     """
     Registra un movimiento de cargo en el expediente del empleado.
     Si el cargo no existe en el catálogo, se crea automáticamente.
@@ -224,7 +224,7 @@ def add_historial_cargo(empleado_id: int, data: HistorialCargoIn):
 
 
 @router.delete("/empleado/{empleado_id}/historial_cargos/{historial_id}")
-def delete_historial_cargo(empleado_id: int, historial_id: int, requester: str = Query(default="")):
+def delete_position_history(empleado_id: int, historial_id: int, requester: str = Query(default="")):
     """Elimina una entrada del historial de cargos (solo para correcciones)."""
     row = db_query(
         "SELECT id FROM public.historial_cargos WHERE id = %s AND empleado_id = %s",

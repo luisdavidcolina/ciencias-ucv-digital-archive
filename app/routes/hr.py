@@ -17,7 +17,7 @@ _auth = [Depends(require_session)]
 # HELPERS DE NEGOCIO
 # =============================================================================
 
-def format_rrhh_person_name(name: str) -> str:
+def format_person_name(name: str) -> str:
     """Normaliza el nombre de una persona al formato 'Apellido(s), Nombre(s)'."""
     name = (name or "").strip()
     if not name:
@@ -37,7 +37,7 @@ def format_rrhh_person_name(name: str) -> str:
     return f"{surnames}, {given_names}"
 
 
-def first_non_empty_value(values) -> str:
+def first_nonempty(values) -> str:
     """Retorna el primer valor no vacío de una serie o lista."""
     if values is None:
         return ""
@@ -50,7 +50,7 @@ def first_non_empty_value(values) -> str:
 # DATAFRAME FETCHER (usado por admin stats y person/profile)
 # =============================================================================
 
-def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
+def fetch_hr_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
     """Retorna el expediente completo de RRHH como DataFrame."""
     base_sql = """
         SELECT
@@ -108,7 +108,7 @@ def fetch_rrhh_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFr
 # =============================================================================
 
 @router.post("/buscar", summary="Búsqueda de expedientes de personal")
-def search_rrhh(req: RrhhSearchRequest):
+def search_hr(req: RrhhSearchRequest):
     """
     Búsqueda de expedientes RRHH sobre la vista agregada `vw_rrhh_persona_index`.
 
@@ -228,7 +228,7 @@ def search_rrhh(req: RrhhSearchRequest):
         records.append({
             "empleado_id":   r["empleado_id"],
             "persona_raw":   r["empleado"],
-            "persona":       format_rrhh_person_name(r["empleado"]),
+            "persona":       format_person_name(r["empleado"]),
             "doc_count":     int(r["doc_count"]),
             "cedulas":       r["cedula"] or "",
             "cedula":        r["cedula"] or "",
@@ -300,8 +300,8 @@ def search_rrhh(req: RrhhSearchRequest):
 
 
 @router.post("/person/profile")
-def get_rrhh_person_profile(req: RrhhProfileRequest):
-    df = fetch_rrhh_dataframe(
+def get_person_profile(req: RrhhProfileRequest):
+    df = fetch_hr_dataframe(
         "e.nombres || ' ' || e.apellidos = %s",
         (req.persona,),
     )
@@ -338,8 +338,8 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
 
     return {
         "persona_raw":      req.persona,
-        "persona":          format_rrhh_person_name(req.persona),
-        "foto_url":         first_non_empty_value(p_df["foto_url"] if "foto_url" in p_df.columns else []),
+        "persona":          format_person_name(req.persona),
+        "foto_url":         first_nonempty(p_df["foto_url"] if "foto_url" in p_df.columns else []),
         "cedulas":          _join_unique("cedula"),
         "rifs":             _join_unique("rif"),
         "departamentos":    _join_unique("departamento"),
@@ -357,7 +357,7 @@ def get_rrhh_person_profile(req: RrhhProfileRequest):
 
 
 @router.get("/empleado/por-cedula/{cedula}")
-def get_empleado_por_cedula(cedula: str):
+def get_employee_by_id(cedula: str):
     """Retorna el expediente de un empleado dado su cédula."""
     row = db_query(
         """SELECT e.id AS empleado_id,
@@ -387,7 +387,7 @@ def get_empleado_por_cedula(cedula: str):
 # =============================================================================
 
 @router.get("/empleado/{emp_id}/documentos", dependencies=_auth)
-def get_empleado_documentos(
+def get_employee_documents(
     emp_id: int,
     search: str = "",
     parte: str = "",
@@ -447,7 +447,7 @@ from fastapi.responses import HTMLResponse as _HTMLResponse
 
 
 @router.get("/report/{emp_id}", response_class=_HTMLResponse, dependencies=_auth)
-def generate_rrhh_report(emp_id: int):
+def generate_hr_report(emp_id: int):
     """Genera reporte HTML imprimible del expediente de un empleado."""
     emp = db_query("""
         SELECT e.id, e.cedula, e.nombres, e.apellidos, e.rif,

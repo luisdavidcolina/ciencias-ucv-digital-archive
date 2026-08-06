@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/archivo", tags=["archivo"])
 # DATAFRAME FETCHER
 # =============================================================================
 
-def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
+def fetch_archive_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
     """Retorna todos los documentos de archivo como DataFrame.
 
     Args:
@@ -71,7 +71,7 @@ def fetch_archivo_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
 # =============================================================================
 
 @router.post("/buscar", summary="Búsqueda de documentos institucionales")
-def search_archivo(req: ArchivoSearchRequest):
+def search_archive(req: ArchivoSearchRequest):
     """
     Búsqueda full-text de documentos en el Archivo Institucional.
 
@@ -278,7 +278,7 @@ def search_archivo(req: ArchivoSearchRequest):
 
 
 @router.get("/documentos/buscar")
-def buscar_tipo_documento(q: str = Query(..., description="Palabra clave a buscar")):
+def lookup_document_type(q: str = Query(..., description="Palabra clave a buscar")):
     rows = db_query(
         """
         SELECT DISTINCT val AS nombre_corto

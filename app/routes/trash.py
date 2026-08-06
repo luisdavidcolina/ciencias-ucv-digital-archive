@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends
 # =============================================================================
 
 @router.get("/papelera")
-def list_papelera(
+def list_trash(
     modulo: str = "Archivo",
     page: int = 1,
     per_page: int = 25,
@@ -76,7 +76,7 @@ def list_papelera(
 
 
 @router.post("/papelera/{doc_id}/restaurar")
-def restaurar_documento(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
+def restore_document(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Recupera un documento de la papelera (deshace el soft-delete)."""
     _require_modulo(modulo)
     if modulo == "Archivo":
@@ -98,7 +98,7 @@ def restaurar_documento(doc_id: int, modulo: str = "Archivo", usuario: str = "")
 
 
 @router.delete("/papelera/{doc_id}/purgar")
-def purgar_documento(doc_id: int, modulo: str, usuario: str):
+def purge_document(doc_id: int, modulo: str, usuario: str):
     """Elimina permanentemente un documento de la papelera. Irreversible."""
     if modulo == "Archivo":
         existing = db_query(
@@ -126,7 +126,7 @@ def purgar_documento(doc_id: int, modulo: str, usuario: str):
 
 # Papelera de empleados
 @router.get("/papelera/empleados")
-def list_papelera_empleados(page: int = 1, per_page: int = 25):
+def list_trash_employees(page: int = 1, per_page: int = 25):
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset = (page - 1) * per_page
@@ -150,7 +150,7 @@ def list_papelera_empleados(page: int = 1, per_page: int = 25):
 
 
 @router.post("/papelera/empleados/{emp_id}/restaurar")
-def restaurar_empleado(emp_id: int, usuario: str = ""):
+def restore_employee(emp_id: int, usuario: str = ""):
     result = db_query(
         "UPDATE public.empleados SET deleted_at=NULL, deleted_by=NULL WHERE id=%s AND deleted_at IS NOT NULL RETURNING id",
         [emp_id], fetch="one", commit=True,
@@ -162,7 +162,7 @@ def restaurar_empleado(emp_id: int, usuario: str = ""):
 
 
 @router.delete("/papelera/empleados/{emp_id}/purgar")
-def purgar_empleado(emp_id: int, usuario: str):
+def purge_employee(emp_id: int, usuario: str):
     existing = db_query(
         "SELECT id FROM public.empleados WHERE id=%s AND deleted_at IS NOT NULL",
         [emp_id], fetch="one",
@@ -181,7 +181,7 @@ def purgar_empleado(emp_id: int, usuario: str):
 # =============================================================================
 
 @router.get("/documento/{doc_id}/versiones")
-def list_versiones(doc_id: int, modulo: str = "Archivo"):
+def list_versions(doc_id: int, modulo: str = "Archivo"):
     _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     rows = db_query(
@@ -250,7 +250,7 @@ def add_version(
 
 
 @router.post("/documento/{doc_id}/versiones/{ver_id}/restaurar")
-def restaurar_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
+def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Restaura el archivo digital de una versión anterior como versión actual."""
     _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"

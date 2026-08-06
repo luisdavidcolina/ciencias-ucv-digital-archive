@@ -9,7 +9,7 @@ import pandas as pd
 
 from database import db_query
 from models import StatsRequest
-from ..archive import fetch_archivo_dataframe
+from ..archive import fetch_archive_dataframe
 
 router = APIRouter()
 
@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/stats")
 def get_admin_stats(req: StatsRequest):
     import routes.hr as _rrhh_mod  # lazy to avoid circular import
-    df = fetch_archivo_dataframe() if req.modulo == "Archivo" else _rrhh_mod.fetch_rrhh_dataframe()
+    df = fetch_archive_dataframe() if req.modulo == "Archivo" else _rrhh_mod.fetch_hr_dataframe()
     if df.empty:
         return {"total_docs": 0, "categories_count": 0, "by_type": [], "timeline": []}
 

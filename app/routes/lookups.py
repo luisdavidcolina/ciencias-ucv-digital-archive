@@ -5,7 +5,7 @@ from fastapi import APIRouter
 import pandas as pd
 
 from database import db_query, split_terms
-from .archive import fetch_archivo_dataframe
+from .archive import fetch_archive_dataframe
 
 router = APIRouter(tags=["choices"])
 
@@ -27,8 +27,8 @@ def get_choices():
     if _cache and time.monotonic() - _cache_ts < _TTL:
         return _cache
 
-    df_arch = fetch_archivo_dataframe()
-    df_rh   = _rrhh_mod.fetch_rrhh_dataframe()
+    df_arch = fetch_archive_dataframe()
+    df_rh   = _rrhh_mod.fetch_hr_dataframe()
 
     # ── Archivo ───────────────────────────────────────────────────────────────
     arch_doc_types = sorted([x for x in df_arch["doc_type"].dropna().unique().tolist() if str(x).strip()])

@@ -31,7 +31,7 @@ class RetencionUpdate(BaseModel):
 
 
 @router.get("/retencion/tipos")
-def list_tipos_retencion(scope: str = Query(default="")):
+def list_retention_types(scope: str = Query(default="")):
     """
     Lista todos los tipos de documento con su plazo de retenciÃ³n configurado.
     Filtra por scope ('archivo' | 'rrhh' | '' para todos).
@@ -65,7 +65,7 @@ def list_tipos_retencion(scope: str = Query(default="")):
 
 
 @router.patch("/retencion/tipos/{tipo_id}")
-def update_retencion(tipo_id: int, data: RetencionUpdate):
+def update_retention(tipo_id: int, data: RetencionUpdate):
     """Actualiza el plazo de retenciÃ³n de un tipo de documento."""
     existing = db_query(
         "SELECT id, nombre FROM public.tipo_documento WHERE id = %s", [tipo_id], fetch="one"
@@ -93,7 +93,7 @@ def update_retencion(tipo_id: int, data: RetencionUpdate):
 
 
 @router.get("/retencion/vencimientos")
-def get_vencimientos(limite: int = Query(default=50, ge=1, le=500)):
+def get_expired_docs(limite: int = Query(default=50, ge=1, le=500)):
     """
     Documentos del mÃ³dulo Archivo cuyo plazo de retenciÃ³n ha expirado.
     Ordenados por antigÃ¼edad de vencimiento (ISO 15489-1:2016 Â§8.5 â€“ DisposiciÃ³n).

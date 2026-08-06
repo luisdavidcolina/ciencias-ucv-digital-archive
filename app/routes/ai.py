@@ -46,7 +46,7 @@ _MODULOS = {
 }
 
 
-def _contexto(usuario: str | None, conversacion_id=None) -> dict:
+def _build_context(usuario: str | None, conversacion_id=None) -> dict:
     """Traduce un usuario autenticado a lo que el asistente puede hacer.
 
     Sin usuario, o con uno que ya no está activo, el perfil es `publico`. No se lanza 401:
@@ -75,7 +75,7 @@ def _contexto(usuario: str | None, conversacion_id=None) -> dict:
     return base
 
 
-def _sesion_opcional(
+def _optional_session(
     ds_session: str | None = Cookie(default=None),
     x_session_token: str | None = Header(default=None),
 ) -> str | None:
@@ -87,7 +87,7 @@ def _sesion_opcional(
 # GASTO
 # =============================================================================
 
-def _gasto_de_hoy() -> float:
+def _daily_spend() -> float:
     fila = db_query(
         "SELECT COALESCE(SUM(costo), 0) AS total FROM public.ia_mensajes "
         "WHERE created_at::date = CURRENT_DATE",
@@ -100,7 +100,7 @@ def _gasto_de_hoy() -> float:
 # CONVERSACIONES
 # =============================================================================
 
-def _abrir_conversacion(conv_id, meta: dict) -> int:
+def _open_conversation(conv_id, meta: dict) -> int:
     if conv_id:
         try:
             existe = db_query("SELECT id FROM public.ia_conversaciones WHERE id = %s",
@@ -121,7 +121,7 @@ def _abrir_conversacion(conv_id, meta: dict) -> int:
     return fila["id"]
 
 
-def _guardar_turno(conv_id: int, rol: str, contenido: str, extra=None):
+def _save_turn(conv_id: int, rol: str, contenido: str, extra=None):
     extra = extra or {}
     db_query("""
         INSERT INTO public.ia_mensajes
@@ -148,13 +148,13 @@ def _guardar_turno(conv_id: int, rol: str, contenido: str, extra=None):
 # =============================================================================
 
 @router.get("/disponible")
-def disponible(usuario: str | None = Depends(_sesion_opcional)):
+def available(usuario: str | None = Depends(_optional_session)):
     """Nunca revienta por configuración faltante: la pantalla muestra un aviso legible."""
     est = ai.estado()
     if not est["disponible"]:
         return est
 
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     est["perfil"] = ctx["perfil"]
     est["modulos"] = sorted(ctx["modulos"])
     est["puede_escribir"] = ctx["perfil"] == "editor"
@@ -163,7 +163,7 @@ def disponible(usuario: str | None = Depends(_sesion_opcional)):
     # fallar: el documento existe, el enlace es correcto y aun así no abre.
     est["usuario"] = ctx["usuario"]
     try:
-        est["gasto_hoy"] = round(_gasto_de_hoy(), 6)
+        est["gasto_hoy"] = round(_daily_spend(), 6)
         est["tope_diario"] = ai.tope_diario()
     except Exception:
         pass
@@ -171,17 +171,17 @@ def disponible(usuario: str | None = Depends(_sesion_opcional)):
 
 
 @router.post("/chat")
-def chat(payload: dict = Body(...), usuario: str | None = Depends(_sesion_opcional)):
+def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_session)):
     est = ai.estado()
     if not est["disponible"]:
         raise HTTPException(status_code=503, detail=est["motivo"])
 
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     mensajes = ai.sanear_historial(payload.get("mensajes"), ai.MAX_HISTORIAL[ctx["perfil"]])
     if not mensajes:
         raise HTTPException(status_code=422, detail="No hay ningún mensaje que enviar.")
 
-    gasto, tope = _gasto_de_hoy(), ai.tope_diario()
+    gasto, tope = _daily_spend(), ai.tope_diario()
     if gasto >= tope:
         logger.warning(f"IA: rechazado por tope diario (${gasto:.4f} / ${tope})")
         raise HTTPException(
@@ -191,7 +191,7 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_sesion_opcion
         )
 
     ultimo = mensajes[-1]["content"]
-    conv_id = _abrir_conversacion(payload.get("conversacion_id"), {
+    conv_id = _open_conversation(payload.get("conversacion_id"), {
         "canal": "web", "perfil": ctx["perfil"], "usuario": ctx["usuario"],
         "titulo": ultimo, "modelo": ai.modelo_actual(),
     })
@@ -199,7 +199,7 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_sesion_opcion
     # adjunto de otro hilo sería alcanzable adivinando un id.
     ctx["conversacion_id"] = conv_id
 
-    _guardar_turno(conv_id, "user", ultimo)
+    _save_turn(conv_id, "user", ultimo)
 
     t0 = time.time()
     r = ai.conversar(ai_prompts.prompt(ctx), mensajes, ctx,
@@ -209,7 +209,7 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_sesion_opcion
     if "error" in r:
         return JSONResponse(status_code=r.get("status", 502), content={"detail": r["error"]})
 
-    _guardar_turno(conv_id, "assistant", r["respuesta"], {
+    _save_turn(conv_id, "assistant", r["respuesta"], {
         "herramientas": r.get("herramientas"), "modelo": r.get("modelo"),
         "tokens": r["uso"]["total_tokens"], "costo": r["uso"]["costo"], "ms": ms,
     })
@@ -249,7 +249,7 @@ async def adjuntar(
     extensión y tamaño. Todavía no queda enganchado a ningún documento: para eso hace falta
     una propuesta aprobada.
     """
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     if ctx["perfil"] != "editor":
         raise HTTPException(status_code=403,
                             detail="Solo un administrador de módulo puede subir archivos al chat.")
@@ -309,14 +309,14 @@ async def adjuntar(
 # =============================================================================
 
 @router.get("/propuestas")
-def propuestas(conversacion_id: int | None = None, estado: str = "pendiente",
+def proposals(conversacion_id: int | None = None, estado: str = "pendiente",
                usuario: str = Depends(require_session)):
     return {"propuestas": ai_proposals.listar(conversacion_id, estado)}
 
 
 @router.post("/propuesta/{propuesta_id}/aprobar")
-def aprobar_propuesta(propuesta_id: int, usuario: str = Depends(require_session)):
-    ctx = _contexto(usuario)
+def approve_proposal(propuesta_id: int, usuario: str = Depends(require_session)):
+    ctx = _build_context(usuario)
     if ctx["perfil"] != "editor":
         raise HTTPException(status_code=403,
                             detail="Solo un administrador de módulo puede aprobar cambios.")
@@ -331,7 +331,7 @@ def aprobar_propuesta(propuesta_id: int, usuario: str = Depends(require_session)
 
 
 @router.post("/propuesta/{propuesta_id}/rechazar")
-def rechazar_propuesta(propuesta_id: int, usuario: str = Depends(require_session)):
+def reject_proposal(propuesta_id: int, usuario: str = Depends(require_session)):
     try:
         return ai_proposals.rechazar(propuesta_id, usuario)
     except ai_proposals.PropuestaError as e:
@@ -342,11 +342,11 @@ def rechazar_propuesta(propuesta_id: int, usuario: str = Depends(require_session
 # HISTORIAL Y ADMINISTRACIÓN
 # =============================================================================
 
-def _es_global(ctx: dict) -> bool:
+def _is_global(ctx: dict) -> bool:
     return ctx["modulos"] == {"archivo", "rrhh"}
 
 
-def _puede_ver_conversacion(ctx: dict, cab: dict) -> bool:
+def _can_view_conversation(ctx: dict, cab: dict) -> bool:
     """Tu conversación es tuya. Solo un administrador Global ve las ajenas.
 
     Una conversación puede tener el nombre de un empleado, el contenido de un expediente o
@@ -357,15 +357,15 @@ def _puede_ver_conversacion(ctx: dict, cab: dict) -> bool:
     El Global sí puede: es quien responde por el gasto y por lo que el asistente contesta, y
     sin poder leer los hilos donde falla no hay forma de mejorarlo.
     """
-    return _es_global(ctx) or (cab.get("usuario") and cab["usuario"] == ctx["usuario"])
+    return _is_global(ctx) or (cab.get("usuario") and cab["usuario"] == ctx["usuario"])
 
 
 @router.get("/conversaciones")
-def conversaciones(todas: bool = False, limite: int = 30,
+def conversations(todas: bool = False, limite: int = 30,
                    usuario: str = Depends(require_session)):
     """Las conversaciones del usuario. `todas=true` solo lo honra un admin Global."""
-    ctx = _contexto(usuario)
-    ver_todas = todas and _es_global(ctx)
+    ctx = _build_context(usuario)
+    ver_todas = todas and _is_global(ctx)
 
     filas = db_query("""
         SELECT id, titulo, modo AS perfil, modelo, mensajes, tokens, costo, usuario,
@@ -379,13 +379,13 @@ def conversaciones(todas: bool = False, limite: int = 30,
 
 
 @router.get("/conversacion/{conv_id}")
-def conversacion(conv_id: int, usuario: str = Depends(require_session)):
+def conversation(conv_id: int, usuario: str = Depends(require_session)):
     """Restaura una conversación completa, para retomarla desde donde quedó."""
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     cab = db_query("SELECT * FROM public.ia_conversaciones WHERE id = %s", [conv_id], fetch="one")
     if not cab:
         raise HTTPException(status_code=404, detail="Esa conversación no existe.")
-    if not _puede_ver_conversacion(ctx, cab):
+    if not _can_view_conversation(ctx, cab):
         # 404 y no 403: a quien no debe verla tampoco se le confirma que existe.
         raise HTTPException(status_code=404, detail="Esa conversación no existe.")
 
@@ -413,14 +413,14 @@ def conversacion(conv_id: int, usuario: str = Depends(require_session)):
 
 
 @router.delete("/conversacion/{conv_id}")
-def borrar_conversacion(conv_id: int, usuario: str = Depends(require_session)):
+def delete_conversation(conv_id: int, usuario: str = Depends(require_session)):
     """Borra la conversación y, en cascada, sus mensajes y adjuntos."""
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     cab = db_query("SELECT usuario FROM public.ia_conversaciones WHERE id = %s",
                    [conv_id], fetch="one")
     if not cab:
         raise HTTPException(status_code=404, detail="Esa conversación no existe.")
-    if not _puede_ver_conversacion(ctx, cab):
+    if not _can_view_conversation(ctx, cab):
         raise HTTPException(status_code=404, detail="Esa conversación no existe.")
 
     db_query("DELETE FROM public.ia_conversaciones WHERE id = %s", [conv_id],
@@ -433,7 +433,7 @@ def borrar_conversacion(conv_id: int, usuario: str = Depends(require_session)):
 
 
 @router.get("/gastos")
-def gastos(dias: int = 30, usuario: str = Depends(require_session)):
+def spending(dias: int = 30, usuario: str = Depends(require_session)):
     dias = max(1, min(dias, 365))
     por_dia = db_query("""
         SELECT TO_CHAR(created_at::date, 'YYYY-MM-DD') AS dia,
@@ -448,11 +448,11 @@ def gastos(dias: int = 30, usuario: str = Depends(require_session)):
         FROM public.ia_mensajes WHERE rol = 'assistant'
     """, fetch="one")
     return {"por_dia": por_dia, "historico": total,
-            "hoy": round(_gasto_de_hoy(), 6), "tope_diario": ai.tope_diario()}
+            "hoy": round(_daily_spend(), 6), "tope_diario": ai.tope_diario()}
 
 
 @router.get("/modelos")
-def modelos(usuario: str = Depends(require_session)):
+def models(usuario: str = Depends(require_session)):
     """El catálogo real de OpenRouter, con el costo por mil mensajes ya calculado."""
     if not ai.api_key():
         raise HTTPException(status_code=503, detail="Falta OPENROUTER_API_KEY.")
@@ -470,7 +470,7 @@ _CLAVES_CONFIG = {"modelo", "nombre", "tono", "conocimiento", "reglas",
 
 
 @router.get("/config")
-def ver_config(usuario: str = Depends(require_session)):
+def get_config(usuario: str = Depends(require_session)):
     cfg = ai_prompts.config()
     cfg["modelo"] = ai.modelo_actual()
     cfg["tope_diario"] = ai.tope_diario()
@@ -479,10 +479,10 @@ def ver_config(usuario: str = Depends(require_session)):
 
 
 @router.post("/config")
-def guardar_config(payload: dict = Body(...), usuario: str = Depends(require_session)):
+def save_config(payload: dict = Body(...), usuario: str = Depends(require_session)):
     # El cerebro del asistente lo ve todo el mundo que lo use: cambiarlo es un acto de
     # administración global, no de módulo.
-    ctx = _contexto(usuario)
+    ctx = _build_context(usuario)
     if ctx["modulos"] != {"archivo", "rrhh"}:
         raise HTTPException(status_code=403,
                             detail="Solo un administrador Global puede configurar el asistente.")
