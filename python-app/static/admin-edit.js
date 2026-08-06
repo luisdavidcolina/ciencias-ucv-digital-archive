@@ -35,9 +35,9 @@ async function openEditDocModal(id) {
   const sel = document.getElementById("edit-doc-type");
   if (sel) {
     const types = state.choices?.archivo?.doc_types || [];
-    sel.innerHTML = types.map(t => `<option value="${t}"${t === rec.doc_type ? " selected" : ""}>${t}</option>`).join("");
+    sel.innerHTML = types.map(t => `<option value="${escHtml(t)}"${t === rec.doc_type ? " selected" : ""}>${escHtml(t)}</option>`).join("");
     if (!types.includes(rec.doc_type) && rec.doc_type) {
-      sel.innerHTML = `<option value="${rec.doc_type}" selected>${rec.doc_type}</option>` + sel.innerHTML;
+      sel.innerHTML = `<option value="${escHtml(rec.doc_type)}" selected>${escHtml(rec.doc_type)}</option>` + sel.innerHTML;
     }
   }
 
@@ -106,7 +106,7 @@ async function _lookupByCedula(suf) {
     const estadoSel = document.getElementById(`reg-estado-${suf}`);
     if (estadoSel && emp.estado) estadoSel.value = emp.estado;
 
-    if (hintEl) hintEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Empleado encontrado: ${emp.nombres} ${emp.apellidos}. Datos prellenados.</span>`;
+    if (hintEl) hintEl.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Empleado encontrado: ${escHtml(emp.nombres)} ${escHtml(emp.apellidos)}. Datos prellenados.</span>`;
     showToast(`Datos de ${emp.nombres} ${emp.apellidos} cargados.`, "info");
   } catch {
     if (hintEl) hintEl.innerHTML = '<span class="text-danger">Error al buscar el empleado.</span>';
@@ -153,7 +153,7 @@ async function _uploadEditDocFile(file) {
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
     if (urlField) urlField.value = data.file_url;
-    if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${file.name} subido</span>`;
+    if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${escHtml(file.name)} subido</span>`;
     if (zone)   { zone.style.borderColor = "#28a745"; zone.style.background = "#f0fff4"; }
     _refreshEditDocPreview();
     showToast("Archivo subido correctamente.", "success");
