@@ -21,6 +21,8 @@ def list_papelera(
     per_page: int = 25,
 ):
     """Lista los documentos (y empleados en RRHH) en la papelera."""
+    if modulo not in ("Archivo", "RRHH"):
+        raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset = (page - 1) * per_page

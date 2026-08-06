@@ -43,20 +43,6 @@ def _get_pool() -> pg_pool.ThreadedConnectionPool:
     return _pool
 
 
-# Kept for backwards-compatibility (not used by db_query anymore)
-def get_db_connection():
-    """Crea y retorna una conexión a Neon (PostgreSQL)."""
-    if not DATABASE_URL:
-        logger.error("DATABASE_URL no está definido en .env")
-        return None
-    try:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        return conn
-    except Exception as e:
-        logger.error(f"Error conectando a Neon: {e}")
-        return None
-
-
 def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _retries: int = 2):
     """Helper unificado para ejecutar queries en Neon usando ThreadedConnectionPool.
 

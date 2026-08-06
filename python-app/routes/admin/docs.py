@@ -28,6 +28,9 @@ def list_all_files(
     page: int = 1,
     per_page: int = 25,
 ):
+    if modulo not in ("Archivo", "RRHH"):
+        raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
+
     page     = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset   = (page - 1) * per_page
