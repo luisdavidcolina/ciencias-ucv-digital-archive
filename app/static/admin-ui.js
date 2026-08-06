@@ -1,6 +1,6 @@
 // =============================================================================
 // ADMIN-UI — Utilidades de UX: modales, loading, debounce, atajos de teclado
-// Cargado antes de admin.js en admin_archivo.html y admin_rrhh.html
+// Cargado antes de admin.js en admin_archive.html y admin_hr.html
 // =============================================================================
 
 // ─── Debounce ────────────────────────────────────────────────────────────────

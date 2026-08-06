@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel RRHH - UCV</title>
+  <title>Panel Archivo - UCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
@@ -21,7 +21,7 @@
 .info-box { border-radius: 0.5rem !important; }
   </style>
 </head>
-<body class="hold-transition sidebar-mini" data-page="admin-rrhh"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
+<body class="hold-transition sidebar-mini" data-page="admin-archivo"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
 
   <!-- HEADER NAVBAR -->
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -32,7 +32,7 @@
         </button>
       </li>
       <li class="nav-item dropdown">
-        <a href="/rrhh" class="ds-navbar-logo nav-link">
+        <a href="/archivo" class="ds-navbar-logo nav-link">
           <img src="/static/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
         </a>
       </li>
@@ -55,77 +55,92 @@
   <div id="sidebar-overlay" class="ds-sidebar-overlay"></div>
 
   <!-- SIDEBAR -->
-  <aside id="app-sidebar" class="ds-sidebar">
-    <div class="ds-sidebar-header">
-      <div class="ds-sidebar-brand">
-        <img src="/assets/icons/favicon-32x32.png"
-             alt="logo"
-             style="height:28px; width:28px; display:inline-block; vertical-align:middle;">
-        <span style="vertical-align:middle;">Ciencias UCV</span>
-      </div>
-      <button id="sidebar-close-btn" class="ds-sidebar-close" title="Cerrar menú">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="ds-sidebar-divider"></div>
-    <nav class="ds-sidebar-nav">
-      <div class="ds-sidebar-section-label">Módulos</div>
-      <a id="menu-btn-archivo" href="/archivo" class="ds-sidebar-link">
-        <i class="fas fa-folder-open"></i>
-        <span>Archivo Institucional</span>
-      </a>
-      <a id="menu-btn-rrhh" href="/rrhh" class="ds-sidebar-link">
-        <i class="fas fa-users"></i>
-        <span>Personal</span>
-      </a>
+<aside id="app-sidebar" class="ds-sidebar">
 
-      <div id="sidebar-admin-group">
-        <div class="ds-sidebar-section-label">Administración</div>
-        <a id="menu-btn-admin-archivo" href="/admin/archivo" class="ds-sidebar-link">
-          <i class="fas fa-sliders-h"></i>
-          <span>Panel Archivo</span>
-          <span class="ds-sidebar-badge">A</span>
-        </a>
-        <a id="menu-btn-admin-rrhh" href="/admin/rrhh" class="ds-sidebar-link active">
-          <i class="fas fa-user-shield"></i>
-          <span>Panel RRHH</span>
-          <span class="ds-sidebar-badge">R</span>
-        </a>
-        <a id="menu-btn-admin-sistema" href="/admin/sistema" class="ds-sidebar-link" style="display:none">
-          <i class="fas fa-server"></i>
-          <span>Sistema Global</span>
-        </a>
-      </div>
+  <!-- HEADER -->
+  <div class="ds-sidebar-header">
 
-      <div class="ds-sidebar-section-label">Utilidades</div>
-      <a href="/ayuda" class="ds-sidebar-link">
-        <i class="fas fa-life-ring"></i>
-        <span>Ayuda</span>
-      </a>
-      <a href="/investigacion" class="ds-sidebar-link">
-        <i class="fas fa-flask"></i>
-        <span>Investigación</span>
-      </a>
-      <button class="ds-sidebar-theme-btn" onclick="openThemePanel()">
-        <i class="fas fa-palette"></i>
-        <span>Personalización</span>
-      </button>
-    </nav>
-    <div class="ds-sidebar-footer">
-      <i class="fas fa-shield-alt mr-1"></i> Intranet Cifrada
+    <div class="ds-sidebar-brand">
+      <img src="/assets/icons/favicon-32x32.png"
+           alt="logo"
+           style="height:28px; width:28px; display:inline-block; vertical-align:middle;">
+      <span style="vertical-align:middle;">Ciencias UCV</span>
     </div>
-  </aside>
+
+    <button id="sidebar-close-btn"
+            class="ds-sidebar-close"
+            title="Cerrar menú">
+      <i class="fas fa-times"></i>
+    </button>
+
+  </div>
+
+  <div class="ds-sidebar-divider"></div>
+
+  <!-- NAV -->
+  <nav class="ds-sidebar-nav">
+
+    <div class="ds-sidebar-section-label">Módulos</div>
+    <a id="menu-btn-archivo" href="/archivo" class="ds-sidebar-link">
+      <i class="fas fa-folder-open"></i>
+      <span>Archivo Institucional</span>
+    </a>
+    <a id="menu-btn-rrhh" href="/rrhh" class="ds-sidebar-link">
+      <i class="fas fa-users"></i>
+      <span>Personal</span>
+    </a>
+
+    <div id="sidebar-admin-group">
+      <div class="ds-sidebar-section-label">Administración</div>
+      <a id="menu-btn-admin-archivo" href="/admin/archivo" class="ds-sidebar-link active">
+        <i class="fas fa-sliders-h"></i>
+        <span>Panel Archivo</span>
+        <span class="ds-sidebar-badge">A</span>
+      </a>
+      <a id="menu-btn-admin-rrhh" href="/admin/rrhh" class="ds-sidebar-link">
+        <i class="fas fa-user-shield"></i>
+        <span>Panel RRHH</span>
+        <span class="ds-sidebar-badge">R</span>
+      </a>
+      <a id="menu-btn-admin-sistema" href="/admin/sistema" class="ds-sidebar-link" style="display:none">
+        <i class="fas fa-server"></i>
+        <span>Sistema Global</span>
+      </a>
+    </div>
+
+    <div class="ds-sidebar-section-label">Utilidades</div>
+    <a href="/ayuda" class="ds-sidebar-link">
+      <i class="fas fa-life-ring"></i>
+      <span>Ayuda</span>
+    </a>
+    <a href="/investigacion" class="ds-sidebar-link">
+      <i class="fas fa-flask"></i>
+      <span>Investigación</span>
+    </a>
+    <button class="ds-sidebar-theme-btn" onclick="openThemePanel()">
+      <i class="fas fa-palette"></i>
+      <span>Personalización</span>
+    </button>
+
+  </nav>
+
+  <!-- FOOTER -->
+  <div class="ds-sidebar-footer">
+    <i class="fas fa-shield-alt mr-1"></i> Intranet Cifrada
+  </div>
+
+</aside>
 
   <!-- CONTENT WRAPPER -->
   <div class="content-wrapper">
 
-    <!-- TAB PANEL DE CONTROL (ADMIN RRHH) -->
-    <section id="tab-admin-rrhh" class="app-tab-section p-4">
+    <!-- TAB PANEL DE CONTROL (ADMIN ARCHIVO) -->
+    <section id="tab-admin-archivo" class="app-tab-section p-4">
       <div class="row">
         <div class="col-12">
           <div class="ds-breadcrumb-wrapper">
             <div class="ds-breadcrumb">
-              <i class="fas fa-shield-alt"></i> Panel de Control / Administración - RRHH
+              <i class="fas fa-shield-alt"></i> Panel de Control / Administración - Archivo
             </div>
           </div>
         </div>
@@ -138,7 +153,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Documentos</h6>
-                <h3 id="kpi-total-docs-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+                <h3 id="kpi-total-docs-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
               <i class="fas fa-file-invoice fa-lg text-primary opacity-50"></i>
             </div>
@@ -148,8 +163,8 @@
           <div class="card ds-kpi-mini shadow-sm bg-white" style="border-left: 4px solid #28a745;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Partes RRHH</h6>
-                <h3 id="kpi-total-cats-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+                <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Tipologías</h6>
+                <h3 id="kpi-total-cats-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
               <i class="fas fa-tags fa-lg text-success opacity-50"></i>
             </div>
@@ -160,7 +175,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Usuarios</h6>
-                <h3 id="kpi-total-users-rrhh" class="font-weight-bold text-dark mb-0">0</h3>
+                <h3 id="kpi-total-users-archivo" class="font-weight-bold text-dark mb-0">0</h3>
               </div>
               <i class="fas fa-users-cog fa-lg text-warning opacity-50"></i>
             </div>
@@ -171,7 +186,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Último Ingreso</h6>
-                <h3 id="kpi-latest-entry-rrhh" class="font-weight-bold text-dark mb-0" style="font-size: 1rem;">N/A</h3>
+                <h3 id="kpi-latest-entry-archivo" class="font-weight-bold text-dark mb-0" style="font-size: 1rem;">N/A</h3>
               </div>
               <i class="fas fa-history fa-lg text-danger opacity-50"></i>
             </div>
@@ -182,20 +197,20 @@
       <!-- TABS DE ADMINISTRACIÓN -->
       <div class="card">
         <div class="ds-admin-card-header">
-          <ul id="admin_workspace_tabs-rrhh" class="nav ds-admin-tabs" role="tablist">
+          <ul id="admin_workspace_tabs-archivo" class="nav ds-admin-tabs" role="tablist">
             <!-- Principales -->
             <li class="nav-item">
-              <a class="nav-link active" id="tab-admin-rrhh-stats" data-toggle="pill" href="#pane-admin-rrhh-stats" role="tab" onclick="loadAdminTab('stats')">
+              <a class="nav-link active" id="tab-admin-archivo-stats" data-toggle="pill" href="#pane-admin-archivo-stats" role="tab" onclick="loadAdminTab('stats')">
                 <i class="fas fa-chart-bar"></i><span>Análisis</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-monitor" data-toggle="pill" href="#pane-admin-rrhh-monitor" role="tab" onclick="loadAdminTab('monitor')">
+              <a class="nav-link" id="tab-admin-archivo-monitor" data-toggle="pill" href="#pane-admin-archivo-monitor" role="tab" onclick="loadAdminTab('monitor')">
                 <i class="fas fa-table"></i><span>Monitor</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-new" data-toggle="pill" href="#pane-admin-rrhh-new" role="tab" onclick="loadAdminTab('new')">
+              <a class="nav-link" id="tab-admin-archivo-new" data-toggle="pill" href="#pane-admin-archivo-new" role="tab" onclick="loadAdminTab('new')">
                 <i class="fas fa-plus-circle"></i><span>Nuevo</span>
               </a>
             </li>
@@ -203,22 +218,22 @@
             <li class="ds-tab-sep"></li>
             <!-- Configuración -->
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-categories" data-toggle="pill" href="#pane-admin-rrhh-categories" role="tab" onclick="loadAdminTab('categories')">
-                <i class="fas fa-sitemap"></i><span>Partes</span>
+              <a class="nav-link" id="tab-admin-archivo-categories" data-toggle="pill" href="#pane-admin-archivo-categories" role="tab" onclick="loadAdminTab('categories')">
+                <i class="fas fa-sitemap"></i><span>Tipos</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-users" data-toggle="pill" href="#pane-admin-rrhh-users" role="tab" onclick="loadAdminTab('users')">
+              <a class="nav-link" id="tab-admin-archivo-users" data-toggle="pill" href="#pane-admin-archivo-users" role="tab" onclick="loadAdminTab('users')">
                 <i class="fas fa-users-cog"></i><span>Acceso</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-audit" data-toggle="pill" href="#pane-admin-rrhh-audit" role="tab" onclick="loadAdminTab('audit')">
+              <a class="nav-link" id="tab-admin-archivo-audit" data-toggle="pill" href="#pane-admin-archivo-audit" role="tab" onclick="loadAdminTab('audit')">
                 <i class="fas fa-history"></i><span>Log</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="tab-admin-rrhh-papelera" data-toggle="pill" href="#pane-admin-rrhh-papelera" role="tab" onclick="loadAdminTab('papelera')">
+              <a class="nav-link" id="tab-admin-archivo-papelera" data-toggle="pill" href="#pane-admin-archivo-papelera" role="tab" onclick="loadAdminTab('papelera')">
                 <i class="fas fa-trash-alt"></i><span>Papelera</span>
               </a>
             </li>
@@ -229,9 +244,9 @@
           <div class="tab-content">
 
             <!-- 1. PESTAÑA: ESTADÍSTICAS -->
-            <div class="tab-pane fade show active" id="pane-admin-rrhh-stats" role="tabpanel">
-              <!-- Banner de alertas de jubilación -->
-              <div id="alertas-jubilacion-banner" style="display:none;" class="mb-3"></div>
+            <div class="tab-pane fade show active" id="pane-admin-archivo-stats" role="tabpanel">
+              <!-- Banner de alertas de vencimiento -->
+              <div id="alertas-vencimiento-banner" style="display:none;" class="mb-3"></div>
 
               <div class="card card-info mb-3">
                 <div class="card-header p-3">
@@ -242,13 +257,13 @@
                     <div class="col-md-6">
                       <label class="font-weight-bold text-muted">Rango de fechas para analíticas</label>
                       <div class="d-flex align-items-center gap-1">
-                        <input type="date" id="stats-date-start-rrhh" class="form-control form-control-sm">
+                        <input type="date" id="stats-date-start-archivo" class="form-control form-control-sm">
                         <span class="px-1 text-muted">a</span>
-                        <input type="date" id="stats-date-end-rrhh" class="form-control form-control-sm">
+                        <input type="date" id="stats-date-end-archivo" class="form-control form-control-sm">
                       </div>
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
-                      <button id="btn-apply-stats-rrhh" class="btn btn-info btn-sm w-100">Actualizar Análisis</button>
+                      <button id="btn-apply-stats-archivo" class="btn btn-info btn-sm w-100">Actualizar Análisis</button>
                     </div>
                   </div>
                 </div>
@@ -258,7 +273,7 @@
                   <div class="card card-primary">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie"></i> Distribución por Tipo</h3></div>
                     <div class="card-body p-3">
-                      <div id="stats_by_type-rrhh" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
+                      <div id="stats_by_type-archivo" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
                         [Cargando Gráfico...]
                       </div>
                     </div>
@@ -268,7 +283,7 @@
                   <div class="card card-success">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-alt"></i> Cronología de Ingresos</h3></div>
                     <div class="card-body p-3">
-                      <div id="stats_timeline-rrhh" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
+                      <div id="stats_timeline-archivo" style="min-height: 250px; background: #fafafa; border-radius: 8px; border:1px solid #eee; display: flex; align-items: center; justify-content: center;" class="text-muted">
                         [Cargando Histograma...]
                       </div>
                     </div>
@@ -280,56 +295,47 @@
                   <div class="card card-secondary">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-server"></i> Estado del Sistema</h3></div>
                     <div class="card-body p-3">
-                      <div id="stats_system-rrhh" class="row"></div>
+                      <div id="stats_system-archivo" class="row"></div>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Stats cards rápidas (Chart.js) -->
-              <div class="row mb-3 mt-4" id="stats-cards-rrhh">
+              <div class="row mb-3 mt-4" id="stats-cards-archivo">
                 <div class="col-sm-3">
                   <div class="info-box shadow-sm">
-                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-users"></i></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text">Total Empleados</span>
-                      <span class="info-box-number" id="chart-total-emp-rrhh">—</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-sm-3">
-                  <div class="info-box shadow-sm">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-check"></i></span>
-                    <div class="info-box-content">
-                      <span class="info-box-text">Activos</span>
-                      <span class="info-box-number" id="chart-total-activos-rrhh">—</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-sm-3">
-                  <div class="info-box shadow-sm">
-                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-file-archive"></i></span>
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-file-alt"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Total Documentos</span>
-                      <span class="info-box-number" id="chart-total-docs-rrhh">—</span>
+                      <span class="info-box-number" id="chart-total-docs-archivo">—</span>
                     </div>
                   </div>
                 </div>
                 <div class="col-sm-3">
                   <div class="info-box shadow-sm">
-                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-user-graduate"></i></span>
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-tags"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Jubilados/Pensionados</span>
-                      <span class="info-box-number" id="chart-total-jub-rrhh">—</span>
+                      <span class="info-box-text">Tipos de Documento</span>
+                      <span class="info-box-number" id="chart-total-types-archivo">—</span>
                     </div>
                   </div>
                 </div>
                 <div class="col-sm-3">
                   <div class="info-box shadow-sm">
-                    <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-exchange-alt"></i></span>
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-key"></i></span>
                     <div class="info-box-content">
-                      <span class="info-box-text">Movimientos de Cargo</span>
-                      <span class="info-box-number" id="chart-total-movimientos-rrhh">—</span>
+                      <span class="info-box-text">Palabras Clave</span>
+                      <span class="info-box-number" id="chart-total-keywords-archivo">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-user-edit"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Autores Únicos</span>
+                      <span class="info-box-number" id="chart-total-autores-archivo">—</span>
                     </div>
                   </div>
                 </div>
@@ -338,126 +344,86 @@
               <!-- Gráficas Chart.js -->
               <div class="row">
                 <div class="col-md-6">
-                  <div class="card card-outline card-warning shadow-sm">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Empleados por Estado</h3></div>
-                    <div class="card-body"><canvas id="chart-by-status-rrhh" height="220"></canvas></div>
-                  </div>
-                </div>
-                <div class="col-md-6">
                   <div class="card card-outline card-primary shadow-sm">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Top Departamentos</h3></div>
-                    <div class="card-body"><canvas id="chart-by-dept-rrhh" height="220"></canvas></div>
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Documentos por Tipo</h3></div>
+                    <div class="card-body"><canvas id="chart-by-type-archivo" height="220"></canvas></div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card card-outline card-success shadow-sm">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Documentos por Año</h3></div>
+                    <div class="card-body"><canvas id="chart-by-year-archivo" height="220"></canvas></div>
                   </div>
                 </div>
               </div>
               <div class="row mt-3">
-                <div class="col-md-6">
-                  <div class="card card-outline card-success shadow-sm">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Docs por Tipo</h3></div>
-                    <div class="card-body"><canvas id="chart-by-doctype-rrhh" height="220"></canvas></div>
-                  </div>
-                </div>
-                <div class="col-md-6">
+                <div class="col-12">
                   <div class="card card-outline card-info shadow-sm">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-layer-group mr-2"></i>Docs por Parte</h3></div>
-                    <div class="card-body"><canvas id="chart-by-parte-rrhh" height="220"></canvas></div>
-                  </div>
-                </div>
-              </div>
-              <div class="row mt-3">
-                <div class="col-md-7">
-                  <div class="card card-outline card-success shadow-sm">
-                    <div class="card-header">
-                      <h3 class="card-title"><i class="fas fa-graduation-cap mr-2"></i>Nivel Educativo</h3>
-                      <div class="card-tools"><span class="badge badge-light border text-muted small">LOTTT</span></div>
-                    </div>
-                    <div class="card-body"><canvas id="chart-by-nivel-rrhh" height="220"></canvas></div>
-                  </div>
-                </div>
-                <div class="col-md-5">
-                  <div class="card card-outline card-warning shadow-sm">
-                    <div class="card-header">
-                      <h3 class="card-title"><i class="fas fa-venus-mars mr-2"></i>Distribución por Sexo</h3>
-                      <div class="card-tools"><span class="badge badge-light border text-muted small">LOTTT</span></div>
-                    </div>
-                    <div class="card-body"><canvas id="chart-by-sexo-rrhh" height="220"></canvas></div>
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Tendencia Mensual (24 meses)</h3></div>
+                    <div class="card-body"><canvas id="chart-by-month-archivo" height="100"></canvas></div>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- 2. PESTAÑA: NUEVO INGRESO -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-new" role="tabpanel">
-              <!-- Import CSV compacto — dos tipos en dos barras -->
-              <div class="ds-import-bar mb-2">
-                <span class="ds-import-bar-label"><i class="fas fa-users text-secondary mr-1"></i>Personal</span>
-                <input type="file" id="csv-import-empleados-rrhh" accept=".csv" class="ds-import-file-input"
-                       title="cedula,nombres,apellidos,cargo,departamento,estado[,rif,fecha_jubilacion,fecha_pension]">
-                <label for="csv-import-empleados-rrhh" class="ds-import-file-label">
-                  <i class="fas fa-paperclip mr-1"></i><span id="csv-label-empleados-rrhh">Elegir CSV…</span>
-                </label>
-                <button class="btn btn-outline-primary btn-sm ds-import-btn" onclick="handleImportCSV('empleados','rrhh')">
-                  <i class="fas fa-upload mr-1"></i>Importar
-                </button>
-                <a href="#" class="ds-import-hint" tabindex="-1" data-toggle="tooltip" data-html="true"
-                   title="<b>Columnas:</b> cedula, nombres, apellidos, cargo, departamento, estado<br><small>Opcionales: rif, fecha_jubilacion, fecha_pension</small>">
-                  <i class="fas fa-question-circle text-muted"></i>
-                </a>
-                <div id="csv-import-result-empleados-rrhh" class="ds-import-result"></div>
-              </div>
+            <div class="tab-pane fade" id="pane-admin-archivo-new" role="tabpanel">
+              <!-- Import CSV compacto -->
               <div class="ds-import-bar mb-3">
-                <span class="ds-import-bar-label"><i class="fas fa-file-alt text-secondary mr-1"></i>Documentos</span>
-                <input type="file" id="csv-import-docs-rrhh" accept=".csv" class="ds-import-file-input"
-                       title="cedula_empleado,tipo_documento,fecha,ubicacion[,notas]">
-                <label for="csv-import-docs-rrhh" class="ds-import-file-label">
-                  <i class="fas fa-paperclip mr-1"></i><span id="csv-label-docs-rrhh">Elegir CSV…</span>
+                <span class="ds-import-bar-label">
+                  <i class="fas fa-file-csv text-secondary mr-1"></i>
+                  Importar CSV
+                </span>
+                <input type="file" id="csv-import-docs-archivo" accept=".csv" class="ds-import-file-input" title="titulo,autor,fecha,tipo_documento,ubicacion[,palabras_clave,abstract,numero_folio,soporte,numero_paginas]">
+                <label for="csv-import-docs-archivo" class="ds-import-file-label">
+                  <i class="fas fa-paperclip mr-1"></i><span id="csv-label-docs-archivo">Elegir archivo…</span>
                 </label>
-                <button class="btn btn-outline-success btn-sm ds-import-btn" onclick="handleImportCSV('documentos-rrhh','rrhh')">
+                <button class="btn btn-outline-primary btn-sm ds-import-btn" onclick="handleImportCSV('documentos-archivo','archivo')">
                   <i class="fas fa-upload mr-1"></i>Importar
                 </button>
                 <a href="#" class="ds-import-hint" tabindex="-1" data-toggle="tooltip" data-html="true"
-                   title="<b>Columnas:</b> cedula_empleado, tipo_documento, fecha, ubicacion<br><small>Opcional: notas</small>">
+                   title="<b>Columnas:</b> titulo, autor, fecha, tipo_documento, ubicacion<br><small>Opcionales: palabras_clave (sep. ;), abstract, numero_folio, soporte, numero_paginas</small>">
                   <i class="fas fa-question-circle text-muted"></i>
                 </a>
-                <div id="csv-import-result-docs-rrhh" class="ds-import-result"></div>
+                <div id="csv-import-result-docs-archivo" class="ds-import-result"></div>
               </div>
 
               <div class="row">
                 <div class="col-12">
-                  <form id="admin-submit-form-rrhh" class="card card-primary">
+                  <form id="admin-submit-form-archivo" class="card card-primary">
                     <div class="card-header py-2">
-                      <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-user-plus mr-1"></i> Nuevo Empleado / Documento</h3>
+                      <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-plus-circle mr-1"></i> Nuevo Documento de Archivo</h3>
                     </div>
                     <div class="card-body p-3 ds-submit-form">
-                      <div id="dynamic-submit-fields-rrhh"></div>
+                      <div id="dynamic-submit-fields-archivo"></div>
                       <!-- Zona de carga compacta -->
-                      <div class="ds-dropzone-compact mt-3" id="dropzone-rrhh">
+                      <div class="ds-dropzone-compact mt-3" id="dropzone-archivo">
                         <i class="fas fa-file-upload text-secondary"></i>
                         <span class="ds-drop-label text-muted">Arrastra el archivo digital aquí o</span>
-                        <input type="file" id="file_upload-rrhh" style="display:none;">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-rrhh').click()">
+                        <input type="file" id="file_upload-archivo" style="display:none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo').click()">
                           Explorar
                         </button>
                         <span class="text-muted" style="font-size:0.75rem;">PDF, DOC, ZIP, PNG — máx 200 MB</span>
                       </div>
                       <div class="d-flex justify-content-between align-items-center mt-3">
                         <span class="text-muted" style="font-size:0.8rem;"><i class="fas fa-asterisk text-danger" style="font-size:0.6rem;"></i> campos obligatorios</span>
-                        <button type="submit" id="btn_submit_workspace-rrhh" class="btn btn-success btn-sm px-4">
-                          <i class="fas fa-cloud-upload-alt mr-1"></i> Guardar en RRHH
+                        <button type="submit" id="btn_submit_workspace-archivo" class="btn btn-success btn-sm px-4">
+                          <i class="fas fa-cloud-upload-alt mr-1"></i> Guardar en Archivo
                         </button>
                       </div>
                     </div>
                   </form>
                 </div>
-                <div class="col-md-4" style="display:none;"><!-- placeholder legacy dropzone -->
+                <div class="col-md-4" style="display:none;"><!-- drop zone placeholder para initDropZone() -->
                   <div class="card card-secondary" style="display:none;">
                     <div class="card-body p-4 text-center">
                       <div style="border: 2px dashed #adb5bd; border-radius: 10px; padding: 30px; background-color: #f8f9fa; margin-bottom: 15px;">
                         <i class="fas fa-file-upload fa-3x text-secondary mb-2"></i>
                         <h5 class="font-weight-bold text-dark">ZONA DROP</h5>
                         <p class="text-muted mb-3" style="font-size:0.85rem;">Arrastra aquí o selecciona archivos</p>
-                        <input type="file" id="file_upload-rrhh-legacy" class="form-control-file" style="display: none;">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-rrhh-legacy').click()">Explorar...</button>
+                        <input type="file" id="file_upload-archivo-legacy" class="form-control-file" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo-legacy').click()">Explorar...</button>
                       </div>
                       <div class="text-left mt-3" style="font-size:0.85rem; color:#6c757d;">
                         <p class="mb-1"><i class="fas fa-check-circle text-success"></i> Formatos: PDF, DOC, ZIP, PNG</p>
@@ -471,38 +437,38 @@
                       <h3 class="card-title"><i class="fas fa-history"></i> Últimos Ingresos</h3>
                     </div>
                     <div class="card-body p-3">
-                      <ul id="recent_submissions-rrhh" class="list-unstyled m-0" style="font-size:0.85rem; max-height: 200px; overflow-y:auto;"></ul>
+                      <ul id="recent_submissions-archivo" class="list-unstyled m-0" style="font-size:0.85rem; max-height: 200px; overflow-y:auto;"></ul>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- 3. PESTAÑA: MONITOR RRHH -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-monitor" role="tabpanel">
+            <!-- 3. PESTAÑA: MONITOR DE ARCHIVOS -->
+            <div class="tab-pane fade" id="pane-admin-archivo-monitor" role="tabpanel">
               <div class="card card-info">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h3 class="card-title"><i class="fas fa-database"></i> Directorio Activo RRHH</h3>
-                  <div id="monitor-status-badges-rrhh" class="d-flex" style="gap:6px;"></div>
+                  <h3 class="card-title"><i class="fas fa-database"></i> Directorio Activo Local</h3>
+                  <div id="monitor-status-badges-archivo" class="d-flex" style="gap:6px;"></div>
                 </div>
-                <div class="card-body p-3">
+                <div class="card-body p-4">
                   <div class="ds-monitor-filters mb-3">
-                    <input type="text" id="admin_search-rrhh" class="form-control form-control-sm" placeholder="Buscar...">
-                    <select id="admin_filter_type-rrhh" class="form-control form-control-sm">
+                    <input type="text" id="admin_search-archivo" class="form-control form-control-sm" placeholder="Buscar...">
+                    <select id="admin_filter_type-archivo" class="form-control form-control-sm">
                       <option value="">Tipo...</option>
                     </select>
-                    <select id="admin_filter_person-rrhh" class="form-control form-control-sm">
+                    <select id="admin_filter_person-archivo" class="form-control form-control-sm">
                       <option value="">Persona...</option>
                     </select>
-                    <select id="admin_filter_status-rrhh" class="form-control form-control-sm" style="max-width:130px;" title="Estado laboral">
+                    <select id="admin_filter_status-archivo" class="form-control form-control-sm" style="max-width:130px;" title="Filtrar por estado">
                       <option value="">Todos</option>
-                      <option value="Activo">Activos</option>
-                      <option value="Retirado">Retirados</option>
-                      <option value="Jubilado">Jubilados</option>
-                      <option value="Pensionado">Pensionados</option>
+                      <option value="aprobado">✓ Aprobados</option>
+                      <option value="revision">⏳ Revisión</option>
+                      <option value="draft">✎ Borradores</option>
+                      <option value="rechazado">✗ Rechazados</option>
                     </select>
-                    <button id="btn_export_csv-rrhh" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="Exportar CSV"><i class="fas fa-file-csv"></i></button>
-                    <button id="btn_refresh_table-rrhh" class="btn btn-outline-info btn-sm flex-shrink-0" title="Refrescar"><i class="fas fa-sync-alt"></i></button>
+                    <button id="btn_export_csv-archivo" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="Exportar CSV"><i class="fas fa-file-csv"></i></button>
+                    <button id="btn_refresh_table-archivo" class="btn btn-outline-info btn-sm flex-shrink-0" title="Refrescar"><i class="fas fa-sync-alt"></i></button>
                   </div>
                   <div class="table-responsive">
                     <table class="table table-bordered table-striped" style="font-size:0.85rem;">
@@ -516,21 +482,21 @@
                           <th>Acciones</th>
                         </tr>
                       </thead>
-                      <tbody id="admin_control_table-rrhh"></tbody>
+                      <tbody id="admin_control_table-archivo"></tbody>
                     </table>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap" style="gap:6px;">
-                    <span id="admin_table_summary-rrhh" class="text-muted" style="font-size:0.85rem;">Mostrando 0 registros</span>
+                    <span id="admin_table_summary-archivo" class="text-muted" style="font-size:0.85rem;">Mostrando 0 registros</span>
                     <div class="d-flex align-items-center" style="gap:8px;">
-                      <select id="admin_per_page-rrhh" class="form-control form-control-sm" style="width:auto;" title="Filas por página">
+                      <select id="admin_per_page-archivo" class="form-control form-control-sm" style="width:auto;" title="Filas por página">
                         <option value="10">10/pág</option>
                         <option value="25" selected>25/pág</option>
                         <option value="50">50/pág</option>
                         <option value="100">100/pág</option>
                       </select>
-                      <button id="admin_prev-rrhh" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-left"></i></button>
-                      <span id="admin_page_info-rrhh" class="text-muted" style="font-size:0.85rem;">Pág 1 de 1</span>
-                      <button id="admin_next-rrhh" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-right"></i></button>
+                      <button id="admin_prev-archivo" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-left"></i></button>
+                      <span id="admin_page_info-archivo" class="text-muted" style="font-size:0.85rem;">Pág 1 de 1</span>
+                      <button id="admin_next-archivo" class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-right"></i></button>
                     </div>
                   </div>
                 </div>
@@ -538,7 +504,7 @@
             </div>
 
             <!-- 4. PESTAÑA: CATEGORÍAS -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-categories" role="tabpanel">
+            <div class="tab-pane fade" id="pane-admin-archivo-categories" role="tabpanel">
               <div class="row">
                 <div class="col-md-5">
                   <div class="card card-warning">
@@ -548,22 +514,16 @@
                     <div class="card-body p-4">
                       <div class="form-group mb-3">
                         <label class="font-weight-bold text-muted">Nombre de la Tipología *</label>
-                        <input type="text" id="new_tax_name-rrhh" class="form-control" placeholder="Ej: Resolución Rectoral">
+                        <input type="text" id="new_tax_name-archivo" class="form-control" placeholder="Ej: Resolución Rectoral">
                       </div>
                       <div class="form-group mb-3">
                         <label class="font-weight-bold text-muted">Descripción</label>
-                        <textarea id="new_tax_desc-rrhh" class="form-control" rows="3" placeholder="Breve descripción de esta tipología documental..."></textarea>
+                        <textarea id="new_tax_desc-archivo" class="form-control" rows="3" placeholder="Breve descripción de esta tipología documental..."></textarea>
                       </div>
                       <div class="form-group mb-3">
-                        <label class="font-weight-bold text-muted">Clasificar en Parte</label>
-                        <select id="new_tax_parte-rrhh" class="form-control">
-                          <option value="parte-i">Parte I — Ingreso y Contratación</option>
-                          <option value="parte-ii">Parte II — Escalafón y Desarrollo</option>
-                          <option value="parte-iii">Parte III — Permisos y Formación</option>
-                          <option value="parte-iv">Parte IV — Documentos Personales</option>
-                        </select>
+                        <small class="text-muted"><i class="fas fa-info-circle"></i> La tipología se añadirá al catálogo del Módulo <strong>Archivo</strong>.</small>
                       </div>
-                      <button id="add_tax_btn-rrhh" class="btn btn-warning w-100 font-weight-bold" style="border-radius:8px;">
+                      <button id="add_tax_btn-archivo" class="btn btn-warning w-100 font-weight-bold" style="border-radius:8px;">
                         <i class="fas fa-check-circle"></i> Guardar Tipología
                       </button>
                     </div>
@@ -575,13 +535,13 @@
                       <h3 class="card-title"><i class="fas fa-tags"></i> Taxonomías Activas</h3>
                     </div>
                     <div class="card-body p-3">
-                      <div id="admin_tax_list-rrhh" class="list-group"></div>
+                      <div id="admin_tax_list-archivo" class="list-group"></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Plazos de retención por tipo RRHH -->
+              <!-- Plazos de retención por tipo -->
               <div class="card card-secondary mt-3">
                 <div class="card-header d-flex justify-content-between align-items-center">
                   <h3 class="card-title"><i class="fas fa-calendar-check mr-2"></i>Plazos de Retención (ISO 15489)</h3>
@@ -593,7 +553,7 @@
                       <thead class="thead-light">
                         <tr><th>Tipo de Documento</th><th style="width:140px;">Plazo (años)</th><th style="width:80px;"></th></tr>
                       </thead>
-                      <tbody id="retencion-tipos-body-rrhh">
+                      <tbody id="retencion-tipos-body-archivo">
                         <tr><td colspan="3" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>
                       </tbody>
                     </table>
@@ -603,35 +563,35 @@
             </div>
 
             <!-- 5. PESTAÑA: USUARIOS -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-users" role="tabpanel">
+            <div class="tab-pane fade" id="pane-admin-archivo-users" role="tabpanel">
               <div class="card card-danger">
                 <div class="card-header">
                   <h3 class="card-title"><i class="fas fa-user-shield"></i> Control de Acceso</h3>
                 </div>
                 <div class="card-body p-4">
-                  <div id="admin_users_table-rrhh" class="table-responsive mb-4"></div>
+                  <div id="admin_users_table-archivo" class="table-responsive mb-4"></div>
                   <hr>
                   <h6 class="font-weight-bold text-dark mb-3"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h6>
                   <div class="row mb-3">
                     <div class="col-md-3">
-                      <input type="text" id="new_user_name-rrhh" class="form-control form-control-sm" placeholder="Usuario">
+                      <input type="text" id="new_user_name-archivo" class="form-control form-control-sm" placeholder="Usuario">
                     </div>
                     <div class="col-md-3">
-                      <input type="password" id="new_user_pass-rrhh" class="form-control form-control-sm" placeholder="Contraseña">
+                      <input type="password" id="new_user_pass-archivo" class="form-control form-control-sm" placeholder="Contraseña">
                     </div>
                     <div class="col-md-3">
-                      <select id="new_user_modulo-rrhh" class="form-control form-control-sm">
-                        <option value="RRHH">RRHH</option>
+                      <select id="new_user_modulo-archivo" class="form-control form-control-sm">
+                        <option value="Archivo">Archivo</option>
                       </select>
                     </div>
                     <div class="col-md-3">
-                      <select id="new_user_rol-rrhh" class="form-control form-control-sm">
+                      <select id="new_user_rol-archivo" class="form-control form-control-sm">
                         <option value="Normal">Normal</option>
                         <option value="Admin">Admin</option>
                       </select>
                     </div>
                   </div>
-                  <button id="btn_add_user-rrhh" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
+                  <button id="btn_add_user-archivo" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
                     <i class="fas fa-user-plus"></i> Crear Usuario
                   </button>
                 </div>
@@ -639,11 +599,11 @@
             </div>
 
             <!-- 6. PESTAÑA: AUDITORÍA -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-audit" role="tabpanel">
+            <div class="tab-pane fade" id="pane-admin-archivo-audit" role="tabpanel">
               <div class="card card-secondary">
                 <div class="card-header d-flex justify-content-between align-items-center">
                   <h3 class="card-title"><i class="fas fa-history mr-2"></i>Registro de Auditoría</h3>
-                  <input type="text" id="audit_search-rrhh" class="form-control form-control-sm w-25" placeholder="Buscar evento o usuario...">
+                  <input type="text" id="audit_search-archivo" class="form-control form-control-sm w-25" placeholder="Buscar evento o usuario...">
                 </div>
                 <div class="card-body p-0">
                   <div class="table-responsive">
@@ -658,83 +618,81 @@
                           <th>Resultado</th>
                         </tr>
                       </thead>
-                      <tbody id="audit_table_body-rrhh"></tbody>
+                      <tbody id="audit_table_body-archivo"></tbody>
                     </table>
                   </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <small id="audit_summary-rrhh" class="text-muted"></small>
+                  <small id="audit_summary-archivo" class="text-muted"></small>
                   <div>
-                    <button id="audit_prev-rrhh" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)"><i class="fas fa-chevron-left"></i></button>
-                    <span id="audit_page_info-rrhh" class="text-muted small"></span>
-                    <button id="audit_next-rrhh" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)"><i class="fas fa-chevron-right"></i></button>
+                    <button id="audit_prev-archivo" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span id="audit_page_info-archivo" class="text-muted small"></span>
+                    <button id="audit_next-archivo" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)"><i class="fas fa-chevron-right"></i></button>
                   </div>
                 </div>
               </div>
+              <!-- Tabla de vencimientos por retención -->
+              <div class="card card-warning mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h3 class="card-title"><i class="fas fa-hourglass-end mr-2"></i>Documentos con Retención Vencida</h3>
+                  <button class="btn btn-sm btn-outline-light" onclick="loadVencimientosTable()"><i class="fas fa-sync-alt mr-1"></i>Actualizar</button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.8rem;">
+                      <thead class="thead-light">
+                        <tr><th>#</th><th>Título</th><th>Tipo</th><th>Fecha Doc.</th><th>Plazo</th><th>Vencido</th><th>Ubicación</th></tr>
+                      </thead>
+                      <tbody id="vencimientos-table-body">
+                        <tr><td colspan="7" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <small id="vencimientos-summary" class="text-muted">—</small>
+                </div>
+              </div>
+
               <div class="card card-info mt-3">
                 <div class="card-header py-2">
-                  <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-download mr-1"></i> Exportar datos del módulo RRHH</h3>
+                  <h3 class="card-title" style="font-size:0.9rem;"><i class="fas fa-download mr-1"></i> Exportar datos del módulo Archivo</h3>
                 </div>
                 <div class="card-body py-2 px-3">
-                  <p class="text-muted small mb-2">Descarga un JSON con empleados, documentos y tipos del módulo RRHH. Útil como respaldo local.</p>
-                  <button class="btn btn-info btn-sm" onclick="handleModuleExport('rrhh')">
-                    <i class="fas fa-download mr-1"></i>Descargar backup RRHH (.json)
+                  <p class="text-muted small mb-2">Descarga un JSON con documentos, descriptores y tipos del módulo Archivo. Útil como respaldo local.</p>
+                  <button class="btn btn-info btn-sm" onclick="handleModuleExport('archivo')">
+                    <i class="fas fa-download mr-1"></i>Descargar backup Archivo (.json)
                   </button>
-                  <div id="ds-export-status-rrhh" class="mt-2 small"></div>
+                  <div id="ds-export-status-archivo" class="mt-2 small"></div>
                 </div>
               </div>
             </div>
 
-            <!-- PESTAÑA: PAPELERA -->
-            <div class="tab-pane fade" id="pane-admin-rrhh-papelera" role="tabpanel">
-              <div class="card card-danger mb-4">
+            <!-- 7. PESTAÑA: PAPELERA -->
+            <div class="tab-pane fade" id="pane-admin-archivo-papelera" role="tabpanel">
+              <div class="card card-danger">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h3 class="card-title"><i class="fas fa-trash-alt mr-2"></i>Papelera — Documentos RRHH</h3>
+                  <h3 class="card-title"><i class="fas fa-trash-alt mr-2"></i>Papelera de Reciclaje</h3>
+                  <small class="text-white-50">Los documentos aquí pueden restaurarse o eliminarse permanentemente</small>
                 </div>
                 <div class="card-body p-0">
                   <div class="table-responsive">
                     <table class="table table-sm table-hover mb-0">
                       <thead class="thead-light">
-                        <tr><th>#</th><th>Tipo</th><th>Empleado</th><th>Fecha</th><th>Eliminado por</th><th>Eliminado el</th><th style="width:100px;">Acciones</th></tr>
+                        <tr><th>#</th><th>Título</th><th>Tipo</th><th>Fecha</th><th>Eliminado por</th><th>Eliminado el</th><th style="width:100px;">Acciones</th></tr>
                       </thead>
-                      <tbody id="papelera-body-rrhh">
+                      <tbody id="papelera-body-archivo">
                         <tr><td colspan="7" class="text-center text-muted py-3">Cargando...</td></tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
-                  <small id="papelera-summary-rrhh" class="text-muted">— documentos</small>
+                  <small id="papelera-summary-archivo" class="text-muted">— documentos</small>
                   <div>
-                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="changePapeleraPage(-1,'rrhh')"><i class="fas fa-chevron-left"></i></button>
-                    <span id="papelera-page-info-rrhh" class="text-muted small"></span>
-                    <button class="btn btn-sm btn-outline-secondary ml-1" onclick="changePapeleraPage(1,'rrhh')"><i class="fas fa-chevron-right"></i></button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card card-secondary">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h3 class="card-title"><i class="fas fa-user-slash mr-2"></i>Papelera — Empleados</h3>
-                </div>
-                <div class="card-body p-0">
-                  <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                      <thead class="thead-light">
-                        <tr><th>#</th><th>Nombre</th><th>Cédula</th><th>Eliminado por</th><th>Eliminado el</th><th style="width:100px;">Acciones</th></tr>
-                      </thead>
-                      <tbody id="papelera-body-empleados">
-                        <tr><td colspan="6" class="text-center text-muted py-3">Cargando...</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                  <small id="papelera-summary-empleados" class="text-muted">— empleados</small>
-                  <div>
-                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="changePapeleraPage(-1,'empleados')"><i class="fas fa-chevron-left"></i></button>
-                    <span id="papelera-page-info-empleados" class="text-muted small"></span>
-                    <button class="btn btn-sm btn-outline-secondary ml-1" onclick="changePapeleraPage(1,'empleados')"><i class="fas fa-chevron-right"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary mr-1" onclick="changePapeleraPage(-1,'archivo')"><i class="fas fa-chevron-left"></i></button>
+                    <span id="papelera-page-info-archivo" class="text-muted small"></span>
+                    <button class="btn btn-sm btn-outline-secondary ml-1" onclick="changePapeleraPage(1,'archivo')"><i class="fas fa-chevron-right"></i></button>
                   </div>
                 </div>
               </div>
@@ -800,8 +758,8 @@
   <!-- Toast Container -->
   <div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
 
-  <!-- Modal: Editar Documento RRHH (mismo ID que Archivo — admin.js lo comparte) -->
-  <div class="modal fade" id="editArchivoModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <!-- Modal: Editar Documento Archivo -->
+  <div class="modal fade" id="editArchivoModal" tabindex="-1" role="dialog" aria-labelledby="editArchivoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header bg-warning">
@@ -837,21 +795,27 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="font-weight-bold text-muted">Personas Relacionadas</label>
-            <input type="text" id="edit-doc-personas" class="form-control" placeholder="Ej: Juan Pérez; Comisión de Estudios">
+            <label class="font-weight-bold text-muted">Palabras Clave (separadas por coma)</label>
+            <input type="text" id="edit-doc-palabras" class="form-control" placeholder="Ej: gestión, planificación">
           </div>
           <div class="form-group">
-            <label class="font-weight-bold text-muted">Notas</label>
-            <textarea id="edit-doc-resumen" class="form-control" rows="2"></textarea>
+            <label class="font-weight-bold text-muted">Personas Relacionadas</label>
+            <input type="text" id="edit-doc-personas" class="form-control" placeholder="Ej: Decano Juan Pérez; Comisión de Estudios">
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold text-muted">Resumen / Abstract</label>
+            <textarea id="edit-doc-resumen" class="form-control" rows="3"></textarea>
           </div>
           <div class="form-group">
             <label class="font-weight-bold text-muted">Ubicación Física</label>
             <input type="text" id="edit-doc-ubicacion" class="form-control">
           </div>
+          <!-- Campos ISAD(G) / ISO 15489 -->
           <div class="row">
             <div class="col-md-4 form-group">
               <label class="font-weight-bold text-muted">N° de Folio / Signatura</label>
-              <input type="text" id="edit-doc-folio" class="form-control form-control-sm" placeholder="Ej: F-023">
+              <input type="text" id="edit-doc-folio" class="form-control form-control-sm" placeholder="Ej: F-023, Carp-A-12">
+              <small class="text-muted">Signatura topográfica física</small>
             </div>
             <div class="col-md-4 form-group">
               <label class="font-weight-bold text-muted">Soporte</label>
@@ -863,7 +827,7 @@
             </div>
             <div class="col-md-4 form-group">
               <label class="font-weight-bold text-muted">N° de Páginas</label>
-              <input type="number" id="edit-doc-paginas" class="form-control form-control-sm" min="1">
+              <input type="number" id="edit-doc-paginas" class="form-control form-control-sm" min="1" placeholder="Páginas">
             </div>
           </div>
           <div class="row">
@@ -876,11 +840,12 @@
                 <option value="pt">Portugués</option>
               </select>
             </div>
-            <div class="col-md-4 form-group d-none">
-              <label class="font-weight-bold text-muted">Palabras Clave</label>
-              <input type="text" id="edit-doc-palabras" class="form-control">
+            <div class="col-md-5 form-group">
+              <label class="font-weight-bold text-muted">Vencimiento <span class="badge badge-warning text-dark" style="font-size:0.68rem;">Retención</span></label>
+              <input type="date" id="edit-doc-vencimiento" class="form-control form-control-sm" title="Fecha explícita de vencimiento — sobreescribe el plazo del tipo">
             </div>
           </div>
+
           <div class="form-group mt-2">
             <label class="font-weight-bold text-muted">Archivo Digital</label>
             <div id="edit-doc-dropzone"
@@ -905,12 +870,14 @@
             </div>
             <small class="text-muted">La URL se completa automáticamente tras la subida. También puede editarla manualmente.</small>
           </div>
+          <!-- Preview del archivo actual -->
           <div class="form-group">
             <label class="font-weight-bold text-muted small">Vista previa</label>
             <div id="edit-doc-file-preview" class="p-2 bg-light border rounded" style="min-height:40px;">
               <p class="text-muted small mb-0">Sin archivo adjunto.</p>
             </div>
           </div>
+          <!-- Historial de versiones -->
           <hr class="my-2">
           <div>
             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -927,6 +894,7 @@
             </div>
           </div>
           <hr class="my-2">
+          <!-- Status del documento -->
           <div class="form-group">
             <label class="font-weight-bold text-muted">Estado del documento</label>
             <select id="edit-doc-status" class="form-control form-control-sm w-50">
@@ -942,7 +910,7 @@
           <button type="button" class="btn btn-outline-info btn-sm mr-auto" onclick="_guardarComoVersion()" title="Guarda el archivo actual en el historial antes de reemplazarlo">
             <i class="fas fa-code-branch mr-1"></i>Guardar versión
           </button>
-          <button type="button" class="btn btn-warning font-weight-bold btn-save-modal" onclick="handleSaveEditDoc()">
+          <button type="button" class="btn btn-warning font-weight-bold btn-save-modal" data-save-modal onclick="handleSaveEditDoc()">
             <i class="fas fa-save mr-1"></i>Guardar Cambios
           </button>
         </div>
@@ -950,140 +918,6 @@
     </div>
   </div>
 
-  <!-- Modal: Editar Empleado RRHH -->
-  <div class="modal fade" id="editEmpleadoModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header bg-warning">
-          <h5 class="modal-title text-dark font-weight-bold">
-            <i class="fas fa-user-edit mr-2"></i>Editar Datos del Empleado
-          </h5>
-          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-        </div>
-        <div class="modal-body p-4">
-          <input type="hidden" id="edit-emp-id">
-          <div class="row">
-            <div class="col-md-6 form-group">
-              <label class="font-weight-bold text-muted">Nombres</label>
-              <input type="text" id="edit-emp-nombres" class="form-control">
-            </div>
-            <div class="col-md-6 form-group">
-              <label class="font-weight-bold text-muted">Apellidos</label>
-              <input type="text" id="edit-emp-apellidos" class="form-control">
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Cargo</label>
-              <input type="text" id="edit-emp-cargo" class="form-control" list="dl-cargos" autocomplete="off" placeholder="Cargo del empleado">
-              <datalist id="dl-cargos"></datalist>
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Departamento</label>
-              <input type="text" id="edit-emp-departamento" class="form-control" list="dl-departamentos" autocomplete="off" placeholder="Departamento">
-              <datalist id="dl-departamentos"></datalist>
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Estado Laboral</label>
-              <select id="edit-emp-estado" class="form-control">
-                <option value="Activo">Activo</option>
-                <option value="Retirado">Retirado</option>
-                <option value="Jubilado">Jubilado</option>
-                <option value="Pensionado">Pensionado</option>
-                <option value="Fallecido">Fallecido</option>
-              </select>
-            </div>
-          </div>
-          <!-- Datos personales LOTTT -->
-          <div class="row">
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Fecha de Nacimiento</label>
-              <input type="date" id="edit-emp-nacimiento" class="form-control">
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Sexo</label>
-              <select id="edit-emp-sexo" class="form-control">
-                <option value="">No especificado</option>
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-                <option value="O">Otro</option>
-              </select>
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Nivel Educativo</label>
-              <select id="edit-emp-nivel-educativo" class="form-control">
-                <option value="">Sin especificar</option>
-                <option value="Bachiller">Bachiller</option>
-                <option value="TSU">TSU</option>
-                <option value="Universitario">Universitario</option>
-                <option value="Especialización">Especialización</option>
-                <option value="Maestría">Maestría</option>
-                <option value="Doctorado">Doctorado</option>
-                <option value="Postdoctorado">Postdoctorado</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">RIF</label>
-              <input type="text" id="edit-emp-rif" class="form-control" placeholder="Ej: J-12345678-0">
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Fecha Jubilación</label>
-              <input type="date" id="edit-emp-jubilacion" class="form-control">
-            </div>
-            <div class="col-md-4 form-group">
-              <label class="font-weight-bold text-muted">Fecha Pensión</label>
-              <input type="date" id="edit-emp-pension" class="form-control">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="font-weight-bold text-muted">URL Foto Avatar</label>
-            <input type="text" id="edit-emp-foto" class="form-control" placeholder="https://...">
-          </div>
-          <!-- Historial de Cargos (gestión desde el admin) -->
-          <hr>
-          <div>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="font-weight-bold text-muted mb-0">
-                <i class="fas fa-exchange-alt mr-1"></i>Historial de Cargos
-              </h6>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-toggle-historial-admin"
-                      onclick="_adminToggleHistorial()">
-                <i class="fas fa-chevron-down mr-1"></i>Ver historial
-              </button>
-            </div>
-            <div id="admin-historial-container" style="display:none;">
-              <div id="admin-historial-body" class="mb-2" style="max-height:200px;overflow-y:auto;">
-                <p class="text-muted small text-center py-2">Cargando...</p>
-              </div>
-              <div class="input-group input-group-sm mt-2">
-                <input type="text" id="admin-historial-cargo-input" class="form-control"
-                       placeholder="Cargo (Ej: Profesor Asociado)" list="dl-cargos" autocomplete="off">
-                <input type="date" id="admin-historial-desde-input" class="form-control" style="max-width:140px;">
-                <input type="text" id="admin-historial-motivo-input" class="form-control"
-                       placeholder="Motivo (Ej: Ascenso por concurso)">
-                <div class="input-group-append">
-                  <button class="btn btn-success btn-sm" type="button" onclick="_adminAddCargo()">
-                    <i class="fas fa-plus"></i>
-                  </button>
-                </div>
-              </div>
-              <small class="text-muted">El cargo anterior se cerrará automáticamente en la fecha indicada.</small>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancelar</button>
-          <button type="button" class="btn btn-warning font-weight-bold" onclick="handleSaveEditEmpleado()">
-            <i class="fas fa-save mr-1"></i>Guardar Cambios
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <!-- Modal de Confirmación Universal -->
   <div class="modal fade" id="ds-confirm-modal" tabindex="-1" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -1121,6 +955,7 @@
     </div>
   </div>
 
+  <!-- Skeleton CSS + Quick-status CSS -->
   <style>
     .ds-skeleton { background: linear-gradient(90deg,#e9ecef 25%,#f8f9fa 50%,#e9ecef 75%); background-size:200% 100%; animation:ds-shimmer 1.4s infinite; border-radius:4px; height:14px; }
     @keyframes ds-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
@@ -1130,15 +965,15 @@
     .ds-quick-status-menu .dropdown-item:hover { background:#f8f9fa; }
   </style>
 
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/static/app-core.js"></script>
-  <script src="/static/rrhh.js"></script>
   <script src="/static/admin-ui.js"></script>
   <script src="/static/admin-stats.js"></script>
   <script src="/static/admin-submit.js"></script>
   <script src="/static/admin-monitor.js"></script>
   <script src="/static/admin-edit.js"></script>
-  <script src="/static/admin-edit-rrhh.js"></script>
+  <script src="/static/admin-edit-hr.js"></script>
   <script src="/static/admin.js"></script>
   <script src="/static/admin-categories.js"></script>
   <script src="/static/admin-users.js"></script>
@@ -1147,7 +982,7 @@
   <script src="/static/app-theme.js"></script>
   <script src="/static/app.js"></script>
   <script src="/static/scanner-client.js"></script>
-  <link rel="stylesheet" href="/static/ia-widget.css">
-  <script src="/static/ia-widget.js" defer></script>
+  <link rel="stylesheet" href="/static/ai-widget.css">
+  <script src="/static/ai-widget.js" defer></script>
 </body>
 </html>

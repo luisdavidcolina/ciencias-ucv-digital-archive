@@ -1,6 +1,6 @@
 /* Asistente IA — burbuja de chat flotante.
  *
- * Se auto-inyecta: basta con <script src="/static/ia-widget.js" defer></script> en la página.
+ * Se auto-inyecta: basta con <script src="/static/ai-widget.js" defer></script> en la página.
  *
  * QUÉ HACE Y QUÉ NO
  * -----------------

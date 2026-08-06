@@ -25,32 +25,32 @@ async def serve_login():
 
 @router.get("/archivo", include_in_schema=False)
 async def serve_archivo():
-    return _page("archivo.html")
+    return _page("archive.html")
 
 
 @router.get("/rrhh", include_in_schema=False)
 async def serve_rrhh():
-    return _page("rrhh.html")
+    return _page("hr.html")
 
 
 @router.get("/admin/archivo", include_in_schema=False)
 async def serve_admin_archivo():
-    return _page("admin_archivo.html")
+    return _page("admin_archive.html")
 
 
 @router.get("/admin/rrhh", include_in_schema=False)
 async def serve_admin_rrhh():
-    return _page("admin_rrhh.html")
+    return _page("admin_hr.html")
 
 
 @router.get("/admin/sistema", include_in_schema=False)
 async def serve_admin_sistema():
-    return _page("admin_sistema.html")
+    return _page("admin_system.html")
 
 
 @router.get("/admin/ia", include_in_schema=False)
 async def serve_admin_ia():
-    return _page("admin_ia.html")
+    return _page("admin_ai.html")
 
 
 @router.get("/investigacion", include_in_schema=False)

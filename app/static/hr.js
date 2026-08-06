@@ -1,4 +1,4 @@
-// ==========================================================================
+﻿// ==========================================================================
 // BÚSQUEDA Y RENDER — RRHH
 // ==========================================================================
 
@@ -166,7 +166,7 @@ function renderRrhhList() {
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
             <i class="fas fa-eye"></i>
           </button>
-          ${state.user ? `<a href="/static/admin_rrhh.html?empId=${p.empleado_id}" class="btn btn-outline-warning ds-action-btn" title="Editar expediente (Admin)"
+          ${state.user ? `<a href="/static/admin_hr.html?empId=${p.empleado_id}" class="btn btn-outline-warning ds-action-btn" title="Editar expediente (Admin)"
             onclick="event.stopPropagation()"
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
             <i class="fas fa-pen" style="font-size:0.8rem;"></i>
@@ -307,7 +307,7 @@ function renderRrhhDossierModal() {
                   </a>`
                 : ''}
               ${state.user && profile.rows && profile.rows[0]?.empleado_id
-                ? `<a href="/static/admin_rrhh.html?empId=${profile.rows[0].empleado_id}" class="btn btn-outline-warning btn-sm ml-2" title="Editar expediente en panel de administración">
+                ? `<a href="/static/admin_hr.html?empId=${profile.rows[0].empleado_id}" class="btn btn-outline-warning btn-sm ml-2" title="Editar expediente en panel de administración">
                     <i class="fas fa-pen mr-1"></i>Editar
                   </a>`
                 : ''}
