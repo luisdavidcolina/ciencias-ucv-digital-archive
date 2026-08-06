@@ -17,34 +17,40 @@ Sistema de gestión documental e inventario de RRHH para la Facultad de Ciencias
 ├── api/
 │   ├── index.py          # Punto de entrada Vercel (mangum wrapper)
 │   └── requirements.txt  # Dependencias para Vercel
-├── python-app/
+├── app/                  # (antes python-app/)
 │   ├── main.py           # App FastAPI, run_migrations(), include_router()
 │   ├── database.py       # ThreadedConnectionPool + db_query() helper
 │   ├── models.py         # Pydantic models para todos los endpoints
+│   ├── utils.py          # paginate(), generate_slug() y helpers sin deps de rutas
 │   ├── schema.sql        # Esquema SQL de referencia (NO modificar)
 │   ├── core/
 │   │   ├── config.py     # Settings class con variables de entorno
 │   │   ├── security.py   # hash_password(), verify_password()
 │   │   └── cache.py      # TTLCache para choices
 │   ├── routes/
-│   │   ├── admin.py      # CRUD admin, users, audit, charts, import CSV
-│   │   ├── archivo.py    # Búsqueda y CRUD de Archivo institucional
+│   │   ├── admin/        # Subpaquete: docs, catalog, stats, retention, import_, users, helpers
+│   │   ├── archive.py    # Búsqueda y CRUD de Archivo institucional
+│   │   ├── hr.py         # Búsqueda y CRUD de RRHH + report PDF
+│   │   ├── hr_alerts.py  # Alertas jubilaciones + historial de cargos
 │   │   ├── auth.py       # Login, restore session, password change
 │   │   ├── backup.py     # Export/restore/history de backups
-│   │   ├── choices.py    # Datos para dropdowns (con cache TTL 300s)
+│   │   ├── lookups.py    # Datos para dropdowns (con cache TTL 300s)
 │   │   ├── pages.py      # Serve HTML pages
-│   │   └── rrhh.py       # Búsqueda y CRUD de RRHH + report PDF
+│   │   ├── files.py      # Proxy/serve de archivos desde R2
+│   │   ├── trash.py      # Papelera + versiones de archivos digitales
+│   │   └── ai.py         # Asistente IA (chat, propuestas, config)
 │   ├── static/
 │   │   ├── index.html    # SPA principal (tabs Archivo + RRHH)
 │   │   ├── app.js        # Estado global, sesión, helpers compartidos
-│   │   ├── admin.js      # Toda la lógica de admin panels (~1000+ líneas)
-│   │   ├── archivo.js    # Búsqueda pública Archivo
-│   │   ├── rrhh.js       # Búsqueda pública RRHH + dossier
-│   │   ├── admin_archivo.html  # Admin panel Archivo
-│   │   ├── admin_rrhh.html    # Admin panel RRHH
-│   │   ├── admin_sistema.html # Admin Global (backup, audit, stats)
-│   │   ├── archivo.html  # Página pública Archivo
-│   │   ├── rrhh.html     # Página pública RRHH
+│   │   ├── admin.js      # Toda la lógica de admin panels
+│   │   ├── archive.js    # Búsqueda pública Archivo
+│   │   ├── hr.js         # Búsqueda pública RRHH + dossier
+│   │   ├── admin_archive.html  # Admin panel Archivo
+│   │   ├── admin_hr.html       # Admin panel RRHH
+│   │   ├── admin_system.html   # Admin Global (backup, audit, stats)
+│   │   ├── admin_ai.html       # Admin panel IA
+│   │   ├── archive.html  # Página pública Archivo
+│   │   ├── hr.html       # Página pública RRHH
 │   │   └── login.html    # Página de login
 └── vercel.json           # Config Vercel: builds + routes
 ```
@@ -92,7 +98,7 @@ En `main.py`, lista de tuplas `(description, sql)`. Se ejecuta en `@app.on_event
 - Para INSERT en tablas de catálogo: `ON CONFLICT (slug) DO NOTHING` o `ON CONFLICT DO NOTHING`
 
 ### Caché de choices
-`choices.py` tiene cache TTL 300s. Llama `invalidate_choices_cache()` después de modificar categoria o tipo_documento.
+`lookups.py` tiene cache TTL 300s. Llama `invalidate_choices_cache()` después de modificar categoria o tipo_documento.
 
 ### Autenticación
 - Sesión guardada en `localStorage` como JSON con TTL 12h
@@ -101,7 +107,7 @@ En `main.py`, lista de tuplas `(description, sql)`. Se ejecuta en `@app.on_event
 - Global admin = tiene AMBOS módulos
 
 ### Admin Panels
-- Dos páginas separadas: `admin_archivo.html` y `admin_rrhh.html`
+- Dos páginas separadas: `admin_archive.html` y `admin_hr.html`
 - `adminSuffixFromTab()` retorna "archivo" o "rrhh"
 - IDs de elementos HTML tienen sufijo: `#monitor-table-archivo`, `#monitor-table-rrhh`
 - `loadAdminTab(tabId)` es el switch principal de tabs en `admin.js`
