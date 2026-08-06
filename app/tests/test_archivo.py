@@ -1,4 +1,4 @@
-"""Tests para búsqueda de archivo institucional."""
+﻿"""Tests para bÃºsqueda de archivo institucional."""
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -17,8 +17,8 @@ def _doc_row(**kwargs):
         "fecha_documento": "2024-01-10", "tesauro_primario": "Informe",
         "tesauro_secundario": "Parte I", "ubicacion": "Estante A",
         "abstract": "Resumen.", "file_url": "", "personas_relacionadas": "",
-        "numero_folio": None, "soporte": "Físico", "numero_paginas": None,
-        "descriptores_libres": "gestión",
+        "numero_folio": None, "soporte": "FÃ­sico", "numero_paginas": None,
+        "descriptores_libres": "gestiÃ³n",
         "relevance": 1.0, "total_count": 1,
     }
     base.update(kwargs)
@@ -26,7 +26,7 @@ def _doc_row(**kwargs):
 
 
 def _search_mock(doc_rows):
-    """Mock para db_query: devuelve docs en la query principal, vacío en las facets."""
+    """Mock para db_query: devuelve docs en la query principal, vacÃ­o en las facets."""
     call_count = [0]
 
     def _side(sql, params=None, fetch="all", commit=False):
@@ -40,7 +40,7 @@ class TestArchivoSearch:
     def test_busqueda_vacia_retorna_resultados(self, client):
         doc = _doc_row()
 
-        with patch("routes.archivo.db_query", side_effect=_search_mock([doc])):
+        with patch("routes.archive.db_query", side_effect=_search_mock([doc])):
             res = client.post("/api/archivo/buscar", json={
                 "search_term": "", "doc_types": [], "tesauro_terms": [],
                 "descriptors": [], "date_start": "", "date_end": "",
@@ -55,7 +55,7 @@ class TestArchivoSearch:
     def test_busqueda_por_texto(self, client):
         doc = _doc_row(titulo="Informe Anual")
 
-        with patch("routes.archivo.db_query", side_effect=_search_mock([doc])):
+        with patch("routes.archive.db_query", side_effect=_search_mock([doc])):
             res = client.post("/api/archivo/buscar", json={
                 "search_term": "informe", "doc_types": [], "tesauro_terms": [],
                 "descriptors": [], "date_start": "", "date_end": "",
@@ -69,7 +69,7 @@ class TestArchivoSearch:
     def test_filtro_por_doc_type(self, client):
         doc = _doc_row(tesauro_primario="Plano", titulo="Plano B")
 
-        with patch("routes.archivo.db_query", side_effect=_search_mock([doc])):
+        with patch("routes.archive.db_query", side_effect=_search_mock([doc])):
             res = client.post("/api/archivo/buscar", json={
                 "search_term": "", "doc_types": ["Plano"], "tesauro_terms": [],
                 "descriptors": [], "date_start": "", "date_end": "",
@@ -80,7 +80,7 @@ class TestArchivoSearch:
         assert body["total"] == 1
 
     def test_sin_datos_retorna_lista_vacia(self, client):
-        with patch("routes.archivo.db_query", side_effect=_search_mock([])):
+        with patch("routes.archive.db_query", side_effect=_search_mock([])):
             res = client.post("/api/archivo/buscar", json={
                 "search_term": "", "doc_types": [], "tesauro_terms": [],
                 "descriptors": [], "date_start": "", "date_end": "",

@@ -1,4 +1,4 @@
-"""Tests para endpoints de categorías, palabras clave, retención y papelera."""
+﻿"""Tests para endpoints de categorÃ­as, palabras clave, retenciÃ³n y papelera."""
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -18,13 +18,13 @@ def _row(**data):
 
 class TestKeywords:
     def test_list_keywords(self, client):
-        kw = _row(id=1, nombre="gestión", uso_archivo=3)
-        with patch("routes.admin.misc.db_query", return_value=[kw]):
+        kw = _row(id=1, nombre="gestiÃ³n", uso_archivo=3)
+        with patch("routes.admin.catalog.db_query", return_value=[kw]):
             res = client.get("/api/admin/keywords")
         assert res.status_code == 200
         body = res.json()
         assert isinstance(body, list)
-        assert body[0]["nombre"] == "gestión"
+        assert body[0]["nombre"] == "gestiÃ³n"
 
     def test_create_keyword_ok(self, client):
         new_kw = _row(id=5)
@@ -34,7 +34,7 @@ class TestKeywords:
             if call_n[0] == 1:  # SELECT exists check
                 return None
             return new_kw  # INSERT RETURNING
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.post("/api/admin/keywords", json={"nombre": "nueva"})
         assert res.status_code == 200
         assert res.json()["success"] is True
@@ -45,12 +45,12 @@ class TestKeywords:
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
             return existing if call_n[0] == 1 else None
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.post("/api/admin/keywords", json={"nombre": "duplicado"})
         assert res.status_code == 400
 
     def test_create_keyword_vacio_retorna_400(self, client):
-        with patch("routes.admin.misc.db_query", return_value=None):
+        with patch("routes.admin.catalog.db_query", return_value=None):
             res = client.post("/api/admin/keywords", json={"nombre": "   "})
         assert res.status_code == 400
 
@@ -64,14 +64,14 @@ class TestKeywords:
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
             return uso if call_n[0] == 1 else None
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.delete("/api/admin/keywords/1")
         assert res.status_code == 200
         assert res.json()["success"] is True
 
     def test_delete_keyword_en_uso_sin_force_retorna_400(self, client):
         uso = _row(cnt=3)
-        with patch("routes.admin.misc.db_query", return_value=uso):
+        with patch("routes.admin.catalog.db_query", return_value=uso):
             res = client.delete("/api/admin/keywords/1")
         assert res.status_code == 400
         assert "uso" in res.json()["detail"].lower()
@@ -82,14 +82,14 @@ class TestKeywords:
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
             return uso if call_n[0] == 1 else None
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.delete("/api/admin/keywords/1?force=true")
         assert res.status_code == 200
         assert res.json()["removed_from_docs"] == 3
 
 
 # =============================================================================
-# Categorías (tipologías)
+# CategorÃ­as (tipologÃ­as)
 # =============================================================================
 
 class TestCategories:
@@ -98,19 +98,19 @@ class TestCategories:
         call_n = [0]
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
-            if "slug" in sql and call_n[0] == 1:  # busca categoría
+            if "slug" in sql and call_n[0] == 1:  # busca categorÃ­a
                 return cat
             if "LOWER(nombre)" in sql:             # busca existente
                 return None
             return None
         with (
-            patch("routes.admin.misc.db_query", side_effect=mock_q),
-            patch("routes.admin.misc.generate_unique_slug", return_value="nueva-tipo"),
-            patch("routes.admin.misc.invalidate_choices_cache"),
-            patch("routes.admin.misc.log_event"),
+            patch("routes.admin.catalog.db_query", side_effect=mock_q),
+            patch("routes.admin.catalog.generate_unique_slug", return_value="nueva-tipo"),
+            patch("routes.admin.catalog.invalidate_choices_cache"),
+            patch("routes.admin.catalog.log_event"),
         ):
             res = client.post("/api/admin/add_category", json={
-                "name": "Nueva Tipología", "desc": "Desc", "scope": "Archivo",
+                "name": "Nueva TipologÃ­a", "desc": "Desc", "scope": "Archivo",
                 "usuario": "admin", "parte": "",
             })
         assert res.status_code == 200
@@ -125,7 +125,7 @@ class TestCategories:
 
 
 # =============================================================================
-# Retención
+# RetenciÃ³n
 # =============================================================================
 
 class TestRetencion:
@@ -133,7 +133,7 @@ class TestRetencion:
         tipo = _row(id=1, nombre="Acta", nombre_corto="Acta",
                     plazo_retencion_anios=5, categoria="Archivo",
                     categoria_slug="archivo", uso_archivo=0, uso_rrhh=0)
-        with patch("routes.admin.retencion.db_query", return_value=[tipo]):
+        with patch("routes.admin.retention.db_query", return_value=[tipo]):
             res = client.get("/api/admin/retencion/tipos")
         assert res.status_code == 200
         assert res.json()["tipos"][0]["plazo_retencion_anios"] == 5
@@ -145,9 +145,9 @@ class TestRetencion:
             call_n[0] += 1
             return tipo if call_n[0] == 1 else None
         with (
-            patch("routes.admin.retencion.db_query", side_effect=mock_q),
-            patch("routes.admin.retencion.invalidate_choices_cache"),
-            patch("routes.admin.retencion.log_event"),
+            patch("routes.admin.retention.db_query", side_effect=mock_q),
+            patch("routes.admin.retention.invalidate_choices_cache"),
+            patch("routes.admin.retention.log_event"),
         ):
             res = client.patch("/api/admin/retencion/tipos/1",
                                json={"plazo_retencion_anios": 10, "requester": "admin"})
@@ -170,7 +170,7 @@ class TestRetencion:
         assert res.status_code == 422
 
     def test_update_retencion_tipo_inexistente_retorna_404(self, client):
-        with patch("routes.admin.retencion.db_query", return_value=None):
+        with patch("routes.admin.retention.db_query", return_value=None):
             res = client.patch("/api/admin/retencion/tipos/999",
                                json={"plazo_retencion_anios": 5})
         assert res.status_code == 404
@@ -178,9 +178,9 @@ class TestRetencion:
     def test_get_vencimientos(self, client):
         v = _row(id_archivo=1, titulo="Doc viejo", autor="A",
                  fecha_documento="2010-01-01", ubicacion="Estante 1",
-                 soporte="Físico", tipo_documento="Acta",
+                 soporte="FÃ­sico", tipo_documento="Acta",
                  plazo_anios=5, fecha_vencimiento="2015-01-01", dias_vencido=3650)
-        with patch("routes.admin.retencion.db_query", return_value=[v]):
+        with patch("routes.admin.retention.db_query", return_value=[v]):
             res = client.get("/api/admin/retencion/vencimientos")
         assert res.status_code == 200
         body = res.json()
@@ -201,7 +201,7 @@ class TestPapelera:
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
             return count if call_n[0] == 1 else [doc]
-        with patch("routes.papelera.db_query", side_effect=mock_q):
+        with patch("routes.trash.db_query", side_effect=mock_q):
             res = client.get("/api/admin/papelera?modulo=Archivo")
         assert res.status_code == 200
         body = res.json()
@@ -216,7 +216,7 @@ class TestPapelera:
         count = _row(total=50)
         def mock_q(sql, params=None, fetch="all", commit=False):
             return count if "COUNT" in sql else []
-        with patch("routes.papelera.db_query", side_effect=mock_q):
+        with patch("routes.trash.db_query", side_effect=mock_q):
             res = client.get("/api/admin/papelera?modulo=Archivo&page=2&per_page=10")
         assert res.status_code == 200
         body = res.json()
@@ -237,7 +237,7 @@ class TestAuditLog:
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
             return count if call_n[0] == 1 else [evt, evt]
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.get("/api/admin/audit_log?page=1&per_page=50")
         assert res.status_code == 200
         body = res.json()
@@ -248,7 +248,7 @@ class TestAuditLog:
         count = _row(total=0)
         def mock_q(sql, params=None, fetch="all", commit=False):
             return count if "COUNT" in sql else []
-        with patch("routes.admin.misc.db_query", side_effect=mock_q):
+        with patch("routes.admin.catalog.db_query", side_effect=mock_q):
             res = client.get("/api/admin/audit_log?search=admin")
         assert res.status_code == 200
         assert res.json()["total"] == 0
@@ -260,9 +260,9 @@ class TestAuditLog:
 
 class TestNotifications:
     def test_notifications_archivo(self, client):
-        notif = _row(id=1, label="Doc en revisión", status="revision",
+        notif = _row(id=1, label="Doc en revisiÃ³n", status="revision",
                      modulo="Archivo", ts="2024-01-01 10:00")
-        with patch("routes.admin.misc.db_query", return_value=[notif]):
+        with patch("routes.admin.catalog.db_query", return_value=[notif]):
             res = client.get("/api/admin/notifications?modulo=Archivo")
         assert res.status_code == 200
         body = res.json()
@@ -271,6 +271,6 @@ class TestNotifications:
 
     def test_notifications_sin_modulo(self, client):
         notif = _row(id=1, label="Doc", status="draft", modulo="Archivo", ts="2024-01-01 10:00")
-        with patch("routes.admin.misc.db_query", return_value=[notif]):
+        with patch("routes.admin.catalog.db_query", return_value=[notif]):
             res = client.get("/api/admin/notifications")
         assert res.status_code == 200

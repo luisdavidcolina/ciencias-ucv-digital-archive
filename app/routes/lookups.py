@@ -5,7 +5,7 @@ from fastapi import APIRouter
 import pandas as pd
 
 from database import db_query, split_terms
-from .archivo import fetch_archivo_dataframe
+from .archive import fetch_archivo_dataframe
 
 router = APIRouter(tags=["choices"])
 
@@ -22,7 +22,7 @@ def invalidate_choices_cache() -> None:
 @router.get("/api/choices")
 def get_choices():
     """Retorna las opciones disponibles para los filtros del UI. Cacheado 5 min."""
-    import routes.rrhh as _rrhh_mod  # lazy to avoid circular import
+    import routes.hr as _rrhh_mod  # lazy to avoid circular import
     global _cache, _cache_ts
     if _cache and time.monotonic() - _cache_ts < _TTL:
         return _cache

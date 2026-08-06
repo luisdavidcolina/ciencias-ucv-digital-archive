@@ -1,4 +1,4 @@
-"""Tests para /api/choices (estructura del payload y caché)."""
+﻿"""Tests para /api/choices (estructura del payload y cachÃ©)."""
 import pytest
 from unittest.mock import patch
 import pandas as pd
@@ -20,19 +20,19 @@ def _archivo_df():
         "id": 1, "titulo": "Doc", "autor": "A", "fecha": "2024-01-01",
         "doc_type": "Informe", "categoria": "Parte I", "ubicacion": "Estante 1",
         "tesauro_primario": "Informe", "tesauro_secundario": "Parte I",
-        "descriptores_libres": "gestión; académico", "resumen": "", "file_url": "",
+        "descriptores_libres": "gestiÃ³n; acadÃ©mico", "resumen": "", "file_url": "",
     }])
 
 
 class TestChoices:
     def test_estructura_correcta(self, client):
         with (
-            patch("routes.choices.fetch_archivo_dataframe", return_value=_archivo_df()),
-            patch("routes.rrhh.fetch_rrhh_dataframe",       return_value=_empty_rrhh_df()),
-            patch("routes.choices.db_query",                return_value=[]),
+            patch("routes.lookups.fetch_archivo_dataframe", return_value=_archivo_df()),
+            patch("routes.hr.fetch_rrhh_dataframe",       return_value=_empty_rrhh_df()),
+            patch("routes.lookups.db_query",                return_value=[]),
         ):
-            # Limpiar caché antes del test
-            import routes.choices as ch
+            # Limpiar cachÃ© antes del test
+            import routes.lookups as ch
             ch._cache = {}
 
             res = client.get("/api/choices")
@@ -50,15 +50,15 @@ class TestChoices:
         assert "people"    in body["rrhh"]
 
     def test_cache_activo(self, client):
-        """Segunda llamada devuelve el caché sin tocar la BD."""
-        import routes.choices as ch
+        """Segunda llamada devuelve el cachÃ© sin tocar la BD."""
+        import routes.lookups as ch
         ch._cache = {"archivo": {"doc_types": ["Cached"]}, "rrhh": {}}
-        ch._cache_ts = 1e18  # Timestamp muy futuro → nunca expira
+        ch._cache_ts = 1e18  # Timestamp muy futuro â†’ nunca expira
 
         res = client.get("/api/choices")
         assert res.status_code == 200
         assert res.json()["archivo"]["doc_types"] == ["Cached"]
 
-        # Limpiar después del test
+        # Limpiar despuÃ©s del test
         ch._cache = {}
         ch._cache_ts = 0.0

@@ -8,17 +8,17 @@ from fastapi.staticfiles import StaticFiles
 
 from database import ensure_audit_table, db_query, logger
 from utils import populate_missing_slugs, generate_unique_slug
-from routes.auth         import router as auth_router
-from routes.archivo      import router as archivo_router
-from routes.rrhh         import router as rrhh_router
-from routes.rrhh_alertas import router as rrhh_alertas_router
-from routes.admin        import router as admin_router
-from routes.choices      import router as choices_router
-from routes.pages        import router as pages_router
-from routes.backup       import router as backup_router
-from routes.files        import router as files_router
-from routes.papelera     import router as papelera_router
-from routes.ia           import router as ia_router
+from routes.auth       import router as auth_router
+from routes.archive    import router as archive_router
+from routes.hr         import router as hr_router
+from routes.hr_alerts  import router as hr_alerts_router
+from routes.admin      import router as admin_router
+from routes.lookups    import router as lookups_router
+from routes.pages      import router as pages_router
+from routes.backup     import router as backup_router
+from routes.files      import router as files_router
+from routes.trash      import router as trash_router
+from routes.ai         import router as ai_router
 
 # =============================================================================
 # APLICACION
@@ -621,16 +621,16 @@ def _backfill_rrhh_tipo_fk():
 # =============================================================================
 
 app.include_router(auth_router)
-app.include_router(archivo_router)
-app.include_router(rrhh_router)
-app.include_router(rrhh_alertas_router)
+app.include_router(archive_router)
+app.include_router(hr_router)
+app.include_router(hr_alerts_router)
 app.include_router(admin_router)
-app.include_router(choices_router)
+app.include_router(lookups_router)
 app.include_router(pages_router)
 app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
 app.include_router(files_router)
-app.include_router(papelera_router)
-app.include_router(ia_router)
+app.include_router(trash_router)
+app.include_router(ai_router)
 
 
 # =============================================================================

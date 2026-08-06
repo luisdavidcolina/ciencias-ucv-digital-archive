@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends
 from .deps      import require_session
 from .stats     import router as stats_router
 from .docs      import router as docs_router
-from .import_   import router as import_router
-from .misc      import router as misc_router
+from .imports   import router as imports_router
+from .catalog   import router as catalog_router
 from .users     import router as users_router
-from .retencion import router as retencion_router
+from .retention import router as retention_router
 
 router = APIRouter(
     prefix="/api/admin",
@@ -17,7 +17,7 @@ router = APIRouter(
 
 router.include_router(stats_router)
 router.include_router(docs_router)
-router.include_router(import_router)
-router.include_router(misc_router)
+router.include_router(imports_router)
+router.include_router(catalog_router)
 router.include_router(users_router)
-router.include_router(retencion_router)
+router.include_router(retention_router)

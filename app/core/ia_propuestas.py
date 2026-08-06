@@ -217,7 +217,7 @@ def _palabras_clave(p, datos):
     # El caché de choices sirve las palabras clave a los formularios: sin invalidarlo, la
     # pantalla seguiría mostrando la lista vieja hasta cinco minutos.
     try:
-        from routes.choices import invalidate_choices_cache
+        from routes.lookups import invalidate_choices_cache
         invalidate_choices_cache()
     except Exception:
         pass

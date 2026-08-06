@@ -1,4 +1,4 @@
-"""CRUD de documentos y empleados en el panel de administración."""
+﻿"""CRUD de documentos y empleados en el panel de administraciÃ³n."""
 import re
 from datetime import datetime
 from typing import Optional
@@ -40,7 +40,7 @@ def list_all_files(
     if modulo == "Archivo":
         conditions, params = ["da.deleted_at IS NULL"], []
         if search:
-            _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', search))
+            _has_letters = bool(re.search(r'[A-Za-zÃ€-Ã¿]', search))
             if _has_letters:
                 conditions.append(
                     "(to_tsvector('spanish', coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'')) "
@@ -86,7 +86,7 @@ def list_all_files(
                 COALESCE(da.file_url, '')          AS file_url,
                 COALESCE(da.status, 'aprobado')   AS status,
                 COALESCE(da.numero_folio,'')       AS numero_folio,
-                COALESCE(da.soporte,'Físico')      AS soporte,
+                COALESCE(da.soporte,'FÃ­sico')      AS soporte,
                 da.numero_paginas
             FROM public.datos_archivo da
             {where}
@@ -104,7 +104,7 @@ def list_all_files(
     else:
         conditions, params = [], []
         if search:
-            _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', search))
+            _has_letters = bool(re.search(r'[A-Za-zÃ€-Ã¿]', search))
             if _has_letters:
                 conditions.append(
                     "(to_tsvector('spanish', coalesce(e.nombres,'') || ' ' || coalesce(e.apellidos,'')) "
@@ -198,7 +198,7 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
                       COALESCE(status,'aprobado')              AS status,
                       COALESCE(personas_relacionadas,'')       AS personas_relacionadas,
                       COALESCE(numero_folio,'')                AS numero_folio,
-                      COALESCE(soporte,'Físico')               AS soporte,
+                      COALESCE(soporte,'FÃ­sico')               AS soporte,
                       numero_paginas,
                       COALESCE(idioma,'es')                    AS idioma,
                       TO_CHAR(fecha_vencimiento,'YYYY-MM-DD')  AS fecha_vencimiento,
@@ -256,13 +256,13 @@ def admin_submit(req: DocumentSubmitRequest):
             RETURNING id_archivo
             """,
             (
-                req.titulo or "Sin título",
+                req.titulo or "Sin tÃ­tulo",
                 req.resumen or "",
-                req.autor or "Anónimo",
+                req.autor or "AnÃ³nimo",
                 fecha_doc, req.ubicacion, creado_por, req.doc_type,
                 req.tesauro_secundario or "", tipo_id,
                 req.numero_folio or None,
-                req.soporte or "Físico",
+                req.soporte or "FÃ­sico",
                 req.numero_paginas or None,
                 req.file_url or None,
                 getattr(req, "fecha_vencimiento", None) or None,
@@ -300,11 +300,11 @@ def admin_submit(req: DocumentSubmitRequest):
         invalidate_choices_cache()
         return {"success": True, "id": str(new_row["id_archivo"])}
 
-    # ── Módulo RRHH ──────────────────────────────────────────────────────────
+    # â”€â”€ MÃ³dulo RRHH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     tipo_id = _resolve_or_create_tipo_documento(req.doc_type)
     cedula = (req.cedula or "").strip()
     if not cedula:
-        raise HTTPException(status_code=400, detail="Cédula es requerida para RRHH")
+        raise HTTPException(status_code=400, detail="CÃ©dula es requerida para RRHH")
 
     emp_row = db_query("SELECT id FROM public.empleados WHERE cedula = %s", (cedula,), fetch="one")
     if not emp_row:
@@ -425,7 +425,7 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
         # Campos ISAD(G) / ISO 15489
         if req.numero_folio is not None:
             set_clauses.append("numero_folio = %s"); params.append(req.numero_folio or None)
-        if req.soporte is not None and req.soporte in ("Físico", "Digital", "Digitalizado"):
+        if req.soporte is not None and req.soporte in ("FÃ­sico", "Digital", "Digitalizado"):
             set_clauses.append("soporte = %s"); params.append(req.soporte)
         if req.numero_paginas is not None:
             set_clauses.append("numero_paginas = %s"); params.append(req.numero_paginas or None)
@@ -511,7 +511,7 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 
 @router.delete("/documento/{doc_id}")
 def delete_documento(doc_id: int, modulo: str, usuario: str):
-    """Soft-delete: marca el documento como eliminado (papelera). No borra físicamente."""
+    """Soft-delete: marca el documento como eliminado (papelera). No borra fÃ­sicamente."""
     _require_modulo(modulo)
     now = datetime.utcnow().isoformat()
     if modulo == "Archivo":
@@ -540,10 +540,10 @@ def update_documento_status(
     modulo: str = Query(default="Archivo"),
     requester: str = Query(default=""),
 ):
-    """Cambia el status de un documento: draft → revision → aprobado | rechazado."""
+    """Cambia el status de un documento: draft â†’ revision â†’ aprobado | rechazado."""
     _require_modulo(modulo)
     if status not in VALID_STATUS:
-        raise HTTPException(400, f"Status inválido. Válidos: {VALID_STATUS}")
+        raise HTTPException(400, f"Status invÃ¡lido. VÃ¡lidos: {VALID_STATUS}")
 
     table = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     pk    = "id_archivo"    if modulo == "Archivo" else "id_rrhh"
@@ -555,13 +555,13 @@ def update_documento_status(
     if not result:
         raise HTTPException(404, "Documento no encontrado")
 
-    log_event(requester, f"Status Documento", modulo, f"doc_id={doc_id} → {status}")
+    log_event(requester, f"Status Documento", modulo, f"doc_id={doc_id} â†’ {status}")
     return {"success": True, "doc_id": doc_id, "status": status}
 
 
 @router.get("/documentos/pendientes")
 def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: int = 25):
-    """Lista documentos en estado draft o revision para revisión/aprobación."""
+    """Lista documentos en estado draft o revision para revisiÃ³n/aprobaciÃ³n."""
     _require_modulo(modulo)
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
@@ -608,7 +608,7 @@ async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: s
     _require_modulo(modulo)
     return {
         "success": False,
-        "detail": "Servicio de almacenamiento pendiente de configuración. Por favor ingrese la URL del archivo manualmente.",
+        "detail": "Servicio de almacenamiento pendiente de configuraciÃ³n. Por favor ingrese la URL del archivo manualmente.",
         "doc_id": doc_id,
     }
 
@@ -713,7 +713,7 @@ def get_status_counts(modulo: str = "Archivo"):
 
 @router.delete("/empleado/{emp_id}")
 def delete_empleado(emp_id: int, usuario: str):
-    """Soft-delete: envía el empleado a la papelera. No borra físicamente."""
+    """Soft-delete: envÃ­a el empleado a la papelera. No borra fÃ­sicamente."""
     result = db_query(
         "UPDATE public.empleados SET deleted_at=%s, deleted_by=%s WHERE id=%s AND deleted_at IS NULL RETURNING id",
         [datetime.utcnow().isoformat(), usuario, emp_id], fetch="one", commit=True,
