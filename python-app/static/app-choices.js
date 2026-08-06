@@ -25,7 +25,7 @@ function _populateDataLists(rrhh) {
   const fill = (id, items) => {
     const dl = document.getElementById(id);
     if (!dl || !Array.isArray(items)) return;
-    dl.innerHTML = items.map(v => `<option value="${String(v).replace(/"/g,'&quot;')}">`).join("");
+    dl.innerHTML = items.map(v => `<option value="${escHtml(String(v))}">`).join("");
   };
   fill("dl-cargos",       rrhh.cargos);
   fill("dl-departamentos", rrhh.departamentos);

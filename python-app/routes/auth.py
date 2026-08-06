@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, status
 
+from core.config import settings
 from core.security import generate_session_token, verify_session_token
 from database import db_query, log_event, verify_password
 from models import LoginRequest, RestoreSessionRequest
@@ -61,7 +62,7 @@ def _set_session_cookie(response: Response, username: str) -> None:
         max_age=43200,       # 12 horas
         httponly=True,
         samesite="lax",
-        secure=False,        # Vercel sirve HTTPS; en dev puede ser HTTP
+        secure=settings.environment == "production",
     )
 
 
