@@ -1,5 +1,14 @@
+import re
 from typing import List, Optional
 from pydantic import BaseModel, field_validator
+
+_SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
+
+def _validate_file_url(v):
+    """Reject javascript:, data:, and other dangerous URL schemes."""
+    if v and not _SAFE_URL_RE.match(v):
+        raise ValueError("file_url debe comenzar con / o https://")
+    return v or None
 
 
 # =============================================================================
@@ -93,6 +102,11 @@ class DocumentSubmitRequest(BaseModel):
             raise ValueError("modulo debe ser 'Archivo' o 'RRHH'")
         return v
 
+    @field_validator("file_url", "foto_url", mode="before")
+    @classmethod
+    def file_url_scheme(cls, v):
+        return _validate_file_url(v)
+
     @field_validator("status")
     @classmethod
     def status_must_be_valid(cls, v):
@@ -170,6 +184,11 @@ class DocumentUpdateRequest(BaseModel):
     fecha_vencimiento: Optional[str] = None
     usuario: str
 
+    @field_validator("file_url", mode="before")
+    @classmethod
+    def file_url_scheme(cls, v):
+        return _validate_file_url(v)
+
 
 class EmpleadoUpdateRequest(BaseModel):
     nombres: Optional[str] = None
@@ -185,6 +204,11 @@ class EmpleadoUpdateRequest(BaseModel):
     foto_url: Optional[str] = None
     rif: Optional[str] = None
     usuario: str
+
+    @field_validator("foto_url", mode="before")
+    @classmethod
+    def foto_url_scheme(cls, v):
+        return _validate_file_url(v)
 
     @field_validator("sexo")
     @classmethod
