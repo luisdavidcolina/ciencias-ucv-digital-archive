@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from database import db_query, log_event
 from routes.admin.deps import require_session
+from routes.admin.helpers import _require_modulo
 
 router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends(require_session)])
 
@@ -21,8 +22,7 @@ def list_papelera(
     per_page: int = 25,
 ):
     """Lista los documentos (y empleados en RRHH) en la papelera."""
-    if modulo not in ("Archivo", "RRHH"):
-        raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
+    _require_modulo(modulo)
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset = (page - 1) * per_page
@@ -75,6 +75,7 @@ def list_papelera(
 @router.post("/papelera/{doc_id}/restaurar")
 def restaurar_documento(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Recupera un documento de la papelera (deshace el soft-delete)."""
+    _require_modulo(modulo)
     if modulo == "Archivo":
         result = db_query(
             "UPDATE public.datos_archivo SET deleted_at=NULL, deleted_by=NULL WHERE id_archivo=%s AND deleted_at IS NOT NULL RETURNING id_archivo",
@@ -178,6 +179,7 @@ def purgar_empleado(emp_id: int, usuario: str):
 
 @router.get("/documento/{doc_id}/versiones")
 def list_versiones(doc_id: int, modulo: str = "Archivo"):
+    _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     rows = db_query(
         """SELECT id, version_num, file_url, comentario, subido_por,
@@ -199,6 +201,7 @@ def add_version(
     usuario: str = "",
 ):
     """Registra una nueva versión del archivo digital para un documento."""
+    _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     pk = "id_archivo" if modulo == "Archivo" else "id_rrhh"
     tabla_rr = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
@@ -244,6 +247,7 @@ def add_version(
 @router.post("/documento/{doc_id}/versiones/{ver_id}/restaurar")
 def restaurar_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Restaura el archivo digital de una versión anterior como versión actual."""
+    _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
 
     ver = db_query(
@@ -271,6 +275,7 @@ def restaurar_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario
 @router.delete("/documento/{doc_id}/versiones/{ver_id}")
 def delete_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Elimina una versión del historial (permanente, no afecta el archivo actual)."""
+    _require_modulo(modulo)
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     result = db_query(
         "DELETE FROM public.documento_versiones WHERE id=%s AND tabla=%s AND documento_id=%s RETURNING id",
