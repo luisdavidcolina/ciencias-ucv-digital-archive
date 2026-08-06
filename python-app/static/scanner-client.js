@@ -328,7 +328,7 @@
     try {
       const r = await fetch(_restBase(u) + "/status", { signal: AbortSignal.timeout(3500) });
       const d = await r.json();
-      st.innerHTML = `<span style="color:#28a745"><i class="fas fa-check mr-1"></i>Bridge activo — clientes: ${d.clients||0}, modo: ${d.mode||"?"}</span>`;
+      st.innerHTML = `<span style="color:#28a745"><i class="fas fa-check mr-1"></i>Bridge activo — clientes: ${Number(d.clients||0)}, modo: ${escHtml(d.mode||"?")}</span>`;
     } catch (e) {
       st.innerHTML = `<span style="color:#dc3545"><i class="fas fa-times mr-1"></i>${e.message}</span>`;
     }
@@ -367,7 +367,7 @@
       });
       document.body.appendChild(el);
     }
-    el.innerHTML = `<i class="fas fa-barcode mr-1"></i>${code}`;
+    el.innerHTML = `<i class="fas fa-barcode mr-1"></i>${escHtml(code)}`;
     el.style.opacity = "1";
     clearTimeout(el._t);
     el._t = setTimeout(() => { el.style.opacity = "0"; }, 2500);

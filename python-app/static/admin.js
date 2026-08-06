@@ -22,9 +22,9 @@ function loadAdminTab(adminTabId) {
   try {
     const mod = state.user?.modulo || "Archivo";
     const bc = document.querySelector(`${root} .ds-breadcrumb`);
-    if (bc) bc.innerHTML = `<i class="fas fa-shield-alt"></i> Panel de Control / Administración - ${mod}`;
+    if (bc) bc.innerHTML = `<i class="fas fa-shield-alt"></i> Panel de Control / Administración - ${escHtml(mod)}`;
     const submitBtn = document.getElementById(`btn_submit_workspace-${suf}`);
-    if (submitBtn) submitBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Guardar en ${mod}`;
+    if (submitBtn) submitBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Guardar en ${escHtml(mod)}`;
     const monitorTitle = document.querySelector(`${root} .card-title`);
     if (monitorTitle) monitorTitle.innerHTML = `<i class="fas fa-database"></i> Monitor de ${mod === "RRHH" ? "RRHH" : "Archivos"}`;
   } catch (e) {
