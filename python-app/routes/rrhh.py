@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -126,10 +127,9 @@ def search_rrhh(req: RrhhSearchRequest):
     conditions: list = []
     params: list = []
 
-    import re as _re
     if req.search_term:
         term = f"%{req.search_term}%"
-        _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         if _has_letters:
             conditions.append(
                 "("
@@ -185,8 +185,7 @@ def search_rrhh(req: RrhhSearchRequest):
     }
     base_order = sort_map.get(req.sort_mode, "v.persona_raw ASC")
 
-    import re as _re2
-    _search_has_letters = req.search_term and bool(_re2.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+    _search_has_letters = req.search_term and bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
 
     if _search_has_letters:
         order = "relevance DESC, v.persona_raw ASC"
@@ -250,11 +249,10 @@ def search_rrhh(req: RrhhSearchRequest):
         })
 
     # ── Facetas: conteos por departamento y por estado ──────────────────────
-    import re as _ref
     facet_conds: list = []
     facet_params: list = []
     if req.search_term:
-        _has_l = bool(_ref.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        _has_l = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         term_f = f"%{req.search_term}%"
         if _has_l:
             facet_conds.append(

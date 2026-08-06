@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Query
 import pandas as pd
 
@@ -87,10 +88,9 @@ def search_archivo(req: ArchivoSearchRequest):
     conditions: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
     params: list = []
 
-    import re as _re
     if req.search_term:
         term = f"%{req.search_term}%"
-        _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         if _has_letters:
             conditions.append(
                 "("
@@ -154,8 +154,7 @@ def search_archivo(req: ArchivoSearchRequest):
     }
     base_order = sort_map.get(req.sort_mode, "da.titulo ASC")
 
-    import re as _re2
-    _search_has_letters = req.search_term and bool(_re2.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+    _search_has_letters = req.search_term and bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
 
     if _search_has_letters:
         order = f"relevance DESC, da.titulo ASC"
@@ -221,11 +220,10 @@ def search_archivo(req: ArchivoSearchRequest):
     # ── Facetas: conteos por tipo y año (sin filtro de tipo para mostrar todos) ──
     # Reconstruye el WHERE sin el filtro de tipo para que los conteos sean correctos
     # incluso cuando el usuario ya tiene un tipo seleccionado.
-    import re as _ref
     facet_conds: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
     facet_params: list = []
     if req.search_term:
-        _has_l = bool(_ref.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        _has_l = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
         if _has_l:
             facet_conds.append(
                 "(to_tsvector('spanish',"

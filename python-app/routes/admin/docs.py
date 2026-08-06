@@ -1,4 +1,5 @@
 """CRUD de documentos y empleados en el panel de administración."""
+import re
 from datetime import datetime
 from typing import Optional
 
@@ -35,11 +36,10 @@ def list_all_files(
     per_page = max(1, min(per_page, 100))
     offset   = (page - 1) * per_page
 
-    import re as _re
     if modulo == "Archivo":
         conditions, params = ["da.deleted_at IS NULL"], []
         if search:
-            _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', search))
+            _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', search))
             if _has_letters:
                 conditions.append(
                     "(to_tsvector('spanish', coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'')) "
@@ -103,7 +103,7 @@ def list_all_files(
     else:
         conditions, params = [], []
         if search:
-            _has_letters = bool(_re.search(r'[A-Za-zÀ-ÿ]', search))
+            _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', search))
             if _has_letters:
                 conditions.append(
                     "(to_tsvector('spanish', coalesce(e.nombres,'') || ' ' || coalesce(e.apellidos,'')) "
