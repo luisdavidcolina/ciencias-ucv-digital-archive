@@ -188,7 +188,7 @@ function renderArchivoList() {
         </div>
         ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${hl(doc.resumen)}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
-          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${b}</span>`).join(""); })()}
+          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${escHtml(b)}</span>`).join(""); })()}
           ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${filtered.length - 4}</span>` : ""; })()}
         </div>
       </div>
@@ -198,7 +198,7 @@ function renderArchivoList() {
           style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
           <i class="fas fa-eye"></i>
         </button>
-        ${hasFile ? `<a href="${doc.file_url}" target="_blank" class="btn btn-outline-info ds-action-btn" title="Abrir archivo digital"
+        ${hasFile ? `<a href="${_secureFileUrl(doc.file_url)}" target="_blank" class="btn btn-outline-info ds-action-btn" title="Abrir archivo digital"
           onclick="event.stopPropagation()"
           style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
           <i class="fas fa-file-pdf" style="font-size:0.8rem;"></i>

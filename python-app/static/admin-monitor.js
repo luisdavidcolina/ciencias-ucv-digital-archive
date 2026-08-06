@@ -109,7 +109,7 @@ function renderMonitorTable() {
     container.innerHTML = records.map(f => {
       const statusBadge = STATUS_BADGES[f.status] || STATUS_BADGES["aprobado"];
       const fileIcon = f.file_url
-        ? `<a href="${f.file_url}" target="_blank" class="btn btn-xs btn-outline-info mr-1" title="Ver archivo"><i class="fas fa-file"></i></a>`
+        ? `<a href="${_secureFileUrl(f.file_url)}" target="_blank" class="btn btn-xs btn-outline-info mr-1" title="Ver archivo"><i class="fas fa-file"></i></a>`
         : "";
       const titulo = typeof highlightTerms === "function"
         ? highlightTerms(f.titulo || "", searchTerms)

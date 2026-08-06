@@ -75,18 +75,19 @@ function _secureFileUrl(url) {
 }
 
 function highlightTerms(text, terms) {
-  if (!text || !terms || !terms.length) return text || "";
+  if (!text || !terms || !terms.length) return escHtml(text) || "";
+  const safe = escHtml(text);
   const escaped = terms
-    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .map(t => escHtml(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .filter(Boolean)
     .join("|");
-  if (!escaped) return text;
+  if (!escaped) return safe;
   try {
-    return String(text).replace(
+    return safe.replace(
       new RegExp(`(${escaped})`, "gi"),
       '<mark style="background:#fff176;border-radius:2px;padding:0 1px;">$1</mark>'
     );
-  } catch { return text; }
+  } catch { return safe; }
 }
 
 function formatISOToSpanish(iso) {
