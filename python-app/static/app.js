@@ -322,6 +322,16 @@ function setupEventListeners() {
 // HELPER CENTRAL DE FETCH — maneja 401/403/red uniformemente
 // ==========================================================================
 
+/** Escapa caracteres HTML especiales para uso seguro en innerHTML. */
+function escHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /**
  * Fetch con manejo automático de errores de sesión y red.
  * Opts es igual a los init de fetch(); retorna la Response o lanza Error.

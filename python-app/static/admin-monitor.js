@@ -119,13 +119,13 @@ function renderMonitorTable() {
         : (f.autor || "—");
       const statusBtnTitle = { draft: "Borrador", revision: "En revisión", aprobado: "Aprobado", rechazado: "Rechazado" }[f.status] || "Aprobado";
       return `<tr>
-        <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(f.titulo||'').replace(/"/g,'&quot;')}">${titulo}</td>
+        <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(f.titulo||'')}">${titulo}</td>
         <td class="text-muted small">${autor}</td>
         <td class="text-muted small">${formatISOToSpanish(f.fecha)}</td>
-        <td><span class="badge badge-light border">${f.doc_type || '—'}</span></td>
+        <td><span class="badge badge-light border">${escHtml(f.doc_type||'—')}</span></td>
         <td>
           <button class="btn btn-xs btn-link p-0 ds-status-btn" title="Cambiar estado: ${statusBtnTitle}"
-            onclick="openQuickStatusMenu(this,${f.id},'${f.status || 'aprobado'}','${state.user.modulo}')">
+            onclick="openQuickStatusMenu(this,${f.id},${JSON.stringify(f.status||'aprobado')},${JSON.stringify(state.user.modulo)})">
             ${statusBadge}
           </button>
         </td>
@@ -133,7 +133,7 @@ function renderMonitorTable() {
           ${fileIcon}
           <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button>
           <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditDocModal(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},'${(f.titulo||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},${JSON.stringify(f.titulo||'')})" title="Eliminar"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`;
     }).join("");
@@ -143,16 +143,16 @@ function renderMonitorTable() {
       const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
       return `
         <tr>
-          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(f.empleado||'').replace(/"/g,'&quot;')}">${hlEmpleado}</td>
-          <td class="text-muted small">${f.cedula || "—"}</td>
-          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.cargo || f.departamento || "—"}</td>
-          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${f.estado || "—"}</span></td>
-          <td><span class="badge badge-light border" title="${f.tipos||''}" style="padding:3px 6px;">${(f.tipos||'').split(';')[0].trim() || '—'}</span></td>
-          <td class="text-muted small">${f.ubicacion || "—"}</td>
+          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${hlEmpleado}</td>
+          <td class="text-muted small">${escHtml(f.cedula||'—')}</td>
+          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(f.cargo||f.departamento||'—')}</td>
+          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${escHtml(f.estado||'—')}</span></td>
+          <td><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
+          <td class="text-muted small">${escHtml(f.ubicacion||'—')}</td>
           <td>
-            <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier('${f.empleado}')" title="Ver Expediente"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier(${JSON.stringify(f.empleado)})" title="Ver Expediente"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar"><i class="fas fa-edit"></i></button>
-            <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteEmpleado(${f.empleado_id},'${(f.empleado||'').replace(/'/g,"\\'")}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteEmpleado(${f.empleado_id},${JSON.stringify(f.empleado||'')})" title="Eliminar"><i class="fas fa-trash"></i></button>
           </td>
         </tr>
       `;

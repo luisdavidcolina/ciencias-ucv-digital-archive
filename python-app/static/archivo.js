@@ -343,8 +343,8 @@ function _renderArchivoFacets(facets) {
   const typeRows = byType.map(f => {
     const active = selectedTypes.includes(f.name);
     return `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row${active ? " ds-facet-active" : ""}"
-                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetTypeClick('${f.name.replace(/'/g, "\\'")}')">
-      <span class="text-truncate" style="max-width:140px;" title="${f.name}">${f.name}</span>
+                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetTypeClick(${JSON.stringify(f.name)})">
+      <span class="text-truncate" style="max-width:140px;" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
     </div>`;
   }).join("");

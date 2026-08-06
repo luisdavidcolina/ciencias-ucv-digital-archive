@@ -18,15 +18,17 @@ async function loadUsersTab() {
           ${users.map(u => {
             const isActive  = u.is_active !== false;
             const lastLogin = u.last_login ? u.last_login.substring(0, 16).replace('T', ' ') : 'Nunca';
+            const uEsc      = escHtml(u.usuario);
+            const uAttr     = uEsc.replace(/&quot;/g, "&amp;quot;");
             return `
             <tr>
-              <td class="font-weight-bold text-dark"><i class="fas fa-user-circle mr-1 text-secondary"></i> ${u.usuario}</td>
-              <td class="text-muted">${u.password}</td>
-              <td>${u.modulo}</td>
-              <td><span class="badge ${u.rol === "Admin" ? "badge-danger" : "badge-primary"}">${u.rol}</span></td>
+              <td class="font-weight-bold text-dark"><i class="fas fa-user-circle mr-1 text-secondary"></i> ${uEsc}</td>
+              <td class="text-muted">${escHtml(u.password)}</td>
+              <td>${escHtml(u.modulo)}</td>
+              <td><span class="badge ${u.rol === "Admin" ? "badge-danger" : "badge-primary"}">${escHtml(u.rol)}</span></td>
               <td>
                 <button class="btn btn-xs ${isActive ? 'btn-success' : 'btn-secondary'} mr-1"
-                        onclick="handleToggleUserActive(${u.id}, '${u.usuario}')"
+                        onclick="handleToggleUserActive(${u.id}, ${JSON.stringify(u.usuario)})"
                         title="${isActive ? 'Desactivar usuario' : 'Activar usuario'}">
                   <i class="fas fa-${isActive ? 'check-circle' : 'times-circle'}"></i>
                   ${isActive ? 'Activo' : 'Inactivo'}
@@ -34,10 +36,10 @@ async function loadUsersTab() {
               </td>
               <td class="text-muted small">${lastLogin}</td>
               <td style="white-space:nowrap;">
-                <button class="btn btn-xs btn-outline-secondary mr-1" onclick="handleChangePassword(${u.id},'${u.usuario}')">
+                <button class="btn btn-xs btn-outline-secondary mr-1" onclick="handleChangePassword(${u.id}, ${JSON.stringify(u.usuario)})">
                   <i class="fas fa-key"></i> Clave
                 </button>
-                <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteUser(${u.id},'${u.usuario}')">
+                <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteUser(${u.id}, ${JSON.stringify(u.usuario)})">
                   <i class="fas fa-trash-alt"></i>
                 </button>
               </td>
@@ -125,12 +127,12 @@ async function loadAuditTab() {
       ? `<tr><td colspan="6" class="text-center text-muted p-3">Sin eventos registrados.</td></tr>`
       : data.records.map(r => `
           <tr>
-            <td class="text-muted">${r.timestamp || ""}</td>
-            <td class="font-weight-bold">${r.usuario || ""}</td>
-            <td>${r.evento || ""}</td>
-            <td><span class="badge badge-secondary">${r.modulo || ""}</span></td>
-            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(r.detalle||'').replace(/"/g,'&quot;')}">${r.detalle || ""}</td>
-            <td class="${colorResult(r.resultado)}">${r.resultado || "OK"}</td>
+            <td class="text-muted">${escHtml(r.timestamp || "")}</td>
+            <td class="font-weight-bold">${escHtml(r.usuario || "")}</td>
+            <td>${escHtml(r.evento || "")}</td>
+            <td><span class="badge badge-secondary">${escHtml(r.modulo || "")}</span></td>
+            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(r.detalle||'')}">${escHtml(r.detalle || "")}</td>
+            <td class="${colorResult(r.resultado)}">${escHtml(r.resultado || "OK")}</td>
           </tr>`).join("");
   } catch (e) {
     if (body) body.innerHTML = `<tr><td colspan="6" class="text-danger text-center p-3">Error cargando auditoría.</td></tr>`;
