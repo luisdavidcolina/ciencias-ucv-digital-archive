@@ -16,7 +16,15 @@ from .helpers import (
 
 router = APIRouter()
 
-VALID_STATUS = ("draft", "revision", "aprobado", "rechazado")
+VALID_STATUS  = ("draft", "revision", "aprobado", "rechazado")
+VALID_MODULOS = ("Archivo", "RRHH")
+
+
+def _require_modulo(modulo: str) -> str:
+    """Valida que modulo sea 'Archivo' o 'RRHH', lanza 400 si no."""
+    if modulo not in VALID_MODULOS:
+        raise HTTPException(400, f"modulo debe ser uno de: {', '.join(VALID_MODULOS)}")
+    return modulo
 
 
 @router.get("/list_all")
@@ -185,6 +193,7 @@ def list_all_files(
 
 @router.get("/documento/{doc_id}")
 def get_documento(doc_id: int, modulo: str = "Archivo"):
+    _require_modulo(modulo)
     if modulo == "Archivo":
         row = db_query(
             """SELECT id_archivo AS id, titulo, autor, abstract AS resumen,
@@ -510,6 +519,7 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 @router.delete("/documento/{doc_id}")
 def delete_documento(doc_id: int, modulo: str, usuario: str):
     """Soft-delete: marca el documento como eliminado (papelera). No borra físicamente."""
+    _require_modulo(modulo)
     now = datetime.utcnow().isoformat()
     if modulo == "Archivo":
         result = db_query(
@@ -538,6 +548,7 @@ def update_documento_status(
     requester: str = Query(default=""),
 ):
     """Cambia el status de un documento: draft → revision → aprobado | rechazado."""
+    _require_modulo(modulo)
     if status not in VALID_STATUS:
         raise HTTPException(400, f"Status inválido. Válidos: {VALID_STATUS}")
 
@@ -558,6 +569,7 @@ def update_documento_status(
 @router.get("/documentos/pendientes")
 def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: int = 25):
     """Lista documentos en estado draft o revision para revisión/aprobación."""
+    _require_modulo(modulo)
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset = (page - 1) * per_page
@@ -600,6 +612,7 @@ def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: 
 @router.post("/documento/{doc_id}/upload")
 async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Stub para subida de archivos. Implementar cuando se elija proveedor de storage."""
+    _require_modulo(modulo)
     return {
         "success": False,
         "detail": "Servicio de almacenamiento pendiente de configuración. Por favor ingrese la URL del archivo manualmente.",
@@ -687,6 +700,7 @@ def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
 @router.get("/status_counts")
 def get_status_counts(modulo: str = "Archivo"):
     """Retorna conteo de documentos por status para badges en el monitor."""
+    _require_modulo(modulo)
     if modulo == "Archivo":
         rows = db_query(
             """SELECT COALESCE(status, 'aprobado') AS status, COUNT(*) AS cnt
