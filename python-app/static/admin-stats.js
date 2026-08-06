@@ -46,7 +46,7 @@ async function loadDynamicStats() {
           ${stats.by_type.map((t, i) => `
             <div class="mb-3">
               <div class="d-flex justify-content-between" style="font-size:0.85rem;margin-bottom:2px;">
-                <span class="font-weight-bold text-dark">${t.type}</span>
+                <span class="font-weight-bold text-dark">${escHtml(t.type)}</span>
                 <span class="text-primary">${t.count} (${t.pct}%)</span>
               </div>
               <div class="progress" style="height:10px;border-radius:5px;background-color:#e9ecef;">

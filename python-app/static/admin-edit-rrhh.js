@@ -231,10 +231,10 @@ async function _adminLoadHistorial() {
         <tbody>
           ${data.historial.map(h => `
             <tr>
-              <td>${h.cargo}</td>
-              <td>${h.fecha_inicio || "—"}</td>
-              <td>${h.fecha_fin || '<span class="text-success font-weight-bold">Actual</span>'}</td>
-              <td class="text-muted">${h.motivo || "—"}</td>
+              <td>${escHtml(h.cargo)}</td>
+              <td>${escHtml(h.fecha_inicio || "—")}</td>
+              <td>${h.fecha_fin ? escHtml(h.fecha_fin) : '<span class="text-success font-weight-bold">Actual</span>'}</td>
+              <td class="text-muted">${escHtml(h.motivo || "—")}</td>
               <td><button class="btn btn-xs btn-outline-danger" onclick="_adminDeleteCargo(${empId}, ${h.id})"><i class="fas fa-trash"></i></button></td>
             </tr>`).join("")}
         </tbody>
