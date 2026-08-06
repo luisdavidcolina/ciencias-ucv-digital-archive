@@ -5,6 +5,39 @@ from utils import paginate  # re-exported for callers that import from here
 
 VALID_MODULOS = ("Archivo", "RRHH")
 
+_MODULE_META = {
+    "Archivo": ("datos_archivo", "id_archivo"),
+    "RRHH":    ("datos_rrhh",   "id_rrhh"),
+}
+
+
+def module_meta(modulo: str) -> tuple[str, str]:
+    """Return (table_name, pk_column) for a validated modulo string."""
+    return _MODULE_META[modulo]
+
+
+def upsert_descriptors(raw: str, doc_id: int, link_table: str, fk_col: str) -> None:
+    """Parse a comma/semicolon-separated keyword string and link each to a document.
+
+    Upserts into descriptores_libres, then inserts into the link table.
+    link_table: 'archivo_descriptores' or 'rrhh_descriptores'
+    fk_col: 'id_archivo' or 'id_rrhh'
+    """
+    from database import db_query
+    if not raw:
+        return
+    keywords = [k.strip() for k in raw.replace(";", ",").split(",") if k.strip()]
+    for kw in keywords:
+        desc_row = db_query(
+            "INSERT INTO public.descriptores_libres (nombre) VALUES (%s) "
+            "ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre RETURNING id_descriptor",
+            (kw,), fetch="one", commit=True,
+        )
+        db_query(
+            f"INSERT INTO public.{link_table} ({fk_col}, id_descriptor) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+            (doc_id, desc_row["id_descriptor"]), fetch="none", commit=True,
+        )
+
 
 def fetch_one_or_404(sql: str, params, msg: str = "No encontrado") -> dict:
     """Run a fetch='one' query; raise 404 if nothing is returned."""

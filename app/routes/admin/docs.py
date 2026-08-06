@@ -13,7 +13,9 @@ from .helpers import (
     _resolve_user_id,
     _require_modulo,
     invalidate_choices_cache,
+    module_meta,
     paginate,
+    upsert_descriptors,
 )
 
 router = APIRouter()
@@ -270,32 +272,8 @@ def admin_submit(req: DocumentSubmitRequest):
             commit=True,
         )
 
-        if req.descriptores_libres:
-            raw_descs = req.descriptores_libres.replace(";", ",").split(",")
-            descriptores = [d.strip() for d in raw_descs if d.strip()]
-            for desc in descriptores:
-                desc_row = db_query(
-                    """
-                    INSERT INTO public.descriptores_libres (nombre)
-                    VALUES (%s)
-                    ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
-                    RETURNING id_descriptor
-                    """,
-                    (desc,),
-                    fetch="one",
-                    commit=True,
-                )
-                db_query(
-                    """
-                    INSERT INTO public.archivo_descriptores (id_archivo, id_descriptor)
-                    VALUES (%s, %s)
-                    ON CONFLICT DO NOTHING
-                    """,
-                    (new_row["id_archivo"], desc_row["id_descriptor"]),
-                    fetch="none",
-                    commit=True,
-                )
-
+        upsert_descriptors(req.descriptores_libres, new_row["id_archivo"],
+                           "archivo_descriptores", "id_archivo")
         invalidate_choices_cache()
         return {"success": True, "id": str(new_row["id_archivo"])}
 
@@ -355,32 +333,8 @@ def admin_submit(req: DocumentSubmitRequest):
         commit=True,
     )
 
-    if req.descriptores_libres:
-        raw_descs = req.descriptores_libres.replace(";", ",").split(",")
-        descriptores = [d.strip() for d in raw_descs if d.strip()]
-        for desc in descriptores:
-            desc_row = db_query(
-                """
-                INSERT INTO public.descriptores_libres (nombre)
-                VALUES (%s)
-                ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre
-                RETURNING id_descriptor
-                """,
-                (desc,),
-                fetch="one",
-                commit=True,
-            )
-            db_query(
-                """
-                INSERT INTO public.rrhh_descriptores (id_rrhh, id_descriptor)
-                VALUES (%s, %s)
-                ON CONFLICT DO NOTHING
-                """,
-                (new_row["id_rrhh"], desc_row["id_descriptor"]),
-                fetch="none",
-                commit=True,
-            )
-
+    upsert_descriptors(req.descriptores_libres, new_row["id_rrhh"],
+                       "rrhh_descriptores", "id_rrhh")
     invalidate_choices_cache()
     return {"success": True, "id": str(new_row["id_rrhh"])}
 
@@ -448,18 +402,8 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
                 "DELETE FROM public.archivo_descriptores WHERE id_archivo = %s",
                 (doc_id,), fetch="none", commit=True,
             )
-            raw_descs = req.palabras_clave.replace(";", ",").split(",")
-            descriptores = [d.strip() for d in raw_descs if d.strip()]
-            for desc in descriptores:
-                desc_row = db_query(
-                    "INSERT INTO public.descriptores_libres (nombre) VALUES (%s) "
-                    "ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre RETURNING id_descriptor",
-                    (desc,), fetch="one", commit=True,
-                )
-                db_query(
-                    "INSERT INTO public.archivo_descriptores (id_archivo, id_descriptor) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-                    (doc_id, desc_row["id_descriptor"]), fetch="none", commit=True,
-                )
+            upsert_descriptors(req.palabras_clave, doc_id,
+                               "archivo_descriptores", "id_archivo")
 
         invalidate_choices_cache()
         log_event(req.usuario, "Update Document", "Archivo", f"ID: {doc_id}, Titulo: {(req.titulo or '')[:60]}, Status: {req.status or 'aprobado'}")
@@ -544,8 +488,7 @@ def update_documento_status(
     if status not in VALID_STATUS:
         raise HTTPException(400, f"Status invÃ¡lido. VÃ¡lidos: {VALID_STATUS}")
 
-    table = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
-    pk    = "id_archivo"    if modulo == "Archivo" else "id_rrhh"
+    table, pk = module_meta(modulo)
 
     result = db_query(
         f"UPDATE public.{table} SET status=%s, updated_at=NOW() WHERE {pk}=%s RETURNING {pk}",

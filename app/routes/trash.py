@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from database import db_query, log_event
 from routes.admin.deps import require_session
-from routes.admin.helpers import _require_modulo, paginate
+from routes.admin.helpers import _require_modulo, module_meta, paginate
 
 router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends(require_session)])
 
@@ -179,7 +179,7 @@ def purge_employee(emp_id: int, usuario: str):
 @router.get("/documento/{doc_id}/versiones")
 def list_versions(doc_id: int, modulo: str = "Archivo"):
     _require_modulo(modulo)
-    tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
+    tabla, _ = module_meta(modulo)
     rows = db_query(
         """SELECT id, version_num, file_url, comentario, subido_por,
                   TO_CHAR(created_at,'YYYY-MM-DD HH24:MI') AS created_at
@@ -203,12 +203,10 @@ def add_version(
     _require_modulo(modulo)
     if file_url and not _SAFE_URL_RE.match(file_url):
         raise HTTPException(400, "file_url inválida")
-    tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
-    pk = "id_archivo" if modulo == "Archivo" else "id_rrhh"
-    tabla_rr = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
+    tabla, pk = module_meta(modulo)
 
     current = db_query(
-        f"SELECT file_url FROM public.{tabla_rr} WHERE {pk}=%s AND deleted_at IS NULL",
+        f"SELECT file_url FROM public.{tabla} WHERE {pk}=%s AND deleted_at IS NULL",
         [doc_id], fetch="one",
     )
     if not current:
@@ -229,17 +227,10 @@ def add_version(
             fetch="none", commit=True,
         )
 
-    # Actualizar el archivo actual en el documento
-    if modulo == "Archivo":
-        db_query(
-            "UPDATE public.datos_archivo SET file_url=%s, updated_at=NOW() WHERE id_archivo=%s",
-            [file_url, doc_id], fetch="none", commit=True,
-        )
-    else:
-        db_query(
-            "UPDATE public.datos_rrhh SET file_url=%s, updated_at=NOW() WHERE id_rrhh=%s",
-            [file_url, doc_id], fetch="none", commit=True,
-        )
+    db_query(
+        f"UPDATE public.{tabla} SET file_url=%s, updated_at=NOW() WHERE {pk}=%s",
+        [file_url, doc_id], fetch="none", commit=True,
+    )
 
     log_event(usuario or "sistema", "Nueva Versión", modulo, f"doc_id={doc_id} v{next_ver}")
     return {"success": True, "version_num": next_ver}
@@ -249,7 +240,7 @@ def add_version(
 def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Restaura el archivo digital de una versión anterior como versión actual."""
     _require_modulo(modulo)
-    tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
+    tabla, pk = module_meta(modulo)
 
     ver = db_query(
         "SELECT file_url FROM public.documento_versiones WHERE id=%s AND tabla=%s AND documento_id=%s",
@@ -258,16 +249,10 @@ def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: 
     if not ver:
         raise HTTPException(404, "Versión no encontrada")
 
-    if modulo == "Archivo":
-        db_query(
-            "UPDATE public.datos_archivo SET file_url=%s, updated_at=NOW() WHERE id_archivo=%s",
-            [ver["file_url"], doc_id], fetch="none", commit=True,
-        )
-    else:
-        db_query(
-            "UPDATE public.datos_rrhh SET file_url=%s, updated_at=NOW() WHERE id_rrhh=%s",
-            [ver["file_url"], doc_id], fetch="none", commit=True,
-        )
+    db_query(
+        f"UPDATE public.{tabla} SET file_url=%s, updated_at=NOW() WHERE {pk}=%s",
+        [ver["file_url"], doc_id], fetch="none", commit=True,
+    )
 
     log_event(usuario or "sistema", "Restaurar Versión", modulo, f"doc_id={doc_id}, ver_id={ver_id}")
     return {"success": True}
@@ -277,7 +262,7 @@ def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: 
 def delete_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
     """Elimina una versión del historial (permanente, no afecta el archivo actual)."""
     _require_modulo(modulo)
-    tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
+    tabla, _ = module_meta(modulo)
     result = db_query(
         "DELETE FROM public.documento_versiones WHERE id=%s AND tabla=%s AND documento_id=%s RETURNING id",
         [ver_id, tabla, doc_id], fetch="one", commit=True,

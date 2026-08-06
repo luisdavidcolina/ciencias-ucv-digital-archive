@@ -10,6 +10,23 @@ from .helpers import _resolve_or_create_lookup, _resolve_or_create_tipo_document
 
 router = APIRouter()
 
+_CSV_ENCODINGS = ("utf-8-sig", "utf-8", "latin-1", "cp1252")
+_VALID_SOPORTE = ("Físico", "Digital", "Digitalizado")
+
+
+def _coerce_soporte(raw: str) -> str:
+    v = (raw or "").strip()
+    return v if v in _VALID_SOPORTE else "Físico"
+
+
+def _decode_csv(content: bytes) -> str | None:
+    for enc in _CSV_ENCODINGS:
+        try:
+            return content.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return None
+
 
 def _parse_date(v):
     v = str(v or "").strip()
@@ -40,13 +57,8 @@ async def import_empleados_csv(
     Si la cédula ya existe, actualiza el registro; si no, lo inserta.
     """
     content = await file.read()
-    for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
-        try:
-            text = content.decode(enc)
-            break
-        except (UnicodeDecodeError, LookupError):
-            continue
-    else:
+    text = _decode_csv(content)
+    if text is None:
         return {"inserted": 0, "updated": 0, "skipped": 0, "errors": ["No se pudo decodificar el archivo. Use UTF-8 o Latin-1."]}
     reader = _csv_module.DictReader(_io_module.StringIO(text))
     if reader.fieldnames is None:
@@ -124,13 +136,8 @@ async def import_documentos_csv(
     from .helpers import _require_modulo
     _require_modulo(modulo)
     content = await file.read()
-    for enc in ("utf-8-sig", "utf-8", "latin-1", "cp1252"):
-        try:
-            text = content.decode(enc)
-            break
-        except (UnicodeDecodeError, LookupError):
-            continue
-    else:
+    text = _decode_csv(content)
+    if text is None:
         return {"inserted": 0, "skipped": 0, "errors": ["No se pudo decodificar el archivo. Use UTF-8 o Latin-1."]}
     reader = _csv_module.DictReader(_io_module.StringIO(text))
     if reader.fieldnames is None:
@@ -145,9 +152,7 @@ async def import_documentos_csv(
                     continue
                 tipo_nombre = str(row.get("tipo_documento", "") or "").strip()
                 tipo_id = _resolve_or_create_tipo_documento(tipo_nombre, "archivo") if tipo_nombre else None
-                _soporte = str(row.get("soporte", "") or "Físico").strip()
-                if _soporte not in ("Físico", "Digital", "Digitalizado"):
-                    _soporte = "Físico"
+                _soporte = _coerce_soporte(row.get("soporte", ""))
                 _paginas_raw = str(row.get("numero_paginas", "") or "").strip()
                 _paginas = int(_paginas_raw) if _paginas_raw.isdigit() and int(_paginas_raw) > 0 else None
                 doc_row = db_query(
@@ -190,9 +195,7 @@ async def import_documentos_csv(
                 if not tipo_id:
                     results["errors"].append(f"Fila {i}: tipo_documento inválido")
                     continue
-                _soporte_r = str(row.get("soporte", "") or "Físico").strip()
-                if _soporte_r not in ("Físico", "Digital", "Digitalizado"):
-                    _soporte_r = "Físico"
+                _soporte_r = _coerce_soporte(row.get("soporte", ""))
                 _paginas_r_raw = str(row.get("numero_paginas", "") or "").strip()
                 _paginas_r = int(_paginas_r_raw) if _paginas_r_raw.isdigit() and int(_paginas_r_raw) > 0 else None
                 db_query(

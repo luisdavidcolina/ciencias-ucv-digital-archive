@@ -71,7 +71,6 @@ def get_admin_stats(req: StatsRequest):
         "timeline":         timeline,
         "system": {
             "status": "Operativo" if total_docs > 0 else "Sin Datos",
-            "ram":    f"{round(30 + total_docs * 0.005, 2)} MB",
             "cpu":    multiprocessing.cpu_count(),
             "os":     f"{platform.system()} {platform.release()}",
         },
