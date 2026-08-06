@@ -7,8 +7,11 @@ from fastapi.responses import StreamingResponse
 from database import db_query
 import json
 import io
+import re
 from datetime import datetime, date
 from typing import Optional
+
+_SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
 
 from routes.admin.deps import require_session
 
@@ -158,7 +161,9 @@ async def restore_backup(
 
             inserted = 0
             for row in rows:
-                cols = list(row.keys())
+                cols = [c for c in row.keys() if _SAFE_IDENTIFIER.match(c)]
+                if not cols:
+                    continue
                 vals = [row[c] for c in cols]
                 placeholders = ", ".join(["%s"] * len(cols))
                 col_names = ", ".join(cols)
