@@ -344,36 +344,37 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
     updated_by = _resolve_user_id(req.usuario)
     updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    def _common(sc, p):
+        """Append shared fields present in both Archivo and RRHH."""
+        if req.titulo is not None:
+            sc.append("titulo = %s"); p.append(req.titulo)
+        if req.autor is not None:
+            sc.append("autor = %s"); p.append(req.autor)
+        if req.resumen is not None:
+            sc.append("abstract = %s"); p.append(req.resumen)
+        if req.fecha is not None:
+            sc.append("fecha_documento = %s"); p.append(req.fecha)
+        if req.ubicacion is not None:
+            sc.append("ubicacion = %s"); p.append(req.ubicacion)
+        if req.tesauro_secundario is not None:
+            sc.append("tesauro_secundario = %s"); p.append(req.tesauro_secundario)
+        if req.file_url is not None:
+            sc.append("file_url = %s"); p.append(req.file_url or None)
+        if req.status is not None and req.status in VALID_STATUS:
+            sc.append("status = %s"); p.append(req.status)
+        if req.personas_relacionadas is not None:
+            sc.append("personas_relacionadas = %s"); p.append(req.personas_relacionadas or None)
+        sc.append("updated_at = %s"); p.append(updated_at)
+        sc.append("updated_by = %s"); p.append(updated_by)
+
     if req.modulo == "Archivo":
         set_clauses, params = [], []
-
-        if req.titulo is not None:
-            set_clauses.append("titulo = %s"); params.append(req.titulo)
-        if req.autor is not None:
-            set_clauses.append("autor = %s"); params.append(req.autor)
-        if req.resumen is not None:
-            set_clauses.append("abstract = %s"); params.append(req.resumen)
-        if req.fecha is not None:
-            set_clauses.append("fecha_documento = %s"); params.append(req.fecha)
-        if req.ubicacion is not None:
-            set_clauses.append("ubicacion = %s"); params.append(req.ubicacion)
-        if req.tesauro_secundario is not None:
-            set_clauses.append("tesauro_secundario = %s"); params.append(req.tesauro_secundario)
+        _common(set_clauses, params)
 
         if req.doc_type is not None:
             tipo_id = _resolve_or_create_tipo_documento(req.doc_type, cat_slug="archivo")
             set_clauses.append("id_tipo_documento = %s"); params.append(tipo_id)
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
-
-        if req.file_url is not None:
-            set_clauses.append("file_url = %s"); params.append(req.file_url or None)
-
-        if req.status is not None and req.status in VALID_STATUS:
-            set_clauses.append("status = %s"); params.append(req.status)
-
-        # Personas relacionadas
-        if req.personas_relacionadas is not None:
-            set_clauses.append("personas_relacionadas = %s"); params.append(req.personas_relacionadas or None)
 
         # Campos ISAD(G) / ISO 15489
         if req.numero_folio is not None:
@@ -386,9 +387,6 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
             set_clauses.append("idioma = %s"); params.append(req.idioma)
         if req.fecha_vencimiento is not None:
             set_clauses.append("fecha_vencimiento = %s"); params.append(req.fecha_vencimiento or None)
-
-        set_clauses.append("updated_at = %s"); params.append(updated_at)
-        set_clauses.append("updated_by = %s"); params.append(updated_by)
 
         if set_clauses:
             params.append(doc_id)
@@ -411,34 +409,12 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 
     else:  # RRHH
         set_clauses, params = [], []
+        _common(set_clauses, params)
 
-        if req.titulo is not None:
-            set_clauses.append("titulo = %s"); params.append(req.titulo)
-        if req.autor is not None:
-            set_clauses.append("autor = %s"); params.append(req.autor)
-        if req.resumen is not None:
-            set_clauses.append("abstract = %s"); params.append(req.resumen)
-        if req.fecha is not None:
-            set_clauses.append("fecha_documento = %s"); params.append(req.fecha)
-        if req.ubicacion is not None:
-            set_clauses.append("ubicacion = %s"); params.append(req.ubicacion)
-        if req.tesauro_secundario is not None:
-            set_clauses.append("tesauro_secundario = %s"); params.append(req.tesauro_secundario)
         if req.doc_type is not None:
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
-        if req.personas_relacionadas is not None:
-            set_clauses.append("personas_relacionadas = %s"); params.append(req.personas_relacionadas)
         if req.notas is not None:
             set_clauses.append("notas = %s"); params.append(req.notas)
-
-        if req.file_url is not None:
-            set_clauses.append("file_url = %s"); params.append(req.file_url or None)
-
-        if req.status is not None and req.status in VALID_STATUS:
-            set_clauses.append("status = %s"); params.append(req.status)
-
-        set_clauses.append("updated_at = %s"); params.append(updated_at)
-        set_clauses.append("updated_by = %s"); params.append(updated_by)
 
         if set_clauses:
             params.append(doc_id)
@@ -457,16 +433,11 @@ def delete_documento(doc_id: int, modulo: str, usuario: str):
     """Soft-delete: marca el documento como eliminado (papelera). No borra fÃ­sicamente."""
     _require_modulo(modulo)
     now = datetime.utcnow().isoformat()
-    if modulo == "Archivo":
-        result = db_query(
-            "UPDATE public.datos_archivo SET deleted_at=%s, deleted_by=%s WHERE id_archivo=%s AND deleted_at IS NULL RETURNING id_archivo",
-            [now, usuario, doc_id], fetch="one", commit=True,
-        )
-    else:
-        result = db_query(
-            "UPDATE public.datos_rrhh SET deleted_at=%s, deleted_by=%s WHERE id_rrhh=%s AND deleted_at IS NULL RETURNING id_rrhh",
-            [now, usuario, doc_id], fetch="one", commit=True,
-        )
+    table, pk = module_meta(modulo)
+    result = db_query(
+        f"UPDATE public.{table} SET deleted_at=%s, deleted_by=%s WHERE {pk}=%s AND deleted_at IS NULL RETURNING {pk}",
+        [now, usuario, doc_id], fetch="one", commit=True,
+    )
 
     if not result:
         raise HTTPException(404, "Documento no encontrado o ya eliminado")
