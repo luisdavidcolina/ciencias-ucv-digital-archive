@@ -23,7 +23,7 @@ LAS DOS COSAS QUE NO SE PUEDEN AFLOJAR
 import json
 
 from database import db_query, log_event
-from core.ia_tools import campos_permitidos
+from core.ai_tools import campos_permitidos
 
 _TABLAS = {
     "archivo": ("datos_archivo", "id_archivo"),
