@@ -65,7 +65,10 @@ function showToast(message, type, duration) {
 // ==========================================================================
 
 function _secureFileUrl(url) {
-  if (!url || !url.startsWith("/api/files/")) return url;
+  if (!url) return "";
+  // Solo permitir URLs relativas o http/https — nunca javascript:, data:, etc.
+  if (!/^(\/|https?:\/\/)/.test(url)) return "";
+  if (!url.startsWith("/api/files/")) return url;
   const username = state.user?.username || "";
   if (!username) return url;
   return `${url}${url.includes("?") ? "&" : "?"}u=${encodeURIComponent(username)}`;
