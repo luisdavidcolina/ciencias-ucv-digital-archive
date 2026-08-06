@@ -45,7 +45,7 @@ async function _loadAlertasBanner() {
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.vencimientos || []).slice(0, 3).map(v =>
-        `<li class="small"><strong>${v.titulo || "(sin título)"}</strong> — ${v.tipo_documento || "?"} — venció ${v.dias_vencido} días</li>`
+        `<li class="small"><strong>${escHtml(v.titulo || "(sin título)")}</strong> — ${escHtml(v.tipo_documento || "?")} — venció ${Number(v.dias_vencido)} días</li>`
       ).join("");
       el.innerHTML = `
         <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert">
@@ -65,7 +65,7 @@ async function _loadAlertasBanner() {
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.alertas || []).slice(0, 3).map(a =>
-        `<li class="small"><strong>${a.nombre_completo}</strong> — ${a.tipo_alerta} (${a.dias_restantes} días)</li>`
+        `<li class="small"><strong>${escHtml(a.nombre_completo)}</strong> — ${escHtml(a.tipo_alerta)} (${Number(a.dias_restantes)} días)</li>`
       ).join("");
       el.innerHTML = `
         <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert">
@@ -100,7 +100,7 @@ async function handleModuleExport(modulo) {
     URL.revokeObjectURL(url);
     if (statusEl) statusEl.innerHTML = '<span class="text-success"><i class="fas fa-check mr-1"></i>Descarga iniciada.</span>';
   } catch (e) {
-    if (statusEl) statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle mr-1"></i>${e.message}</span>`;
+    if (statusEl) { statusEl.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle mr-1"></i></span>`; statusEl.querySelector("span").append(e.message); }
   }
 }
 
