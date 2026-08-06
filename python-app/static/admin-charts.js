@@ -236,7 +236,7 @@ async function handleImportCSV(tipo, suf) {
   fd.append("file", fileInput.files[0]);
   try {
     const data = await apiFetchJSON(endpoint, { method: "POST", body: fd });
-    const errs     = (data.errors||[]).slice(0,5).map(e => `<li class="small">${e}</li>`).join("");
+    const errs     = (data.errors||[]).slice(0,5).map(e => `<li class="small">${escHtml(String(e))}</li>`).join("");
     const moreErrs = (data.errors||[]).length > 5 ? `<li class="small text-muted">... y ${(data.errors.length-5)} más</li>` : "";
     const summary  = [
       data.inserted != null ? `${data.inserted} insertados` : null,
@@ -255,7 +255,7 @@ async function handleImportCSV(tipo, suf) {
   } catch(e) {
     if (resultEl) {
       if (typeof hideProgress === "function") hideProgress(resultEl.id);
-      resultEl.innerHTML = `<div class="alert alert-danger p-2 mb-0">Error: ${e.message}</div>`;
+      resultEl.innerHTML = `<div class="alert alert-danger p-2 mb-0">Error: ${escHtml(e.message)}</div>`;
     }
     showToast("Error al importar el CSV.", "error");
   }
