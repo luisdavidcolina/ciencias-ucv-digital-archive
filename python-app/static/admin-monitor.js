@@ -25,7 +25,7 @@ async function loadMonitorTable() {
     if (typeSelector && typeSelector.options.length <= 1 && state.choices) {
       const types = isArchivoModule() ? state.choices.archivo.doc_types : state.choices.rrhh.doc_types;
       typeSelector.innerHTML = `<option value="">Filtrar por Tipología...</option>` +
-        types.map(t => `<option value="${t}">${t}</option>`).join("");
+        types.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join("");
     }
 
     // Poblar filtro de persona (solo primera carga)
@@ -38,7 +38,7 @@ async function loadMonitorTable() {
         people = state.choices?.rrhh?.people || [];
       }
       personSelector.innerHTML = `<option value="">Filtrar por Persona...</option>` +
-        people.map(p => `<option value="${p}">${p}</option>`).join("");
+        people.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join("");
     }
 
     renderMonitorTable();

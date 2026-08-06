@@ -20,7 +20,7 @@ function renderDynamicSubmitFields() {
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Tipo de Documento *</label>
           <select id="reg-doc-type-${suf}" class="form-control" required>
-            ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe","Plano Arquitectónico","Acta de Sesión","Resolución","Reglamento"]).map(t => `<option value="${t}">${t}</option>`).join("")}
+            ${(state.choices?.archivo?.doc_types || ["Proyecto de Investigación","Informe","Plano Arquitectónico","Acta de Sesión","Resolución","Reglamento"]).map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
@@ -57,7 +57,7 @@ function renderDynamicSubmitFields() {
         <div class="col-md-4 form-group">
           <label class="font-weight-bold text-muted">Soporte</label>
           <select id="reg-soporte-${suf}" class="form-control">
-            ${(state.choices?.archivo?.soportes || ["Físico","Digital","Digitalizado"]).map(s => `<option value="${s}">${s}</option>`).join("")}
+            ${(state.choices?.archivo?.soportes || ["Físico","Digital","Digitalizado"]).map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-4 form-group">
@@ -124,10 +124,10 @@ function renderDynamicSubmitFields() {
               const tiposPP = state.choices?.rrhh?.tipos_por_parte || {};
               if (Object.keys(tiposPP).length > 0) {
                 return Object.entries(tiposPP).map(([parte, tipos]) =>
-                  `<optgroup label="${parte}">${tipos.map(t => `<option value="${t}">${t}</option>`).join("")}</optgroup>`
+                  `<optgroup label="${escHtml(parte)}">${tipos.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join("")}</optgroup>`
                 ).join("");
               }
-              return (state.choices?.rrhh?.doc_types || ["Hoja de Vida","Contrato"]).map(t => `<option value="${t}">${t}</option>`).join("");
+              return (state.choices?.rrhh?.doc_types || ["Hoja de Vida","Contrato"]).map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join("");
             })()}
           </select>
         </div>
@@ -186,7 +186,7 @@ function renderDynamicSubmitFields() {
           <label class="font-weight-bold text-muted">Nivel Educativo <span class="badge badge-secondary badge-sm">LOTTT</span></label>
           <select id="reg-nivel-${suf}" class="form-control">
             <option value="">No especificado</option>
-            ${(state.choices?.rrhh?.niveles_educativos || ["Bachiller","TSU","Universitario","Especialización","Maestría","Doctorado","Postdoctorado"]).map(n => `<option value="${n}">${n}</option>`).join("")}
+            ${(state.choices?.rrhh?.niveles_educativos || ["Bachiller","TSU","Universitario","Especialización","Maestría","Doctorado","Postdoctorado"]).map(n => `<option value="${escHtml(n)}">${escHtml(n)}</option>`).join("")}
           </select>
         </div>
       </div>

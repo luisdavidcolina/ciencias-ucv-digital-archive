@@ -364,7 +364,7 @@ function renderRrhhDossierModal() {
           <select id="inner-dossier-class" class="form-control form-control-sm"
             onchange="state.innerDossierClass=this.value;filterInnerDossier();">
             <option value="">Todas las categorías</option>
-            ${docTypes.map(c => `<option value="${c}">${c}</option>`).join("")}
+            ${docTypes.map(c => `<option value="${escHtml(c)}">${escHtml(c)}</option>`).join("")}
           </select>
         </div>
         <div class="col-md-3 mb-2">
