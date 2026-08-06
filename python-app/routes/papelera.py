@@ -1,6 +1,9 @@
 """Papelera de reciclaje y versiones de archivos digitales."""
+import re
 from datetime import datetime
 from typing import Optional
+
+_SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -202,6 +205,8 @@ def add_version(
 ):
     """Registra una nueva versión del archivo digital para un documento."""
     _require_modulo(modulo)
+    if file_url and not _SAFE_URL_RE.match(file_url):
+        raise HTTPException(400, "file_url inválida")
     tabla = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
     pk = "id_archivo" if modulo == "Archivo" else "id_rrhh"
     tabla_rr = "datos_archivo" if modulo == "Archivo" else "datos_rrhh"
