@@ -139,7 +139,7 @@ function renderDynamicSubmitFields() {
           <label class="font-weight-bold text-muted">Estado *</label>
           <select id="reg-estado-${suf}" class="form-control" required>
             ${(state.choices?.rrhh?.estados_catalog || ["Activo","Retirado","Jubilado","Pensionado"])
-              .map(e => `<option value="${e}"${e==="Activo"?" selected":""}>${e}</option>`).join("")}
+              .map(e => `<option value="${escHtml(e)}"${e==="Activo"?" selected":""}>${escHtml(e)}</option>`).join("")}
           </select>
         </div>
       </div>

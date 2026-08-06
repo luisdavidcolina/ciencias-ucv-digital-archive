@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, HTTPException, Response, status
+from typing import Optional
 
 from core.config import settings
 from core.security import generate_session_token, verify_session_token
@@ -102,7 +103,17 @@ def login(req: LoginRequest, response: Response):
 
 
 @router.post("/restore")
-def restore_session(req: RestoreSessionRequest, response: Response):
+def restore_session(
+    req: RestoreSessionRequest,
+    response: Response,
+    ds_session: Optional[str] = Cookie(default=None),
+):
+    # Require a valid HMAC session token — otherwise anyone who knows a username
+    # could call this endpoint and obtain a fresh authenticated cookie.
+    token_user = verify_session_token(ds_session) if ds_session else None
+    if not token_user or token_user.lower() != req.username.strip().lower():
+        raise HTTPException(status_code=401, detail="Sesión no válida o expirada")
+
     rows = db_query(
         "SELECT usuario, nombre_usuario, modulo, rol, "
         "COALESCE(is_active, TRUE) AS is_active "
