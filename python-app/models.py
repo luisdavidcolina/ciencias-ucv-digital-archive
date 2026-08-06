@@ -1,5 +1,5 @@
 from typing import List, Optional
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 # =============================================================================
@@ -86,13 +86,15 @@ class DocumentSubmitRequest(BaseModel):
     nivel_educativo: Optional[str] = None
     sexo: Optional[str] = None
 
-    @validator("modulo")
+    @field_validator("modulo")
+    @classmethod
     def modulo_must_be_valid(cls, v):
         if v not in ("Archivo", "RRHH"):
             raise ValueError("modulo debe ser 'Archivo' o 'RRHH'")
         return v
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def status_must_be_valid(cls, v):
         allowed = ("draft", "revision", "aprobado", "rechazado")
         if v and v not in allowed:
@@ -130,13 +132,15 @@ class UserCreateRequest(BaseModel):
     rol: str
     creator: str
 
-    @validator("password")
+    @field_validator("password")
+    @classmethod
     def password_min_length(cls, v):
         if len(v.strip()) < 6:
             raise ValueError("La contraseña debe tener al menos 6 caracteres")
         return v.strip()
 
-    @validator("usuario")
+    @field_validator("usuario")
+    @classmethod
     def usuario_not_empty(cls, v):
         if not v.strip():
             raise ValueError("El nombre de usuario no puede estar vacío")
@@ -182,13 +186,15 @@ class EmpleadoUpdateRequest(BaseModel):
     rif: Optional[str] = None
     usuario: str
 
-    @validator("sexo")
+    @field_validator("sexo")
+    @classmethod
     def sexo_valid(cls, v):
         if v and v.upper() not in ("M", "F", "O", ""):
             raise ValueError("sexo debe ser M, F u O")
         return (v or "").upper() or None
 
-    @validator("nivel_educativo")
+    @field_validator("nivel_educativo")
+    @classmethod
     def nivel_educativo_valid(cls, v):
         allowed = {"Bachiller", "TSU", "Universitario", "Especialización",
                    "Maestría", "Doctorado", "Postdoctorado", ""}
@@ -201,7 +207,8 @@ class PasswordChangeRequest(BaseModel):
     new_password: str
     requester: str
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def password_min_length(cls, v):
         if len(v.strip()) < 6:
             raise ValueError("La contraseña debe tener al menos 6 caracteres")
@@ -212,7 +219,8 @@ class DocumentStatusUpdateRequest(BaseModel):
     status: str
     usuario: str
 
-    @validator("status")
+    @field_validator("status")
+    @classmethod
     def status_valid(cls, v):
         allowed = ("draft", "revision", "aprobado", "rechazado")
         if v not in allowed:

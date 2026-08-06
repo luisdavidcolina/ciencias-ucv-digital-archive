@@ -1,4 +1,5 @@
 ﻿import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,7 +24,16 @@ from routes.ia           import router as ia_router
 # APLICACION
 # =============================================================================
 
-app = FastAPI(
+@asynccontextmanager
+async def _lifespan(app):
+    ensure_audit_table()
+    populate_missing_slugs()
+    run_migrations()
+    _backfill_rrhh_tipo_fk()
+    yield
+
+
+app = FastAPI(lifespan=_lifespan,
     title="Archivo Institucional Digital — Facultad de Ciencias, UCV",
     version="3.2.1-Neon",
     description="""
@@ -604,14 +614,6 @@ def _backfill_rrhh_tipo_fk():
         logger.info("Backfill id_tipo_documento RRHH OK")
     except Exception as exc:
         logger.warning(f"Backfill id_tipo_documento RRHH omitido: {exc}")
-
-
-@app.on_event("startup")
-def on_startup():
-    ensure_audit_table()
-    populate_missing_slugs()
-    run_migrations()
-    _backfill_rrhh_tipo_fk()
 
 
 # =============================================================================

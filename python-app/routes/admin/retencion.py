@@ -10,7 +10,7 @@ antes de poder ser eliminado o transferido al archivo permanente.
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from database import db_query, log_event
 from ..choices import invalidate_choices_cache
@@ -22,7 +22,8 @@ class RetencionUpdate(BaseModel):
     plazo_retencion_anios: int
     requester: Optional[str] = ""
 
-    @validator("plazo_retencion_anios")
+    @field_validator("plazo_retencion_anios")
+    @classmethod
     def plazo_must_be_positive(cls, v):
         if v < 1 or v > 100:
             raise ValueError("El plazo de retención debe estar entre 1 y 100 años")

@@ -9,7 +9,7 @@ from datetime import date
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from database import db_query, log_event
 from routes.admin.deps import require_session
@@ -131,16 +131,18 @@ class HistorialCargoIn(BaseModel):
     motivo: Optional[str] = None
     registrado_por: Optional[str] = ""
 
-    @validator("cargo_nombre")
+    @field_validator("cargo_nombre")
+    @classmethod
     def cargo_not_empty(cls, v):
         v = (v or "").strip()
         if not v:
             raise ValueError("cargo_nombre no puede estar vacío")
         return v
 
-    @validator("fecha_fin")
-    def fin_after_inicio(cls, v, values):
-        if v and "fecha_inicio" in values and v < values["fecha_inicio"]:
+    @field_validator("fecha_fin")
+    @classmethod
+    def fin_after_inicio(cls, v, info):
+        if v and "fecha_inicio" in info.data and v < info.data["fecha_inicio"]:
             raise ValueError("fecha_fin no puede ser anterior a fecha_inicio")
         return v
 

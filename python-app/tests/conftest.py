@@ -16,6 +16,7 @@ def app():
         patch("utils.populate_missing_slugs", return_value=None),
         patch("main.run_migrations", return_value=None),
         patch("main._backfill_rrhh_tipo_fk", return_value=None),
+        patch("database.log_event", return_value=None),
     ):
         from main import app as _app
         yield _app
