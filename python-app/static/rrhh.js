@@ -264,14 +264,14 @@ function renderRrhhDossierModal() {
 
   const initials  = getPersonInitials(profile.persona_raw);
   const photoHtml = profile.foto_url
-    ? `<div class="rrhh-person-photo-card"><img src="${profile.foto_url}" class="rrhh-person-photo" alt="${profile.persona}"></div>`
-    : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${initials}</span><i class="fas fa-user rrhh-person-photo-icon"></i></div>`;
+    ? `<div class="rrhh-person-photo-card"><img src="${escHtml(profile.foto_url)}" class="rrhh-person-photo" alt="${escHtml(profile.persona)}"></div>`
+    : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${escHtml(initials)}</span><i class="fas fa-user rrhh-person-photo-icon"></i></div>`;
 
   const isRetirado  = (profile.statuses || "").includes("Retirado");
   const isPensionado = (profile.statuses || "").includes("Pensionado");
   const cedulaDoc = findPersonKeyDoc(profile, ["cedula"]);
   const ciHtml = profile.cedulas
-    ? `${profile.cedulas}${cedulaDoc ? ` <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="openDocMetadataModal('${cedulaDoc.__idx}');return false;"><i class="fas fa-id-card"></i> Ver</a>` : ""}`
+    ? `${escHtml(profile.cedulas)}${cedulaDoc ? ` <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="openDocMetadataModal(${JSON.stringify(cedulaDoc.__idx)});return false;"><i class="fas fa-id-card"></i> Ver</a>` : ""}`
     : "N/A";
 
   // Derivar categorías visibles desde los documentos (usa slug→parte canónica como fallback)
@@ -298,9 +298,9 @@ function renderRrhhDossierModal() {
         </div>
         <div class="ds-person-info flex-grow-1 w-100">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-            <h3 class="ds-person-name m-0 text-primary font-weight-bold">${profile.persona}</h3>
+            <h3 class="ds-person-name m-0 text-primary font-weight-bold">${escHtml(profile.persona)}</h3>
             <div class="d-flex align-items-center">
-              <span class="badge badge-info text-uppercase px-3 py-2">${profile.statuses || "Sin estado"}</span>
+              <span class="badge badge-info text-uppercase px-3 py-2">${escHtml(profile.statuses || "Sin estado")}</span>
               ${profile.rows && profile.rows[0]?.empleado_id
                 ? `<a href="${API_BASE}/api/rrhh/report/${profile.rows[0].empleado_id}" target="_blank" class="btn btn-outline-secondary btn-sm ml-2" title="Generar reporte imprimible">
                     <i class="fas fa-print mr-1"></i>Imprimir Expediente
@@ -314,16 +314,16 @@ function renderRrhhDossierModal() {
             </div>
           </div>
           <h5 class="ds-person-cargo text-secondary mb-3 font-weight-bold">
-            <i class="fas fa-user-tie mr-2"></i>${profile.cargos || "Cargo no especificado"}
+            <i class="fas fa-user-tie mr-2"></i>${escHtml(profile.cargos || "Cargo no especificado")}
           </h5>
           <div class="row">
             <div class="col-6 mb-2"><strong>C.I.:</strong> ${ciHtml}</div>
-            <div class="col-6 mb-2"><strong>RIF:</strong> ${profile.rifs || "N/A"}</div>
-            <div class="col-6 mb-2"><strong>Adscripción:</strong> ${profile.departamentos || "N/A"}</div>
-            <div class="col-6 mb-2"><strong>Ingreso:</strong> ${formatISOToSpanish(profile.fecha_ingreso) || "No registrada"}</div>
-            ${profile.fecha_nacimiento ? `<div class="col-6 mb-2"><strong>Nacimiento:</strong> ${formatISOToSpanish(profile.fecha_nacimiento)}${_calcEdad(profile.fecha_nacimiento) ? ` <span class="text-muted small">(${_calcEdad(profile.fecha_nacimiento)} años)</span>` : ""}</div>` : ""}
-            ${profile.nivel_educativo  ? `<div class="col-6 mb-2"><strong>Nivel Educ.:</strong> <span class="badge badge-light border">${profile.nivel_educativo}</span></div>` : ""}
-            ${profile.sexo             ? `<div class="col-6 mb-2"><strong>Sexo:</strong> ${{ M: "Masculino", F: "Femenino", O: "Otro" }[profile.sexo] || profile.sexo}</div>` : ""}
+            <div class="col-6 mb-2"><strong>RIF:</strong> ${escHtml(profile.rifs || "N/A")}</div>
+            <div class="col-6 mb-2"><strong>Adscripción:</strong> ${escHtml(profile.departamentos || "N/A")}</div>
+            <div class="col-6 mb-2"><strong>Ingreso:</strong> ${escHtml(formatISOToSpanish(profile.fecha_ingreso) || "No registrada")}</div>
+            ${profile.fecha_nacimiento ? `<div class="col-6 mb-2"><strong>Nacimiento:</strong> ${escHtml(formatISOToSpanish(profile.fecha_nacimiento))}${_calcEdad(profile.fecha_nacimiento) ? ` <span class="text-muted small">(${_calcEdad(profile.fecha_nacimiento)} años)</span>` : ""}</div>` : ""}
+            ${profile.nivel_educativo  ? `<div class="col-6 mb-2"><strong>Nivel Educ.:</strong> <span class="badge badge-light border">${escHtml(profile.nivel_educativo)}</span></div>` : ""}
+            ${profile.sexo             ? `<div class="col-6 mb-2"><strong>Sexo:</strong> ${escHtml({ M: "Masculino", F: "Femenino", O: "Otro" }[profile.sexo] || profile.sexo)}</div>` : ""}
             ${isRetirado   ? `<div class="col-6 mb-2"><strong>Jubilación:</strong> ${formatISOToSpanish(profile.fecha_jubilacion) || "No registrada"}</div>` : ""}
             ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong>    ${formatISOToSpanish(profile.fecha_pension)    || "No registrada"}</div>` : ""}
           </div>
@@ -505,11 +505,11 @@ function _renderDossierFileList(catFiles, dossierTerms) {
           <span class="rrhh-person-file-sub">Fecha: ${formatISOToSpanish(f.fecha_documento || f.fecha_ingreso)}</span>
         </div>
         <a href="#" class="btn btn-sm btn-outline-info"
-          onclick="openDocMetadataModal('${f.__idx}');return false;">Abrir archivo</a>
+          onclick="openDocMetadataModal(${JSON.stringify(f.__idx)});return false;">Abrir archivo</a>
       </div>
       <div class="rrhh-person-file-meta">
-        <span>Dependencia: <strong>${f.departamento || "N/A"}</strong></span>
-        <span>Estatus: <strong>${f.estatus || f.estado || "N/A"}</strong></span>
+        <span>Dependencia: <strong>${escHtml(f.departamento || "N/A")}</strong></span>
+        <span>Estatus: <strong>${escHtml(f.estatus || f.estado || "N/A")}</strong></span>
         <span>Ubicación: <strong>${hlD(f.ubicacion) || "N/A"}</strong></span>
         ${f.notas ? `<span>Notas: <em>${hlD(f.notas)}</em></span>` : ""}
       </div>
@@ -529,15 +529,15 @@ function openDocMetadataModal(idxReal) {
 
   const docLbl = _docLabel(doc);
   document.getElementById("modal-doc-meta-container").innerHTML = `
-    <div class="ds-doc-meta-row"><span class="k">Titular</span><span class="v">${doc.empleado}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Cédula</span><span class="v">${doc.cedula}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Tipo de Documento</span><span class="v">${docLbl}</span></div>
-    ${doc.titulo_doc && doc.titulo_doc !== docLbl ? `<div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo_doc}</span></div>` : ""}
-    ${doc.categoria ? `<div class="ds-doc-meta-row"><span class="k">Clasificación</span><span class="v">${doc.categoria}</span></div>` : ""}
-    <div class="ds-doc-meta-row"><span class="k">Personas vinculadas</span><span class="v">${doc.personas_relacionadas || "N/A"}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion || "N/A"}</span></div>
-    <div class="ds-doc-meta-row"><span class="k">Fecha del Documento</span><span class="v">${formatISOToSpanish(doc.fecha_documento || doc.fecha_ingreso)}</span></div>
-    ${doc.notas ? `<div class="ds-doc-meta-row"><span class="k">Notas</span><span class="v">${doc.notas}</span></div>` : ""}
+    <div class="ds-doc-meta-row"><span class="k">Titular</span><span class="v">${escHtml(doc.empleado)}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Cédula</span><span class="v">${escHtml(doc.cedula)}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Tipo de Documento</span><span class="v">${escHtml(docLbl)}</span></div>
+    ${doc.titulo_doc && doc.titulo_doc !== docLbl ? `<div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${escHtml(doc.titulo_doc)}</span></div>` : ""}
+    ${doc.categoria ? `<div class="ds-doc-meta-row"><span class="k">Clasificación</span><span class="v">${escHtml(doc.categoria)}</span></div>` : ""}
+    <div class="ds-doc-meta-row"><span class="k">Personas vinculadas</span><span class="v">${escHtml(doc.personas_relacionadas || "N/A")}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${escHtml(doc.ubicacion || "N/A")}</span></div>
+    <div class="ds-doc-meta-row"><span class="k">Fecha del Documento</span><span class="v">${escHtml(formatISOToSpanish(doc.fecha_documento || doc.fecha_ingreso))}</span></div>
+    ${doc.notas ? `<div class="ds-doc-meta-row"><span class="k">Notas</span><span class="v">${escHtml(doc.notas)}</span></div>` : ""}
   `;
   document.getElementById("modal-doc-abstract").innerText =
     doc.notas || `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;

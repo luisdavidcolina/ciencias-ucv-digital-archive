@@ -164,27 +164,27 @@ function renderArchivoList() {
     const soporteColor = {"Físico":"#6c757d","Digital":"#17a2b8","Digitalizado":"#fd7e14"}[doc.soporte] || "#6c757d";
 
     return `
-    <div class="ds-item-card" onclick="openArchivoModal('${doc.__idx}')" style="cursor:pointer;border-left:3px solid ${iconData.color};">
+    <div class="ds-item-card" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;border-left:3px solid ${iconData.color};">
       <div class="ds-item-thumbnail" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
         <i class="${iconData.icon}" style="font-size:36px;color:${iconData.color};"></i>
         ${hasFile ? `<span class="badge badge-info" style="font-size:0.6rem;padding:2px 5px;"><i class="fas fa-file mr-1"></i>Digital</span>` : ""}
-        ${doc.soporte ? `<span class="badge" style="font-size:0.55rem;padding:2px 5px;background:${soporteColor};color:#fff;"><i class="fas ${soporteIcon} mr-1"></i>${doc.soporte}</span>` : ""}
+        ${doc.soporte ? `<span class="badge" style="font-size:0.55rem;padding:2px 5px;background:${soporteColor};color:#fff;"><i class="fas ${soporteIcon} mr-1"></i>${escHtml(doc.soporte)}</span>` : ""}
       </div>
       <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <span class="badge badge-light" style="font-size:0.75rem;color:#2b4e72;font-weight:bold;border:1px solid #d9e6f4;border-radius:12px;padding:3px 10px;">
-            <i class="fas fa-bookmark mr-1"></i> ${doc.tesauro_primario || doc.doc_type}
+            <i class="fas fa-bookmark mr-1"></i> ${escHtml(doc.tesauro_primario || doc.doc_type)}
           </span>
-          <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${formatISOToSpanish(doc.fecha)}</span>
+          <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${escHtml(formatISOToSpanish(doc.fecha))}</span>
         </div>
         <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:4px 0;">${hl(doc.titulo)}</h4>
         <div class="ds-item-authors" style="font-size:0.82rem;color:#495057;margin-bottom:2px;">
           <i class="fas fa-user-edit mr-1"></i> <strong>${hl(doc.autor)}</strong>
         </div>
         <div class="ds-item-publisher" style="font-size:0.82rem;color:#6c757d;margin-bottom:4px;">
-          <i class="fas fa-map-marker-alt mr-1"></i> <strong>${doc.ubicacion}</strong>
-          ${doc.numero_folio ? `<span class="ml-2 text-muted"><i class="fas fa-hashtag mr-1"></i>${doc.numero_folio}</span>` : ""}
-          ${doc.numero_paginas ? `<span class="ml-2 text-muted"><i class="fas fa-file-alt mr-1"></i>${doc.numero_paginas} p.</span>` : ""}
+          <i class="fas fa-map-marker-alt mr-1"></i> <strong>${escHtml(doc.ubicacion)}</strong>
+          ${doc.numero_folio ? `<span class="ml-2 text-muted"><i class="fas fa-hashtag mr-1"></i>${escHtml(doc.numero_folio)}</span>` : ""}
+          ${doc.numero_paginas ? `<span class="ml-2 text-muted"><i class="fas fa-file-alt mr-1"></i>${escHtml(String(doc.numero_paginas))} p.</span>` : ""}
         </div>
         ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${hl(doc.resumen)}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
@@ -194,7 +194,7 @@ function renderArchivoList() {
       </div>
       <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
         <button class="btn btn-primary ds-action-btn" title="Ver detalle"
-          onclick="event.stopPropagation();openArchivoModal('${doc.__idx}')"
+          onclick="event.stopPropagation();openArchivoModal(${doc.__idx})"
           style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
           <i class="fas fa-eye"></i>
         </button>
@@ -234,29 +234,29 @@ function openDocModalWithRecord(doc) {
 
   if (isPlano) {
     document.getElementById("modal-doc-meta-container").innerHTML = `
-      <div class="ds-doc-meta-row"><span class="k">Proyecto</span><span class="v">${doc.proyecto || doc.titulo}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Año</span><span class="v">${anio || "N/A"}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Dibujante / Autor</span><span class="v">${doc.autor || "N/A"}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Proyecto</span><span class="v">${escHtml(doc.proyecto || doc.titulo)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${escHtml(doc.titulo)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Año</span><span class="v">${escHtml(anio || "N/A")}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${escHtml(doc.doc_type)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Dibujante / Autor</span><span class="v">${escHtml(doc.autor || "N/A")}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${escHtml(doc.ubicacion)}</span></div>
     `;
   } else {
     const dateLabel = isActa ? "Fecha de Sesión" : "Fecha de Emisión";
     const dateValue = isActa
-      ? `${formatISOToSpanish(doc.fecha)} <small class="text-muted">(Sesión)</small>`
-      : formatISOToSpanish(doc.fecha);
+      ? `${escHtml(formatISOToSpanish(doc.fecha))} <small class="text-muted">(Sesión)</small>`
+      : escHtml(formatISOToSpanish(doc.fecha));
     document.getElementById("modal-doc-meta-container").innerHTML = `
-      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${doc.titulo}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Autor / Ente</span><span class="v">${doc.autor}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">${dateLabel}</span><span class="v">${dateValue}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${doc.doc_type}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Soporte</span><span class="v">${doc.soporte || "Físico"}</span></div>
-      ${doc.numero_folio ? `<div class="ds-doc-meta-row"><span class="k">N° de Folio / Signatura</span><span class="v">${doc.numero_folio}</span></div>` : ""}
-      ${doc.numero_paginas ? `<div class="ds-doc-meta-row"><span class="k">N° de Páginas</span><span class="v">${doc.numero_paginas}</span></div>` : ""}
-      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${doc.ubicacion}</span></div>
-      ${doc.personas_relacionadas ? `<div class="ds-doc-meta-row"><span class="k">Personas Relacionadas</span><span class="v">${doc.personas_relacionadas}</span></div>` : ""}
-      <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${badges.join("; ")}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${escHtml(doc.titulo)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Autor / Ente</span><span class="v">${escHtml(doc.autor)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">${escHtml(dateLabel)}</span><span class="v">${dateValue}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${escHtml(doc.doc_type)}</span></div>
+      <div class="ds-doc-meta-row"><span class="k">Soporte</span><span class="v">${escHtml(doc.soporte || "Físico")}</span></div>
+      ${doc.numero_folio ? `<div class="ds-doc-meta-row"><span class="k">N° de Folio / Signatura</span><span class="v">${escHtml(doc.numero_folio)}</span></div>` : ""}
+      ${doc.numero_paginas ? `<div class="ds-doc-meta-row"><span class="k">N° de Páginas</span><span class="v">${escHtml(String(doc.numero_paginas))}</span></div>` : ""}
+      <div class="ds-doc-meta-row"><span class="k">Ubicación Física</span><span class="v">${escHtml(doc.ubicacion)}</span></div>
+      ${doc.personas_relacionadas ? `<div class="ds-doc-meta-row"><span class="k">Personas Relacionadas</span><span class="v">${escHtml(doc.personas_relacionadas)}</span></div>` : ""}
+      <div class="ds-doc-meta-row"><span class="k">Clasificación / Palabras Clave</span><span class="v">${escHtml(badges.join("; "))}</span></div>
     `;
   }
   document.getElementById("modal-doc-abstract").innerText =
