@@ -96,7 +96,7 @@ def _registrar(perfil, modulo, esquema, manejador):
     })
 
 
-def definiciones(ctx: dict) -> list:
+def definitions(ctx: dict) -> list:
     """El subconjunto de herramientas que existe para este usuario concreto."""
     perfil = ctx.get("perfil", "publico")
     modulos = ctx.get("modulos") or set()
@@ -110,7 +110,7 @@ def definiciones(ctx: dict) -> list:
     return fuera
 
 
-def ejecutar(nombre: str, args: dict, ctx: dict) -> dict:
+def execute(nombre: str, args: dict, ctx: dict) -> dict:
     """Despacha la herramienta, revalidando el permiso.
 
     La comprobación se repite AQUÍ además de en `definiciones`. Es deliberado: si mañana
@@ -512,7 +512,7 @@ _CAMPOS_RRHH = {
 }
 
 
-def campos_permitidos(modulo):
+def allowed_fields(modulo):
     return _CAMPOS_ARCHIVO if modulo == "archivo" else _CAMPOS_RRHH
 
 
@@ -544,7 +544,7 @@ def _crear_propuesta(ctx, accion, modulo, objetivo_id, datos, resumen):
 
 def _normalizar_campos(modulo, datos):
     """Filtra a la lista blanca y normaliza tipos. Lo que no pasa, se informa."""
-    permitidos = campos_permitidos(modulo)
+    permitidos = allowed_fields(modulo)
     limpios, rechazados = {}, []
     for k, v in (datos or {}).items():
         clave = str(k).strip().lower()
@@ -572,7 +572,7 @@ def _proponer_actualizacion(args, ctx):
     campos, rechazados = _normalizar_campos(modulo, args.get("campos"))
     if not campos:
         return {"error": "No indicaste ningún campo modificable. "
-                         f"Se pueden cambiar: {', '.join(sorted(campos_permitidos(modulo)))}."}
+                         f"Se pueden cambiar: {', '.join(sorted(allowed_fields(modulo)))}."}
 
     # Se lee el estado ACTUAL y se guarda en la propuesta. Sin esto, quien aprueba ve
     # "titulo -> X" sin saber qué decía antes, que es justo lo que necesita para decidir.

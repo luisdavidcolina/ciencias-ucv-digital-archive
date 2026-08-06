@@ -23,7 +23,7 @@ LAS DOS COSAS QUE NO SE PUEDEN AFLOJAR
 import json
 
 from database import db_query, log_event
-from core.ai_tools import campos_permitidos
+from core.ai_tools import allowed_fields
 
 _TABLAS = {
     "archivo": ("datos_archivo", "id_archivo"),
@@ -45,7 +45,7 @@ def _usuario_id(usuario: str):
     return fila["id"]
 
 
-def listar(conversacion_id=None, estado="pendiente", limite=50):
+def list_proposals(conversacion_id=None, estado="pendiente", limite=50):
     where, params = [], []
     if conversacion_id is not None:
         where.append("conversacion_id = %s")
@@ -65,7 +65,7 @@ def listar(conversacion_id=None, estado="pendiente", limite=50):
     """, params, fetch="all")
 
 
-def rechazar(propuesta_id: int, usuario: str) -> dict:
+def reject(propuesta_id: int, usuario: str) -> dict:
     fila = db_query("SELECT estado FROM public.ia_propuestas WHERE id = %s",
                     [propuesta_id], fetch="one")
     if not fila:
@@ -82,7 +82,7 @@ def rechazar(propuesta_id: int, usuario: str) -> dict:
     return {"ok": True, "estado": "rechazada"}
 
 
-def aprobar(propuesta_id: int, usuario: str, modulos: set) -> dict:
+def approve(propuesta_id: int, usuario: str, modulos: set) -> dict:
     """Ejecuta la propuesta de verdad. Es el único punto del módulo que escribe."""
     p = db_query("SELECT * FROM public.ia_propuestas WHERE id = %s", [propuesta_id], fetch="one")
     if not p:
@@ -130,7 +130,7 @@ def _sql_campos(modulo, campos):
     JSON que un modelo escribió, así que sus CLAVES no pueden llegar al SQL. Solo llegan
     las que coinciden con la lista blanca, y esas son literales del código.
     """
-    permitidos = campos_permitidos(modulo)
+    permitidos = allowed_fields(modulo)
     trozos, valores = [], []
     for clave in sorted(permitidos):
         if clave in campos:
@@ -164,7 +164,7 @@ def _crear(p, datos, usuario):
     campos = dict(datos.get("campos") or {})
     extra = datos.get("extra") or {}
 
-    permitidos = campos_permitidos(p["modulo"])
+    permitidos = allowed_fields(p["modulo"])
     columnas = [c for c in sorted(permitidos) if c in campos]
     valores = [None if campos[c] == "" else campos[c] for c in columnas]
 

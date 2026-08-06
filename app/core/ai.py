@@ -90,7 +90,7 @@ def api_key() -> str:
     return _env("OPENROUTER_API_KEY").strip()
 
 
-def habilitada() -> bool:
+def enabled() -> bool:
     return _env("IA_HABILITADA", "true").lower() not in ("false", "0", "no")
 
 
@@ -106,7 +106,7 @@ def max_tokens() -> int:
     return 1500
 
 
-def tope_diario() -> float:
+def daily_limit() -> float:
     """Tope de gasto por día, en dólares. El riesgo del día uno es el costo descontrolado."""
     for valor in (_de_bd("tope_diario"), _env("IA_TOPE_DIARIO", "1.00")):
         try:
@@ -118,21 +118,21 @@ def tope_diario() -> float:
     return 1.00
 
 
-def estado() -> dict:
+def status() -> dict:
     """Nunca un 500 por configuración faltante: se degrada con un motivo legible."""
-    if not habilitada():
+    if not enabled():
         return {"disponible": False, "motivo": "El asistente está deshabilitado (IA_HABILITADA=false)."}
     if not api_key():
         return {"disponible": False, "motivo": "Falta OPENROUTER_API_KEY en las variables de entorno."}
     return {"disponible": True, "modelo": modelo_actual()}
 
 
-def modelo_actual() -> str:
+def current_model() -> str:
     """El modelo elegido desde el panel; si nadie eligió, el de la variable de entorno."""
     return _de_bd("modelo") or _env("OPENROUTER_MODEL", MODELO_POR_DEFECTO)
 
 
-def modelo_existe(slug: str) -> bool:
+def model_exists(slug: str) -> bool:
     """Comprueba el slug contra el catálogo real antes de dejar guardarlo.
 
     Sin esto, un slug mal escrito (por ejemplo el id nativo `claude-haiku-4-5` en vez del de
@@ -176,7 +176,7 @@ _CATALOGO = {"datos": None, "ts": 0.0}
 _CATALOGO_TTL = 6 * 3600  # el catálogo de OpenRouter cambia de semana en semana, no de minuto
 
 
-def catalogo_modelos() -> list:
+def list_models() -> list:
     """El catálogo real de OpenRouter, normalizado para el panel.
 
     No se adivinan slugs ni precios: se consultan. Los slugs de OpenRouter llevan prefijo de
@@ -262,7 +262,7 @@ def catalogo_modelos() -> list:
 # EL CICLO DE CONVERSACIÓN CON HERRAMIENTAS
 # =============================================================================
 
-def bloque_sistema(prompt: str) -> dict:
+def system_block(prompt: str) -> dict:
     """El turno de sistema, con CACHÉ DE PROMPT — la palanca de costo real.
 
     El prompt de sistema (identidad + catálogos + reglas) son ~2000 tokens que se reenvían
@@ -281,7 +281,7 @@ def bloque_sistema(prompt: str) -> dict:
     }
 
 
-def sanear_historial(crudos, tope: int = 20) -> list:
+def sanitize_history(crudos, tope: int = 20) -> list:
     """Deja pasar solo turnos user/assistant y recorta a los últimos `tope`.
 
     Lo que llega del navegador es texto no confiable: aquí se decide la forma, no allá.
@@ -298,7 +298,7 @@ def sanear_historial(crudos, tope: int = 20) -> list:
     return limpios[-tope:] if len(limpios) > tope else limpios
 
 
-def conversar(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> dict:
+def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> dict:
     """Un turno completo: pregunta → (herramientas)* → respuesta.
 
     El modelo puede pedir datos en vez de responder: contesta con `tool_calls`, se ejecuta
@@ -310,7 +310,7 @@ def conversar(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) ->
 
     Devuelve siempre un dict; los errores llegan como {"error": ..., "status": ...}.
     """
-    conversacion = [bloque_sistema(prompt)] + mensajes
+    conversacion = [system_block(prompt)] + mensajes
     herramientas = definiciones(ctx)
 
     tokens = 0

@@ -150,7 +150,7 @@ def _save_turn(conv_id: int, rol: str, contenido: str, extra=None):
 @router.get("/disponible")
 def available(usuario: str | None = Depends(_optional_session)):
     """Nunca revienta por configuración faltante: la pantalla muestra un aviso legible."""
-    est = ai.estado()
+    est = ai.status()
     if not est["disponible"]:
         return est
 
@@ -164,7 +164,7 @@ def available(usuario: str | None = Depends(_optional_session)):
     est["usuario"] = ctx["usuario"]
     try:
         est["gasto_hoy"] = round(_daily_spend(), 6)
-        est["tope_diario"] = ai.tope_diario()
+        est["tope_diario"] = ai.daily_limit()
     except Exception:
         pass
     return est
@@ -172,16 +172,16 @@ def available(usuario: str | None = Depends(_optional_session)):
 
 @router.post("/chat")
 def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_session)):
-    est = ai.estado()
+    est = ai.status()
     if not est["disponible"]:
         raise HTTPException(status_code=503, detail=est["motivo"])
 
     ctx = _build_context(usuario)
-    mensajes = ai.sanear_historial(payload.get("mensajes"), ai.MAX_HISTORIAL[ctx["perfil"]])
+    mensajes = ai.sanitize_history(payload.get("mensajes"), ai.MAX_HISTORIAL[ctx["perfil"]])
     if not mensajes:
         raise HTTPException(status_code=422, detail="No hay ningún mensaje que enviar.")
 
-    gasto, tope = _daily_spend(), ai.tope_diario()
+    gasto, tope = _daily_spend(), ai.daily_limit()
     if gasto >= tope:
         logger.warning(f"IA: rechazado por tope diario (${gasto:.4f} / ${tope})")
         raise HTTPException(
@@ -193,7 +193,7 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_sess
     ultimo = mensajes[-1]["content"]
     conv_id = _open_conversation(payload.get("conversacion_id"), {
         "canal": "web", "perfil": ctx["perfil"], "usuario": ctx["usuario"],
-        "titulo": ultimo, "modelo": ai.modelo_actual(),
+        "titulo": ultimo, "modelo": ai.current_model(),
     })
     # Las herramientas de adjuntos y propuestas se anclan a la conversación: sin esto, un
     # adjunto de otro hilo sería alcanzable adivinando un id.
@@ -202,8 +202,8 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_sess
     _save_turn(conv_id, "user", ultimo)
 
     t0 = time.time()
-    r = ai.conversar(ai_prompts.prompt(ctx), mensajes, ctx,
-                     ai_tools.ejecutar, ai_tools.definiciones)
+    r = ai.converse(ai_prompts.prompt(ctx), mensajes, ctx,
+                     ai_tools.execute, ai_tools.definitions)
     ms = int((time.time() - t0) * 1000)
 
     if "error" in r:
@@ -225,7 +225,7 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_sess
     r["conversacion_id"] = conv_id
     r["perfil"] = ctx["perfil"]
     # Las propuestas que este turno dejó pendientes, para que el chat pinte los botones.
-    r["propuestas"] = ai_proposals.listar(conversacion_id=conv_id, estado="pendiente")
+    r["propuestas"] = ai_proposals.list_proposals(conversacion_id=conv_id, estado="pendiente")
     return r
 
 
@@ -311,7 +311,7 @@ async def adjuntar(
 @router.get("/propuestas")
 def proposals(conversacion_id: int | None = None, estado: str = "pendiente",
                usuario: str = Depends(require_session)):
-    return {"propuestas": ai_proposals.listar(conversacion_id, estado)}
+    return {"propuestas": ai_proposals.list_proposals(conversacion_id, estado)}
 
 
 @router.post("/propuesta/{propuesta_id}/aprobar")
@@ -321,7 +321,7 @@ def approve_proposal(propuesta_id: int, usuario: str = Depends(require_session))
         raise HTTPException(status_code=403,
                             detail="Solo un administrador de módulo puede aprobar cambios.")
     try:
-        return ai_proposals.aprobar(propuesta_id, usuario, ctx["modulos"])
+        return ai_proposals.approve(propuesta_id, usuario, ctx["modulos"])
     except ai_proposals.PropuestaError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -333,7 +333,7 @@ def approve_proposal(propuesta_id: int, usuario: str = Depends(require_session))
 @router.post("/propuesta/{propuesta_id}/rechazar")
 def reject_proposal(propuesta_id: int, usuario: str = Depends(require_session)):
     try:
-        return ai_proposals.rechazar(propuesta_id, usuario)
+        return ai_proposals.reject(propuesta_id, usuario)
     except ai_proposals.PropuestaError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -408,7 +408,7 @@ def conversation(conv_id: int, usuario: str = Depends(require_session)):
         "conversacion": cab,
         "mensajes": msgs,
         # Las propuestas que quedaron sin resolver siguen vivas al retomar el hilo.
-        "propuestas": ai_proposals.listar(conversacion_id=conv_id, estado="pendiente"),
+        "propuestas": ai_proposals.list_proposals(conversacion_id=conv_id, estado="pendiente"),
     }
 
 
@@ -448,7 +448,7 @@ def spending(dias: int = 30, usuario: str = Depends(require_session)):
         FROM public.ia_mensajes WHERE rol = 'assistant'
     """, fetch="one")
     return {"por_dia": por_dia, "historico": total,
-            "hoy": round(_daily_spend(), 6), "tope_diario": ai.tope_diario()}
+            "hoy": round(_daily_spend(), 6), "tope_diario": ai.daily_limit()}
 
 
 @router.get("/modelos")
@@ -457,11 +457,11 @@ def models(usuario: str = Depends(require_session)):
     if not ai.api_key():
         raise HTTPException(status_code=503, detail="Falta OPENROUTER_API_KEY.")
     try:
-        lista = ai.catalogo_modelos()
+        lista = ai.list_models()
     except Exception as e:
         logger.error(f"IA: no se pudo traer el catálogo de OpenRouter: {e}")
         raise HTTPException(status_code=502, detail="No se pudo consultar el catálogo de modelos.")
-    return {"actual": ai.modelo_actual(), "por_defecto": ai.MODELO_POR_DEFECTO,
+    return {"actual": ai.current_model(), "por_defecto": ai.MODELO_POR_DEFECTO,
             "total": len(lista), "modelos": lista, "supuesto": ai.TOKENS_MENSAJE_TIPICO}
 
 
@@ -472,8 +472,8 @@ _CLAVES_CONFIG = {"modelo", "nombre", "tono", "conocimiento", "reglas",
 @router.get("/config")
 def get_config(usuario: str = Depends(require_session)):
     cfg = ai_prompts.config()
-    cfg["modelo"] = ai.modelo_actual()
-    cfg["tope_diario"] = ai.tope_diario()
+    cfg["modelo"] = ai.current_model()
+    cfg["tope_diario"] = ai.daily_limit()
     cfg["max_tokens"] = ai.max_tokens()
     return cfg
 
@@ -493,7 +493,7 @@ def save_config(payload: dict = Body(...), usuario: str = Depends(require_sessio
         slug = str(payload["modelo"] or "").strip()
         if not slug:
             raise HTTPException(status_code=422, detail="El modelo no puede ir vacío.")
-        if not ai.modelo_existe(slug):
+        if not ai.model_exists(slug):
             raise HTTPException(
                 status_code=422,
                 detail=f"'{slug}' no existe en OpenRouter. Los slugs llevan prefijo de "
@@ -532,4 +532,4 @@ def save_config(payload: dict = Body(...), usuario: str = Depends(require_sessio
         guardadas.append(clave)
 
     log_event(usuario, "Actualizó configuración de IA", "IA", ", ".join(guardadas))
-    return {"ok": True, "guardadas": guardadas, "modelo": ai.modelo_actual()}
+    return {"ok": True, "guardadas": guardadas, "modelo": ai.current_model()}
