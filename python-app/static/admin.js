@@ -124,12 +124,12 @@ async function loadVencimientosTable() {
       const urgency = v.dias_vencido > 365 ? "table-danger" : v.dias_vencido > 90 ? "table-warning" : "";
       return `<tr class="${urgency}">
         <td class="text-muted">${i + 1}</td>
-        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${v.titulo}">${v.titulo || "—"}</td>
-        <td><span class="badge badge-secondary">${v.tipo_documento || "—"}</span></td>
-        <td>${v.fecha_documento || "—"}</td>
-        <td>${v.plazo_anios} año${v.plazo_anios !== 1 ? "s" : ""}</td>
-        <td><strong>${v.dias_vencido}</strong> días</td>
-        <td class="text-muted small">${v.ubicacion || "—"}</td>
+        <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(v.titulo)}">${escHtml(v.titulo || "—")}</td>
+        <td><span class="badge badge-secondary">${escHtml(v.tipo_documento || "—")}</span></td>
+        <td>${escHtml(v.fecha_documento || "—")}</td>
+        <td>${Number(v.plazo_anios)} año${Number(v.plazo_anios) !== 1 ? "s" : ""}</td>
+        <td><strong>${Number(v.dias_vencido)}</strong> días</td>
+        <td class="text-muted small">${escHtml(v.ubicacion || "—")}</td>
       </tr>`;
     }).join("");
   } catch (e) {
@@ -155,11 +155,11 @@ async function loadRetentionConfig() {
     }
     tbody.innerHTML = tipos.map(t => `
       <tr>
-        <td>${t.nombre_corto || t.nombre}</td>
+        <td>${escHtml(t.nombre_corto || t.nombre)}</td>
         <td>
           <div class="input-group input-group-sm">
             <input type="number" class="form-control form-control-sm"
-                   id="ret-plazo-${t.id}" value="${t.plazo_retencion_anios}" min="1" max="100"
+                   id="ret-plazo-${t.id}" value="${Number(t.plazo_retencion_anios)}" min="1" max="100"
                    style="max-width:80px;">
             <div class="input-group-append">
               <span class="input-group-text text-muted">años</span>
@@ -168,7 +168,7 @@ async function loadRetentionConfig() {
         </td>
         <td>
           <button class="btn btn-sm btn-outline-success" onclick="_saveRetentionPlazo(${t.id})"
-                  title="Guardar plazo para ${t.nombre_corto || t.nombre}">
+                  title="Guardar plazo para ${escHtml(t.nombre_corto || t.nombre)}">
             <i class="fas fa-save"></i>
           </button>
         </td>
