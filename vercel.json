@@ -9,14 +9,14 @@
       }
     },
     {
-      "src": "python-app/static/**/*",
+      "src": "app/static/**/*",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/python-app/static/$1"
+      "dest": "/app/static/$1"
     },
     {
       "src": "/(.*)",
