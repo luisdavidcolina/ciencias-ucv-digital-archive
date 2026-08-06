@@ -19,7 +19,7 @@ async function openEditDocModal(id) {
   // Preview de archivo si hay URL
   const previewContainer = document.getElementById("edit-doc-file-preview");
   if (previewContainer) {
-    const url = rec.file_url || "";
+    const url = _secureFileUrl(rec.file_url || "");
     if (!url) {
       previewContainer.innerHTML = '<p class="text-muted small mb-0">Sin archivo adjunto.</p>';
     } else if (/\.(pdf)$/i.test(url)) {
@@ -114,7 +114,7 @@ async function _lookupByCedula(suf) {
 }
 
 function _refreshEditDocPreview() {
-  const url = (document.getElementById("edit-doc-file-url")?.value || "").trim();
+  const url = _secureFileUrl((document.getElementById("edit-doc-file-url")?.value || "").trim());
   const container = document.getElementById("edit-doc-file-preview");
   if (!container) return;
   if (!url) {
