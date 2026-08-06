@@ -226,10 +226,10 @@ async function loadRecentSubmissions() {
         <i class="fas fa-file-alt mr-2 text-primary" style="font-size:1.15rem;flex-shrink:0;"></i>
         <div style="overflow:hidden;flex-grow:1;">
           <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            <strong style="font-size:0.82rem;" class="text-dark">${title || "Sin título"}</strong>
+            <strong style="font-size:0.82rem;" class="text-dark">${escHtml(title || "Sin título")}</strong>
           </div>
           <div class="d-flex align-items-center gap-1">
-            <span class="text-muted" style="font-size:0.70rem;">${item.doc_type || ""}</span>
+            <span class="text-muted" style="font-size:0.70rem;">${escHtml(item.doc_type || "")}</span>
             ${statusBadge(item.status)}
           </div>
         </div>
