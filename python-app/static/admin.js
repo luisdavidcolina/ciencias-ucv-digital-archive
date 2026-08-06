@@ -133,7 +133,8 @@ async function loadVencimientosTable() {
       </tr>`;
     }).join("");
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-danger text-center py-2">${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-danger text-center py-2"></td></tr>`;
+    tbody.querySelector("td").textContent = e.message;
   }
 }
 
@@ -174,7 +175,8 @@ async function loadRetentionConfig() {
         </td>
       </tr>`).join("");
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-2">${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-2"></td></tr>`;
+    tbody.querySelector("td").textContent = e.message;
   }
 }
 
