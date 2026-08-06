@@ -267,11 +267,11 @@ async function _loadPapeleraDocumentos(modulo, suf) {
       body.innerHTML = data.records.map((r, i) => `
         <tr>
           <td>${(page - 1) * 20 + i + 1}</td>
-          <td>${r.titulo || "—"}</td>
-          <td><small>${r.doc_type || "—"}</small></td>
-          <td><small>${r.fecha || "—"}</small></td>
-          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
-          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
+          <td>${escHtml(r.titulo || "—")}</td>
+          <td><small>${escHtml(r.doc_type || "—")}</small></td>
+          <td><small>${escHtml(r.fecha || "—")}</small></td>
+          <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
+          <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},'${modulo}')" title="Restaurar"><i class="fas fa-undo"></i></button>
             <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},'${modulo}')" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
@@ -302,10 +302,10 @@ async function _loadPapeleraEmpleados() {
       body.innerHTML = data.records.map((r, i) => `
         <tr>
           <td>${(page - 1) * 20 + i + 1}</td>
-          <td>${r.nombre || "—"}</td>
-          <td><small>${r.cedula || "—"}</small></td>
-          <td><small class="text-muted">${r.deleted_by || "—"}</small></td>
-          <td><small class="text-muted">${r.deleted_at || "—"}</small></td>
+          <td>${escHtml(r.nombre || "—")}</td>
+          <td><small>${escHtml(r.cedula || "—")}</small></td>
+          <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
+          <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id})" title="Restaurar"><i class="fas fa-undo"></i></button>
             <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>

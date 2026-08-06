@@ -155,14 +155,14 @@ function renderRrhhList() {
             <span><i class="fas fa-user-tie mr-1 text-muted"></i> <strong>${hl(p.cargos)}</strong></span>
           </div>
           <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
-            <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.73rem;">${p.estatuses}</span>
-            <span class="badge badge-light border" style="padding:3px 8px;border-radius:10px;font-size:0.73rem;"><i class="fas fa-file-alt mr-1"></i>${p.doc_count} docs</span>
-            ${(p.tipos||"").split(";").filter(Boolean).slice(0,3).map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${t.trim()}</span>`).join("")}
+            <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.73rem;">${escHtml(p.estatuses)}</span>
+            <span class="badge badge-light border" style="padding:3px 8px;border-radius:10px;font-size:0.73rem;"><i class="fas fa-file-alt mr-1"></i>${Number(p.doc_count) || 0} docs</span>
+            ${(p.tipos||"").split(";").filter(Boolean).slice(0,3).map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${escHtml(t.trim())}</span>`).join("")}
           </div>
         </div>
         <div class="ds-item-actions" style="margin-left:12px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
           <button class="btn btn-primary ds-action-btn" title="Ver expediente"
-            onclick="event.stopPropagation();openRrhhPersonDossier('${escapedRaw}')"
+            onclick="event.stopPropagation();openRrhhPersonDossier(${escapedRaw})"
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
             <i class="fas fa-eye"></i>
           </button>
@@ -235,8 +235,8 @@ function renderQuickDocLinks(profile) {
     if (doc) {
       return `
         <button class="btn btn-sm btn-outline-primary mr-2 mb-2"
-          onclick="openDocMetadataModal('${doc.__idx}')" title="Ver ${qd.label} en el expediente">
-          <i class="fas ${qd.icon} mr-1"></i>${qd.label}
+          onclick="openDocMetadataModal(${doc.__idx})" title="Ver ${escHtml(qd.label)} en el expediente">
+          <i class="fas ${qd.icon} mr-1"></i>${escHtml(qd.label)}
         </button>`;
     }
     return `
