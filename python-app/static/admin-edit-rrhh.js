@@ -17,7 +17,7 @@ async function openEditEmpleadoModal(empId) {
   if (estadoSel) {
     const estadosCat = state.choices?.rrhh?.estados_catalog || [];
     if (estadosCat.length) {
-      estadoSel.innerHTML = estadosCat.map(e => `<option value="${e}">${e}</option>`).join("");
+      estadoSel.innerHTML = estadosCat.map(e => `<option value="${escHtml(e)}">${escHtml(e)}</option>`).join("");
     }
     estadoSel.value = rec.estado || "Activo";
   }

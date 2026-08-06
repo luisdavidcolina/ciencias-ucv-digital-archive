@@ -45,7 +45,8 @@ function showToast(message, type, duration) {
 
   const toast = document.createElement("div");
   toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:8px;padding:10px 14px;margin-bottom:8px;min-width:260px;max-width:380px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s,transform 0.3s;transform:translateX(20px);`;
-  toast.innerHTML = `<i class="${cfg.icon}" style="font-size:1rem;flex-shrink:0;margin-top:2px;"></i><span style="flex:1;">${message}</span><button style="background:none;border:none;padding:0 0 0 8px;cursor:pointer;opacity:0.6;color:inherit;font-size:1rem;" onclick="this.closest('div').remove()">✕</button>`;
+  toast.innerHTML = `<i class="${cfg.icon}" style="font-size:1rem;flex-shrink:0;margin-top:2px;"></i><span style="flex:1;"></span><button style="background:none;border:none;padding:0 0 0 8px;cursor:pointer;opacity:0.6;color:inherit;font-size:1rem;" onclick="this.closest('div').remove()">✕</button>`;
+  toast.querySelector("span").textContent = message;
   container.appendChild(toast);
 
   requestAnimationFrame(() => { toast.style.transform = "translateX(0)"; });
