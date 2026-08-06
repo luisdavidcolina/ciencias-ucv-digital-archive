@@ -8,6 +8,7 @@ from database import db_query
 import json
 import io
 import re
+from utils import paginate
 from datetime import datetime, date
 from typing import Optional
 
@@ -202,9 +203,7 @@ async def restore_backup(
 @router.get("/history")
 def get_backup_history(page: int = 1, per_page: int = 20):
     """Historial de backups realizados."""
-    page = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
 
     count_row = db_query("SELECT COUNT(*) AS total FROM public.backup_history", fetch="one")
     total = int(count_row["total"]) if count_row else 0

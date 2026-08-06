@@ -7,6 +7,7 @@ import pandas as pd
 from database import db_query, split_terms
 from models import RrhhSearchRequest, RrhhProfileRequest
 from routes.admin.deps import require_session
+from utils import paginate
 
 router = APIRouter(prefix="/api/rrhh", tags=["rrhh"])
 
@@ -120,9 +121,7 @@ def search_hr(req: RrhhSearchRequest):
     Cada registro incluye el conteo de documentos (`doc_count`) y los tipos
     de documento presentes en el expediente (`tipos`).
     """
-    page     = max(1, req.page)
-    per_page = max(1, min(req.per_page, 50))
-    offset   = (page - 1) * per_page
+    page, per_page, offset = paginate(req.page, req.per_page, max_per_page=50)
 
     conditions: list = []
     params: list = []
@@ -395,9 +394,7 @@ def get_employee_documents(
     per_page: int = 20,
 ):
     """Documentos de un empleado con filtro y paginación."""
-    page = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
     conditions = ["dr.empleado_id = %s"]
     params: list = [emp_id]
     if search:

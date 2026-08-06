@@ -3,6 +3,13 @@
 import re
 import unicodedata
 
+
+def paginate(page: int, per_page: int, max_per_page: int = 100) -> tuple[int, int, int]:
+    """Clamp pagination params and return (page, per_page, offset)."""
+    page = max(1, page)
+    per_page = max(1, min(per_page, max_per_page))
+    return page, per_page, (page - 1) * per_page
+
 from database import db_query, logger
 
 

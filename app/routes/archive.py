@@ -4,6 +4,7 @@ import pandas as pd
 
 from database import db_query, split_terms
 from models import ArchivoSearchRequest
+from utils import paginate
 
 router = APIRouter(prefix="/api/archivo", tags=["archivo"])
 
@@ -81,9 +82,7 @@ def search_archive(req: ArchivoSearchRequest):
 
     Retorna paginación server-side: `{records, total, page, per_page}`.
     """
-    page     = max(1, req.page)
-    per_page = max(1, min(req.per_page, 50))
-    offset   = (page - 1) * per_page
+    page, per_page, offset = paginate(req.page, req.per_page, max_per_page=50)
 
     conditions: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
     params: list = []

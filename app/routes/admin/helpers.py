@@ -1,7 +1,18 @@
 ﻿"""Helpers privados compartidos entre los sub-mÃ³dulos de admin."""
 from fastapi import HTTPException
 
+from utils import paginate  # re-exported for callers that import from here
+
 VALID_MODULOS = ("Archivo", "RRHH")
+
+
+def fetch_one_or_404(sql: str, params, msg: str = "No encontrado") -> dict:
+    """Run a fetch='one' query; raise 404 if nothing is returned."""
+    from database import db_query
+    row = db_query(sql, params, fetch="one")
+    if not row:
+        raise HTTPException(404, msg)
+    return row
 
 
 def _require_modulo(modulo: str) -> str:

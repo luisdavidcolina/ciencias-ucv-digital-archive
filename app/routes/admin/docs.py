@@ -13,6 +13,7 @@ from .helpers import (
     _resolve_user_id,
     _require_modulo,
     invalidate_choices_cache,
+    paginate,
 )
 
 router = APIRouter()
@@ -33,9 +34,7 @@ def list_all_files(
     if modulo not in ("Archivo", "RRHH"):
         raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
 
-    page     = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset   = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
 
     if modulo == "Archivo":
         conditions, params = ["da.deleted_at IS NULL"], []
@@ -563,9 +562,7 @@ def update_documento_status(
 def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: int = 25):
     """Lista documentos en estado draft o revision para revisiÃ³n/aprobaciÃ³n."""
     _require_modulo(modulo)
-    page = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
 
     if modulo == "Archivo":
         count_row = db_query(

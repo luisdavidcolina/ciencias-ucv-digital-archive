@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from database import db_query, log_event
 from routes.admin.deps import require_session
-from routes.admin.helpers import _require_modulo
+from routes.admin.helpers import _require_modulo, paginate
 
 router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends(require_session)])
 
@@ -26,9 +26,7 @@ def list_trash(
 ):
     """Lista los documentos (y empleados en RRHH) en la papelera."""
     _require_modulo(modulo)
-    page = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
 
     if modulo == "Archivo":
         count_row = db_query(
@@ -127,9 +125,7 @@ def purge_document(doc_id: int, modulo: str, usuario: str):
 # Papelera de empleados
 @router.get("/papelera/empleados")
 def list_trash_employees(page: int = 1, per_page: int = 25):
-    page = max(1, page)
-    per_page = max(1, min(per_page, 100))
-    offset = (page - 1) * per_page
+    page, per_page, offset = paginate(page, per_page)
 
     count_row = db_query(
         "SELECT COUNT(*) AS total FROM public.empleados WHERE deleted_at IS NOT NULL",
