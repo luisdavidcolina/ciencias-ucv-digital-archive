@@ -330,7 +330,7 @@
       const d = await r.json();
       st.innerHTML = `<span style="color:#28a745"><i class="fas fa-check mr-1"></i>Bridge activo — clientes: ${Number(d.clients||0)}, modo: ${escHtml(d.mode||"?")}</span>`;
     } catch (e) {
-      st.innerHTML = `<span style="color:#dc3545"><i class="fas fa-times mr-1"></i>${e.message}</span>`;
+      st.innerHTML = `<span style="color:#dc3545"><i class="fas fa-times mr-1"></i></span>`; st.querySelector("span").append(e.message);
     }
   };
 
@@ -348,7 +348,7 @@
       if (!r.ok) throw new Error("HTTP " + r.status);
       st.innerHTML = '<span style="color:#28a745"><i class="fas fa-check mr-1"></i>Escaneo de prueba enviado</span>';
     } catch (e) {
-      st.innerHTML = `<span style="color:#dc3545"><i class="fas fa-times mr-1"></i>${e.message}</span>`;
+      st.innerHTML = `<span style="color:#dc3545"><i class="fas fa-times mr-1"></i></span>`; st.querySelector("span").append(e.message);
     }
   };
 

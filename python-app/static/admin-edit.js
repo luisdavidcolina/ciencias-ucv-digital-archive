@@ -158,7 +158,7 @@ async function _uploadEditDocFile(file) {
     _refreshEditDocPreview();
     showToast("Archivo subido correctamente.", "success");
   } catch (e) {
-    if (status) status.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle mr-1"></i>${e.message}</span>`;
+    if (status) { status.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle mr-1"></i></span>`; status.querySelector("span").append(e.message); }
     if (zone)   { zone.style.borderColor = "#dc3545"; zone.style.background = "#fff5f5"; }
     showToast(`Error al subir: ${e.message}`, "error");
   }
