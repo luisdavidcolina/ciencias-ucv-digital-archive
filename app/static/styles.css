@@ -3579,3 +3579,100 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 }
 .ds-filter-card > .card-header .card-title { color: var(--viz-ink); font-size: 0.92rem; }
 .ds-filter-card > .card-header .card-title i { color: var(--viz-ink-muted); }
+
+/* =============================================================================
+   INFO-BOX
+   El marcado usa el componente info-box de AdminLTE, pero AdminLTE nunca se
+   carga (solo Bootstrap): las cajas salian sin estructura, con el fondo del
+   icono ocupando el ancho completo y el texto encima, ilegible. Aqui se
+   implementa el componente con los tokens propios.
+   ========================================================================== */
+.info-box {
+  display: flex;
+  align-items: stretch;
+  min-height: 62px;
+  margin-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--viz-surface);
+  border: 1px solid var(--viz-grid);
+  overflow: hidden;
+}
+.info-box-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 58px;
+  width: 58px;
+  font-size: 1.35rem;
+  color: #fff;
+  background: var(--viz-1);
+}
+.info-box-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.info-box-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--viz-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.info-box-number {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--viz-ink);
+}
+
+/* Las utilidades bg-* teñian la caja entera de color saturado. El color pasa al
+   cuadro del icono: la cifra se lee sobre superficie neutra, igual que en los
+   paneles de Archivo y RRHH. */
+.info-box.bg-info,
+.info-box.bg-success,
+.info-box.bg-warning,
+.info-box.bg-secondary,
+.info-box.bg-primary,
+.info-box.bg-danger {
+  background: var(--viz-surface) !important;
+  color: var(--viz-ink) !important;
+}
+.info-box.bg-info      .info-box-icon { background: var(--viz-1); }
+.info-box.bg-success   .info-box-icon { background: var(--viz-3); }
+.info-box.bg-warning   .info-box-icon { background: var(--viz-4); }
+.info-box.bg-secondary .info-box-icon { background: var(--viz-ink-muted); }
+.info-box.bg-primary   .info-box-icon { background: var(--viz-1); }
+.info-box.bg-danger    .info-box-icon { background: var(--viz-8); }
+
+.info-box-icon.bg-primary   { background: var(--viz-1) !important; }
+.info-box-icon.bg-success   { background: var(--viz-3) !important; }
+.info-box-icon.bg-warning   { background: var(--viz-4) !important; }
+.info-box-icon.bg-info      { background: var(--viz-1) !important; }
+.info-box-icon.bg-danger    { background: var(--viz-8) !important; }
+.info-box-icon.bg-secondary { background: var(--viz-ink-muted) !important; }
+
+@media (max-width: 575.98px) {
+  .info-box-icon { flex: 0 0 46px; width: 46px; font-size: 1.1rem; }
+  .info-box-number { font-size: 1.1rem; }
+}
+
+/* El panel de Sistema mezclaba filas de col-md-3 y col-md-4, asi que los bordes
+   no alineaban entre filas. La rejilla auto-fit las cuadra sin tocar el
+   marcado: las columnas de Bootstrap ceden su ancho a la celda. */
+.ds-kpi-grid > [class*="col-"] {
+  flex: none;
+  max-width: none;
+  width: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+.ds-kpi-grid.row { margin-left: 0; margin-right: 0; }
+.ds-kpi-grid .info-box { margin-bottom: 0; height: 100%; }

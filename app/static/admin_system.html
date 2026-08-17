@@ -158,7 +158,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-retencion" role="tab" onclick="loadRetencionTipos()">
+              <a class="nav-link" data-toggle="pill" href="#pane-retencion" role="tab" onclick="loadRetencionTipos(); loadVencimientosRetencion();">
                 <i class="fas fa-clock"></i> Retención
               </a>
             </li>
@@ -170,7 +170,7 @@
 
             <!-- TAB: SISTEMA -->
             <div class="tab-pane fade show active" id="pane-sistema" role="tabpanel">
-              <div class="row">
+              <div class="row ds-kpi-grid">
                 <div class="col-md-3">
                   <div class="info-box bg-info">
                     <span class="info-box-icon"><i class="fas fa-database"></i></span>
@@ -249,7 +249,7 @@
               </div>
 
               <!-- Alertas de pendientes -->
-              <div class="row mt-2" id="sys-pending-alerts">
+              <div class="row mt-2 ds-kpi-grid" id="sys-pending-alerts">
                 <div class="col-md-4">
                   <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/archivo'">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
@@ -283,13 +283,13 @@
               <!-- Charts globales -->
               <div class="row mt-3">
                 <div class="col-md-6">
-                  <div class="card card-outline card-primary shadow-sm">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Distribución por Módulo</h3></div>
-                    <div class="card-body"><canvas id="sys-chart-modulos" height="180"></canvas></div>
+                    <div class="card-body ds-chart-box"><canvas id="sys-chart-modulos"></canvas></div>
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="card card-outline card-success shadow-sm">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-users mr-2"></i>Usuarios del Sistema</h3></div>
                     <div class="card-body p-0">
                       <table class="table table-sm mb-0" style="font-size:.83rem">
@@ -363,12 +363,14 @@
                   <h3 class="card-title"><i class="fas fa-history mr-2"></i>Historial de Backups</h3>
                 </div>
                 <div class="card-body p-0">
+                  <div class="table-responsive">
                   <table class="table table-sm mb-0">
                     <thead>
                       <tr><th>Fecha</th><th>Usuario</th><th>Tipo</th><th>Tablas</th><th>Filas</th><th>Notas</th></tr>
                     </thead>
                     <tbody id="backup-history-body"></tbody>
                   </table>
+                  </div>
                 </div>
               </div>
 
@@ -460,34 +462,7 @@
                 </div>
               </div>
 
-              <!-- Documentos vencidos -->
-              <div class="card card-danger card-outline">
-                <div class="card-header">
-                  <h3 class="card-title"><i class="fas fa-exclamation-triangle mr-2"></i>Documentos con Plazo de Retención Vencido</h3>
-                  <small class="text-muted ml-2">ISO 15489-1:2016 §8.5 — Disposición</small>
-                </div>
-                <div class="card-body p-0">
-                  <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0" style="font-size:0.82rem;">
-                      <thead class="bg-light">
-                        <tr>
-                          <th>Título</th>
-                          <th>Tipo</th>
-                          <th>Fecha Doc.</th>
-                          <th>Plazo (años)</th>
-                          <th>Venció</th>
-                          <th>Días Vencido</th>
-                          <th>Soporte</th>
-                          <th>Ubicación</th>
-                        </tr>
-                      </thead>
-                      <tbody id="alertas-vencidos-tbody">
-                        <tr><td colspan="8" class="text-center text-muted p-3">Cargando...</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+
             </div>
 
             <!-- TAB: RETENCIÓN DOCUMENTAL -->
@@ -526,6 +501,34 @@
                       </thead>
                       <tbody id="retencion-tbody">
                         <tr><td colspan="5" class="text-center text-muted p-3">Cargando...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <!-- Documentos vencidos -->
+              <div class="card card-outline ds-chart-card mt-3">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-exclamation-triangle mr-2"></i>Documentos con Plazo de Retención Vencido</h3>
+                  <small class="text-muted ml-2">ISO 15489-1:2016 §8.5 — Disposición</small>
+                </div>
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0" style="font-size:0.82rem;">
+                      <thead class="bg-light">
+                        <tr>
+                          <th>Título</th>
+                          <th>Tipo</th>
+                          <th>Fecha Doc.</th>
+                          <th>Plazo (años)</th>
+                          <th>Venció</th>
+                          <th>Días Vencido</th>
+                          <th>Soporte</th>
+                          <th>Ubicación</th>
+                        </tr>
+                      </thead>
+                      <tbody id="alertas-vencidos-tbody">
+                        <tr><td colspan="8" class="text-center text-muted p-3">Cargando...</td></tr>
                       </tbody>
                     </table>
                   </div>
@@ -718,6 +721,7 @@ async function loadSystemStats() {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,   // la altura la fija .ds-chart-box
           cutout: "58%",
           animation: { duration: 450, easing: "easeOutQuart" },
           plugins: { legend: { position: "bottom" } }
@@ -1025,18 +1029,13 @@ function openThemePanel() {
 async function loadAlertasJubilaciones() {
   const horizonte = document.getElementById("alertas-horizonte")?.value || 365;
   const jubTbody    = document.getElementById("alertas-jubilaciones-tbody");
-  const vencTbody   = document.getElementById("alertas-vencidos-tbody");
   const badge       = document.getElementById("alertas-jubilaciones-badge");
   const badgeNav    = document.getElementById("badge-alertas");
 
   if (jubTbody) jubTbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm text-warning mr-2"></span>Cargando alertas...</td></tr>`;
-  if (vencTbody) vencTbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm text-danger mr-2"></span>Cargando vencimientos...</td></tr>`;
 
   try {
-    const [jubRes, vencRes] = await Promise.all([
-      apiFetchJSON(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=${horizonte}`),
-      apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=30`),
-    ]);
+    const jubRes = await apiFetchJSON(`${API_BASE}/api/rrhh/alertas/jubilaciones?horizonte_dias=${horizonte}`);
 
     // Jubilaciones
     const alertas = jubRes.alertas || [];
@@ -1067,29 +1066,42 @@ async function loadAlertasJubilaciones() {
       }
     }
 
-    // Documentos vencidos
-    const vencidos = vencRes.vencimientos || [];
-    if (vencTbody) {
-      if (!vencidos.length) {
-        vencTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted p-3"><i class="fas fa-check-circle text-success mr-2"></i>No hay documentos con retención vencida.</td></tr>`;
-      } else {
-        vencTbody.innerHTML = vencidos.map(v => {
-          const diasV = parseInt(v.dias_vencido) || 0;
-          return `<tr>
-            <td class="font-weight-bold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.titulo||'').replace(/"/g,'&quot;')}">${v.titulo || "—"}</td>
-            <td><span class="badge badge-light border">${v.tipo_documento || "—"}</span></td>
-            <td class="text-muted small">${v.fecha_documento || "—"}</td>
-            <td class="text-center">${v.plazo_anios || 5}</td>
-            <td class="text-muted small">${v.fecha_vencimiento || "—"}</td>
-            <td><span class="badge badge-danger">${diasV} días</span></td>
-            <td><span class="badge ${v.soporte === 'Digital' || v.soporte === 'Digitalizado' ? 'badge-info' : 'badge-secondary'}">${v.soporte || 'Físico'}</span></td>
-            <td class="text-muted small">${v.ubicacion || "—"}</td>
-          </tr>`;
-        }).join("");
-      }
-    }
   } catch (err) {
     if (jubTbody) jubTbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger p-3">Error al cargar alertas. Intente nuevamente.</td></tr>`;
+  }
+}
+
+// Los documentos con el plazo vencido viven en la pestaña Retencion, junto al
+// calendario que define esos plazos. Se cargan aparte de las jubilaciones para
+// que abrir una pestaña no dispare la consulta de la otra.
+async function loadVencimientosRetencion() {
+  const vencTbody = document.getElementById("alertas-vencidos-tbody");
+  if (!vencTbody) return;
+  vencTbody.innerHTML = `<tr><td colspan="8" class="text-center py-3"><span class="spinner-border spinner-border-sm text-danger mr-2"></span>Cargando vencimientos...</td></tr>`;
+  try {
+    const vencRes = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=30`);
+  const vencidos = vencRes.vencimientos || [];
+  if (vencTbody) {
+    if (!vencidos.length) {
+      vencTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted p-3"><i class="fas fa-check-circle text-success mr-2"></i>No hay documentos con retención vencida.</td></tr>`;
+    } else {
+      vencTbody.innerHTML = vencidos.map(v => {
+        const diasV = parseInt(v.dias_vencido) || 0;
+        return `<tr>
+          <td class="font-weight-bold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.titulo||'').replace(/"/g,'&quot;')}">${v.titulo || "—"}</td>
+          <td><span class="badge badge-light border">${v.tipo_documento || "—"}</span></td>
+          <td class="text-muted small">${v.fecha_documento || "—"}</td>
+          <td class="text-center">${v.plazo_anios || 5}</td>
+          <td class="text-muted small">${v.fecha_vencimiento || "—"}</td>
+          <td><span class="badge badge-danger">${diasV} días</span></td>
+          <td><span class="badge ${v.soporte === 'Digital' || v.soporte === 'Digitalizado' ? 'badge-info' : 'badge-secondary'}">${v.soporte || 'Físico'}</span></td>
+          <td class="text-muted small">${v.ubicacion || "—"}</td>
+        </tr>`;
+      }).join("");
+    }
+  }
+  } catch (err) {
+    vencTbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger p-3">Error al cargar los vencimientos. Intente nuevamente.</td></tr>`;
   }
 }
 
