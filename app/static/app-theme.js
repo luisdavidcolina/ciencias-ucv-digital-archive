@@ -457,3 +457,21 @@ async function loadNotifications() {
     }).join("");
   } catch { /* silencioso */ }
 }
+
+// Auto-arranque: hasta ahora initTheme() solo se llamaba desde app.js, asi que
+// una pagina que incluyera este archivo sin app.js — el panel de IA, por
+// ejemplo — se quedaba sin tema y sin modo oscuro, en silencio. Es idempotente,
+// de modo que la llamada de app.js sigue siendo inocua.
+(function () {
+  let hecho = false;
+  const arrancar = () => {
+    if (hecho) return;
+    hecho = true;
+    initTheme();
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", arrancar);
+  } else {
+    arrancar();
+  }
+})();
