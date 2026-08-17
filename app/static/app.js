@@ -137,11 +137,15 @@ function configureSidebarVisibilities(user) {
   if (rArch === "Admin" && linkAdminArchivo) linkAdminArchivo.style.display = "flex";
   if (rRrhh === "Admin" && linkAdminRrhh)   linkAdminRrhh.style.display = "flex";
 
-  const linkSistema = document.getElementById("menu-btn-admin-sistema");
-  // Mostrar si el usuario tiene AMBOS módulos (Global admin)
-  if (linkSistema && user.modules && user.modules.includes("Archivo") && user.modules.includes("RRHH")) {
-    linkSistema.style.display = "flex";
-  }
+  // Sistema Global y la consola del asistente son ambas de admin Global: la
+  // segunda fija el modelo y los topes de gasto, no es una herramienta de
+  // módulo.
+  const esGlobal = !!(user.modules &&
+    user.modules.includes("Archivo") && user.modules.includes("RRHH"));
+  ["menu-btn-admin-sistema", "menu-btn-admin-ia"].forEach(id => {
+    const link = document.getElementById(id);
+    if (link && esGlobal) link.style.display = "flex";
+  });
 
   // Mostrar el grupo "Administración" si al menos un panel es accesible
   const adminGroup = document.getElementById("sidebar-admin-group");
@@ -159,6 +163,13 @@ function configureSidebarVisibilities(user) {
     else if (standalonePage === "rrhh")     allowed = modules.includes("RRHH");
     else if (standalonePage === "admin-archivo") allowed = rArch === "Admin";
     else if (standalonePage === "admin-rrhh")    allowed = rRrhh === "Admin";
+    // Sistema Global y la consola del asistente son de admin Global. Faltaban:
+    // al no tener rama, `allowed` quedaba en false y la comprobación expulsaba
+    // de su propio panel a quien sí tenía permiso.
+    else if (standalonePage === "admin-sistema" || standalonePage === "admin-ia") {
+      allowed = esGlobal;
+    }
+    else allowed = true;   // páginas sin restricción propia (ayuda, investigación)
     if (!allowed) {
       if (modules.includes("RRHH")) { window.location.href = "/rrhh"; return; }
       window.location.href = "/archivo";

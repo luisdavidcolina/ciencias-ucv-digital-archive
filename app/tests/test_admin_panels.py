@@ -164,3 +164,49 @@ def test_monitor_ocultamiento_responsive_coherente(suf):
         f"monitor {suf}: columnas con ocultamiento distinto entre <th> y <td>: "
         f"{descuadres}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Cáscara compartida
+# ---------------------------------------------------------------------------
+# El menú lateral estaba copiado en cinco páginas. Eran idénticos salvo por cuál
+# enlace llevaba `active`, y aun así habían derivado: el enlace del asistente
+# existía solo en el panel de Sistema. Ahora se renderiza desde app-shell.js.
+
+PAGINAS_CON_CASCARA = [
+    "admin_archive.html", "admin_hr.html", "admin_system.html",
+    "archive.html", "hr.html",
+]
+
+
+@pytest.mark.parametrize("nombre", PAGINAS_CON_CASCARA)
+def test_menu_lateral_no_esta_duplicado(nombre):
+    html = (STATIC / nombre).read_text(encoding="utf-8")
+    assert "<aside id=\"app-sidebar\"" not in html, (
+        f"{nombre} vuelve a traer el menú escrito a mano; debe usar el hueco "
+        "#app-shell-sidebar que rellena app-shell.js"
+    )
+    assert 'id="app-shell-sidebar"' in html, f"{nombre} no tiene el hueco del menú"
+    assert "/static/app-shell.js" in html, f"{nombre} no carga app-shell.js"
+
+
+def test_el_hueco_se_rellena_antes_de_usarse():
+    """app-shell.js debe cargarse en el <body>, no al final: configureSidebarVisibilities()
+    busca los enlaces por id y necesita que ya existan."""
+    for nombre in PAGINAS_CON_CASCARA:
+        html = (STATIC / nombre).read_text(encoding="utf-8")
+        hueco = html.index('id="app-shell-sidebar"')
+        shell = html.index("/static/app-shell.js")
+        app_js = html.index("/static/app.js")
+        assert hueco < shell < app_js, (
+            f"{nombre}: el orden debe ser hueco → app-shell.js → app.js"
+        )
+
+
+def test_todas_las_paginas_declaran_su_data_page():
+    """El enlace activo del menú sale de data-page; sin él no se marca ninguno."""
+    faltan = [
+        n for n in PAGINAS_CON_CASCARA
+        if "data-page=" not in (STATIC / n).read_text(encoding="utf-8")
+    ]
+    assert not faltan, f"páginas sin data-page: {faltan}"
