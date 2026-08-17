@@ -233,21 +233,27 @@ def get_global_summary():
     """Resumen global para el panel de sistema (Admin Global)."""
     row = db_query("""
         SELECT
-            (SELECT COUNT(*) FROM public.datos_archivo)           AS total_docs,
-            (SELECT COUNT(*) FROM public.empleados)               AS total_empleados,
-            (SELECT COUNT(*) FROM public.datos_rrhh)              AS total_rrhh_docs,
+            (SELECT COUNT(*) FROM public.datos_archivo WHERE deleted_at IS NULL)  AS total_docs,
+            (SELECT COUNT(*) FROM public.empleados     WHERE deleted_at IS NULL)  AS total_empleados,
+            (SELECT COUNT(*) FROM public.datos_rrhh    WHERE deleted_at IS NULL)  AS total_rrhh_docs,
             (SELECT COUNT(*) FROM public.descriptores_libres)     AS total_keywords,
             (SELECT COUNT(*) FROM public.usuarios_sistema WHERE COALESCE(is_active,TRUE)) AS total_usuarios,
-            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'revision')  AS arch_en_revision,
-            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'draft')     AS arch_borradores,
-            (SELECT COUNT(*) FROM public.datos_archivo WHERE COALESCE(status,'aprobado') = 'rechazado') AS arch_rechazados,
-            (SELECT COUNT(*) FROM public.datos_rrhh WHERE COALESCE(status,'aprobado') = 'revision')     AS rrhh_en_revision,
-            (SELECT COUNT(*) FROM public.datos_rrhh WHERE COALESCE(status,'aprobado') = 'draft')        AS rrhh_borradores,
+            (SELECT COUNT(*) FROM public.datos_archivo
+              WHERE COALESCE(status,'aprobado') = 'revision'  AND deleted_at IS NULL) AS arch_en_revision,
+            (SELECT COUNT(*) FROM public.datos_archivo
+              WHERE COALESCE(status,'aprobado') = 'draft'     AND deleted_at IS NULL) AS arch_borradores,
+            (SELECT COUNT(*) FROM public.datos_archivo
+              WHERE COALESCE(status,'aprobado') = 'rechazado' AND deleted_at IS NULL) AS arch_rechazados,
+            (SELECT COUNT(*) FROM public.datos_rrhh
+              WHERE COALESCE(status,'aprobado') = 'revision'  AND deleted_at IS NULL) AS rrhh_en_revision,
+            (SELECT COUNT(*) FROM public.datos_rrhh
+              WHERE COALESCE(status,'aprobado') = 'draft'     AND deleted_at IS NULL) AS rrhh_borradores,
             (SELECT COUNT(*) FROM public.empleados e
              JOIN public.estados_laborales el ON e.estado_id = el.id
-             WHERE LOWER(el.estados) LIKE '%%activo%%')           AS empleados_activos,
-            (SELECT MAX(created_at) FROM public.audit_log)        AS ultima_actividad,
-            (SELECT COUNT(*) FROM public.audit_log WHERE created_at >= NOW() - INTERVAL '24 hours') AS eventos_24h,
+             WHERE LOWER(el.estados) LIKE '%%activo%%' AND e.deleted_at IS NULL) AS empleados_activos,
+            (SELECT MAX(al.timestamp) FROM public.audit_log al)   AS ultima_actividad,
+            (SELECT COUNT(*) FROM public.audit_log al
+              WHERE al.timestamp >= NOW() - INTERVAL '24 hours')  AS eventos_24h,
             (SELECT COUNT(*) FROM public.backup_history)          AS total_backups
     """, fetch="one")
     if not row:
