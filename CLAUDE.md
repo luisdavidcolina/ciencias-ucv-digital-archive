@@ -35,8 +35,9 @@ ya llegaron a `main` una vez:
   refactor de renombrado dejó cinco llamadas a funciones que ya no existían.
 - `test_secrets.py` — rechaza credenciales escritas en el código.
 - `test_admin_panels.py` — cada pestaña tiene panel, cada panel tiene pestaña,
-  ambos módulos ofrecen la misma navegación, y los encabezados del monitor
-  cuadran con las celdas que emite la plantilla.
+  ambos módulos ofrecen la misma navegación, los encabezados del monitor cuadran
+  con las celdas que emite la plantilla, y ninguna página vuelve a traer la
+  cáscara escrita a mano.
 
 ## Estructura de Directorios
 
@@ -83,6 +84,7 @@ ya llegaron a `main` una vez:
 │       ├── login.html · ayuda.html · investigacion.html
 │       ├── styles.css          # TODA la hoja de estilos propia
 │       │
+│       ├── app-shell.js        # Barra superior y menú lateral (definición única)
 │       ├── app-core.js         # state, API_BASE, escHtml, showToast, helpers
 │       ├── app.js              # Sesión, navegación entre secciones, listeners
 │       ├── app-theme.js        # Temas, modo oscuro, densidad, notificaciones
@@ -173,6 +175,29 @@ Al añadir una pestaña hacen falta **tres** cosas, o queda un panel en blanco q
 nadie reporta: el `<li>` con `id="tab-admin-{suf}-{x}"`, el
 `<div id="pane-admin-{suf}-{x}">`, y su rama en `loadAdminTab`. Ambos módulos
 deben ofrecer la misma navegación. `test_admin_panels.py` verifica las tres.
+
+### Cáscara compartida (`app-shell.js`)
+La barra superior y el menú lateral se renderizan desde una sola definición.
+Cada página aporta dos huecos y el script, **en este orden**:
+
+```html
+<div id="app-shell-navbar"></div>
+<div id="app-shell-sidebar"></div>
+<script src="/static/app-shell.js"></script>
+```
+
+Se inyectan de forma **síncrona** al parsear, no en `DOMContentLoaded`:
+`configureSidebarVisibilities()` busca los enlaces por id y necesita que ya
+existan. Por eso el `<script>` va en el `<body>`, no al final.
+
+- El enlace activo sale de `document.body.dataset.page`. Sin `data-page` no se
+  marca ninguno.
+- **Qué ve cada quien lo decide el rol**, no el marcado — por eso el menú puede
+  ser idéntico en todas las páginas. La lógica está en
+  `configureSidebarVisibilities()` (`app.js`), que además hace el control de
+  acceso de la página: **al añadir una página con `data-page` hay que darle su
+  rama ahí**, o rebotará a quien sí tiene permiso.
+- Al añadir un enlace, se añade en `SHELL_SECCIONES` y en ningún HTML.
 
 ### Colores de datos (tokens `--viz-*`)
 La paleta de gráficos vive en `styles.css` como tokens `--viz-1` … `--viz-8`,
