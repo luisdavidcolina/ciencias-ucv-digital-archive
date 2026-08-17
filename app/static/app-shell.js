@@ -97,3 +97,62 @@ function shellSidebarHTML(pagina) {
   if (!hueco) return;
   hueco.outerHTML = shellSidebarHTML(document.body.dataset.page || "");
 })();
+
+// -----------------------------------------------------------------------------
+// Barra superior
+//
+// Estaba copiada en las mismas cinco páginas. Las diferencias eran el destino
+// del logo y, en el panel de Sistema, un id distinto para el nombre de usuario
+// y un onclick propio en el botón de salir que solo limpiaba localStorage — sin
+// avisar al servidor, así que la sesión seguía viva del otro lado.
+// -----------------------------------------------------------------------------
+
+const SHELL_INICIO = { "rrhh": "/rrhh", "admin-rrhh": "/rrhh" };
+
+function shellNavbarHTML(pagina) {
+  const inicio = SHELL_INICIO[pagina] || "/archivo";
+  const volver = pagina === "admin-sistema" || pagina === "admin-ia"
+    ? `<li class="nav-item">
+         <a href="/archivo" class="btn btn-outline-secondary btn-sm" style="margin-top:5px;margin-right:8px;">
+           <i class="fas fa-arrow-left"></i> <span class="ds-btn-label">Volver al Inicio</span>
+         </a>
+       </li>`
+    : "";
+
+  return `
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <button id="sidebar-toggle-btn" class="btn btn-link nav-link px-2" title="Menú"
+              style="font-size:1.3rem;color:var(--ds-accent);">
+        <i class="fas fa-bars"></i>
+      </button>
+    </li>
+    <li class="nav-item dropdown">
+      <a href="${inicio}" class="ds-navbar-logo nav-link">
+        <img src="/static/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
+      </a>
+    </li>
+  </ul>
+  <ul class="navbar-nav ml-auto">
+    ${volver}
+    <li class="nav-item dropdown ds-nav-user">
+      <span style="padding-top:10px;display:inline-block;margin-right:8px;font-weight:bold;color:#dc3545;">
+        <i class="fas fa-user-circle"></i> <span id="nav_username">ID: anonymous</span>
+      </span>
+    </li>
+    <li class="nav-item dropdown ds-nav-logout">
+      <button id="logout_btn" class="btn btn-outline-secondary btn-sm"
+              style="margin-top:5px;margin-right:10px;">
+        <i class="fas fa-sign-out-alt"></i> <span class="ds-btn-label">Cerrar Sesión</span>
+      </button>
+    </li>
+  </ul>
+</nav>`;
+}
+
+(function () {
+  const hueco = document.getElementById("app-shell-navbar");
+  if (!hueco) return;
+  hueco.outerHTML = shellNavbarHTML(document.body.dataset.page || "");
+})();

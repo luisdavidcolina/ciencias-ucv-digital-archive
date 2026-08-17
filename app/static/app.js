@@ -37,8 +37,10 @@ async function checkPersistedSession() {
 
 function loginSuccess(user) {
   const pageAttr = document.body.dataset.page;
-  if (pageAttr === "admin-archivo") user.modulo = "Archivo";
-  else if (pageAttr === "admin-rrhh") user.modulo = "RRHH";
+  // La página manda sobre el módulo activo. Las dos búsquedas públicas faltaban,
+  // así que en /rrhh la credencial seguía diciendo "Archivo".
+  if      (pageAttr === "admin-archivo" || pageAttr === "archivo") user.modulo = "Archivo";
+  else if (pageAttr === "admin-rrhh"    || pageAttr === "rrhh")    user.modulo = "RRHH";
 
   user.modules = user.modules || (user.modulo ? [user.modulo] : []);
   user.roles = user.roles || {};

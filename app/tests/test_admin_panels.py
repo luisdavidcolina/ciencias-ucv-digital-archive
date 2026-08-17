@@ -180,6 +180,16 @@ PAGINAS_CON_CASCARA = [
 
 
 @pytest.mark.parametrize("nombre", PAGINAS_CON_CASCARA)
+def test_barra_superior_no_esta_duplicada(nombre):
+    html = (STATIC / nombre).read_text(encoding="utf-8")
+    assert '<nav class="main-header' not in html, (
+        f"{nombre} vuelve a traer la barra escrita a mano; debe usar el hueco "
+        "#app-shell-navbar"
+    )
+    assert 'id="app-shell-navbar"' in html, f"{nombre} no tiene el hueco de la barra"
+
+
+@pytest.mark.parametrize("nombre", PAGINAS_CON_CASCARA)
 def test_menu_lateral_no_esta_duplicado(nombre):
     html = (STATIC / nombre).read_text(encoding="utf-8")
     assert "<aside id=\"app-sidebar\"" not in html, (
@@ -195,11 +205,12 @@ def test_el_hueco_se_rellena_antes_de_usarse():
     busca los enlaces por id y necesita que ya existan."""
     for nombre in PAGINAS_CON_CASCARA:
         html = (STATIC / nombre).read_text(encoding="utf-8")
-        hueco = html.index('id="app-shell-sidebar"')
-        shell = html.index("/static/app-shell.js")
+        barra  = html.index('id="app-shell-navbar"')
+        menu   = html.index('id="app-shell-sidebar"')
+        shell  = html.index("/static/app-shell.js")
         app_js = html.index("/static/app.js")
-        assert hueco < shell < app_js, (
-            f"{nombre}: el orden debe ser hueco → app-shell.js → app.js"
+        assert barra < menu < shell < app_js, (
+            f"{nombre}: el orden debe ser huecos → app-shell.js → app.js"
         )
 
 

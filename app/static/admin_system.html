@@ -16,38 +16,9 @@
 </head>
 <body class="hold-transition sidebar-mini" data-page="admin-sistema"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
 
-  <!-- HEADER NAVBAR -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <button id="sidebar-toggle-btn" class="btn btn-link nav-link px-2" title="Menú" style="font-size:1.3rem; color:#2b4e72;">
-          <i class="fas fa-bars"></i>
-        </button>
-      </li>
-      <li class="nav-item dropdown">
-        <a href="/archivo" class="ds-navbar-logo nav-link">
-          <img src="/static/logo.png" alt="Archivo Institucional" class="ds-navbar-logo-img">
-        </a>
-      </li>
-    </ul>
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a href="/archivo" class="btn btn-outline-secondary btn-sm" style="margin-top:5px; margin-right:8px;">
-          <i class="fas fa-arrow-left"></i> Volver al Inicio
-        </a>
-      </li>
-      <li class="nav-item dropdown ds-nav-user">
-        <span style="padding-top:10px; display:inline-block; margin-right:8px; font-weight:bold; color:#dc3545;">
-          <i class="fas fa-user-circle"></i> <span id="nav-username-display">---</span>
-        </span>
-      </li>
-      <li class="nav-item dropdown ds-nav-logout">
-        <button id="logout_btn" class="btn btn-outline-secondary btn-sm" style="margin-top:5px; margin-right:10px;" onclick="localStorage.removeItem('archive_session'); window.location.href='/';">
-          <i class="fas fa-sign-out-alt"></i> <span class="ds-btn-label">Cerrar Sesión</span>
-        </button>
-      </li>
-    </ul>
-  </nav>
+  <!-- Barra superior: definida en app-shell.js. -->
+  <div id="app-shell-navbar"></div>
+
 
   <!-- Menú lateral: se renderiza desde app-shell.js, que es donde
        vive su única definición. -->
@@ -595,7 +566,7 @@ async function checkSession() {
       window.location.href = "/";
       return;
     }
-    document.getElementById("nav-username-display").innerText = `${s.username} (Global Admin)`;
+    document.getElementById("nav_username").innerText = `${s.username} (Global Admin)`;
     // Esta página valida la sesión por su cuenta y no pasa por el flujo de
     // app.js, así que tiene que pedir explícitamente la configuración del menú:
     // quién ve cada enlace se decide en un solo sitio.
