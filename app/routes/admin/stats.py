@@ -48,6 +48,23 @@ def get_admin_stats(req: StatsRequest):
     }
 
 
+# Las cifras del tablero se devuelven como enteros, pero no todas lo son:
+# `ultimo_ingreso` es una fecha en texto. Coaccionar el diccionario entero con
+# int() lanzaba ValueError y el endpoint respondia 500 — un error de Python, no
+# de base de datos, por eso el mensaje era generico.
+def _normalizar_totales(fila) -> dict:
+    salida = {}
+    for k, v in (dict(fila) if fila else {}).items():
+        if v is None:
+            salida[k] = None if k.startswith("ultimo_") else 0
+            continue
+        try:
+            salida[k] = int(v)
+        except (TypeError, ValueError):
+            salida[k] = v          # fechas y cualquier otro texto, tal cual
+    return salida
+
+
 @router.get("/charts")
 def get_charts_data(modulo: str = "Archivo"):
     from .helpers import _require_modulo
@@ -126,7 +143,7 @@ def get_charts_data(modulo: str = "Archivo"):
                 "by_year":    [{"label": r["label"], "value": int(r["value"])} for r in by_year],
                 "by_month":   [{"label": r["label"], "value": int(r["value"])} for r in by_month],
                 "by_soporte": [{"label": r["label"], "value": int(r["value"])} for r in by_soporte],
-                "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},
+                "totals": _normalizar_totales(totals),
             }
         }
 
@@ -237,7 +254,7 @@ def get_charts_data(modulo: str = "Archivo"):
                                    "total": int(r["total"])} for r in cobertura],
                 "by_nivel":      [{"label": r["label"], "value": int(r["value"])} for r in by_nivel],
                 "by_sexo":       [{"label": r["label"], "value": int(r["value"])} for r in by_sexo],
-                "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},
+                "totals": _normalizar_totales(totals),
             }
         }
 
