@@ -2,6 +2,10 @@
 // ADMIN — Dashboard Charts (Chart.js) + Importación CSV masiva
 // Depende de: admin.js (state, API_BASE, adminSuffixFromTab, showToast)
 // Requiere: Chart.js@4.4.0 cargado antes en el HTML
+//
+// Los colores se leen de los tokens --viz-* vía viz-tokens.js (cargar antes).
+// Así el modo oscuro y los temas de color cambian los gráficos sin una segunda
+// tabla de colores que mantener en sincronía.
 // =============================================================================
 
 const _chartInstances = {};
@@ -13,17 +17,29 @@ function _destroyChart(id) {
   }
 }
 
-const CHART_COLORS = [
-  "#4e73df","#1cc88a","#36b9cc","#f6c23e","#e74a3b",
-  "#858796","#5a5c69","#2e59d9","#17a673","#2c9faf",
-  "#fd7e14","#6f42c1","#20c9a6","#3a3b45","#dddfeb",
-];
+function _catOptions(extra = {}) {
+  return Object.assign({
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 450, easing: "easeOutQuart" },
+    plugins: { legend: { display: false } },
+  }, extra);
+}
+
+// Escala numérica compartida: rejilla discreta, sin decimales inventados.
+function _countScale(axis = "y") {
+  const g = { beginAtZero: true, ticks: { precision: 0 }, grid: { color: _viz("grid", "#e6e6e2") } };
+  const o = { grid: { display: false } };
+  return axis === "y" ? { y: g, x: o } : { x: g, y: o };
+}
 
 async function loadChartsData() {
   const suf    = adminSuffixFromTab();
   const modulo = suf === "archivo" ? "Archivo" : "RRHH";
+  applyChartTheme();
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/charts?modulo=${modulo}`);
+    _lastChartsData = { data, suf, modulo };
     if (modulo === "Archivo") {
       _renderArchivoCharts(data, suf);
     } else {
@@ -32,11 +48,22 @@ async function loadChartsData() {
   } catch(e) { console.error("Charts error:", e); }
 }
 
+// Se guarda el último payload para poder repintar al cambiar de tema o al
+// rotar el dispositivo sin volver a pegarle a la API.
+let _lastChartsData = null;
+
+function _repaintCharts() {
+  if (!_lastChartsData) return;
+  applyChartTheme();
+  const { data, suf, modulo } = _lastChartsData;
+  if (modulo === "Archivo") _renderArchivoCharts(data, suf);
+  else                      _renderRrhhCharts(data, suf);
+}
+
 function _renderArchivoCharts(data, suf) {
-  const t    = data.charts.totals || {};
+  const t     = data.charts.totals || {};
+  const C     = vizSeries();
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
-  setEl(`chart-total-docs-${suf}`, t.total_docs);
-  setEl(`chart-total-types-${suf}`, t.total_types);
   setEl(`chart-total-keywords-${suf}`, t.total_keywords);
   setEl(`chart-total-autores-${suf}`, t.total_autores);
 
@@ -48,9 +75,17 @@ function _renderArchivoCharts(data, suf) {
       type: "doughnut",
       data: {
         labels: byType.map(r => r.label),
-        datasets: [{ data: byType.map(r => r.value), backgroundColor: CHART_COLORS, borderWidth: 2 }]
+        datasets: [{
+          data: byType.map(r => r.value),
+          backgroundColor: C,
+          borderColor: _viz("surface", "#ffffff"),
+          borderWidth: 2            // anillo de superficie: separa los sectores
+        }]
       },
-      options: { responsive: true, plugins: { legend: { position: "right", labels: { font: { size: 11 } } } } }
+      options: _catOptions({
+        cutout: "58%",
+        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
+      })
     });
   }
 
@@ -63,10 +98,9 @@ function _renderArchivoCharts(data, suf) {
       data: {
         labels: byYear.map(r => r.label),
         datasets: [{ label: "Documentos", data: byYear.map(r => r.value),
-          backgroundColor: "#4e73df", borderRadius: 4 }]
+          backgroundColor: C[0], borderRadius: 4, maxBarThickness: 42 }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      options: _catOptions({ scales: _countScale("y") })
     });
   }
 
@@ -79,56 +113,67 @@ function _renderArchivoCharts(data, suf) {
       data: {
         labels: byMonth.map(r => r.label),
         datasets: [{ label: "Documentos", data: byMonth.map(r => r.value),
-          borderColor: "#1cc88a", backgroundColor: "#1cc88a22",
-          fill: true, tension: 0.4, pointRadius: 3 }]
+          borderColor: C[2], backgroundColor: C[2] + "22", borderWidth: 2,
+          fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5 }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      options: _catOptions({
+        interaction: { mode: "index", intersect: false },   // crosshair: toda la columna
+        scales: _countScale("y")
+      })
     });
   }
 }
 
 function _renderRrhhCharts(data, suf) {
-  const t    = data.charts.totals || {};
+  const t     = data.charts.totals || {};
+  const C     = vizSeries();
+  const ring  = _viz("surface", "#ffffff");
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
   setEl(`chart-total-emp-${suf}`, t.total_employees);
   setEl(`chart-total-activos-${suf}`, t.total_activos);
-  setEl(`chart-total-docs-${suf}`, t.total_documents);
   setEl(`chart-total-jub-${suf}`, t.total_jubilados);
+  setEl(`chart-total-movimientos-${suf}`, t.total_movimientos_cargo);
 
-  const byStatus = data.charts.by_status || [];
-  if (byStatus.length) {
-    _destroyChart(`by-status-${suf}`);
-    const ctx = document.getElementById(`chart-by-status-${suf}`)?.getContext("2d");
-    if (ctx) _chartInstances[`by-status-${suf}`] = new Chart(ctx, {
+  const doughnut = (key, id, rows) => {
+    if (!rows.length) return;
+    _destroyChart(key);
+    const ctx = document.getElementById(id)?.getContext("2d");
+    if (!ctx) return;
+    _chartInstances[key] = new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: byStatus.map(r => r.label),
-        datasets: [{ data: byStatus.map(r => r.value),
-          backgroundColor: ["#1cc88a","#6f42c1","#e74a3b","#f6c23e","#858796"], borderWidth: 2 }]
+        labels: rows.map(r => r.label),
+        datasets: [{ data: rows.map(r => r.value), backgroundColor: C,
+          borderColor: ring, borderWidth: 2 }]
       },
-      options: { responsive: true, plugins: { legend: { position: "right" } } }
+      options: _catOptions({
+        cutout: "58%",
+        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
+      })
     });
-  }
+  };
 
-  const byDept = data.charts.by_department || [];
-  if (byDept.length) {
-    _destroyChart(`by-dept-${suf}`);
-    const ctx = document.getElementById(`chart-by-dept-${suf}`)?.getContext("2d");
-    if (ctx) _chartInstances[`by-dept-${suf}`] = new Chart(ctx, {
+  const barH = (key, id, rows, color) => {
+    if (!rows.length) return;
+    _destroyChart(key);
+    const ctx = document.getElementById(id)?.getContext("2d");
+    if (!ctx) return;
+    _chartInstances[key] = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: byDept.map(r => r.label),
-        datasets: [{ label: "Empleados", data: byDept.map(r => r.value),
-          backgroundColor: "#4e73df", borderRadius: 4 }]
+        labels: rows.map(r => r.label),
+        datasets: [{ label: "Empleados", data: rows.map(r => r.value),
+          backgroundColor: color, borderRadius: 4, maxBarThickness: 26 }]
       },
-      options: {
-        indexAxis: "y", responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-      }
+      options: _catOptions({ indexAxis: "y", scales: _countScale("x") })
     });
-  }
+  };
+
+  doughnut(`by-status-${suf}`, `chart-by-status-${suf}`, data.charts.by_status || []);
+  doughnut(`by-parte-${suf}`,  `chart-by-parte-${suf}`,  data.charts.by_parte  || []);
+  doughnut(`by-sexo-${suf}`,   `chart-by-sexo-${suf}`,   data.charts.by_sexo   || []);
+  barH(`by-dept-${suf}`,  `chart-by-dept-${suf}`,  data.charts.by_department || [], C[0]);
+  barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[6]);
 
   const byDocType = data.charts.by_doc_type || [];
   if (byDocType.length) {
@@ -139,71 +184,21 @@ function _renderRrhhCharts(data, suf) {
       data: {
         labels: byDocType.map(r => r.label),
         datasets: [{ label: "Docs", data: byDocType.map(r => r.value),
-          backgroundColor: CHART_COLORS, borderRadius: 4 }]
+          backgroundColor: C[2], borderRadius: 4, maxBarThickness: 42 }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+      options: _catOptions({ scales: _countScale("y") })
     });
-  }
-
-  const byParte = data.charts.by_parte || [];
-  if (byParte.length) {
-    _destroyChart(`by-parte-${suf}`);
-    const ctx = document.getElementById(`chart-by-parte-${suf}`)?.getContext("2d");
-    if (ctx) _chartInstances[`by-parte-${suf}`] = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: byParte.map(r => r.label),
-        datasets: [{ data: byParte.map(r => r.value),
-          backgroundColor: ["#0d6efd","#198754","#fd7e14","#6f42c1"], borderWidth: 2 }]
-      },
-      options: { responsive: true, plugins: { legend: { position: "right" } } }
-    });
-  }
-
-  // Gráfico por nivel educativo (nuevo — LOTTT)
-  const byNivel = data.charts.by_nivel || [];
-  if (byNivel.length) {
-    _destroyChart(`by-nivel-${suf}`);
-    const ctx = document.getElementById(`chart-by-nivel-${suf}`)?.getContext("2d");
-    if (ctx) _chartInstances[`by-nivel-${suf}`] = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: byNivel.map(r => r.label),
-        datasets: [{ label: "Empleados", data: byNivel.map(r => r.value),
-          backgroundColor: ["#4e73df","#1cc88a","#36b9cc","#f6c23e","#e74a3b","#6f42c1","#20c9a6"],
-          borderRadius: 4 }]
-      },
-      options: {
-        indexAxis: "y", responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-      }
-    });
-  }
-
-  // Gráfico por sexo (nuevo — LOTTT)
-  const bySexo = data.charts.by_sexo || [];
-  if (bySexo.length) {
-    _destroyChart(`by-sexo-${suf}`);
-    const ctx = document.getElementById(`chart-by-sexo-${suf}`)?.getContext("2d");
-    if (ctx) _chartInstances[`by-sexo-${suf}`] = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: bySexo.map(r => r.label),
-        datasets: [{ data: bySexo.map(r => r.value),
-          backgroundColor: ["#4e73df","#e74a3b","#1cc88a","#858796"], borderWidth: 2 }]
-      },
-      options: { responsive: true, plugins: { legend: { position: "right" } } }
-    });
-  }
-
-  // Actualizar badge de movimientos de cargo si existe
-  const movBadge = document.getElementById(`chart-total-movimientos-${suf}`);
-  if (movBadge && t.total_movimientos_cargo !== undefined) {
-    movBadge.innerText = t.total_movimientos_cargo;
   }
 }
+
+// Repintar cuando cambia el tema (claro/oscuro o acento) o el ancho cruza el
+// punto donde la leyenda se mueve de lado a abajo.
+document.addEventListener("ds:theme-change", _repaintCharts);
+let _vizResizeSide = typeof window !== "undefined" ? null : null;
+window.addEventListener("resize", () => {
+  const side = vizLegendSide();
+  if (side !== _vizResizeSide) { _vizResizeSide = side; _repaintCharts(); }
+});
 
 // =============================================================================
 // IMPORT CSV MASIVO

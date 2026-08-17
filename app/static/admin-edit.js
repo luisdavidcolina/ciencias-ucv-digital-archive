@@ -89,8 +89,8 @@ async function _lookupByCedula(suf) {
     try {
       emp = await apiFetchJSON(`${API_BASE}/api/rrhh/empleado/por-cedula/${encodeURIComponent(cedula)}`);
     } catch (err) {
-      if (err.message?.includes(“404”) || err.message?.includes(“422”)) {
-        if (hintEl) hintEl.innerHTML = '<span class=”text-info”><i class=”fas fa-user-plus mr-1”></i>Empleado nuevo — complete los datos.</span>';
+      if (err.message?.includes("404") || err.message?.includes("422")) {
+        if (hintEl) hintEl.innerHTML = '<span class="text-info"><i class="fas fa-user-plus mr-1"></i>Empleado nuevo — complete los datos.</span>';
         return;
       }
       throw err;
@@ -142,7 +142,7 @@ async function _uploadEditDocFile(file) {
   const zone   = document.getElementById("edit-doc-dropzone");
   const urlField = document.getElementById("edit-doc-file-url");
 
-  if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Subiendoâ€¦';
+  if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Subiendo…';
   if (zone)   { zone.style.borderColor = "#fd7e14"; zone.style.background = "#fff8f0"; }
 
   const fd = new FormData();

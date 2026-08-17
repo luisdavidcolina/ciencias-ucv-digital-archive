@@ -31,32 +31,32 @@ const FONT_FAMILIES = [
 ];
 
 const DENSITIES = [
-  { id: “comfortable”, label: “Cómodo”,   icon: “fas fa-expand-arrows-alt” },
-  { id: “compact”,     label: “Compacto”, icon: “fas fa-compress-arrows-alt” },
+  { id: "comfortable", label: "Cómodo",   icon: "fas fa-expand-arrows-alt" },
+  { id: "compact",     label: "Compacto", icon: "fas fa-compress-arrows-alt" },
 ];
 
 const STYLE_THEMES = [
-  { id: “default”,       name: “Estándar”,      preview: `<div style=”width:24px;height:24px;border-radius:6px;background:#f0f4f8;border:2px solid #2b4e72;”></div>` },
-  { id: “glassmorphism”, name: “Vidrio”,         preview: `<div style=”width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,rgba(255,255,255,0.5),rgba(255,255,255,0.1));backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 8px rgba(0,0,0,0.18);”></div>` },
-  { id: “claymorphism”,  name: “Clay”,           preview: `<div style=”width:24px;height:24px;border-radius:12px;background:#e0e8f0;box-shadow:4px 4px 8px rgba(163,177,198,0.5),-3px -3px 6px rgba(255,255,255,0.9);”></div>` },
-  { id: “minimalism”,    name: “Minimalismo”,    preview: `<div style=”width:24px;height:24px;border-radius:3px;background:#fff;border:1.5px solid rgba(0,0,0,0.12);”></div>` },
-  { id: “maximalism”,    name: “Maximalismo”,    preview: `<div style=”width:24px;height:24px;border-radius:8px;background:#f8f9fa;border:2.5px solid #2b4e72;box-shadow:4px 4px 0 #2b4e72;”></div>` },
-  { id: “brutalism”,     name: “Brutalismo”,     preview: `<div style=”width:24px;height:24px;border-radius:0;background:#fff;border:3px solid #111;box-shadow:4px 4px 0 #111;”></div>` },
-  { id: “liquid-glass”,  name: “Liquid Glass”,   preview: `<div style=”width:24px;height:24px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.1));border:1px solid rgba(255,255,255,0.5);box-shadow:0 0 0 1px rgba(255,255,255,0.1),0 4px 16px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.4);”></div>` },
+  { id: "default",       name: "Estándar",      preview: `<div style="width:24px;height:24px;border-radius:6px;background:#f0f4f8;border:2px solid #2b4e72;"></div>` },
+  { id: "glassmorphism", name: "Vidrio",         preview: `<div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,rgba(255,255,255,0.5),rgba(255,255,255,0.1));backdrop-filter:blur(4px);border:1.5px solid rgba(255,255,255,0.5);box-shadow:0 2px 8px rgba(0,0,0,0.18);"></div>` },
+  { id: "claymorphism",  name: "Clay",           preview: `<div style="width:24px;height:24px;border-radius:12px;background:#e0e8f0;box-shadow:4px 4px 8px rgba(163,177,198,0.5),-3px -3px 6px rgba(255,255,255,0.9);"></div>` },
+  { id: "minimalism",    name: "Minimalismo",    preview: `<div style="width:24px;height:24px;border-radius:3px;background:#fff;border:1.5px solid rgba(0,0,0,0.12);"></div>` },
+  { id: "maximalism",    name: "Maximalismo",    preview: `<div style="width:24px;height:24px;border-radius:8px;background:#f8f9fa;border:2.5px solid #2b4e72;box-shadow:4px 4px 0 #2b4e72;"></div>` },
+  { id: "brutalism",     name: "Brutalismo",     preview: `<div style="width:24px;height:24px;border-radius:0;background:#fff;border:3px solid #111;box-shadow:4px 4px 0 #111;"></div>` },
+  { id: "liquid-glass",  name: "Liquid Glass",   preview: `<div style="width:24px;height:24px;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.1));border:1px solid rgba(255,255,255,0.5);box-shadow:0 0 0 1px rgba(255,255,255,0.1),0 4px 16px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.4);"></div>` },
 ];
 
 const ACCENT_COLORS = [
-  { id: “default”,        color: “#2b4e72”, name: “UCV Azul”   },
-  { id: “accent-teal”,    color: “#0d7377”, name: “Teal”       },
-  { id: “accent-emerald”, color: “#1a7f4b”, name: “Esmeralda”  },
-  { id: “accent-crimson”, color: “#c62828”, name: “Carmesí”    },
-  { id: “accent-amber”,   color: “#b7791f”, name: “Ámbar”      },
-  { id: “accent-purple”,  color: “#7c3aed”, name: “Violeta”    },
-  { id: “accent-rose”,    color: “#be185d”, name: “Rosa”       },
-  { id: “accent-slate”,   color: “#475569”, name: “Slate”      },
+  { id: "default",        color: "#2b4e72", name: "UCV Azul"   },
+  { id: "accent-teal",    color: "#0d7377", name: "Teal"       },
+  { id: "accent-emerald", color: "#1a7f4b", name: "Esmeralda"  },
+  { id: "accent-crimson", color: "#c62828", name: "Carmesí"    },
+  { id: "accent-amber",   color: "#b7791f", name: "Ámbar"      },
+  { id: "accent-purple",  color: "#7c3aed", name: "Violeta"    },
+  { id: "accent-rose",    color: "#be185d", name: "Rosa"       },
+  { id: "accent-slate",   color: "#475569", name: "Slate"      },
 ];
 
-// -- init --â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- init --────────────────────────────────────────────────────────────────────
 
 function initTheme() {
   const savedTheme = localStorage.getItem("ds_theme");
@@ -81,7 +81,13 @@ function initTheme() {
   });
 }
 
-// â”€â”€ dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── dark mode ─────────────────────────────────────────────────────────────────
+
+// Aviso a los componentes que pintan con los tokens del tema (por ejemplo los
+// graficos sobre <canvas>) para que se repinten: el CSS se actualiza solo.
+function _notifyThemeChange() {
+  document.dispatchEvent(new CustomEvent("ds:theme-change"));
+}
 
 function _applyDarkModeDOM(mode) {
   const isDark = mode === "dark" ||
@@ -91,6 +97,7 @@ function _applyDarkModeDOM(mode) {
     if (!img.dataset.logoLight) img.dataset.logoLight = img.src;
     img.src = isDark ? "/static/logoblanco.png" : img.dataset.logoLight;
   });
+  _notifyThemeChange();
 }
 
 function applyDarkMode(mode) {
@@ -98,7 +105,7 @@ function applyDarkMode(mode) {
   _applyDarkModeDOM(mode);
 }
 
-// â”€â”€ font scale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── font scale ────────────────────────────────────────────────────────────────
 
 function _applyFontScaleDOM(scale) {
   document.documentElement.style.setProperty("--ds-font-scale", scale);
@@ -151,6 +158,7 @@ function applyTheme(themeId) {
   document.body.className = document.body.className.replace(/\btheme-[\w-]+\b/g, "").trim();
   if (themeId !== "default") document.body.classList.add(themeId);
   localStorage.setItem("ds_theme", themeId);
+  _notifyThemeChange();
   _rebuildPanel();
 }
 
@@ -164,6 +172,7 @@ function _applyStyleThemeDOM(styleId) {
 function applyStyleTheme(styleId) {
   localStorage.setItem("ds_style_theme", styleId);
   _applyStyleThemeDOM(styleId);
+  _notifyThemeChange();
   _rebuildPanel();
 }
 
@@ -177,10 +186,11 @@ function _applyAccentColorDOM(accentId) {
 function applyAccentColor(accentId) {
   localStorage.setItem("ds_accent_color", accentId);
   _applyAccentColorDOM(accentId);
+  _notifyThemeChange();
   _rebuildPanel();
 }
 
-// â”€â”€ panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── panel ─────────────────────────────────────────────────────────────────────
 
 function openThemePanel() {
   let panel = document.getElementById("ds-theme-panel");
@@ -346,7 +356,7 @@ function _createThemePanel() {
   return panel;
 }
 
-// â”€â”€ NOTIFICACIONES Y PENDIENTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── NOTIFICACIONES Y PENDIENTES ──────────────────────────────────────────────
 let _notifInterval = null;
 
 function _initNotificationBell(user) {

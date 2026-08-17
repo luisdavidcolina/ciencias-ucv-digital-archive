@@ -596,6 +596,7 @@
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/static/viz-tokens.js"></script>
   <script src="/static/app-core.js"></script>
   <script src="/static/admin-ui.js"></script>
   <script src="/static/app-choices.js"></script>
@@ -702,13 +703,25 @@ async function loadSystemStats() {
     const ctx = document.getElementById("sys-chart-modulos")?.getContext("2d");
     if (ctx) {
       if (_sysChartModulos) { _sysChartModulos.destroy(); }
+      applyChartTheme();
+      const C = vizSeries();
       _sysChartModulos = new Chart(ctx, {
         type: "doughnut",
         data: {
           labels: ["Archivo Institucional", "Documentos RRHH"],
-          datasets: [{ data: [archDocs, rrhhDocs], backgroundColor: ["#4e73df","#1cc88a"], borderWidth: 2 }]
+          datasets: [{
+            data: [archDocs, rrhhDocs],
+            backgroundColor: [C[0], C[2]],
+            borderColor: _viz("surface", "#ffffff"),
+            borderWidth: 2
+          }]
         },
-        options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+        options: {
+          responsive: true,
+          cutout: "58%",
+          animation: { duration: 450, easing: "easeOutQuart" },
+          plugins: { legend: { position: "bottom" } }
+        }
       });
     }
 

@@ -91,7 +91,7 @@ function initDateControls(module, data) {
       minDate: data.min_date,
       maxDate: data.max_date,
       locale: {
-        rangeSeparator: " â†’ ",
+        rangeSeparator: " → ",
         firstDayOfWeek: 1,
         weekdays: {
           shorthand: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
@@ -109,7 +109,7 @@ function initDateControls(module, data) {
           state[module].dateEnd   = fmt(selectedDates[1]);
           state[module].page = 1;
           const lbl = document.getElementById(`fp-${module}-label`);
-          if (lbl) lbl.innerText = `${formatISOToSpanish(state[module].dateStart)} â†’ ${formatISOToSpanish(state[module].dateEnd)}`;
+          if (lbl) lbl.innerText = `${formatISOToSpanish(state[module].dateStart)} → ${formatISOToSpanish(state[module].dateEnd)}`;
           if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
         }
       }
@@ -126,7 +126,7 @@ function initDateControls(module, data) {
           const maxY = parseInt(data.max_date.substring(0, 4));
           return Array.from({ length: maxY - minY + 1 }, (_, i) => maxY - i);
         })();
-    sy.innerHTML = `<option value="">Seleccionar añoâ€¦</option>` +
+    sy.innerHTML = `<option value="">Seleccionar año…</option>` +
       years.map(y => `<option value="${y}">${y}</option>`).join("");
   }
 
@@ -134,7 +134,7 @@ function initDateControls(module, data) {
   state[module].dateEnd   = data.max_date;
   _setChipActive(module, "all");
   const lbl = document.getElementById(`fp-${module}-label`);
-  if (lbl) lbl.innerText = `${formatISOToSpanish(data.min_date)} â†’ ${formatISOToSpanish(data.max_date)}`;
+  if (lbl) lbl.innerText = `${formatISOToSpanish(data.min_date)} → ${formatISOToSpanish(data.max_date)}`;
 }
 
 function _setChipActive(module, preset) {
@@ -178,7 +178,7 @@ function applyDatePreset(module, preset) {
   state[module].dateStart = startDate;
   state[module].dateEnd   = endDate;
   state[module].page = 1;
-  if (lbl) lbl.innerText = `${formatISOToSpanish(startDate)} â†’ ${formatISOToSpanish(endDate)}`;
+  if (lbl) lbl.innerText = `${formatISOToSpanish(startDate)} → ${formatISOToSpanish(endDate)}`;
   if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
 }
 

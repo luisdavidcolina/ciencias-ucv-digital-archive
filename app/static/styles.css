@@ -3345,3 +3345,55 @@ body[data-style="liquid-glass"] .custom-select {
 }
 .ds-accent-swatch:hover { transform: scale(1.12); }
 .ds-accent-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px #2b4e72, 0 2px 6px rgba(0,0,0,0.18); }
+
+/* =============================================================================
+   CAPA DE VISUALIZACIÓN DE DATOS
+   Paleta categórica validada (contraste + separación para daltonismo) en ambos
+   modos. Los gráficos leen estos tokens en runtime, así que el tema oscuro y los
+   temas de color no requieren una segunda tabla de colores en JS.
+   ========================================================================== */
+:root {
+  --viz-surface:    #ffffff;
+  --viz-ink:        #212529;
+  --viz-ink-muted:  #6c757d;
+  --viz-grid:       #e6e6e2;
+  --viz-axis:       #c3c2b7;
+  --viz-1: #2a78d6;  --viz-2: #eb6834;  --viz-3: #1baf7a;  --viz-4: #eda100;
+  --viz-5: #e87ba4;  --viz-6: #008300;  --viz-7: #4a3aa7;  --viz-8: #e34948;
+  --viz-good: #0ca30c;  --viz-warning: #fab219;
+  --viz-serious: #ec835a;  --viz-critical: #d03b3b;
+}
+body.dark-mode {
+  --viz-surface:    #23272f;
+  --viz-ink:        #e0e4ee;
+  --viz-ink-muted:  #7880a0;
+  --viz-grid:       #2e3342;
+  --viz-axis:       #3e4660;
+  --viz-1: #3987e5;  --viz-2: #d95926;  --viz-3: #199e70;  --viz-4: #c98500;
+  --viz-5: #d55181;  --viz-6: #008300;  --viz-7: #9085e9;  --viz-8: #e66767;
+}
+
+/* Rejilla de KPIs: se reacomoda sola en cualquier ancho, sin col-* que cuadrar */
+.ds-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 0.75rem;
+}
+.ds-kpi-grid .ds-kpi-mini { margin-bottom: 0; height: 100%; }
+@media (max-width: 400px) {
+  .ds-kpi-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+  .ds-kpi-mini h3 { font-size: 1.1rem !important; }
+}
+
+/* Contenedor de gráfico: Chart.js con maintainAspectRatio:false toma la altura
+   del padre, así que aquí se fija explícitamente. */
+.ds-chart-box {
+  position: relative;
+  height: 268px;
+}
+.ds-chart-box-wide { height: 200px; }
+@media (max-width: 575.98px) {
+  .ds-chart-box      { height: 300px; }   /* la leyenda pasa abajo y necesita aire */
+  .ds-chart-box-wide { height: 210px; }
+}
+.ds-chart-box > canvas { max-width: 100%; }

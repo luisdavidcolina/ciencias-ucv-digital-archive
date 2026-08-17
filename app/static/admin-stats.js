@@ -1,4 +1,7 @@
 // --- ESTADÍSTICAS ---
+// Alimenta la fila de KPIs del encabezado y dispara las gráficas Chart.js.
+// El detalle visual (por tipo, por año, tendencia) vive en admin-charts.js: aquí
+// sólo quedan las cifras que no se derivan de una gráfica.
 async function loadDynamicStats() {
   const suf = adminSuffixFromTab();
   try {
@@ -35,69 +38,9 @@ async function loadDynamicStats() {
       }
     }
 
-    // Distribución por tipo
-    const typeContainer = document.getElementById(`stats_by_type-${suf}`);
-    if (typeContainer) {
-      if (stats.by_type.length === 0) {
-        typeContainer.innerHTML = `<div class="text-muted">Sin datos.</div>`;
-      } else {
-        const colors = ["#2b4e72","#0056b3","#28a745","#ffc107","#dc3545","#6f42c1"];
-        typeContainer.innerHTML = `<div class="w-100" style="padding:10px;">
-          ${stats.by_type.map((t, i) => `
-            <div class="mb-3">
-              <div class="d-flex justify-content-between" style="font-size:0.85rem;margin-bottom:2px;">
-                <span class="font-weight-bold text-dark">${escHtml(t.type)}</span>
-                <span class="text-primary">${t.count} (${t.pct}%)</span>
-              </div>
-              <div class="progress" style="height:10px;border-radius:5px;background-color:#e9ecef;">
-                <div class="progress-bar" style="width:${t.pct}%;background-color:${colors[i % colors.length]};border-radius:5px;"></div>
-              </div>
-            </div>
-          `).join("")}
-        </div>`;
-      }
-    }
-
-    // Línea de tiempo
-    const timelineContainer = document.getElementById(`stats_timeline-${suf}`);
-    if (timelineContainer) {
-      if (stats.timeline.length === 0) {
-        timelineContainer.innerHTML = `<div class="text-muted">Sin datos de línea de tiempo.</div>`;
-      } else {
-        timelineContainer.innerHTML = `<div class="w-100" style="padding:15px 10px;">
-          ${stats.timeline.map(y => `
-            <div class="d-flex align-items-center mb-3">
-              <div style="width:60px;text-align:right;margin-right:15px;font-size:0.85rem;font-weight:bold;">${y.year}</div>
-              <div style="flex-grow:1;">
-                <div class="progress" style="height:22px;border-radius:11px;background-color:#e9ecef;">
-                  <div class="progress-bar d-flex align-items-center justify-content-center"
-                    style="width:${y.pct_width}%;background:linear-gradient(135deg,#2b4e72,#0056b3);border-radius:11px;font-size:0.78rem;font-weight:bold;color:white;">
-                    ${y.count} docs
-                  </div>
-                </div>
-              </div>
-            </div>
-          `).join("")}
-        </div>`;
-      }
-    }
-
-    // Estado del sistema
-    const sysContainer = document.getElementById(`stats_system-${suf}`);
-    if (sysContainer) {
-      sysContainer.innerHTML = `
-        <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-server fa-2x text-primary mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.status}</h5><span class="text-muted" style="font-size:0.8rem;">Estado Global</span></div>
-        <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-memory fa-2x text-success mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.ram}</h5><span class="text-muted" style="font-size:0.8rem;">Consumo RAM</span></div>
-        <div class="col-md-3 text-center p-3 border-right"><i class="fas fa-microchip fa-2x text-warning mb-2"></i><h5 class="font-weight-bold m-0">${stats.system.cpu} Núcleos</h5><span class="text-muted" style="font-size:0.8rem;">Procesamiento</span></div>
-        <div class="col-md-3 text-center p-3"><i class="fas fa-laptop-code fa-2x text-danger mb-2"></i><h5 class="font-weight-bold m-0" style="font-size:0.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${stats.system.os}</h5><span class="text-muted" style="font-size:0.8rem;">Plataforma</span></div>
-      `;
-    }
-
-    // Cargar gráficas Chart.js
     loadChartsData();
 
   } catch (e) {
     console.error("Error al cargar analíticas dinámicas:", e);
   }
 }
-

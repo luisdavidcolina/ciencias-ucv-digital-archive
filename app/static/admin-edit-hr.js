@@ -147,7 +147,7 @@ function exportAdminCSV() {
   showToast(`CSV exportado: ${records.length} registro(s).`, "success");
 }
 
-// â”€â”€â”€ Drag & Drop en zona de carga â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Drag & Drop en zona de carga ───────────────────────────────────────────
 function initDropZone(suf) {
   const zone = document.querySelector(`#pane-admin-${suf}-new [style*="dashed"]`);
   const fileInput = document.getElementById(`file_upload-${suf}`);
