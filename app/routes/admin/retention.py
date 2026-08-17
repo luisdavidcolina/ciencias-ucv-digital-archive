@@ -50,14 +50,14 @@ def list_retention_types(scope: str = Query(default="")):
             COALESCE(td.plazo_retencion_anios, 5)  AS plazo_retencion_anios,
             c.nombre                                AS categoria,
             c.slug                                  AS categoria_slug,
-            COUNT(da.id_archivo)                    AS uso_archivo,
-            COUNT(dr.id_rrhh)                       AS uso_rrhh
+            COUNT(DISTINCT da.id_archivo)           AS uso_archivo,
+            COUNT(DISTINCT dr.id_rrhh)              AS uso_rrhh
         FROM public.tipo_documento td
         JOIN public.categoria c ON td.id_categoria = c.id
         LEFT JOIN public.datos_archivo da ON da.id_tipo_documento = td.id
         LEFT JOIN public.datos_rrhh    dr ON dr.id_tipo_documento = td.id
         {where}
-        GROUP BY td.id, td.nombre, td.nombre_corto, td.plazo_retencion_anios, c.nombre, c.slug
+        GROUP BY td.id, td.nombre, td.nombre_corto, td.plazo_retencion_anios, c.id, c.nombre, c.slug
         ORDER BY c.id, td.nombre
     """, params or None, fetch="all") or []
 

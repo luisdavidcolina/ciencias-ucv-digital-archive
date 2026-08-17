@@ -161,7 +161,7 @@ def get_notifications(modulo: Optional[str] = Query(default="")):
     # Archivo pendientes
     if not modulo or modulo in ("Archivo", "Global"):
         arch_rows = db_query(
-            """SELECT da.id, da.titulo AS label, da.status, 'Archivo' AS modulo,
+            """SELECT da.id_archivo AS id, da.titulo AS label, da.status, 'Archivo' AS modulo,
                       TO_CHAR(da.updated_at, 'YYYY-MM-DD HH24:MI') AS ts
                FROM public.datos_archivo da
                WHERE da.status IN ('revision','draft') AND da.deleted_at IS NULL
@@ -175,11 +175,11 @@ def get_notifications(modulo: Optional[str] = Query(default="")):
     # RRHH pendientes
     if not modulo or modulo in ("RRHH", "Global"):
         rrhh_rows = db_query(
-            """SELECT dr.id, COALESCE(e.nombres||' '||e.apellidos, 'Sin nombre') AS label,
+            """SELECT dr.id_rrhh AS id, COALESCE(e.nombres||' '||e.apellidos, 'Sin nombre') AS label,
                       dr.status, 'RRHH' AS modulo,
                       TO_CHAR(dr.updated_at, 'YYYY-MM-DD HH24:MI') AS ts
                FROM public.datos_rrhh dr
-               LEFT JOIN public.empleados e ON e.id = dr.id_empleado
+               LEFT JOIN public.empleados e ON e.id = dr.empleado_id
                WHERE dr.status IN ('revision','draft') AND dr.deleted_at IS NULL
                ORDER BY dr.updated_at DESC LIMIT 20""",
             fetch="all",
