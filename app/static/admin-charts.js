@@ -69,6 +69,30 @@ function _marcarKpi(id, valor, clase) {
   if (valor > 0) card.classList.add(clase);
 }
 
+// Una tarjeta de grafico en blanco no comunica "no hay datos", comunica "esto
+// esta roto". Con 20 documentos y ninguno en los ultimos 24 meses, varias
+// tarjetas salian vacias sin explicar por que.
+function _sinDatos(canvasId, mensaje) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const caja = canvas.parentElement;
+  canvas.style.display = "none";
+  let aviso = caja.querySelector(".ds-chart-empty");
+  if (!aviso) {
+    aviso = document.createElement("div");
+    aviso.className = "ds-chart-empty";
+    caja.appendChild(aviso);
+  }
+  aviso.innerHTML = `<i class="fas fa-circle-info"></i><span>${mensaje}</span>`;
+}
+
+function _conDatos(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.style.display = "";
+  canvas.parentElement.querySelector(".ds-chart-empty")?.remove();
+}
+
 function _renderArchivoCharts(data, suf) {
   const t     = data.charts.totals || {};
   const C     = vizSeries();
@@ -80,6 +104,7 @@ function _renderArchivoCharts(data, suf) {
   setEl(`chart-total-digitalizados-${suf}`, t.total_digitalizados);
   setEl(`chart-total-pendientes-${suf}`, t.total_pendientes);
   setEl(`chart-total-vencidos-${suf}`, t.total_vencidos);
+  if (t.ultimo_ingreso) setEl(`kpi-latest-entry-${suf}`, formatISOToSpanish(t.ultimo_ingreso));
 
   // El avance de digitalización solo se lee como proporción del fondo.
   const pct = t.total_docs ? Math.round((t.total_digitalizados / t.total_docs) * 100) : 0;
@@ -92,33 +117,36 @@ function _renderArchivoCharts(data, suf) {
   _marcarKpi(`chart-total-vencidos-${suf}`, t.total_vencidos, "ds-kpi-alerta");
   _marcarKpi(`chart-total-pendientes-${suf}`, t.total_pendientes, "ds-kpi-aviso");
 
-  // Estado de digitalización: los tres soportes son estados de una misma cosa,
-  // así que llevan colores fijos por significado, no por posición en la lista.
-  const bySoporte = data.charts.by_soporte || [];
-  if (bySoporte.length) {
-    _destroyChart(`by-soporte-${suf}`);
-    const ctx = document.getElementById(`chart-by-soporte-${suf}`)?.getContext("2d");
-    const colorSoporte = { "Digital": C[2], "Digitalizado": C[0], "Físico": _viz("ink-muted", "#6c757d") };
-    if (ctx) _chartInstances[`by-soporte-${suf}`] = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: bySoporte.map(r => r.label),
-        datasets: [{
-          data: bySoporte.map(r => r.value),
-          backgroundColor: bySoporte.map(r => colorSoporte[r.label] || C[3]),
-          borderColor: _viz("surface", "#ffffff"),
-          borderWidth: 2
-        }]
-      },
-      options: _catOptions({
-        cutout: "58%",
-        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
-      })
-    });
+  // Estado de digitalización. Una proporción sobre un total se lee como barra,
+  // no como dona: con cero digitalizados la dona era un círculo gris entero que
+  // no decía nada. La barra dice lo mismo a 0% que a 60%.
+  const caja = document.getElementById(`soporte-${suf}`);
+  if (caja) {
+    const filas = data.charts.by_soporte || [];
+    const total = filas.reduce((a, r) => a + r.value, 0);
+    const color = { "Digitalizado": C[0], "Digital": C[2], "Físico": _viz("ink-muted", "#6c757d") };
+    const digital = filas
+      .filter(r => r.label === "Digital" || r.label === "Digitalizado")
+      .reduce((a, r) => a + r.value, 0);
+    const pctDig = total ? Math.round((digital / total) * 100) : 0;
+
+    caja.innerHTML = total === 0
+      ? `<div class="ds-chart-empty"><i class="fas fa-circle-info"></i><span>Aún no hay documentos registrados.</span></div>`
+      : `
+      <div class="ds-avance-cifra">${pctDig}<span>%</span></div>
+      <div class="ds-avance-pie">${digital} de ${total} documentos con soporte digital</div>
+      <div class="ds-avance-barra">
+        ${filas.map(r => `<div class="ds-avance-tramo" style="width:${(r.value / total) * 100}%;background:${color[r.label] || C[3]}" title="${escHtml(r.label)}: ${r.value}"></div>`).join("")}
+      </div>
+      <ul class="ds-avance-leyenda">
+        ${filas.map(r => `<li><span class="ds-avance-punto" style="background:${color[r.label] || C[3]}"></span>${escHtml(r.label)} <b>${r.value}</b></li>`).join("")}
+      </ul>`;
   }
 
   const byType = data.charts.by_type || [];
-  if (byType.length) {
+  if (!byType.length) _sinDatos(`chart-by-type-${suf}`, "Aún no hay documentos clasificados por tipo.");
+  else {
+    _conDatos(`chart-by-type-${suf}`);
     _destroyChart(`by-type-${suf}`);
     const ctx = document.getElementById(`chart-by-type-${suf}`)?.getContext("2d");
     if (ctx) _chartInstances[`by-type-${suf}`] = new Chart(ctx, {
@@ -140,7 +168,9 @@ function _renderArchivoCharts(data, suf) {
   }
 
   const byYear = data.charts.by_year || [];
-  if (byYear.length) {
+  if (!byYear.length) _sinDatos(`chart-by-year-${suf}`, "Ningún documento tiene fecha registrada.");
+  else {
+    _conDatos(`chart-by-year-${suf}`);
     _destroyChart(`by-year-${suf}`);
     const ctx = document.getElementById(`chart-by-year-${suf}`)?.getContext("2d");
     if (ctx) _chartInstances[`by-year-${suf}`] = new Chart(ctx, {
@@ -155,7 +185,9 @@ function _renderArchivoCharts(data, suf) {
   }
 
   const byMonth = data.charts.by_month || [];
-  if (byMonth.length) {
+  if (byMonth.length < 2) _sinDatos(`chart-by-month-${suf}`, "Sin ingresos en los últimos 24 meses.");
+  else {
+    _conDatos(`chart-by-month-${suf}`);
     _destroyChart(`by-month-${suf}`);
     const ctx = document.getElementById(`chart-by-month-${suf}`)?.getContext("2d");
     if (ctx) _chartInstances[`by-month-${suf}`] = new Chart(ctx, {
@@ -187,6 +219,7 @@ function _renderRrhhCharts(data, suf) {
   setEl(`chart-total-movimientos-${suf}`, t.total_movimientos_cargo);
   setEl(`chart-total-jubproximas-${suf}`, t.total_jubilaciones_proximas);
   setEl(`chart-total-sindocs-${suf}`, t.total_sin_documentos);
+  if (t.ultimo_ingreso) setEl(`kpi-latest-entry-${suf}`, formatISOToSpanish(t.ultimo_ingreso));
 
   setSub(`kpi-sub-jubproximas-${suf}`,
          t.total_jubilaciones_proximas ? "preparar expediente" : "ninguna en el año");

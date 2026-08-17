@@ -56,12 +56,22 @@ def get_charts_data(modulo: str = "Archivo"):
         # Todas las consultas excluyen los borrados logicos: hasta ahora el panel
         # contaba documentos que ya estaban en la papelera.
         by_type = db_query("""
-            SELECT COALESCE(td.nombre_corto, da.tesauro_primario, 'Sin tipo') AS label,
-                   COUNT(*) AS value
-            FROM public.datos_archivo da
-            LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
-            WHERE da.deleted_at IS NULL
-            GROUP BY label ORDER BY value DESC LIMIT 12
+            WITH conteo AS (
+                SELECT COALESCE(td.nombre_corto, da.tesauro_primario, 'Sin tipo') AS label,
+                       COUNT(*) AS value
+                FROM public.datos_archivo da
+                LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
+                WHERE da.deleted_at IS NULL
+                GROUP BY label
+            ), ordenado AS (
+                SELECT label, value, ROW_NUMBER() OVER (ORDER BY value DESC, label) AS pos
+                FROM conteo
+            )
+            SELECT label, value, pos FROM ordenado WHERE pos <= 7
+            UNION ALL
+            SELECT 'Otros', SUM(value), 8 FROM ordenado WHERE pos > 7
+            HAVING SUM(value) > 0
+            ORDER BY pos
         """, fetch="all") or []
         by_year = db_query("""
             SELECT EXTRACT(YEAR FROM fecha_documento)::TEXT AS label, COUNT(*) AS value
@@ -98,6 +108,7 @@ def get_charts_data(modulo: str = "Archivo"):
                                       AND da.file_url <> '')              AS total_digitalizados,
                    COUNT(*) FILTER (WHERE COALESCE(da.status,'aprobado')
                                           IN ('revision','draft'))        AS total_pendientes,
+                   TO_CHAR(MAX(da.created_at), 'YYYY-MM-DD')             AS ultimo_ingreso,
                    COUNT(*) FILTER (
                        WHERE da.fecha_documento IS NOT NULL
                          AND (da.fecha_documento
@@ -198,6 +209,9 @@ def get_charts_data(modulo: str = "Archivo"):
                        AS total_jubilados,
                    (SELECT COUNT(*) FROM public.historial_cargos)
                        AS total_movimientos_cargo,
+                   (SELECT TO_CHAR(MAX(created_at), 'YYYY-MM-DD')
+                    FROM public.datos_rrhh WHERE deleted_at IS NULL)
+                       AS ultimo_ingreso,
                    -- Expedientes sin un solo documento: existen en la nomina pero
                    -- no tienen nada archivado.
                    (SELECT COUNT(*) FROM public.empleados e
