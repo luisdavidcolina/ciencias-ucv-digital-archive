@@ -56,7 +56,7 @@ Implementar una plataforma integral de gestión documental y digitalización par
 ## Inicio Rápido
 
 ```bash
-cd python-app
+cd app
 pip install -r requirements.txt
 python -m uvicorn main:app --reload --port 8000
 ```
@@ -113,7 +113,7 @@ graph TD
 
 ```text
 ciencias-ucv-digital-archive/
-├── python-app/
+├── app/
 │   ├── main.py                 # FastAPI: rutas, modelos Pydantic, lógica de negocio
 │   ├── requirements.txt        # fastapi, uvicorn, pandas, python-multipart
 │   ├── .python-version         # 3.11.9 (pinned para Render)
@@ -525,8 +525,8 @@ Este comando fuerza la recompilación del código fuente y efectúa su publicaci
 ### Arquitectura de la Integración
 
 - La plataforma de Vercel detecta automáticamente el archivo `api/index.py` ubicado en la raíz del proyecto y lo compila como una función *serverless*.
-- Dicho archivo importa y expone el objeto principal `app` del *framework* FastAPI (proveniente de `python-app/main.py`).
-- Los recursos estáticos alojados en la carpeta `python-app/static/` (scripts, hojas de estilo e imágenes) son provistos a través del *middleware* de FastAPI.
+- Dicho archivo importa y expone el objeto principal `app` del *framework* FastAPI (proveniente de `app/main.py`).
+- Los recursos estáticos alojados en la carpeta `app/static/` (scripts, hojas de estilo e imágenes) son provistos a través del *middleware* de FastAPI.
 
 ### Consideraciones Críticas
 

@@ -12,7 +12,7 @@ class Settings:
 
     # Aplicación
     app_name: str = "Archivo Institucional — Ciencias UCV"
-    app_version: str = "3.1.0-Neon"
+    app_version: str = "3.3.0"
     debug: bool = os.environ.get("DEBUG", "false").lower() == "true"
 
     # Entorno (production / development)

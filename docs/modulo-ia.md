@@ -15,13 +15,13 @@ trata, de qué año es, dónde está en físico y **el enlace al digitalizado cu
 
 | Archivo | Qué hace |
 |---|---|
-| `python-app/core/ia.py` | La tubería: llamada a OpenRouter, ciclo de herramientas, caché de prompt, costo. No sabe nada del archivo. |
-| `python-app/core/ia_tools.py` | Las herramientas: **lo único que toca la base**. Todas de solo lectura. |
-| `python-app/core/ia_prompts.py` | El prompt de sistema por perfil, más la parte editable desde el panel. |
-| `python-app/core/ia_propuestas.py` | La bandeja de aprobación: donde una propuesta se vuelve un cambio real. |
-| `python-app/routes/ia.py` | Los endpoints, la resolución de permisos y el tope de gasto. |
-| `python-app/static/ia-widget.js` | La burbuja. No sabe nada: manda y pinta. |
-| `python-app/static/admin_ia.html` | Panel: cerebro, gasto, conversaciones y elección de modelo. |
+| `app/core/ai.py` | La tubería: llamada a OpenRouter, ciclo de herramientas, caché de prompt, costo. No sabe nada del archivo. |
+| `app/core/ai_tools.py` | Las herramientas: **lo único que toca la base**. Todas de solo lectura. |
+| `app/core/ai_prompts.py` | El prompt de sistema por perfil, más la parte editable desde el panel. |
+| `app/core/ai_proposals.py` | La bandeja de aprobación: donde una propuesta se vuelve un cambio real. |
+| `app/routes/ai.py` | Los endpoints, la resolución de permisos y el tope de gasto. |
+| `app/static/ai-widget.js` | La burbuja. No sabe nada: manda y pinta. |
+| `app/static/admin_ai.html` | Panel: cerebro, gasto, conversaciones y elección de modelo. |
 
 ## Tres perfiles — lo más importante
 
@@ -85,7 +85,7 @@ servidor valida, y el navegador decide si redirige.
 
 Ninguna herramienta modifica el archivo. Las `proponer_*` crean una fila en `ia_propuestas`
 que aparece en el chat como **[Aprobar] [Rechazar]**. El cambio ocurre solo si alguien
-aprieta el botón, y entonces `core/ia_propuestas.py` lo ejecuta y lo registra en
+aprieta el botón, y entonces `core/ai_proposals.py` lo ejecuta y lo registra en
 `audit_log`.
 
 No es exceso de celo. Un modelo que se equivoca al leer da una respuesta que el usuario

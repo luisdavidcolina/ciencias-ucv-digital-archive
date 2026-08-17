@@ -6,6 +6,85 @@ Este proyecto usa [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [3.3.0] — 2026-08-17
+
+### Corregido — Fallos que impedían cargar
+
+- `app-theme.js` y `admin-edit.js` no parseaban: comillas tipográficas usadas
+  como delimitador de string. Un `SyntaxError` duro deja el archivo entero sin
+  cargar, así que el panel de personalización completo (modo oscuro, temas,
+  densidad, notificaciones) y la edición de documentos estaban muertos.
+- `core/ai.py` llamaba a `modelo_actual()` y `catalogo_modelos()` en cinco
+  sitios tras haber renombrado esas definiciones. Cada llamada era un
+  `NameError`: el chat, la validación de modelo y el endpoint de disponibilidad
+  respondían 500.
+- La pestaña Papelera nunca llamaba a `loadPapelera()`: abría una tabla vacía.
+- El panel entraba por "Monitor" mientras el marcado marcaba "Análisis" como
+  activa; como los KPIs de cabecera solo se llenan en esa rama, la fila entera
+  se quedaba en cero al abrir.
+- El monitor de RRHH emitía siete celdas bajo un encabezado de seis columnas:
+  la tabla salía corrida y cada dato aparecía bajo el título equivocado. En
+  Archivo las etiquetas también estaban desplazadas.
+- El panel de Sistema usa `info-box` 58 veces, pero AdminLTE nunca se carga:
+  las cajas salían sin estructura, con el fondo del icono ocupando el ancho
+  completo y la cifra encima, ilegible.
+
+### Corregido — Codificación
+
+- Texto doble-codificado (UTF-8 guardado como cp1252) en backend, documentación
+  y estáticos. No era solo cosmético: en `docs.py` la clase de caracteres del
+  fallback de búsqueda estaba corrupta, y en `retention.py` y `docs.py` el daño
+  estaba dentro de literales SQL, así que `COALESCE(autor,'—')` devolvía texto
+  corrupto al usuario. Se eliminan además 20 BOM.
+
+### Cambiado — Backoffice
+
+- Las pestañas pasan de siete planas a nueve agrupadas por intención
+  (operación diaria · configuración · gobernanza documental), con separador
+  visible. "Auditoría" era un cajón de sastre con auditoría, retención vencida
+  y exportación; la retención estaba partida en dos pestañas y ahora está
+  completa en una. Mismo criterio aplicado al panel de Sistema.
+- El pane de analíticas apilaba dos generaciones de gráficos: "Distribución por
+  Tipo" duplicaba "Documentos por Tipo", "Cronología" duplicaba "Documentos por
+  Año" y "Total Documentos" aparecía dos veces. Se elimina la generación vieja,
+  incluido "Estado del Sistema", que reportaba RAM y CPU del lambda de Vercel.
+- La paleta de gráficos fallaba tres comprobaciones de accesibilidad (banda de
+  luminosidad, piso de croma, separación a visión normal). Se sustituye por una
+  validada en claro y oscuro contra las superficies reales, expuesta como
+  tokens `--viz-*` que los gráficos leen en runtime.
+- La consola de IA vivía fuera del sistema de diseño: sin `styles.css`, con su
+  propio verde y sin modo oscuro. Queda integrada.
+
+### Añadido
+
+- Capa de movimiento: entrada escalonada de resultados, transición entre
+  pestañas y realce al pasar por encima de lo accionable. `prefers-reduced-motion`
+  ahora apaga la animación globalmente, no solo en una regla suelta.
+- Responsive verificado a 390 px: sin desborde horizontal en ninguna página ni
+  pestaña. El logo ocupaba 241 px de 390 y expulsaba de la barra al usuario y al
+  botón de salir.
+- `requirements-dev.txt` con pytest, httpx y pyflakes.
+
+### Seguridad
+
+- Las credenciales de Cloudflare R2 estaban escritas en `storage.py`. Pasan a
+  leerse del entorno. **Siguen en el historial de git y el repositorio es
+  público: hay que rotarlas en Cloudflare.**
+
+### Pruebas — de 87 a 361
+
+Guardas nuevas, cada una verificada contra el código roto que la motivó:
+
+- `test_static_assets.py` — UTF-8 válido, sin BOM ni doble codificación, y
+  `node --check` sobre cada `.js`.
+- `test_static_analysis.py` — un nombre indefinido es un error; sin imports
+  muertos; todos los módulos importan.
+- `test_secrets.py` — sin credenciales en el código, sin `.env` versionado.
+- `test_admin_panels.py` — cada pestaña tiene panel y rama de carga, ambos
+  módulos son simétricos, y los encabezados del monitor cuadran con las celdas.
+
+---
+
 ## [3.2.0] — 2026-06-24
 
 ### Añadido — Estándares Documentales (ISAD(G) / ISO 15489)
