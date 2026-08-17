@@ -41,11 +41,11 @@ _LIMITE_MAX = 25
 _ESCALA = {"publico": 0, "consulta": 1, "editor": 2}
 
 
-def _perfil_alcanza(perfil, minimo):
+def _profile_qualifies(perfil, minimo):
     return _ESCALA.get(perfil, 0) >= _ESCALA.get(minimo, 0)
 
 
-def _limite(args, defecto=8):
+def _limit(args, defecto=8):
     try:
         n = int(args.get("limite") or defecto)
     except (TypeError, ValueError):
@@ -53,7 +53,7 @@ def _limite(args, defecto=8):
     return max(1, min(n, _LIMITE_MAX))
 
 
-def _texto(args, clave, largo=200):
+def _text(args, clave, largo=200):
     v = args.get(clave)
     return str(v).strip()[:largo] if v not in (None, "") else None
 
@@ -86,7 +86,7 @@ def _fn(nombre, descripcion, propiedades=None, requeridos=None):
 _REGISTRO = []
 
 
-def _registrar(perfil, modulo, esquema, manejador):
+def _register(perfil, modulo, esquema, manejador):
     _REGISTRO.append({
         "nombre": esquema["function"]["name"],
         "perfil": perfil,
@@ -102,7 +102,7 @@ def definitions(ctx: dict) -> list:
     modulos = ctx.get("modulos") or set()
     fuera = []
     for h in _REGISTRO:
-        if not _perfil_alcanza(perfil, h["perfil"]):
+        if not _profile_qualifies(perfil, h["perfil"]):
             continue
         if h["modulo"] and h["modulo"] not in modulos:
             continue
@@ -123,7 +123,7 @@ def execute(nombre: str, args: dict, ctx: dict) -> dict:
         return {"error": f"La herramienta '{nombre}' no existe."}
 
     perfil = ctx.get("perfil", "publico")
-    if not _perfil_alcanza(perfil, entrada["perfil"]):
+    if not _profile_qualifies(perfil, entrada["perfil"]):
         return {"error": "No tienes permiso para esa acción con tu tipo de usuario."}
     if entrada["modulo"] and entrada["modulo"] not in (ctx.get("modulos") or set()):
         return {"error": f"Tu usuario no tiene acceso al módulo {entrada['modulo']}."}
@@ -138,11 +138,11 @@ def execute(nombre: str, args: dict, ctx: dict) -> dict:
 # LECTURA — ARCHIVO (público)
 # =============================================================================
 
-def _buscar_archivo(args, ctx):
+def _search_archive(args, ctx):
     where = ["da.deleted_at IS NULL"]
     params = []
 
-    termino = _texto(args, "termino")
+    termino = _text(args, "termino")
     if termino:
         # FTS en español con fallback a ILIKE: el mismo patrón que la búsqueda pública del
         # sistema, para que el asistente y la pantalla no den resultados distintos.
@@ -154,17 +154,17 @@ def _buscar_archivo(args, ctx):
         )""")
         params += [termino, f"%{termino}%", f"%{termino}%", f"%{termino}%"]
 
-    tipo = _texto(args, "tipo_documento", 120)
+    tipo = _text(args, "tipo_documento", 120)
     if tipo:
         where.append("(td.nombre ILIKE %s OR td.nombre_corto ILIKE %s OR da.tesauro_primario ILIKE %s)")
         params += [f"%{tipo}%", f"%{tipo}%", f"%{tipo}%"]
 
-    autor = _texto(args, "autor", 120)
+    autor = _text(args, "autor", 120)
     if autor:
         where.append("da.autor ILIKE %s")
         params.append(f"%{autor}%")
 
-    palabra = _texto(args, "palabra_clave", 120)
+    palabra = _text(args, "palabra_clave", 120)
     if palabra:
         where.append("""EXISTS (
             SELECT 1 FROM public.archivo_descriptores ax
@@ -183,7 +183,7 @@ def _buscar_archivo(args, ctx):
     if args.get("solo_digitalizados"):
         where.append("da.file_url IS NOT NULL AND da.file_url <> ''")
 
-    params.append(_limite(args))
+    params.append(_limit(args))
 
     filas = db_query(f"""
         SELECT da.id_archivo AS id, da.titulo,
@@ -209,7 +209,7 @@ def _buscar_archivo(args, ctx):
     }
 
 
-def _ver_documento(args, ctx):
+def _get_document(args, ctx):
     try:
         doc_id = int(args.get("id"))
     except (TypeError, ValueError):
@@ -262,7 +262,7 @@ def _ver_documento(args, ctx):
     return fila or {"error": "No existe un documento con ese id en el Archivo."}
 
 
-def _listar_tipos(args, ctx):
+def _list_types(args, ctx):
     if (args.get("modulo") or "archivo").lower() == "rrhh":
         filas = db_query("""
             SELECT td.id, td.nombre_corto AS tipo, c.nombre AS parte, COUNT(dr.id_rrhh) AS documentos
@@ -292,7 +292,7 @@ def _listar_tipos(args, ctx):
             "nota": "Usa el 'id' del tipo al proponer o modificar un documento."}
 
 
-def _listar_palabras_clave(args, ctx):
+def _list_keywords(args, ctx):
     filas = db_query("""
         SELECT dl.nombre AS palabra_clave, COUNT(ad.id_archivo) AS documentos
         FROM public.descriptores_libres dl
@@ -300,11 +300,11 @@ def _listar_palabras_clave(args, ctx):
         GROUP BY dl.nombre
         ORDER BY documentos DESC, dl.nombre
         LIMIT %s
-    """, [_limite(args, 20)], fetch="all")
+    """, [_limit(args, 20)], fetch="all")
     return {"palabras_clave": filas}
 
 
-def _estadisticas(args, ctx):
+def _statistics(args, ctx):
     fila = db_query("""
         SELECT
             (SELECT COUNT(*) FROM public.datos_archivo WHERE deleted_at IS NULL) AS documentos_archivo,
@@ -327,8 +327,8 @@ _RUTAS_VALIDAS = {
 }
 
 
-def _ir_a(args, ctx):
-    ruta = _texto(args, "ruta", 60) or ""
+def _navigate_to(args, ctx):
+    ruta = _text(args, "ruta", 60) or ""
     if ruta not in _RUTAS_VALIDAS:
         return {"error": f"Ruta no válida. Disponibles: {', '.join(sorted(_RUTAS_VALIDAS))}."}
     # El frontend lee `navegar_a` de la respuesta y redirige. La ruta sale de una lista
@@ -340,26 +340,26 @@ def _ir_a(args, ctx):
 # LECTURA — RRHH (requiere sesión y módulo)
 # =============================================================================
 
-def _buscar_empleado(args, ctx):
+def _search_employee(args, ctx):
     where = ["1=1"]
     params = []
 
-    termino = _texto(args, "termino", 120)
+    termino = _text(args, "termino", 120)
     if termino:
         where.append("(v.persona_raw ILIKE %s OR v.cedula ILIKE %s)")
         params += [f"%{termino}%", f"%{termino}%"]
 
-    depto = _texto(args, "departamento", 120)
+    depto = _text(args, "departamento", 120)
     if depto:
         where.append("v.departamento ILIKE %s")
         params.append(f"%{depto}%")
 
-    estado = _texto(args, "estado", 60)
+    estado = _text(args, "estado", 60)
     if estado:
         where.append("v.estado ILIKE %s")
         params.append(f"%{estado}%")
 
-    params.append(_limite(args))
+    params.append(_limit(args))
 
     filas = db_query(f"""
         SELECT v.cedula, v.persona_raw AS nombre, v.cargo, v.departamento, v.estado,
@@ -372,8 +372,8 @@ def _buscar_empleado(args, ctx):
     return {"encontrados": len(filas), "empleados": filas}
 
 
-def _expediente_empleado(args, ctx):
-    cedula = _texto(args, "cedula", 20)
+def _employee_file(args, ctx):
+    cedula = _text(args, "cedula", 20)
     if not cedula:
         return {"error": "Falta la cédula."}
 
@@ -407,14 +407,14 @@ def _expediente_empleado(args, ctx):
     return {"empleado": persona, "total_documentos": len(docs), "expediente": por_parte}
 
 
-def _buscar_documento_rrhh(args, ctx):
-    termino = _texto(args, "termino")
+def _search_hr_document(args, ctx):
+    termino = _text(args, "termino")
     where = ["1=1"]
     params = []
     if termino:
         where.append("(dr.titulo ILIKE %s OR dr.abstract ILIKE %s OR dr.notas ILIKE %s)")
         params += [f"%{termino}%"] * 3
-    params.append(_limite(args))
+    params.append(_limit(args))
 
     filas = db_query(f"""
         SELECT dr.id_rrhh AS id, dr.titulo,
@@ -433,12 +433,12 @@ def _buscar_documento_rrhh(args, ctx):
     return {"encontrados": len(filas), "documentos": filas}
 
 
-def _documentos_por_vencer(args, ctx):
+def _expiring_documents(args, ctx):
     try:
         dias = max(1, min(int(args.get("dias") or 90), 1825))
     except (TypeError, ValueError):
         dias = 90
-    limite = _limite(args, 15)
+    limite = _limit(args, 15)
 
     filas = db_query("""
         SELECT * FROM (
@@ -475,7 +475,7 @@ def _documentos_por_vencer(args, ctx):
 # ADJUNTOS — lo que el usuario suelta en el chat
 # =============================================================================
 
-def _mis_adjuntos(args, ctx):
+def _my_attachments(args, ctx):
     """Los archivos que el usuario subió en esta conversación.
 
     El asistente NO puede subir nada por su cuenta: la subida la hace la persona desde el
@@ -516,7 +516,7 @@ def allowed_fields(modulo):
     return _CAMPOS_ARCHIVO if modulo == "archivo" else _CAMPOS_RRHH
 
 
-def _crear_propuesta(ctx, accion, modulo, objetivo_id, datos, resumen):
+def _create_proposal(ctx, accion, modulo, objetivo_id, datos, resumen):
     """Deja la propuesta en la bandeja y devuelve al modelo algo que anunciar.
 
     El resumen se guarda porque quien aprueba tiene que poder juzgar sin releer toda la
@@ -542,7 +542,7 @@ def _crear_propuesta(ctx, accion, modulo, objetivo_id, datos, resumen):
     }
 
 
-def _normalizar_campos(modulo, datos):
+def _normalize_fields(modulo, datos):
     """Filtra a la lista blanca y normaliza tipos. Lo que no pasa, se informa."""
     permitidos = allowed_fields(modulo)
     limpios, rechazados = {}, []
@@ -557,7 +557,7 @@ def _normalizar_campos(modulo, datos):
     return limpios, rechazados
 
 
-def _proponer_actualizacion(args, ctx):
+def _propose_update(args, ctx):
     modulo = (args.get("modulo") or "archivo").lower()
     if modulo not in ("archivo", "rrhh"):
         return {"error": "modulo debe ser 'archivo' o 'rrhh'."}
@@ -569,7 +569,7 @@ def _proponer_actualizacion(args, ctx):
     except (TypeError, ValueError):
         return {"error": "Falta el id del documento a modificar."}
 
-    campos, rechazados = _normalizar_campos(modulo, args.get("campos"))
+    campos, rechazados = _normalize_fields(modulo, args.get("campos"))
     if not campos:
         return {"error": "No indicaste ningún campo modificable. "
                          f"Se pueden cambiar: {', '.join(sorted(allowed_fields(modulo)))}."}
@@ -587,20 +587,20 @@ def _proponer_actualizacion(args, ctx):
     cambios = ", ".join(f"{k}: '{antes.get(k)}' → '{v}'" for k, v in campos.items())
     resumen = f"Modificar «{actual.get('titulo')}» (id {objetivo}, {modulo}). {cambios}"
 
-    return _crear_propuesta(ctx, "actualizar", modulo, objetivo,
+    return _create_proposal(ctx, "actualizar", modulo, objetivo,
                             {"campos": campos, "antes": antes}, resumen) | (
         {"campos_ignorados": rechazados} if rechazados else {}
     )
 
 
-def _proponer_documento(args, ctx):
+def _propose_document(args, ctx):
     modulo = (args.get("modulo") or "archivo").lower()
     if modulo not in ("archivo", "rrhh"):
         return {"error": "modulo debe ser 'archivo' o 'rrhh'."}
     if modulo not in (ctx.get("modulos") or set()):
         return {"error": f"Tu usuario no puede crear documentos en {modulo}."}
 
-    campos, rechazados = _normalizar_campos(modulo, args.get("campos"))
+    campos, rechazados = _normalize_fields(modulo, args.get("campos"))
     if not campos.get("titulo"):
         return {"error": "Un documento necesita al menos un 'titulo'."}
     if not campos.get("ubicacion"):
@@ -610,7 +610,7 @@ def _proponer_documento(args, ctx):
 
     extra = {}
     if modulo == "rrhh":
-        cedula = _texto(args, "cedula_empleado", 20)
+        cedula = _text(args, "cedula_empleado", 20)
         if not cedula:
             return {"error": "Un documento de RRHH necesita la cédula del empleado."}
         emp = db_query("SELECT id FROM public.empleados WHERE cedula = %s", [cedula], fetch="one")
@@ -619,13 +619,13 @@ def _proponer_documento(args, ctx):
         extra["empleado_id"] = emp["id"]
 
     resumen = f"Crear documento «{campos['titulo']}» en {modulo} (ubicación: {campos['ubicacion']})."
-    return _crear_propuesta(ctx, "crear", modulo, None,
+    return _create_proposal(ctx, "crear", modulo, None,
                             {"campos": campos, "extra": extra}, resumen) | (
         {"campos_ignorados": rechazados} if rechazados else {}
     )
 
 
-def _proponer_adjuntar_archivo(args, ctx):
+def _propose_attach_file(args, ctx):
     """Engancha un archivo que el usuario subió al chat con un documento existente."""
     modulo = (args.get("modulo") or "archivo").lower()
     if modulo not in ("archivo", "rrhh"):
@@ -664,7 +664,7 @@ def _proponer_adjuntar_archivo(args, ctx):
     resumen = (f"Adjuntar «{adj['nombre_archivo']}» al documento «{doc['titulo']}» "
                f"(id {objetivo}, {modulo}).{aviso}")
 
-    return _crear_propuesta(
+    return _create_proposal(
         ctx, "actualizar", modulo, objetivo,
         {"campos": {"file_url": adj["file_url"]},
          "antes": {"file_url": doc.get("file_url")}},
@@ -672,7 +672,7 @@ def _proponer_adjuntar_archivo(args, ctx):
     )
 
 
-def _proponer_palabras_clave(args, ctx):
+def _propose_keywords(args, ctx):
     if "archivo" not in (ctx.get("modulos") or set()):
         return {"error": "Tu usuario no puede modificar el Archivo."}
     try:
@@ -695,7 +695,7 @@ def _proponer_palabras_clave(args, ctx):
 
     resumen = (f"Agregar palabras clave a «{doc['titulo']}» (id {objetivo}): "
                f"{', '.join(palabras)}.")
-    return _crear_propuesta(ctx, "palabras_clave", "archivo", objetivo,
+    return _create_proposal(ctx, "palabras_clave", "archivo", objetivo,
                             {"palabras": palabras}, resumen)
 
 
@@ -703,7 +703,7 @@ def _proponer_palabras_clave(args, ctx):
 # REGISTRO
 # =============================================================================
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "buscar_archivo",
     "Busca documentos en el Archivo Institucional por texto libre (título, resumen, autor, "
     "palabras clave). Devuelve el enlace al documento digitalizado cuando existe. Úsala para "
@@ -718,9 +718,9 @@ _registrar("publico", None, _fn(
         "solo_digitalizados": {"type": "boolean", "description": "True para devolver solo los que tienen enlace."},
         "limite": {"type": "integer", "description": "Cuántos resultados (1-25, por defecto 8)."},
     },
-), _buscar_archivo)
+), _search_archive)
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "ver_documento",
     "Ficha completa de un documento: resumen, ubicación física, folio, páginas, palabras "
     "clave y enlace al digitalizado. Primero obtén su id con buscar_archivo.",
@@ -729,30 +729,30 @@ _registrar("publico", None, _fn(
         "modulo": {"type": "string", "description": "'archivo' o 'rrhh'. Por defecto 'archivo'."},
     },
     ["id"],
-), _ver_documento)
+), _get_document)
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "listar_tipos_documento",
     "Lista los tipos de documento con su id y cuántos documentos tiene cada uno. Úsala "
     "cuando pregunten qué clases de documentos existen, o para obtener el id de un tipo "
     "antes de crear o modificar un documento.",
     {"modulo": {"type": "string", "description": "'archivo' o 'rrhh'. Por defecto 'archivo'."}},
-), _listar_tipos)
+), _list_types)
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "listar_palabras_clave",
     "Lista las palabras clave (descriptores) más usadas en el Archivo, con su frecuencia. "
     "Sirve para orientar una búsqueda cuando el usuario no sabe qué términos existen.",
     {"limite": {"type": "integer", "description": "Cuántas traer (1-25, por defecto 20)."}},
-), _listar_palabras_clave)
+), _list_keywords)
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "estadisticas",
     "Cifras generales: total de documentos del Archivo, documentos de RRHH, empleados, "
     "cuántos están digitalizados y el rango de años cubierto.",
-), _estadisticas)
+), _statistics)
 
-_registrar("publico", None, _fn(
+_register("publico", None, _fn(
     "ir_a",
     "Lleva al usuario a una pantalla del sistema. Úsala cuando pidan ir o ver una sección "
     "('llévame al archivo', 'abre el panel de RRHH').",
@@ -760,9 +760,9 @@ _registrar("publico", None, _fn(
               "Una de: '/archivo', '/rrhh', '/admin/archivo', '/admin/rrhh', "
               "'/admin/sistema', '/admin/ia', '/investigacion', '/ayuda'."}},
     ["ruta"],
-), _ir_a)
+), _navigate_to)
 
-_registrar("consulta", "rrhh", _fn(
+_register("consulta", "rrhh", _fn(
     "buscar_empleado",
     "Busca personal de la Facultad por nombre, apellido o cédula. Devuelve cargo, "
     "departamento, estado laboral y cuántos documentos tiene su expediente.",
@@ -772,18 +772,18 @@ _registrar("consulta", "rrhh", _fn(
         "estado": {"type": "string", "description": "Filtrar por estado laboral. Opcional."},
         "limite": {"type": "integer", "description": "Cuántos resultados (1-25, por defecto 8)."},
     },
-), _buscar_empleado)
+), _search_employee)
 
-_registrar("consulta", "rrhh", _fn(
+_register("consulta", "rrhh", _fn(
     "expediente_empleado",
     "Expediente completo de un empleado: sus documentos agrupados por Parte (I Ingreso, "
     "II Escalafón, III Permisos, IV Documentos Personales), con enlaces a los digitalizados. "
     "Primero obtén la cédula con buscar_empleado.",
     {"cedula": {"type": "string", "description": "Cédula del empleado, sin puntos."}},
     ["cedula"],
-), _expediente_empleado)
+), _employee_file)
 
-_registrar("consulta", "rrhh", _fn(
+_register("consulta", "rrhh", _fn(
     "buscar_documento_rrhh",
     "Busca documentos dentro de los expedientes de RRHH por texto libre, sin partir de un "
     "empleado concreto. Devuelve a qué empleado pertenece cada uno.",
@@ -791,9 +791,9 @@ _registrar("consulta", "rrhh", _fn(
         "termino": {"type": "string", "description": "Texto a buscar en título, resumen o notas."},
         "limite": {"type": "integer", "description": "Cuántos resultados (1-25, por defecto 8)."},
     },
-), _buscar_documento_rrhh)
+), _search_hr_document)
 
-_registrar("consulta", "rrhh", _fn(
+_register("consulta", "rrhh", _fn(
     "documentos_por_vencer",
     "Documentos cuya fecha de vencimiento está próxima o ya pasó. Úsala cuando pregunten "
     "por vencimientos, alertas o documentos por renovar.",
@@ -801,15 +801,15 @@ _registrar("consulta", "rrhh", _fn(
         "dias": {"type": "integer", "description": "Ventana en días hacia adelante (por defecto 90)."},
         "limite": {"type": "integer", "description": "Cuántos resultados (1-25, por defecto 15)."},
     },
-), _documentos_por_vencer)
+), _expiring_documents)
 
-_registrar("editor", None, _fn(
+_register("editor", None, _fn(
     "mis_adjuntos",
     "Lista los archivos que el usuario subió con el clip en esta conversación. Úsala antes "
     "de proponer adjuntar un archivo a un documento, para obtener su 'adjunto_id'.",
-), _mis_adjuntos)
+), _my_attachments)
 
-_registrar("editor", None, _fn(
+_register("editor", None, _fn(
     "proponer_actualizacion",
     "Propone MODIFICAR un documento existente. NO lo modifica: crea una propuesta que el "
     "usuario tiene que aprobar con un botón. Úsala para corregir títulos, fechas, "
@@ -824,9 +824,9 @@ _registrar("editor", None, _fn(
                    "notas, fecha_vencimiento (AAAA-MM-DD)."},
     },
     ["modulo", "id", "campos"],
-), _proponer_actualizacion)
+), _propose_update)
 
-_registrar("editor", None, _fn(
+_register("editor", None, _fn(
     "proponer_documento",
     "Propone CREAR un documento nuevo. NO lo crea: deja una propuesta que el usuario "
     "aprueba con un botón. Pregunta los datos que falten; no inventes ubicación ni fecha.",
@@ -840,9 +840,9 @@ _registrar("editor", None, _fn(
                             "Obligatoria si modulo='rrhh': de quién es el expediente."},
     },
     ["modulo", "campos"],
-), _proponer_documento)
+), _propose_document)
 
-_registrar("editor", None, _fn(
+_register("editor", None, _fn(
     "proponer_adjuntar_archivo",
     "Propone enganchar un archivo que el usuario subió al chat con un documento existente, "
     "para que quede como su versión digitalizada. Primero usa mis_adjuntos para el "
@@ -853,9 +853,9 @@ _registrar("editor", None, _fn(
         "adjunto_id": {"type": "integer", "description": "id devuelto por mis_adjuntos."},
     },
     ["modulo", "id", "adjunto_id"],
-), _proponer_adjuntar_archivo)
+), _propose_attach_file)
 
-_registrar("editor", "archivo", _fn(
+_register("editor", "archivo", _fn(
     "proponer_palabras_clave",
     "Propone agregar palabras clave (descriptores) a un documento del Archivo. Las que no "
     "existan se crean al aprobar. Nunca digas 'tesauro': aquí se llaman Palabras Clave.",
@@ -865,4 +865,4 @@ _registrar("editor", "archivo", _fn(
                      "description": "Lista de palabras clave a agregar."},
     },
     ["id", "palabras"],
-), _proponer_palabras_clave)
+), _propose_keywords)
