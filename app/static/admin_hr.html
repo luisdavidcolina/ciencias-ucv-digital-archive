@@ -134,75 +134,77 @@
       <!-- KPI METRICS -->
       <div class="ds-kpi-grid mb-3">
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-1);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Empleados</h6>
-              <h3 id="chart-total-emp-rrhh" class="font-weight-bold mb-0">—</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Empleados</h6>
+              <h3 id="chart-total-emp-rrhh" class="ds-kpi-value">—</h3>
             </div>
-            <i class="fas fa-users fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-users ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-3);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Activos</h6>
-              <h3 id="chart-total-activos-rrhh" class="font-weight-bold mb-0">—</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Activos</h6>
+              <h3 id="chart-total-activos-rrhh" class="ds-kpi-value">—</h3>
             </div>
-            <i class="fas fa-user-check fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-user-check ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Jubilados / Pens.</h6>
-              <h3 id="chart-total-jub-rrhh" class="font-weight-bold mb-0">—</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Jubilados / Pens.</h6>
+              <h3 id="chart-total-jub-rrhh" class="ds-kpi-value">—</h3>
             </div>
-            <i class="fas fa-user-graduate fa-lg text-muted opacity-50"></i>
-          </div>
-        </div>
-        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-5);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Mov. de Cargo</h6>
-              <h3 id="chart-total-movimientos-rrhh" class="font-weight-bold mb-0">—</h3>
-            </div>
-            <i class="fas fa-exchange-alt fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-user-graduate ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-4);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Documentos</h6>
-              <h3 id="kpi-total-docs-rrhh" class="font-weight-bold mb-0">0</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Jubilación &lt; 12 meses</h6>
+              <h3 id="chart-total-jubproximas-rrhh" class="ds-kpi-value">—</h3>
+              <div class="ds-kpi-sub" id="kpi-sub-jubproximas-rrhh">preparar expediente</div>
             </div>
-            <i class="fas fa-file-invoice fa-lg text-muted opacity-50"></i>
-          </div>
-        </div>
-        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-6);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Partes RRHH</h6>
-              <h3 id="kpi-total-cats-rrhh" class="font-weight-bold mb-0">0</h3>
-            </div>
-            <i class="fas fa-tags fa-lg text-muted opacity-50"></i>
-          </div>
-        </div>
-        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-2);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Usuarios</h6>
-              <h3 id="kpi-total-users-rrhh" class="font-weight-bold mb-0">0</h3>
-            </div>
-            <i class="fas fa-users-cog fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-user-clock ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-8);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Último Ingreso</h6>
-              <h3 id="kpi-latest-entry-rrhh" class="font-weight-bold mb-0" style="font-size: 1rem;">N/A</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Sin documentos</h6>
+              <h3 id="chart-total-sindocs-rrhh" class="ds-kpi-value">—</h3>
+              <div class="ds-kpi-sub" id="kpi-sub-sindocs-rrhh">expedientes vacíos</div>
             </div>
-            <i class="fas fa-history fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-folder-open ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-2);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Documentos</h6>
+              <h3 id="kpi-total-docs-rrhh" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-file-invoice ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-5);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Mov. de cargo</h6>
+              <h3 id="chart-total-movimientos-rrhh" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-exchange-alt ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-ink-muted);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Último ingreso</h6>
+              <h3 id="kpi-latest-entry-rrhh" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-clock-rotate-left ds-kpi-icon"></i>
           </div>
         </div>
       </div>
@@ -316,8 +318,11 @@
                 </div>
                 <div class="col-md-6">
                   <div class="card card-outline ds-chart-card shadow-sm">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-layer-group mr-2"></i>Docs por Parte</h3></div>
-                    <div class="card-body ds-chart-box"><canvas id="chart-by-parte-rrhh" height="220"></canvas></div>
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-layer-group mr-2"></i>Cobertura de Expedientes</h3>
+                      <div class="card-tools"><span class="badge badge-light border text-muted small">% con al menos un documento</span></div>
+                    </div>
+                    <div class="card-body ds-chart-box"><canvas id="chart-cobertura-rrhh"></canvas></div>
                   </div>
                 </div>
               </div>

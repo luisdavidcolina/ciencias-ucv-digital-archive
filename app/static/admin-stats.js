@@ -20,11 +20,9 @@ async function loadDynamicStats() {
     if (kpiDocs) kpiDocs.innerText = stats.total_docs;
     if (kpiCats) kpiCats.innerText = stats.categories_count;
 
-    try {
-      const uList = await apiFetchJSON(`${API_BASE}/api/admin/users?modulo=${encodeURIComponent(state.user.modulo)}`);
-      const kpiUsers = document.getElementById(`kpi-total-users-${suf}`);
-      if (kpiUsers) kpiUsers.innerText = uList.length;
-    } catch {}
+    // El número de usuarios ya no encabeza el panel: no es una medida del
+    // archivo ni de los expedientes, y vive donde se gestiona, en "Acceso".
+    // Con ello se ahorra además una llamada a la API en cada carga.
 
     const isArchivo  = state.user.modulo === "Archivo";
     const db_list    = isArchivo ? state.archivo.results : state.rrhh.results;

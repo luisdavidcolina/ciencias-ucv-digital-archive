@@ -53,69 +53,122 @@ def get_charts_data(modulo: str = "Archivo"):
     from .helpers import _require_modulo
     _require_modulo(modulo)
     if modulo == "Archivo":
+        # Todas las consultas excluyen los borrados logicos: hasta ahora el panel
+        # contaba documentos que ya estaban en la papelera.
         by_type = db_query("""
-            SELECT COALESCE(tesauro_primario, 'Sin tipo') AS label, COUNT(*) AS value
-            FROM public.datos_archivo GROUP BY tesauro_primario ORDER BY value DESC LIMIT 12
+            SELECT COALESCE(td.nombre_corto, da.tesauro_primario, 'Sin tipo') AS label,
+                   COUNT(*) AS value
+            FROM public.datos_archivo da
+            LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
+            WHERE da.deleted_at IS NULL
+            GROUP BY label ORDER BY value DESC LIMIT 12
         """, fetch="all") or []
         by_year = db_query("""
             SELECT EXTRACT(YEAR FROM fecha_documento)::TEXT AS label, COUNT(*) AS value
-            FROM public.datos_archivo WHERE fecha_documento IS NOT NULL
+            FROM public.datos_archivo
+            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL
             GROUP BY label ORDER BY label DESC LIMIT 10
         """, fetch="all") or []
         by_month = db_query("""
             SELECT TO_CHAR(fecha_documento, 'Mon YYYY') AS label,
                    DATE_TRUNC('month', fecha_documento) AS sort_key, COUNT(*) AS value
-            FROM public.datos_archivo WHERE fecha_documento IS NOT NULL
+            FROM public.datos_archivo
+            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL
               AND fecha_documento >= NOW() - INTERVAL '24 months'
             GROUP BY label, sort_key ORDER BY sort_key
         """, fetch="all") or []
+
+        # El proyecto se llama "Archivo Institucional Digital": cuanto del fondo
+        # esta efectivamente digitalizado es la medida que da sentido al resto,
+        # y hasta ahora no aparecia por ninguna parte.
+        by_soporte = db_query("""
+            SELECT COALESCE(NULLIF(TRIM(soporte),''), 'Físico') AS label, COUNT(*) AS value
+            FROM public.datos_archivo WHERE deleted_at IS NULL
+            GROUP BY label ORDER BY value DESC
+        """, fetch="all") or []
+
         totals = db_query("""
             SELECT COUNT(*) AS total_docs,
-                   COUNT(DISTINCT COALESCE(tesauro_primario,'')) AS total_types,
-                   (SELECT COUNT(*) FROM public.descriptores_libres) AS total_keywords,
-                   COUNT(DISTINCT autor) FILTER (WHERE autor IS NOT NULL AND autor<>'') AS total_autores
-            FROM public.datos_archivo
+                   COUNT(DISTINCT da.id_tipo_documento)
+                     FILTER (WHERE da.id_tipo_documento IS NOT NULL)      AS total_types,
+                   (SELECT COUNT(*) FROM public.descriptores_libres)      AS total_keywords,
+                   COUNT(DISTINCT da.autor)
+                     FILTER (WHERE da.autor IS NOT NULL AND da.autor<>'') AS total_autores,
+                   COUNT(*) FILTER (WHERE da.file_url IS NOT NULL
+                                      AND da.file_url <> '')              AS total_digitalizados,
+                   COUNT(*) FILTER (WHERE COALESCE(da.status,'aprobado')
+                                          IN ('revision','draft'))        AS total_pendientes,
+                   COUNT(*) FILTER (
+                       WHERE da.fecha_documento IS NOT NULL
+                         AND (da.fecha_documento
+                              + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL
+                             )::DATE < CURRENT_DATE
+                   )                                                      AS total_vencidos
+            FROM public.datos_archivo da
+            LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
+            WHERE da.deleted_at IS NULL
         """, fetch="one")
         return {
             "modulo": "Archivo",
             "charts": {
-                "by_type":  [{"label": r["label"], "value": int(r["value"])} for r in by_type],
-                "by_year":  [{"label": r["label"], "value": int(r["value"])} for r in by_year],
-                "by_month": [{"label": r["label"], "value": int(r["value"])} for r in by_month],
+                "by_type":    [{"label": r["label"], "value": int(r["value"])} for r in by_type],
+                "by_year":    [{"label": r["label"], "value": int(r["value"])} for r in by_year],
+                "by_month":   [{"label": r["label"], "value": int(r["value"])} for r in by_month],
+                "by_soporte": [{"label": r["label"], "value": int(r["value"])} for r in by_soporte],
                 "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},
             }
         }
+
     else:  # RRHH
         by_dept = db_query("""
             SELECT COALESCE(d.nombre,'Sin departamento') AS label, COUNT(*) AS value
             FROM public.empleados e
             LEFT JOIN public.departamentos d ON e.departamento_id = d.id
+            WHERE e.deleted_at IS NULL
             GROUP BY d.nombre ORDER BY value DESC LIMIT 10
         """, fetch="all") or []
         by_status = db_query("""
             SELECT COALESCE(el.estados,'Sin estado') AS label, COUNT(*) AS value
             FROM public.empleados e
             LEFT JOIN public.estados_laborales el ON e.estado_id = el.id
+            WHERE e.deleted_at IS NULL
             GROUP BY el.estados ORDER BY value DESC
         """, fetch="all") or []
         by_doc_type = db_query("""
             SELECT td.nombre_corto AS label, COUNT(*) AS value
             FROM public.datos_rrhh dr
             JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+            WHERE dr.deleted_at IS NULL
             GROUP BY td.nombre_corto ORDER BY value DESC LIMIT 10
         """, fetch="all") or []
-        by_parte = db_query("""
-            SELECT c.nombre AS label, COUNT(*) AS value
-            FROM public.datos_rrhh dr
-            JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
-            JOIN public.categoria c ON td.id_categoria = c.id
-            WHERE c.slug LIKE 'parte-%%'
-            GROUP BY c.nombre, c.id ORDER BY c.id
+
+        # Cobertura, no volumen. Contar documentos por Parte no dice si los
+        # expedientes estan completos: mil titulos en la Parte I y ninguna
+        # evaluacion en la II se veria "bien". Lo que importa es a cuantos
+        # empleados les falta cada Parte.
+        cobertura = db_query("""
+            WITH activos AS (
+                SELECT e.id FROM public.empleados e WHERE e.deleted_at IS NULL
+            ), partes AS (
+                SELECT c.id, c.nombre FROM public.categoria c
+                WHERE c.slug LIKE 'parte-%%'
+            )
+            SELECT p.nombre AS label,
+                   (SELECT COUNT(*) FROM activos)                       AS total,
+                   COUNT(DISTINCT dr.empleado_id)                       AS value
+            FROM partes p
+            LEFT JOIN public.tipo_documento td ON td.id_categoria = p.id
+            LEFT JOIN public.datos_rrhh dr
+                   ON dr.id_tipo_documento = td.id
+                  AND dr.deleted_at IS NULL
+                  AND dr.empleado_id IN (SELECT id FROM activos)
+            GROUP BY p.nombre, p.id ORDER BY p.id
         """, fetch="all") or []
+
         by_nivel = db_query("""
             SELECT COALESCE(NULLIF(TRIM(nivel_educativo),''), 'Sin especificar') AS label,
                    COUNT(*) AS value
-            FROM public.empleados
+            FROM public.empleados WHERE deleted_at IS NULL
             GROUP BY nivel_educativo ORDER BY value DESC
         """, fetch="all") or []
         by_sexo = db_query("""
@@ -126,19 +179,39 @@ def get_charts_data(modulo: str = "Archivo"):
                      ELSE 'Sin especificar'
                    END AS label,
                    COUNT(*) AS value
-            FROM public.empleados
+            FROM public.empleados WHERE deleted_at IS NULL
             GROUP BY sexo ORDER BY value DESC
         """, fetch="all") or []
+
         totals = db_query("""
-            SELECT (SELECT COUNT(*) FROM public.empleados) AS total_employees,
-                   (SELECT COUNT(*) FROM public.datos_rrhh) AS total_documents,
+            SELECT (SELECT COUNT(*) FROM public.empleados WHERE deleted_at IS NULL)
+                       AS total_employees,
+                   (SELECT COUNT(*) FROM public.datos_rrhh WHERE deleted_at IS NULL)
+                       AS total_documents,
                    (SELECT COUNT(*) FROM public.empleados e
                     JOIN public.estados_laborales el ON e.estado_id = el.id
-                    WHERE el.estados = 'Activo') AS total_activos,
+                    WHERE el.estados = 'Activo' AND e.deleted_at IS NULL)
+                       AS total_activos,
                    (SELECT COUNT(*) FROM public.empleados e
                     JOIN public.estados_laborales el ON e.estado_id = el.id
-                    WHERE el.estados IN ('Jubilado','Pensionado')) AS total_jubilados,
-                   (SELECT COUNT(*) FROM public.historial_cargos) AS total_movimientos_cargo
+                    WHERE el.estados IN ('Jubilado','Pensionado') AND e.deleted_at IS NULL)
+                       AS total_jubilados,
+                   (SELECT COUNT(*) FROM public.historial_cargos)
+                       AS total_movimientos_cargo,
+                   -- Expedientes sin un solo documento: existen en la nomina pero
+                   -- no tienen nada archivado.
+                   (SELECT COUNT(*) FROM public.empleados e
+                    WHERE e.deleted_at IS NULL AND NOT EXISTS (
+                        SELECT 1 FROM public.datos_rrhh dr
+                        WHERE dr.empleado_id = e.id AND dr.deleted_at IS NULL))
+                       AS total_sin_documentos,
+                   -- Jubilaciones o pensiones que caen dentro de los proximos 12
+                   -- meses: es el aviso que da tiempo a preparar el expediente.
+                   (SELECT COUNT(*) FROM public.empleados e
+                    WHERE e.deleted_at IS NULL
+                      AND COALESCE(e.fecha_jubilacion, e.fecha_pension)
+                          BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '365 days')
+                       AS total_jubilaciones_proximas
         """, fetch="one")
         return {
             "modulo": "RRHH",
@@ -146,7 +219,8 @@ def get_charts_data(modulo: str = "Archivo"):
                 "by_department": [{"label": r["label"], "value": int(r["value"])} for r in by_dept],
                 "by_status":     [{"label": r["label"], "value": int(r["value"])} for r in by_status],
                 "by_doc_type":   [{"label": r["label"], "value": int(r["value"])} for r in by_doc_type],
-                "by_parte":      [{"label": r["label"], "value": int(r["value"])} for r in by_parte],
+                "cobertura":     [{"label": r["label"], "value": int(r["value"]),
+                                   "total": int(r["total"])} for r in cobertura],
                 "by_nivel":      [{"label": r["label"], "value": int(r["value"])} for r in by_nivel],
                 "by_sexo":       [{"label": r["label"], "value": int(r["value"])} for r in by_sexo],
                 "totals": {k: int(v or 0) for k, v in (dict(totals) if totals else {}).items()},

@@ -60,12 +60,62 @@ function _repaintCharts() {
   else                      _renderRrhhCharts(data, suf);
 }
 
+// Marca la tarjeta como alerta solo si hay algo que atender. El color va
+// siempre acompañado de la etiqueta y el icono, nunca solo.
+function _marcarKpi(id, valor, clase) {
+  const card = document.getElementById(id)?.closest(".ds-kpi-mini");
+  if (!card) return;
+  card.classList.remove("ds-kpi-alerta", "ds-kpi-aviso");
+  if (valor > 0) card.classList.add(clase);
+}
+
 function _renderArchivoCharts(data, suf) {
   const t     = data.charts.totals || {};
   const C     = vizSeries();
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
+  const setSub = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+
   setEl(`chart-total-keywords-${suf}`, t.total_keywords);
   setEl(`chart-total-autores-${suf}`, t.total_autores);
+  setEl(`chart-total-digitalizados-${suf}`, t.total_digitalizados);
+  setEl(`chart-total-pendientes-${suf}`, t.total_pendientes);
+  setEl(`chart-total-vencidos-${suf}`, t.total_vencidos);
+
+  // El avance de digitalización solo se lee como proporción del fondo.
+  const pct = t.total_docs ? Math.round((t.total_digitalizados / t.total_docs) * 100) : 0;
+  setSub(`kpi-sub-digitalizados-${suf}`, `${pct}% del fondo`);
+  setSub(`kpi-sub-pendientes-${suf}`,
+         t.total_pendientes ? "borrador o revisión" : "todo aprobado");
+  setSub(`kpi-sub-vencidos-${suf}`,
+         t.total_vencidos ? "requieren disposición" : "ninguno vencido");
+
+  _marcarKpi(`chart-total-vencidos-${suf}`, t.total_vencidos, "ds-kpi-alerta");
+  _marcarKpi(`chart-total-pendientes-${suf}`, t.total_pendientes, "ds-kpi-aviso");
+
+  // Estado de digitalización: los tres soportes son estados de una misma cosa,
+  // así que llevan colores fijos por significado, no por posición en la lista.
+  const bySoporte = data.charts.by_soporte || [];
+  if (bySoporte.length) {
+    _destroyChart(`by-soporte-${suf}`);
+    const ctx = document.getElementById(`chart-by-soporte-${suf}`)?.getContext("2d");
+    const colorSoporte = { "Digital": C[2], "Digitalizado": C[0], "Físico": _viz("ink-muted", "#6c757d") };
+    if (ctx) _chartInstances[`by-soporte-${suf}`] = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: bySoporte.map(r => r.label),
+        datasets: [{
+          data: bySoporte.map(r => r.value),
+          backgroundColor: bySoporte.map(r => colorSoporte[r.label] || C[3]),
+          borderColor: _viz("surface", "#ffffff"),
+          borderWidth: 2
+        }]
+      },
+      options: _catOptions({
+        cutout: "58%",
+        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
+      })
+    });
+  }
 
   const byType = data.charts.by_type || [];
   if (byType.length) {
@@ -129,10 +179,60 @@ function _renderRrhhCharts(data, suf) {
   const C     = vizSeries();
   const ring  = _viz("surface", "#ffffff");
   const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
+  const setSub = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+
   setEl(`chart-total-emp-${suf}`, t.total_employees);
   setEl(`chart-total-activos-${suf}`, t.total_activos);
   setEl(`chart-total-jub-${suf}`, t.total_jubilados);
   setEl(`chart-total-movimientos-${suf}`, t.total_movimientos_cargo);
+  setEl(`chart-total-jubproximas-${suf}`, t.total_jubilaciones_proximas);
+  setEl(`chart-total-sindocs-${suf}`, t.total_sin_documentos);
+
+  setSub(`kpi-sub-jubproximas-${suf}`,
+         t.total_jubilaciones_proximas ? "preparar expediente" : "ninguna en el año");
+  setSub(`kpi-sub-sindocs-${suf}`,
+         t.total_sin_documentos ? "expedientes vacíos" : "todos con documentos");
+
+  _marcarKpi(`chart-total-sindocs-${suf}`, t.total_sin_documentos, "ds-kpi-alerta");
+  _marcarKpi(`chart-total-jubproximas-${suf}`, t.total_jubilaciones_proximas, "ds-kpi-aviso");
+
+  // Cobertura por Parte: qué proporción de la plantilla tiene al menos un
+  // documento en cada una. Contar documentos no responde esa pregunta — mil
+  // títulos en la Parte I y ninguna evaluación en la II se vería "bien".
+  const cobertura = data.charts.cobertura || [];
+  if (cobertura.length) {
+    _destroyChart(`cobertura-${suf}`);
+    const ctx = document.getElementById(`chart-cobertura-${suf}`)?.getContext("2d");
+    const total = cobertura[0]?.total || 0;
+    if (ctx) _chartInstances[`cobertura-${suf}`] = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: cobertura.map(r => r.label),
+        datasets: [{
+          label: "Empleados con documentos",
+          data: cobertura.map(r => total ? Math.round((r.value / total) * 100) : 0),
+          backgroundColor: C[0], borderRadius: 4, maxBarThickness: 26
+        }]
+      },
+      options: _catOptions({
+        indexAxis: "y",
+        scales: {
+          x: { beginAtZero: true, max: 100, ticks: { callback: v => `${v}%` },
+               grid: { color: _viz("grid", "#e6e6e2") } },
+          y: { grid: { display: false } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            label: c => {
+              const fila = cobertura[c.dataIndex];
+              return ` ${fila.value} de ${total} empleados (${c.parsed.x}%)`;
+            }
+          } }
+        }
+      })
+    });
+  }
 
   const doughnut = (key, id, rows) => {
     if (!rows.length) return;
@@ -170,7 +270,6 @@ function _renderRrhhCharts(data, suf) {
   };
 
   doughnut(`by-status-${suf}`, `chart-by-status-${suf}`, data.charts.by_status || []);
-  doughnut(`by-parte-${suf}`,  `chart-by-parte-${suf}`,  data.charts.by_parte  || []);
   doughnut(`by-sexo-${suf}`,   `chart-by-sexo-${suf}`,   data.charts.by_sexo   || []);
   barH(`by-dept-${suf}`,  `chart-by-dept-${suf}`,  data.charts.by_department || [], C[0]);
   barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[0]);

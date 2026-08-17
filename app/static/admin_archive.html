@@ -149,57 +149,78 @@
       <!-- KPI METRICS -->
       <div class="ds-kpi-grid mb-3">
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-1);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Documentos</h6>
-              <h3 id="kpi-total-docs-archivo" class="font-weight-bold mb-0">0</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Documentos</h6>
+              <h3 id="kpi-total-docs-archivo" class="ds-kpi-value">—</h3>
             </div>
-            <i class="fas fa-file-invoice fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-file-invoice ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-3);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Tipologías</h6>
-              <h3 id="kpi-total-cats-archivo" class="font-weight-bold mb-0">0</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Digitalizados</h6>
+              <h3 id="chart-total-digitalizados-archivo" class="ds-kpi-value">—</h3>
+              <div class="ds-kpi-sub" id="kpi-sub-digitalizados-archivo">del fondo</div>
             </div>
-            <i class="fas fa-tags fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-cloud-arrow-up ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-4);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Palabras Clave</h6>
-              <h3 id="chart-total-keywords-archivo" class="font-weight-bold mb-0">—</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Pendientes</h6>
+              <h3 id="chart-total-pendientes-archivo" class="ds-kpi-value">—</h3>
+              <div class="ds-kpi-sub" id="kpi-sub-pendientes-archivo">borrador o revisión</div>
             </div>
-            <i class="fas fa-key fa-lg text-muted opacity-50"></i>
-          </div>
-        </div>
-        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-7);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Autores</h6>
-              <h3 id="chart-total-autores-archivo" class="font-weight-bold mb-0">—</h3>
-            </div>
-            <i class="fas fa-user-edit fa-lg text-muted opacity-50"></i>
-          </div>
-        </div>
-        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-2);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Usuarios</h6>
-              <h3 id="kpi-total-users-archivo" class="font-weight-bold mb-0">0</h3>
-            </div>
-            <i class="fas fa-users-cog fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-hourglass-half ds-kpi-icon"></i>
           </div>
         </div>
         <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-8);">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted text-uppercase mb-1" style="font-size:0.68rem;">Último Ingreso</h6>
-              <h3 id="kpi-latest-entry-archivo" class="font-weight-bold mb-0" style="font-size: 1rem;">N/A</h3>
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Retención vencida</h6>
+              <h3 id="chart-total-vencidos-archivo" class="ds-kpi-value">—</h3>
+              <div class="ds-kpi-sub" id="kpi-sub-vencidos-archivo">ISO 15489 §8.5</div>
             </div>
-            <i class="fas fa-history fa-lg text-muted opacity-50"></i>
+            <i class="fas fa-triangle-exclamation ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-7);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Tipologías</h6>
+              <h3 id="kpi-total-cats-archivo" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-sitemap ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-5);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Palabras clave</h6>
+              <h3 id="chart-total-keywords-archivo" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-key ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-2);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Autores</h6>
+              <h3 id="chart-total-autores-archivo" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-user-edit ds-kpi-icon"></i>
+          </div>
+        </div>
+        <div class="card ds-kpi-mini shadow-sm" style="border-left: 4px solid var(--viz-ink-muted);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ds-kpi-body">
+              <h6 class="ds-kpi-label">Último ingreso</h6>
+              <h3 id="kpi-latest-entry-archivo" class="ds-kpi-value">—</h3>
+            </div>
+            <i class="fas fa-clock-rotate-left ds-kpi-icon"></i>
           </div>
         </div>
       </div>
@@ -299,8 +320,19 @@
                 </div>
                 <div class="col-md-6">
                   <div class="card card-outline ds-chart-card shadow-sm">
+                    <div class="card-header">
+                      <h3 class="card-title"><i class="fas fa-cloud-arrow-up mr-2"></i>Estado de Digitalización</h3>
+                      <div class="card-tools"><span class="badge badge-light border text-muted small">ISAD(G)</span></div>
+                    </div>
+                    <div class="card-body ds-chart-box"><canvas id="chart-by-soporte-archivo"></canvas></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Documentos por Año</h3></div>
-                    <div class="card-body ds-chart-box"><canvas id="chart-by-year-archivo" height="220"></canvas></div>
+                    <div class="card-body ds-chart-box"><canvas id="chart-by-year-archivo"></canvas></div>
                   </div>
                 </div>
               </div>

@@ -3689,3 +3689,49 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   font-weight: 600;
 }
 .ds-kw-badge-more { background: var(--viz-ink-muted); }
+
+/* Tarjeta KPI: etiqueta, cifra y una línea de contexto opcional. El contexto
+   es lo que convierte un número en una lectura — "412" no dice nada, "412 ·
+   68% del fondo" sí. */
+.ds-kpi-body { min-width: 0; }
+.ds-kpi-label {
+  font-size: 0.66rem !important;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--viz-ink-muted);
+  margin-bottom: 2px;
+  white-space: normal;
+  line-height: 1.2;
+  min-height: 2.4em;          /* dos líneas: mantiene las cifras alineadas */
+  display: flex;
+  align-items: flex-start;
+}
+.ds-kpi-value {
+  font-size: 1.35rem !important;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--viz-ink);
+}
+.ds-kpi-sub {
+  font-size: 0.68rem;
+  line-height: 1.25;
+  margin-top: 3px;
+  color: var(--viz-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-kpi-icon { color: var(--viz-ink-muted); opacity: .45; font-size: 1.1rem; margin-left: 8px; }
+
+/* Un contador de alerta en cero no es una alerta: solo se tiñe cuando hay algo
+   que atender, y siempre con icono y etiqueta, nunca con el color solo. */
+.ds-kpi-mini.ds-kpi-alerta .ds-kpi-value { color: var(--viz-critical); }
+.ds-kpi-mini.ds-kpi-alerta .ds-kpi-icon  { color: var(--viz-critical); opacity: .8; }
+.ds-kpi-mini.ds-kpi-aviso  .ds-kpi-value { color: var(--viz-serious); }
+.ds-kpi-mini.ds-kpi-aviso  .ds-kpi-icon  { color: var(--viz-serious); opacity: .8; }
+
+@media (max-width: 400px) {
+  .ds-kpi-value { font-size: 1.15rem !important; }
+}
