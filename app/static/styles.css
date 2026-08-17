@@ -2734,11 +2734,15 @@ body.dark-mode .ds-admin-tabs .nav-link.active { background: #2b4e72 !important;
 body.dark-mode .ds-tab-sep { background: #2e3342; }
 body.dark-mode .ds-admin-card-header { background: #1e222b; border-color: #2e3342; }
 
-/* Responsive: ocultar label de tab en pantallas pequeñas */
+/* Responsive: en pantallas pequeñas las pestañas se reducen a su icono, salvo
+   la activa — con nueve pestañas, una fila de iconos sueltos no dice en cual
+   estas. Las demas conservan su nombre en title/aria-label. */
 @media (max-width: 576px) {
-  .ds-admin-tabs .nav-link span { display: none; }
-  .ds-admin-tabs .nav-link i { margin: 0; font-size: 1rem; }
-  .ds-admin-tabs .nav-link { padding: 8px 10px; }
+  .ds-admin-tabs .nav-link:not(.active) span { display: none; }
+  .ds-admin-tabs .nav-link:not(.active) i { margin: 0; font-size: 1rem; }
+  .ds-admin-tabs .nav-link:not(.active) { padding: 8px 10px; }
+  .ds-admin-tabs .nav-link.active { padding: 8px 12px; }
+  .ds-admin-tabs .nav-link.active i { margin-right: 6px; }
 }
 
 /* ============================================================
@@ -2885,10 +2889,25 @@ body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color
   .ds-submit-form .col-md-4,
   .ds-submit-form .col-md-8 { flex: 0 0 100%; max-width: 100%; }
 
-  /* Monitor filter bar: stack vertically */
-  .ds-monitor-filters { flex-direction: column; align-items: stretch; }
-  .ds-monitor-filters .form-control,
-  .ds-monitor-filters .btn { width: 100%; }
+  /* Barra de filtros del monitor: los campos se apilan, pero los botones de
+     accion son iconos — estirarlos a todo el ancho los dejaba enormes y vacios.
+     Se agrupan en una fila propia al final. */
+  /* Fila que envuelve en vez de columna: los campos ocupan el ancho completo y
+     los botones de icono se agrupan juntos en la ultima linea, en vez de
+     estirarse cada uno a todo el ancho. */
+  .ds-monitor-filters { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .ds-monitor-filters .form-control { flex: 1 1 100%; width: 100%; }
+  .ds-monitor-filters .btn { flex: 0 0 auto; width: auto; }
+
+  /* Los tres botones de accion caben en una linea si se compactan; sin esto la
+     papelera saltaba de renglon y doblaba el alto de cada fila. */
+  .ds-monitor-row td:last-child { white-space: nowrap; }
+  .ds-monitor-row td:last-child .btn {
+    margin-bottom: 0;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+  }
+  .ds-monitor-row td:last-child .btn.mr-1 { margin-right: 2px !important; }
 
   /* Import bar: stack on very small screens */
   .ds-import-bar { flex-direction: column; align-items: stretch; }
