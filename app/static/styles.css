@@ -3676,3 +3676,16 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 }
 .ds-kpi-grid.row { margin-left: 0; margin-right: 0; }
 .ds-kpi-grid .info-box { margin-bottom: 0; height: 100%; }
+
+/* Etiquetas de palabras clave en los resultados de búsqueda. Estaban con el
+   color escrito en cada plantilla; aquí siguen al acento del tema. */
+.ds-kw-badge {
+  background: var(--ds-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-right: 4px;
+  font-weight: 600;
+}
+.ds-kw-badge-more { background: var(--viz-ink-muted); }

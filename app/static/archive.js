@@ -163,6 +163,11 @@ function renderArchivoList() {
     const soporteIcon = {"Físico":"fa-archive","Digital":"fa-laptop","Digitalizado":"fa-scanner"}[doc.soporte] || "fa-archive";
     const soporteColor = {"Físico":"#6c757d","Digital":"#17a2b8","Digitalizado":"#fd7e14"}[doc.soporte] || "#6c757d";
 
+    // Sin el `|| []`, un registro sin tesauro_badges lanza dentro del .map() y
+    // se queda en blanco la lista entera, no solo esa tarjeta.
+    const badges = (doc.tesauro_badges || [])
+      .filter(b => b !== doc.tesauro_primario && b !== doc.doc_type);
+
     return `
     <div class="ds-item-card" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;border-left:3px solid ${iconData.color};">
       <div class="ds-item-thumbnail" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
@@ -188,8 +193,8 @@ function renderArchivoList() {
         </div>
         ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${hl(doc.resumen)}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
-          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.slice(0, 4).map(b => `<span class="badge" style="background-color:#2b4e72;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;margin-right:4px;">${escHtml(b)}</span>`).join(""); })()}
-          ${(() => { const filtered = doc.tesauro_badges.filter(b => b !== doc.tesauro_primario && b !== doc.doc_type); return filtered.length > 4 ? `<span class="badge" style="background-color:#6c757d;color:white;font-size:0.7rem;padding:2px 7px;border-radius:4px;">+${filtered.length - 4}</span>` : ""; })()}
+          ${badges.slice(0, 4).map(b => `<span class="badge ds-kw-badge">${escHtml(b)}</span>`).join("")}
+          ${badges.length > 4 ? `<span class="badge ds-kw-badge ds-kw-badge-more">+${badges.length - 4}</span>` : ""}
         </div>
       </div>
       <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
