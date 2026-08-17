@@ -468,7 +468,7 @@ def update_documento_status(
     if not result:
         raise HTTPException(404, "Documento no encontrado")
 
-    log_event(requester, f"Status Documento", modulo, f"doc_id={doc_id} → {status}")
+    log_event(requester, "Status Documento", modulo, f"doc_id={doc_id} → {status}")
     return {"success": True, "doc_id": doc_id, "status": status}
 
 

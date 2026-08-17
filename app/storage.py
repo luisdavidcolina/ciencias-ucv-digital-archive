@@ -9,7 +9,6 @@ Variables de entorno requeridas:
 El bucket permanece privado: los archivos se sirven mediante URLs prefirmadas
 generadas bajo demanda (véase routes/files.py).
 """
-import os
 import re
 import unicodedata
 import uuid

@@ -54,9 +54,9 @@ def _require_modulo(modulo: str) -> str:
         raise HTTPException(400, f"modulo debe ser uno de: {', '.join(VALID_MODULOS)}")
     return modulo
 
-from database import db_query, log_event, logger, hash_password
+from database import db_query
 from utils import generate_unique_slug
-from ..lookups import invalidate_choices_cache
+from ..lookups import invalidate_choices_cache  # re-exported for callers that import from here
 
 
 def _resolve_or_create_lookup(table: str, nombre: str, default_name: str = "Por Asignar") -> int:

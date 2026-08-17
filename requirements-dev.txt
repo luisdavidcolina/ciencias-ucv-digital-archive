@@ -1,0 +1,14 @@
+# Dependencias solo de desarrollo y pruebas.
+# api/requirements.txt es lo que instala Vercel: nada de esto va ahi.
+#
+#   pip install -r requirements-dev.txt
+#
+-r api/requirements.txt
+
+pytest>=8.0
+httpx>=0.27          # TestClient de FastAPI
+pyflakes>=3.2        # guarda de nombres indefinidos e imports muertos
+
+# Opcional: revision visual del backoffice (capturas y deteccion de desbordes).
+# Sin esto las pruebas siguen pasando; solo se pierde esa comprobacion manual.
+#   pip install playwright && python -m playwright install chromium

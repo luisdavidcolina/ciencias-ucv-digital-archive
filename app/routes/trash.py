@@ -1,11 +1,10 @@
 """Papelera de reciclaje y versiones de archivos digitales."""
 import re
-from datetime import datetime
 from typing import Optional
 
 _SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 
 from database import db_query, log_event
 from routes.admin.deps import require_session

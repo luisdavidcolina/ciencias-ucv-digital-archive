@@ -1,5 +1,5 @@
 """Dependencias compartidas de los endpoints de administración."""
-from fastapi import Cookie, Depends, HTTPException, Header, status
+from fastapi import Cookie, HTTPException, Header, status
 
 from core.security import verify_session_token
 

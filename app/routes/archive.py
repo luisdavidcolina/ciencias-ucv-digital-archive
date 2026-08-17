@@ -156,7 +156,7 @@ def search_archive(req: ArchivoSearchRequest):
     _search_has_letters = req.search_term and bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
 
     if _search_has_letters:
-        order = f"relevance DESC, da.titulo ASC"
+        order = "relevance DESC, da.titulo ASC"
     else:
         order = base_order
 

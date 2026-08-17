@@ -1,6 +1,4 @@
 """Estadísticas y gráficas del panel de administración."""
-import multiprocessing
-import platform
 from datetime import datetime
 
 from fastapi import APIRouter
@@ -16,10 +14,15 @@ router = APIRouter()
 
 @router.post("/stats")
 def get_admin_stats(req: StatsRequest):
+    """Cifras de la fila de KPIs, con los filtros del panel aplicados.
+
+    El desglose por tipo y por año lo sirve /charts: es lo que dibujan las
+    graficas. Este endpoint solo devuelve los totales.
+    """
     import routes.hr as _rrhh_mod  # lazy to avoid circular import
     df = fetch_archive_dataframe() if req.modulo == "Archivo" else _rrhh_mod.fetch_hr_dataframe()
     if df.empty:
-        return {"total_docs": 0, "categories_count": 0, "by_type": [], "timeline": []}
+        return {"total_docs": 0, "categories_count": 0}
 
     fecha_col = "fecha" if req.modulo == "Archivo" else "fecha_ingreso"
 
@@ -39,41 +42,9 @@ def get_admin_stats(req: StatsRequest):
             cutoff = datetime.now().year - 2
             df = df[pd.to_datetime(df["fecha"], errors="coerce").dt.year >= cutoff]
 
-    total_docs = len(df)
-    categories_count = len(df["doc_type"].dropna().unique())
-
-    by_type = []
-    if total_docs > 0:
-        for t_name, count in df["doc_type"].value_counts().items():
-            by_type.append({
-                "type":  t_name,
-                "count": int(count),
-                "pct":   int(round(count / total_docs * 100)),
-            })
-
-    timeline = []
-    if total_docs > 0:
-        years = pd.to_datetime(df[fecha_col], errors="coerce").dt.year.dropna().astype(int)
-        if not years.empty:
-            conteos = years.value_counts().sort_index()
-            max_c = int(conteos.max())
-            for y_val, count in conteos.items():
-                timeline.append({
-                    "year":      str(y_val),
-                    "count":     int(count),
-                    "pct_width": int(round(count / max_c * 100)) if max_c > 0 else 0,
-                })
-
     return {
-        "total_docs":       total_docs,
-        "categories_count": categories_count,
-        "by_type":          by_type,
-        "timeline":         timeline,
-        "system": {
-            "status": "Operativo" if total_docs > 0 else "Sin Datos",
-            "cpu":    multiprocessing.cpu_count(),
-            "os":     f"{platform.system()} {platform.release()}",
-        },
+        "total_docs":       len(df),
+        "categories_count": len(df["doc_type"].dropna().unique()),
     }
 
 

@@ -124,7 +124,7 @@ def status() -> dict:
         return {"disponible": False, "motivo": "El asistente está deshabilitado (IA_HABILITADA=false)."}
     if not api_key():
         return {"disponible": False, "motivo": "Falta OPENROUTER_API_KEY en las variables de entorno."}
-    return {"disponible": True, "modelo": modelo_actual()}
+    return {"disponible": True, "modelo": current_model()}
 
 
 def current_model() -> str:
@@ -144,7 +144,7 @@ def model_exists(slug: str) -> bool:
     administra a bloquear un cambio legítimo porque OpenRouter esté caído en ese momento.
     """
     try:
-        return any(m["id"] == slug for m in catalogo_modelos())
+        return any(m["id"] == slug for m in list_models())
     except Exception:
         logger.warning(f"IA: no se pudo validar el modelo '{slug}' contra el catálogo.")
         return True
@@ -320,7 +320,7 @@ def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> 
     try:
         for _ in range(MAX_VUELTAS):
             datos = _post({
-                "model": modelo_actual(),
+                "model": current_model(),
                 "messages": conversacion,
                 "max_tokens": max_tokens(),
                 "tools": herramientas,
@@ -343,7 +343,7 @@ def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> 
                     return {"error": "El asistente respondió vacío. Intenta de nuevo.", "status": 502}
                 return {
                     "respuesta": texto,
-                    "modelo": datos.get("model") or modelo_actual(),
+                    "modelo": datos.get("model") or current_model(),
                     "uso": {"total_tokens": tokens, "costo": round(costo, 6)},
                     "herramientas": usadas,
                 }
@@ -379,7 +379,7 @@ def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> 
         return {
             "respuesta": "Estuve consultando el archivo pero no logré cerrar la respuesta. "
                          "¿Podrías reformular la pregunta?",
-            "modelo": modelo_actual(),
+            "modelo": current_model(),
             "uso": {"total_tokens": tokens, "costo": round(costo, 6)},
             "herramientas": usadas,
         }
