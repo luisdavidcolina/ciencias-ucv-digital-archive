@@ -20,6 +20,12 @@ function loadAdminTab(adminTabId) {
   else if (adminTabId === "audit")      loadAuditTab();
   else if (adminTabId === "retencion")  { loadRetentionConfig(); loadVencimientosTable(); }
   else if (adminTabId === "papelera")   loadPapelera(suf);
+  else if (adminTabId === "export") {
+    // No hay nada que cargar, pero sí que limpiar: el resultado de una descarga
+    // anterior seguiría en pantalla y se leería como el estado actual.
+    const status = document.getElementById(`ds-export-status-${suf}`);
+    if (status) status.innerHTML = "";
+  }
 
   try {
     const mod = state.user?.modulo || "Archivo";

@@ -3397,3 +3397,40 @@ body.dark-mode {
   .ds-chart-box-wide { height: 210px; }
 }
 .ds-chart-box > canvas { max-width: 100%; }
+
+/* Separador entre grupos de pestañas del panel de administración.
+   Las pestañas están agrupadas por intención — operación diaria, configuración,
+   gobernanza documental — y el separador es lo que hace visible esa agrupación. */
+.ds-tab-sep {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 1px;
+  margin: 6px 8px;
+  background: #dee2e6;
+  list-style: none;
+}
+body.dark-mode .ds-tab-sep { background: #2e3342; }
+
+/* La barra de pestañas hace scroll horizontal; sin una pista visual el usuario
+   no sabe que hay más pestañas fuera de vista. */
+.ds-admin-card-header {
+  position: relative;
+}
+.ds-admin-card-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 28px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--viz-surface));
+  opacity: 0;
+  transition: opacity .2s;
+}
+.ds-admin-card-header.ds-has-overflow::after { opacity: 1; }
+
+@media (max-width: 575.98px) {
+  .ds-admin-tabs .nav-link { padding: 8px 11px; font-size: 0.8rem; }
+  .ds-tab-sep { margin: 6px 5px; }
+}

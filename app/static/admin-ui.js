@@ -269,3 +269,50 @@ document.addEventListener("mouseover", e => {
   target.addEventListener("mousemove", move);
   target.addEventListener("mouseleave", leave);
 });
+
+// ─── Barra de pestañas: desbordamiento y navegación ──────────────────────────
+// La barra hace scroll horizontal cuando no caben las 9 pestañas. Sin señal
+// visual el usuario no descubre las que quedan fuera, y al cambiar de pestaña
+// con el teclado la seleccionada puede quedar fuera de vista.
+
+function _syncTabOverflow() {
+  document.querySelectorAll(".ds-admin-tabs").forEach(bar => {
+    const header = bar.closest(".ds-admin-card-header");
+    if (!header) return;
+    const overflow = bar.scrollWidth - bar.clientWidth > 4;
+    const atEnd    = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 4;
+    header.classList.toggle("ds-has-overflow", overflow && !atEnd);
+  });
+}
+
+function _scrollActiveTabIntoView() {
+  document.querySelectorAll(".ds-admin-tabs .nav-link.active").forEach(link => {
+    link.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  });
+}
+
+// Flechas izquierda/derecha para moverse entre pestañas, como en un tablist real.
+function _initTabKeyboardNav() {
+  document.querySelectorAll(".ds-admin-tabs").forEach(bar => {
+    bar.addEventListener("keydown", e => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      const links = [...bar.querySelectorAll(".nav-link")];
+      const i = links.indexOf(document.activeElement);
+      if (i === -1) return;
+      e.preventDefault();
+      const next = links[(i + (e.key === "ArrowRight" ? 1 : -1) + links.length) % links.length];
+      next.focus();
+      next.click();
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  _syncTabOverflow();
+  _initTabKeyboardNav();
+  document.querySelectorAll(".ds-admin-tabs").forEach(bar => {
+    bar.addEventListener("scroll", _syncTabOverflow, { passive: true });
+    bar.addEventListener("click", () => setTimeout(_scrollActiveTabIntoView, 0));
+  });
+});
+window.addEventListener("resize", _syncTabOverflow);
