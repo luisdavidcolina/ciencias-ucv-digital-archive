@@ -62,7 +62,11 @@ function loginSuccess(user) {
   if (appPortal) appPortal.style.display = "block";
 
   const activeRole = (user.roles && user.roles[user.modulo]) ? user.roles[user.modulo] : user.rol;
-  document.getElementById("nav_username").innerText = `ID: ${user.username} (${user.modulo} - ${activeRole})`;
+  // Módulo y rol van en su propio <span> para poder plegarlos en pantallas
+  // angostas: la credencial completa desbordaba la barra por casi 90px.
+  document.getElementById("nav_username").innerHTML =
+    `ID: ${escHtml(user.username)}` +
+    `<span class="ds-nav-user-ctx"> (${escHtml(user.modulo)} - ${escHtml(activeRole)})</span>`;
 
   loadDynamicChoices();
   configureSidebarVisibilities(user);
@@ -196,8 +200,11 @@ function switchTab(tabId) {
   const tabAdminRrhh    = document.getElementById("tab-admin-rrhh");
   if      (tabId === "archivo"       && tabArchivo)      { tabArchivo.style.display = "block"; triggerArchivoSearch(); }
   else if (tabId === "rrhh"          && tabRrhh)         { tabRrhh.style.display = "block"; triggerRrhhSearch(); }
-  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("monitor"); }
-  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("monitor"); }
+  // Se entra por "stats": es la pestaña que el marcado marca como activa, la
+  // primera del grupo de operación, y la única que llena la fila de KPIs de la
+  // cabecera. Entrando por "monitor" esos KPIs se quedaban en cero.
+  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("stats"); }
+  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("stats"); }
 }
 
 function openSidebar() {
@@ -294,9 +301,13 @@ function setupEventListeners() {
 
   // Panel Admin (ambos namespaces)
   ["archivo", "rrhh"].forEach(suf => {
-    ["stats", "new", "monitor", "categories", "users", "audit"].forEach(t => {
-      document.getElementById(`tab-admin-${suf}-${t}`)?.addEventListener("click", e => { e.preventDefault(); loadAdminTab(t); });
-    });
+    // Derivado del DOM en vez de una lista fija: la lista se quedaba corta cada
+    // vez que se añadía una pestaña (papelera, retención y exportar faltaban).
+    document.querySelectorAll(`#admin_workspace_tabs-${suf} .nav-link[id^="tab-admin-${suf}-"]`)
+      .forEach(link => {
+        const t = link.id.replace(`tab-admin-${suf}-`, "");
+        link.addEventListener("click", e => { e.preventDefault(); loadAdminTab(t); });
+      });
     document.getElementById(`audit_search-${suf}`)?.addEventListener("input", () => {
       auditState.page = 1;
       loadAuditTab();

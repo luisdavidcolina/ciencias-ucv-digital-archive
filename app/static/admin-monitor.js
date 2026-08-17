@@ -118,11 +118,11 @@ function renderMonitorTable() {
         ? highlightTerms(f.autor || "—", searchTerms)
         : (f.autor || "—");
       const statusBtnTitle = { draft: "Borrador", revision: "En revisión", aprobado: "Aprobado", rechazado: "Rechazado" }[f.status] || "Aprobado";
-      return `<tr>
+      return `<tr class="ds-monitor-row">
         <td class="font-weight-bold text-dark" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(f.titulo||'')}">${titulo}</td>
-        <td class="text-muted small">${autor}</td>
-        <td class="text-muted small">${formatISOToSpanish(f.fecha)}</td>
-        <td><span class="badge badge-light border">${escHtml(f.doc_type||'—')}</span></td>
+        <td class="text-muted small ds-hide-sm">${autor}</td>
+        <td class="text-muted small ds-hide-xs">${formatISOToSpanish(f.fecha)}</td>
+        <td class="ds-hide-sm"><span class="badge badge-light border">${escHtml(f.doc_type||'—')}</span></td>
         <td>
           <button class="btn btn-xs btn-link p-0 ds-status-btn" title="Cambiar estado: ${statusBtnTitle}"
             onclick="openQuickStatusMenu(this,${f.id},${JSON.stringify(f.status||'aprobado')},${JSON.stringify(state.user.modulo)})">
@@ -142,13 +142,13 @@ function renderMonitorTable() {
       const c = getStatusColor(f.estado);
       const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
       return `
-        <tr>
+        <tr class="ds-monitor-row">
           <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${hlEmpleado}</td>
-          <td class="text-muted small">${escHtml(f.cedula||'—')}</td>
-          <td class="text-muted small" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(f.cargo||f.departamento||'—')}</td>
+          <td class="text-muted small ds-hide-sm">${escHtml(f.cedula||'—')}</td>
+          <td class="text-muted small ds-hide-sm" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(f.cargo||f.departamento||'—')}</td>
           <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${escHtml(f.estado||'—')}</span></td>
-          <td><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
-          <td class="text-muted small">${escHtml(f.ubicacion||'—')}</td>
+          <td class="ds-hide-sm"><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
+          <td class="text-muted small ds-hide-sm">${escHtml(f.ubicacion||'—')}</td>
           <td>
             <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier(${JSON.stringify(f.empleado)})" title="Ver Expediente"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar"><i class="fas fa-edit"></i></button>

@@ -3434,3 +3434,129 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   .ds-admin-tabs .nav-link { padding: 8px 11px; font-size: 0.8rem; }
   .ds-tab-sep { margin: 6px 5px; }
 }
+
+/* =============================================================================
+   CAPA DE MOVIMIENTO
+   Duraciones cortas y salidas suaves: el movimiento aquí sirve para explicar de
+   dónde viene el contenido, no para decorar. Todo se apaga con la preferencia
+   del sistema o con el interruptor de la app.
+   ========================================================================== */
+
+@keyframes ds-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes ds-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Entrada del contenido al cambiar de pestaña en el panel de administración. */
+.tab-pane.show.active { animation: ds-rise .22s ease-out both; }
+
+/* Resultados de búsqueda y filas de tablas: aparición escalonada.
+   El escalonado se corta a los 12 primeros — más allá, la espera acumulada se
+   nota más que el efecto. */
+.ds-item-card,
+.ds-monitor-row {
+  animation: ds-rise .26s ease-out both;
+}
+.ds-item-card:nth-child(1),  .ds-monitor-row:nth-child(1)  { animation-delay: 0ms; }
+.ds-item-card:nth-child(2),  .ds-monitor-row:nth-child(2)  { animation-delay: 22ms; }
+.ds-item-card:nth-child(3),  .ds-monitor-row:nth-child(3)  { animation-delay: 44ms; }
+.ds-item-card:nth-child(4),  .ds-monitor-row:nth-child(4)  { animation-delay: 66ms; }
+.ds-item-card:nth-child(5),  .ds-monitor-row:nth-child(5)  { animation-delay: 88ms; }
+.ds-item-card:nth-child(6),  .ds-monitor-row:nth-child(6)  { animation-delay: 110ms; }
+.ds-item-card:nth-child(7),  .ds-monitor-row:nth-child(7)  { animation-delay: 132ms; }
+.ds-item-card:nth-child(8),  .ds-monitor-row:nth-child(8)  { animation-delay: 154ms; }
+.ds-item-card:nth-child(9),  .ds-monitor-row:nth-child(9)  { animation-delay: 176ms; }
+.ds-item-card:nth-child(10), .ds-monitor-row:nth-child(10) { animation-delay: 198ms; }
+.ds-item-card:nth-child(11), .ds-monitor-row:nth-child(11) { animation-delay: 220ms; }
+.ds-item-card:nth-child(n+12), .ds-monitor-row:nth-child(n+12) { animation-delay: 242ms; }
+
+/* Tarjetas KPI: entran juntas, sin escalonar — son una sola lectura. */
+.ds-kpi-grid .ds-kpi-mini { animation: ds-fade .3s ease-out both; }
+
+/* Realce al pasar por encima de lo que es accionable. */
+.ds-item-card {
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+}
+.ds-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+.ds-kpi-mini { transition: transform .15s ease-out, box-shadow .15s ease-out; }
+.ds-kpi-mini:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.09); }
+
+/* Botones: respuesta táctil al pulsar. */
+.btn { transition: background-color .15s, border-color .15s, box-shadow .15s, transform .08s; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+
+/* La preferencia del sistema pesa tanto como el interruptor de la app: hasta
+   ahora sólo la respetaba una regla suelta. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* La barra superior no cabía en pantallas angostas: la credencial completa más
+   el botón de salir desbordaban el documento ~90px, y el desborde arrastraba a
+   todas las páginas con sesión iniciada. Se pliega lo prescindible. */
+.main-header .navbar-nav.ml-auto { min-width: 0; }
+#nav_username {
+  display: inline-block;
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+@media (max-width: 767.98px) {
+  .ds-nav-user-ctx { display: none; }        /* el módulo ya lo dice el propio panel */
+}
+/* El logo institucional es una imagen ancha (~240px): a 390px de viewport se
+   comia dos tercios de la barra y empujaba fuera al usuario y al boton. */
+@media (max-width: 767.98px) {
+  .ds-navbar-logo-img { height: 30px; max-width: 44vw; object-fit: contain;
+                        object-position: left center; }
+  .main-header .navbar-nav:first-child { min-width: 0; }
+  .main-header .ds-navbar-logo { min-width: 0; overflow: hidden; }
+}
+@media (max-width: 575.98px) {
+  .ds-btn-label { display: none; }           /* el botón queda sólo con su icono */
+  #logout_btn { margin-right: 4px !important; padding: 4px 9px; }
+  .ds-nav-user { margin-right: 0 !important; }
+  #nav_username { max-width: 30vw; font-size: 0.8rem; }
+  .ds-navbar-logo-img { height: 27px; max-width: 38vw; }
+  .main-header.navbar { padding-left: 6px; padding-right: 6px; }
+}
+
+/* Tarjetas de gráfico: marco neutro. Cada una llevaba una banda de color
+   distinta (azul, verde, ámbar, turquesa) que no codificaba nada y competía con
+   los colores de los datos. El color pertenece al gráfico, no al marco. */
+.ds-chart-card {
+  border-top: 3px solid var(--viz-grid) !important;
+}
+.ds-chart-card > .card-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--viz-grid);
+}
+.ds-chart-card > .card-header .card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--viz-ink);
+}
+.ds-chart-card > .card-header .card-title i { color: var(--viz-ink-muted); }
+
+/* Tarjeta de filtros: es un control, no un dato. Marco neutro como el de los
+   gráficos, para que no compita con ellos ni desentone en modo oscuro. */
+.ds-filter-card > .card-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--viz-grid);
+}
+.ds-filter-card > .card-header .card-title { color: var(--viz-ink); font-size: 0.92rem; }
+.ds-filter-card > .card-header .card-title i { color: var(--viz-ink-muted); }

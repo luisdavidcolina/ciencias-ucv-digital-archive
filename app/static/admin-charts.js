@@ -113,7 +113,7 @@ function _renderArchivoCharts(data, suf) {
       data: {
         labels: byMonth.map(r => r.label),
         datasets: [{ label: "Documentos", data: byMonth.map(r => r.value),
-          borderColor: C[2], backgroundColor: C[2] + "22", borderWidth: 2,
+          borderColor: C[0], backgroundColor: C[0] + "22", borderWidth: 2,
           fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5 }]
       },
       options: _catOptions({
@@ -173,7 +173,7 @@ function _renderRrhhCharts(data, suf) {
   doughnut(`by-parte-${suf}`,  `chart-by-parte-${suf}`,  data.charts.by_parte  || []);
   doughnut(`by-sexo-${suf}`,   `chart-by-sexo-${suf}`,   data.charts.by_sexo   || []);
   barH(`by-dept-${suf}`,  `chart-by-dept-${suf}`,  data.charts.by_department || [], C[0]);
-  barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[6]);
+  barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[0]);
 
   const byDocType = data.charts.by_doc_type || [];
   if (byDocType.length) {
@@ -184,7 +184,7 @@ function _renderRrhhCharts(data, suf) {
       data: {
         labels: byDocType.map(r => r.label),
         datasets: [{ label: "Docs", data: byDocType.map(r => r.value),
-          backgroundColor: C[2], borderRadius: 4, maxBarThickness: 42 }]
+          backgroundColor: C[0], borderRadius: 4, maxBarThickness: 42 }]
       },
       options: _catOptions({ scales: _countScale("y") })
     });

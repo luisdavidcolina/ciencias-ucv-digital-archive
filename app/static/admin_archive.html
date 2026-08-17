@@ -45,7 +45,7 @@
       </li>
       <li class="nav-item dropdown ds-nav-logout">
         <button id="logout_btn" class="btn btn-outline-secondary btn-sm" style="margin-top:5px; margin-right:10px;">
-          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          <i class="fas fa-sign-out-alt"></i> <span class="ds-btn-label">Cerrar Sesión</span>
         </button>
       </li>
     </ul>
@@ -269,7 +269,7 @@
               <!-- Banner de alertas de vencimiento -->
               <div id="alertas-vencimiento-banner" style="display:none;" class="mb-3"></div>
 
-              <div class="card card-info mb-3">
+              <div class="card ds-filter-card mb-3">
                 <div class="card-header p-3">
                   <h5 class="card-title m-0"><i class="fas fa-filter mr-2"></i> Filtros Analíticos</h5>
                 </div>
@@ -284,7 +284,7 @@
                       </div>
                     </div>
                     <div class="col-md-6 d-flex align-items-end">
-                      <button id="btn-apply-stats-archivo" class="btn btn-info btn-sm w-100">Actualizar Análisis</button>
+                      <button id="btn-apply-stats-archivo" class="btn btn-primary btn-sm w-100">Actualizar Análisis</button>
                     </div>
                   </div>
                 </div>
@@ -292,13 +292,13 @@
               <!-- Gráficas Chart.js -->
               <div class="row">
                 <div class="col-md-6">
-                  <div class="card card-outline card-primary shadow-sm">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Documentos por Tipo</h3></div>
                     <div class="card-body ds-chart-box"><canvas id="chart-by-type-archivo" height="220"></canvas></div>
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="card card-outline card-success shadow-sm">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Documentos por Año</h3></div>
                     <div class="card-body ds-chart-box"><canvas id="chart-by-year-archivo" height="220"></canvas></div>
                   </div>
@@ -306,7 +306,7 @@
               </div>
               <div class="row mt-3">
                 <div class="col-12">
-                  <div class="card card-outline card-info shadow-sm">
+                  <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Tendencia Mensual (24 meses)</h3></div>
                     <div class="card-body ds-chart-box ds-chart-box-wide"><canvas id="chart-by-month-archivo" height="100"></canvas></div>
                   </div>
@@ -422,11 +422,11 @@
                     <table class="table table-bordered table-striped" style="font-size:0.85rem;">
                       <thead>
                         <tr class="bg-light text-dark">
-                          <th>Título / Empleado</th>
-                          <th class="ds-hide-sm">Tipo / Cédula</th>
-                          <th class="ds-hide-sm">Ubicación</th>
+                          <th>Título</th>
+                          <th class="ds-hide-sm">Autor</th>
                           <th class="ds-hide-xs">Fecha</th>
-                          <th class="ds-hide-sm">Auditoría / Estado</th>
+                          <th class="ds-hide-sm">Tipo</th>
+                          <th>Estado</th>
                           <th>Acciones</th>
                         </tr>
                       </thead>

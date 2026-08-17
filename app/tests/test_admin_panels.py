@@ -96,3 +96,71 @@ def test_loadadmintab_maneja_todas_las_pestanas():
     assert not sin_rama, (
         f"pestañas sin rama en loadAdminTab (abren un panel vacío): {sin_rama}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Tabla del monitor
+# ---------------------------------------------------------------------------
+# El monitor de RRHH emitia siete celdas bajo un encabezado de seis columnas:
+# la tabla entera salia corrida y cada dato aparecia bajo el titulo equivocado.
+# Las etiquetas dobles ("Titulo / Empleado") venian de cuando ambos modulos
+# compartian una sola pagina.
+
+MONITOR_HEAD = re.compile(
+    r'<tbody id="admin_control_table-(\w+)"', re.S)
+
+
+def _monitor_headers(html, suf):
+    """Columnas <th> de la tabla del monitor de ese módulo."""
+    i = html.index(f'admin_control_table-{suf}')
+    head = html.rindex("<thead", 0, i)
+    seg = html[head:i]
+    return re.findall(r"<th(?=[\s>])[^>]*>(.*?)</th>", seg, re.S)
+
+
+def _row_template_cells(js, modulo):
+    """Celdas <td> de la plantilla de fila correspondiente al módulo."""
+    marker = 'return `<tr class="ds-monitor-row">' if modulo == "archivo" \
+        else 'return `\n        <tr class="ds-monitor-row">'
+    i = js.index(marker)
+    j = js.index("</tr>", i)
+    return re.findall(r"<td[^>]*>", js[i:j])
+
+
+@pytest.mark.parametrize("suf", sorted(PANELS))
+def test_monitor_columnas_y_celdas_cuadran(suf):
+    html = _read(suf)
+    js = (STATIC / "admin-monitor.js").read_text(encoding="utf-8")
+    cabeceras = _monitor_headers(html, suf)
+    celdas = _row_template_cells(js, suf)
+    assert len(cabeceras) == len(celdas), (
+        f"monitor {suf}: {len(cabeceras)} columnas en el <thead> pero "
+        f"{len(celdas)} celdas por fila — la tabla sale corrida"
+    )
+
+
+@pytest.mark.parametrize("suf", sorted(PANELS))
+def test_monitor_ocultamiento_responsive_coherente(suf):
+    """Si el <th> se oculta en móvil, su <td> también: si no, la fila se desplaza."""
+    html = _read(suf)
+    js = (STATIC / "admin-monitor.js").read_text(encoding="utf-8")
+
+    def clases(tag):
+        m = re.search(r'class="([^"]*)"', tag)
+        return {c for c in (m.group(1).split() if m else []) if c.startswith("ds-hide-")}
+
+    i = html.index(f"admin_control_table-{suf}")
+    head = html.rindex("<thead", 0, i)
+    # `<th[^>]*>` tambien casaria con `<thead>` y desplazaria la lista.
+    th_tags = re.findall(r"<th(?=[\s>])[^>]*>", html[head:i])
+    td_tags = _row_template_cells(js, suf)
+
+    descuadres = [
+        (n, clases(th), clases(td))
+        for n, (th, td) in enumerate(zip(th_tags, td_tags), 1)
+        if clases(th) != clases(td)
+    ]
+    assert not descuadres, (
+        f"monitor {suf}: columnas con ocultamiento distinto entre <th> y <td>: "
+        f"{descuadres}"
+    )
