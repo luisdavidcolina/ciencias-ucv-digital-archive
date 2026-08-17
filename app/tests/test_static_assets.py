@@ -16,12 +16,36 @@ from pathlib import Path
 
 import pytest
 
-STATIC = Path(__file__).resolve().parents[1] / "static"
+APP = Path(__file__).resolve().parents[1]
+REPO = APP.parent
+STATIC = APP / "static"
 
 JS_FILES = sorted(STATIC.glob("*.js"))
-TEXT_FILES = sorted(
-    p for p in STATIC.rglob("*") if p.suffix in {".js", ".html", ".css"}
-)
+
+# Este archivo contiene los marcadores de mojibake a propósito: si se revisara a
+# sí mismo, fallaría siempre.
+_SELF = Path(__file__).resolve()
+
+
+def _sources():
+    seen = []
+    for base, patterns in (
+        (STATIC, ("**/*.js", "**/*.html", "**/*.css")),
+        (APP, ("**/*.py",)),
+        (REPO / "api", ("**/*.py",)),
+        (REPO, ("*.md",)),
+        (REPO / "docs", ("**/*.md",)),
+    ):
+        if not base.exists():
+            continue
+        for pattern in patterns:
+            for p in base.glob(pattern):
+                if p.is_file() and p.resolve() != _SELF and p not in seen:
+                    seen.append(p)
+    return sorted(seen)
+
+
+TEXT_FILES = _sources()
 
 # Comillas tipográficas. Son legítimas dentro de texto visible, pero nunca deben
 # aparecer donde JavaScript espera un delimitador de string.
@@ -48,12 +72,15 @@ def test_hay_archivos_estaticos():
 
 @pytest.mark.parametrize("path", TEXT_FILES, ids=lambda p: p.name)
 def test_es_utf8_valido(path):
-    """Cada estático debe decodificar como UTF-8 sin pérdida."""
+    """Cada fuente debe decodificar como UTF-8 sin pérdida y sin BOM."""
     raw = path.read_bytes()
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
         pytest.fail(f"{path.name} no es UTF-8 válido: {exc}")
+    assert not raw.startswith(b"\xef\xbb\xbf"), (
+        f"{path.name} empieza con BOM: sobra en UTF-8 y ensucia la primera línea"
+    )
     assert REPLACEMENT not in text, (
         f"{path.name} contiene el carácter de reemplazo U+FFFD: "
         "el archivo se decodificó mal en algún punto de su historia"

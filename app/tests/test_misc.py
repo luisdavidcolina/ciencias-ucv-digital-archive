@@ -1,4 +1,4 @@
-﻿"""Tests para endpoints de categorÃ­as, palabras clave, retenciÃ³n y papelera."""
+"""Tests para endpoints de categorías, palabras clave, retención y papelera."""
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -18,13 +18,13 @@ def _row(**data):
 
 class TestKeywords:
     def test_list_keywords(self, client):
-        kw = _row(id=1, nombre="gestiÃ³n", uso_archivo=3)
+        kw = _row(id=1, nombre="gestión", uso_archivo=3)
         with patch("routes.admin.catalog.db_query", return_value=[kw]):
             res = client.get("/api/admin/keywords")
         assert res.status_code == 200
         body = res.json()
         assert isinstance(body, list)
-        assert body[0]["nombre"] == "gestiÃ³n"
+        assert body[0]["nombre"] == "gestión"
 
     def test_create_keyword_ok(self, client):
         new_kw = _row(id=5)
@@ -89,7 +89,7 @@ class TestKeywords:
 
 
 # =============================================================================
-# CategorÃ­as (tipologÃ­as)
+# Categorías (tipologías)
 # =============================================================================
 
 class TestCategories:
@@ -98,7 +98,7 @@ class TestCategories:
         call_n = [0]
         def mock_q(sql, params=None, fetch="all", commit=False):
             call_n[0] += 1
-            if "slug" in sql and call_n[0] == 1:  # busca categorÃ­a
+            if "slug" in sql and call_n[0] == 1:  # busca categoría
                 return cat
             if "LOWER(nombre)" in sql:             # busca existente
                 return None
@@ -110,7 +110,7 @@ class TestCategories:
             patch("routes.admin.catalog.log_event"),
         ):
             res = client.post("/api/admin/add_category", json={
-                "name": "Nueva TipologÃ­a", "desc": "Desc", "scope": "Archivo",
+                "name": "Nueva Tipología", "desc": "Desc", "scope": "Archivo",
                 "usuario": "admin", "parte": "",
             })
         assert res.status_code == 200
@@ -125,7 +125,7 @@ class TestCategories:
 
 
 # =============================================================================
-# RetenciÃ³n
+# Retención
 # =============================================================================
 
 class TestRetencion:
@@ -178,7 +178,7 @@ class TestRetencion:
     def test_get_vencimientos(self, client):
         v = _row(id_archivo=1, titulo="Doc viejo", autor="A",
                  fecha_documento="2010-01-01", ubicacion="Estante 1",
-                 soporte="FÃ­sico", tipo_documento="Acta",
+                 soporte="Físico", tipo_documento="Acta",
                  plazo_anios=5, fecha_vencimiento="2015-01-01", dias_vencido=3650)
         with patch("routes.admin.retention.db_query", return_value=[v]):
             res = client.get("/api/admin/retencion/vencimientos")
@@ -260,7 +260,7 @@ class TestAuditLog:
 
 class TestNotifications:
     def test_notifications_archivo(self, client):
-        notif = _row(id=1, label="Doc en revisiÃ³n", status="revision",
+        notif = _row(id=1, label="Doc en revisión", status="revision",
                      modulo="Archivo", ts="2024-01-01 10:00")
         with patch("routes.admin.catalog.db_query", return_value=[notif]):
             res = client.get("/api/admin/notifications?modulo=Archivo")

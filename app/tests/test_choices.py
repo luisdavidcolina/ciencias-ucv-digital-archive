@@ -1,4 +1,4 @@
-﻿"""Tests para /api/choices (estructura del payload y cachÃ©)."""
+"""Tests para /api/choices (estructura del payload y caché)."""
 import pytest
 from unittest.mock import patch
 import pandas as pd
@@ -20,7 +20,7 @@ def _archivo_df():
         "id": 1, "titulo": "Doc", "autor": "A", "fecha": "2024-01-01",
         "doc_type": "Informe", "categoria": "Parte I", "ubicacion": "Estante 1",
         "tesauro_primario": "Informe", "tesauro_secundario": "Parte I",
-        "descriptores_libres": "gestiÃ³n; acadÃ©mico", "resumen": "", "file_url": "",
+        "descriptores_libres": "gestión; académico", "resumen": "", "file_url": "",
     }])
 
 
@@ -31,7 +31,7 @@ class TestChoices:
             patch("routes.hr.fetch_hr_dataframe",       return_value=_empty_rrhh_df()),
             patch("routes.lookups.db_query",                return_value=[]),
         ):
-            # Limpiar cachÃ© antes del test
+            # Limpiar caché antes del test
             import routes.lookups as ch
             ch._cache = {}
 
@@ -50,15 +50,15 @@ class TestChoices:
         assert "people"    in body["rrhh"]
 
     def test_cache_activo(self, client):
-        """Segunda llamada devuelve el cachÃ© sin tocar la BD."""
+        """Segunda llamada devuelve el caché sin tocar la BD."""
         import routes.lookups as ch
         ch._cache = {"archivo": {"doc_types": ["Cached"]}, "rrhh": {}}
-        ch._cache_ts = 1e18  # Timestamp muy futuro â†’ nunca expira
+        ch._cache_ts = 1e18  # Timestamp muy futuro → nunca expira
 
         res = client.get("/api/choices")
         assert res.status_code == 200
         assert res.json()["archivo"]["doc_types"] == ["Cached"]
 
-        # Limpiar despuÃ©s del test
+        # Limpiar después del test
         ch._cache = {}
         ch._cache_ts = 0.0

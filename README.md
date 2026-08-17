@@ -337,11 +337,11 @@ erDiagram
 | :--- | :---: | :---: |
 | Búsqueda y consulta | ✅ | ✅ |
 | Ver modal de documento/expediente | ✅ | ✅ |
-| Ingresar nuevo documento | � | ✅ |
-| Monitor de expedientes | � | ✅ |
-| Gestión de categorías | � | ✅ |
-| Gestión de usuarios | � | ✅ |
-| Ver estadísticas | � | ✅ |
+| Ingresar nuevo documento | ❌ | ✅ |
+| Monitor de expedientes | ❌ | ✅ |
+| Gestión de categorías | ❌ | ✅ |
+| Gestión de usuarios | ❌ | ✅ |
+| Ver estadísticas | ❌ | ✅ |
 
 La segregación por módulo es absoluta: un usuario de Archivo no puede acceder a rutas RRHH y viceversa.
 

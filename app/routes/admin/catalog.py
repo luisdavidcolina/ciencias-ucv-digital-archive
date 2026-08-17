@@ -1,4 +1,4 @@
-﻿"""CategorÃ­as, palabras clave y audit log."""
+"""Categorías, palabras clave y audit log."""
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 
@@ -28,7 +28,7 @@ def get_keywords():
 def create_keyword(req: KeywordRequest):
     nombre = (req.nombre or "").strip()
     if not nombre:
-        raise HTTPException(400, "Nombre vacÃ­o")
+        raise HTTPException(400, "Nombre vacío")
     existing = db_query(
         "SELECT id_descriptor FROM public.descriptores_libres WHERE LOWER(nombre) = LOWER(%s)",
         (nombre,), fetch="one",
@@ -46,7 +46,7 @@ def create_keyword(req: KeywordRequest):
 def update_keyword(kid: int, req: KeywordRequest):
     nombre = (req.nombre or "").strip()
     if not nombre:
-        raise HTTPException(400, "Nombre vacÃ­o")
+        raise HTTPException(400, "Nombre vacío")
     db_query(
         "UPDATE public.descriptores_libres SET nombre = %s WHERE id_descriptor = %s",
         (nombre, kid), fetch="none", commit=True,
@@ -64,7 +64,7 @@ def delete_keyword(kid: int, force: bool = False):
     if uso_count > 0 and not force:
         raise HTTPException(
             400,
-            f"La palabra clave estÃ¡ en uso en {uso_count} documento(s). "
+            f"La palabra clave está en uso en {uso_count} documento(s). "
             "Use force=true para eliminar de todas formas."
         )
     if uso_count > 0:
@@ -81,10 +81,10 @@ def delete_keyword(kid: int, force: bool = False):
 
 @router.post("/add_category")
 def add_category(req: CategoryCreateRequest):
-    log_event(req.usuario, "Create Category", req.scope, f"Nueva TipologÃ­a: {req.name}")
+    log_event(req.usuario, "Create Category", req.scope, f"Nueva Tipología: {req.name}")
     nombre = (req.name or "").strip()
     if not nombre:
-        raise HTTPException(400, "Nombre vacÃ­o")
+        raise HTTPException(400, "Nombre vacío")
 
     if req.parte:
         cat_slug = req.parte
@@ -97,7 +97,7 @@ def add_category(req: CategoryCreateRequest):
     if not cat:
         cat = db_query("SELECT id FROM public.categoria ORDER BY id LIMIT 1", fetch="one")
     if not cat:
-        raise HTTPException(500, "No hay categorÃ­as en la BD")
+        raise HTTPException(500, "No hay categorías en la BD")
 
     existing = db_query("SELECT id FROM public.tipo_documento WHERE LOWER(nombre) = LOWER(%s)", (nombre,), fetch="one")
     if existing:
@@ -115,7 +115,7 @@ def add_category(req: CategoryCreateRequest):
 
 @router.get("/audit_log")
 def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
-    """Retorna el log de auditorÃ­a con paginaciÃ³n y bÃºsqueda opcional."""
+    """Retorna el log de auditoría con paginación y búsqueda opcional."""
     page     = max(1, page)
     per_page = max(1, min(per_page, 100))
     offset   = (page - 1) * per_page
@@ -153,7 +153,7 @@ def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
 def get_notifications(modulo: Optional[str] = Query(default="")):
     """
     Devuelve un resumen de pendientes para el panel de notificaciones.
-    Incluye docs en revisiÃ³n y borradores del mÃ³dulo solicitado.
+    Incluye docs en revisión y borradores del módulo solicitado.
     """
     items = []
     total = 0

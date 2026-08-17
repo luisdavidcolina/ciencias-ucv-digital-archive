@@ -1,4 +1,4 @@
-﻿import os
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException

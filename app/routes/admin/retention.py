@@ -1,10 +1,10 @@
-﻿"""
-GestiÃ³n de plazos de retenciÃ³n documental.
+"""
+Gestión de plazos de retención documental.
 
-EstÃ¡ndar de referencia: ISO 15489-1:2016 Â§8 (Procesos y controles de gestiÃ³n de documentos)
+Estándar de referencia: ISO 15489-1:2016 §8 (Procesos y controles de gestión de documentos)
 y Ley de Archivos Nacionales de Venezuela (1945, vigente con reformas).
 
-El plazo de retenciÃ³n establece cuÃ¡ntos aÃ±os debe conservarse un tipo de documento
+El plazo de retención establece cuántos años debe conservarse un tipo de documento
 antes de poder ser eliminado o transferido al archivo permanente.
 """
 from typing import Optional
@@ -26,14 +26,14 @@ class RetencionUpdate(BaseModel):
     @classmethod
     def plazo_must_be_positive(cls, v):
         if v < 1 or v > 100:
-            raise ValueError("El plazo de retenciÃ³n debe estar entre 1 y 100 aÃ±os")
+            raise ValueError("El plazo de retención debe estar entre 1 y 100 años")
         return v
 
 
 @router.get("/retencion/tipos")
 def list_retention_types(scope: str = Query(default="")):
     """
-    Lista todos los tipos de documento con su plazo de retenciÃ³n configurado.
+    Lista todos los tipos de documento con su plazo de retención configurado.
     Filtra por scope ('archivo' | 'rrhh' | '' para todos).
     """
     params = []
@@ -66,7 +66,7 @@ def list_retention_types(scope: str = Query(default="")):
 
 @router.patch("/retencion/tipos/{tipo_id}")
 def update_retention(tipo_id: int, data: RetencionUpdate):
-    """Actualiza el plazo de retenciÃ³n de un tipo de documento."""
+    """Actualiza el plazo de retención de un tipo de documento."""
     existing = db_query(
         "SELECT id, nombre FROM public.tipo_documento WHERE id = %s", [tipo_id], fetch="one"
     )
@@ -80,9 +80,9 @@ def update_retention(tipo_id: int, data: RetencionUpdate):
     invalidate_choices_cache()
     log_event(
         data.requester or "sistema",
-        "RetenciÃ³n Actualizada",
+        "Retención Actualizada",
         "Admin",
-        f"tipo_id={tipo_id} nombre='{existing['nombre']}' plazo={data.plazo_retencion_anios} aÃ±os",
+        f"tipo_id={tipo_id} nombre='{existing['nombre']}' plazo={data.plazo_retencion_anios} años",
     )
     return {
         "success": True,
@@ -95,18 +95,18 @@ def update_retention(tipo_id: int, data: RetencionUpdate):
 @router.get("/retencion/vencimientos")
 def get_expired_docs(limite: int = Query(default=50, ge=1, le=500)):
     """
-    Documentos del mÃ³dulo Archivo cuyo plazo de retenciÃ³n ha expirado.
-    Ordenados por antigÃ¼edad de vencimiento (ISO 15489-1:2016 Â§8.5 â€“ DisposiciÃ³n).
+    Documentos del módulo Archivo cuyo plazo de retención ha expirado.
+    Ordenados por antigüedad de vencimiento (ISO 15489-1:2016 §8.5 – Disposición).
     """
     rows = db_query("""
         SELECT
             da.id_archivo,
             da.titulo,
-            COALESCE(da.autor, 'â€”')                     AS autor,
+            COALESCE(da.autor, '—')                     AS autor,
             TO_CHAR(da.fecha_documento, 'YYYY-MM-DD')   AS fecha_documento,
-            COALESCE(da.ubicacion, 'â€”')                 AS ubicacion,
-            COALESCE(da.soporte, 'FÃ­sico')              AS soporte,
-            COALESCE(td.nombre_corto, 'â€”')              AS tipo_documento,
+            COALESCE(da.ubicacion, '—')                 AS ubicacion,
+            COALESCE(da.soporte, 'Físico')              AS soporte,
+            COALESCE(td.nombre_corto, '—')              AS tipo_documento,
             COALESCE(td.plazo_retencion_anios, 5)       AS plazo_anios,
             TO_CHAR(
                 (da.fecha_documento + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL)::DATE,

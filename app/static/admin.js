@@ -17,7 +17,9 @@ function loadAdminTab(adminTabId) {
   else if (adminTabId === "monitor")    { state.adminTable.page = 1; loadMonitorTable(); }
   else if (adminTabId === "categories") { loadCategoriesTab(); loadRetentionConfig(); }
   else if (adminTabId === "users")      loadUsersTab();
-  else if (adminTabId === "audit")      { loadAuditTab(); if (suf === "archivo") loadVencimientosTable(); }
+  else if (adminTabId === "audit")      loadAuditTab();
+  else if (adminTabId === "retencion")  { loadRetentionConfig(); loadVencimientosTable(); }
+  else if (adminTabId === "papelera")   loadPapelera(suf);
 
   try {
     const mod = state.user?.modulo || "Archivo";
@@ -25,7 +27,9 @@ function loadAdminTab(adminTabId) {
     if (bc) bc.innerHTML = `<i class="fas fa-shield-alt"></i> Panel de Control / Administración - ${escHtml(mod)}`;
     const submitBtn = document.getElementById(`btn_submit_workspace-${suf}`);
     if (submitBtn) submitBtn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Guardar en ${escHtml(mod)}`;
-    const monitorTitle = document.querySelector(`${root} .card-title`);
+    // Acotado al pane del monitor: sin el ancla, esto reescribía el primer
+    // .card-title de toda la sección (el de "Filtros Analíticos") en cada cambio.
+    const monitorTitle = document.querySelector(`#pane-admin-${suf}-monitor .card-title`);
     if (monitorTitle) monitorTitle.innerHTML = `<i class="fas fa-database"></i> Monitor de ${mod === "RRHH" ? "RRHH" : "Archivos"}`;
   } catch (e) {
     console.error("Error actualizando etiquetas del panel:", e);

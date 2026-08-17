@@ -1,4 +1,4 @@
-﻿"""Tests para bÃºsqueda de archivo institucional."""
+"""Tests para búsqueda de archivo institucional."""
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -17,8 +17,8 @@ def _doc_row(**kwargs):
         "fecha_documento": "2024-01-10", "tesauro_primario": "Informe",
         "tesauro_secundario": "Parte I", "ubicacion": "Estante A",
         "abstract": "Resumen.", "file_url": "", "personas_relacionadas": "",
-        "numero_folio": None, "soporte": "FÃ­sico", "numero_paginas": None,
-        "descriptores_libres": "gestiÃ³n",
+        "numero_folio": None, "soporte": "Físico", "numero_paginas": None,
+        "descriptores_libres": "gestión",
         "relevance": 1.0, "total_count": 1,
     }
     base.update(kwargs)
@@ -26,7 +26,7 @@ def _doc_row(**kwargs):
 
 
 def _search_mock(doc_rows):
-    """Mock para db_query: devuelve docs en la query principal, vacÃ­o en las facets."""
+    """Mock para db_query: devuelve docs en la query principal, vacío en las facets."""
     call_count = [0]
 
     def _side(sql, params=None, fetch="all", commit=False):
