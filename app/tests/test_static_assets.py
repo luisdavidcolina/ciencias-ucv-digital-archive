@@ -122,8 +122,10 @@ def test_sin_comillas_tipograficas_en_codigo(path):
 @pytest.mark.parametrize("path", JS_FILES, ids=lambda p: p.name)
 def test_javascript_parsea(path):
     """`node --check`: la red de seguridad definitiva contra un JS que no carga."""
+    # 60s, no 30: la suite lanza un proceso de node por archivo y bajo carga
+    # alguno llegaba al limite y fallaba sin que el archivo tuviera nada malo.
     res = subprocess.run(
-        ["node", "--check", str(path)], capture_output=True, text=True, timeout=30
+        ["node", "--check", str(path)], capture_output=True, text=True, timeout=60
     )
     assert res.returncode == 0, (
         f"{path.name} no parsea como JavaScript:\n{res.stderr.strip()}"
