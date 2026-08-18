@@ -6,7 +6,8 @@ from datetime import datetime
 from fastapi import APIRouter, UploadFile, File, Query
 
 from database import db_query, log_event
-from .helpers import _resolve_or_create_lookup, _resolve_or_create_tipo_documento
+from .helpers import (_resolve_or_create_lookup, _resolve_or_create_tipo_documento,
+                      _resolve_user_id)
 
 router = APIRouter()
 
@@ -142,6 +143,8 @@ async def import_documentos_csv(
     reader = _csv_module.DictReader(_io_module.StringIO(text))
     if reader.fieldnames is None:
         return {"inserted": 0, "skipped": 0, "errors": ["Archivo CSV vacío o sin encabezados."]}
+    # updated_by es INTEGER: hay que guardar el id del usuario, no su nombre.
+    _uid = _resolve_user_id(requester)
     results = {"inserted": 0, "skipped": 0, "errors": []}
     for i, row in enumerate(reader, 1):
         try:
@@ -162,7 +165,7 @@ async def import_documentos_csv(
                        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_archivo""",
                     [
                         titulo, row.get("autor", ""), _parse_date(row.get("fecha")),
-                        tipo_nombre, tipo_id, row.get("abstract", ""), row.get("ubicacion", ""), requester,
+                        tipo_nombre, tipo_id, row.get("abstract", ""), row.get("ubicacion", ""), _uid,
                         str(row.get("numero_folio", "") or "").strip() or None,
                         _soporte, _paginas,
                     ],
@@ -203,7 +206,7 @@ async def import_documentos_csv(
                            (empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,updated_by,
                             numero_folio,soporte,numero_paginas)
                        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""), row.get("ubicacion", ""), requester,
+                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""), row.get("ubicacion", ""), _uid,
                      str(row.get("numero_folio", "") or "").strip() or None, _soporte_r, _paginas_r],
                     fetch="none", commit=True,
                 )
