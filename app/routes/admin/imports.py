@@ -161,11 +161,13 @@ async def import_documentos_csv(
                 doc_row = db_query(
                     """INSERT INTO public.datos_archivo
                            (titulo,autor,fecha_documento,tesauro_primario,id_tipo_documento,
-                            abstract,ubicacion,updated_by,numero_folio,soporte,numero_paginas)
-                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_archivo""",
+                            abstract,ubicacion,creado_por,updated_by,
+                            numero_folio,soporte,numero_paginas)
+                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id_archivo""",
                     [
                         titulo, row.get("autor", ""), _parse_date(row.get("fecha")),
-                        tipo_nombre, tipo_id, row.get("abstract", ""), row.get("ubicacion", ""), _uid,
+                        tipo_nombre, tipo_id, row.get("abstract", ""), row.get("ubicacion", ""),
+                        _uid, _uid,
                         str(row.get("numero_folio", "") or "").strip() or None,
                         _soporte, _paginas,
                     ],
@@ -203,10 +205,11 @@ async def import_documentos_csv(
                 _paginas_r = int(_paginas_r_raw) if _paginas_r_raw.isdigit() and int(_paginas_r_raw) > 0 else None
                 db_query(
                     """INSERT INTO public.datos_rrhh
-                           (empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,updated_by,
-                            numero_folio,soporte,numero_paginas)
-                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""), row.get("ubicacion", ""), _uid,
+                           (empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,
+                            creado_por,updated_by,numero_folio,soporte,numero_paginas)
+                       VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    [emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""),
+                     row.get("ubicacion", ""), _uid, _uid,
                      str(row.get("numero_folio", "") or "").strip() or None, _soporte_r, _paginas_r],
                     fetch="none", commit=True,
                 )
