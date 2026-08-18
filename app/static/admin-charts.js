@@ -33,19 +33,46 @@ function _countScale(axis = "y") {
   return axis === "y" ? { y: g, x: o } : { x: g, y: o };
 }
 
+// Mientras se espera a /api/admin/charts el panel era un muro de tarjetas en
+// blanco durante varios segundos, indistinguible de "esto no funciona".
+function _marcarCargando() {
+  document.querySelectorAll(".ds-chart-box canvas, #soporte-archivo, #soporte-rrhh")
+    .forEach(el => {
+      const caja = el.tagName === "CANVAS" ? el.parentElement : el;
+      if (caja.querySelector(".ds-chart-cargando")) return;
+      const aviso = document.createElement("div");
+      aviso.className = "ds-chart-empty ds-chart-cargando";
+      aviso.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i><span>Cargando…</span>';
+      caja.appendChild(aviso);
+      if (el.tagName === "CANVAS") el.style.visibility = "hidden";
+    });
+}
+
+function _quitarCargando() {
+  document.querySelectorAll(".ds-chart-cargando").forEach(e => e.remove());
+  document.querySelectorAll(".ds-chart-box canvas").forEach(c => { c.style.visibility = ""; });
+}
+
 async function loadChartsData() {
   const suf    = adminSuffixFromTab();
   const modulo = suf === "archivo" ? "Archivo" : "RRHH";
   applyChartTheme();
+  _marcarCargando();
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/charts?modulo=${modulo}`);
+    _quitarCargando();
     _lastChartsData = { data, suf, modulo };
     if (modulo === "Archivo") {
       _renderArchivoCharts(data, suf);
     } else {
       _renderRrhhCharts(data, suf);
     }
-  } catch(e) { console.error("Charts error:", e); }
+  } catch(e) {
+    _quitarCargando();
+    document.querySelectorAll(".ds-chart-box canvas").forEach(c =>
+      _sinDatos(c.id, "No se pudieron cargar las gráficas."));
+    console.error("Charts error:", e);
+  }
 }
 
 // Se guarda el último payload para poder repintar al cambiar de tema o al

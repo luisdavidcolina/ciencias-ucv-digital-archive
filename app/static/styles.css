@@ -3788,3 +3788,12 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   border-radius: 50%;
   margin-right: 6px;
 }
+
+/* Estado de carga de un gráfico. Sin esto, los segundos que tarda la API se ven
+   igual que un panel roto. */
+.ds-chart-cargando {
+  position: absolute;
+  inset: 0;
+  background: var(--viz-surface);
+}
+.ds-chart-cargando i { opacity: .55; }
