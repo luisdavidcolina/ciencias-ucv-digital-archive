@@ -42,6 +42,10 @@ ya llegaron a `main` una vez:
 - `test_migraciones.py` — la huella del esquema: con el esquema al día no se
   ejecuta ninguna sentencia, y si una migración falla la huella NO se registra.
 - `test_stats_totales.py` — la forma de la respuesta de cifras del tablero.
+- `test_paginas.py` — cada HTML tiene ruta y cada ruta su HTML. Existe porque
+  `index.html` (1328 líneas) no estaba enrutado: sólo se alcanzaba en
+  `/static/index.html`, nadie lo enlazaba, y llevaba tiempo divergiendo del
+  resto. Se retiró junto con las ramas de `app.js` que sólo servían a esa SPA.
 - `test_admin_panels.py` — cada pestaña tiene panel, cada panel tiene pestaña,
   ambos módulos ofrecen la misma navegación, los encabezados del monitor cuadran
   con las celdas que emite la plantilla, y ninguna página vuelve a traer la
@@ -84,7 +88,6 @@ ya llegaron a `main` una vez:
 │   │   └── ai.py         # Asistente IA (chat, propuestas, config)
 │   ├── tests/            # pytest — endpoints + guardas (ver "Pruebas")
 │   └── static/
-│       ├── index.html          # SPA principal (tabs Archivo + RRHH)
 │       ├── archive.html / hr.html          # Búsqueda pública
 │       ├── admin_archive.html / admin_hr.html   # Paneles de módulo
 │       ├── admin_system.html   # Admin Global (backup, audit, alertas)

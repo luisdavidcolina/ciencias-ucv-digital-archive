@@ -58,11 +58,6 @@ function loginSuccess(user) {
     ts: Date.now()
   }));
 
-  const loginScr = document.getElementById("login-screen");
-  const appPortal = document.getElementById("app-portal");
-  if (loginScr) loginScr.style.setProperty("display", "none", "important");
-  if (appPortal) appPortal.style.display = "block";
-
   const activeRole = (user.roles && user.roles[user.modulo]) ? user.roles[user.modulo] : user.rol;
   // Módulo y rol van en su propio <span> para poder plegarlos en pantallas
   // angostas: la credencial completa desbordaba la barra por casi 90px.
@@ -73,16 +68,6 @@ function loginSuccess(user) {
   loadDynamicChoices();
   configureSidebarVisibilities(user);
   _initNotificationBell(user);
-
-  const switchBtn = document.getElementById("module_switch_btn");
-  if (switchBtn) {
-    if (user.modules && user.modules.length > 1) {
-      switchBtn.style.display = "inline-block";
-      switchBtn.innerText = `Switch (${user.modules.join(" / ")})`;
-    } else {
-      switchBtn.style.display = "none";
-    }
-  }
 
   // Auto-open edit modal when navigating from public search (?docId= / ?empId=)
   const _page = document.body.dataset.page;
@@ -105,16 +90,9 @@ function logout() {
   fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
   state.user = null;
   localStorage.removeItem("archive_session");
-  const appPortal = document.getElementById("app-portal");
-  const loginScr = document.getElementById("login-screen");
-  if (appPortal) appPortal.style.display = "none";
-  if (loginScr) {
-    loginScr.style.setProperty("display", "flex", "important");
-    const lp = document.getElementById("login_pass");
-    if (lp) lp.value = "";
-  } else {
-    window.location.href = "/";
-  }
+  // Antes había una rama para ocultar el portal de la SPA sin navegar; esa
+  // página ya no se sirve, así que siempre se vuelve al inicio.
+  window.location.href = "/";
 }
 
 function configureSidebarVisibilities(user) {
@@ -182,16 +160,6 @@ function configureSidebarVisibilities(user) {
   switchTab(standalonePage || ((user.modulo === "RRHH") ? "rrhh" : "archivo"));
 }
 
-function handleModuleSwitch() {
-  if (!state.user?.modules || state.user.modules.length < 2) return;
-  const idx  = state.user.modules.indexOf(state.user.modulo);
-  state.user.modulo = state.user.modules[(idx + 1) % state.user.modules.length];
-  const role = state.user.roles?.[state.user.modulo] || "Normal";
-  document.getElementById("nav_username").innerText = `ID: ${state.user.username} (${state.user.modulo} - ${role})`;
-  configureSidebarVisibilities(state.user);
-  switchTab(state.user.modulo === "RRHH" ? "rrhh" : "archivo");
-}
-
 const _BREADCRUMBS = {
   "archivo":       "Archivo / Búsqueda",
   "rrhh":          "RRHH / Búsqueda",
@@ -257,12 +225,8 @@ function setupEventListeners() {
   safeOn("sidebar-overlay",   "click", closeSidebar);
 
   // Tabs (SPA únicamente; en standalone las <a href> navegan normalmente)
-  const isSPA = !!document.getElementById("app-portal");
-  safeOn("menu-btn-archivo",       "click", e => { if (!isSPA) return; e.preventDefault(); switchTab("archivo"); });
-  safeOn("menu-btn-rrhh",          "click", e => { if (!isSPA) return; e.preventDefault(); switchTab("rrhh"); });
-  safeOn("menu-btn-admin-archivo", "click", e => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "Archivo"; switchTab("admin-archivo"); });
-  safeOn("menu-btn-admin-rrhh",    "click", e => { if (!isSPA) return; e.preventDefault(); if (state.user) state.user.modulo = "RRHH";    switchTab("admin-rrhh"); });
-  safeOn("module_switch_btn",      "click", handleModuleSwitch);
+  // Los enlaces del menú son <a href> y navegan solos. Aquí vivían handlers de
+  // la SPA (index.html) que interceptaban el clic; esa página ya no se sirve.
 
   // Buscador Archivo — debounce 420ms en input, inmediato en botón/enter
   safeOn("search_archivo",    "input",  e => {
