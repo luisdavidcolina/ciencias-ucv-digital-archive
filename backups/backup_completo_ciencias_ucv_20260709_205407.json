@@ -1,0 +1,2878 @@
+{
+  "_metadata": {
+    "created_at": "2026-07-09T20:54:03.106542",
+    "version": "1.1",
+    "tables": [
+      "categoria",
+      "cargos",
+      "departamentos",
+      "estados_laborales",
+      "tipo_documento",
+      "descriptores_libres",
+      "empleados",
+      "historial_cargos",
+      "datos_rrhh",
+      "rrhh_descriptores",
+      "datos_archivo",
+      "archivo_descriptores",
+      "usuarios_sistema"
+    ],
+    "partial": false
+  },
+  "categoria": [
+    {
+      "id": 1,
+      "nombre": "Parte I",
+      "slug": "parte-i"
+    },
+    {
+      "id": 2,
+      "nombre": "Parte II",
+      "slug": "parte-ii"
+    },
+    {
+      "id": 3,
+      "nombre": "Parte III",
+      "slug": "parte-iii"
+    },
+    {
+      "id": 4,
+      "nombre": "Parte IV",
+      "slug": "parte-iv"
+    },
+    {
+      "id": 5,
+      "nombre": "Archivo",
+      "slug": "archivo"
+    }
+  ],
+  "cargos": [
+    {
+      "id": 1,
+      "nombre": "Por Asignar"
+    },
+    {
+      "id": 2,
+      "nombre": "Superintendente"
+    },
+    {
+      "id": 3,
+      "nombre": "Asistente Contable"
+    },
+    {
+      "id": 4,
+      "nombre": "Técnico de Laboratorio"
+    },
+    {
+      "id": 5,
+      "nombre": "Secretaria Ejecutiva"
+    },
+    {
+      "id": 6,
+      "nombre": "Profesor Titular"
+    },
+    {
+      "id": 7,
+      "nombre": "Director General"
+    },
+    {
+      "id": 8,
+      "nombre": "Coordinadora de Nómina"
+    },
+    {
+      "id": 9,
+      "nombre": "Analista de Sistemas"
+    },
+    {
+      "id": 10,
+      "nombre": "Asistente Administrativo"
+    },
+    {
+      "id": 11,
+      "nombre": "Jefe de Taller"
+    }
+  ],
+  "departamentos": [
+    {
+      "id": 1,
+      "nombre": "Por Asignar"
+    },
+    {
+      "id": 2,
+      "nombre": "Mantenimiento"
+    },
+    {
+      "id": 3,
+      "nombre": "Física"
+    },
+    {
+      "id": 4,
+      "nombre": "Informática"
+    },
+    {
+      "id": 5,
+      "nombre": "Decanato"
+    },
+    {
+      "id": 6,
+      "nombre": "Matemáticas"
+    },
+    {
+      "id": 7,
+      "nombre": "Química"
+    },
+    {
+      "id": 8,
+      "nombre": "Biología"
+    },
+    {
+      "id": 9,
+      "nombre": "Recursos Humanos"
+    }
+  ],
+  "estados_laborales": [
+    {
+      "id": 1,
+      "estados": "Pendiente de Registro"
+    },
+    {
+      "id": 2,
+      "estados": "Activo"
+    },
+    {
+      "id": 3,
+      "estados": "Jubilado"
+    },
+    {
+      "id": 4,
+      "estados": "Retirado"
+    },
+    {
+      "id": 5,
+      "estados": "Pensionado"
+    }
+  ],
+  "tipo_documento": [
+    {
+      "id": 1,
+      "nombre": "Concurso de oposicion/credenciales C.U.",
+      "nombre_corto": "Concurso de Oposición/Credenciales",
+      "slug": "concurso-de-oposicion-credenciales-c-u",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 2,
+      "nombre": "Contratos, renovaciones, prorrogas de contratos y suplencias",
+      "nombre_corto": "Contratos y Suplencias",
+      "slug": "contratos-renovaciones-prorrogas-de-contratos-y-suplencias",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 3,
+      "nombre": "Disminucion de nomina_formulario A",
+      "nombre_corto": "Disminución de Nómina",
+      "slug": "disminucion-de-nomina-formulario-a",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 4,
+      "nombre": "Documentos de ingreso (planillas de solicitud de empleo, evaluacion medica pre_empleo, copia certificado de salud, copia numero de cuenta bancaria, periodo de prueba)",
+      "nombre_corto": "Documentos de Ingreso",
+      "slug": "documentos-de-ingreso-planillas-de-solicitud-de-empleo-evaluacion-medica-pre-empleo-copia-certificado-de-salud-copia-numero-de-cuenta-bancaria-periodo-de-prueba",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 5,
+      "nombre": "Estudios de cargos y evaluacion de credenciales",
+      "nombre_corto": "Evaluación de Cargos",
+      "slug": "estudios-de-cargos-y-evaluacion-de-credenciales",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 6,
+      "nombre": "Inclusion planta Profesoral (Postgrado)",
+      "nombre_corto": "Inclusión Profesoral (Postgrado)",
+      "slug": "inclusion-planta-profesoral-postgrado",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 7,
+      "nombre": "Informes de actividades a realizar y realizadas",
+      "nombre_corto": "Informes de Actividades",
+      "slug": "informes-de-actividades-a-realizar-y-realizadas",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 8,
+      "nombre": "Nombramiento provisional, nombramiento definitivo, otros nombramientos y designaciones",
+      "nombre_corto": "Nombramientos y Designaciones",
+      "slug": "nombramiento-provisional-nombramiento-definitivo-otros-nombramientos-y-designaciones",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 9,
+      "nombre": "Retiros, renuncias, disminucion de nomina, calificaciones de despido. En el caso de retiro por fallecimiento del empleado o sucesor, Incluye Acta De Defuncion",
+      "nombre_corto": "Retiros y Despidos",
+      "slug": "retiros-renuncias-disminucion-de-nomina-calificaciones-de-despido-en-el-caso-de-retiro-por-fallecimiento-del-empleado-o-sucesor-incluye-acta-de-defuncion",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 10,
+      "nombre": "Solicitud de apertura de concurso de oposicion / nombramiento de jurados",
+      "nombre_corto": "Concurso de Oposicion / Nombramiento de Jurados",
+      "slug": "solicitud-de-apertura-de-concurso-de-oposicion-nombramiento-de-jurados",
+      "id_categoria": 1,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 11,
+      "nombre": "Actas de traslado",
+      "nombre_corto": "Actas de Traslado",
+      "slug": "actas-de-traslado",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 12,
+      "nombre": "Adecuacion del plan de formacion y capacitacion de docentes (instructores)",
+      "nombre_corto": "Adecuación Formación y Capacitacion",
+      "slug": "adecuacion-del-plan-de-formacion-y-capacitacion-de-docentes-instructores",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 13,
+      "nombre": "Aprobacion de informes semestrales, anuales y final del plan de formacion",
+      "nombre_corto": "Informes Formación",
+      "slug": "aprobacion-de-informes-semestrales-anuales-y-final-del-plan-de-formacion",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 14,
+      "nombre": "Aprobacion de prorroga de plan de formacion",
+      "nombre_corto": "Prórroga Formación",
+      "slug": "aprobacion-de-prorroga-de-plan-de-formacion",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 15,
+      "nombre": "Aprobacion de temario de leccion publica",
+      "nombre_corto": "Temario Lección Pública",
+      "slug": "aprobacion-de-temario-de-leccion-publica",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 16,
+      "nombre": "Ascensos",
+      "nombre_corto": "Ascensos",
+      "slug": "ascensos",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 17,
+      "nombre": "Cambios de dedicacion, cambios de unidades ejecutoras y cambios de financiamiento",
+      "nombre_corto": "Cambios de Dedicación, Unidades Ejecutoras y Finaciamento",
+      "slug": "cambios-de-dedicacion-cambios-de-unidades-ejecutoras-y-cambios-de-financiamiento",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 18,
+      "nombre": "Escalafon",
+      "nombre_corto": "Escalafón",
+      "slug": "escalafon",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 19,
+      "nombre": "Jubilacion y pension",
+      "nombre_corto": "Jubilación y Pensión",
+      "slug": "jubilacion-y-pension",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 20,
+      "nombre": "Modificaciones y actualizacion de datos (movimientos de personal)",
+      "nombre_corto": "Movimientos de Personal",
+      "slug": "modificaciones-y-actualizacion-de-datos-movimientos-de-personal",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 21,
+      "nombre": "Nombramiento de jurado de leccion publica",
+      "nombre_corto": "Jurado Lección Pública",
+      "slug": "nombramiento-de-jurado-de-leccion-publica",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 22,
+      "nombre": "Normas de permanencia",
+      "nombre_corto": "Normas Permanencia",
+      "slug": "normas-de-permanencia",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 23,
+      "nombre": "Prorroga de leccion publica",
+      "nombre_corto": "Prórroga Lección Pública",
+      "slug": "prorroga-de-leccion-publica",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 24,
+      "nombre": "Ratificacion de cargo",
+      "nombre_corto": "Ratificación de Cargo",
+      "slug": "ratificacion-de-cargo",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 25,
+      "nombre": "Reconocimientos de antigüedad",
+      "nombre_corto": "Antigüedad",
+      "slug": "reconocimientos-de-antiguedad",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 26,
+      "nombre": "Registro de asignacion de sueldos (RAS)",
+      "nombre_corto": "RAS",
+      "slug": "registro-de-asignacion-de-sueldos-ras",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 27,
+      "nombre": "Relaciones de cargos y tiempo de servicio",
+      "nombre_corto": "Tiempo de Servicio",
+      "slug": "relaciones-de-cargos-y-tiempo-de-servicio",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 28,
+      "nombre": "Solicitudes de calculos de pasivos laborales",
+      "nombre_corto": "Pasivos Laborales",
+      "slug": "solicitudes-de-calculos-de-pasivos-laborales",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 29,
+      "nombre": "Transferencias",
+      "nombre_corto": "Transferencias",
+      "slug": "transferencias",
+      "id_categoria": 2,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 30,
+      "nombre": "Año sabatico e informes de actividades de año sabatico",
+      "nombre_corto": "Año Sabático",
+      "slug": "ano-sabatico-e-informes-de-actividades-de-ano-sabatico",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 31,
+      "nombre": "Becas, solicitudes y tramitacion de becas, prorroga de beca_sueldo nacional y exterior",
+      "nombre_corto": "Becas",
+      "slug": "becas-solicitudes-y-tramitacion-de-becas-prorroga-de-beca-sueldo-nacional-y-exterior",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 32,
+      "nombre": "Certificados de incapacidad",
+      "nombre_corto": "Certificado Incapacidad",
+      "slug": "certificados-de-incapacidad",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 33,
+      "nombre": "Financiamientos de estudios y cursos",
+      "nombre_corto": "Financiamiento Estudios",
+      "slug": "financiamientos-de-estudios-y-cursos",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 34,
+      "nombre": "Informe de actividades por asistencia a congresos y/o eventos",
+      "nombre_corto": "Asistencia a Eventos",
+      "slug": "informe-de-actividades-por-asistencia-a-congresos-y-o-eventos",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 35,
+      "nombre": "Informes de pasantia, informe de actividades docentes",
+      "nombre_corto": "Informes Pasantía y Actividades Docentes",
+      "slug": "informes-de-pasantia-informe-de-actividades-docentes",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 36,
+      "nombre": "Pre y post natal",
+      "nombre_corto": "Pre y Post Natal",
+      "slug": "pre-y-post-natal",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 37,
+      "nombre": "Reposos y permisos, permisos remunerados y no remunerados, reincorporaciones de permisos y de reposos medicos, Asistencia A Eventos, Permisos Por Excedencia Activa_Pasiva",
+      "nombre_corto": "Reposos y Permisos",
+      "slug": "reposos-y-permisos-permisos-remunerados-y-no-remunerados-reincorporaciones-de-permisos-y-de-reposos-medicos-asistencia-a-eventos-permisos-por-excedencia-activa-pasiva",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 38,
+      "nombre": "Vacaciones",
+      "nombre_corto": "Vacaciones",
+      "slug": "vacaciones",
+      "id_categoria": 3,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 39,
+      "nombre": "Acta de separacion de bienes",
+      "nombre_corto": "Separación de Bienes",
+      "slug": "acta-de-separacion-de-bienes",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 40,
+      "nombre": "Adelantos de prestaciones sociales y planilla de liquidacion de prestaciones sociales",
+      "nombre_corto": "Prestaciones Sociales",
+      "slug": "adelantos-de-prestaciones-sociales-y-planilla-de-liquidacion-de-prestaciones-sociales",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 41,
+      "nombre": "Amonestaciones",
+      "nombre_corto": "Amonestaciones",
+      "slug": "amonestaciones",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 42,
+      "nombre": "Aportes por defuncion familiar, nacimiento de hijo, lentes, etc",
+      "nombre_corto": "Aportes Familiares",
+      "slug": "aportes-por-defuncion-familiar-nacimiento-de-hijo-lentes-etc",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 43,
+      "nombre": "Autorizaciones",
+      "nombre_corto": "Autorizaciones",
+      "slug": "autorizaciones",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 44,
+      "nombre": "Becas de hijos",
+      "nombre_corto": "Becas de Hijos",
+      "slug": "becas-de-hijos",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 45,
+      "nombre": "Bonos (nocturno, juguetes, transporte, doctoral)",
+      "nombre_corto": "Bonos",
+      "slug": "bonos-nocturno-juguetes-transporte-doctoral",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 46,
+      "nombre": "Botones, diplomas, ordenas, premios, reconocimientos y agradecimientos",
+      "nombre_corto": "Reconocimientos",
+      "slug": "botones-diplomas-ordenas-premios-reconocimientos-y-agradecimientos",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 47,
+      "nombre": "Cedula De Identidad",
+      "nombre_corto": "Cédula",
+      "slug": "cedula-de-identidad",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 48,
+      "nombre": "Constancias",
+      "nombre_corto": "Constancias",
+      "slug": "constancias",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 49,
+      "nombre": "Curriculum Vitae Y Anexos",
+      "nombre_corto": "CV",
+      "slug": "curriculum-vitae-y-anexos",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 50,
+      "nombre": "Declaracion jurada de patrimonio",
+      "nombre_corto": "Declaración Jurada",
+      "slug": "declaracion-jurada-de-patrimonio",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 51,
+      "nombre": "Descuentos y reclamos por pago de institutiones educativas",
+      "nombre_corto": "Descuentos Educativos",
+      "slug": "descuentos-y-reclamos-por-pago-de-institutiones-educativas",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 52,
+      "nombre": "HCM y seguro de vida",
+      "nombre_corto": "HCM y Seguro",
+      "slug": "hcm-y-seguro-de-vida",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 53,
+      "nombre": "Pagos por diferencia de sueldo",
+      "nombre_corto": "Diferencia de sueldo",
+      "slug": "pagos-por-diferencia-de-sueldo",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 54,
+      "nombre": "Planillas Ari Y Planillas De Declaracion De Impuesto Sobre La Renta Y Otros Documentos Fiscales",
+      "nombre_corto": "Declaración Fiscal",
+      "slug": "planillas-ari-y-planillas-de-declaracion-de-impuesto-sobre-la-renta-y-otros-documentos-fiscales",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 55,
+      "nombre": "Planillas Del Seguro Social",
+      "nombre_corto": "Seguro Social",
+      "slug": "planillas-del-seguro-social",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 56,
+      "nombre": "Primas Y Disminuciones De Primas",
+      "nombre_corto": "Primas",
+      "slug": "primas-y-disminuciones-de-primas",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 57,
+      "nombre": "Recibos de pago y relaciones salariales",
+      "nombre_corto": "Recibos de Pago",
+      "slug": "recibos-de-pago-y-relaciones-salariales",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 58,
+      "nombre": "Reclamos de Personal y reclamos por cobros indebidos",
+      "nombre_corto": "Reclamos Personal",
+      "slug": "reclamos-de-personal-y-reclamos-por-cobros-indebidos",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 59,
+      "nombre": "Registro de Informacion Fiscal (RIF)",
+      "nombre_corto": "RIF",
+      "slug": "registro-de-informacion-fiscal-rif",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 60,
+      "nombre": "Registro y/o planilla de datos personales o de actualizacion de datos",
+      "nombre_corto": "Actualización de datos",
+      "slug": "registro-y-o-planilla-de-datos-personales-o-de-actualizacion-de-datos",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 61,
+      "nombre": "Registros_partidas de nacimiento matrimonio y divorcio",
+      "nombre_corto": "Actas Registro Civil",
+      "slug": "registros-partidas-de-nacimiento-matrimonio-y-divorcio",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 62,
+      "nombre": "Reintegros de sueldo",
+      "nombre_corto": "Reintegros",
+      "slug": "reintegros-de-sueldo",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 63,
+      "nombre": "Rutagrama",
+      "nombre_corto": "Rutagrama",
+      "slug": "rutagrama",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 64,
+      "nombre": "Rotapama",
+      "nombre_corto": "Rotapama",
+      "slug": "rotapama",
+      "id_categoria": 4,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 65,
+      "nombre": "Informe Técnico",
+      "nombre_corto": "Informe Técnico",
+      "slug": "informe-tecnico",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 67,
+      "nombre": "Reglamento",
+      "nombre_corto": "Reglamento",
+      "slug": "reglamento",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 69,
+      "nombre": "Plano Sanitario",
+      "nombre_corto": "Plano Sanitario",
+      "slug": "plano-sanitario",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 71,
+      "nombre": "Plan de Estudio",
+      "nombre_corto": "Plan de Estudio",
+      "slug": "plan-de-estudio",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 73,
+      "nombre": "Resolución",
+      "nombre_corto": "Resolución",
+      "slug": "resolucion",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 75,
+      "nombre": "Manual",
+      "nombre_corto": "Manual",
+      "slug": "manual",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 77,
+      "nombre": "Plano Arquitectónico",
+      "nombre_corto": "Plano Arquitectónico",
+      "slug": "plano-arquitectonico",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 79,
+      "nombre": "Inventario",
+      "nombre_corto": "Inventario",
+      "slug": "inventario",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 81,
+      "nombre": "Proyecto",
+      "nombre_corto": "Proyecto",
+      "slug": "proyecto",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 83,
+      "nombre": "Acta de Grado",
+      "nombre_corto": "Acta de Grado",
+      "slug": "acta-de-grado",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 85,
+      "nombre": "Plan Estratégico",
+      "nombre_corto": "Plan Estratégico",
+      "slug": "plan-estrategico",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 87,
+      "nombre": "Informe",
+      "nombre_corto": "Informe",
+      "slug": "informe",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 89,
+      "nombre": "Presupuesto",
+      "nombre_corto": "Presupuesto",
+      "slug": "presupuesto",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 91,
+      "nombre": "Convenio",
+      "nombre_corto": "Convenio",
+      "slug": "convenio",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    },
+    {
+      "id": 93,
+      "nombre": "Acta de Sesión",
+      "nombre_corto": "Acta de Sesión",
+      "slug": "acta-de-sesion",
+      "id_categoria": 5,
+      "plazo_retencion_anios": 5
+    }
+  ],
+  "descriptores_libres": [
+    {
+      "id_descriptor": 1,
+      "nombre": "Acreditación internacional"
+    },
+    {
+      "id_descriptor": 2,
+      "nombre": "Edificio de docencia"
+    },
+    {
+      "id_descriptor": 3,
+      "nombre": "Gestión administrativa"
+    },
+    {
+      "id_descriptor": 4,
+      "nombre": "Gastos operativos"
+    },
+    {
+      "id_descriptor": 5,
+      "nombre": "Infraestructura universitaria"
+    },
+    {
+      "id_descriptor": 6,
+      "nombre": "Control patrimonial"
+    },
+    {
+      "id_descriptor": 7,
+      "nombre": "Actas de grado"
+    },
+    {
+      "id_descriptor": 8,
+      "nombre": "Resolución oficial"
+    },
+    {
+      "id_descriptor": 9,
+      "nombre": "Prevención de riesgos"
+    },
+    {
+      "id_descriptor": 10,
+      "nombre": "Postgrado conjunto"
+    },
+    {
+      "id_descriptor": 11,
+      "nombre": "Calidad educativa"
+    },
+    {
+      "id_descriptor": 12,
+      "nombre": "Patrimonio arquitectónico"
+    },
+    {
+      "id_descriptor": 13,
+      "nombre": "Clases presenciales"
+    },
+    {
+      "id_descriptor": 14,
+      "nombre": "Nanotecnología aplicada"
+    },
+    {
+      "id_descriptor": 15,
+      "nombre": "Nanopartículas de oro"
+    },
+    {
+      "id_descriptor": 16,
+      "nombre": "Alianza interinstitucional"
+    },
+    {
+      "id_descriptor": 17,
+      "nombre": "Acreditación académica"
+    },
+    {
+      "id_descriptor": 18,
+      "nombre": "Rendición de cuentas académica"
+    },
+    {
+      "id_descriptor": 19,
+      "nombre": "Ordenamiento territorial interno"
+    },
+    {
+      "id_descriptor": 20,
+      "nombre": "Computación"
+    },
+    {
+      "id_descriptor": 21,
+      "nombre": "Actualización de infraestructura técnica"
+    },
+    {
+      "id_descriptor": 22,
+      "nombre": "Normas de higiene"
+    },
+    {
+      "id_descriptor": 23,
+      "nombre": "Protocolo biológico"
+    },
+    {
+      "id_descriptor": 24,
+      "nombre": "Seguridad en laboratorios"
+    },
+    {
+      "id_descriptor": 25,
+      "nombre": "Planificación estratégica"
+    },
+    {
+      "id_descriptor": 26,
+      "nombre": "Planificación ambiental universitaria"
+    },
+    {
+      "id_descriptor": 27,
+      "nombre": "Equipamiento científico"
+    },
+    {
+      "id_descriptor": 28,
+      "nombre": "Registro de egresados"
+    },
+    {
+      "id_descriptor": 29,
+      "nombre": "Resonancia magnética"
+    },
+    {
+      "id_descriptor": 30,
+      "nombre": "Graduación"
+    },
+    {
+      "id_descriptor": 31,
+      "nombre": "Reforma curricular"
+    },
+    {
+      "id_descriptor": 32,
+      "nombre": "Instalaciones sanitarias"
+    },
+    {
+      "id_descriptor": 33,
+      "nombre": "Diagnóstico de concreto"
+    },
+    {
+      "id_descriptor": 34,
+      "nombre": "inventario vegetal"
+    },
+    {
+      "id_descriptor": 35,
+      "nombre": "Promoción académica"
+    },
+    {
+      "id_descriptor": 36,
+      "nombre": "Investigación científica"
+    },
+    {
+      "id_descriptor": 37,
+      "nombre": "Gestión académica"
+    },
+    {
+      "id_descriptor": 38,
+      "nombre": "mantenimiento preventivo"
+    },
+    {
+      "id_descriptor": 39,
+      "nombre": "Jefes de departamento"
+    },
+    {
+      "id_descriptor": 40,
+      "nombre": "Desarrollo institucional"
+    },
+    {
+      "id_descriptor": 41,
+      "nombre": "Trabajo de grado"
+    },
+    {
+      "id_descriptor": 42,
+      "nombre": "Pensum de estudios"
+    },
+    {
+      "id_descriptor": 43,
+      "nombre": "Fundaciones estructurales"
+    },
+    {
+      "id_descriptor": 44,
+      "nombre": "Ingeniería eléctrica edilicia"
+    },
+    {
+      "id_descriptor": 45,
+      "nombre": "distribución espacial"
+    },
+    {
+      "id_descriptor": 46,
+      "nombre": "Proyecto financiado"
+    },
+    {
+      "id_descriptor": 47,
+      "nombre": "Evaluación de desempeño institucional"
+    },
+    {
+      "id_descriptor": 48,
+      "nombre": "Indicadores académicos"
+    },
+    {
+      "id_descriptor": 49,
+      "nombre": "Red de tuberías"
+    },
+    {
+      "id_descriptor": 50,
+      "nombre": "Autoevaluación"
+    },
+    {
+      "id_descriptor": 51,
+      "nombre": "Auditorio de Ciencias"
+    },
+    {
+      "id_descriptor": 52,
+      "nombre": "Metas de gestión"
+    },
+    {
+      "id_descriptor": 53,
+      "nombre": "cumplimiento de metas"
+    },
+    {
+      "id_descriptor": 54,
+      "nombre": "Pabellones antiguos"
+    },
+    {
+      "id_descriptor": 55,
+      "nombre": "Informe"
+    },
+    {
+      "id_descriptor": 56,
+      "nombre": "Resoluciones decanales"
+    },
+    {
+      "id_descriptor": 57,
+      "nombre": "Cooperación técnica"
+    },
+    {
+      "id_descriptor": 58,
+      "nombre": "Planos originales"
+    },
+    {
+      "id_descriptor": 59,
+      "nombre": "Vulnerabilidad estructural"
+    },
+    {
+      "id_descriptor": 60,
+      "nombre": "Doctorado en Química"
+    },
+    {
+      "id_descriptor": 61,
+      "nombre": "Planificación financiera"
+    },
+    {
+      "id_descriptor": 62,
+      "nombre": "Discusión académica"
+    },
+    {
+      "id_descriptor": 63,
+      "nombre": "Designación de cargos"
+    },
+    {
+      "id_descriptor": 64,
+      "nombre": "Normativa académica"
+    },
+    {
+      "id_descriptor": 65,
+      "nombre": "Licenciatura"
+    },
+    {
+      "id_descriptor": 66,
+      "nombre": "Investigación médica"
+    },
+    {
+      "id_descriptor": 67,
+      "nombre": "Visión decanal"
+    },
+    {
+      "id_descriptor": 68,
+      "nombre": "Actas oficiales"
+    },
+    {
+      "id_descriptor": 69,
+      "nombre": "Microscopía electrónica"
+    },
+    {
+      "id_descriptor": 70,
+      "nombre": "Arquitectura académica"
+    },
+    {
+      "id_descriptor": 71,
+      "nombre": "Consejo de Facultad"
+    },
+    {
+      "id_descriptor": 72,
+      "nombre": "Postgrado"
+    },
+    {
+      "id_descriptor": 73,
+      "nombre": "Plano Arquitectónico"
+    },
+    {
+      "id_descriptor": 74,
+      "nombre": "Mantenimiento preventivo"
+    },
+    {
+      "id_descriptor": 75,
+      "nombre": "Presupuesto anual"
+    },
+    {
+      "id_descriptor": 76,
+      "nombre": "Ingeniería civil"
+    },
+    {
+      "id_descriptor": 77,
+      "nombre": "Creación de programa"
+    },
+    {
+      "id_descriptor": 78,
+      "nombre": "Impuestos"
+    },
+    {
+      "id_descriptor": 79,
+      "nombre": "Planilla"
+    },
+    {
+      "id_descriptor": 80,
+      "nombre": "Cédula"
+    },
+    {
+      "id_descriptor": 81,
+      "nombre": "Fiscal"
+    },
+    {
+      "id_descriptor": 82,
+      "nombre": "Curriculum"
+    },
+    {
+      "id_descriptor": 83,
+      "nombre": "Datos personales"
+    },
+    {
+      "id_descriptor": 84,
+      "nombre": "RIF"
+    },
+    {
+      "id_descriptor": 85,
+      "nombre": "Identificación"
+    },
+    {
+      "id_descriptor": 86,
+      "nombre": "Docente"
+    },
+    {
+      "id_descriptor": 87,
+      "nombre": "Nombramiento"
+    },
+    {
+      "id_descriptor": 88,
+      "nombre": "Ingreso"
+    },
+    {
+      "id_descriptor": 89,
+      "nombre": "Formación académica"
+    },
+    {
+      "id_descriptor": 90,
+      "nombre": "Trámite"
+    },
+    {
+      "id_descriptor": 91,
+      "nombre": "Contrato"
+    },
+    {
+      "id_descriptor": 92,
+      "nombre": "Actualización"
+    },
+    {
+      "id_descriptor": 93,
+      "nombre": "Documento personal"
+    },
+    {
+      "id_descriptor": 94,
+      "nombre": "Jubilación"
+    },
+    {
+      "id_descriptor": 95,
+      "nombre": "Escalafón"
+    },
+    {
+      "id_descriptor": 96,
+      "nombre": "Administrativo"
+    },
+    {
+      "id_descriptor": 97,
+      "nombre": "SENIAT"
+    },
+    {
+      "id_descriptor": 98,
+      "nombre": "Experiencia laboral"
+    },
+    {
+      "id_descriptor": 99,
+      "nombre": "Pensión"
+    },
+    {
+      "id_descriptor": 100,
+      "nombre": "Plan"
+    }
+  ],
+  "empleados": [
+    {
+      "id": 1,
+      "cedula": "V-18765432",
+      "nombres": "Ana Lucia",
+      "apellidos": "Silva Torres",
+      "rif": "J-18765432-3",
+      "cargo_id": 8,
+      "departamento_id": 9,
+      "estado_id": 2,
+      "fecha_ingreso": "2018-09-01",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=9",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 2,
+      "cedula": "V-15678901",
+      "nombres": "Luis Miguel",
+      "apellidos": "Rodriguez Garcia",
+      "rif": "J-15678901-4",
+      "cargo_id": 6,
+      "departamento_id": 8,
+      "estado_id": 2,
+      "fecha_ingreso": "2021-03-12",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=8",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 3,
+      "cedula": "V-12345678",
+      "nombres": "Carlos Alberto",
+      "apellidos": "Gomez Perez",
+      "rif": "J-12345678-0",
+      "cargo_id": 7,
+      "departamento_id": 5,
+      "estado_id": 2,
+      "fecha_ingreso": "2015-06-20",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=11",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 4,
+      "cedula": "V-23456789",
+      "nombres": "Maria Fernanda",
+      "apellidos": "Lopez Ruiz",
+      "rif": "J-23456789-1",
+      "cargo_id": 9,
+      "departamento_id": 4,
+      "estado_id": 2,
+      "fecha_ingreso": "2020-01-10",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=5",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 5,
+      "cedula": "V-21345678",
+      "nombres": "David Andres",
+      "apellidos": "Bello Castillo",
+      "rif": "J-21345678-6",
+      "cargo_id": 4,
+      "departamento_id": 3,
+      "estado_id": 2,
+      "fecha_ingreso": "2019-07-25",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=13",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 6,
+      "cedula": "V-11223344",
+      "nombres": "Pedro Miguel",
+      "apellidos": "Hernandez Castro",
+      "rif": "J-11223344-5",
+      "cargo_id": 6,
+      "departamento_id": 6,
+      "estado_id": 3,
+      "fecha_ingreso": "1985-03-10",
+      "fecha_jubilacion": "2015-06-30",
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=12",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 7,
+      "cedula": "V-55443322",
+      "nombres": "Luisa Elena",
+      "apellidos": "Rodriguez Moreno",
+      "rif": "J-55443322-4",
+      "cargo_id": 5,
+      "departamento_id": 5,
+      "estado_id": 3,
+      "fecha_ingreso": "1990-07-15",
+      "fecha_jubilacion": "2020-12-31",
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=25",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 8,
+      "cedula": "V-77889900",
+      "nombres": "Roberto Enrique",
+      "apellidos": "Vargas Peña",
+      "rif": "J-77889900-6",
+      "cargo_id": 11,
+      "departamento_id": 2,
+      "estado_id": 3,
+      "fecha_ingreso": "1992-01-20",
+      "fecha_jubilacion": "2018-05-15",
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=18",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 9,
+      "cedula": "V-10293847",
+      "nombres": "Carmen Elena",
+      "apellidos": "Suarez Navarro",
+      "rif": "J-10293847-5",
+      "cargo_id": 10,
+      "departamento_id": 7,
+      "estado_id": 4,
+      "fecha_ingreso": "1988-11-04",
+      "fecha_jubilacion": "2015-12-15",
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=42",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 10,
+      "cedula": "V-25678912",
+      "nombres": "Sofia Valentina",
+      "apellidos": "Herrera Mendez",
+      "rif": "J-25678912-7",
+      "cargo_id": 3,
+      "departamento_id": 6,
+      "estado_id": 4,
+      "fecha_ingreso": "2022-02-14",
+      "fecha_jubilacion": null,
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=28",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    },
+    {
+      "id": 11,
+      "cedula": "V-09876543",
+      "nombres": "José Antonio",
+      "apellidos": "Martinez Rojas",
+      "rif": "J-09876543-2",
+      "cargo_id": 2,
+      "departamento_id": 2,
+      "estado_id": 4,
+      "fecha_ingreso": "1995-02-15",
+      "fecha_jubilacion": "2020-03-01",
+      "fecha_pension": null,
+      "foto_url": "https://i.pravatar.cc/150?img=15",
+      "fecha_nacimiento": null,
+      "nivel_educativo": null,
+      "sexo": null,
+      "updated_at": "2026-07-01T15:40:33.398451+00:00",
+      "updated_by": null,
+      "deleted_at": null,
+      "deleted_by": null
+    }
+  ],
+  "historial_cargos": [],
+  "datos_rrhh": [
+    {
+      "id_rrhh": 1,
+      "titulo": "Contrato Individual de Trabajo",
+      "abstract": "Contrato de trabajo administrativo",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 2,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Contratos y Suplencias",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 2,
+      "titulo": "Contrato Individual de Trabajo",
+      "abstract": "Contrato de trabajo administrativo",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 2,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Contratos y Suplencias",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 3,
+      "titulo": "Nombramiento de Cátedra Docente",
+      "abstract": "Nombramiento ordinario provisional de docente",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 8,
+      "empleado_id": 3,
+      "fecha_documento": "1985-03-10",
+      "tesauro_primario": "Nombramientos y Designaciones",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Expedientes Jubilados - Caja RRHH-01",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 4,
+      "titulo": "Nombramiento de Cátedra Docente",
+      "abstract": "Nombramiento ordinario provisional de docente",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 8,
+      "empleado_id": 6,
+      "fecha_documento": "1985-03-10",
+      "tesauro_primario": "Nombramientos y Designaciones",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Expedientes Jubilados - Caja RRHH-01",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 5,
+      "titulo": "Acta de Jubilación de Personal Ordinario",
+      "abstract": "Acta de jubilacion ordinaria aprobada por Consejo de Facultad",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 19,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-30",
+      "tesauro_primario": "Jubilación y Pensión",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 6,
+      "titulo": "Acta de Jubilación de Personal Ordinario",
+      "abstract": "Acta de jubilacion ordinaria aprobada por Consejo de Facultad",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 19,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-30",
+      "tesauro_primario": "Jubilación y Pensión",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 7,
+      "titulo": "Cedula de Identidad - Expediente Personal",
+      "abstract": "Copia de la cedula de identidad del empleado archivada en el expediente personal.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 47,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Cédula",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 8,
+      "titulo": "Cedula de Identidad - Expediente Personal",
+      "abstract": "Copia de la cedula de identidad del empleado archivada en el expediente personal.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 47,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Cédula",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 9,
+      "titulo": "Registro de Informacion Fiscal del Empleado",
+      "abstract": "Copia del RIF del empleado consignada para el expediente de nomina.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 59,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "RIF",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 10,
+      "titulo": "Registro de Informacion Fiscal del Empleado",
+      "abstract": "Copia del RIF del empleado consignada para el expediente de nomina.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 59,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "RIF",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 11,
+      "titulo": "Curriculum Vitae y Soportes Academicos",
+      "abstract": "Curriculum vitae y soportes academicos consignados al momento del ingreso.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 49,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "CV",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 12,
+      "titulo": "Curriculum Vitae y Soportes Academicos",
+      "abstract": "Curriculum vitae y soportes academicos consignados al momento del ingreso.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 49,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "CV",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 13,
+      "titulo": "Planilla de Actualizacion de Datos Personales",
+      "abstract": "Planilla de registro y actualizacion de datos personales del empleado.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 60,
+      "empleado_id": 3,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Actualización de datos",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_rrhh": 14,
+      "titulo": "Planilla de Actualizacion de Datos Personales",
+      "abstract": "Planilla de registro y actualizacion de datos personales del empleado.",
+      "autor": "Recursos Humanos",
+      "id_tipo_documento": 60,
+      "empleado_id": 6,
+      "fecha_documento": "2015-06-20",
+      "tesauro_primario": "Actualización de datos",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:35.818252+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    }
+  ],
+  "rrhh_descriptores": [
+    {
+      "id_rrhh": 1,
+      "id_descriptor": 96
+    },
+    {
+      "id_rrhh": 1,
+      "id_descriptor": 88
+    },
+    {
+      "id_rrhh": 1,
+      "id_descriptor": 91
+    },
+    {
+      "id_rrhh": 2,
+      "id_descriptor": 88
+    },
+    {
+      "id_rrhh": 2,
+      "id_descriptor": 91
+    },
+    {
+      "id_rrhh": 2,
+      "id_descriptor": 96
+    },
+    {
+      "id_rrhh": 3,
+      "id_descriptor": 87
+    },
+    {
+      "id_rrhh": 3,
+      "id_descriptor": 95
+    },
+    {
+      "id_rrhh": 3,
+      "id_descriptor": 86
+    },
+    {
+      "id_rrhh": 4,
+      "id_descriptor": 86
+    },
+    {
+      "id_rrhh": 4,
+      "id_descriptor": 95
+    },
+    {
+      "id_rrhh": 4,
+      "id_descriptor": 87
+    },
+    {
+      "id_rrhh": 5,
+      "id_descriptor": 99
+    },
+    {
+      "id_rrhh": 5,
+      "id_descriptor": 90
+    },
+    {
+      "id_rrhh": 5,
+      "id_descriptor": 94
+    },
+    {
+      "id_rrhh": 6,
+      "id_descriptor": 99
+    },
+    {
+      "id_rrhh": 6,
+      "id_descriptor": 90
+    },
+    {
+      "id_rrhh": 6,
+      "id_descriptor": 94
+    },
+    {
+      "id_rrhh": 7,
+      "id_descriptor": 80
+    },
+    {
+      "id_rrhh": 7,
+      "id_descriptor": 85
+    },
+    {
+      "id_rrhh": 7,
+      "id_descriptor": 93
+    },
+    {
+      "id_rrhh": 8,
+      "id_descriptor": 85
+    },
+    {
+      "id_rrhh": 8,
+      "id_descriptor": 80
+    },
+    {
+      "id_rrhh": 8,
+      "id_descriptor": 93
+    },
+    {
+      "id_rrhh": 9,
+      "id_descriptor": 84
+    },
+    {
+      "id_rrhh": 9,
+      "id_descriptor": 97
+    },
+    {
+      "id_rrhh": 9,
+      "id_descriptor": 81
+    },
+    {
+      "id_rrhh": 9,
+      "id_descriptor": 78
+    },
+    {
+      "id_rrhh": 10,
+      "id_descriptor": 97
+    },
+    {
+      "id_rrhh": 10,
+      "id_descriptor": 81
+    },
+    {
+      "id_rrhh": 10,
+      "id_descriptor": 84
+    },
+    {
+      "id_rrhh": 10,
+      "id_descriptor": 78
+    },
+    {
+      "id_rrhh": 11,
+      "id_descriptor": 82
+    },
+    {
+      "id_rrhh": 11,
+      "id_descriptor": 98
+    },
+    {
+      "id_rrhh": 11,
+      "id_descriptor": 89
+    },
+    {
+      "id_rrhh": 12,
+      "id_descriptor": 98
+    },
+    {
+      "id_rrhh": 12,
+      "id_descriptor": 82
+    },
+    {
+      "id_rrhh": 12,
+      "id_descriptor": 89
+    },
+    {
+      "id_rrhh": 13,
+      "id_descriptor": 83
+    },
+    {
+      "id_rrhh": 13,
+      "id_descriptor": 79
+    },
+    {
+      "id_rrhh": 13,
+      "id_descriptor": 92
+    },
+    {
+      "id_rrhh": 14,
+      "id_descriptor": 92
+    },
+    {
+      "id_rrhh": 14,
+      "id_descriptor": 79
+    },
+    {
+      "id_rrhh": 14,
+      "id_descriptor": 83
+    }
+  ],
+  "datos_archivo": [
+    {
+      "id_archivo": 1,
+      "titulo": "Informe Anual de Gestión 2023",
+      "abstract": "Informe anual de gestión institucional de la Facultad de Ciencias correspondiente al año 2023.",
+      "autor": "Decanato Ciencias",
+      "id_tipo_documento": 87,
+      "fecha_documento": "2024-01-10",
+      "tesauro_primario": "Informe",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 2,
+      "titulo": "Plan Regulador de Áreas Verdes",
+      "abstract": "Plan maestro de ordenamiento y diseño paisajístico de las áreas verdes del campus universitario.",
+      "autor": "Arq. Villanueva",
+      "id_tipo_documento": 77,
+      "fecha_documento": "2022-11-20",
+      "tesauro_primario": "Plano Arquitectónico",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Mapoteca - Gaveta 1",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 3,
+      "titulo": "Planos Eléctricos Edificio A",
+      "abstract": "Planos técnicos de la red de distribución eléctrica e iluminación del Edificio A de laboratorios.",
+      "autor": "Ing. Ramirez",
+      "id_tipo_documento": 77,
+      "fecha_documento": "2023-12-01",
+      "tesauro_primario": "Plano Arquitectónico",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Mapoteca - Gaveta 4",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 4,
+      "titulo": "Planos Nuevo Pabellón Biología",
+      "abstract": "Planos estructurales y de distribución del nuevo pabellón de investigación del Instituto de Biología.",
+      "autor": "Arq. Mendez",
+      "id_tipo_documento": 77,
+      "fecha_documento": "2024-01-15",
+      "tesauro_primario": "Plano Arquitectónico",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Mapoteca - Gaveta 3",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 5,
+      "titulo": "Reglamento Interno de Trabajos de Grado",
+      "abstract": "Normativa vigente para la presentación y evaluación de trabajos especiales de grado de licenciatura.",
+      "autor": "Consejo de Facultad",
+      "id_tipo_documento": 67,
+      "fecha_documento": "2021-05-18",
+      "tesauro_primario": "Reglamento",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo General - Estante A",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 6,
+      "titulo": "Presupuesto Anual de Funcionamiento 2024",
+      "abstract": "Distribución presupuestaria aprobada para gastos operativos y de investigación del ejercicio fiscal 2024.",
+      "autor": "Dirección de Administración",
+      "id_tipo_documento": 89,
+      "fecha_documento": "2023-11-15",
+      "tesauro_primario": "Presupuesto",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Bóveda de Seguridad - Estante 2",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 7,
+      "titulo": "Plan de Desarrollo Curricular de Computación",
+      "abstract": "Propuesta de actualización del plan de estudios de la Licenciatura en Computación bajo enfoque por competencias.",
+      "autor": "Escuela de Computación",
+      "id_tipo_documento": 71,
+      "fecha_documento": "2022-06-30",
+      "tesauro_primario": "Plan de Estudio",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo General - Estante C",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 8,
+      "titulo": "Convenio de Cooperación UCV - IVIC",
+      "abstract": "Acuerdo marco de cooperación institucional para el desarrollo de proyectos de investigación conjunta de postgrado.",
+      "autor": "Rectorado UCV",
+      "id_tipo_documento": 91,
+      "fecha_documento": "2020-10-05",
+      "tesauro_primario": "Convenio",
+      "tesauro_secundario": "Parte III",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 9,
+      "titulo": "Acta de Grado Promoción Ciencias 2023",
+      "abstract": "Acta oficial de otorgamiento de títulos de la promoción de Licenciados de la Facultad de Ciencias.",
+      "autor": "Control de Estudios",
+      "id_tipo_documento": 83,
+      "fecha_documento": "2023-07-20",
+      "tesauro_primario": "Acta de Grado",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo Histórico - Caja 4",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 10,
+      "titulo": "Inventario de Equipos de Alta Tecnología",
+      "abstract": "Catálogo detallado y estado de funcionamiento de los equipos de microscopía y resonancia de la facultad.",
+      "autor": "Coordinación de Laboratorios",
+      "id_tipo_documento": 79,
+      "fecha_documento": "2023-09-12",
+      "tesauro_primario": "Inventario",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Sótano A - Gaveta 12",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 11,
+      "titulo": "Informe de Autoevaluación Institucional 2022",
+      "abstract": "Resultado del proceso de autoevaluación interna de la facultad con miras a la reacreditación internacional.",
+      "autor": "Comisión de Acreditación",
+      "id_tipo_documento": 87,
+      "fecha_documento": "2022-12-15",
+      "tesauro_primario": "Informe",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 12,
+      "titulo": "Planos de Instalaciones Sanitarias Edificio B",
+      "abstract": "Plano de la red de tuberías de aguas blancas, servidas y sistemas de drenaje del Edificio B.",
+      "autor": "Ing. Mendoza",
+      "id_tipo_documento": 69,
+      "fecha_documento": "2018-04-22",
+      "tesauro_primario": "Plano Sanitario",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Mapoteca - Gaveta 5",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 13,
+      "titulo": "Resolución de Creación del Doctorado en Química",
+      "abstract": "Resolución del Consejo Universitario que aprueba formalmente la creación y apertura del Doctorado en Química.",
+      "autor": "Consejo Universitario",
+      "id_tipo_documento": 73,
+      "fecha_documento": "1998-03-11",
+      "tesauro_primario": "Resolución",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Bóveda de Seguridad - Estante 1",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 14,
+      "titulo": "Informe Técnico de Vulnerabilidad Estructural",
+      "abstract": "Estudio y diagnóstico técnico de las estructuras de concreto y acero de los pabellones más antiguos de la facultad.",
+      "autor": "Instituto de Materiales",
+      "id_tipo_documento": 65,
+      "fecha_documento": "2021-10-30",
+      "tesauro_primario": "Informe Técnico",
+      "tesauro_secundario": "Parte III",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo Técnico - Estante D",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 15,
+      "titulo": "Plan Estratégico Decanal 2023-2026",
+      "abstract": "Líneas estratégicas y metas de desarrollo de la Facultad de Ciencias para el periodo de gestión actual.",
+      "autor": "Decanato Ciencias",
+      "id_tipo_documento": 85,
+      "fecha_documento": "2023-03-15",
+      "tesauro_primario": "Plan Estratégico",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 16,
+      "titulo": "Acta de Sesión Extraordinaria Nro 15",
+      "abstract": "Acta oficial de la discusión plenaria del Consejo de Facultad sobre el reinicio presencial de clases.",
+      "autor": "Consejo de Facultad",
+      "id_tipo_documento": 93,
+      "fecha_documento": "2022-09-18",
+      "tesauro_primario": "Acta de Sesión",
+      "tesauro_secundario": "Parte II",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo de Actas - Tomo 2022",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 17,
+      "titulo": "Guía de Normas de Seguridad en Laboratorios",
+      "abstract": "Manual y protocolo oficial de seguridad biológica, química y radiológica para estudiantes y profesores.",
+      "autor": "Coordinación de Higiene",
+      "id_tipo_documento": 75,
+      "fecha_documento": "2019-11-04",
+      "tesauro_primario": "Manual",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Digitalizado Exclusivo",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 18,
+      "titulo": "Resolución de Designación de Jefes de Departamento",
+      "abstract": "Resolución rectoral de designación de los nuevos Jefes de Departamento para el periodo académico actual.",
+      "autor": "Decanato Ciencias",
+      "id_tipo_documento": 73,
+      "fecha_documento": "2023-06-15",
+      "tesauro_primario": "Resolución",
+      "tesauro_secundario": "Parte I",
+      "personas_relacionadas": null,
+      "ubicacion": "Expedientes de Gestión - Caja 2",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 19,
+      "titulo": "Proyecto de Investigación: Nanotecnología Aplicada",
+      "abstract": "Propuesta y fases de ejecución del proyecto de investigación sobre síntesis de nanopartículas de oro en medicina.",
+      "autor": "Dr. Briceño",
+      "id_tipo_documento": 81,
+      "fecha_documento": "2021-08-25",
+      "tesauro_primario": "Proyecto",
+      "tesauro_secundario": "Parte III",
+      "personas_relacionadas": null,
+      "ubicacion": "Archivo Técnico - Estante E",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    },
+    {
+      "id_archivo": 20,
+      "titulo": "Planos Estructurales Auditorio de Ciencias",
+      "abstract": "Plano original detallado del diseño de fundaciones, vigas y techado del Auditorio Principal de la Facultad.",
+      "autor": "Arq. Villanueva",
+      "id_tipo_documento": 77,
+      "fecha_documento": "1965-02-18",
+      "tesauro_primario": "Plano Arquitectónico",
+      "tesauro_secundario": "Parte IV",
+      "personas_relacionadas": null,
+      "ubicacion": "Mapoteca - Gaveta 2",
+      "file_url": null,
+      "soporte": "Físico",
+      "numero_folio": null,
+      "numero_paginas": null,
+      "idioma": "es",
+      "status": "aprobado",
+      "notas": null,
+      "creado_por": 2,
+      "updated_at": null,
+      "updated_by": null,
+      "created_at": "2026-07-01T15:40:34.366343+00:00",
+      "deleted_at": null,
+      "deleted_by": null,
+      "fecha_vencimiento": null
+    }
+  ],
+  "archivo_descriptores": [
+    {
+      "id_archivo": 1,
+      "id_descriptor": 18
+    },
+    {
+      "id_archivo": 1,
+      "id_descriptor": 55
+    },
+    {
+      "id_archivo": 1,
+      "id_descriptor": 53
+    },
+    {
+      "id_archivo": 1,
+      "id_descriptor": 47
+    },
+    {
+      "id_archivo": 2,
+      "id_descriptor": 19
+    },
+    {
+      "id_archivo": 2,
+      "id_descriptor": 26
+    },
+    {
+      "id_archivo": 2,
+      "id_descriptor": 34
+    },
+    {
+      "id_archivo": 2,
+      "id_descriptor": 73
+    },
+    {
+      "id_archivo": 3,
+      "id_descriptor": 44
+    },
+    {
+      "id_archivo": 3,
+      "id_descriptor": 74
+    },
+    {
+      "id_archivo": 3,
+      "id_descriptor": 38
+    },
+    {
+      "id_archivo": 3,
+      "id_descriptor": 73
+    },
+    {
+      "id_archivo": 3,
+      "id_descriptor": 21
+    },
+    {
+      "id_archivo": 4,
+      "id_descriptor": 45
+    },
+    {
+      "id_archivo": 4,
+      "id_descriptor": 5
+    },
+    {
+      "id_archivo": 4,
+      "id_descriptor": 73
+    },
+    {
+      "id_archivo": 4,
+      "id_descriptor": 70
+    },
+    {
+      "id_archivo": 5,
+      "id_descriptor": 41
+    },
+    {
+      "id_archivo": 5,
+      "id_descriptor": 64
+    },
+    {
+      "id_archivo": 5,
+      "id_descriptor": 71
+    },
+    {
+      "id_archivo": 5,
+      "id_descriptor": 65
+    },
+    {
+      "id_archivo": 6,
+      "id_descriptor": 61
+    },
+    {
+      "id_archivo": 6,
+      "id_descriptor": 75
+    },
+    {
+      "id_archivo": 6,
+      "id_descriptor": 3
+    },
+    {
+      "id_archivo": 6,
+      "id_descriptor": 4
+    },
+    {
+      "id_archivo": 7,
+      "id_descriptor": 20
+    },
+    {
+      "id_archivo": 7,
+      "id_descriptor": 17
+    },
+    {
+      "id_archivo": 7,
+      "id_descriptor": 42
+    },
+    {
+      "id_archivo": 7,
+      "id_descriptor": 31
+    },
+    {
+      "id_archivo": 8,
+      "id_descriptor": 57
+    },
+    {
+      "id_archivo": 8,
+      "id_descriptor": 10
+    },
+    {
+      "id_archivo": 8,
+      "id_descriptor": 16
+    },
+    {
+      "id_archivo": 8,
+      "id_descriptor": 36
+    },
+    {
+      "id_archivo": 9,
+      "id_descriptor": 7
+    },
+    {
+      "id_archivo": 9,
+      "id_descriptor": 30
+    },
+    {
+      "id_archivo": 9,
+      "id_descriptor": 35
+    },
+    {
+      "id_archivo": 9,
+      "id_descriptor": 28
+    },
+    {
+      "id_archivo": 10,
+      "id_descriptor": 6
+    },
+    {
+      "id_archivo": 10,
+      "id_descriptor": 69
+    },
+    {
+      "id_archivo": 10,
+      "id_descriptor": 29
+    },
+    {
+      "id_archivo": 10,
+      "id_descriptor": 27
+    },
+    {
+      "id_archivo": 11,
+      "id_descriptor": 11
+    },
+    {
+      "id_archivo": 11,
+      "id_descriptor": 50
+    },
+    {
+      "id_archivo": 11,
+      "id_descriptor": 1
+    },
+    {
+      "id_archivo": 11,
+      "id_descriptor": 48
+    },
+    {
+      "id_archivo": 12,
+      "id_descriptor": 49
+    },
+    {
+      "id_archivo": 12,
+      "id_descriptor": 38
+    },
+    {
+      "id_archivo": 12,
+      "id_descriptor": 32
+    },
+    {
+      "id_archivo": 12,
+      "id_descriptor": 2
+    },
+    {
+      "id_archivo": 12,
+      "id_descriptor": 74
+    },
+    {
+      "id_archivo": 13,
+      "id_descriptor": 60
+    },
+    {
+      "id_archivo": 13,
+      "id_descriptor": 8
+    },
+    {
+      "id_archivo": 13,
+      "id_descriptor": 77
+    },
+    {
+      "id_archivo": 13,
+      "id_descriptor": 72
+    },
+    {
+      "id_archivo": 14,
+      "id_descriptor": 54
+    },
+    {
+      "id_archivo": 14,
+      "id_descriptor": 76
+    },
+    {
+      "id_archivo": 14,
+      "id_descriptor": 33
+    },
+    {
+      "id_archivo": 14,
+      "id_descriptor": 59
+    },
+    {
+      "id_archivo": 15,
+      "id_descriptor": 25
+    },
+    {
+      "id_archivo": 15,
+      "id_descriptor": 67
+    },
+    {
+      "id_archivo": 15,
+      "id_descriptor": 52
+    },
+    {
+      "id_archivo": 15,
+      "id_descriptor": 40
+    },
+    {
+      "id_archivo": 16,
+      "id_descriptor": 71
+    },
+    {
+      "id_archivo": 16,
+      "id_descriptor": 68
+    },
+    {
+      "id_archivo": 16,
+      "id_descriptor": 62
+    },
+    {
+      "id_archivo": 16,
+      "id_descriptor": 13
+    },
+    {
+      "id_archivo": 17,
+      "id_descriptor": 23
+    },
+    {
+      "id_archivo": 17,
+      "id_descriptor": 9
+    },
+    {
+      "id_archivo": 17,
+      "id_descriptor": 22
+    },
+    {
+      "id_archivo": 17,
+      "id_descriptor": 24
+    },
+    {
+      "id_archivo": 18,
+      "id_descriptor": 37
+    },
+    {
+      "id_archivo": 18,
+      "id_descriptor": 63
+    },
+    {
+      "id_archivo": 18,
+      "id_descriptor": 39
+    },
+    {
+      "id_archivo": 18,
+      "id_descriptor": 56
+    },
+    {
+      "id_archivo": 19,
+      "id_descriptor": 14
+    },
+    {
+      "id_archivo": 19,
+      "id_descriptor": 15
+    },
+    {
+      "id_archivo": 19,
+      "id_descriptor": 66
+    },
+    {
+      "id_archivo": 19,
+      "id_descriptor": 46
+    },
+    {
+      "id_archivo": 20,
+      "id_descriptor": 51
+    },
+    {
+      "id_archivo": 20,
+      "id_descriptor": 58
+    },
+    {
+      "id_archivo": 20,
+      "id_descriptor": 12
+    },
+    {
+      "id_archivo": 20,
+      "id_descriptor": 43
+    }
+  ],
+  "usuarios_sistema": [
+    {
+      "id": 1,
+      "usuario": "admin",
+      "nombre_usuario": "Administrador Global",
+      "contrasena": "$2b$12$oDTjO3i6UgbP/A6pp8/hIO79Fndsp8/UxGnFwls3ms9515e1Gw7ES",
+      "modulo": "Global",
+      "rol": "Admin",
+      "is_active": true,
+      "created_at": "2026-07-01T15:40:31.442208",
+      "last_login": "2026-07-09T20:53:09.211327"
+    },
+    {
+      "id": 2,
+      "usuario": "archivo_normal",
+      "nombre_usuario": "Operador de Archivo",
+      "contrasena": "$2b$12$cbZ7aftcIoviCEMIpEC/i.XwkDOGKnjspUDGDGr8jHvzwceqZAsCm",
+      "modulo": "Archivo",
+      "rol": "Normal",
+      "is_active": true,
+      "created_at": "2026-07-01T15:40:31.442208",
+      "last_login": null
+    },
+    {
+      "id": 3,
+      "usuario": "archivo_admin",
+      "nombre_usuario": "Administrador de Archivo",
+      "contrasena": "$2b$12$cbZ7aftcIoviCEMIpEC/i.XwkDOGKnjspUDGDGr8jHvzwceqZAsCm",
+      "modulo": "Archivo",
+      "rol": "Admin",
+      "is_active": true,
+      "created_at": "2026-07-01T15:40:31.442208",
+      "last_login": "2026-07-09T20:44:14.854937"
+    },
+    {
+      "id": 4,
+      "usuario": "rrhh_normal",
+      "nombre_usuario": "Analista de RRHH",
+      "contrasena": "$2b$12$cbZ7aftcIoviCEMIpEC/i.XwkDOGKnjspUDGDGr8jHvzwceqZAsCm",
+      "modulo": "RRHH",
+      "rol": "Normal",
+      "is_active": true,
+      "created_at": "2026-07-01T15:40:31.442208",
+      "last_login": null
+    },
+    {
+      "id": 5,
+      "usuario": "rrhh_admin",
+      "nombre_usuario": "Director de RRHH",
+      "contrasena": "$2b$12$cbZ7aftcIoviCEMIpEC/i.XwkDOGKnjspUDGDGr8jHvzwceqZAsCm",
+      "modulo": "RRHH",
+      "rol": "Admin",
+      "is_active": true,
+      "created_at": "2026-07-01T15:40:31.442208",
+      "last_login": "2026-07-09T20:50:47.634345"
+    }
+  ]
+}

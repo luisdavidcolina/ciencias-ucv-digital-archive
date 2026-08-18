@@ -42,6 +42,11 @@ ya llegaron a `main` una vez:
 - `test_migraciones.py` — la huella del esquema: con el esquema al día no se
   ejecuta ninguna sentencia, y si una migración falla la huella NO se registra.
 - `test_stats_totales.py` — la forma de la respuesta de cifras del tablero.
+- `test_sql_inserts.py` — cada `INSERT` cuadra columnas contra valores y no
+  omite columnas `NOT NULL`. La importación CSV nunca funcionó: escribía el
+  nombre de usuario en `updated_by` (INTEGER) y omitía `creado_por`. Como el
+  bucle captura la excepción por fila, devolvía HTTP 200 con `inserted: 0` y la
+  pantalla decía "Importación completada".
 - `test_paginas.py` — cada HTML tiene ruta y cada ruta su HTML. Existe porque
   `index.html` (1328 líneas) no estaba enrutado: sólo se alcanzaba en
   `/static/index.html`, nadie lo enlazaba, y llevaba tiempo divergiendo del
