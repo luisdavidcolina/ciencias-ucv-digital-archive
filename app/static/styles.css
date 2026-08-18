@@ -3797,3 +3797,7 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   background: var(--viz-surface);
 }
 .ds-chart-cargando i { opacity: .55; }
+
+/* La tarjeta de digitalización no es un canvas, así que necesita su propio alto
+   mínimo: vacía se veía como una franja fina en vez de una tarjeta. */
+#soporte-archivo, #soporte-rrhh { position: relative; min-height: 200px; }

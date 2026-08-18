@@ -4,6 +4,10 @@
 // sólo quedan las cifras que no se derivan de una gráfica.
 async function loadDynamicStats() {
   const suf = adminSuffixFromTab();
+  // Se marca aqui, no en loadChartsData(): entre que se abre la pestaña y que
+  // responde /api/admin/stats ya pasan segundos, y en ese hueco las tarjetas
+  // estaban en blanco.
+  if (typeof _marcarCargando === "function") _marcarCargando();
   try {
     const stats = await apiFetchJSON(`${API_BASE}/api/admin/stats`, {
       method: "POST",
