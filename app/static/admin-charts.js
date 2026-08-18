@@ -267,8 +267,9 @@ function _renderRrhhCharts(data, suf) {
     });
   }
 
-  const doughnut = (key, id, rows) => {
-    if (!rows.length) return;
+  const doughnut = (key, id, rows, vacio) => {
+    if (rows.length < 2) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
+    _conDatos(id);
     _destroyChart(key);
     const ctx = document.getElementById(id)?.getContext("2d");
     if (!ctx) return;
@@ -286,8 +287,9 @@ function _renderRrhhCharts(data, suf) {
     });
   };
 
-  const barH = (key, id, rows, color) => {
-    if (!rows.length) return;
+  const barH = (key, id, rows, color, vacio) => {
+    if (rows.length < 2) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
+    _conDatos(id);
     _destroyChart(key);
     const ctx = document.getElementById(id)?.getContext("2d");
     if (!ctx) return;
@@ -302,13 +304,20 @@ function _renderRrhhCharts(data, suf) {
     });
   };
 
-  doughnut(`by-status-${suf}`, `chart-by-status-${suf}`, data.charts.by_status || []);
-  doughnut(`by-sexo-${suf}`,   `chart-by-sexo-${suf}`,   data.charts.by_sexo   || []);
-  barH(`by-dept-${suf}`,  `chart-by-dept-${suf}`,  data.charts.by_department || [], C[0]);
-  barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[0]);
+  doughnut(`by-status-${suf}`, `chart-by-status-${suf}`, data.charts.by_status || [],
+         "Todos los empleados están en el mismo estado.");
+  doughnut(`by-sexo-${suf}`,   `chart-by-sexo-${suf}`,   data.charts.by_sexo   || [],
+         "Sin sexo registrado en las fichas de personal.");
+  barH(`by-dept-${suf}`,  `chart-by-dept-${suf}`,  data.charts.by_department || [], C[0],
+     "Sin departamentos asignados.");
+  barH(`by-nivel-${suf}`, `chart-by-nivel-${suf}`, data.charts.by_nivel      || [], C[0],
+     "Sin nivel educativo registrado en las fichas de personal.");
 
   const byDocType = data.charts.by_doc_type || [];
-  if (byDocType.length) {
+  if (byDocType.length < 2) {
+    _sinDatos(`chart-by-doctype-${suf}`, "Aún no hay documentos clasificados por tipo.");
+  } else {
+    _conDatos(`chart-by-doctype-${suf}`);
     _destroyChart(`by-doctype-${suf}`);
     const ctx = document.getElementById(`chart-by-doctype-${suf}`)?.getContext("2d");
     if (ctx) _chartInstances[`by-doctype-${suf}`] = new Chart(ctx, {

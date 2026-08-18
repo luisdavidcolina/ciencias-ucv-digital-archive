@@ -99,7 +99,7 @@
     body.dark-mode .help-faq-body        { color: #b8c0d0; }
   </style>
 </head>
-<body>
+<body><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
 <a href="/archivo" class="ds-volver-app" title="Volver al Archivo Institucional">
   <span aria-hidden="true">&#8592;</span> Volver a la aplicación
 </a>
@@ -240,5 +240,7 @@ document.getElementById("help-search")?.addEventListener("input", function() {
   });
 });
 </script>
+<script src="/static/app-core.js"></script>
+<script src="/static/app-theme.js"></script>
 </body>
 </html>
