@@ -36,7 +36,9 @@ function loadAdminTab(adminTabId) {
     // Acotado al pane del monitor: sin el ancla, esto reescribía el primer
     // .card-title de toda la sección (el de "Filtros Analíticos") en cada cambio.
     const monitorTitle = document.querySelector(`#pane-admin-${suf}-monitor .card-title`);
-    if (monitorTitle) monitorTitle.innerHTML = `<i class="fas fa-database"></i> Monitor de ${mod === "RRHH" ? "RRHH" : "Archivos"}`;
+    if (monitorTitle) monitorTitle.innerHTML = mod === "RRHH"
+      ? '<i class="fas fa-id-card"></i> Expedientes de personal'
+      : '<i class="fas fa-folder-open"></i> Documentos del archivo';
   } catch (e) {
     console.error("Error actualizando etiquetas del panel:", e);
   }
@@ -62,7 +64,7 @@ async function _loadAlertasBanner() {
           <i class="fas fa-exclamation-triangle mr-2"></i>
           <strong>${total} documento${total !== 1 ? "s" : ""} con plazo de retención vencido.</strong>
           <ul class="mb-1 mt-1 pl-3">${muestra}</ul>
-          ${total > 3 ? `<small>…y ${total - 3} más. Ver <em>Auditoría → Vencimientos</em>.</small>` : ""}
+          ${total > 3 ? `<small>…y ${total - 3} más. Ver la pestaña <em>Retención</em>.</small>` : ""}
           <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar"><span>&times;</span></button>
         </div>`;
       el.style.display = "";

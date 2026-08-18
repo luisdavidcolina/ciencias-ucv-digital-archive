@@ -199,9 +199,19 @@ entre grupos:
 
 | Grupo | Pestañas |
 |---|---|
-| Operación diaria | Análisis · Nuevo · Monitor · Papelera |
-| Configuración | Tipos · Acceso |
-| Gobernanza documental | Retención · Auditoría · Exportar |
+| Uso diario | Resumen · Ingresar |
+| Gestionar | Documentos / Expedientes · Tipos · Papelera |
+| Controlar | Retención · Auditoría |
+| Administrar | Acceso · Exportar |
+
+Están agrupadas **por verbo**, que es como lo resuelven los sistemas de
+descripción archivística — AtoM organiza su menú en *Add / Manage / Import /
+Admin*, no en una lista plana de funciones.
+
+El nombre dice **qué hay dentro**, y por eso difiere entre módulos: en Archivo la
+unidad de trabajo es el documento y en RRHH el expediente. "Monitor" no
+significaba nada. Los identificadores internos (`monitor`, `stats`, …) no
+cambian; sólo la etiqueta.
 
 Al añadir una pestaña hacen falta **tres** cosas, o queda un panel en blanco que
 nadie reporta: el `<li>` con `id="tab-admin-{suf}-{x}"`, el
