@@ -1,3 +1,4 @@
+import hashlib as _hashlib
 import os
 from contextlib import asynccontextmanager
 
@@ -6,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from core.config import settings
 from database import ensure_audit_table, db_query, logger
 from utils import populate_missing_slugs, generate_unique_slug
 from routes.auth       import router as auth_router
@@ -35,7 +37,7 @@ async def _lifespan(app):
 
 app = FastAPI(lifespan=_lifespan,
     title="Archivo Institucional Digital — Facultad de Ciencias, UCV",
-    version="3.2.1-Neon",
+    version=settings.app_version,
     description="""
 Sistema de gestión documental e inventario de RRHH de la Facultad de Ciencias,
 Universidad Central de Venezuela.
@@ -191,7 +193,7 @@ def run_migrations():
                    'reincorporacion-labores-docentes',
                    (SELECT id FROM public.categoria WHERE slug = 'parte-i')
             WHERE NOT EXISTS (
-                SELECT 1 FROM public.tipo_documento WHERE LOWER(nombre) LIKE '%reincorporaci%labores%'
+                SELECT 1 FROM public.tipo_documento WHERE LOWER(nombre) LIKE '%%reincorporaci%%labores%%'
             )"""),
         ("tipo Rotapama",
          """INSERT INTO public.tipo_documento (nombre, nombre_corto, slug, id_categoria)
@@ -521,8 +523,21 @@ def run_migrations():
         ("idx ia_adjuntos conv",
          "CREATE INDEX IF NOT EXISTS idx_ia_adj_conv ON public.ia_adjuntos(conversacion_id, id DESC)"),
     ]
+    # En serverless esta funcion corre en CADA arranque en frio. Son ~80 viajes
+    # de ida y vuelta a Neon antes de poder responder la primera peticion, y el
+    # esquema casi nunca ha cambiado. Se guarda una huella del conjunto: si
+    # coincide con la registrada, no hay nada que aplicar y basta una consulta.
+    huella = _hashlib.sha256(
+        "|".join(f"{lbl}:{sql.strip()}" for lbl, sql in migrations).encode("utf-8")
+    ).hexdigest()
+
+    if _esquema_al_dia(huella):
+        logger.info("Migraciones al dia (huella %s); nada que aplicar.", huella[:12])
+        return
+
     t_total = _time.time()
     slow_threshold_ms = 500
+    fallos = 0
     for label, sql in migrations:
         try:
             t0 = _time.time()
@@ -533,13 +548,55 @@ def run_migrations():
             else:
                 logger.info(f"Migración OK ({elapsed}ms): {label}")
         except Exception as e:
+            fallos += 1
             logger.warning(f"Migración omitida ({label}): {e}")
 
     total_ms = round((_time.time() - t_total) * 1000)
-    logger.info(f"Migrations completadas en {total_ms}ms ({len(migrations)} pasos)")
+    logger.info(f"Migrations completadas en {total_ms}ms ({len(migrations)} pasos, "
+                f"{fallos} omitidas)")
 
     _migrate_archivo_tipos()
     _backfill_archivo_tipo_fk()
+
+    # La huella se registra solo si TODO aplico. Con alguna omitida se vuelve a
+    # intentar en el proximo arranque, que es justo lo que hacia falta cuando
+    # una migracion fallaba en silencio.
+    if fallos == 0:
+        _registrar_huella(huella)
+    else:
+        logger.warning("Huella no registrada: %d migracion(es) fallaron.", fallos)
+
+
+def _esquema_al_dia(huella: str) -> bool:
+    """Una sola consulta para saber si hay algo que aplicar."""
+    try:
+        db_query(
+            """CREATE TABLE IF NOT EXISTS public.schema_version (
+                   id         INTEGER PRIMARY KEY DEFAULT 1,
+                   huella     TEXT NOT NULL,
+                   aplicado   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                   CONSTRAINT schema_version_unica CHECK (id = 1)
+               )""", fetch="none", commit=True)
+        fila = db_query("SELECT huella FROM public.schema_version WHERE id = 1",
+                        fetch="one")
+        return bool(fila and fila["huella"] == huella)
+    except Exception as e:
+        # Ante la duda, aplicar: es idempotente y perder un arranque rapido es
+        # mejor que saltarse una migracion real.
+        logger.warning("No se pudo leer schema_version (%s); se aplican igual.", e)
+        return False
+
+
+def _registrar_huella(huella: str) -> None:
+    try:
+        db_query(
+            """INSERT INTO public.schema_version (id, huella, aplicado)
+               VALUES (1, %s, NOW())
+               ON CONFLICT (id) DO UPDATE
+                   SET huella = EXCLUDED.huella, aplicado = NOW()""",
+            [huella], fetch="none", commit=True)
+    except Exception as e:
+        logger.warning("No se pudo registrar la huella del esquema: %s", e)
 
 
 def _migrate_archivo_tipos():
@@ -640,7 +697,6 @@ app.include_router(ai_router)
 @app.get("/api/health", tags=["system"])
 def health_check():
     """Endpoint de salud para monitoreo básico."""
-    from core.config import settings
     try:
         counts = db_query(
             """SELECT

@@ -11,11 +11,21 @@ from fastapi.testclient import TestClient
 @pytest.fixture(scope="session")
 def app():
     """Importa la app con startup hooks desactivados (sin conexión a BD)."""
+    # Se parchean los nombres TAL COMO QUEDAN LIGADOS EN `main`, no en su modulo
+    # de origen: main hace `from database import ensure_audit_table`, asi que
+    # parchear `database.ensure_audit_table` no le llega si main ya fue
+    # importado. Dependia del orden de importacion — y en cuanto otro test
+    # importo main durante la recoleccion, el arranque intento conectar de
+    # verdad a Neon y la suite se quedo colgada.
+    import main  # noqa: F401  (asegura que el modulo exista antes de parchearlo)
+
     with (
-        patch("database.ensure_audit_table", return_value=None),
-        patch("utils.populate_missing_slugs", return_value=None),
+        patch("main.ensure_audit_table", return_value=None),
+        patch("main.populate_missing_slugs", return_value=None),
         patch("main.run_migrations", return_value=None),
         patch("main._backfill_rrhh_tipo_fk", return_value=None),
+        patch("database.ensure_audit_table", return_value=None),
+        patch("utils.populate_missing_slugs", return_value=None),
         patch("database.log_event", return_value=None),
     ):
         from main import app as _app

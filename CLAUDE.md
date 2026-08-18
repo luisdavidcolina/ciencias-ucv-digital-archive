@@ -34,6 +34,14 @@ ya llegaron a `main` una vez:
 - `test_static_analysis.py` — `pyflakes`: un nombre indefinido es un error. Un
   refactor de renombrado dejó cinco llamadas a funciones que ya no existían.
 - `test_secrets.py` — rechaza credenciales escritas en el código.
+- `test_sql_columns.py` — el SQL sólo puede citar columnas que existen, y todo
+  `%` literal debe ir duplicado. Existe porque cinco endpoints respondían 500 en
+  producción por esas dos causas y la suite no los veía: mockea `db_query`, así
+  que ninguna consulta se ejecuta nunca. El esquema se deriva de `schema.sql`
+  más las migraciones, sin necesidad de base de datos.
+- `test_migraciones.py` — la huella del esquema: con el esquema al día no se
+  ejecuta ninguna sentencia, y si una migración falla la huella NO se registra.
+- `test_stats_totales.py` — la forma de la respuesta de cifras del tablero.
 - `test_admin_panels.py` — cada pestaña tiene panel, cada panel tiene pestaña,
   ambos módulos ofrecen la misma navegación, los encabezados del monitor cuadran
   con las celdas que emite la plantilla, y ninguna página vuelve a traer la
@@ -115,7 +123,7 @@ ya llegaron a `main` una vez:
 
 ### Módulo RRHH
 - `empleados` — personal docente (cedula, nombres, apellidos, cargo, departamento, estado, rif, fecha_jubilacion, fecha_pension, foto_url, is_active, last_login)
-- `datos_rrhh` — documentos por empleado (id_empleado FK, id_tipo_documento FK, personas_relacionadas, notas, fecha_documento, ubicacion, file_url)
+- `datos_rrhh` — documentos por empleado (empleado_id FK, id_tipo_documento FK, personas_relacionadas, notas, fecha_documento, ubicacion, file_url)
 - `rrhh_descriptores` — relación (raro, mayormente RRHH no usa descriptores libres)
 - `tipo_documento` (scope RRHH) — 4 Partes: parte-i, parte-ii, parte-iii, parte-iv
 
@@ -123,6 +131,8 @@ ya llegaron a `main` una vez:
 - `categoria` — categorías con slug (parte-i, parte-ii, parte-iii, parte-iv, archivo)
 - `usuarios_sistema` — usuarios con modulo, rol, is_active, last_login
 - `audit_log` — eventos del sistema (accion, usuario, modulo, detalle, status, timestamp)
+  ⚠️ La marca de tiempo se llama `timestamp`, **no** `created_at`: usarla mal
+  costó un 500 en el panel de Sistema.
 - `backup_history` — registro de exports/restores
 
 ### Vista
@@ -142,7 +152,26 @@ db_query("UPDATE tabla SET x=%s WHERE id=%s", [x, id], fetch="none", commit=True
 - `fetch="none"` → None, úsalo para INSERT/UPDATE/DELETE con commit=True
 
 ### run_migrations()
-En `main.py`, lista de tuplas `(description, sql)`. Se ejecuta en `@app.on_event("startup")`.
+En `main.py`, lista de tuplas `(description, sql)`. Se ejecuta al arrancar la app.
+
+**Corre en cada arranque en frío.** En serverless eso son ~80 viajes de ida y
+vuelta a Neon —que está en otro continente— antes de poder responder la primera
+petición. Por eso se guarda una huella SHA-256 del conjunto en
+`public.schema_version`: si coincide, no se aplica nada y basta una consulta.
+
+- La huella se registra **sólo si todas las migraciones aplicaron**. Si alguna
+  falla se reintenta en el siguiente arranque; congelar un fallo sería peor.
+- Si no se puede leer `schema_version`, se aplican igual: son idempotentes y
+  perder un arranque rápido es mejor que saltarse una migración real.
+- Añadir o editar una migración cambia la huella sola. No hay número de versión
+  que recordar.
+
+⚠️ **Todo `%` literal dentro de SQL va duplicado (`%%`).** `db_query` hace
+`cur.execute(sql, params or ())`, así que psycopg2 recibe siempre una tupla e
+interpreta cualquier `%` como marcador aunque no haya parámetros. Un
+`LIKE '%algo%'` lanza `IndexError` en tiempo de ejecución. Una migración llevaba
+así desde el principio, fallando en silencio porque el bucle captura la
+excepción por paso.
 - Siempre usar `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`
 - Nunca usar `DROP` en migraciones
 - Para INSERT en tablas de catálogo: `ON CONFLICT (slug) DO NOTHING` o `ON CONFLICT DO NOTHING`
