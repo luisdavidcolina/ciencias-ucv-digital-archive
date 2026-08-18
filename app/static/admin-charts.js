@@ -250,8 +250,15 @@ function _renderRrhhCharts(data, suf) {
 
   setSub(`kpi-sub-jubproximas-${suf}`,
          t.total_jubilaciones_proximas ? "preparar expediente" : "ninguna en el año");
+  // Los sistemas de expedientes miden la completitud como TASA contra una meta,
+  // no como conteo: "9" no dice nada sin saber sobre cuantos.
+  const conDocs = (t.total_employees || 0) - (t.total_sin_documentos || 0);
+  const pctComp = t.total_employees
+    ? Math.round((conDocs / t.total_employees) * 100) : 0;
   setSub(`kpi-sub-sindocs-${suf}`,
-         t.total_sin_documentos ? "expedientes vacíos" : "todos con documentos");
+         t.total_employees
+           ? `${pctComp}% de expedientes iniciados`
+           : "sin personal registrado");
 
   _marcarKpi(`chart-total-sindocs-${suf}`, t.total_sin_documentos, "ds-kpi-alerta");
   _marcarKpi(`chart-total-jubproximas-${suf}`, t.total_jubilaciones_proximas, "ds-kpi-aviso");
