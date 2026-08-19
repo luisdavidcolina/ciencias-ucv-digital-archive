@@ -143,7 +143,7 @@ function renderRrhhList() {
         <div class="ds-item-thumbnail" style="align-items:center;padding-top:0;">
           <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid ${colorState};flex-shrink:0;">
             ${p.foto_url
-              ? `<img src="${_secureFileUrl(p.foto_url)}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+              ? `<img src="${_secureFileUrl(p.foto_url)}" alt="Fotografía de ${escHtml(p.persona || "el empleado")}" style="width:100%;height:100%;object-fit:cover;display:block;">`
               : `<span style="width:100%;height:100%;background:#2b4e72;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">${initials}</span>`}
           </div>
         </div>
