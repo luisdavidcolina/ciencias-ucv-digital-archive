@@ -3940,3 +3940,8 @@ body:not(.dark-mode) .btn-primary { background-color: #0072ed; border-color: #00
 body:not(.dark-mode) .btn-outline-primary,
 body:not(.dark-mode) a.text-primary,
 body:not(.dark-mode) .text-primary { color: #0072ed !important; }
+
+/* .btn-outline-secondary hereda #6c757d, que sobre el gris de la barra de
+   paginación (#f8f9fa) da 4,44:1 — por debajo del mínimo por poco. */
+body:not(.dark-mode) .btn-outline-secondary { color: #6a737b; border-color: #adb5bd; }
+body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
