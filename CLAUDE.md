@@ -47,6 +47,9 @@ ya llegaron a `main` una vez:
   nombre de usuario en `updated_by` (INTEGER) y omitía `creado_por`. Como el
   bucle captura la excepción por fila, devolvía HTTP 200 con `inserted: 0` y la
   pantalla decía "Importación completada".
+- `test_share.py` — los enlaces externos: caducan, no se pueden manipular, no
+  sirven para otro documento, no sobreviven a un cambio de `SECRET_KEY` y no
+  exponen la ruta interna del archivo.
 - `test_paginas.py` — cada HTML tiene ruta y cada ruta su HTML. Existe porque
   `index.html` (1328 líneas) no estaba enrutado: sólo se alcanzaba en
   `/static/index.html`, nadie lo enlazaba, y llevaba tiempo divergiendo del
@@ -98,6 +101,7 @@ ya llegaron a `main` una vez:
 │       ├── admin_system.html   # Admin Global (backup, audit, alertas)
 │       ├── admin_ai.html       # Consola del asistente IA
 │       ├── login.html · ayuda.html · investigacion.html
+│       ├── compartido.html     # Vista pública de un documento compartido
 │       ├── styles.css          # TODA la hoja de estilos propia
 │       │
 │       ├── app-shell.js        # Barra superior y menú lateral (definición única)
@@ -280,6 +284,20 @@ app (`body.ds-no-anim`) y `prefers-reduced-motion` del sistema.
 - `GET /api/admin/backup/export` — JSON de todas las tablas
 - `POST /api/admin/backup/restore?mode=merge|overwrite`
 - Solo para el admin Global (ambos módulos)
+
+### Compartición externa (`share.py`)
+La comparativa de mercado marcaba esta función como ausente frente a Alfresco,
+SharePoint y Nextcloud. Un enlace `/compartido/<token>` deja consultar **un**
+documento sin sesión.
+
+- **Sin tabla**: el token es HMAC firmado con `SECRET_KEY` y lleva dentro módulo,
+  id y caducidad. No hay estado que mantener ni limpiar.
+- Sólo lectura, y sólo de ese documento. No da acceso a la búsqueda.
+- Un documento en papelera deja de verse aunque el enlace siga vigente.
+- El `file_url` interno no se expone: se sirve por la propia ruta del enlace,
+  para que el token siga siendo la única llave.
+- Crear el enlace y cada consulta quedan en auditoría — compartir hacia fuera es
+  precisamente lo que un archivo necesita poder rastrear.
 
 ## Terminología (UI)
 - **NUNCA usar "Tesauro"** → siempre "Palabras Clave"

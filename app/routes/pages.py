@@ -61,3 +61,14 @@ async def serve_investigacion():
 @router.get("/ayuda", include_in_schema=False)
 async def serve_ayuda():
     return _page("ayuda.html")
+
+
+@router.get("/compartido/{token}", include_in_schema=False)
+async def serve_compartido(token: str):
+    """Pagina publica de un documento compartido. El token lo valida la API.
+
+    La ruta acepta cualquier token: la pagina consulta /api/compartido/<token> y
+    es esa llamada la que decide. Asi un enlace caducado muestra un mensaje
+    entendible en vez de un 404 crudo del servidor.
+    """
+    return _page("compartido.html")

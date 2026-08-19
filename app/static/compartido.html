@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Documento compartido — Archivo Ciencias UCV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.ico">
+</head>
+<body data-page="compartido"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
+
+<div class="ds-compartido-wrap">
+  <header class="ds-compartido-cab">
+    <img src="/static/logo.png" alt="Facultad de Ciencias UCV" class="ds-compartido-logo">
+    <span class="ds-compartido-sello"><i class="fas fa-link"></i> Documento compartido</span>
+  </header>
+
+  <main id="contenido" class="ds-compartido-caja">
+    <div class="ds-chart-empty"><i class="fas fa-circle-notch fa-spin"></i><span>Cargando…</span></div>
+  </main>
+
+  <footer class="ds-compartido-pie">
+    Archivo Institucional Digital · Facultad de Ciencias, Universidad Central de Venezuela
+  </footer>
+</div>
+
+<script src="/static/app-core.js"></script>
+<script src="/static/app-theme.js"></script>
+<script>
+// El token viaja en la ruta (/compartido/<token>), no en la query: así no se
+// queda en los registros de referer de terceros al pulsar un enlace saliente.
+const TOKEN = decodeURIComponent(location.pathname.split('/compartido/')[1] || '');
+const caja  = document.getElementById('contenido');
+
+function aviso(icono, titulo, detalle) {
+  caja.innerHTML =
+    '<div class="ds-compartido-aviso">' +
+      '<i class="fas ' + icono + '"></i>' +
+      '<h2>' + escHtml(titulo) + '</h2>' +
+      '<p>' + escHtml(detalle) + '</p>' +
+    '</div>';
+}
+
+function fila(etiqueta, valor) {
+  if (!valor) return '';
+  return '<div class="ds-compartido-fila"><dt>' + escHtml(etiqueta) + '</dt>' +
+         '<dd>' + escHtml(valor) + '</dd></div>';
+}
+
+(async () => {
+  if (!TOKEN) {
+    aviso('fa-triangle-exclamation', 'Enlace incompleto',
+          'La dirección no incluye un identificador de documento.');
+    return;
+  }
+  let res;
+  try {
+    res = await fetch('/api/compartido/' + encodeURIComponent(TOKEN));
+  } catch (e) {
+    aviso('fa-plug-circle-xmark', 'Sin conexión',
+          'No se pudo contactar con el servidor. Inténtelo de nuevo.');
+    return;
+  }
+  if (res.status === 404) {
+    aviso('fa-clock-rotate-left', 'Enlace caducado o no válido',
+          'Los enlaces de consulta tienen una vigencia limitada. Solicite uno nuevo a quien se lo compartió.');
+    return;
+  }
+  if (!res.ok) {
+    aviso('fa-triangle-exclamation', 'No se pudo abrir el documento',
+          'El servidor respondió con un error. Inténtelo más tarde.');
+    return;
+  }
+
+  const datos = await res.json();
+  const d = datos.documento || {};
+  const descarga = d.tiene_archivo
+    ? '<a class="btn btn-primary" href="/api/compartido/' + encodeURIComponent(TOKEN) +
+      '/archivo" target="_blank" rel="noopener">' +
+      '<i class="fas fa-file-arrow-down mr-1"></i>Ver el documento digitalizado</a>'
+    : '<div class="ds-compartido-sinarchivo"><i class="fas fa-box-archive mr-1"></i>' +
+      'Este documento no está digitalizado; se conserva en soporte físico.</div>';
+
+  caja.innerHTML =
+    '<span class="ds-compartido-modulo">' + escHtml(datos.modulo) + '</span>' +
+    '<h1 class="ds-compartido-titulo">' + escHtml(d.titulo || 'Documento') + '</h1>' +
+    '<dl class="ds-compartido-datos">' +
+      fila('Tipo documental', d.tipo) +
+      fila('Autor / Emisor', d.autor) +
+      fila('Fecha del documento', d.fecha) +
+      fila('Soporte', d.soporte) +
+      fila('Ubicación', d.ubicacion) +
+    '</dl>' +
+    '<div class="ds-compartido-acciones">' + descarga + '</div>' +
+    '<p class="ds-compartido-nota"><i class="fas fa-shield-halved mr-1"></i>' +
+    'Consulta autorizada mediante enlace temporal. Su acceso queda registrado en la auditoría del archivo.</p>';
+})();
+</script>
+</body>
+</html>

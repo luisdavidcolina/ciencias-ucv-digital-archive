@@ -17,7 +17,7 @@ PAGES_PY = APP / "routes" / "pages.py"
 
 # HTML que no se sirven por ruta a propósito (fragmentos, plantillas parciales).
 # Si añades uno, justifícalo aquí.
-SIN_RUTA_A_PROPOSITO: set[str] = set()
+SIN_RUTA_A_PROPOSITO: set[str] = set()   # (se sirven por _page)
 
 
 def _servidos():

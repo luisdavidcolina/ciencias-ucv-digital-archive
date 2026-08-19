@@ -52,3 +52,49 @@ def verify_session_token(token: str | None) -> str | None:
         return username
     except Exception:
         return None
+
+
+# =============================================================================
+# ENLACES DE COMPARTICIÓN EXTERNA
+# =============================================================================
+# La investigación de mercado marcaba "Compartición Externa Segura" como
+# ausente: para enseñarle un documento a alguien de fuera había que crearle un
+# usuario o mandarle el archivo por correo, que es justo lo que un archivo
+# institucional no debe hacer.
+#
+# El enlace es stateless y firmado: no hay tabla que mantener ni que limpiar, y
+# caduca solo. Lleva el módulo y el id del documento para que el servidor no
+# tenga que fiarse de nada que venga en la URL sin firmar.
+
+def generate_share_token(modulo: str, doc_id: int, horas: int = 72) -> str:
+    """Firma un enlace de consulta de un documento, con caducidad."""
+    expira = int(time.time()) + int(horas) * 3600
+    payload = f"{modulo}:{int(doc_id)}:{expira}"
+    sig = hmac.new(
+        settings.secret_key.encode(), payload.encode(), hashlib.sha256
+    ).hexdigest()
+    return base64.urlsafe_b64encode(f"{payload}:{sig}".encode()).decode().rstrip("=")
+
+
+def verify_share_token(token: str | None) -> tuple[str, int] | None:
+    """Retorna (modulo, doc_id) si el enlace es válido y no expiró."""
+    if not token:
+        return None
+    try:
+        relleno = "=" * (-len(token) % 4)      # se quitó al firmar; hay que reponerlo
+        raw = base64.urlsafe_b64decode((token + relleno).encode()).decode()
+        modulo, doc_id, expira, sig = raw.rsplit(":", 3)
+        esperada = hmac.new(
+            settings.secret_key.encode(),
+            f"{modulo}:{doc_id}:{expira}".encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        if not hmac.compare_digest(sig, esperada):
+            return None
+        if time.time() > int(expira):
+            return None
+        if modulo not in ("Archivo", "RRHH"):
+            return None
+        return modulo, int(doc_id)
+    except Exception:
+        return None

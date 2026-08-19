@@ -133,6 +133,7 @@ function renderMonitorTable() {
           ${fileIcon}
           <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openAdminDocById(${f.id})" title="Ver"><i class="fas fa-eye"></i></button>
           <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditDocModal(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-xs btn-outline-info mr-1" onclick="compartirDocumento(${f.id})" title="Compartir enlace temporal"><i class="fas fa-link"></i></button>
           <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},${JSON.stringify(f.titulo||'')})" title="Eliminar"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`;
@@ -266,4 +267,34 @@ function initDropZone(suf) {
   fileInput.addEventListener("change", () => {
     if (fileInput.files?.[0]) updateLabel(fileInput.files[0].name);
   });
+}
+
+
+// ─── Compartición externa ────────────────────────────────────────────────────
+// Genera un enlace firmado y con caducidad para enseñarle un documento a
+// alguien de fuera sin crearle un usuario. El enlace se copia al portapapeles;
+// si el navegador no lo permite, se muestra para copiarlo a mano.
+async function compartirDocumento(docId) {
+  const modulo = isArchivoModule() ? "Archivo" : "RRHH";
+  const horas  = 72;
+  try {
+    const r = await apiFetchJSON(
+      `${API_BASE}/api/admin/compartir?modulo=${modulo}&doc_id=${docId}` +
+      `&horas=${horas}&usuario=${encodeURIComponent(state.user?.username || "")}`,
+      { method: "POST" });
+    const url = `${window.location.origin}${r.url}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast(`Enlace copiado. Caduca en ${horas} horas.`, "success");
+    } catch {
+      // Sin permiso de portapapeles (o sin HTTPS): mostrarlo para copiar a mano.
+      confirmModal(
+        "Enlace de consulta",
+        `<p class="small text-muted mb-2">Caduca en ${horas} horas.</p>` +
+        `<input class="form-control form-control-sm" readonly onclick="this.select()" value="${escHtml(url)}">`,
+        "Cerrar", "btn-secondary");
+    }
+  } catch (e) {
+    showToast(e.message || "No se pudo generar el enlace.", "error");
+  }
 }

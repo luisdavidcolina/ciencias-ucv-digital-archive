@@ -3801,3 +3801,109 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 /* La tarjeta de digitalización no es un canvas, así que necesita su propio alto
    mínimo: vacía se veía como una franja fina en vez de una tarjeta. */
 #soporte-archivo, #soporte-rrhh { position: relative; min-height: 200px; }
+
+/* =============================================================================
+   PÁGINA DE DOCUMENTO COMPARTIDO
+   La ve gente de fuera de la institución, sin sesión y probablemente desde el
+   móvil: sobria, sin menú y sin nada en lo que perderse.
+   ========================================================================== */
+.ds-compartido-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 18px 40px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.ds-compartido-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ds-compartido-logo { height: 40px; max-width: 60vw; object-fit: contain; }
+.ds-compartido-sello {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--viz-ink-muted);
+  border: 1px solid var(--viz-grid);
+  border-radius: 20px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+.ds-compartido-caja {
+  flex: 1;
+  background: var(--viz-surface);
+  border: 1px solid var(--viz-grid);
+  border-radius: 12px;
+  padding: 26px;
+  box-shadow: 0 2px 14px rgba(0,0,0,.05);
+}
+.ds-compartido-modulo {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #fff;
+  background: var(--ds-accent);
+  border-radius: 4px;
+  padding: 3px 9px;
+  margin-bottom: 10px;
+}
+.ds-compartido-titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--viz-ink);
+  margin: 0 0 18px;
+}
+.ds-compartido-datos { margin: 0 0 22px; }
+.ds-compartido-fila {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--viz-grid);
+}
+.ds-compartido-fila dt {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--viz-ink-muted);
+  margin: 0;
+}
+.ds-compartido-fila dd { margin: 0; color: var(--viz-ink); font-size: .9rem; }
+.ds-compartido-acciones { margin-bottom: 18px; }
+.ds-compartido-sinarchivo {
+  font-size: .86rem;
+  color: var(--viz-ink-muted);
+  background: rgba(var(--ds-accent-rgb), .06);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ds-compartido-nota {
+  font-size: .76rem;
+  color: var(--viz-ink-muted);
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--viz-grid);
+}
+.ds-compartido-aviso { text-align: center; padding: 40px 16px; color: var(--viz-ink-muted); }
+.ds-compartido-aviso i { font-size: 2.2rem; opacity: .5; margin-bottom: 14px; }
+.ds-compartido-aviso h2 { font-size: 1.1rem; color: var(--viz-ink); margin-bottom: 8px; }
+.ds-compartido-aviso p { font-size: .88rem; margin: 0; }
+.ds-compartido-pie {
+  margin-top: 22px;
+  text-align: center;
+  font-size: .74rem;
+  color: var(--viz-ink-muted);
+}
+@media (max-width: 575.98px) {
+  .ds-compartido-caja { padding: 18px; }
+  .ds-compartido-fila { grid-template-columns: 1fr; gap: 2px; }
+  .ds-compartido-titulo { font-size: 1.15rem; }
+}
