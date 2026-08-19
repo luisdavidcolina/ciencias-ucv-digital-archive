@@ -291,6 +291,14 @@ páginas. Lo que costó llegar ahí, para no repetirlo:
 - **El contraste se calcula contra el fondo real**, no contra blanco por
   defecto: el mismo gris cumple sobre `#ffffff` y falla sobre `#f8f9fa`.
 - Un color en un `style` en línea no lo arregla ninguna hoja de estilos.
+- **Enlace para saltar la navegación** (WCAG 2.4.1): lo genera `app-shell.js`
+  antepuesto a la barra — si fuera después habría que atravesarla igual. Se
+  oculta desplazándolo fuera de pantalla, **nunca con `display:none`**, que lo
+  sacaría del orden de tabulación. El destino (`#contenido-principal`) también
+  se marca por script y lleva `tabindex="-1"`: sin eso el salto mueve el scroll
+  pero deja el foco donde estaba.
+- `login.html` no lleva enlace de salto a propósito: no tiene bloque de
+  navegación repetido que saltarse.
 
 ### Movimiento
 La capa de animación vive al final de `styles.css`. Duraciones cortas
