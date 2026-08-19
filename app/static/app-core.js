@@ -126,9 +126,11 @@ function getPersonInitials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+// Los colores llevan texto blanco encima, asi que tienen que aguantar 4,5:1
+// contra el. El verde de Bootstrap se quedaba en 3,13:1; el resto ya cumplia.
 function getStatusColor(status) {
   switch (status) {
-    case "Activo":    return "#28a745";
+    case "Activo":    return "#208838";
     case "Retirado":  return "#dc3545";
     case "Jubilado":  return "#6f42c1";
     case "Pensionado":return "#0056b3";
