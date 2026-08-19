@@ -2,11 +2,13 @@
 Backup y restauración de datos del sistema.
 Solo accesible para el administrador máximo (Global).
 """
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Header, Query, UploadFile
 from fastapi.responses import StreamingResponse
-from database import db_query
+import storage
+from database import db_query, logger
 import json
 import io
+import os
 import re
 from utils import paginate
 from datetime import datetime, date
@@ -17,6 +19,10 @@ _SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
 from routes.admin.deps import require_session
 
 router = APIRouter(dependencies=[Depends(require_session)])
+
+# El backup programado no puede exigir cookie de sesión: lo llama Vercel Cron,
+# no un navegador. Va aparte y se autentica con CRON_SECRET.
+router_cron = APIRouter()
 
 # Tablas exportables, en orden de dependencias (sin FK issues)
 EXPORTABLE_TABLES = [
@@ -57,6 +63,32 @@ def _serialize_value(v):
     return v
 
 
+def _construir_backup(selected: list) -> tuple[dict, int]:
+    """Serializa las tablas indicadas. Devuelve (payload, filas totales)."""
+    backup = {
+        "_metadata": {
+            "created_at": datetime.utcnow().isoformat(),
+            "version": "1.1",
+            "tables": selected,
+            "partial": len(selected) < len(EXPORTABLE_TABLES),
+        }
+    }
+    total_rows = 0
+    for table in selected:
+        try:
+            rows = db_query(f"SELECT * FROM public.{table} ORDER BY 1", fetch="all")
+            serialized = [
+                {k: _serialize_value(v) for k, v in dict(row).items()}
+                for row in (rows or [])
+            ]
+            backup[table] = serialized
+            total_rows += len(serialized)
+        except Exception as e:
+            backup[table] = []
+            backup[f"_error_{table}"] = str(e)
+    return backup, total_rows
+
+
 @router.get("/groups")
 def get_table_groups():
     """Devuelve los grupos de tablas disponibles para selección en el export."""
@@ -82,26 +114,7 @@ def export_backup(
     else:
         selected = EXPORTABLE_TABLES
 
-    backup = {
-        "_metadata": {
-            "created_at": datetime.utcnow().isoformat(),
-            "version": "1.1",
-            "tables": selected,
-            "partial": len(selected) < len(EXPORTABLE_TABLES),
-        }
-    }
-    total_rows = 0
-    for table in selected:
-        try:
-            rows = db_query(f"SELECT * FROM public.{table} ORDER BY 1", fetch="all")
-            serialized = []
-            for row in (rows or []):
-                serialized.append({k: _serialize_value(v) for k, v in dict(row).items()})
-            backup[table] = serialized
-            total_rows += len(serialized)
-        except Exception as e:
-            backup[table] = []
-            backup[f"_error_{table}"] = str(e)
+    backup, total_rows = _construir_backup(selected)
 
     notas = f"Export {'parcial' if len(selected) < len(EXPORTABLE_TABLES) else 'completo'} via UI ({len(selected)} tablas)"
     try:
@@ -218,3 +231,67 @@ def get_backup_history(page: int = 1, per_page: int = 20):
     ) or []
 
     return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
+
+
+# =============================================================================
+# BACKUP PROGRAMADO
+# =============================================================================
+# Hasta ahora la unica copia era la que alguien se acordara de descargar a mano
+# desde el panel. Si se pierde la base no hay nada: el export no se guardaba en
+# ningun sitio, se enviaba al navegador y ya.
+#
+# Este endpoint lo dispara Vercel Cron y deja el JSON en R2, que es el mismo
+# almacenamiento donde ya viven los digitalizados. Es de solo lectura sobre la
+# base: no modifica nada, solo copia.
+
+@router_cron.get("/programado")
+def backup_programado(
+    authorization: str = Header(default=""),
+    x_vercel_cron: str = Header(default=""),
+):
+    """Copia completa a R2. Pensado para ejecutarse por cron, no a mano.
+
+    Se protege con CRON_SECRET: sin el, este endpoint seria una descarga
+    completa de la base abierta a cualquiera. Si la variable no esta definida se
+    rechaza — fallar cerrado es lo correcto aqui.
+    """
+    esperado = os.environ.get("CRON_SECRET", "")
+    if not esperado:
+        raise HTTPException(
+            503, "CRON_SECRET no está configurado; el backup programado está deshabilitado.")
+    if authorization != f"Bearer {esperado}":
+        raise HTTPException(401, "No autorizado")
+
+    if not storage.is_configured():
+        raise HTTPException(503, "Almacenamiento R2 sin configurar; no hay dónde guardar la copia.")
+
+    backup, total_rows = _construir_backup(EXPORTABLE_TABLES)
+    crudo = json.dumps(backup, ensure_ascii=False).encode("utf-8")
+    clave = f"backups/{datetime.utcnow().strftime('%Y/%m/%d-%H%M%S')}-completo.json"
+
+    try:
+        storage.upload_fileobj(io.BytesIO(crudo), clave, content_type="application/json")
+    except Exception as e:
+        logger.error("Backup programado: fallo al subir a R2: %s", e)
+        _registrar_backup("cron", len(EXPORTABLE_TABLES), total_rows,
+                          f"FALLO al subir: {str(e)[:120]}")
+        raise HTTPException(502, "No se pudo guardar la copia en el almacenamiento.")
+
+    tam_kb = round(len(crudo) / 1024, 1)
+    _registrar_backup("cron", len(EXPORTABLE_TABLES), total_rows,
+                      f"Copia automática en R2 ({clave}, {tam_kb} KB)")
+    logger.info("Backup programado OK: %s (%s filas, %s KB)", clave, total_rows, tam_kb)
+    return {"ok": True, "clave": clave, "tablas": len(EXPORTABLE_TABLES),
+            "filas": total_rows, "kb": tam_kb}
+
+
+def _registrar_backup(usuario: str, tablas: int, filas: int, notas: str) -> None:
+    """Deja constancia en backup_history. Nunca debe tumbar el backup."""
+    try:
+        db_query(
+            """INSERT INTO public.backup_history(usuario, tipo, tabla_count, total_rows, notas)
+               VALUES(%s, 'export', %s, %s, %s)""",
+            (usuario, tablas, filas, notas), fetch="none", commit=True,
+        )
+    except Exception as e:
+        logger.warning("No se pudo registrar el backup en el historial: %s", e)

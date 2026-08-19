@@ -47,6 +47,9 @@ ya llegaron a `main` una vez:
   nombre de usuario en `updated_by` (INTEGER) y omitía `creado_por`. Como el
   bucle captura la excepción por fila, devolvía HTTP 200 con `inserted: 0` y la
   pantalla decía "Importación completada".
+- `test_backup_programado.py` — el endpoint de copia automática falla cerrado
+  sin `CRON_SECRET`, rechaza credenciales equivocadas, no reporta éxito si el
+  almacenamiento falla, y está declarado en `vercel.json`.
 - `test_share.py` — los enlaces externos: caducan, no se pueden manipular, no
   sirven para otro documento, no sobreviven a un cambio de `SECRET_KEY` y no
   exponen la ruta interna del archivo.
@@ -284,6 +287,19 @@ app (`body.ds-no-anim`) y `prefers-reduced-motion` del sistema.
 - `GET /api/admin/backup/export` — JSON de todas las tablas
 - `POST /api/admin/backup/restore?mode=merge|overwrite`
 - Solo para el admin Global (ambos módulos)
+
+### Backup programado
+Hasta ahora la única copia era la que alguien se acordara de descargar a mano:
+el export se enviaba al navegador y no se guardaba en ningún sitio.
+`GET /api/admin/backup/programado` deja una copia completa en R2, y lo dispara
+**Vercel Cron** (declarado en `vercel.json`, 07:10 UTC = 03:10 en Venezuela).
+
+- Va en `router_cron`, **sin** `require_session`: lo llama un cron, no un
+  navegador. Se autentica con `CRON_SECRET` vía `Authorization: Bearer`.
+- **Falla cerrado**: sin `CRON_SECRET` definido responde 503. Este endpoint
+  devuelve la base entera; abierto sería una fuga completa.
+- Si R2 falla, responde 502 en vez de fingir éxito, y el intento fallido queda
+  igualmente en `backup_history` — que es cuando más falta hace.
 
 ### Compartición externa (`share.py`)
 La comparativa de mercado marcaba esta función como ausente frente a Alfresco,

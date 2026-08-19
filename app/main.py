@@ -18,6 +18,7 @@ from routes.admin      import router as admin_router
 from routes.lookups    import router as lookups_router
 from routes.pages      import router as pages_router
 from routes.backup     import router as backup_router
+from routes.backup     import router_cron as backup_cron_router
 from routes.files      import router as files_router
 from routes.share      import router as share_router
 from routes.trash      import router as trash_router
@@ -686,6 +687,7 @@ app.include_router(admin_router)
 app.include_router(lookups_router)
 app.include_router(pages_router)
 app.include_router(backup_router, prefix="/api/admin/backup", tags=["backup"])
+app.include_router(backup_cron_router, prefix="/api/admin/backup", tags=["backup"])
 app.include_router(files_router)
 app.include_router(trash_router)
 app.include_router(share_router)
