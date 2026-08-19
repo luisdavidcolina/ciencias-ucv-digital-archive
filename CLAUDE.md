@@ -50,6 +50,10 @@ ya llegaron a `main` una vez:
 - `test_backup_programado.py` — el endpoint de copia automática falla cerrado
   sin `CRON_SECRET`, rechaza credenciales equivocadas, no reporta éxito si el
   almacenamiento falla, y está declarado en `vercel.json`.
+- `test_contraste.py` — las razones de contraste de los colores declarados en
+  el código. Una auditoría con axe-core encontró 42 nodos por debajo de 4,5:1,
+  varios a un pelo del mínimo (el gris de Bootstrap da 4,45 sobre el fondo de
+  las tarjetas), que es justo lo que no se detecta a ojo.
 - `test_share.py` — los enlaces externos: caducan, no se pueden manipular, no
   sirven para otro documento, no sobreviven a un cambio de `SECRET_KEY` y no
   exponen la ruta interna del archivo.
@@ -270,6 +274,23 @@ los entrega a Chart.js.
   emite `ds:theme-change` y `admin-charts.js` lo escucha.
 - Con `maintainAspectRatio:false` la altura la pone el contenedor: envuelve el
   canvas en `.ds-chart-box`.
+
+### Accesibilidad
+El despliegue pasa **axe-core sin incidencias** (WCAG 2.1 A y AA) en las siete
+páginas. Lo que costó llegar ahí, para no repetirlo:
+
+- `role="tab"` exige un padre `role="tablist"` **directo**. El `<li>` intermedio
+  rompía la relación, y de paso dejaba a esos `<li>` "fuera de una lista". Los
+  `<li>` de la barra de pestañas llevan `role="presentation"`.
+- Un contenedor con `role="list"` obliga a que sus hijos sean `listitem`: si no,
+  promete una estructura que no existe.
+- Los controles que sólo llevan icono (paginación, acciones) necesitan
+  `aria-label`; el `title` no basta.
+- TomSelect hereda el nombre accesible del `<select>` original, así que ése
+  necesita `aria-label`.
+- **El contraste se calcula contra el fondo real**, no contra blanco por
+  defecto: el mismo gris cumple sobre `#ffffff` y falla sobre `#f8f9fa`.
+- Un color en un `style` en línea no lo arregla ninguna hoja de estilos.
 
 ### Movimiento
 La capa de animación vive al final de `styles.css`. Duraciones cortas

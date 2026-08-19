@@ -286,7 +286,7 @@
           <i class="fas fa-vial mr-1"></i>Env&#237;ar escaneo de prueba al bridge
         </button>
       </div>
-      <div id="ds-scn-status" style="min-height:1.4em;font-size:.75rem;color:#6c757d;margin-bottom:.55rem;"></div>
+      <div id="ds-scn-status" style="min-height:1.4em;font-size:.75rem;color:#6a737b;margin-bottom:.55rem;"></div>
       <button onclick="_scnSave()"
         style="width:100%;padding:.35rem;background:#2b4e72;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:.82rem;">
         Guardar y aplicar
