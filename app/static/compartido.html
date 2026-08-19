@@ -28,11 +28,18 @@
   </footer>
 </div>
 
-<script src="/static/app-core.js"></script>
 <script src="/static/app-theme.js"></script>
 <script>
 // El token viaja en la ruta (/compartido/<token>), no en la query: así no se
 // queda en los registros de referer de terceros al pulsar un enlace saliente.
+// Escapado propio: esta página no carga app.js a proposito, porque app.js
+// exige sesion y redirige al login — y aqui no hay sesion por diseño.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 const TOKEN = decodeURIComponent(location.pathname.split('/compartido/')[1] || '');
 const caja  = document.getElementById('contenido');
 
@@ -40,15 +47,15 @@ function aviso(icono, titulo, detalle) {
   caja.innerHTML =
     '<div class="ds-compartido-aviso">' +
       '<i class="fas ' + icono + '"></i>' +
-      '<h2>' + escHtml(titulo) + '</h2>' +
-      '<p>' + escHtml(detalle) + '</p>' +
+      '<h2>' + esc(titulo) + '</h2>' +
+      '<p>' + esc(detalle) + '</p>' +
     '</div>';
 }
 
 function fila(etiqueta, valor) {
   if (!valor) return '';
-  return '<div class="ds-compartido-fila"><dt>' + escHtml(etiqueta) + '</dt>' +
-         '<dd>' + escHtml(valor) + '</dd></div>';
+  return '<div class="ds-compartido-fila"><dt>' + esc(etiqueta) + '</dt>' +
+         '<dd>' + esc(valor) + '</dd></div>';
 }
 
 (async () => {
@@ -86,8 +93,8 @@ function fila(etiqueta, valor) {
       'Este documento no está digitalizado; se conserva en soporte físico.</div>';
 
   caja.innerHTML =
-    '<span class="ds-compartido-modulo">' + escHtml(datos.modulo) + '</span>' +
-    '<h1 class="ds-compartido-titulo">' + escHtml(d.titulo || 'Documento') + '</h1>' +
+    '<span class="ds-compartido-modulo">' + esc(datos.modulo) + '</span>' +
+    '<h1 class="ds-compartido-titulo">' + esc(d.titulo || 'Documento') + '</h1>' +
     '<dl class="ds-compartido-datos">' +
       fila('Tipo documental', d.tipo) +
       fila('Autor / Emisor', d.autor) +
