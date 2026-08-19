@@ -3907,3 +3907,8 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   .ds-compartido-fila { grid-template-columns: 1fr; gap: 2px; }
   .ds-compartido-titulo { font-size: 1.15rem; }
 }
+
+/* El buscador de auditoría iba con w-25, que en móvil deja un campo de 90px
+   inservible. */
+.ds-audit-buscador { width: 260px; max-width: 100%; }
+@media (max-width: 767.98px) { .ds-audit-buscador { width: 100%; margin-top: 8px; } }

@@ -374,3 +374,109 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 window.addEventListener("resize", _syncTabOverflow);
+
+// ─── Paneles idénticos entre módulos ─────────────────────────────────────────
+// "Acceso" y "Auditoría" eran exactamente el mismo marcado en los dos paneles,
+// salvo el sufijo del módulo. Los demás paneles difieren con motivo —Retención
+// sólo muestra vencidos en Archivo, Papelera lleva dos tablas en RRHH— y se
+// quedan en su HTML.
+//
+// Se inyectan al cargar, antes de que app.js enganche sus listeners: admin-ui.js
+// se carga antes, así que su handler de DOMContentLoaded corre primero.
+
+function _panelAcceso(suf, modulo) {
+  return `
+<div class="tab-pane fade" id="pane-admin-${suf}-users" role="tabpanel">
+  <div class="card card-danger">
+    <div class="card-header">
+      <h3 class="card-title"><i class="fas fa-user-shield"></i> Control de Acceso</h3>
+    </div>
+    <div class="card-body p-4">
+      <div id="admin_users_table-${suf}" class="table-responsive mb-4"></div>
+      <hr>
+      <h6 class="font-weight-bold mb-3"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h6>
+      <div class="row mb-3">
+        <div class="col-md-3 mb-2">
+          <input type="text" id="new_user_name-${suf}" class="form-control form-control-sm" placeholder="Usuario">
+        </div>
+        <div class="col-md-3 mb-2">
+          <input type="password" id="new_user_pass-${suf}" class="form-control form-control-sm" placeholder="Contraseña">
+        </div>
+        <div class="col-md-3 mb-2">
+          <select id="new_user_modulo-${suf}" class="form-control form-control-sm">
+            <option value="${modulo}">${modulo}</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-2">
+          <select id="new_user_rol-${suf}" class="form-control form-control-sm">
+            <option value="Normal">Normal</option>
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+      </div>
+      <button id="btn_add_user-${suf}" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
+        <i class="fas fa-user-plus"></i> Crear Usuario
+      </button>
+    </div>
+  </div>
+</div>`;
+}
+
+function _panelAuditoria(suf) {
+  return `
+<div class="tab-pane fade" id="pane-admin-${suf}-audit" role="tabpanel">
+  <div class="card card-secondary">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+      <h3 class="card-title"><i class="fas fa-history mr-2"></i>Registro de Auditoría</h3>
+      <input type="text" id="audit_search-${suf}" class="form-control form-control-sm ds-audit-buscador"
+             placeholder="Buscar evento o usuario...">
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-sm mb-0" style="font-size:0.82rem;">
+          <thead class="bg-light">
+            <tr>
+              <th>Fecha y hora</th>
+              <th class="ds-hide-sm">Usuario</th>
+              <th>Evento</th>
+              <th class="ds-hide-sm">Módulo</th>
+              <th class="ds-hide-sm">Detalle</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody id="audit_table_body-${suf}"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <small id="audit_summary-${suf}" class="text-muted"></small>
+      <div>
+        <button id="audit_prev-${suf}" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)"><i class="fas fa-chevron-left"></i></button>
+        <span id="audit_page_info-${suf}" class="text-muted small"></span>
+        <button id="audit_next-${suf}" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function _inyectarPanelesComunes() {
+  [["archivo", "Archivo"], ["rrhh", "RRHH"]].forEach(([suf, modulo]) => {
+    const seccion = document.getElementById(`tab-admin-${suf}`);
+    if (!seccion) return;
+    const contenido = seccion.querySelector(".tab-content");
+    if (!contenido) return;
+    if (!document.getElementById(`pane-admin-${suf}-users`)) {
+      contenido.insertAdjacentHTML("beforeend", _panelAcceso(suf, modulo));
+    }
+    if (!document.getElementById(`pane-admin-${suf}-audit`)) {
+      contenido.insertAdjacentHTML("beforeend", _panelAuditoria(suf));
+    }
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", _inyectarPanelesComunes);
+} else {
+  _inyectarPanelesComunes();
+}

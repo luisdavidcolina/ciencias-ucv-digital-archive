@@ -39,9 +39,21 @@ def _pills(html, suf):
 
 
 def _panes(html, suf):
-    return set(
+    """Paneles del HTML MÁS los que inyecta admin-ui.js.
+
+    "Acceso" y "Auditoría" eran el mismo marcado en los dos módulos, así que
+    viven en admin-ui.js. Para esta comprobación cuentan igual: lo que importa
+    es que la pestaña tenga a dónde apuntar, no en qué archivo esté escrito.
+    """
+    del_html = set(
         re.findall(r'<div class="tab-pane[^"]*" id="(pane-admin-%s-[\w-]+)"' % suf, html)
     )
+    js = (STATIC / "admin-ui.js").read_text(encoding="utf-8")
+    inyectados = {
+        f"pane-admin-{suf}-{tab}"
+        for tab in re.findall(r'id="pane-admin-\$\{suf\}-([\w-]+)"', js)
+    }
+    return del_html | inyectados
 
 
 @pytest.mark.parametrize("suf", sorted(PANELS))
