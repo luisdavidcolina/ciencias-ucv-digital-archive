@@ -4,45 +4,43 @@
 // sólo quedan las cifras que no se derivan de una gráfica.
 async function loadDynamicStats() {
   const suf = adminSuffixFromTab();
-  // Se marca aqui, no en loadChartsData(): entre que se abre la pestaña y que
-  // responde /api/admin/stats ya pasan segundos, y en ese hueco las tarjetas
-  // estaban en blanco.
-  if (typeof _marcarCargando === "function") _marcarCargando();
-  try {
-    const stats = await apiFetchJSON(`${API_BASE}/api/admin/stats`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        modulo:     state.user.modulo,
-        date_start: document.getElementById(`stats-date-start-${suf}`)?.value || "",
-        date_end:   document.getElementById(`stats-date-end-${suf}`)?.value   || ""
-      })
-    });
 
+  // Se marca aquí, no en loadChartsData(): entre que se abre la pestaña y que
+  // responde la API ya pasan segundos, y en ese hueco las tarjetas se quedaban
+  // en blanco, indistinguibles de un panel roto.
+  if (typeof _marcarCargando === "function") _marcarCargando();
+
+  // Las dos peticiones son independientes: /stats trae los totales con los
+  // filtros de fecha aplicados y /charts el detalle. Encadenarlas duplicaba la
+  // espera sin motivo — ahora salen juntas.
+  const totales = apiFetchJSON(`${API_BASE}/api/admin/stats`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      modulo:     state.user.modulo,
+      date_start: document.getElementById(`stats-date-start-${suf}`)?.value || "",
+      date_end:   document.getElementById(`stats-date-end-${suf}`)?.value   || ""
+    })
+  });
+  const graficas = loadChartsData();
+
+  try {
+    const stats = await totales;
     const kpiDocs = document.getElementById(`kpi-total-docs-${suf}`);
     const kpiCats = document.getElementById(`kpi-total-cats-${suf}`);
     if (kpiDocs) kpiDocs.innerText = stats.total_docs;
     if (kpiCats) kpiCats.innerText = stats.categories_count;
-
-    // El número de usuarios ya no encabeza el panel: no es una medida del
-    // archivo ni de los expedientes, y vive donde se gestiona, en "Acceso".
-    // Con ello se ahorra además una llamada a la API en cada carga.
-
-    const isArchivo  = state.user.modulo === "Archivo";
-    const db_list    = isArchivo ? state.archivo.results : state.rrhh.results;
-    const kpiLatest  = document.getElementById(`kpi-latest-entry-${suf}`);
-    if (kpiLatest) {
-      if (db_list.length > 0) {
-        const dates = db_list.map(r => isArchivo ? r.fecha : r.fecha_ingreso).filter(Boolean).sort().reverse();
-        kpiLatest.innerText = formatISOToSpanish(dates[0]);
-      } else {
-        kpiLatest.innerText = "N/A";
-      }
-    }
-
-    loadChartsData();
-
   } catch (e) {
-    console.error("Error al cargar analíticas dinámicas:", e);
+    console.error("Error al cargar las cifras del panel:", e);
+  }
+
+  // "Último ingreso" lo sirve /charts junto al resto de totales. Antes se
+  // derivaba de state.archivo.results —los resultados de la búsqueda pública,
+  // que en el panel de administración no se cargan nunca—, así que ponía "N/A"
+  // hasta que la otra respuesta lo sobrescribía.
+  try {
+    await graficas;
+  } catch (e) {
+    console.error("Error al cargar las gráficas:", e);
   }
 }
