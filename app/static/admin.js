@@ -123,13 +123,13 @@ async function loadVencimientosTable() {
   const tbody   = document.getElementById("vencimientos-table-body");
   const summary = document.getElementById("vencimientos-summary");
   if (!tbody) return;
-  tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
     const rows = data.vencimientos || [];
     if (summary) summary.textContent = `${rows.length} documento${rows.length !== 1 ? "s" : ""} con retención vencida`;
     if (rows.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-success py-3"><i class="fas fa-check-circle mr-1"></i>Sin vencimientos pendientes.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-success py-3"><i class="fas fa-check-circle mr-1"></i>Sin vencimientos pendientes.</td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map((v, i) => {
@@ -141,11 +141,17 @@ async function loadVencimientosTable() {
         <td>${escHtml(v.fecha_documento || "—")}</td>
         <td>${Number(v.plazo_anios)} año${Number(v.plazo_anios) !== 1 ? "s" : ""}</td>
         <td><strong>${Number(v.dias_vencido)}</strong> días</td>
-        <td class="text-muted small">${escHtml(v.ubicacion || "—")}</td>
+        <td class="text-muted small ds-hide-sm">${escHtml(v.ubicacion || "—")}</td>
+        <td class="text-nowrap">
+          <button class="btn btn-xs btn-outline-primary" onclick="abrirDisposicion(${v.id_archivo}, ${JSON.stringify(v.titulo || "")})"
+                  title="Registrar disposición documental">
+            <i class="fas fa-gavel mr-1"></i>Disponer
+          </button>
+        </td>
       </tr>`;
     }).join("");
   } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-danger text-center py-2"></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-danger text-center py-2"></td></tr>`;
     tbody.querySelector("td").textContent = e.message;
   }
 }
@@ -211,3 +217,78 @@ async function _saveRetentionPlazo(tipoId) {
   }
 }
 
+
+
+// ─── Disposición documental (ISO 15489-1:2016 §8.5) ──────────────────────────
+// Disponer no borra: deja constancia de qué se decidió, quién y con qué acta.
+// Por eso el acta es obligatoria — una disposición sin respaldo documental no
+// sirve para lo único que sirve una disposición: demostrarla después.
+async function abrirDisposicion(docId, titulo) {
+  const acta = await promptModal(
+    "Registrar disposición",
+    `Acta o resolución que respalda la decisión sobre "${titulo}"`,
+    "", "Ej: Acta 12/2026 del Consejo de Facultad");
+  if (acta === null) return;
+  if (!String(acta).trim()) {
+    showToast("Hace falta el acta que respalda la decisión.", "warning");
+    return;
+  }
+
+  const decision = await _elegirDisposicion();
+  if (!decision) return;
+
+  try {
+    await apiFetchJSON(`${API_BASE}/api/admin/retencion/disponer/${docId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        disposicion: decision,
+        acta: String(acta).trim(),
+        requester: state.user?.username || ""
+      })
+    });
+    showToast("Disposición registrada.", "success");
+    loadVencimientosTable();
+    _loadAlertasBanner();
+  } catch (e) {
+    showToast(e.message || "No se pudo registrar la disposición.", "error");
+  }
+}
+
+// Las tres salidas posibles de un documento con el plazo cumplido.
+function _elegirDisposicion() {
+  return new Promise(resolve => {
+    const opciones = [
+      ["conservar",   "Conservación permanente", "fa-shield-halved"],
+      ["transferido", "Transferir al archivo histórico", "fa-boxes-packing"],
+      ["eliminado",   "Eliminar por expurgo", "fa-fire"],
+    ];
+    const cuerpo = opciones.map(([v, txt, ic]) =>
+      `<button class="btn btn-outline-secondary btn-block text-left mb-2 ds-disp-op" data-v="${v}">
+         <i class="fas ${ic} mr-2"></i>${txt}
+       </button>`).join("");
+    const caja = document.createElement("div");
+    caja.className = "modal fade show";
+    caja.style.cssText = "display:block;background:rgba(0,0,0,.5)";
+    caja.innerHTML = `
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+          <div class="modal-header border-0 pb-1"><h6 class="modal-title font-weight-bold">¿Qué se decide?</h6></div>
+          <div class="modal-body pt-2">${cuerpo}</div>
+          <div class="modal-footer border-0 pt-0">
+            <button class="btn btn-sm btn-secondary ds-disp-cancel">Cancelar</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(caja);
+    caja.querySelector(".ds-disp-op")?.focus();
+    caja.addEventListener("click", e => {
+      const op = e.target.closest(".ds-disp-op");
+      if (op) { caja.remove(); resolve(op.dataset.v); return; }
+      if (e.target.closest(".ds-disp-cancel") || e.target === caja) { caja.remove(); resolve(null); }
+    });
+    caja.addEventListener("keydown", e => {
+      if (e.key === "Escape") { caja.remove(); resolve(null); }
+    });
+  });
+}

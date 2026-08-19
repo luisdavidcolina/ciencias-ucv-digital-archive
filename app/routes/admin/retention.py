@@ -119,8 +119,102 @@ def get_expired_docs(limite: int = Query(default=50, ge=1, le=500)):
         WHERE da.fecha_documento IS NOT NULL
           AND (da.fecha_documento + (COALESCE(td.plazo_retencion_anios, 5) || ' years')::INTERVAL)::DATE < CURRENT_DATE
           AND COALESCE(da.status, 'aprobado') = 'aprobado'
+          AND da.disposicion IS NULL
+          AND da.deleted_at IS NULL
         ORDER BY dias_vencido DESC
         LIMIT %s
     """, [limite], fetch="all") or []
 
     return {"total": len(rows), "vencimientos": [dict(r) for r in rows]}
+
+
+# =============================================================================
+# DISPOSICIÓN DOCUMENTAL (ISO 15489-1:2016 §8.5)
+# =============================================================================
+# El sistema avisaba de los documentos con el plazo vencido pero no ofrecía
+# ninguna acción, así que la decisión archivística no quedaba en ninguna parte.
+#
+# Disponer NO borra: registra qué se decidió, quién lo decidió, cuándo y con qué
+# acta. Eso es lo que un archivo tiene que poder demostrar años después. Para
+# retirar el documento de la vista está la papelera, que es otra cosa.
+
+DISPOSICIONES = {
+    "conservar":   "Conservación permanente",
+    "transferido": "Transferido al archivo histórico",
+    "eliminado":   "Eliminado por expurgo",
+}
+
+
+class DisposicionIn(BaseModel):
+    disposicion: str
+    acta: Optional[str] = ""
+    requester: Optional[str] = ""
+
+    @field_validator("disposicion")
+    @classmethod
+    def debe_ser_conocida(cls, v):
+        if v not in DISPOSICIONES:
+            raise ValueError(
+                "disposicion debe ser una de: " + ", ".join(sorted(DISPOSICIONES))
+            )
+        return v
+
+
+@router.post("/retencion/disponer/{doc_id}")
+def registrar_disposicion(doc_id: int, data: DisposicionIn):
+    """Deja constancia de la decisión de disposición sobre un documento."""
+    fila = db_query(
+        """SELECT id_archivo, titulo, disposicion
+           FROM public.datos_archivo
+           WHERE id_archivo = %s AND deleted_at IS NULL""",
+        [doc_id], fetch="one",
+    )
+    if not fila:
+        raise HTTPException(404, "El documento no existe o está en la papelera")
+    if fila["disposicion"]:
+        raise HTTPException(
+            409,
+            f"El documento ya tiene una disposición registrada "
+            f"({DISPOSICIONES.get(fila['disposicion'], fila['disposicion'])}). "
+            "Rectificarla exige un acta nueva."
+        )
+
+    db_query(
+        """UPDATE public.datos_archivo
+           SET disposicion = %s, disposicion_fecha = CURRENT_DATE,
+               disposicion_acta = %s, disposicion_por = %s
+           WHERE id_archivo = %s""",
+        [data.disposicion, (data.acta or "").strip() or None,
+         (data.requester or "sistema").strip(), doc_id],
+        fetch="none", commit=True,
+    )
+    log_event(data.requester or "sistema", "Disposición Documental", "Archivo",
+              f"doc_id={doc_id}, {DISPOSICIONES[data.disposicion]}, "
+              f"acta: {(data.acta or '—')[:60]}")
+    return {"success": True, "doc_id": doc_id,
+            "disposicion": data.disposicion,
+            "etiqueta": DISPOSICIONES[data.disposicion]}
+
+
+@router.get("/retencion/disposiciones")
+def listar_disposiciones(limite: int = Query(default=100, ge=1, le=500)):
+    """Historial de disposiciones: es el registro que un archivo debe conservar."""
+    filas = db_query(
+        """SELECT da.id_archivo, da.titulo, da.disposicion,
+                  TO_CHAR(da.disposicion_fecha, 'YYYY-MM-DD') AS fecha,
+                  da.disposicion_acta AS acta, da.disposicion_por AS responsable,
+                  COALESCE(td.nombre_corto, td.nombre, '—')   AS tipo
+           FROM public.datos_archivo da
+           LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
+           WHERE da.disposicion IS NOT NULL
+           ORDER BY da.disposicion_fecha DESC NULLS LAST, da.id_archivo DESC
+           LIMIT %s""",
+        [limite], fetch="all",
+    ) or []
+    return {
+        "total": len(filas),
+        "disposiciones": [
+            dict(f, etiqueta=DISPOSICIONES.get(f["disposicion"], f["disposicion"]))
+            for f in filas
+        ],
+    }

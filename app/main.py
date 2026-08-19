@@ -522,6 +522,20 @@ def run_migrations():
                 tamano_bytes   INTEGER      NULL,
                 created_at     TIMESTAMP    NULL
             )"""),
+        # Disposicion documental (ISO 15489-1:2016 §8.5). El sistema avisaba de
+        # documentos con el plazo vencido pero no ofrecia ninguna accion, asi que
+        # la decision archivistica no quedaba registrada en ninguna parte.
+        ("disposicion en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS disposicion TEXT"),
+        ("disposicion_fecha en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS disposicion_fecha DATE"),
+        ("disposicion_acta en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS disposicion_acta TEXT"),
+        ("disposicion_por en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS disposicion_por TEXT"),
+        ("idx disposicion",
+         "CREATE INDEX IF NOT EXISTS idx_datos_archivo_disposicion "
+         "ON public.datos_archivo(disposicion) WHERE disposicion IS NOT NULL"),
         ("idx ia_adjuntos conv",
          "CREATE INDEX IF NOT EXISTS idx_ia_adj_conv ON public.ia_adjuntos(conversacion_id, id DESC)"),
     ]
