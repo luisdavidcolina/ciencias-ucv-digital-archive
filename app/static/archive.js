@@ -186,7 +186,7 @@ function renderArchivoList() {
         <div class="ds-item-authors" style="font-size:0.82rem;color:#495057;margin-bottom:2px;">
           <i class="fas fa-user-edit mr-1"></i> <strong>${hl(doc.autor)}</strong>
         </div>
-        <div class="ds-item-publisher" style="font-size:0.82rem;color:#6c757d;margin-bottom:4px;">
+        <div class="ds-item-publisher" style="font-size:0.82rem;color:#6a737b;margin-bottom:4px;">
           <i class="fas fa-map-marker-alt mr-1"></i> <strong>${escHtml(doc.ubicacion)}</strong>
           ${doc.numero_folio ? `<span class="ml-2 text-muted"><i class="fas fa-hashtag mr-1"></i>${escHtml(doc.numero_folio)}</span>` : ""}
           ${doc.numero_paginas ? `<span class="ml-2 text-muted"><i class="fas fa-file-alt mr-1"></i>${escHtml(String(doc.numero_paginas))} p.</span>` : ""}
