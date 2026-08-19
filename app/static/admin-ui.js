@@ -9,12 +9,69 @@ function debounce(fn, ms) {
   return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
 }
 
+// ─── Modales propios de estos helpers ────────────────────────────────────────
+// El marcado de los modales de confirmación y de texto estaba copiado en las
+// tres páginas de administración. Es infraestructura de estos helpers, no de
+// las páginas: si confirmModal() vive aquí, su modal también. Así una página
+// nueva que llame a confirmModal() funciona sin tener que acordarse de pegar
+// veinte líneas de HTML.
+const _MODALES_UI = `
+<div class="modal fade" id="ds-confirm-modal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title font-weight-bold ds-cm-title">Confirmar</h6>
+      </div>
+      <div class="modal-body pt-2 pb-2">
+        <p class="ds-cm-body mb-0 text-muted" style="font-size:0.9rem;"></p>
+      </div>
+      <div class="modal-footer border-0 pt-1">
+        <button type="button" class="btn btn-secondary btn-sm ds-cm-cancel">Cancelar</button>
+        <button type="button" class="btn btn-danger btn-sm ds-cm-ok">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="ds-prompt-modal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title font-weight-bold ds-pm-title">Ingrese un valor</h6>
+      </div>
+      <div class="modal-body pt-2 pb-2">
+        <label class="text-muted small ds-pm-label mb-1"></label>
+        <input type="text" class="form-control ds-pm-input" autocomplete="off">
+      </div>
+      <div class="modal-footer border-0 pt-1">
+        <button type="button" class="btn btn-secondary btn-sm ds-pm-cancel">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-sm ds-pm-ok">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+function _asegurarModalesUI() {
+  if (document.getElementById("ds-confirm-modal")) return;
+  const cont = document.createElement("div");
+  cont.innerHTML = _MODALES_UI;
+  while (cont.firstElementChild) document.body.appendChild(cont.firstElementChild);
+}
+
+// Se inyectan en cuanto el <body> existe: confirmModal() puede llamarse desde
+// cualquier handler y no debe depender de quién cargó primero.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", _asegurarModalesUI);
+} else {
+  _asegurarModalesUI();
+}
+
 // ─── Modal de confirmación (reemplaza window.confirm) ────────────────────────
 let _confirmResolve = null;
 
 function confirmModal(title, body, btnLabel = "Eliminar", btnClass = "btn-danger") {
   return new Promise(resolve => {
     _confirmResolve = resolve;
+    _asegurarModalesUI();
     const el = document.getElementById("ds-confirm-modal");
     if (!el) { resolve(window.confirm(body)); return; }
     el.querySelector(".ds-cm-title").textContent  = title || "Confirmar";
@@ -46,6 +103,7 @@ let _promptResolve = null;
 function promptModal(title, label, defaultVal = "", placeholder = "") {
   return new Promise(resolve => {
     _promptResolve = resolve;
+    _asegurarModalesUI();
     const el = document.getElementById("ds-prompt-modal");
     if (!el) { resolve(window.prompt(label, defaultVal)); return; }
     el.querySelector(".ds-pm-title").textContent = title || "Ingrese un valor";

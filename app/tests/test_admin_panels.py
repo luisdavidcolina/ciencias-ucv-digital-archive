@@ -221,3 +221,35 @@ def test_todas_las_paginas_declaran_su_data_page():
         if "data-page=" not in (STATIC / n).read_text(encoding="utf-8")
     ]
     assert not faltan, f"páginas sin data-page: {faltan}"
+
+
+# ---------------------------------------------------------------------------
+# Modales de admin-ui.js
+# ---------------------------------------------------------------------------
+# El marcado de los modales de confirmación y de texto estaba copiado en las
+# tres páginas de administración. Es infraestructura de esos helpers, no de las
+# páginas: si confirmModal() vive en admin-ui.js, su modal también.
+
+PAGINAS_ADMIN = ["admin_archive.html", "admin_hr.html", "admin_system.html"]
+
+
+@pytest.mark.parametrize("nombre", PAGINAS_ADMIN)
+def test_los_modales_de_ui_no_estan_pegados_en_el_html(nombre):
+    html = (STATIC / nombre).read_text(encoding="utf-8")
+    for mid in ("ds-confirm-modal", "ds-prompt-modal"):
+        assert f'id="{mid}"' not in html, (
+            f"{nombre} vuelve a traer #{mid} escrito a mano; lo inyecta admin-ui.js"
+        )
+
+
+def test_admin_ui_define_sus_modales():
+    js = (STATIC / "admin-ui.js").read_text(encoding="utf-8")
+    for mid in ("ds-confirm-modal", "ds-prompt-modal"):
+        assert f'id="{mid}"' in js, f"admin-ui.js ya no define #{mid}"
+    assert "_asegurarModalesUI" in js
+
+
+@pytest.mark.parametrize("nombre", PAGINAS_ADMIN)
+def test_las_paginas_que_usan_los_modales_cargan_admin_ui(nombre):
+    html = (STATIC / nombre).read_text(encoding="utf-8")
+    assert "/static/admin-ui.js" in html, f"{nombre} no carga admin-ui.js"
