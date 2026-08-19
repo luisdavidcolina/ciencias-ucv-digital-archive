@@ -77,19 +77,19 @@ function renderRrhhPagination() {
       <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
       <ul class="pagination pagination-sm mb-0">
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(1)" title="Primera"><i class="fas fa-angle-double-left"></i></button>
+          <button class="page-link" onclick="changeRrhhPage(1)" title="Primera" aria-label="Primera página"><i class="fas fa-angle-double-left"></i></button>
         </li>
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
+          <button class="page-link" onclick="changeRrhhPage(${page - 1})" aria-label="Página anterior"><i class="fas fa-chevron-left"></i></button>
         </li>
         ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
           <button class="page-link" onclick="changeRrhhPage(${p})">${p}</button>
         </li>`).join("")}
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+          <button class="page-link" onclick="changeRrhhPage(${page + 1})" aria-label="Página siguiente"><i class="fas fa-chevron-right"></i></button>
         </li>
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${pages})" title="Última"><i class="fas fa-angle-double-right"></i></button>
+          <button class="page-link" onclick="changeRrhhPage(${pages})" title="Última" aria-label="Última página"><i class="fas fa-angle-double-right"></i></button>
         </li>
       </ul>
     </nav>`;
@@ -139,7 +139,7 @@ function renderRrhhList() {
     const colorState = getStatusColor(p.estatuses);
     const escapedRaw = JSON.stringify(p.persona_raw || "");
     return `
-      <div class="ds-item-card ds-person-card" onclick="openRrhhPersonDossier(${escapedRaw})" style="cursor:pointer;border-left:3px solid ${colorState};">
+      <div class="ds-item-card ds-person-card" role="listitem" onclick="openRrhhPersonDossier(${escapedRaw})" style="cursor:pointer;border-left:3px solid ${colorState};">
         <div class="ds-item-thumbnail" style="align-items:center;padding-top:0;">
           <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid ${colorState};flex-shrink:0;">
             ${p.foto_url

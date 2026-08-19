@@ -3912,3 +3912,31 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
    inservible. */
 .ds-audit-buscador { width: 260px; max-width: 100%; }
 @media (max-width: 767.98px) { .ds-audit-buscador { width: 100%; margin-top: 8px; } }
+
+/* =============================================================================
+   CONTRASTE — WCAG 2.1 AA
+   Una auditoría con axe-core sobre el despliegue encontró 42 nodos por debajo
+   del mínimo de 4,5:1. Los valores de abajo son los mínimos calculados que
+   cumplen contra el fondo real sobre el que se pintan, no aproximaciones: el
+   gris de Bootstrap se quedaba en 4,45 — a un pelo, pero por debajo.
+   ========================================================================== */
+:root {
+  --ds-muted-aa: #6a737b;    /* 4,58:1 sobre #f8f9fa */
+  --ds-muted-aa-oscuro: #636b73;  /* 4,56:1 sobre #e9ecef */
+}
+body:not(.dark-mode) .text-muted,
+body:not(.dark-mode) small.text-muted,
+body:not(.dark-mode) .ds-pagination-info { color: var(--ds-muted-aa) !important; }
+
+/* La migaja va sobre un gris más oscuro, así que necesita bajar un paso más. */
+body:not(.dark-mode) .ds-breadcrumb { color: var(--ds-muted-aa-oscuro) !important; }
+
+/* Blanco sobre el verde de Bootstrap daba 3,13:1. */
+body:not(.dark-mode) .badge-success,
+body:not(.dark-mode) .bg-success { background-color: #208838 !important; }
+
+/* El azul primario daba 3,97:1, tanto de texto como de fondo. */
+body:not(.dark-mode) .btn-primary { background-color: #0072ed; border-color: #0072ed; }
+body:not(.dark-mode) .btn-outline-primary,
+body:not(.dark-mode) a.text-primary,
+body:not(.dark-mode) .text-primary { color: #0072ed !important; }

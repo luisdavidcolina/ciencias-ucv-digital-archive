@@ -78,19 +78,19 @@ function renderArchivoPagination() {
       <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
       <ul class="pagination pagination-sm mb-0">
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(1)" title="Primera"><i class="fas fa-angle-double-left"></i></button>
+          <button class="page-link" onclick="changeArchivoPage(1)" title="Primera" aria-label="Primera página"><i class="fas fa-angle-double-left"></i></button>
         </li>
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${page - 1})"><i class="fas fa-chevron-left"></i></button>
+          <button class="page-link" onclick="changeArchivoPage(${page - 1})" aria-label="Página anterior"><i class="fas fa-chevron-left"></i></button>
         </li>
         ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
           <button class="page-link" onclick="changeArchivoPage(${p})">${p}</button>
         </li>`).join("")}
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${page + 1})"><i class="fas fa-chevron-right"></i></button>
+          <button class="page-link" onclick="changeArchivoPage(${page + 1})" aria-label="Página siguiente"><i class="fas fa-chevron-right"></i></button>
         </li>
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${pages})" title="Última"><i class="fas fa-angle-double-right"></i></button>
+          <button class="page-link" onclick="changeArchivoPage(${pages})" title="Última" aria-label="Última página"><i class="fas fa-angle-double-right"></i></button>
         </li>
       </ul>
     </nav>`;
@@ -169,7 +169,7 @@ function renderArchivoList() {
       .filter(b => b !== doc.tesauro_primario && b !== doc.doc_type);
 
     return `
-    <div class="ds-item-card" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;border-left:3px solid ${iconData.color};">
+    <div class="ds-item-card" role="listitem" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;border-left:3px solid ${iconData.color};">
       <div class="ds-item-thumbnail" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
         <i class="${iconData.icon}" style="font-size:36px;color:${iconData.color};"></i>
         ${hasFile ? `<span class="badge badge-info" style="font-size:0.6rem;padding:2px 5px;"><i class="fas fa-file mr-1"></i>Digital</span>` : ""}
