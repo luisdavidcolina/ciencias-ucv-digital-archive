@@ -265,3 +265,36 @@ def test_admin_ui_define_sus_modales():
 def test_las_paginas_que_usan_los_modales_cargan_admin_ui(nombre):
     html = (STATIC / nombre).read_text(encoding="utf-8")
     assert "/static/admin-ui.js" in html, f"{nombre} no carga admin-ui.js"
+
+
+# ---------------------------------------------------------------------------
+# Saltar la navegación (WCAG 2.4.1, nivel A)
+# ---------------------------------------------------------------------------
+# Sin este enlace, quien navega con teclado atraviesa trece controles de menú
+# antes de llegar al contenido — en cada página y cada vez.
+
+def test_la_cascara_ofrece_el_enlace_de_salto():
+    js = (STATIC / "app-shell.js").read_text(encoding="utf-8")
+    assert "ds-skip-link" in js, "app-shell.js ya no genera el enlace de salto"
+    assert "contenido-principal" in js, "el enlace de salto no tiene destino"
+    assert "_marcarContenidoPrincipal" in js, (
+        "nadie marca el destino del salto; el enlace apuntaría a la nada"
+    )
+
+
+def test_el_enlace_de_salto_es_el_primer_elemento():
+    """Si no va antes que la barra, deja de servir: habría que atravesarla."""
+    js = (STATIC / "app-shell.js").read_text(encoding="utf-8")
+    i = js.index("shellSkipLinkHTML() + shellNavbarHTML")
+    assert i > 0, "el enlace de salto debe anteponerse a la barra superior"
+
+
+def test_el_enlace_de_salto_no_se_oculta_con_display_none():
+    """display:none lo saca del orden de tabulación y lo vuelve inservible."""
+    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    i = css.index(".ds-skip-link {")
+    bloque = css[i:css.index("}", i)]
+    assert "display: none" not in bloque and "display:none" not in bloque
+    assert "position: absolute" in bloque, (
+        "se oculta moviéndolo fuera de la pantalla, no quitándolo del flujo"
+    )

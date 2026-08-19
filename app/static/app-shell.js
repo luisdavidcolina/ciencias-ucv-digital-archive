@@ -151,8 +151,34 @@ function shellNavbarHTML(pagina) {
 </nav>`;
 }
 
+// Enlace para saltar la navegación (WCAG 2.4.1, nivel A). Sin él, quien navega
+// con teclado atraviesa trece controles de menú antes de llegar al contenido —
+// en cada página, cada vez. Está oculto hasta que recibe el foco.
+function shellSkipLinkHTML() {
+  return '<a class="ds-skip-link" href="#contenido-principal">' +
+         'Saltar al contenido principal</a>';
+}
+
+// El destino del salto se marca aquí y no en cada HTML: así ninguna página
+// nueva se queda sin él por olvido.
+function _marcarContenidoPrincipal() {
+  if (document.getElementById("contenido-principal")) return;
+  const destino = document.querySelector(".content-wrapper, main, [role='main']");
+  if (!destino) return;
+  destino.id = "contenido-principal";
+  // tabindex="-1" para que el navegador pueda enfocarlo: sin esto el salto
+  // mueve el scroll pero no el foco, y el teclado sigue donde estaba.
+  destino.setAttribute("tabindex", "-1");
+}
+
 (function () {
   const hueco = document.getElementById("app-shell-navbar");
   if (!hueco) return;
-  hueco.outerHTML = shellNavbarHTML(document.body.dataset.page || "");
+  hueco.outerHTML = shellSkipLinkHTML() + shellNavbarHTML(document.body.dataset.page || "");
 })();
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", _marcarContenidoPrincipal);
+} else {
+  _marcarContenidoPrincipal();
+}
