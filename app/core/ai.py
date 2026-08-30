@@ -36,10 +36,11 @@ logger = logging.getLogger("app.ia")
 
 OPENROUTER_BASE = "https://openrouter.ai/api/v1/"
 
-# Haiku 4.5 por defecto ($1/$5 por millón). El grueso del tráfico de un archivo son
-# preguntas repetidas que se contestan con una búsqueda + un párrafo: para eso alcanza.
-# Si hiciera falta más cabeza se sube desde el panel, sin tocar código.
-MODELO_POR_DEFECTO = "anthropic/claude-haiku-4.5"
+# Ministral 3B por defecto: el más barato del catálogo que admite herramientas. El
+# grueso del tráfico de un archivo son preguntas repetidas que se contestan con una
+# búsqueda + un párrafo: para eso alcanza. Si hiciera falta más cabeza se sube desde
+# el panel, sin tocar código.
+MODELO_POR_DEFECTO = "mistralai/ministral-3b-2512"
 
 # Tope de vueltas del ciclo de herramientas. Cada vuelta es una llamada paga que reenvía
 # toda la conversación: sin tope, un modelo que se obstine en buscar quema dinero sin fin.
@@ -128,8 +129,14 @@ def status() -> dict:
 
 
 def current_model() -> str:
-    """El modelo elegido desde el panel; si nadie eligió, el de la variable de entorno."""
-    return _de_bd("modelo") or _env("OPENROUTER_MODEL", MODELO_POR_DEFECTO)
+    """El modelo elegido desde el panel; si nadie eligió, el de la variable de entorno.
+
+    Prohibido usar Claude/Anthropic (u otro modelo caro no-Mistral): si lo elegido
+    en el panel o en la env var no empieza con "mistralai/", se ignora y se usa el
+    barato por defecto en su lugar.
+    """
+    elegido = _de_bd("modelo") or _env("OPENROUTER_MODEL", MODELO_POR_DEFECTO)
+    return elegido if elegido.startswith("mistralai/") else MODELO_POR_DEFECTO
 
 
 def model_exists(slug: str) -> bool:
