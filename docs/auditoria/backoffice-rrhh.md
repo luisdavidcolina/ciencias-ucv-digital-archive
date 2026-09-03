@@ -1499,7 +1499,7 @@ supera un umbral y proceso en segundo plano si hace falta.
 `app/static/admin-monitor.js:223`
 **Hoy**: `new Blob(["" + csv], { type: "text/csv;charset=utf-8;" })`. Excel en Windows
 —el destino real de este archivo— ignora el `type` y lee en la codificación del
-sistema. Escenario: se abre el CSV y aparece «PÃ©rez GonzÃ¡lez» en las 25 filas.
+sistema. Escenario: se abre el CSV y aparece «Pérez González» en las 25 filas.
 **Debe**: anteponer `﻿`, como ya hace el importador al aceptar `utf-8-sig`.
 **Esfuerzo**: S. **Archivos**: `app/static/admin-monitor.js` `[CHOCA]`.
 
