@@ -323,6 +323,11 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       (`admin-users.js:610`) sigue llamando a `promptModal` sin el quinto argumento; hay que
       pasarle `"password"`.
 
+- [x] `OA-015` · resuelto por agente-b5-admin-monitor (B5-admin-monitor): `compartirDocumento`
+      en `admin-monitor.js` ahora llama a `linkModal(...)` (admin-ui.js) en vez de pasar
+      marcado HTML crudo a `confirmModal()`, con respaldo al comportamiento anterior si
+      `linkModal` no está cargada.
+
 - [ ] `OA-093` · **archivo**: `app/static/admin-submit.js` · **carril dueño**: B7-admin-submit
       **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
       **qué hace falta**: `showProgress(containerId, label, { pct, onCancel })` ahora admite una
@@ -401,6 +406,56 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       su propia migración; no es un ajuste de gráficos, y `admin-charts.js` sólo la tocaría una
       vez exista el endpoint.
 
+- **NOTA (no es un pendiente, es una carrera de git)**: hice `git add app/static/admin-charts.js
+      app/static/admin-stats.js docs/auditoria/_BUZON.md` con nombres explícitos (regla 10) y
+      comprobé `git diff --cached --stat` antes de confirmar que sólo llevaba mis tres archivos.
+      Entre ese `add` y mi `commit`, otro agente (`agente-b6-admin-ui`) hizo su propio commit
+      sobre el mismo índice compartido y se llevó mis dos archivos ya en stage: quedaron en
+      `3b6001e` ("Buzon: notas cruzadas de B6-admin-ui para OA-015, OA-039/040, OA-093, OA-182,
+      OR-207"), no en un commit propio de este carril. Verificado con `git show --stat 3b6001e`:
+      el diffstat de `admin-charts.js`/`admin-stats.js` coincide exactamente con lo que yo tenía
+      en stage (155/37 líneas). El contenido es correcto — OA-014/OR-026, OA-067, OA-074/076,
+      OA-075/VI-036, OA-077, OR-073/074, OR-110, OA-071/072/OR-234 — no reparo el historial.
+      — agente-b10-admin-charts (B10-admin-charts)
+
+- [x] `SD-208` · **decisión tomada, no anotación pendiente** · agente-f1-paginas
+      (F1-paginas-estaticas): confirmado con evidencia — `vercel.json` sólo construye
+      `api/index.py` (rutas dinámicas) y `app/static/**/*` (`@vercel/static`); no hay build ni
+      route para `www/`. No existe ningún `www/` a nivel de holding en `C:\negocios\` (la raíz
+      del repo sólo tiene `apps/`, `docs/`, `negocio/`, `areas/`, `archivo/`) con el que esta
+      carpeta pudiera compartirse — es interna y exclusiva de esta app. `www/` no tiene ningún
+      HTML propio (sólo `styles.css`, `logo.png`, `logoblanco.png`), y su `styles.css` es
+      literalmente una copia congelada de las primeras ~1050 líneas de `app/static/styles.css`
+      (compárese la cabecera: la copia carece de `--ds-font-scale` y corta un selector a mitad
+      de línea al final). Con esa evidencia, borrado (`git rm www/styles.css`, dentro de mi
+      carril). `www/logo.png` y `www/logoblanco.png` no son míos (mi carril sólo declara
+      `www/styles.css`) — quedan intactos; si alguien confirma que tampoco se sirven, es candidato
+      a limpiar aparte.
+
+- [ ] `BR-180` / `OR-278` / `DG-165` / `SI-160` · **archivo**: `app/static/hr.html`,
+      `app/static/hr.js`, `app/static/admin_hr.html`, `app/static/admin_archive.html`,
+      `scanner-app/` · **carril dueño**: A3-buscador-rrhh / A4-rrhh-backend / B2-admin-rrhh-html
+      / E1-escaner-puente **quién lo pide**: agente-f1-paginas (F1-paginas-estaticas)
+      **qué hace falta**: estas cuatro fichas piden contenido real en `ayuda.html` (mi archivo)
+      pero enlazado *desde* pantallas que no son mías — el enlace de ayuda contextual en
+      `hr.html`/`admin_hr.html` hacia la sección de RRHH, y la guía de digitalización enlazada
+      desde donde se explique el escáner. Además `DG-159`/`DG-165` piden contenido sobre una
+      pantalla de digitalización (`scanner-app/ui/`) que **todavía no existe** (`DG-154`,
+      `E1-escaner-puente`) — documentar un flujo que no está construido dejaría la ayuda
+      describiendo algo falso. Dejo `ayuda.html` con la estructura de categorías ya lista
+      («Módulo RRHH», «Administración») para que cuando esas pantallas enlacen aquí, el contenido
+      se agregue sin tocar mi archivo dos veces; no invento el contenido de las 4 Partes ni del
+      flujo del escáner porque esas fichas describen comportamiento que vive en otros carriles.
+
+- [ ] `SI-161` · **archivo**: `app/static/ayuda.html:236-242` (buscador de ayuda) ·
+      **carril dueño**: F1-paginas-estaticas (el mío, pero fuera de alcance de esta pasada)
+      **quién lo pide**: agente-f1-paginas (F1-paginas-estaticas)
+      **qué hace falta**: la ficha dice «o se quita el campo hasta que haya contenido, o se
+      implementa con estado vacío explícito». Hoy sigue sin contenido real que buscar (ver
+      `BR-180`/`SI-160` arriba): decidir cuál de las dos opciones toca es una decisión de producto,
+      no una corrección de código — la dejo anotada para cuando haya contenido o para que alguien
+      confirme quitar el campo mientras tanto.
+
 ## Pendientes de B8-admin-edit-archivo que tocan archivos ajenos
 
 - [ ] `OA-133` (vaciar papelera / purgar en lote) · **archivos**: `app/routes/trash.py`
@@ -470,3 +525,17 @@ El contenido en `HEAD` es correcto (verificado leyendo el archivo tras el commit
 mensaje del commit no es el mío. No reparo el historial, según la regla 10.
 
 **quién lo pide**: agente-b8-admin-edit-archivo (B8-admin-edit-archivo)
+
+## Aviso: mi commit de C10-ficheros-r2 quedó fusionado con D1-ia-backend
+
+Antes de comitear comprobé `git status --short` y `git diff --cached --stat`: sólo tenía en
+stage mis tres archivos (`app/routes/files.py`, `app/routes/share.py`,
+`docs/auditoria/_BUZON.md`), 234 inserciones/24 borrados, nada ajeno. Entre ese `add` y el
+`git commit` otro agente (D1-ia-backend, a juzgar por los archivos) hizo su propio commit
+sobre el mismo índice compartido y arrastró su trabajo al mío: el commit resultante
+(`a3052c6`) incluye además `app/core/ai.py`, `app/core/ai_proposals.py`,
+`app/core/ai_tools.py`, `app/routes/ai.py` y `app/tests/test_ia_seguridad.py` (nuevo), que no
+son míos y no los escribí. El contenido de mis tres archivos en `HEAD` es correcto (verificado
+leyendo `files.py`/`share.py` tras el commit). No reparo el historial, según la regla 10.
+
+**quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
