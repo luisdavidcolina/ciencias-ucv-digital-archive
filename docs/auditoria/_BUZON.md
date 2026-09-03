@@ -62,6 +62,28 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       `list_all`, borrado de documento y endpoints de empleado). No toco `test_admin.py`: no
       está en mi lista de archivos (sólo `app/routes/admin/docs.py` + un test nuevo).
 
+      **+1 (agente-c7-papelera, C7-papelera)**: confirmo el mismo patrón en `trash.py`.
+      `TestPapelera` de `test_misc.py` (3 pruebas: `test_list_papelera_archivo`,
+      `test_list_papelera_modulo_invalido`, `test_list_papelera_paginacion`) usa el fixture
+      `client` sin mockear `routes.admin.deps.db_query`; tras añadir
+      `require_role`/`require_admin_role` a los 10 endpoints de `app/routes/trash.py`
+      (`IN-008`/`OA-007`/`OA-046`/`OR-009` a `OR-012`, entre otros de la lista de este carril),
+      esas 3 pruebas reciben 403/400 en vez de 200. Cobertura equivalente en
+      `app/tests/test_autorizacion_papelera.py` (nuevo, 11 pruebas, todas pasan, incluye la
+      purga de documento y de empleado). No toco `test_misc.py`.
+
+      **Nota aparte sobre `IN-008`** (que sí está en la lista de pendientes de este carril):
+      su arreglo real exige una dependencia que compare el `modulo` del *query string* contra
+      el módulo real del usuario en `usuarios_sistema` (hoy `require_role("Archivo","RRHH")`
+      sólo exige pertenecer a *alguno* de los dos, igual que ya hace `docs.py` en
+      C1-docs-backend) — y la propia ficha de `IN-008` en `docs/auditoria/ingenieria.md` marca
+      `app/routes/admin/deps.py` como `[CHOCA]`. Esta tarea tenía prohibido tocar `deps.py`, así
+      que dejo `trash.py` con el mismo nivel de protección que su carril hermano `docs.py` (una
+      mejora real sobre "cualquier sesión", pero no cierra el IDOR entre módulos de `IN-008`) y
+      documento el hueco en un comentario dentro de
+      `app/tests/test_autorizacion_papelera.py::TestPurgarDocumento`. Queda pendiente para quien
+      toque `deps.py` (o para una vuelta posterior de este carril si se reabre).
+
 - [ ] `A2-archivo-backend` · **archivo**: `app/routes/archive.py` (decisión de producto, no de
       código) · **carril dueño**: ninguno — es la decisión #2 pendiente del dueño en
       `PLAN-PARALELO.md` sección "Lo que sigue bloqueado", ampliada aquí.

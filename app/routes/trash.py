@@ -7,7 +7,7 @@ _SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
 from fastapi import APIRouter, Depends, HTTPException
 
 from database import db_query, db_transaction, log_event
-from routes.admin.deps import require_session
+from routes.admin.deps import require_admin_role, require_role, require_session
 from routes.admin.helpers import _require_modulo, module_meta, paginate
 
 router = APIRouter(prefix="/api/admin", tags=["papelera"], dependencies=[Depends(require_session)])
@@ -22,6 +22,7 @@ def list_trash(
     modulo: str = "Archivo",
     page: int = 1,
     per_page: int = 25,
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
     """Lista los documentos (y empleados en RRHH) en la papelera."""
     _require_modulo(modulo)
@@ -73,7 +74,12 @@ def list_trash(
 
 
 @router.post("/papelera/{doc_id}/restaurar")
-def restore_document(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
+def restore_document(
+    doc_id: int,
+    modulo: str = "Archivo",
+    usuario: str = "",
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Recupera un documento de la papelera (deshace el soft-delete)."""
     _require_modulo(modulo)
     if modulo == "Archivo":
@@ -95,13 +101,21 @@ def restore_document(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
 
 
 @router.delete("/papelera/{doc_id}/purgar")
-def purge_document(doc_id: int, modulo: str, usuario: str):
+def purge_document(
+    doc_id: int,
+    modulo: str,
+    usuario: str,
+    _autorizado: str = Depends(require_admin_role("Archivo", "RRHH")),
+):
     """Elimina permanentemente un documento de la papelera. Irreversible.
 
     IN-164 / OR-011 / OR-012: las 2-3 escrituras relacionadas (descriptores,
     versiones y el registro principal) van en una sola `db_transaction()` para
     que no puedan quedar a medias — o se borra todo el rastro del documento, o
     no se borra nada.
+
+    Borrado irreversible: exige `require_admin_role`, no basta con pertenecer
+    al módulo (IN-008/OR-009 a OR-012).
     """
     if modulo == "Archivo":
         existing = db_query(
@@ -131,7 +145,11 @@ def purge_document(doc_id: int, modulo: str, usuario: str):
 
 # Papelera de empleados
 @router.get("/papelera/empleados")
-def list_trash_employees(page: int = 1, per_page: int = 25):
+def list_trash_employees(
+    page: int = 1,
+    per_page: int = 25,
+    _autorizado: str = Depends(require_role("RRHH")),
+):
     page, per_page, offset = paginate(page, per_page)
 
     count_row = db_query(
@@ -153,7 +171,11 @@ def list_trash_employees(page: int = 1, per_page: int = 25):
 
 
 @router.post("/papelera/empleados/{emp_id}/restaurar")
-def restore_employee(emp_id: int, usuario: str = ""):
+def restore_employee(
+    emp_id: int,
+    usuario: str = "",
+    _autorizado: str = Depends(require_role("RRHH")),
+):
     result = db_query(
         "UPDATE public.empleados SET deleted_at=NULL, deleted_by=NULL WHERE id=%s AND deleted_at IS NOT NULL RETURNING id",
         [emp_id], fetch="one", commit=True,
@@ -165,7 +187,12 @@ def restore_employee(emp_id: int, usuario: str = ""):
 
 
 @router.delete("/papelera/empleados/{emp_id}/purgar")
-def purge_employee(emp_id: int, usuario: str):
+def purge_employee(
+    emp_id: int,
+    usuario: str,
+    _autorizado: str = Depends(require_admin_role("RRHH")),
+):
+    """Borrado irreversible del empleado y sus documentos: exige `require_admin_role`."""
     existing = db_query(
         "SELECT id FROM public.empleados WHERE id=%s AND deleted_at IS NOT NULL",
         [emp_id], fetch="one",
@@ -184,7 +211,11 @@ def purge_employee(emp_id: int, usuario: str):
 # =============================================================================
 
 @router.get("/documento/{doc_id}/versiones")
-def list_versions(doc_id: int, modulo: str = "Archivo"):
+def list_versions(
+    doc_id: int,
+    modulo: str = "Archivo",
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     _require_modulo(modulo)
     tabla, _ = module_meta(modulo)
     rows = db_query(
@@ -205,6 +236,7 @@ def add_version(
     file_url: str = "",
     comentario: Optional[str] = None,
     usuario: str = "",
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
     """Registra una nueva versión del archivo digital para un documento."""
     _require_modulo(modulo)
@@ -244,7 +276,13 @@ def add_version(
 
 
 @router.post("/documento/{doc_id}/versiones/{ver_id}/restaurar")
-def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
+def restore_version(
+    doc_id: int,
+    ver_id: int,
+    modulo: str = "Archivo",
+    usuario: str = "",
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Restaura el archivo digital de una versión anterior como versión actual."""
     _require_modulo(modulo)
     tabla, pk = module_meta(modulo)
@@ -266,7 +304,13 @@ def restore_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: 
 
 
 @router.delete("/documento/{doc_id}/versiones/{ver_id}")
-def delete_version(doc_id: int, ver_id: int, modulo: str = "Archivo", usuario: str = ""):
+def delete_version(
+    doc_id: int,
+    ver_id: int,
+    modulo: str = "Archivo",
+    usuario: str = "",
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Elimina una versión del historial (permanente, no afecta el archivo actual)."""
     _require_modulo(modulo)
     tabla, _ = module_meta(modulo)
