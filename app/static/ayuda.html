@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ayuda y Tutoriales — Archivo Digital Ciencias UCV</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/styles.css">
   <style>
@@ -91,9 +91,16 @@
     /* Dark mode */
     body.dark-mode .help-category-card { background: #23272f; border-color: #2e3342; color: #e0e4ee; }
     body.dark-mode .help-category-title { color: #e0e4ee; }
+    /* VI-027: en oscuro estas dos quedaban en el gris claro original (#6c757d),
+       gris medio sobre gris oscuro, por debajo del contraste legible. */
+    body.dark-mode .help-category-desc  { color: #aeb6c4; }
+    body.dark-mode .help-category-count { color: #9099ab; }
     body.dark-mode .help-article-list li { border-color: #2e3342; }
     body.dark-mode .help-article-list a  { color: #d0d6e8; }
     body.dark-mode .help-coming-soon     { background: #1e222b; border-color: #2e3342; }
+    body.dark-mode .help-coming-soon i   { color: #3a4256; }
+    body.dark-mode .help-coming-soon h4,
+    body.dark-mode .help-coming-soon p   { color: #aeb6c4; }
     body.dark-mode .help-faq-toggle      { color: #e0e4ee; }
     body.dark-mode .help-faq-item        { border-color: #2e3342; }
     body.dark-mode .help-faq-body        { color: #b8c0d0; }
@@ -220,13 +227,34 @@
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// FAQ toggle — reutilizable cuando se agreguen preguntas
+// FAQ toggle — reutilizable cuando se agreguen preguntas.
+// SI-165: cada .help-faq-toggle debe generarse con aria-expanded="false" y
+// aria-controls apuntando al id de su .help-faq-body, y ese cuerpo con
+// role="region" y aria-labelledby apuntando de vuelta al botón. Este script
+// mantiene aria-expanded sincronizado con el estado visual en vez de
+// depender solo del giro del icono.
 document.querySelectorAll(".help-faq-toggle").forEach(btn => {
+  const body = btn.nextElementSibling;
+  if (body && !body.hasAttribute("role")) body.setAttribute("role", "region");
+  if (!btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", "false");
+  if (body && !btn.getAttribute("aria-controls") && body.id) {
+    btn.setAttribute("aria-controls", body.id);
+  }
   btn.addEventListener("click", () => {
-    const body = btn.nextElementSibling;
     const isOpen = body.classList.contains("open");
-    document.querySelectorAll(".help-faq-body.open").forEach(b => b.classList.remove("open"));
-    if (!isOpen) body.classList.add("open");
+    document.querySelectorAll(".help-faq-body.open").forEach(b => {
+      b.classList.remove("open");
+      const prevBtn = b.previousElementSibling;
+      if (prevBtn && prevBtn.classList.contains("help-faq-toggle")) {
+        prevBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+    if (!isOpen) {
+      body.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+    } else {
+      btn.setAttribute("aria-expanded", "false");
+    }
     const icon = btn.querySelector(".fa-chevron-down, .fa-chevron-up");
     if (icon) icon.classList.toggle("fa-chevron-up", !isOpen);
   });
