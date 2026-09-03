@@ -28,12 +28,48 @@ from routes.ai         import router as ai_router
 # APLICACION
 # =============================================================================
 
-@asynccontextmanager
-async def _lifespan(app):
+# IN-001: `api/index.py` monta Mangum con `lifespan="off"`, así que el
+# lifespan de FastAPI de aquí abajo NUNCA se ejecuta en Vercel — sólo cuando
+# se corre la app con un servidor ASGI normal (uvicorn local, TestClient).
+# Se investigó activar `lifespan="on"` en Mangum y se descartó: en un entorno
+# serverless el proveedor puede reciclar el contenedor sin llamar a shutdown,
+# y con invocaciones concurrentes durante un arranque en frío no hay garantía
+# de que startup corra exactamente una vez por contenedor antes de que llegue
+# tráfico — Mangum documenta el soporte de lifespan como pensado para un
+# proceso de servidor de larga duración, no para el ciclo de vida de una
+# función serverless. En vez de depender de eso, la misma inicialización se
+# engancha a la primera petición real (ver `_run_startup_once` /
+# `_startup_middleware` más abajo), con una guarda de módulo para no
+# repetirla en cada invocación dentro del mismo contenedor. Sigue siendo
+# segura de correr más de una vez (las migraciones son idempotentes por
+# huella SHA-256), así que una carrera entre dos peticiones concurrentes en
+# frío cuesta, como mucho, una consulta de más — nunca corrompe nada.
+_startup_done = False
+
+
+def _run_startup_once() -> None:
+    """Arranque idempotente: tabla de auditoría, slugs, migraciones, backfill.
+
+    Antes vivía sólo en `_lifespan`, que Mangum apaga en producción (IN-001).
+    Ahora también se llama desde `_startup_middleware` en la primera petición
+    real que llega al contenedor serverless.
+    """
+    global _startup_done
+    if _startup_done:
+        return
     ensure_audit_table()
     populate_missing_slugs()
     run_migrations()
     _backfill_rrhh_tipo_fk()
+    _startup_done = True
+
+
+@asynccontextmanager
+async def _lifespan(app):
+    # Sigue existiendo para uvicorn local / TestClient, donde el lifespan de
+    # FastAPI sí se ejecuta. En Vercel (Mangum, lifespan="off") no se llama
+    # nunca, y `_startup_middleware` es quien hace el trabajo.
+    _run_startup_once()
     yield
 
 
@@ -109,6 +145,19 @@ async def generic_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"detail": "Error interno del servidor. Intente nuevamente.", "status_code": 500},
     )
+
+
+@app.middleware("http")
+async def _startup_middleware(request: Request, call_next):
+    """IN-001: dispara la inicialización de arranque en la primera petición.
+
+    Necesario porque Mangum corre con `lifespan="off"` en Vercel (ver
+    `api/index.py` y el comentario junto a `_run_startup_once`), así que el
+    lifespan de FastAPI nunca se dispara en producción. `_startup_done` evita
+    repetirlo en cada petición dentro del mismo contenedor.
+    """
+    _run_startup_once()
+    return await call_next(request)
 
 
 @app.middleware("http")
