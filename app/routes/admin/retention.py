@@ -9,13 +9,22 @@ antes de poder ser eliminado o transferido al archivo permanente.
 """
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
 from database import db_query, log_event
 from ..lookups import invalidate_choices_cache
+from .deps import require_admin_role, require_role
 
-router = APIRouter()
+# La pestaña "Retención" existe tanto en Archivo como en RRHH (OA-001: hoy la
+# de RRHH abre siempre vacía porque las consultas sólo tocan datos_archivo,
+# bug documentado y no tocado aquí). El catálogo de plazos (tipo_documento)
+# es compartido por ambos módulos, así que las rutas de lectura/edición del
+# catálogo aceptan Archivo o RRHH. Las rutas de vencimientos/disposición hoy
+# sólo operan sobre datos_archivo, así que quedan restringidas a Archivo; la
+# disposición (acción irreversible en la práctica, exige acta) exige además
+# rol Admin — OA-035/OA-046.
+router = APIRouter(dependencies=[Depends(require_role("Archivo", "RRHH"))])
 
 
 class RetencionUpdate(BaseModel):
@@ -92,7 +101,7 @@ def update_retention(tipo_id: int, data: RetencionUpdate):
     }
 
 
-@router.get("/retencion/vencimientos")
+@router.get("/retencion/vencimientos", dependencies=[Depends(require_role("Archivo"))])
 def get_expired_docs(limite: int = Query(default=50, ge=1, le=500)):
     """
     Documentos del módulo Archivo cuyo plazo de retención ha expirado.
@@ -160,7 +169,7 @@ class DisposicionIn(BaseModel):
         return v
 
 
-@router.post("/retencion/disponer/{doc_id}")
+@router.post("/retencion/disponer/{doc_id}", dependencies=[Depends(require_admin_role("Archivo"))])
 def registrar_disposicion(doc_id: int, data: DisposicionIn):
     """Deja constancia de la decisión de disposición sobre un documento."""
     fila = db_query(
@@ -196,7 +205,7 @@ def registrar_disposicion(doc_id: int, data: DisposicionIn):
             "etiqueta": DISPOSICIONES[data.disposicion]}
 
 
-@router.get("/retencion/disposiciones")
+@router.get("/retencion/disposiciones", dependencies=[Depends(require_role("Archivo"))])
 def listar_disposiciones(limite: int = Query(default=100, ge=1, le=500)):
     """Historial de disposiciones: es el registro que un archivo debe conservar."""
     filas = db_query(
