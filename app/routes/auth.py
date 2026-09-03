@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Cookie, HTTPException, Response, status
+import time
+from fastapi import APIRouter, Cookie, HTTPException, Request, Response, status
 from typing import Optional
 
 from core.config import settings
@@ -7,6 +8,47 @@ from database import db_query, log_event, verify_password
 from models import LoginRequest, RestoreSessionRequest
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# =============================================================================
+# BLOQUEO DE LOGIN (SI-031 / SI-032)
+# =============================================================================
+# Contador de fallos en memoria del proceso, por clave "usuario|ip". No
+# sustituye a un almacén persistente compartido entre instancias (eso exige
+# tocar app/schema.sql y app/database.py, fuera de este carril; anotado en
+# _BUZON.md), pero cierra el hueco de que el bloqueo fuera puramente
+# cosmético en el navegador: un cliente que ignore login.js y ataque
+# /api/auth/login directamente también encuentra el bloqueo aquí.
+_FAILED_ATTEMPTS: dict[str, list[float]] = {}
+_LOCK_THRESHOLD = 5
+_LOCK_WINDOW_SECONDS = 300
+_LOCK_SECONDS = 30
+
+
+def _throttle_key(username: str, request: Optional[Request]) -> str:
+    ip = request.client.host if request and request.client else "?"
+    return f"{username.strip().lower()}|{ip}"
+
+
+def _is_locked(key: str) -> Optional[float]:
+    attempts = _FAILED_ATTEMPTS.get(key)
+    if not attempts:
+        return None
+    now = time.time()
+    attempts = [t for t in attempts if now - t < _LOCK_WINDOW_SECONDS]
+    _FAILED_ATTEMPTS[key] = attempts
+    if len(attempts) < _LOCK_THRESHOLD:
+        return None
+    last = attempts[-1]
+    remaining = _LOCK_SECONDS - (now - last)
+    return remaining if remaining > 0 else None
+
+
+def _register_failure(key: str) -> None:
+    _FAILED_ATTEMPTS.setdefault(key, []).append(time.time())
+
+
+def _clear_failures(key: str) -> None:
+    _FAILED_ATTEMPTS.pop(key, None)
 
 
 # =============================================================================
@@ -68,7 +110,17 @@ def _set_session_cookie(response: Response, username: str) -> None:
 
 
 @router.post("/login")
-def login(req: LoginRequest, response: Response):
+def login(req: LoginRequest, response: Response, request: Request):
+    key = _throttle_key(req.username, request)
+    remaining = _is_locked(key)
+    if remaining is not None:
+        log_event(req.username, "Login Blocked", "Auth", "Bloqueado por intentos fallidos", "Failure")
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Demasiados intentos. Intente de nuevo en unos segundos.",
+            headers={"Retry-After": str(int(remaining) + 1)},
+        )
+
     rows = db_query(
         "SELECT usuario, nombre_usuario, contrasena, modulo, rol, "
         "COALESCE(is_active, TRUE) AS is_active "
@@ -80,7 +132,12 @@ def login(req: LoginRequest, response: Response):
     if rows:
         active_rows = [r for r in rows if r.get("is_active", True)]
         for row in active_rows:
-            if verify_password(req.password.strip(), row["contrasena"]):
+            # No tocar la contraseña: sólo se recorta el usuario. Un espacio
+            # inicial o final en la contraseña es parte de la credencial
+            # (SI-035) — recortarla aquí hace que una contraseña creada con
+            # un espacio (el panel de administración no la recorta) deje de
+            # poder usarse nunca.
+            if verify_password(req.password, row["contrasena"]):
                 try:
                     db_query(
                         "UPDATE public.usuarios_sistema SET last_login = NOW() WHERE TRIM(usuario) = %s",
@@ -93,12 +150,16 @@ def login(req: LoginRequest, response: Response):
                 roles = payload["user"]["roles"]
                 log_event(req.username, "Login Success", ";".join(modules), f"Roles: {roles}")
                 _set_session_cookie(response, req.username.strip())
+                _clear_failures(key)
                 return payload
 
+    _register_failure(key)
     log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas o cuenta desactivada", "Failure")
+    # Mensaje único e idéntico para usuario inexistente, contraseña
+    # incorrecta y cuenta desactivada: no debe poder distinguirse cuál pasó.
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Credenciales incorrectas o cuenta desactivada",
+        detail="Usuario o contraseña incorrectos",
     )
 
 
@@ -145,8 +206,14 @@ def logout(response: Response):
 
 
 @router.get("/verify")
-def verify_session_endpoint(ds_session: str | None = None):
-    """Verifica si el token de sesión enviado como parámetro es válido (para debugging)."""
+def verify_session_endpoint(ds_session: Optional[str] = Cookie(default=None)):
+    """Verifica si la cookie de sesión es válida.
+
+    SI-028 / IN-038: antes aceptaba el token por parámetro de query, un
+    endpoint de depuración expuesto en producción — el token quedaba en el
+    historial del navegador, en los registros de acceso y en el `Referer` de
+    cualquier enlace saliente. Ahora sólo lee la cookie httpOnly.
+    """
     username = verify_session_token(ds_session)
     if not username:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")

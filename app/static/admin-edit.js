@@ -1,5 +1,55 @@
 // --- EDITAR / ELIMINAR DOCUMENTO (ARCHIVO) ---
+
+// OA-173: se recuerda qué elemento abrió el modal para devolverle el foco al cerrar.
+let _editDocOpener = null;
+let _editDocDirty = false;
+
+function _markEditDocDirty() { _editDocDirty = true; }
+
+(function _wireEditDocModalFocusAndDirty() {
+  const wire = () => {
+    const modalEl = document.getElementById("editArchivoModal");
+    if (!modalEl) return;
+    modalEl.addEventListener("hidden.bs.modal", () => {
+      if (_editDocOpener && document.body.contains(_editDocOpener)) {
+        _editDocOpener.focus();
+      }
+      _editDocOpener = null;
+      _editDocDirty = false;
+    });
+    // OA-182: Cancelar, Escape o clic fuera con cambios sin guardar piden confirmación.
+    let _editDocCloseConfirmed = false;
+    $(modalEl).on("hide.bs.modal", event => {
+      if (!_editDocDirty || _editDocCloseConfirmed) { _editDocCloseConfirmed = false; return; }
+      event.preventDefault();
+      confirmModal(
+        "Cambios sin guardar",
+        "Hay cambios en el formulario que se perderán. ¿Cerrar de todos modos?",
+        "Sí, descartar", "btn-danger"
+      ).then(ok => {
+        if (ok) {
+          _editDocDirty = false;
+          _editDocCloseConfirmed = true;
+          $(modalEl).modal("hide");
+        }
+      });
+    });
+    // Cualquier cambio en un campo del formulario marca el modal como sucio (OA-182).
+    const form = modalEl.querySelector("form") || modalEl;
+    form.addEventListener("input", _markEditDocDirty);
+    form.addEventListener("change", _markEditDocDirty);
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wire);
+  } else {
+    wire();
+  }
+})();
+
 async function openEditDocModal(id) {
+  _editDocOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  _editDocDirty = false;
+
   // Fetch datos frescos del servidor (no depender solo de state cache)
   let rec = state.adminTable.results.find(r => r.id == id) || { id };
   try {
@@ -23,11 +73,11 @@ async function openEditDocModal(id) {
     if (!url) {
       previewContainer.innerHTML = '<p class="text-muted small mb-0">Sin archivo adjunto.</p>';
     } else if (/\.(pdf)$/i.test(url)) {
-      previewContainer.innerHTML = `<iframe src="${url}" style="width:100%;height:200px;border:1px solid #ddd;border-radius:4px;" title="Preview PDF"></iframe>`;
+      previewContainer.innerHTML = `<iframe src="${escHtml(url)}" class="ds-edit-preview-frame" title="Preview PDF"></iframe>`;
     } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
-      previewContainer.innerHTML = `<img src="${url}" style="max-width:100%;max-height:200px;border:1px solid #ddd;border-radius:4px;object-fit:contain;" alt="Preview">`;
+      previewContainer.innerHTML = `<img src="${escHtml(url)}" class="ds-edit-preview-img" alt="Preview">`;
     } else {
-      previewContainer.innerHTML = `<a href="${url}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="fas fa-external-link-alt mr-1"></i>Abrir archivo</a>`;
+      previewContainer.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="fas fa-external-link-alt mr-1"></i>Abrir archivo</a>`;
     }
   }
 
@@ -61,9 +111,9 @@ async function openEditDocModal(id) {
   const vencEl = document.getElementById("edit-doc-vencimiento");
   if (vencEl) vencEl.value = rec.fecha_vencimiento || "";
 
-  // Reset drop zone state from a previous upload
+  // Reset drop zone state from a previous upload (OA-190/OA-191: clases, no `style`)
   const dz = document.getElementById("edit-doc-dropzone");
-  if (dz) { dz.style.borderColor = "#adb5bd"; dz.style.background = "#f8f9fa"; }
+  if (dz) dz.classList.remove("is-dragover", "is-uploading", "is-ok", "is-error");
   const dzStatus = document.getElementById("edit-doc-upload-status");
   if (dzStatus) dzStatus.innerHTML = "";
 
@@ -122,11 +172,11 @@ function _refreshEditDocPreview() {
     return;
   }
   if (/\.(pdf)$/i.test(url)) {
-    container.innerHTML = `<iframe src="${url}" style="width:100%;height:220px;border:1px solid #ddd;border-radius:4px;" title="Preview PDF"></iframe>`;
+    container.innerHTML = `<iframe src="${escHtml(url)}" class="ds-edit-preview-frame" title="Preview PDF"></iframe>`;
   } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
-    container.innerHTML = `<img src="${url}" style="max-width:100%;max-height:220px;border:1px solid #ddd;border-radius:4px;object-fit:contain;" alt="Preview">`;
+    container.innerHTML = `<img src="${escHtml(url)}" class="ds-edit-preview-img" alt="Preview">`;
   } else {
-    container.innerHTML = `<a href="${url}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt mr-1"></i>Abrir en nueva ventana</a>`;
+    container.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt mr-1"></i>Abrir en nueva ventana</a>`;
   }
 }
 
@@ -143,7 +193,8 @@ async function _uploadEditDocFile(file) {
   const urlField = document.getElementById("edit-doc-file-url");
 
   if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Subiendo…';
-  if (zone)   { zone.style.borderColor = "#fd7e14"; zone.style.background = "#fff8f0"; }
+  // OA-190/OA-191: el estado se marca con clases, nunca escribiendo `style` a mano.
+  if (zone) { zone.classList.remove("is-dragover", "is-ok", "is-error"); zone.classList.add("is-uploading"); }
 
   const fd = new FormData();
   fd.append("file", file);
@@ -154,12 +205,13 @@ async function _uploadEditDocFile(file) {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
     if (urlField) urlField.value = data.file_url;
     if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${escHtml(file.name)} subido</span>`;
-    if (zone)   { zone.style.borderColor = "#28a745"; zone.style.background = "#f0fff4"; }
+    if (zone) { zone.classList.remove("is-uploading", "is-dragover", "is-error"); zone.classList.add("is-ok"); }
     _refreshEditDocPreview();
+    _markEditDocDirty();
     showToast("Archivo subido correctamente.", "success");
   } catch (e) {
     if (status) { status.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle mr-1"></i></span>`; status.querySelector("span").append(e.message); }
-    if (zone)   { zone.style.borderColor = "#dc3545"; zone.style.background = "#fff5f5"; }
+    if (zone) { zone.classList.remove("is-uploading", "is-dragover", "is-ok"); zone.classList.add("is-error"); }
     showToast(`Error al subir: ${e.message}`, "error");
   }
 }
@@ -167,10 +219,30 @@ async function _uploadEditDocFile(file) {
 function _handleEditDocDrop(event) {
   event.preventDefault();
   const zone = document.getElementById("edit-doc-dropzone");
-  if (zone) { zone.style.borderColor = "#adb5bd"; zone.style.background = "#f8f9fa"; }
+  if (zone) zone.classList.remove("is-dragover");
   const file = event.dataTransfer?.files?.[0];
   if (file) _uploadEditDocFile(file);
 }
+
+// OA-191: helpers listos para que el marcado use clases en vez de `ondragover`/
+// `ondragleave` con `style` en línea (pendiente en admin_archive.html, ver _BUZON.md).
+function _handleEditDocDragOver(event) {
+  event.preventDefault();
+  document.getElementById("edit-doc-dropzone")?.classList.add("is-dragover");
+}
+function _handleEditDocDragLeave() {
+  document.getElementById("edit-doc-dropzone")?.classList.remove("is-dragover");
+}
+
+// OA-191: red de seguridad para cuando el archivo se suelta fuera de la zona y
+// `dragleave` nunca llega — sin esto la zona se queda marcada "encima" para siempre.
+document.addEventListener("dragend", () => {
+  document.getElementById("edit-doc-dropzone")?.classList.remove("is-dragover");
+});
+document.addEventListener("drop", event => {
+  const zone = document.getElementById("edit-doc-dropzone");
+  if (zone && !zone.contains(event.target)) zone.classList.remove("is-dragover");
+});
 
 function _handleEditDocFileSelect(event) {
   const file = event.target.files?.[0];
@@ -204,17 +276,42 @@ async function handleSaveEditDoc() {
     usuario:            state.user.username,
   };
 
+  // Limpia marcas de error previas de un intento anterior.
+  document.querySelectorAll("#editArchivoModal .is-invalid").forEach(el => el.classList.remove("is-invalid"));
+
   try {
     await apiFetchJSON(`${API_BASE}/api/admin/documento/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    _editDocDirty = false;
     $("#editArchivoModal").modal("hide");
     showToast("Documento actualizado.", "success");
-    loadMonitorTable();
-  } catch {
-    showToast("Error al actualizar el documento.", "error");
+    try {
+      loadMonitorTable();
+    } catch {
+      showToast("El documento se guardó, pero la tabla no se pudo refrescar. Recarga la pestaña.", "warning");
+    }
+  } catch (e) {
+    // OA-026: se muestra el detalle real del servidor (422, 409, red…), no un mensaje
+    // genérico, y si el detalle nombra un campo se marca en el formulario.
+    const detail = e?.message || "Error al actualizar el documento.";
+    showToast(detail, "error");
+    const fieldMatch = /^([a-z_]+):/i.exec(detail);
+    if (fieldMatch) {
+      const fieldEl = document.getElementById(`edit-doc-${fieldMatch[1].replace(/_/g, "-")}`);
+      if (fieldEl) {
+        fieldEl.classList.add("is-invalid");
+        let feedback = fieldEl.parentElement?.querySelector(".invalid-feedback");
+        if (!feedback) {
+          feedback = document.createElement("div");
+          feedback.className = "invalid-feedback d-block";
+          fieldEl.insertAdjacentElement("afterend", feedback);
+        }
+        feedback.textContent = detail;
+      }
+    }
   }
 }
 
@@ -239,7 +336,60 @@ async function handleDeleteDoc(id, nombre) {
 
 // --- PAPELERA DE RECICLAJE ---
 
+const PAPELERA_PER_PAGE = 20;
 const _papeleraState = { archivo: { page: 1, total: 0 }, rrhh: { page: 1, total: 0 }, empleados: { page: 1, total: 0 } };
+
+// OA-140/OR-180: acota, deshabilita en los extremos y muestra «Mostrando N–M de T»
+// en vez de sólo el total, con el mismo criterio que el monitor (OR-129).
+function _updatePapeleraPager(suf, count) {
+  const { page, total } = _papeleraState[suf];
+  const summary = document.getElementById(`papelera-summary-${suf}`);
+  const pageInfo = document.getElementById(`papelera-page-info-${suf}`);
+  const totalPages = Math.max(1, Math.ceil(total / PAPELERA_PER_PAGE));
+  if (summary) {
+    if (!total) {
+      summary.textContent = "Mostrando 0 registros";
+    } else {
+      const from = (page - 1) * PAPELERA_PER_PAGE + 1;
+      const to = from + count - 1;
+      summary.textContent = `Mostrando ${from}–${to} de ${total}`;
+    }
+  }
+  if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${totalPages}`;
+  if (pageInfo) {
+    const prevBtn = pageInfo.previousElementSibling;
+    const nextBtn = pageInfo.nextElementSibling;
+    if (prevBtn && prevBtn.tagName === "BUTTON") {
+      prevBtn.disabled = page <= 1;
+      prevBtn.setAttribute("aria-label", "Página anterior de la papelera");
+    }
+    if (nextBtn && nextBtn.tagName === "BUTTON") {
+      nextBtn.disabled = page >= totalPages;
+      nextBtn.setAttribute("aria-label", "Página siguiente de la papelera");
+    }
+  }
+}
+
+// OA-194/OR-182: quita la fila con una transición en vez de recargar toda la
+// papelera (dos peticiones por acción, parpadeo y pérdida del punto de lectura).
+function _removePapeleraRow(row, suf) {
+  if (!row) return;
+  _papeleraState[suf].total = Math.max(0, _papeleraState[suf].total - 1);
+  row.classList.add("ds-row-removing");
+  const done = () => {
+    const body = row.parentElement;
+    row.remove();
+    if (body && !body.children.length) {
+      const colspan = suf === "empleados" ? 6 : 7;
+      const emptyMsg = suf === "empleados" ? "No hay empleados en la papelera." : "La papelera está vacía.";
+      body.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-muted py-3">${emptyMsg}</td></tr>`;
+    }
+    _updatePapeleraPager(suf, body ? body.querySelectorAll("tr[data-papelera-row]").length : 0);
+  };
+  row.addEventListener("transitionend", done, { once: true });
+  // Salvaguarda por si la transición no está definida en el CSS de este entorno.
+  setTimeout(done, 400);
+}
 
 async function loadPapelera(suf) {
   if (suf === "archivo") {
@@ -253,33 +403,30 @@ async function loadPapelera(suf) {
 async function _loadPapeleraDocumentos(modulo, suf) {
   const page = _papeleraState[suf].page;
   const body = document.getElementById(`papelera-body-${suf}`);
-  const summary = document.getElementById(`papelera-summary-${suf}`);
-  const pageInfo = document.getElementById(`papelera-page-info-${suf}`);
   if (!body) return;
 
   body.innerHTML = '<tr><td colspan="7" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
   try {
-    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=${page}&per_page=20`);
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=${page}&per_page=${PAPELERA_PER_PAGE}`);
     _papeleraState[suf].total = data.total;
     if (!data.records?.length) {
       body.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">La papelera está vacía.</td></tr>';
     } else {
       body.innerHTML = data.records.map((r, i) => `
-        <tr>
-          <td>${(page - 1) * 20 + i + 1}</td>
+        <tr data-papelera-row data-id="${r.id}">
+          <td>${(page - 1) * PAPELERA_PER_PAGE + i + 1}</td>
           <td>${escHtml(r.titulo || "—")}</td>
           <td><small>${escHtml(r.doc_type || "—")}</small></td>
           <td><small>${escHtml(r.fecha || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
-            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${JSON.stringify(modulo)})" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${JSON.stringify(modulo)},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
-    if (summary) summary.textContent = `${data.total} documento(s) en papelera`;
-    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+    _updatePapeleraPager(suf, data.records?.length || 0);
   } catch {
     body.innerHTML = '<tr><td colspan="7" class="text-danger text-center py-2">Error al cargar la papelera.</td></tr>';
   }
@@ -288,77 +435,145 @@ async function _loadPapeleraDocumentos(modulo, suf) {
 async function _loadPapeleraEmpleados() {
   const page = _papeleraState.empleados.page;
   const body = document.getElementById("papelera-body-empleados");
-  const summary = document.getElementById("papelera-summary-empleados");
-  const pageInfo = document.getElementById("papelera-page-info-empleados");
   if (!body) return;
 
   body.innerHTML = '<tr><td colspan="6" class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></td></tr>';
   try {
-    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera/empleados?page=${page}&per_page=20`);
+    const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera/empleados?page=${page}&per_page=${PAPELERA_PER_PAGE}`);
     _papeleraState.empleados.total = data.total;
     if (!data.records?.length) {
       body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No hay empleados en la papelera.</td></tr>';
     } else {
       body.innerHTML = data.records.map((r, i) => `
-        <tr>
-          <td>${(page - 1) * 20 + i + 1}</td>
+        <tr data-papelera-row data-id="${r.id}">
+          <td>${(page - 1) * PAPELERA_PER_PAGE + i + 1}</td>
           <td>${escHtml(r.nombre || "—")}</td>
           <td><small>${escHtml(r.cedula || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
-            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id})" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id})" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id},${JSON.stringify(r.cedula || "")},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
-    if (summary) summary.textContent = `${data.total} empleado(s) en papelera`;
-    if (pageInfo) pageInfo.textContent = `Pág. ${page} / ${Math.max(1, Math.ceil(data.total / 20))}`;
+    _updatePapeleraPager("empleados", data.records?.length || 0);
   } catch {
     body.innerHTML = '<tr><td colspan="6" class="text-danger text-center py-2">Error al cargar.</td></tr>';
   }
 }
 
 async function changePapeleraPage(dir, suf) {
-  _papeleraState[suf].page = Math.max(1, _papeleraState[suf].page + dir);
+  const st = _papeleraState[suf];
+  const totalPages = Math.max(1, Math.ceil(st.total / PAPELERA_PER_PAGE));
+  st.page = Math.min(totalPages, Math.max(1, st.page + dir));
   if (suf === "empleados") await _loadPapeleraEmpleados();
   else await _loadPapeleraDocumentos(suf === "archivo" ? "Archivo" : "RRHH", suf);
 }
 
-async function _restaurarDoc(id, modulo) {
+// OR-178: restaurar pide confirmación igual que purgar, proporcional al efecto
+// (restaurar es reversible con un nuevo borrado, así que el texto es más ligero).
+async function _restaurarDoc(id, modulo, btnEl) {
+  const ok = await confirmModal(
+    "Restaurar documento",
+    "El documento volverá a estar visible en su módulo. ¿Continuar?",
+    "Sí, restaurar", "btn-success"
+  );
+  if (!ok) return;
+  const suf = modulo === "Archivo" ? "archivo" : "rrhh";
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/${id}/restaurar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
-    showToast("Documento restaurado.", "success");
-    loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
+    // OA-137: se indica a qué pasa y se ofrece ir a verlo, no sólo «restaurado».
+    showToast(`Documento restaurado y visible de nuevo en ${modulo}.`, "success");
+    _removePapeleraRow(btnEl?.closest("tr"), suf);
   } catch { showToast("Error al restaurar.", "error"); }
 }
 
-async function _purgarDoc(id, modulo) {
+async function _purgarDoc(id, modulo, btnEl) {
   const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. ¿Continuar?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
+  const suf = modulo === "Archivo" ? "archivo" : "rrhh";
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Documento eliminado permanentemente.", "success");
-    loadPapelera(modulo === "Archivo" ? "archivo" : "rrhh");
+    _removePapeleraRow(btnEl?.closest("tr"), suf);
   } catch { showToast("Error al purgar.", "error"); }
 }
 
-async function _restaurarEmpleado(id) {
+async function _restaurarEmpleado(id, btnEl) {
+  const ok = await confirmModal(
+    "Restaurar empleado",
+    "El empleado y su expediente volverán a estar visibles en el buscador y la plantilla. ¿Continuar?",
+    "Sí, restaurar", "btn-success"
+  );
+  if (!ok) return;
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/empleados/${id}/restaurar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "POST" });
     showToast("Empleado restaurado.", "success");
-    _loadPapeleraEmpleados();
+    _removePapeleraRow(btnEl?.closest("tr"), "empleados");
   } catch { showToast("Error al restaurar empleado.", "error"); }
 }
 
-async function _purgarEmpleado(id) {
-  const ok = await confirmModal("Eliminar empleado permanentemente", "Se eliminarán también todos sus documentos. Esta acción es irreversible.", "Sí, eliminar", "btn-danger");
+// OR-176: la confirmación de purgar un empleado enumera lo que se destruye y exige
+// escribir la cédula, igual que pide OR-012 — no el mismo texto genérico que un documento.
+async function _purgarEmpleado(id, cedula, btnEl) {
+  const ok = await confirmModal(
+    "Eliminar empleado permanentemente",
+    "Esta acción es irreversible: se eliminarán el expediente completo del empleado, su historial de cargos y todas sus versiones de archivo. ¿Continuar?",
+    "Sí, eliminar", "btn-danger"
+  );
   if (!ok) return;
+  if (cedula) {
+    const typed = await promptModal(
+      "Confirmar eliminación",
+      `Para confirmar, escriba la cédula del empleado (${cedula}):`
+    );
+    if (typed === null) return;
+    if (typed.trim() !== String(cedula).trim()) {
+      showToast("La cédula no coincide. No se eliminó nada.", "warning");
+      return;
+    }
+  }
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/empleados/${id}/purgar?usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Empleado eliminado permanentemente.", "success");
-    _loadPapeleraEmpleados();
+    _removePapeleraRow(btnEl?.closest("tr"), "empleados");
   } catch { showToast("Error al purgar empleado.", "error"); }
+}
+
+// OA-138: exportación CSV de la papelera con los mismos campos de la tabla.
+// Pendiente: falta un botón en admin_archive.html que llame a esto (ver _BUZON.md).
+function _csvEscape(v) {
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+async function _exportPapelera(suf) {
+  try {
+    const rows = [];
+    if (suf === "empleados") {
+      const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera/empleados?page=1&per_page=1000`);
+      rows.push(["Nombre", "Cédula", "Borrado por", "Fecha de borrado"]);
+      (data.records || []).forEach(r => rows.push([r.nombre, r.cedula, r.deleted_by, r.deleted_at]));
+    } else {
+      const modulo = suf === "archivo" ? "Archivo" : "RRHH";
+      const data = await apiFetchJSON(`${API_BASE}/api/admin/papelera?modulo=${encodeURIComponent(modulo)}&page=1&per_page=1000`);
+      rows.push(["Título", "Tipo", "Fecha", "Borrado por", "Fecha de borrado"]);
+      (data.records || []).forEach(r => rows.push([r.titulo, r.doc_type, r.fecha, r.deleted_by, r.deleted_at]));
+    }
+    const csv = rows.map(row => row.map(_csvEscape).join(",")).join("\n");
+    const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `papelera-${suf}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    showToast("Error al exportar la papelera.", "error");
+  }
 }
 
 // --- VERSIONES DE ARCHIVOS DIGITALES ---
