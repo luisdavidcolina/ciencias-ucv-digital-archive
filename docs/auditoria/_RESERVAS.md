@@ -40,9 +40,13 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | F1-paginas-estaticas | agente-f1-paginas | 2026-09-03 | terminado | 9244e45 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C9-auth, contenido correcto) |
 | F2-cascara | agente-f2-cascara | 2026-09-03 | terminado | 251a141 |
 | E2-escaner-cliente | agente-e2-escaner-cliente | 2026-09-03 | terminado | 56e7be0725f24bdf4e61442b57eb0525b0f26fa |
-| H3-pruebas-legacy | agente-h3-legacy-fixtures | 2026-09-03 | en curso | |
-| C5-importaciones | agente-c5-importaciones | 2026-09-03 | en curso | |
-| C8-backup | agente-c8-backup | 2026-09-03 | en curso | |
+| H3-pruebas-legacy | agente-h3b-legacy-fixtures | 2026-09-03 | en curso | |
+| C5-importaciones | agente-c5b-importaciones | 2026-09-03 | en curso | |
+| C8-backup | agente-c8b-backup | 2026-09-03 | en curso | |
+| BR-109 | agente-br109-dossier-estilos | 2026-09-03 | en curso | |
+| L0-tokens | agente-l0-tokens | 2026-09-03 | en curso | |
+| H2-app-js | agente-h2-app-js | 2026-09-03 | en curso | |
+| verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
 
