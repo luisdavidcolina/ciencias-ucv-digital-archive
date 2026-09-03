@@ -16,6 +16,13 @@
   const LS_TOKEN_KEY   = "ds_scanner_token";
   const DEFAULT_WS_URL = "ws://127.0.0.1:3737";
   const MAX_BACKOFF_MS = 30000;
+  // DG-021: techo de reintentos — pasados diez minutos sin conseguir conectar,
+  // dejar de reintentar solo y pedirle al usuario que lo retome a mano.
+  const MAX_RECONNECT_MS = 10 * 60 * 1000;
+  // DG-006 (parte cliente): si estando "conectado" no llega ningún mensaje en
+  // este tiempo, la conexión se trata como muerta aunque el socket siga abierto.
+  const STALE_MS = 45000;
+  const STALE_CHECK_MS = 5000;
 
   let _wsUrl    = localStorage.getItem(LS_URL_KEY)  || DEFAULT_WS_URL;
   let _mode     = localStorage.getItem(LS_MODE_KEY) || "ws";
@@ -26,6 +33,13 @@
   let _active   = false;
   let _backoff  = 1000;
   let _backoffTimer = null;
+  // DG-021: momento del primer intento de esta racha de reconexión, y si ya
+  // se agotó el techo y hay que esperar a que el usuario reintente a mano.
+  let _reconnectStartTs = 0;
+  let _stopped  = false;
+  // DG-006: marca de tiempo del último mensaje recibido y vigilante de silencio.
+  let _lastMsgTs   = 0;
+  let _staleTimer  = null;
   let _cameraStream   = null;
   let _cameraInterval = null;
   let _detector       = null;
@@ -59,6 +73,9 @@
       connected:  ["btn-success",           "fa-barcode",            "Escáner ●"],
       camera:     ["btn-info",              "fa-camera",             "Cámara activa"],
       error:      ["btn-danger",            "fa-exclamation-triangle","Sin señal"],
+      // DG-021: se agotó el techo de reintentos automáticos; hace falta un
+      // clic explícito para que vuelva a intentarlo.
+      stopped:    ["btn-secondary",         "fa-plug",               "Sin conexión — reintentar"],
     }[st] || ["btn-outline-secondary", "fa-barcode", "Escáner"];
     btn.className = btn.className.replace(/btn-\S+/g, "").replace(/\s+/g, " ").trim()
       + " btn btn-sm " + s[0];
@@ -68,42 +85,101 @@
     if (lbl) lbl.textContent = s[2];
   }
 
+  // DG-023: código de cierre → causa entendible, en vez de "Sin señal" para todo.
+  function _closeReason(code) {
+    switch (code) {
+      case 1000: return null; // cierre normal, no es un fallo que explicar
+      case 1006: return "No se pudo contactar al Scanner Bridge. ¿Está encendido y en esta red?";
+      case 1008: return "El bridge rechazó la conexión (token inválido o política). Revisa la configuración.";
+      case 4001: return "Token del escáner incorrecto o ausente.";
+      default:   return "Conexión con el Scanner Bridge interrumpida (código " + code + ").";
+    }
+  }
+
+  // DG-006 (parte cliente): si la conexión sigue "abierta" pero no llega nada
+  // en STALE_MS, tratarla como muerta en vez de dejar el botón verde sin motivo.
+  function _armStaleWatch() {
+    clearInterval(_staleTimer);
+    _staleTimer = setInterval(() => {
+      if (!_ws || _ws.readyState !== 1) return;
+      if (Date.now() - _lastMsgTs > STALE_MS) {
+        _toast("Escáner sin respuesta — reconectando…", "warning");
+        try { _ws.close(); } catch { /* onclose se encarga */ }
+      }
+    }, STALE_CHECK_MS);
+  }
+
   // ── WS con backoff exponencial ───────────────────────────────────────────────
   function _connectWS() {
     if (_ws && (_ws.readyState === 0 || _ws.readyState === 1)) return;
+    _stopped = false;
+    if (!_reconnectStartTs) _reconnectStartTs = Date.now();
+
+    // DG-023: detectar contenido mixto (página HTTPS, bridge ws:// sin cifrar)
+    // ANTES de intentar conectar — el navegador nunca lo permite y reintentar
+    // en bucle solo confunde con un "Sin señal" que no tiene arreglo posible.
+    if (location.protocol === "https:" && /^ws:\/\//i.test(_wsUrl)) {
+      _setBtnState("stopped");
+      _toast("El escáner usa ws:// sin cifrar y esta página es HTTPS: el navegador lo bloquea. Usa wss:// o cambia a modo cámara.", "error");
+      _stopped = true;
+      return;
+    }
+
     _setBtnState("connecting");
     try { _ws = new WebSocket(_wsUrlWithToken(_wsUrl)); } catch (e) {
-      _setBtnState("error"); _scheduleReconnect(); return;
+      _setBtnState("error");
+      _toast("No se pudo abrir la conexión con el escáner: " + e.message, "error");
+      _scheduleReconnect();
+      return;
     }
     _ws.onopen = () => {
       _backoff = 1000;
+      _reconnectStartTs = 0;
+      _lastMsgTs = Date.now();
       _setBtnState("connected");
       _toast("Escáner conectado", "success");
+      _armStaleWatch();
     };
     _ws.onmessage = ev => {
+      _lastMsgTs = Date.now();
       try {
         const m = JSON.parse(ev.data);
         if (m.type === "scan" && m.code) handleScannerCode(m.code);
       } catch { /* ignorar */ }
     };
-    _ws.onclose = () => {
+    _ws.onclose = ev => {
+      clearInterval(_staleTimer);
       if (!_active) { _setBtnState("idle"); return; }
-      _setBtnState("error"); _scheduleReconnect();
+      const reason = _closeReason(ev && ev.code);
+      _setBtnState("error");
+      if (reason) _toast(reason, "error");
+      _scheduleReconnect();
     };
-    _ws.onerror = () => { /* onclose sigue */ };
+    _ws.onerror = () => { /* onclose sigue con el detalle */ };
   }
 
   function _scheduleReconnect() {
     clearTimeout(_backoffTimer);
     if (!_active) return;
+    // DG-021: techo de reintentos — pasados MAX_RECONNECT_MS sin lograr
+    // conectar, dejar de insistir solo y esperar un clic explícito.
+    if (_reconnectStartTs && Date.now() - _reconnectStartTs > MAX_RECONNECT_MS) {
+      _stopped = true;
+      _setBtnState("stopped");
+      _toast("No se pudo conectar con el escáner en varios minutos. Revisa el bridge y pulsa el botón para reintentar.", "error");
+      return;
+    }
     _backoffTimer = setTimeout(() => { if (_active) _connectWS(); }, _backoff);
     _backoff = Math.min(_backoff * 2, MAX_BACKOFF_MS);
   }
 
   function _disconnectWS() {
     clearTimeout(_backoffTimer);
+    clearInterval(_staleTimer);
     if (_ws) { try { _ws.close(); } catch {} _ws = null; }
     _backoff = 1000;
+    _reconnectStartTs = 0;
+    _stopped = false;
     _setBtnState("idle");
   }
 
@@ -220,9 +296,20 @@
 
   // ── API pública ──────────────────────────────────────────────────────────────
   window.toggleScannerMode = function () {
+    // DG-021: si el modo quedó "detenido" tras agotar el techo de reintentos,
+    // el primer clic es un reintento manual explícito, no un apagado.
+    if (_active && _stopped && _mode !== "camera") {
+      _backoff = 1000;
+      _reconnectStartTs = 0;
+      _stopped = false;
+      _connectWS();
+      return;
+    }
     _active = !_active;
     if (_active) {
       _backoff = 1000;
+      _reconnectStartTs = 0;
+      _stopped = false;
       if (_mode === "camera") _startCamera(); else _connectWS();
     } else {
       if (_mode === "camera") _stopCamera(); else _disconnectWS();
