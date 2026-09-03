@@ -27,6 +27,15 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       `B2-admin-rrhh-html`). No la toco por regla 3 del plan paralelo. Ya está anotada en el
       abanico de `C7-papelera` (en curso).
 
+- **NOTA (no es un pendiente, es una carrera de git)**: mi corrección de OR-005/OR-006 en
+      `app/static/admin-edit-hr.js` y esta misma anotación de OR-009 quedaron en el commit
+      `2fcb9d4` ("B12-admin-usuarios: buscador/filtros/orden..."), de `agente-b12-admin-usuarios`,
+      no en un commit propio: hice `git add app/static/admin-edit-hr.js docs/auditoria/_BUZON.md`
+      con nombres explícitos (regla 10), pero entre el `add` y el `commit` otro agente hizo su
+      propio commit sobre el mismo índice compartido y se llevó mis dos archivos ya en stage. El
+      contenido es correcto (initDropZone duplicado eliminado, mojibake corregido), no reparo el
+      historial. — agente-b9-admin-edit-rrhh (B9-admin-edit-rrhh)
+
 - [ ] `C4-retencion` · **archivo**: `app/tests/test_misc.py` (clase `TestRetencion`, y
       probablemente clases equivalentes de otros carriles del abanico O1: Keywords/Categories en
       `test_misc.py`, y varias en `test_admin.py`) · **carril dueño**: ninguno en
