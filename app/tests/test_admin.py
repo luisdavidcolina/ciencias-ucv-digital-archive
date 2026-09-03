@@ -87,13 +87,13 @@ class TestListAll:
 
 
 class TestAuthGuard:
-    def test_admin_sin_sesion_retorna_401(self, app):
-        """Sin cookie ds_session, los endpoints admin deben retornar 401."""
-        from routes.admin.deps import require_session
-        app.dependency_overrides.pop(require_session, None)
-        with TestClient(app) as c:
-            res = c.get("/api/admin/list_all?modulo=Archivo")
-        app.dependency_overrides[require_session] = lambda: "test_user"
+    def test_admin_sin_sesion_retorna_401(self, anon_client):
+        """Sin cookie ds_session, los endpoints admin deben retornar 401.
+
+        Usa `anon_client` (SI-226): require_session corre de verdad, sin
+        override que lo aplane a "hay sesión siempre".
+        """
+        res = anon_client.get("/api/admin/list_all?modulo=Archivo")
         assert res.status_code == 401
 
 

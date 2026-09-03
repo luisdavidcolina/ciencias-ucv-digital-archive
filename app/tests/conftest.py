@@ -34,12 +34,81 @@ def app():
 
 @pytest.fixture
 def client(app):
-    """Cliente de tests con require_session desactivado (retorna usuario ficticio)."""
+    """Cliente de tests con require_session desactivado (retorna usuario ficticio).
+
+    Por defecto simula "hay sesión válida de test_user", para no romper las
+    pruebas existentes que asumen sesión y no les importa quién es el usuario.
+    """
     from routes.admin.deps import require_session
     app.dependency_overrides[require_session] = lambda: "test_user"
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.pop(require_session, None)
+
+
+@pytest.fixture
+def anon_client(app):
+    """Cliente SIN ninguna sobrescritura de require_session.
+
+    A diferencia de `client`, aquí `require_session` corre de verdad: sin
+    cookie ni cabecera X-Session-Token, la petición debe devolver 401. Úsalo
+    para probar "sin sesión, 401" en cualquier ruta admin.
+
+    Nota SI-226: antes de este fixture, `client` aplanaba require_session a
+    `lambda: "test_user"` de forma incondicional en TODA la suite, así que
+    ningún test podía detectar una ruta que se hubiera quedado sin protección.
+    """
+    from routes.admin.deps import require_session
+    previous = app.dependency_overrides.pop(require_session, None)
+    with TestClient(app) as c:
+        yield c
+    # Restaura el estado anterior (el override por defecto de `client`, si lo
+    # hubiera) para no filtrar este cambio a otros tests que compartan `app`.
+    if previous is not None:
+        app.dependency_overrides[require_session] = previous
+    else:
+        app.dependency_overrides.pop(require_session, None)
+
+
+@pytest.fixture
+def client_as(app):
+    """Factory de clientes con sesión de un usuario concreto: `client_as("ana")`.
+
+    Pensado para que otros carriles (bloque O1 y siguientes, cuando exista una
+    comprobación real de rol/módulo aguas abajo de require_session) puedan
+    escribir tests de autorización por rol sin reinventar el mecanismo de
+    override: basta con pedir `client_as("usuario_x")` y, si la ruta consulta
+    la base para conocer el rol/módulo de ese usuario, mockear `db_query` (o
+    lo que corresponda) para que devuelva la fila de usuario que se quiere
+    probar — así se ejercita la lógica real de autorización, no una que
+    siempre da "true".
+
+    Ejemplo de uso futuro:
+
+        def test_solo_admin_global_puede_X(client_as):
+            c = client_as("usuario_normal")
+            with patch("routes.admin.X.db_query", return_value=[fila_rol_normal]):
+                res = c.get("/api/admin/solo-global")
+            assert res.status_code == 403
+    """
+    from routes.admin.deps import require_session
+    previous = app.dependency_overrides.get(require_session)
+    clientes = []
+
+    def _factory(usuario="test_user"):
+        app.dependency_overrides[require_session] = lambda: usuario
+        c = TestClient(app)
+        clientes.append(c)
+        return c
+
+    yield _factory
+
+    for c in clientes:
+        c.close()
+    if previous is not None:
+        app.dependency_overrides[require_session] = previous
+    else:
+        app.dependency_overrides.pop(require_session, None)
 
 
 # ─── Filas de prueba reutilizables ────────────────────────────────────────────
