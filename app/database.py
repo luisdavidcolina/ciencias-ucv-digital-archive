@@ -2,6 +2,7 @@ import os
 import logging
 import threading
 import time as _time
+from contextlib import contextmanager
 from typing import List
 
 import psycopg2
@@ -82,6 +83,15 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                 # fetch == "none": no fetch needed
             if commit:
                 conn.commit()
+            else:
+                # IN-004: psycopg2 abre una transacción implícita en el primer
+                # execute(), también para un SELECT. Sin este rollback, la
+                # conexión vuelve al pool en estado "idle in transaction":
+                # retiene el snapshot de Neon, bloquea VACUUM y, con varias
+                # instancias concurrentes, agota el cupo de conexiones del
+                # proyecto (IN-107). Un rollback sin cambios que confirmar es
+                # barato y deja la conexión limpia para el siguiente préstamo.
+                conn.rollback()
             return result
         except pg_pool.PoolError:
             if conn is not None:
@@ -122,6 +132,96 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                     _get_pool().putconn(conn)
                 except Exception:
                     pass
+
+
+@contextmanager
+def db_transaction():
+    """Gestor de contexto para agrupar varias escrituras en una sola transacción.
+
+    IN-164: `db_query(commit=True)` confirma su propia sentencia y devuelve la
+    conexión al pool — no hay forma de agrupar dos escrituras relacionadas en
+    una sola unidad atómica. Esto ya causó pérdida de datos real (OR-004,
+    OR-011, OR-012): una operación compuesta (alta de empleado + su documento,
+    purga de un registro + sus descriptores, importación CSV de varios
+    campos) puede fallar a mitad de camino y dejar el estado a medias.
+
+    `db_transaction()` toma UNA conexión del mismo pool que usa `db_query`,
+    cede un `execute(sql, params=None, fetch="none")` ligado a esa conexión
+    para correr todas las sentencias que hagan falta, y al salir del bloque
+    `with`:
+      - si no hubo excepción: hace commit una sola vez, para todas las
+        sentencias juntas.
+      - si hubo cualquier excepción: hace rollback — NINGUNA de las
+        sentencias del bloque persiste — y relanza la excepción (envuelta en
+        HTTPException 500 si no lo era ya).
+    La conexión siempre vuelve al pool al salir, éxito o fallo, igual que
+    `db_query`.
+
+    `db_query` sigue siendo el helper para el caso simple (una sola
+    sentencia) — esa decisión no cambia. `db_transaction()` es solo para
+    cuando dos o más escrituras deben tener éxito o fallar juntas.
+
+    Uso (ejemplo copiable):
+
+        from database import db_transaction
+
+        with db_transaction() as execute:
+            execute("DELETE FROM public.archivo_descriptores WHERE id_archivo=%s", [doc_id])
+            execute("DELETE FROM public.documento_versiones WHERE tabla='datos_archivo' AND documento_id=%s", [doc_id])
+            execute("DELETE FROM public.datos_archivo WHERE id_archivo=%s", [doc_id])
+        # si llegó hasta aquí sin excepción, las tres sentencias ya hicieron commit juntas.
+        # si cualquiera lanzó, ninguna de las anteriores quedó persistida.
+
+    Para leer un resultado dentro de la misma transacción (por ejemplo un
+    `RETURNING` o un `SELECT ... FOR UPDATE`), usa `fetch`:
+
+        with db_transaction() as execute:
+            row = execute("UPDATE ... RETURNING id", [x], fetch="one")
+            execute("INSERT INTO ... VALUES (%s)", [row["id"]])
+    """
+    if not DATABASE_URL:
+        logger.error("DATABASE_URL no está definido en .env")
+        raise HTTPException(503, "Base de datos no disponible")
+
+    conn = None
+    try:
+        conn = _get_pool().getconn()
+        if conn.closed:
+            _get_pool().putconn(conn, close=True)
+            conn = _get_pool().getconn()
+
+        def execute(sql: str, params=None, fetch: str = "none"):
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute(sql, params or ())
+                if fetch == "all":
+                    return cur.fetchall() or []
+                if fetch == "one":
+                    return cur.fetchone()
+                return None
+
+        yield execute
+        conn.commit()
+    except HTTPException:
+        if conn is not None:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        raise
+    except Exception as e:
+        if conn is not None:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+        logger.error(f"Error en transacción, revertida: [{type(e).__name__}] {e}")
+        raise HTTPException(status_code=500, detail=f"Error en base de datos: {type(e).__name__}")
+    finally:
+        if conn is not None:
+            try:
+                _get_pool().putconn(conn)
+            except Exception:
+                pass
 
 
 # =============================================================================
