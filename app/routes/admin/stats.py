@@ -1,18 +1,19 @@
 """Estadísticas y gráficas del panel de administración."""
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 import pandas as pd
 
 from database import db_query
 from models import StatsRequest
 from ..archive import fetch_archive_dataframe
+from .deps import require_role
 
 router = APIRouter()
 
 
-@router.post("/stats")
+@router.post("/stats", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def get_admin_stats(req: StatsRequest):
     """Cifras de la fila de KPIs, con los filtros del panel aplicados.
 
@@ -65,7 +66,7 @@ def _normalizar_totales(fila) -> dict:
     return salida
 
 
-@router.get("/charts")
+@router.get("/charts", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def get_charts_data(modulo: str = "Archivo"):
     from .helpers import _require_modulo
     _require_modulo(modulo)
@@ -259,7 +260,7 @@ def get_charts_data(modulo: str = "Archivo"):
         }
 
 
-@router.get("/global_summary")
+@router.get("/global_summary", dependencies=[Depends(require_role("Global"))])
 def get_global_summary():
     """Resumen global para el panel de sistema (Admin Global)."""
     row = db_query("""
