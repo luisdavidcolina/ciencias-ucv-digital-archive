@@ -6,7 +6,7 @@ _SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from database import db_query, log_event
+from database import db_query, db_transaction, log_event
 from routes.admin.deps import require_session
 from routes.admin.helpers import _require_modulo, module_meta, paginate
 
@@ -96,7 +96,13 @@ def restore_document(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
 
 @router.delete("/papelera/{doc_id}/purgar")
 def purge_document(doc_id: int, modulo: str, usuario: str):
-    """Elimina permanentemente un documento de la papelera. Irreversible."""
+    """Elimina permanentemente un documento de la papelera. Irreversible.
+
+    IN-164 / OR-011 / OR-012: las 2-3 escrituras relacionadas (descriptores,
+    versiones y el registro principal) van en una sola `db_transaction()` para
+    que no puedan quedar a medias — o se borra todo el rastro del documento, o
+    no se borra nada.
+    """
     if modulo == "Archivo":
         existing = db_query(
             "SELECT id_archivo FROM public.datos_archivo WHERE id_archivo=%s AND deleted_at IS NOT NULL",
@@ -104,9 +110,10 @@ def purge_document(doc_id: int, modulo: str, usuario: str):
         )
         if not existing:
             raise HTTPException(404, "Documento no está en papelera")
-        db_query("DELETE FROM public.archivo_descriptores WHERE id_archivo=%s", [doc_id], fetch="none", commit=True)
-        db_query("DELETE FROM public.documento_versiones WHERE tabla='datos_archivo' AND documento_id=%s", [doc_id], fetch="none", commit=True)
-        db_query("DELETE FROM public.datos_archivo WHERE id_archivo=%s", [doc_id], fetch="none", commit=True)
+        with db_transaction() as execute:
+            execute("DELETE FROM public.archivo_descriptores WHERE id_archivo=%s", [doc_id])
+            execute("DELETE FROM public.documento_versiones WHERE tabla='datos_archivo' AND documento_id=%s", [doc_id])
+            execute("DELETE FROM public.datos_archivo WHERE id_archivo=%s", [doc_id])
     else:
         existing = db_query(
             "SELECT id_rrhh FROM public.datos_rrhh WHERE id_rrhh=%s AND deleted_at IS NOT NULL",
@@ -114,8 +121,9 @@ def purge_document(doc_id: int, modulo: str, usuario: str):
         )
         if not existing:
             raise HTTPException(404, "Documento no está en papelera")
-        db_query("DELETE FROM public.documento_versiones WHERE tabla='datos_rrhh' AND documento_id=%s", [doc_id], fetch="none", commit=True)
-        db_query("DELETE FROM public.datos_rrhh WHERE id_rrhh=%s", [doc_id], fetch="none", commit=True)
+        with db_transaction() as execute:
+            execute("DELETE FROM public.documento_versiones WHERE tabla='datos_rrhh' AND documento_id=%s", [doc_id])
+            execute("DELETE FROM public.datos_rrhh WHERE id_rrhh=%s", [doc_id])
 
     log_event(usuario, "Purgar Documento (permanente)", modulo, f"ID: {doc_id}")
     return {"success": True}
