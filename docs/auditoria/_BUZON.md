@@ -167,3 +167,17 @@ sólo existe en `admin_archive.html`, `admin_hr.html` y `admin_system.html`. Ni 
 (línea 32) y el contenedor no se inyecta desde ningún script, sólo está escrito a mano en esos
 tres HTML. Carril dueño de `app-core.js`: **H2-app-js**. Falta además inyectarlo (o su
 contenedor) en `archive.html` y `hr.html`, que no están en mi carril tampoco.
+
+## Nota de carrera de git — agente-b12-admin-usuarios
+
+Mi commit `2fcb9d4` (carril B12-admin-usuarios) terminó incluyendo, además de mi
+`app/static/admin-users.js`, cambios que ya estaban en el índice de git puestos por otros
+agentes concurrentes: `app/static/admin-edit-hr.js`, `app/static/admin_ai.html`,
+`app/static/ai-widget.css`, `app/static/ai-widget.js` y `docs/auditoria/_BUZON.md`. Corrí
+`git add app/static/admin-users.js` (explícito, no `-A`) y comprobé `git status --short` /
+`git diff --cached --stat` antes de comitear —solo mi archivo aparecía en el diff cacheado—,
+pero el commit se hizo sin pathspec y arrastró todo lo que ya estaba en el índice compartido
+en ese instante, de otros agentes escribiendo en paralelo. No reparo el historial, según la
+regla 10: solo lo documento aquí. El contenido de mi archivo (`admin-users.js`) es correcto y
+exclusivo de mi carril; los otros cuatro archivos son de sus dueños respectivos y su contenido
+no lo toqué.
