@@ -1,0 +1,5579 @@
+{
+"OA-001": [
+"app/routes/admin/retention.py",
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/tests/test_admin.py"
+],
+"OA-034": [
+"app/routes/admin/stats.py",
+"app/static/admin_archive.html"
+],
+"OA-035": [
+"api/admin",
+"app/routes/admin/__init__.py",
+"app/routes/admin/deps.py",
+"app/routes/files.py",
+"app/routes/hr_alerts.py",
+"app/routes/trash.py",
+"app/static/admin-categories.js",
+"app/tests/test_admin.py",
+"app/tests/test_static_analysis.py"
+],
+"OA-050": [
+"app/main.py",
+"app/static/admin_archive.html",
+"app/tests/test_static_assets.py"
+],
+"OA-051": [
+"app/static/admin-categories.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-064": [
+"app/static/admin_archive.html",
+"app/tests/test_paginas.py"
+],
+"OA-065": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-081": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-082": [
+"app/static/admin.js",
+"app/static/admin_archive.html",
+"app/tests/test_admin_panels.py"
+],
+"OA-102": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html"
+],
+"OA-103": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html",
+"app/static/admin_hr.html"
+],
+"OA-122": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js"
+],
+"OA-123": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js",
+"app/static/admin_archive.html"
+],
+"OA-131": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OA-132": [
+"app/main.py",
+"app/routes/backup.py",
+"app/routes/trash.py"
+],
+"OA-140": [
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-141": [
+"app/routes/admin/retention.py",
+"app/static/admin.js"
+],
+"OA-150": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js"
+],
+"OA-151": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/helpers.py",
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OA-158": [
+"app/static/admin-users.js"
+],
+"OA-159": [
+"app/static/admin-ui.js"
+],
+"OA-166": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OA-167": [
+"app/routes/backup.py",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-171": [
+"app/routes/backup.py",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-172": [
+"app/static/admin-ui.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-182": [
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-183": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/admin-users.js",
+"app/static/admin.js",
+"app/static/admin_archive.html",
+"app/static/styles.css",
+"app/tests/test_static_assets.py"
+],
+"OA-194": [
+"app/static/admin-edit.js",
+"app/static/admin-users.js",
+"app/static/styles.css"
+],
+"OA-195": [
+"app/static/admin-users.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-201": [
+"app/static/admin-charts.js",
+"app/static/styles.css"
+],
+"OA-202": [
+"api/choices",
+"app/routes/lookups.py",
+"app/schema.sql",
+"app/static/admin-categories.js",
+"app/static/admin-submit.js",
+"app/static/admin_archive.html"
+],
+"OA-206": [
+"app/static/admin.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-207": [
+"app/routes/admin/stats.py",
+"app/routes/archive.py"
+],
+"OA-212": [
+"app/static/styles.css"
+],
+"OA-002": [
+"app/routes/admin/retention.py",
+"app/routes/admin/stats.py",
+"app/static/admin_archive.html",
+"app/tests/test_disposicion.py"
+],
+"OA-003": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/routes/admin/stats.py"
+],
+"OA-004": [
+"app/routes/admin/docs.py",
+"app/tests/test_admin.py"
+],
+"OA-005": [
+"app/routes/admin/docs.py"
+],
+"OA-006": [
+"api/files",
+"app/routes/admin/docs.py",
+"app/routes/trash.py",
+"app/storage.py",
+"app/tests/test_admin.py",
+"docs/funcionalidades.md"
+],
+"OA-007": [
+"app/routes/trash.py",
+"app/static/admin-edit.js"
+],
+"OA-008": [
+"app/core/ai_proposals.py",
+"app/routes/trash.py",
+"app/tests/test_admin.py"
+],
+"OA-009": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-010": [
+"app/routes/ai.py",
+"app/routes/files.py",
+"app/static/admin-edit.js",
+"app/storage.py"
+],
+"OA-011": [
+"app/routes/files.py",
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-012": [
+"api/choices",
+"app/routes/lookups.py",
+"app/static/admin_archive.html",
+"app/storage.py"
+],
+"OA-013": [
+"app/static/admin_archive.html"
+],
+"OA-014": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html"
+],
+"OA-015": [
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js"
+],
+"OA-016": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OA-017": [
+"api/auth",
+"app/routes/auth.py",
+"app/static/admin.js",
+"app/tests/test_static_analysis.py"
+],
+"OA-018": [
+"app/static/admin-categories.js"
+],
+"OA-019": [
+"api/files",
+"app/static/admin-edit.js"
+],
+"OA-020": [
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js",
+"app/tests/test_sql_inserts.py"
+],
+"OA-021": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/docs.py"
+],
+"OA-022": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/imports.py",
+"app/routes/backup.py",
+"app/static/admin-charts.js",
+"app/tests/test_sql_inserts.py"
+],
+"OA-023": [
+"app/routes/admin/imports.py",
+"app/static/admin_archive.html"
+],
+"OA-024": [
+"app/main.py",
+"app/routes/trash.py"
+],
+"OA-025": [
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-edit.js"
+],
+"OA-026": [
+"app/static/admin-edit.js"
+],
+"OA-027": [
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js"
+],
+"OA-028": [
+"api/choices",
+"app/routes/lookups.py",
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-029": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-030": [
+"app/static/admin-categories.js"
+],
+"OA-031": [
+"app/static/admin-monitor.js",
+"app/static/app.js"
+],
+"OA-032": [
+"app/main.py",
+"app/routes/admin/catalog.py",
+"app/static/admin-users.js",
+"app/static/app.js"
+],
+"OA-033": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/admin-stats.js"
+],
+"OA-036": [
+"app/routes/admin/deps.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/retention.py",
+"app/routes/admin/users.py",
+"app/routes/hr_alerts.py",
+"app/routes/trash.py",
+"app/static/admin-edit-hr.js"
+],
+"OA-037": [
+"app/main.py",
+"app/routes/admin/deps.py",
+"app/routes/admin/users.py",
+"app/schema.sql",
+"app/tests/test_admin.py"
+],
+"OA-038": [
+"app/models.py",
+"app/routes/admin/users.py",
+"app/static/admin-ui.js"
+],
+"OA-039": [
+"app/core/security.py",
+"app/models.py",
+"app/routes/admin/users.py",
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OA-040": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OA-041": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OA-042": [
+"api/files",
+"app/routes/ai.py",
+"app/routes/files.py",
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/app-core.js"
+],
+"OA-043": [
+"app/static/admin-monitor.js",
+"app/static/app-core.js"
+],
+"OA-044": [
+"api/auth",
+"app/core/security.py",
+"app/routes/auth.py",
+"app/static/admin-ui.js"
+],
+"OA-045": [
+"app/static/admin-ui.js"
+],
+"OA-089": [
+"app/static/admin-categories.js",
+"app/static/admin-submit.js",
+"app/static/admin-ui.js",
+"app/static/admin.js"
+],
+"OA-046": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-047": [
+"api/files",
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/users.py",
+"app/routes/auth.py",
+"app/routes/backup.py",
+"app/routes/files.py"
+],
+"OA-048": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/catalog.py"
+],
+"OA-049": [
+"app/main.py",
+"app/routes/admin/__init__.py",
+"app/routes/admin/imports.py",
+"app/routes/ai.py",
+"app/routes/auth.py",
+"app/routes/backup.py"
+],
+"OA-052": [
+"app/static/admin_archive.html"
+],
+"OA-053": [
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-054": [
+"app/static/admin-categories.js",
+"app/static/admin_archive.html"
+],
+"OA-055": [
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-056": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/admin_archive.html"
+],
+"OA-057": [
+"app/static/admin-submit.js",
+"app/static/admin_archive.html"
+],
+"OA-058": [
+"app/static/admin_archive.html"
+],
+"OA-059": [
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-060": [
+"app/static/admin.js",
+"app/static/app.js"
+],
+"OA-061": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/retention.py",
+"app/static/admin-edit.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-062": [
+"app/routes/admin/retention.py",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-063": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-066": [
+"app/static/admin_archive.html"
+],
+"OA-067": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html"
+],
+"OA-068": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-069": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-070": [
+"app/static/admin-ui.js",
+"app/static/admin_archive.html"
+],
+"OA-071": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html"
+],
+"OA-072": [
+"app/static/admin-charts.js",
+"app/static/admin-stats.js"
+],
+"OA-073": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-074": [
+"app/static/admin-charts.js"
+],
+"OA-075": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js"
+],
+"OA-076": [
+"app/static/admin-charts.js",
+"app/static/admin_archive.html"
+],
+"OA-077": [
+"app/static/admin-charts.js"
+],
+"OA-078": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js"
+],
+"OA-079": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/viz-tokens.js"
+],
+"OA-080": [
+"app/static/admin.js"
+],
+"OA-083": [
+"app/static/admin-submit.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-084": [
+"app/static/admin-submit.js",
+"app/static/styles.css"
+],
+"OA-085": [
+"app/static/admin-submit.js"
+],
+"OA-086": [
+"app/static/admin-submit.js"
+],
+"OA-087": [
+"app/static/admin_archive.html"
+],
+"OA-088": [
+"app/static/admin-submit.js"
+],
+"OA-090": [
+"app/static/admin-submit.js"
+],
+"OA-091": [
+"app/static/admin-submit.js"
+],
+"OA-092": [
+"app/static/admin-submit.js"
+],
+"OA-093": [
+"app/static/admin-submit.js",
+"app/static/admin-ui.js"
+],
+"OA-094": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-095": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-096": [
+"app/static/admin-monitor.js"
+],
+"OA-097": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js"
+],
+"OA-098": [
+"app/static/admin-submit.js"
+],
+"OA-099": [
+"api/choices",
+"app/routes/admin/helpers.py",
+"app/static/admin-submit.js",
+"app/static/app-choices.js"
+],
+"OA-100": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-edit.js",
+"app/static/admin-submit.js",
+"app/static/admin_archive.html"
+],
+"OA-203": [
+"app/routes/lookups.py",
+"app/static/admin-submit.js",
+"app/static/admin_archive.html"
+],
+"OA-101": [
+"app/static/admin-submit.js"
+],
+"OA-104": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-105": [
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/admin_archive.html"
+],
+"OA-106": [
+"app/static/admin-monitor.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-107": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-108": [
+"app/static/admin_archive.html"
+],
+"OA-109": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-110": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-111": [
+"app/static/admin-monitor.js"
+],
+"OA-112": [
+"app/static/admin-ui.js",
+"app/static/styles.css"
+],
+"OA-113": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js"
+],
+"OA-114": [
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js"
+],
+"OA-115": [
+"app/static/admin-monitor.js"
+],
+"OA-116": [
+"app/static/admin-monitor.js"
+],
+"OA-117": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-118": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-119": [
+"app/static/admin-monitor.js"
+],
+"OA-120": [
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js"
+],
+"OA-121": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-124": [
+"app/main.py",
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js",
+"app/static/admin_archive.html"
+],
+"OA-125": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OA-126": [
+"app/static/admin-categories.js"
+],
+"OA-127": [
+"api/choices",
+"app/static/admin-categories.js"
+],
+"OA-128": [
+"app/static/admin-categories.js",
+"app/static/admin_archive.html"
+],
+"OA-129": [
+"app/static/admin-categories.js"
+],
+"OA-130": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OA-133": [
+"app/static/admin-edit.js"
+],
+"OA-134": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-135": [
+"app/routes/admin/docs.py"
+],
+"OA-136": [
+"app/routes/trash.py"
+],
+"OA-137": [
+"app/static/admin-edit.js"
+],
+"OA-138": [
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"OA-139": [
+"app/static/admin_archive.html",
+"app/tests/test_contraste.py"
+],
+"OA-142": [
+"app/routes/admin/retention.py",
+"app/static/admin.js"
+],
+"OA-143": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/static/admin_archive.html"
+],
+"OA-144": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/routes/admin/stats.py"
+],
+"OA-145": [
+"app/routes/admin/retention.py",
+"app/static/admin.js"
+],
+"OA-146": [
+"app/static/admin.js",
+"app/static/styles.css",
+"app/tests/test_contraste.py"
+],
+"OA-147": [
+"app/static/admin.js"
+],
+"OA-148": [
+"app/static/admin-ui.js",
+"app/static/admin.js"
+],
+"OA-149": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/static/admin.js"
+],
+"OA-152": [
+"app/routes/admin/catalog.py",
+"app/static/admin-users.js"
+],
+"OA-153": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/helpers.py",
+"app/static/admin-ui.js"
+],
+"OA-154": [
+"app/static/admin-users.js"
+],
+"OA-155": [
+"app/routes/admin/catalog.py",
+"app/static/admin-users.js"
+],
+"OA-156": [
+"app/database.py",
+"app/static/admin-users.js"
+],
+"OA-157": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js",
+"app/static/styles.css"
+],
+"OA-160": [
+"app/static/admin-ui.js",
+"app/static/admin_archive.html"
+],
+"OA-161": [
+"app/static/admin-ui.js"
+],
+"OA-162": [
+"app/static/admin-users.js"
+],
+"OA-163": [
+"app/static/admin-users.js"
+],
+"OA-164": [
+"app/static/admin-users.js"
+],
+"OA-165": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OA-168": [
+"app/routes/backup.py",
+"app/static/admin.js"
+],
+"OA-169": [
+"app/routes/backup.py",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-170": [
+"app/routes/backup.py",
+"app/static/admin.js"
+],
+"OA-173": [
+"app/static/admin-edit.js",
+"app/static/admin-ui.js"
+],
+"OA-174": [
+"app/static/admin-ui.js",
+"app/static/admin_archive.html"
+],
+"OA-175": [
+"app/static/admin-ui.js"
+],
+"OA-176": [
+"app/static/admin-ui.js"
+],
+"OA-177": [
+"app/static/admin-ui.js"
+],
+"OA-178": [
+"app/static/admin-ui.js",
+"app/static/admin.js",
+"app/static/admin_archive.html"
+],
+"OA-179": [
+"app/static/admin_archive.html"
+],
+"OA-180": [
+"app/static/admin_archive.html"
+],
+"OA-181": [
+"app/static/admin-monitor.js",
+"app/static/admin_archive.html"
+],
+"OA-184": [
+"app/static/styles.css"
+],
+"OA-185": [
+"app/static/styles.css"
+],
+"OA-186": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-187": [
+"app/static/admin-categories.js",
+"app/static/admin-ui.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-188": [
+"app/static/admin-ui.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-189": [
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/admin-ui.js",
+"app/static/admin-users.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-190": [
+"app/static/admin-edit.js",
+"app/static/admin-ui.js",
+"app/static/admin_archive.html",
+"app/static/app-core.js",
+"app/static/styles.css"
+],
+"OA-191": [
+"app/static/admin-edit.js",
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-192": [
+"app/static/admin-ui.js",
+"app/static/styles.css"
+],
+"OA-193": [
+"app/static/admin_archive.html",
+"app/static/app-core.js"
+],
+"OA-196": [
+"app/static/admin-users.js",
+"app/static/admin_archive.html"
+],
+"OA-197": [
+"app/static/admin_archive.html",
+"app/static/styles.css"
+],
+"OA-198": [
+"app/static/styles.css"
+],
+"OA-199": [
+"app/static/styles.css"
+],
+"OA-200": [
+"app/static/admin-ui.js",
+"app/static/styles.css"
+],
+"OA-204": [
+"app/main.py",
+"app/routes/backup.py",
+"app/routes/files.py",
+"app/static/admin_archive.html",
+"app/storage.py"
+],
+"OA-205": [
+"app/routes/admin/docs.py"
+],
+"OA-208": [
+"app/routes/admin/docs.py",
+"app/routes/admin/helpers.py"
+],
+"OA-209": [
+"app/database.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/imports.py",
+"app/routes/trash.py"
+],
+"OA-210": [
+"app/routes/admin/retention.py",
+"app/routes/hr_alerts.py",
+"app/static/admin-stats.js",
+"app/static/admin-submit.js",
+"app/static/admin.js"
+],
+"OA-211": [
+"app/static/admin_archive.html",
+"app/static/admin_hr.html"
+],
+"OR-001": [
+"api/rrhh",
+"app/routes/admin/docs.py",
+"app/routes/hr.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-300": [],
+"OR-042": [
+"app/static/admin.js"
+],
+"OR-043": [
+"api/admin",
+"app/main.py",
+"app/routes/admin/__init__.py",
+"app/routes/admin/deps.py",
+"app/routes/admin/helpers.py",
+"app/routes/admin/users.py",
+"app/static/admin-ui.js"
+],
+"OR-060": [
+"api/auth",
+"app/routes/auth.py",
+"app/static/admin-ui.js"
+],
+"OR-061": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-080": [
+"app/static/admin-stats.js",
+"app/static/admin_hr.html"
+],
+"OR-081": [
+"app/static/admin-submit.js",
+"app/static/admin_hr.html"
+],
+"OR-100": [
+"app/routes/admin/docs.py"
+],
+"OR-101": [
+"app/routes/admin/imports.py",
+"app/static/admin-charts.js",
+"app/tests/test_admin.py"
+],
+"OR-116": [
+"app/main.py",
+"app/routes/admin/imports.py",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-117": [
+"app/static/admin-monitor.js"
+],
+"OR-140": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-141": [
+"app/routes/admin/docs.py",
+"app/static/admin_hr.html"
+],
+"OR-162": [
+"api/rrhh",
+"app/routes/hr.py",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-163": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OR-172": [
+"app/static/admin-ui.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-173": [
+"app/routes/trash.py",
+"app/static/admin_hr.html",
+"vercel.json"
+],
+"OR-182": [
+"app/static/admin-edit.js"
+],
+"OR-183": [
+"api/rrhh",
+"app/routes/admin/retention.py",
+"app/routes/hr_alerts.py",
+"app/static/admin.js",
+"app/static/admin_archive.html",
+"app/static/admin_hr.html",
+"app/tests/test_hr.py"
+],
+"OR-190": [
+"app/routes/admin/retention.py",
+"app/static/admin.js"
+],
+"OR-191": [
+"app/routes/admin/catalog.py",
+"app/static/admin-users.js"
+],
+"OR-198": [
+"app/static/admin-users.js"
+],
+"OR-199": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OR-208": [
+"app/static/admin-users.js"
+],
+"OR-209": [
+"app/routes/backup.py",
+"app/static/admin.js"
+],
+"OR-218": [
+"app/routes/hr.py"
+],
+"OR-219": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-ui.js"
+],
+"OR-226": [
+"app/static/admin-ui.js"
+],
+"OR-227": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin-users.js"
+],
+"OR-240": [
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-241": [
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-246": [
+"app/static/admin-ui.js",
+"app/static/styles.css"
+],
+"OR-247": [
+"app/main.py",
+"app/routes/hr_alerts.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-278": [
+"app/static/admin_hr.html",
+"app/static/ayuda.html"
+],
+"OR-279": [
+"api/admin",
+"app/routes/admin/stats.py",
+"app/routes/hr.py"
+],
+"OR-296": [
+"app/static/admin-ui.js"
+],
+"OR-297": [],
+"BR-004": [
+"app/models.py",
+"app/routes/hr.py",
+"app/static/admin-monitor.js",
+"app/static/hr.js",
+"app/static/styles.css",
+"app/tests/test_hr.py"
+],
+"OR-002": [
+"app/routes/admin/imports.py",
+"app/schema.sql",
+"app/static/admin_hr.html",
+"app/tests/test_sql_inserts.py",
+"docs/funcionalidades.md"
+],
+"OR-003": [
+"app/routes/admin/imports.py",
+"app/schema.sql",
+"app/tests/test_imports.py",
+"app/tests/test_sql_inserts.py"
+],
+"OR-004": [
+"app/routes/admin/imports.py"
+],
+"OR-005": [
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html",
+"app/tests/test_static_analysis.py"
+],
+"OR-006": [
+"app/static/admin-edit-hr.js",
+"app/tests/test_static_assets.py"
+],
+"OR-007": [
+"app/routes/admin/docs.py",
+"app/tests/test_admin.py"
+],
+"OR-008": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/helpers.py",
+"app/routes/admin/imports.py",
+"app/static/admin-categories.js",
+"app/static/admin_hr.html"
+],
+"OR-009": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_hr.html",
+"app/tests/test_admin_panels.py"
+],
+"OR-010": [
+"app/routes/admin/docs.py",
+"app/routes/trash.py",
+"app/tests/test_admin.py"
+],
+"OR-011": [
+"app/routes/trash.py"
+],
+"OR-012": [
+"app/core/ai_proposals.py",
+"app/core/ai_tools.py",
+"app/core/security.py",
+"app/routes/admin/deps.py",
+"app/routes/ai.py",
+"app/routes/backup.py",
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"docs/modulo-ia.md"
+],
+"OR-013": [
+"app/routes/admin/docs.py",
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-014": [
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-015": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js",
+"app/static/admin_hr.html"
+],
+"OR-016": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/imports.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html",
+"app/utils.py"
+],
+"OR-017": [
+"app/models.py",
+"app/routes/admin/imports.py",
+"app/schema.sql"
+],
+"OR-018": [
+"api/admin",
+"app/routes/admin/stats.py",
+"app/routes/hr.py",
+"app/static/admin-stats.js",
+"app/tests/test_stats_totales.py"
+],
+"OR-019": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/admin-stats.js"
+],
+"OR-020": [
+"app/routes/admin/stats.py"
+],
+"OR-021": [
+"app/routes/hr_alerts.py",
+"app/static/admin.js"
+],
+"OR-022": [
+"app/routes/hr_alerts.py",
+"app/tests/test_hr.py"
+],
+"OR-023": [
+"app/routes/hr_alerts.py",
+"app/tests/test_hr.py"
+],
+"OR-024": [
+"app/routes/admin/stats.py",
+"app/routes/hr_alerts.py"
+],
+"OR-025": [
+"app/routes/admin/stats.py"
+],
+"OR-026": [
+"app/static/admin-charts.js",
+"app/static/admin_hr.html"
+],
+"OR-027": [
+"app/routes/admin/imports.py",
+"app/static/admin-ui.js",
+"app/static/admin_archive.html",
+"app/static/admin_hr.html"
+],
+"OR-028": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js",
+"app/static/admin_hr.html",
+"docs/funcionalidades.md"
+],
+"OR-029": [
+"app/static/admin-submit.js",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-030": [
+"app/main.py",
+"app/routes/lookups.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html",
+"app/static/app-core.js"
+],
+"OR-031": [
+"app/routes/admin/docs.py"
+],
+"OR-032": [
+"app/routes/admin/docs.py",
+"app/routes/trash.py"
+],
+"OR-033": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/docs.py"
+],
+"OR-034": [
+"app/routes/admin/docs.py"
+],
+"OR-035": [
+"app/static/admin-submit.js"
+],
+"OR-036": [
+"app/static/admin.js",
+"app/tests/test_static_analysis.py"
+],
+"OR-037": [
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-038": [
+"app/main.py",
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js",
+"app/tests/test_hr.py"
+],
+"OR-039": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/helpers.py",
+"app/routes/hr_alerts.py",
+"app/schema.sql"
+],
+"OR-040": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OR-041": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js",
+"app/static/admin_hr.html"
+],
+"OR-044": [
+"app/static/admin-edit-hr.js"
+],
+"OR-045": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OR-046": [
+"app/routes/admin/deps.py",
+"app/routes/admin/users.py",
+"app/static/admin-users.js",
+"app/tests/test_admin.py",
+"app/tests/test_permisos.py"
+],
+"OR-047": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OR-048": [
+"app/main.py",
+"app/routes/admin/users.py",
+"app/routes/auth.py",
+"app/static/admin-users.js",
+"app/static/login.html"
+],
+"OR-049": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OR-050": [
+"app/models.py",
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OR-051": [
+"app/routes/admin/users.py",
+"app/static/admin-ui.js"
+],
+"OR-052": [
+"app/routes/admin/catalog.py",
+"app/routes/admin/docs.py",
+"app/routes/hr.py"
+],
+"OR-053": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/schema.sql",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-054": [
+"api/files",
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js",
+"app/static/admin_hr.html",
+"app/storage.py"
+],
+"OR-055": [
+"app/routes/admin/docs.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin-submit.js",
+"app/static/admin_hr.html",
+"app/storage.py"
+],
+"OR-056": [
+"api/admin",
+"app/static/admin-categories.js"
+],
+"BR-003": [
+"app/routes/hr.py",
+"app/static/admin-categories.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html",
+"app/static/hr.js",
+"app/tests/test_hr.py",
+"app/tests/test_static_analysis.py"
+],
+"OR-057": [
+"app/routes/hr.py",
+"app/tests/test_hr.py"
+],
+"OR-058": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js",
+"app/tests/test_admin.py"
+],
+"OR-059": [
+"app/main.py",
+"app/routes/admin/users.py",
+"app/routes/auth.py",
+"app/static/admin-users.js"
+],
+"OR-062": [
+"app/static/admin_hr.html"
+],
+"OR-124": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/static/admin-charts.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-063": [
+"app/routes/admin/stats.py",
+"app/static/admin_hr.html"
+],
+"OR-064": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/admin_hr.html"
+],
+"OR-065": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-066": [
+"app/static/admin_hr.html"
+],
+"OR-067": [
+"app/routes/admin/stats.py",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-068": [
+"app/main.py",
+"app/routes/hr_alerts.py",
+"app/static/admin.js"
+],
+"OR-069": [
+"app/static/admin.js"
+],
+"OR-070": [
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-071": [
+"app/routes/admin/docs.py",
+"app/static/admin-charts.js",
+"app/static/admin_hr.html"
+],
+"OR-072": [
+"app/main.py",
+"app/routes/admin/stats.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-256": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/stats.py",
+"app/routes/hr.py",
+"app/static/admin-charts.js",
+"app/static/admin-monitor.js"
+],
+"OR-073": [
+"app/static/admin-charts.js"
+],
+"OR-074": [
+"app/static/admin-charts.js"
+],
+"OR-075": [
+"app/routes/admin/stats.py",
+"app/static/admin_hr.html"
+],
+"OR-076": [
+"app/routes/admin/stats.py"
+],
+"OR-077": [
+"app/static/admin-charts.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-078": [
+"app/static/admin-charts.js",
+"app/static/admin_hr.html"
+],
+"OR-079": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-082": [
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js"
+],
+"OR-083": [
+"app/static/admin-submit.js"
+],
+"OR-084": [
+"app/models.py",
+"app/static/admin-submit.js",
+"app/tests/test_admin.py",
+"app/tests/test_rrhh_reglas.py",
+"app/utils.py"
+],
+"OR-085": [
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/routes/hr_alerts.py",
+"app/schema.sql",
+"app/static/admin-edit-hr.js",
+"app/static/admin-submit.js",
+"app/static/admin_hr.html"
+],
+"OR-086": [
+"app/static/admin-submit.js",
+"app/static/admin_hr.html"
+],
+"OR-087": [
+"app/models.py",
+"app/static/admin-submit.js"
+],
+"OR-088": [
+"app/static/admin-submit.js",
+"app/static/styles.css"
+],
+"OR-089": [
+"app/static/admin-submit.js",
+"app/static/admin.js"
+],
+"OR-090": [
+"app/static/admin-submit.js",
+"app/static/app.js"
+],
+"OR-091": [
+"app/static/admin-submit.js"
+],
+"OR-092": [
+"app/static/admin-submit.js"
+],
+"OR-093": [
+"app/static/admin-submit.js",
+"app/static/app-choices.js"
+],
+"OR-094": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js"
+],
+"OR-095": [
+"app/static/admin-submit.js",
+"app/static/admin-ui.js"
+],
+"OR-096": [
+"app/static/admin-submit.js"
+],
+"OR-097": [
+"app/static/admin-submit.js",
+"app/static/admin_hr.html"
+],
+"OR-098": [
+"app/static/admin-monitor.js",
+"app/static/styles.css"
+],
+"OR-099": [
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js"
+],
+"OR-102": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/imports.py",
+"app/static/admin_hr.html"
+],
+"OR-103": [
+"app/routes/admin/imports.py"
+],
+"OR-104": [
+"app/routes/admin/imports.py",
+"app/static/admin_hr.html"
+],
+"OR-105": [
+"app/static/admin_hr.html"
+],
+"OR-106": [
+"app/routes/admin/imports.py",
+"app/static/admin-charts.js"
+],
+"OR-107": [
+"app/routes/admin/imports.py"
+],
+"OR-108": [
+"app/routes/admin/imports.py"
+],
+"OR-109": [
+"app/routes/admin/imports.py",
+"app/static/admin-charts.js"
+],
+"OR-110": [
+"app/static/admin-charts.js"
+],
+"OR-111": [
+"app/routes/admin/imports.py"
+],
+"OR-112": [
+"app/routes/admin/imports.py",
+"app/static/admin-charts.js"
+],
+"OR-113": [
+"app/routes/admin/imports.py"
+],
+"OR-114": [
+"app/routes/admin/imports.py",
+"app/routes/hr_alerts.py"
+],
+"OR-115": [
+"app/routes/admin/imports.py",
+"app/static/admin_hr.html",
+"app/storage.py"
+],
+"OR-118": [
+"app/main.py",
+"app/routes/admin/docs.py"
+],
+"OR-119": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js"
+],
+"OR-120": [
+"app/static/admin-monitor.js"
+],
+"OR-121": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-122": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/admin_hr.html"
+],
+"OR-123": [
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-125": [
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-126": [
+"app/routes/admin/docs.py"
+],
+"OR-127": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/app.js"
+],
+"OR-128": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-129": [
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-130": [
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-131": [
+"app/static/admin-monitor.js",
+"app/static/admin.js"
+],
+"OR-132": [
+"app/static/admin-monitor.js",
+"app/static/admin.js",
+"app/static/hr.js"
+],
+"OR-133": [
+"app/static/admin-monitor.js"
+],
+"OR-134": [
+"app/static/admin-monitor.js"
+],
+"OR-135": [
+"app/static/admin-monitor.js",
+"app/static/styles.css",
+"app/tests/test_contraste.py"
+],
+"OR-136": [
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-137": [
+"app/routes/admin/docs.py",
+"app/static/admin-monitor.js"
+],
+"OR-138": [
+"app/static/admin-monitor.js"
+],
+"OR-139": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/tests/test_static_analysis.py"
+],
+"OR-142": [
+"app/routes/admin/docs.py",
+"app/static/admin_hr.html"
+],
+"OR-143": [
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html"
+],
+"OR-144": [
+"app/static/admin_hr.html"
+],
+"OR-145": [
+"app/routes/admin/docs.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html"
+],
+"OR-146": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-147": [
+"app/static/admin-edit-hr.js"
+],
+"OR-148": [
+"app/routes/admin/docs.py",
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-149": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-ui.js",
+"app/static/admin_hr.html"
+],
+"OR-150": [
+"app/static/admin_hr.html",
+"app/tests/test_admin_panels.py"
+],
+"OR-151": [
+"app/static/admin-ui.js",
+"app/static/admin_hr.html"
+],
+"OR-152": [
+"app/static/admin_hr.html"
+],
+"OR-153": [
+"app/static/admin-edit-hr.js"
+],
+"OR-154": [
+"app/static/admin-ui.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-155": [
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-156": [
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-157": [
+"app/static/admin-edit-hr.js"
+],
+"OR-158": [
+"app/main.py",
+"app/routes/hr_alerts.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-159": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/hr_alerts.py",
+"app/routes/lookups.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-160": [
+"app/static/admin-edit-hr.js",
+"app/static/styles.css"
+],
+"OR-161": [
+"app/static/admin_hr.html",
+"app/static/hr.js"
+],
+"BR-005": [
+"app/core/ai_tools.py",
+"app/routes/hr.py",
+"app/tests/test_hr.py"
+],
+"BR-109": [
+"app/routes/hr.py",
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/admin_hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"OR-164": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js"
+],
+"OR-165": [
+"app/routes/admin/catalog.py",
+"app/static/admin-categories.js",
+"app/static/admin.js"
+],
+"OR-166": [
+"app/routes/hr.py",
+"app/static/admin-categories.js",
+"app/static/styles.css",
+"app/tests/test_contraste.py"
+],
+"OR-167": [
+"api/choices",
+"app/routes/hr.py",
+"app/routes/lookups.py",
+"app/schema.sql",
+"app/static/admin-categories.js",
+"app/static/admin_hr.html"
+],
+"OR-168": [
+"app/static/admin-categories.js"
+],
+"OR-169": [
+"app/static/admin-categories.js"
+],
+"OR-170": [
+"app/static/admin-categories.js"
+],
+"OR-171": [
+"app/static/admin-categories.js",
+"app/static/admin_hr.html"
+],
+"OR-174": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_hr.html"
+],
+"OR-175": [
+"app/routes/trash.py",
+"app/static/admin-edit.js"
+],
+"OR-176": [
+"app/static/admin-edit.js"
+],
+"OR-177": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/trash.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-178": [
+"app/static/admin-edit.js"
+],
+"OR-179": [
+"app/routes/trash.py"
+],
+"OR-180": [
+"app/static/admin-edit.js",
+"app/static/admin_hr.html"
+],
+"OR-181": [
+"app/static/admin_hr.html"
+],
+"OR-184": [
+"api/rrhh",
+"app/routes/hr_alerts.py"
+],
+"OR-185": [
+"app/static/admin.js"
+],
+"OR-186": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/static/admin_hr.html"
+],
+"OR-187": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-188": [
+"app/static/admin.js"
+],
+"OR-189": [
+"app/static/admin.js"
+],
+"OR-192": [
+"app/main.py",
+"app/routes/admin/catalog.py"
+],
+"OR-193": [
+"app/routes/admin/catalog.py",
+"app/static/admin-ui.js"
+],
+"OR-194": [
+"app/routes/admin/catalog.py",
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OR-195": [
+"app/static/admin-users.js"
+],
+"OR-196": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/catalog.py",
+"app/routes/admin/docs.py",
+"app/routes/hr_alerts.py",
+"app/static/admin-edit-hr.js"
+],
+"OR-197": [
+"app/database.py",
+"app/static/admin-users.js"
+],
+"OR-200": [
+"app/static/admin-users.js"
+],
+"OR-201": [
+"app/static/admin-ui.js",
+"app/static/admin-users.js"
+],
+"OR-202": [
+"app/routes/admin/helpers.py",
+"app/routes/admin/users.py"
+],
+"OR-203": [
+"app/static/admin-users.js"
+],
+"OR-204": [
+"app/static/admin-ui.js"
+],
+"OR-205": [
+"app/static/admin-users.js"
+],
+"OR-206": [
+"app/routes/admin/users.py",
+"app/static/admin-users.js"
+],
+"OR-207": [
+"app/static/admin-ui.js"
+],
+"OR-210": [
+"app/static/admin_hr.html"
+],
+"OR-211": [
+"app/routes/backup.py",
+"app/static/admin.js"
+],
+"OR-212": [
+"app/static/admin.js"
+],
+"OR-213": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/hr.py",
+"app/storage.py"
+],
+"OR-214": [
+"app/routes/hr.py"
+],
+"OR-215": [
+"app/routes/hr.py"
+],
+"OR-216": [
+"app/routes/hr.py"
+],
+"OR-217": [
+"app/routes/hr.py"
+],
+"OR-220": [
+"app/static/admin-ui.js"
+],
+"OR-221": [
+"app/static/admin.js",
+"app/static/styles.css"
+],
+"OR-222": [
+"app/static/admin-ui.js"
+],
+"OR-223": [
+"app/static/admin-ui.js",
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"OR-224": [
+"app/static/admin.js",
+"app/static/admin_hr.html",
+"app/tests/test_admin_panels.py"
+],
+"OR-225": [
+"app/static/admin.js",
+"app/static/admin_hr.html"
+],
+"BR-179": [
+"app/static/admin-ui.js",
+"app/static/ayuda.html",
+"app/static/hr.js"
+],
+"OR-228": [
+"app/static/admin-monitor.js",
+"app/static/admin-ui.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-229": [
+"app/static/admin_hr.html"
+],
+"OR-230": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-231": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-232": [
+"app/static/admin-monitor.js",
+"app/static/admin-users.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-233": [
+"app/static/admin_archive.html",
+"app/static/admin_hr.html"
+],
+"OR-234": [
+"app/static/admin-charts.js",
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-235": [
+"app/static/styles.css",
+"app/tests/test_contraste.py"
+],
+"OR-236": [
+"app/static/admin-monitor.js",
+"app/static/styles.css"
+],
+"OR-237": [
+"app/static/admin-monitor.js",
+"app/static/hr.js"
+],
+"OR-238": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-239": [
+"app/static/admin-categories.js",
+"app/static/admin-monitor.js",
+"app/static/admin_hr.html"
+],
+"OR-242": [
+"app/static/admin_hr.html"
+],
+"OR-243": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-244": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-245": [
+"app/static/admin_hr.html",
+"app/static/styles.css"
+],
+"OR-248": [
+"app/schema.sql"
+],
+"OR-249": [
+"app/main.py",
+"app/routes/hr.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-250": [
+"app/routes/admin/stats.py",
+"app/routes/hr.py",
+"app/schema.sql"
+],
+"OR-251": [
+"app/routes/hr_alerts.py",
+"app/static/admin_hr.html"
+],
+"OR-252": [
+"app/main.py",
+"app/schema.sql"
+],
+"OR-253": [
+"app/main.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-254": [
+"app/schema.sql"
+],
+"OR-255": [
+"app/main.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-257": [
+"app/static/admin-monitor.js"
+],
+"BR-149": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"OR-258": [
+"app/schema.sql"
+],
+"OR-259": [
+"app/schema.sql"
+],
+"OR-260": [
+"app/schema.sql"
+],
+"OR-261": [
+"app/routes/admin/stats.py",
+"app/static/admin_hr.html"
+],
+"OR-262": [
+"app/routes/admin/imports.py"
+],
+"OR-263": [
+"app/routes/auth.py",
+"app/routes/hr.py"
+],
+"OR-264": [
+"app/routes/admin/docs.py"
+],
+"OR-265": [
+"app/routes/admin/catalog.py"
+],
+"OR-266": [
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-267": [
+"app/models.py",
+"app/schema.sql",
+"app/static/admin_hr.html"
+],
+"OR-268": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/hr.py",
+"app/schema.sql"
+],
+"OR-269": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/files.py",
+"app/storage.py"
+],
+"OR-270": [
+"app/routes/admin/docs.py",
+"app/routes/hr.py",
+"app/schema.sql"
+],
+"OR-271": [
+"app/routes/admin/docs.py",
+"app/routes/hr.py"
+],
+"OR-272": [
+"app/routes/admin/docs.py"
+],
+"OR-273": [
+"app/main.py",
+"app/routes/admin/retention.py",
+"app/routes/trash.py"
+],
+"OR-274": [
+"app/routes/files.py",
+"app/static/admin-edit.js",
+"app/static/admin_hr.html"
+],
+"OR-275": [
+"app/routes/admin/catalog.py"
+],
+"OR-276": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/admin_hr.html"
+],
+"OR-277": [
+"app/static/admin-monitor.js"
+],
+"BR-180": [
+"app/static/admin_hr.html",
+"app/static/ayuda.html",
+"app/static/hr.html"
+],
+"OR-280": [
+"app/static/admin-stats.js",
+"app/static/admin.js"
+],
+"OR-281": [
+"app/routes/admin/docs.py",
+"app/static/app.js"
+],
+"OR-282": [
+"app/routes/admin/imports.py"
+],
+"OR-283": [
+"app/routes/admin/docs.py",
+"app/routes/admin/helpers.py",
+"app/routes/hr_alerts.py"
+],
+"OR-284": [
+"app/routes/admin/docs.py"
+],
+"OR-285": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js"
+],
+"OR-286": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-ui.js",
+"app/static/admin_hr.html"
+],
+"OR-287": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin.js"
+],
+"OR-288": [
+"app/static/admin-categories.js",
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/admin-users.js",
+"app/static/admin.js",
+"app/static/app-core.js"
+],
+"OR-289": [
+"app/static/app-core.js"
+],
+"OR-290": [
+"app/static/admin_hr.html"
+],
+"OR-291": [
+"app/static/admin_hr.html"
+],
+"OR-292": [
+"app/routes/admin/helpers.py"
+],
+"OR-293": [
+"app/routes/admin/docs.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/app-core.js"
+],
+"OR-294": [
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html"
+],
+"OR-295": [
+"app/static/admin-ui.js"
+],
+"OR-298": [
+"app/routes/admin/imports.py",
+"app/tests/test_sql_inserts.py"
+],
+"OR-299": [
+"app/tests/test_admin.py"
+],
+"BA-001": [
+"app/static/styles.css"
+],
+"BA-002": [
+"app/core/ai_tools.py",
+"app/main.py",
+"app/routes/files.py",
+"app/routes/lookups.py"
+],
+"BA-003": [
+"app/routes/archive.py",
+"app/tests/test_archivo.py"
+],
+"BA-005": [
+"app/routes/share.py",
+"app/tests/test_archivo.py"
+],
+"BA-030": [],
+"BA-031": [],
+"BA-006": [
+"api/choices"
+],
+"BA-101": [
+"api/choices",
+"app/tests/test_choices.py"
+],
+"BA-050": [
+"docs/funcionalidades.md"
+],
+"BA-004": [
+"app/main.py"
+],
+"BA-007": [],
+"BA-008": [
+"app/static/app-choices.js"
+],
+"BA-009": [
+"app/static/app-core.js"
+],
+"BA-010": [],
+"BA-011": [],
+"BA-012": [],
+"BA-013": [],
+"BA-014": [
+"app/static/app.js"
+],
+"BA-015": [],
+"BA-016": [
+"app/tests/test_archivo.py"
+],
+"BA-017": [],
+"BA-018": [
+"app/static/archive.html"
+],
+"BA-019": [
+"api/files",
+"app/models.py",
+"app/routes/share.py",
+"app/storage.py",
+"app/utils.py",
+"vercel.json"
+],
+"BA-020": [],
+"BA-021": [
+"app/tests/test_archivo.py"
+],
+"BA-022": [],
+"BA-023": [],
+"BA-024": [],
+"BA-025": [
+"docs/funcionalidades.md"
+],
+"BA-026": [],
+"BA-027": [],
+"BA-028": [],
+"BA-029": [],
+"BA-040": [],
+"BA-041": [],
+"BA-042": [],
+"BA-043": [],
+"BA-044": [],
+"BA-045": [],
+"BA-046": [],
+"BA-047": [],
+"BA-048": [],
+"BA-049": [],
+"BA-052": [],
+"BA-053": [],
+"BA-054": [],
+"BA-055": [],
+"BA-123": [],
+"BA-056": [],
+"BA-057": [],
+"BA-058": [],
+"BA-136": [],
+"BA-059": [],
+"BA-060": [],
+"BA-061": [],
+"BA-062": [],
+"BA-063": [],
+"BA-064": [],
+"BA-065": [],
+"BA-066": [],
+"BA-067": [],
+"BA-068": [],
+"BA-070": [],
+"BA-071": [],
+"BA-072": [],
+"BA-073": [],
+"BA-074": [],
+"BA-075": [],
+"BA-076": [],
+"BA-077": [],
+"BA-078": [],
+"BA-079": [],
+"BA-080": [],
+"BA-081": [],
+"BA-082": [],
+"BA-083": [],
+"BA-084": [],
+"BA-085": [],
+"BA-086": [],
+"BA-087": [],
+"BA-088": [],
+"BA-089": [],
+"BA-090": [],
+"BA-091": [],
+"BA-092": [],
+"BA-093": [],
+"BA-094": [],
+"BA-095": [],
+"BA-100": [],
+"BA-102": [],
+"BA-103": [],
+"BA-104": [],
+"BA-105": [],
+"BA-106": [],
+"BA-107": [],
+"BA-108": [],
+"BA-109": [],
+"BA-110": [],
+"BA-111": [],
+"BA-112": [
+"vercel.json"
+],
+"BA-113": [],
+"BA-120": [],
+"BA-121": [],
+"BA-122": [],
+"BA-124": [],
+"BA-125": [],
+"BA-126": [],
+"BA-127": [],
+"BA-128": [],
+"BA-129": [],
+"BA-130": [],
+"BA-131": [],
+"BA-132": [
+"api/admin"
+],
+"BA-133": [],
+"BA-134": [],
+"BA-135": [],
+"BA-137": [],
+"BA-138": [],
+"BA-139": [],
+"BA-140": [],
+"BA-141": [],
+"BA-142": [],
+"BA-143": [],
+"BA-144": [],
+"BA-150": [],
+"BA-151": [],
+"BA-051": [
+"api/archivo"
+],
+"BA-145": [
+"api/choices"
+],
+"BA-146": [],
+"BA-147": [],
+"BA-148": [],
+"BA-149": [
+"app/routes/share.py"
+],
+"BA-152": [],
+"BA-160": [],
+"BA-161": [
+"app/core/ai_tools.py",
+"app/routes/archive.py"
+],
+"BA-162": [],
+"BA-163": [],
+"BA-164": [
+"app/core/ai.py"
+],
+"BA-165": [],
+"BA-166": [],
+"BA-167": [],
+"BA-168": [],
+"BA-169": [],
+"BA-170": [],
+"BA-171": [],
+"BA-172": [],
+"BA-173": [],
+"BA-174": [
+"vercel.json"
+],
+"BA-175": [],
+"BA-176": [],
+"BA-177": [],
+"BA-178": [],
+"BA-179": [],
+"BA-180": [],
+"BA-181": [],
+"BA-182": [],
+"BA-183": [
+"docs/funcionalidades.md"
+],
+"BA-184": [
+"app/core/config.py",
+"app/storage.py"
+],
+"BA-185": [],
+"BA-186": [],
+"BA-187": [],
+"BA-190": [],
+"BA-191": [],
+"BA-192": [],
+"BA-193": [
+"app/tests/test_archivo.py"
+],
+"BA-194": [],
+"BA-195": [
+"app/tests/test_estatico_ids.py",
+"app/tests/test_estilos.py"
+],
+"BA-196": [],
+"BA-197": [],
+"BA-198": [
+"api/choices"
+],
+"BA-199": [],
+"BA-200": [
+"app/static/archive.js",
+"app/tests/test_sql_columns.py"
+],
+"BR-001": [
+"api/rrhh",
+"app/main.py",
+"app/routes/archive.py",
+"app/routes/hr.py",
+"app/static/hr.html",
+"app/static/hr.js",
+"app/tests/test_hr.py"
+],
+"BR-002": [
+"api/rrhh",
+"app/main.py",
+"app/routes/admin/deps.py",
+"app/routes/admin/docs.py",
+"app/routes/archive.py",
+"app/routes/files.py",
+"app/routes/hr.py",
+"app/routes/hr_alerts.py",
+"app/routes/share.py",
+"app/routes/trash.py",
+"app/tests/test_hr.py"
+],
+"BR-006": [
+"app/routes/hr.py"
+],
+"BR-007": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-008": [
+"api/files",
+"app/routes/files.py",
+"app/static/app-core.js",
+"app/static/hr.js"
+],
+"BR-009": [
+"app/main.py",
+"app/routes/hr.py",
+"docs/datos-personales.md"
+],
+"BR-010": [
+"api/rrhh",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-011": [
+"app/static/hr.js"
+],
+"BR-012": [
+"api/rrhh",
+"app/routes/hr.py"
+],
+"BR-013": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-014": [
+"app/routes/hr.py",
+"app/static/app.js",
+"app/static/hr.js"
+],
+"BR-015": [
+"app/routes/hr.py",
+"app/tests/test_hr.py"
+],
+"BR-016": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-017": [
+"app/static/hr.js"
+],
+"BR-018": [
+"app/static/hr.js"
+],
+"BR-019": [
+"app/static/hr.js"
+],
+"BR-020": [
+"app/static/hr.js"
+],
+"BR-021": [
+"app/static/hr.js"
+],
+"BR-022": [
+"app/static/hr.js"
+],
+"BR-023": [
+"app/static/hr.js"
+],
+"BR-024": [
+"app/static/hr.js"
+],
+"BR-025": [
+"app/static/hr.js"
+],
+"BR-026": [
+"app/static/app.js",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-027": [
+"app/static/hr.js"
+],
+"BR-028": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-029": [
+"app/routes/pages.py",
+"app/static/app.js",
+"app/static/hr.js"
+],
+"BR-030": [
+"app/models.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-031": [
+"app/routes/hr.py"
+],
+"BR-032": [
+"app/routes/hr.py",
+"app/static/hr.html"
+],
+"BR-033": [
+"app/models.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-034": [
+"app/static/hr.js"
+],
+"BR-035": [
+"app/static/hr.js"
+],
+"BR-036": [
+"app/routes/hr.py",
+"app/static/app-core.js"
+],
+"BR-037": [
+"app/static/hr.js"
+],
+"BR-038": [
+"app/static/hr.js"
+],
+"BR-039": [
+"app/static/hr.js"
+],
+"BR-040": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-041": [
+"app/static/hr.js"
+],
+"BR-042": [
+"app/static/app.js"
+],
+"BR-043": [
+"app/static/hr.js"
+],
+"BR-044": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-045": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-046": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-047": [
+"app/routes/hr.py"
+],
+"BR-048": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-049": [
+"app/main.py",
+"app/routes/hr.py",
+"app/schema.sql"
+],
+"BR-050": [
+"app/main.py",
+"app/routes/hr.py"
+],
+"BR-051": [
+"app/main.py",
+"app/routes/hr.py",
+"docs/rendimiento.md"
+],
+"BR-052": [
+"app/routes/hr.py"
+],
+"BR-053": [
+"app/routes/hr.py"
+],
+"BR-054": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-055": [
+"app/main.py",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-056": [
+"app/main.py"
+],
+"BR-057": [],
+"BR-058": [
+"app/main.py",
+"app/routes/hr.py"
+],
+"BR-059": [
+"app/routes/hr.py"
+],
+"BR-060": [
+"app/routes/hr.py"
+],
+"BR-061": [
+"app/routes/hr.py",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-062": [
+"app/routes/hr.py"
+],
+"BR-063": [
+"api/admin",
+"api/rrhh",
+"app/routes/hr_alerts.py"
+],
+"BR-064": [
+"app/routes/hr_alerts.py"
+],
+"BR-065": [
+"app/routes/hr_alerts.py"
+],
+"BR-066": [
+"app/main.py",
+"app/routes/admin/catalog.py",
+"app/routes/hr.py",
+"app/routes/hr_alerts.py",
+"app/static/hr.js"
+],
+"BR-067": [
+"app/main.py",
+"app/routes/hr_alerts.py"
+],
+"BR-068": [
+"app/routes/hr_alerts.py"
+],
+"BR-069": [
+"app/routes/hr_alerts.py"
+],
+"BR-070": [
+"app/routes/hr.py",
+"app/routes/hr_alerts.py",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-071": [
+"app/main.py",
+"app/routes/hr_alerts.py"
+],
+"BR-072": [
+"app/routes/hr.py"
+],
+"BR-073": [
+"app/static/hr.js"
+],
+"BR-074": [
+"app/static/hr.html"
+],
+"BR-075": [
+"app/static/hr.html"
+],
+"BR-076": [
+"app/static/hr.html"
+],
+"BR-077": [
+"app/static/hr.js"
+],
+"BR-078": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-079": [
+"app/static/hr.html"
+],
+"BR-080": [
+"app/static/hr.js"
+],
+"BR-081": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-082": [
+"app/static/hr.js"
+],
+"BR-083": [
+"app/static/hr.js"
+],
+"BR-084": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-085": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-086": [
+"app/static/hr.js"
+],
+"BR-087": [
+"app/static/hr.html"
+],
+"BR-088": [
+"app/static/hr.js"
+],
+"BR-089": [
+"app/static/hr.js"
+],
+"BR-090": [
+"app/static/hr.html"
+],
+"BR-091": [
+"app/static/hr.html"
+],
+"BR-092": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-093": [
+"app/static/hr.js"
+],
+"BR-094": [
+"app/static/app-core.js",
+"app/static/hr.js"
+],
+"BR-095": [
+"app/static/app-core.js",
+"app/static/hr.js",
+"app/tests/test_contraste.py"
+],
+"BR-096": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-097": [
+"app/static/app-core.js",
+"app/static/styles.css"
+],
+"BR-098": [
+"app/static/hr.html"
+],
+"BR-099": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-100": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-101": [
+"app/static/hr.js"
+],
+"BR-102": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-103": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-104": [
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"BR-105": [
+"app/static/styles.css"
+],
+"BR-106": [
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"BR-107": [
+"app/static/styles.css"
+],
+"BR-108": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-110": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-111": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-112": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-113": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-114": [
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"BR-115": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-116": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-117": [
+"app/static/hr.html"
+],
+"BR-118": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-119": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-120": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-121": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-122": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-123": [
+"app/static/hr.js"
+],
+"BR-124": [
+"app/static/hr.js"
+],
+"BR-125": [
+"app/routes/hr.py",
+"app/static/hr.js",
+"docs/funcionalidades.md"
+],
+"BR-126": [
+"app/static/hr.js"
+],
+"BR-127": [
+"app/static/hr.js"
+],
+"BR-128": [
+"app/static/hr.js"
+],
+"BR-129": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-141": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-130": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-131": [
+"app/static/hr.js"
+],
+"BR-136": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-132": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-133": [
+"app/static/hr.html"
+],
+"BR-134": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-135": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-137": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-138": [
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"BR-139": [
+"app/static/hr.html"
+],
+"BR-140": [
+"app/static/hr.html"
+],
+"BR-142": [
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-143": [
+"app/static/hr.js"
+],
+"BR-144": [
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"BR-145": [
+"app/static/styles.css"
+],
+"BR-146": [
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-147": [
+"app/static/styles.css"
+],
+"BR-148": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-150": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-151": [],
+"BR-152": [
+"app/main.py",
+"app/models.py",
+"app/routes/hr.py",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-153": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-154": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-155": [
+"app/main.py"
+],
+"BR-156": [
+"app/main.py"
+],
+"BR-157": [
+"app/routes/hr.py",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-158": [
+"app/static/app.js",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-159": [
+"app/routes/hr.py",
+"app/routes/share.py"
+],
+"BR-160": [
+"api/requirements.txt",
+"app/routes/hr.py"
+],
+"BR-161": [
+"app/routes/hr.py"
+],
+"BR-162": [
+"app/routes/hr.py"
+],
+"BR-163": [
+"app/main.py",
+"app/routes/hr.py"
+],
+"BR-164": [
+"app/static/hr.js",
+"docs/funcionalidades.md"
+],
+"BR-165": [
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"BR-166": [
+"app/static/hr.js"
+],
+"BR-167": [
+"app/routes/hr.py",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"BR-168": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-169": [
+"app/static/hr.js"
+],
+"BR-170": [
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"BR-171": [
+"app/static/hr.js"
+],
+"BR-172": [
+"app/static/hr.html"
+],
+"BR-173": [
+"app/static/hr.js"
+],
+"BR-174": [
+"app/main.py",
+"app/routes/hr.py"
+],
+"BR-175": [
+"app/routes/hr.py",
+"app/static/hr.html",
+"app/static/hr.js",
+"docs/funcionalidades.md"
+],
+"BR-176": [
+"app/routes/hr.py"
+],
+"BR-177": [
+"app/static/hr.html"
+],
+"BR-178": [
+"app/static/hr.js"
+],
+"SI-171": [
+"scanner-app/scanner-client.js",
+"scanner-app/server.js"
+],
+"SI-180": [
+"scanner-app/scanner-client.js"
+],
+"SI-239": [],
+"IN-067": [
+"app/static/scanner-client.js",
+"scanner-app/package.json",
+"scanner-app/server.js"
+],
+"DG-001": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-172": [
+"app/database.py"
+],
+"DG-014": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-029": [
+"scanner-app/server.js"
+],
+"DG-015": [
+"app/static/admin_archive.html",
+"app/static/admin_hr.html",
+"app/static/scanner-client.js",
+"scanner-app/package.json"
+],
+"DG-062": [
+"scanner-app/acquire",
+"scanner-app/server.js"
+],
+"DG-084": [],
+"DG-104": [
+"app/main.py",
+"app/routes/files.py",
+"app/routes/ocr.py",
+"app/schema.sql",
+"app/storage.py",
+"scanner-app/ocr"
+],
+"DG-124": [],
+"DG-141": [
+"app/routes/files.py",
+"app/storage.py",
+"scanner-app/process"
+],
+"DG-153": [
+"app/routes/trash.py",
+"app/storage.py"
+],
+"DG-036": [
+"app/tests/test_static_assets.py",
+"scanner-app/package.json",
+"scanner-app/test"
+],
+"DG-044": [
+"scanner-app/package.json"
+],
+"DG-002": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-003": [
+"scanner-app/server.js"
+],
+"SI-172": [
+"scanner-app/server.js"
+],
+"DG-004": [
+"scanner-app/server.js"
+],
+"DG-005": [
+"app/static/scanner-client.js"
+],
+"DG-006": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-007": [
+"scanner-app/server.js"
+],
+"DG-008": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-009": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-010": [
+"scanner-app/server.js"
+],
+"DG-011": [
+"scanner-app/server.js"
+],
+"DG-093": [
+"app/static/capture.js",
+"scanner-app/server.js"
+],
+"DG-012": [
+"app/static/admin_archive.html",
+"app/static/admin_hr.html",
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-013": [
+"scanner-app/server.js"
+],
+"DG-058": [
+"scanner-app/README.md",
+"scanner-app/server.js"
+],
+"SI-173": [
+"scanner-app/server.js"
+],
+"DG-146": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/static/scanner-client.js"
+],
+"DG-016": [
+"scanner-app/server.js"
+],
+"DG-017": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-018": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-019": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-089": [
+"app/static/capture.js",
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-020": [
+"app/static/app.js",
+"app/static/scanner-client.js"
+],
+"DG-021": [
+"app/static/scanner-client.js"
+],
+"DG-022": [
+"scanner-app/package.json",
+"scanner-app/scanner-client.js",
+"scanner-app/server.js"
+],
+"SI-174": [
+"app/static/scanner-client.js",
+"scanner-app/scanner-client.js"
+],
+"DG-023": [
+"app/static/scanner-client.js"
+],
+"DG-024": [
+"scanner-app/server.js"
+],
+"DG-025": [
+"scanner-app/server.js"
+],
+"DG-026": [
+"scanner-app/server.js"
+],
+"DG-027": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-028": [
+"scanner-app/package.json",
+"scanner-app/server.js"
+],
+"DG-030": [
+"scanner-app/server.js"
+],
+"DG-031": [
+"scanner-app/server.js"
+],
+"DG-032": [
+"scanner-app/server.js"
+],
+"DG-033": [
+"scanner-app/server.js",
+"scanner-app/test"
+],
+"DG-034": [
+"scanner-app/package.json",
+"scanner-app/server.js"
+],
+"DG-035": [
+"scanner-app/acquire",
+"scanner-app/build",
+"scanner-app/electron-builder.yml",
+"scanner-app/server.js"
+],
+"DG-037": [
+"scanner-app/.gitignore",
+"scanner-app/package-lock.json",
+"scanner-app/package.json"
+],
+"DG-038": [
+"scanner-app/package.json"
+],
+"DG-039": [
+"scanner-app/package.json",
+"scanner-app/server.js"
+],
+"DG-040": [
+"app/static/scanner-client.js",
+"scanner-app/logger.js",
+"scanner-app/server.js"
+],
+"DG-041": [
+"scanner-app/server.js"
+],
+"DG-042": [
+"scanner-app/server.js"
+],
+"DG-043": [
+"app/static/scanner-client.js",
+"scanner-app/server.js"
+],
+"DG-163": [
+"scanner-app/config.js",
+"scanner-app/server.js"
+],
+"DG-045": [
+"app/routes/files.py",
+"scanner-app/electron-builder.yml",
+"scanner-app/package.json",
+"scanner-app/ui"
+],
+"DG-046": [
+"scanner-app/package.json"
+],
+"DG-061": [
+"api/admin",
+"app/routes/files.py",
+"scanner-app/README.md",
+"scanner-app/electron-builder.yml"
+],
+"DG-047": [
+"scanner-app/electron-builder.yml"
+],
+"DG-048": [
+"scanner-app/build",
+"scanner-app/electron-builder.yml"
+],
+"DG-049": [],
+"DG-050": [],
+"DG-051": [],
+"DG-052": [
+"scanner-app/package.json"
+],
+"DG-053": [
+"app/static/scanner-client.js"
+],
+"DG-054": [
+"scanner-app/README.md"
+],
+"DG-055": [
+"scanner-app/server.js"
+],
+"DG-056": [],
+"DG-057": [
+"scanner-app/server.js"
+],
+"DG-059": [],
+"DG-060": [
+"scanner-app/package.json"
+],
+"DG-063": [
+"scanner-app/acquire"
+],
+"DG-064": [
+"scanner-app/acquire"
+],
+"DG-065": [],
+"DG-066": [
+"scanner-app/acquire"
+],
+"DG-067": [
+"app/static/scanner-client.js",
+"scanner-app/README.md",
+"scanner-app/acquire"
+],
+"DG-068": [],
+"DG-129": [
+"scanner-app/process",
+"scanner-app/queue",
+"scanner-app/server.js",
+"scanner-app/watch"
+],
+"DG-069": [
+"scanner-app/acquire",
+"scanner-app/config.js"
+],
+"DG-070": [
+"scanner-app/acquire"
+],
+"DG-071": [
+"scanner-app/acquire",
+"scanner-app/ui"
+],
+"DG-072": [
+"scanner-app/acquire"
+],
+"DG-073": [
+"scanner-app/acquire"
+],
+"DG-074": [],
+"DG-131": [
+"app/routes/files.py",
+"app/static/admin_qa.html",
+"app/static/styles.css",
+"scanner-app/acquire",
+"scanner-app/qa",
+"scanner-app/queue"
+],
+"DG-075": [
+"scanner-app/ui"
+],
+"DG-076": [
+"app/routes/lookups.py",
+"scanner-app/config.js"
+],
+"DG-077": [
+"scanner-app/acquire"
+],
+"DG-078": [
+"scanner-app/acquire"
+],
+"DG-079": [
+"scanner-app/acquire",
+"scanner-app/qa"
+],
+"DG-080": [
+"app/routes/files.py",
+"app/storage.py"
+],
+"DG-081": [
+"app/routes/capture.py",
+"app/routes/files.py",
+"app/static/admin-submit.js",
+"app/storage.py"
+],
+"DG-082": [
+"app/routes/files.py"
+],
+"DG-083": [
+"app/routes/files.py",
+"app/storage.py",
+"app/tests/conftest.py",
+"app/tests/test_upload.py"
+],
+"IN-131": [
+"app/routes/admin/deps.py",
+"app/routes/admin/stats.py",
+"app/routes/admin/users.py",
+"app/routes/files.py",
+"app/routes/hr.py",
+"app/static/admin.js"
+],
+"DG-085": [
+"app/static/capture.html",
+"app/static/capture.js",
+"app/static/scanner-client.js"
+],
+"DG-086": [
+"app/static/scanner-client.js"
+],
+"DG-087": [
+"app/static/capture.js",
+"app/static/scanner-client.js"
+],
+"DG-088": [
+"app/static/capture.js"
+],
+"DG-090": [
+"app/static/capture.js"
+],
+"DG-091": [
+"app/static/capture.js"
+],
+"DG-092": [
+"app/static/capture.js"
+],
+"DG-094": [
+"app/main.py",
+"app/routes/capture.py",
+"app/static/capture.html"
+],
+"DG-095": [
+"app/routes/capture.py",
+"app/routes/share.py"
+],
+"DG-096": [],
+"DG-097": [
+"app/static/capture.js"
+],
+"DG-098": [
+"app/static/capture.js"
+],
+"DG-099": [
+"app/static/capture.js",
+"app/static/scanner-client.js"
+],
+"DG-100": [
+"app/static/capture.js",
+"app/static/scanner-client.js"
+],
+"DG-101": [],
+"DG-102": [
+"app/static/admin_qa.html",
+"app/static/capture.js"
+],
+"DG-103": [],
+"DG-142": [
+"app/main.py",
+"app/routes/admin/imports.py",
+"app/routes/files.py",
+"app/storage.py",
+"scanner-app/import"
+],
+"DG-105": [
+"app/main.py",
+"app/routes/ocr.py",
+"scanner-app/ocr",
+"scanner-app/queue"
+],
+"DG-106": [
+"app/main.py",
+"app/routes/archive.py",
+"app/routes/trash.py",
+"app/schema.sql"
+],
+"DG-107": [
+"app/main.py",
+"app/routes/archive.py",
+"app/routes/hr.py"
+],
+"DG-108": [
+"app/routes/archive.py",
+"app/static/archive.js"
+],
+"DG-109": [
+"scanner-app/ocr"
+],
+"DG-110": [],
+"DG-111": [
+"scanner-app/ocr"
+],
+"DG-112": [
+"scanner-app/README.md"
+],
+"DG-113": [
+"scanner-app/test"
+],
+"DG-114": [
+"app/main.py",
+"app/static/admin-edit.js"
+],
+"DG-115": [
+"scanner-app/process"
+],
+"DG-116": [
+"scanner-app/process"
+],
+"DG-117": [
+"scanner-app/process"
+],
+"DG-118": [
+"scanner-app/process"
+],
+"DG-119": [
+"scanner-app/process"
+],
+"DG-120": [
+"app/main.py",
+"app/routes/files.py",
+"app/routes/ocr.py",
+"app/storage.py"
+],
+"DG-121": [
+"app/routes/files.py",
+"scanner-app/process"
+],
+"DG-122": [
+"app/main.py"
+],
+"DG-123": [],
+"DG-125": [
+"app/schema.sql"
+],
+"DG-126": [
+"scanner-app/queue"
+],
+"DG-139": [
+"app/database.py",
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/stats.py",
+"app/schema.sql",
+"app/static/admin-charts.js",
+"app/static/admin-stats.js",
+"scanner-app/server.js"
+],
+"DG-127": [
+"scanner-app/queue"
+],
+"DG-128": [
+"scanner-app/queue"
+],
+"DG-130": [
+"app/routes/admin/docs.py",
+"app/static/admin_archive.html"
+],
+"DG-132": [
+"scanner-app/qa"
+],
+"DG-133": [
+"app/static/admin_qa.html",
+"scanner-app/queue"
+],
+"DG-134": [
+"api/admin",
+"app/routes/files.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin-submit.js"
+],
+"DG-135": [
+"app/static/admin-edit-hr.js",
+"app/static/admin_hr.html",
+"app/static/capture.js"
+],
+"DG-136": [
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"DG-137": [
+"app/routes/trash.py",
+"app/static/admin-edit.js",
+"app/static/admin_archive.html"
+],
+"DG-138": [
+"app/main.py",
+"app/static/admin_archive.html"
+],
+"DG-140": [
+"app/routes/files.py"
+],
+"DG-143": [
+"app/main.py",
+"app/schema.sql",
+"scanner-app/process"
+],
+"DG-144": [
+"app/routes/files.py",
+"app/storage.py"
+],
+"DG-145": [
+"docs/politica-digitalizacion.md",
+"scanner-app/test"
+],
+"DG-147": [
+"app/routes/files.py",
+"docs/politica-digitalizacion.md"
+],
+"DG-148": [
+"app/storage.py",
+"scanner-app/process"
+],
+"DG-149": [],
+"SI-001": [
+"app/main.py",
+"app/routes/backup.py",
+"app/static/scanner-client.js",
+"app/storage.py",
+"app/tests/test_secrets.py",
+"docs/politica-digitalizacion.md"
+],
+"DG-150": [
+"docs/politica-digitalizacion.md"
+],
+"DG-151": [
+"docs/politica-digitalizacion.md"
+],
+"DG-152": [
+"app/routes/admin/retention.py",
+"app/storage.py"
+],
+"DG-154": [
+"app/routes/capture.py",
+"app/static/admin.js",
+"app/static/admin_archive.html",
+"app/static/admin_hr.html",
+"app/static/capture.js",
+"app/tests/test_admin_panels.py"
+],
+"DG-155": [
+"app/static/admin_qa.html",
+"scanner-app/ui"
+],
+"DG-156": [],
+"DG-157": [
+"app/static/scanner-client.js",
+"app/static/styles.css",
+"docs/politica-digitalizacion.md"
+],
+"DG-158": [
+"app/static/admin_qa.html"
+],
+"DG-159": [
+"app/static/admin_archive.html",
+"app/static/ayuda.html",
+"scanner-app/ui"
+],
+"DG-160": [
+"app/static/scanner-client.js"
+],
+"DG-161": [
+"app/static/scanner-client.js"
+],
+"SI-177": [
+"app/static/capture.js",
+"app/static/scanner-client.js",
+"app/static/styles.css"
+],
+"DG-162": [
+"app/static/scanner-client.js"
+],
+"DG-164": [
+"scanner-app/server.js"
+],
+"DG-165": [
+"app/static/ayuda.html"
+],
+"SI-160": [
+"app/static/ayuda.html",
+"docs/politica-digitalizacion.md",
+"scanner-app/README.md"
+],
+"DG-166": [
+"scanner-app/ui"
+],
+"DG-167": [
+"app/static/scanner-client.js"
+],
+"DG-168": [
+"app/static/admin_qa.html"
+],
+"DG-169": [
+"api/admin",
+"app/routes/files.py"
+],
+"DG-170": [
+"scanner-app/server.js"
+],
+"DG-171": [
+"app/tests/test_digitalizacion.py",
+"scanner-app/test"
+],
+"IN-098": [],
+"IN-001": [
+"api/admin",
+"api/index.py",
+"app/main.py",
+"app/routes/archive.py",
+"app/static/archive.js",
+"app/tests/test_migraciones.py",
+"docs/funcionalidades.md",
+"vercel.json"
+],
+"IN-040": [],
+"IN-041": [],
+"IN-068": [],
+"IN-104": [],
+"IN-105": [
+"api/requirements.txt"
+],
+"IN-128": [
+"docs/rendimiento.md"
+],
+"IN-129": [
+"api/admin",
+"app/core/security.py",
+"app/main.py",
+"app/routes/admin/deps.py"
+],
+"IN-163": [
+"vercel.json"
+],
+"IN-164": [
+"app/database.py",
+"app/routes/admin/docs.py"
+],
+"IN-180": [],
+"IN-181": [],
+"IN-191": [],
+"IN-192": [
+"app/seed.py"
+],
+"IN-207": [],
+"IN-208": [
+"api/requirements.txt"
+],
+"IN-216": [],
+"IN-002": [
+"app/routes/admin/deps.py",
+"app/storage.py",
+"docs/funcionalidades.md",
+"docs/operacion.md"
+],
+"IN-194": [
+"api/requirements.txt"
+],
+"IN-003": [
+"api/requirements.txt"
+],
+"IN-130": [],
+"IN-004": [
+"app/database.py"
+],
+"IN-132": [],
+"IN-215": [
+"app/storage.py",
+"app/tests/test_secrets.py"
+],
+"IN-107": [
+"app/database.py",
+"app/tests/test_database.py"
+],
+"IN-005": [
+"app/database.py"
+],
+"IN-006": [
+"app/routes/admin/docs.py",
+"app/tests/test_admin.py"
+],
+"IN-007": [
+"app/routes/admin/docs.py"
+],
+"IN-008": [
+"api/admin",
+"app/routes/admin/docs.py",
+"app/routes/trash.py"
+],
+"IN-009": [
+"app/routes/admin/docs.py",
+"app/routes/backup.py"
+],
+"IN-010": [
+"app/routes/admin/docs.py"
+],
+"IN-011": [
+"app/routes/admin/helpers.py"
+],
+"IN-133": [
+"app/routes/admin/docs.py",
+"app/routes/admin/helpers.py",
+"app/routes/admin/imports.py"
+],
+"IN-012": [
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-edit-hr.js",
+"app/static/admin-edit.js"
+],
+"IN-013": [
+"app/routes/admin/docs.py"
+],
+"IN-014": [
+"app/routes/admin/docs.py"
+],
+"IN-047": [
+"app/routes/admin/docs.py",
+"app/routes/admin/stats.py",
+"app/routes/archive.py",
+"app/tests/test_sql_inserts.py"
+],
+"IN-015": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/static/admin-submit.js"
+],
+"IN-016": [
+"app/routes/trash.py"
+],
+"IN-070": [
+"app/main.py",
+"app/routes/trash.py"
+],
+"IN-017": [
+"app/routes/trash.py"
+],
+"IN-018": [
+"app/routes/trash.py",
+"app/static/admin-edit-hr.js",
+"app/storage.py"
+],
+"IN-019": [
+"app/main.py",
+"app/routes/trash.py",
+"app/static/admin-edit.js"
+],
+"IN-020": [
+"app/routes/trash.py"
+],
+"IN-021": [
+"app/routes/backup.py",
+"app/tests/test_backup.py"
+],
+"IN-022": [
+"app/database.py",
+"app/routes/backup.py",
+"vercel.json"
+],
+"IN-023": [
+"app/routes/backup.py",
+"docs/recuperacion.md"
+],
+"IN-024": [
+"app/database.py",
+"app/routes/admin/helpers.py",
+"app/routes/admin/imports.py",
+"app/routes/backup.py"
+],
+"IN-025": [
+"app/routes/admin/imports.py"
+],
+"IN-026": [
+"app/main.py",
+"app/routes/admin/imports.py",
+"app/schema.sql"
+],
+"IN-027": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/imports.py",
+"app/utils.py"
+],
+"IN-028": [
+"app/core/cache.py",
+"app/main.py",
+"app/routes/archive.py",
+"app/routes/hr.py",
+"app/routes/lookups.py"
+],
+"IN-029": [
+"api/choices",
+"app/routes/lookups.py"
+],
+"IN-030": [
+"app/routes/admin/stats.py"
+],
+"IN-031": [
+"app/routes/archive.py",
+"app/routes/hr.py"
+],
+"IN-050": [],
+"IN-045": [
+"api/requirements.txt",
+"app/routes/archive.py",
+"app/routes/hr.py"
+],
+"IN-032": [
+"api/health",
+"app/core/config.py",
+"app/database.py",
+"app/storage.py"
+],
+"IN-033": [
+"app/core/config.py",
+"app/database.py"
+],
+"IN-034": [
+"app/core/config.py",
+"app/main.py"
+],
+"IN-035": [
+"api/admin",
+"app/database.py",
+"app/main.py"
+],
+"IN-183": [
+"app/main.py"
+],
+"IN-036": [
+"app/database.py"
+],
+"IN-037": [
+"api/health",
+"app/main.py"
+],
+"IN-137": [],
+"IN-116": [
+"api/health",
+"app/main.py",
+"app/tests/test_misc.py"
+],
+"IN-038": [
+"api/auth",
+"app/routes/auth.py",
+"app/tests/test_auth.py"
+],
+"IN-039": [
+"app/core/security.py",
+"app/routes/admin/deps.py"
+],
+"IN-042": [],
+"IN-043": [],
+"IN-044": [],
+"IN-046": [
+"app/static/admin-submit.js"
+],
+"IN-048": [],
+"IN-049": [],
+"IN-051": [],
+"IN-052": [],
+"IN-053": [],
+"IN-198": [],
+"IN-054": [],
+"IN-055": [],
+"IN-056": [],
+"IN-057": [],
+"IN-058": [],
+"IN-059": [],
+"IN-060": [
+"app/factory.py",
+"app/middleware.py",
+"app/routes/system.py"
+],
+"IN-061": [],
+"IN-197": [],
+"IN-062": [
+"api/admin",
+"api/sistema"
+],
+"IN-063": [
+"api/admin",
+"api/cron",
+"vercel.json"
+],
+"IN-064": [
+"api/rrhh"
+],
+"IN-065": [
+"vercel.json"
+],
+"IN-066": [],
+"IN-141": [],
+"IN-069": [],
+"IN-071": [],
+"IN-072": [],
+"IN-073": [],
+"IN-074": [],
+"IN-075": [],
+"IN-076": [],
+"IN-077": [],
+"IN-078": [],
+"IN-079": [],
+"IN-080": [],
+"IN-121": [],
+"IN-081": [],
+"IN-082": [],
+"IN-083": [],
+"IN-084": [],
+"IN-085": [],
+"IN-086": [],
+"IN-087": [],
+"IN-088": [],
+"IN-089": [],
+"IN-090": [],
+"IN-091": [],
+"IN-092": [],
+"IN-093": [],
+"IN-094": [],
+"IN-095": [],
+"IN-096": [],
+"IN-097": [],
+"IN-099": [],
+"IN-100": [],
+"IN-101": [],
+"IN-102": [],
+"IN-103": [],
+"IN-106": [],
+"IN-108": [],
+"IN-109": [],
+"IN-209": [
+"api/requirements.txt"
+],
+"IN-110": [
+"vercel.json"
+],
+"IN-111": [],
+"IN-112": [],
+"IN-113": [
+"api/choices"
+],
+"IN-114": [
+"vercel.json"
+],
+"IN-115": [
+"vercel.json"
+],
+"IN-203": [],
+"IN-117": [],
+"IN-118": [],
+"IN-119": [
+"app/static/admin-submit.js"
+],
+"IN-120": [],
+"IN-122": [],
+"IN-123": [],
+"IN-124": [
+"vercel.json"
+],
+"IN-152": [],
+"IN-125": [],
+"IN-176": [],
+"IN-126": [],
+"IN-127": [],
+"IN-134": [],
+"IN-135": [],
+"IN-136": [],
+"IN-138": [],
+"IN-139": [
+"api/health"
+],
+"IN-140": [],
+"IN-142": [],
+"IN-143": [],
+"IN-146": [],
+"IN-144": [],
+"IN-145": [],
+"IN-147": [],
+"IN-148": [],
+"IN-149": [
+"api/files"
+],
+"IN-150": [
+"api/files"
+],
+"IN-151": [],
+"IN-153": [
+"vercel.json"
+],
+"IN-154": [
+"vercel.json"
+],
+"IN-155": [],
+"IN-156": [],
+"IN-157": [],
+"IN-158": [],
+"IN-159": [],
+"IN-160": [],
+"IN-161": [],
+"IN-162": [],
+"IN-165": [],
+"IN-166": [],
+"IN-167": [],
+"IN-168": [
+"vercel.json"
+],
+"IN-169": [],
+"IN-170": [],
+"IN-190": [
+"api/health"
+],
+"IN-171": [],
+"IN-172": [],
+"IN-173": [],
+"IN-174": [],
+"IN-175": [],
+"IN-177": [
+"docs/recuperacion.md"
+],
+"IN-178": [
+"app/cli.py"
+],
+"IN-179": [],
+"IN-182": [],
+"IN-184": [],
+"IN-185": [],
+"IN-186": [],
+"IN-187": [],
+"IN-188": [
+"docs/operacion.md"
+],
+"IN-189": [
+"vercel.json"
+],
+"IN-193": [],
+"IN-195": [],
+"IN-196": [],
+"IN-199": [],
+"IN-200": [],
+"IN-201": [],
+"IN-202": [
+"api/requirements.txt"
+],
+"IN-204": [
+"app/static/app-core.js"
+],
+"IN-205": [],
+"IN-206": [],
+"IN-212": [],
+"IN-210": [],
+"IN-211": [
+"api/requirements.txt"
+],
+"IN-213": [
+"vercel.json"
+],
+"IN-214": [
+"api/requirements.txt"
+],
+"VI-046": [],
+"VI-047": [],
+"SD-031": [],
+"SD-038": [],
+"SD-020": [],
+"VI-001": [],
+"VI-002": [],
+"SD-036": [],
+"SD-037": [],
+"VI-020": [],
+"VI-021": [],
+"VI-048": [],
+"VI-013": [],
+"VI-050": [],
+"VI-051": [],
+"VI-049": [],
+"VI-010": [],
+"VI-011": [],
+"VI-012": [],
+"VI-031": [],
+"VI-032": [],
+"VI-005": [],
+"VI-003": [],
+"VI-004": [],
+"SD-009": [],
+"VI-006": [],
+"VI-007": [],
+"VI-008": [],
+"VI-009": [],
+"SD-023": [],
+"VI-014": [],
+"VI-015": [],
+"VI-016": [],
+"VI-017": [],
+"VI-018": [],
+"VI-019": [],
+"SD-004": [],
+"VI-022": [],
+"VI-023": [],
+"VI-024": [],
+"SD-015": [],
+"VI-025": [],
+"VI-026": [],
+"VI-027": [],
+"SI-163": [],
+"VI-028": [],
+"VI-029": [],
+"VI-030": [],
+"VI-033": [],
+"VI-034": [],
+"VI-035": [],
+"SI-190": [],
+"VI-036": [],
+"VI-037": [],
+"VI-038": [],
+"VI-039": [],
+"VI-040": [],
+"VI-041": [],
+"VI-042": [],
+"VI-043": [],
+"VI-044": [],
+"VI-045": [],
+"SD-002": [],
+"VI-052": [],
+"VI-053": [],
+"VI-054": [],
+"SD-207": [
+"www/styles.css"
+],
+"VI-055": [],
+"VI-056": [],
+"SI-156": [
+"app/routes/pages.py",
+"app/static/robots.txt",
+"docs/funcionalidades.md"
+],
+"VI-057": [],
+"VI-058": [],
+"VI-059": [],
+"VI-060": [],
+"VI-061": [],
+"VI-062": [],
+"VI-063": [],
+"VI-064": [],
+"VI-065": [],
+"VI-066": [],
+"VI-067": [],
+"VI-068": [],
+"VI-069": [],
+"VI-070": [],
+"VI-071": [],
+"VI-072": [],
+"VI-073": [],
+"VI-074": [],
+"VI-075": [],
+"SI-049": [
+"app/static/app.js"
+],
+"VI-076": [],
+"VI-077": [],
+"VI-078": [],
+"SI-186": [],
+"VI-079": [],
+"VI-080": [],
+"RQ-001": [
+"app/core/ai.py",
+"docs/tex/annexes/A_glosario.tex",
+"docs/tex/chapters/04_requerimientos.tex",
+"docs/tex/chapters/06_diseno_tecnico.tex",
+"docs/tex/chapters/11_gobernanza_legal.tex",
+"docs/tex/chapters/12_roadmap.tex",
+"docs/tex/chapters/13_comparativa_dms_shiny.tex",
+"docs/tex/requerimientos_resumen.tex"
+],
+"RQ-002": [
+"docs/tex/chapters/04_requerimientos.tex",
+"docs/tex/chapters/09_operacion_despliegue.tex",
+"docs/tex/requerimientos_resumen.tex"
+],
+"RQ-003": [
+"docs/tex/chapters/01_resumen_ejecutivo.tex",
+"docs/tex/chapters/08_seguridad_auditoria.tex",
+"docs/tex/chapters/11_gobernanza_legal.tex"
+],
+"RQ-004": [
+"app/core/security.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/users.py",
+"app/routes/archive.py",
+"app/routes/auth.py",
+"docs/funcionalidades.md",
+"docs/modulo-ia.md",
+"docs/tex/annexes/C_matriz_trazabilidad.tex",
+"docs/tex/chapters/04_requerimientos.tex"
+],
+"RQ-005": [
+"app/routes/auth.py",
+"app/static/app.js",
+"docs/tex/chapters/04_requerimientos.tex"
+],
+"SI-002": [
+"api/admin",
+"api/auth",
+"api/index.py",
+"app/core/cache.py",
+"app/core/security.py",
+"app/main.py",
+"app/routes/admin/deps.py",
+"app/routes/auth.py",
+"app/routes/backup.py",
+"app/tests/conftest.py"
+],
+"RQ-006": [
+"app/core/security.py",
+"app/routes/archive.py",
+"app/routes/auth.py",
+"app/static/archive.html"
+],
+"RQ-007": [
+"app/routes/archive.py",
+"app/static/app.js",
+"app/static/archive.html",
+"app/static/archive.js",
+"app/utils.py",
+"docs/funcionalidades.md"
+],
+"RQ-008": [
+"app/main.py",
+"app/routes/archive.py",
+"app/routes/hr.py",
+"app/static/app.js",
+"app/static/hr.js",
+"docs/tex/chapters/04_requerimientos.tex"
+],
+"RQ-009": [
+"app/models.py",
+"app/routes/hr.py",
+"app/static/hr.js",
+"docs/tex/chapters/04_requerimientos.tex"
+],
+"RQ-010": [
+"app/main.py",
+"app/models.py",
+"app/routes/archive.py",
+"app/routes/hr.py",
+"app/static/hr.html",
+"app/static/hr.js"
+],
+"RQ-011": [
+"api/rrhh",
+"app/routes/hr.py",
+"app/static/admin_archive.html"
+],
+"RQ-012": [
+"app/routes/admin/stats.py",
+"app/static/admin-charts.js",
+"app/static/admin-stats.js"
+],
+"RQ-013": [
+"app/database.py"
+],
+"RQ-014": [
+"app/database.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/imports.py",
+"app/routes/admin/retention.py",
+"app/routes/admin/users.py",
+"app/routes/files.py",
+"app/routes/hr_alerts.py",
+"app/routes/trash.py"
+],
+"RQ-015": [
+"app/database.py",
+"app/routes/admin/deps.py",
+"docs/auditoria/README.md"
+],
+"RQ-016": [
+"app/routes/hr.py"
+],
+"RQ-017": [
+"app/database.py",
+"app/routes/admin/stats.py",
+"app/routes/archive.py",
+"app/routes/backup.py",
+"app/routes/hr.py",
+"app/routes/lookups.py",
+"app/storage.py",
+"vercel.json"
+],
+"RQ-018": [
+"api/admin",
+"app/routes/backup.py",
+"vercel.json"
+],
+"RQ-019": [
+"api/admin",
+"api/health",
+"app/main.py",
+"app/tests/test_backup.py"
+],
+"RQ-020": [
+"api/health",
+"app/main.py"
+],
+"SI-226": [
+"app/tests/conftest.py",
+"app/tests/test_backup.py"
+],
+"RQ-021": [],
+"RQ-022": [
+"docs/funcionalidades.md"
+],
+"RQ-023": [],
+"RQ-024": [
+"app/main.py"
+],
+"RQ-025": [
+"docs/tex/requerimientos_resumen.tex"
+],
+"RQ-026": [],
+"RQ-027": [
+"app/models.py",
+"docs/tex/annexes/C_matriz_trazabilidad.tex",
+"docs/tex/chapters/04_requerimientos.tex"
+],
+"RQ-028": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/docs.py",
+"app/routes/admin/imports.py",
+"app/routes/archive.py",
+"app/static/admin-edit.js",
+"app/static/admin-submit.js",
+"app/static/archive.js"
+],
+"RQ-029": [
+"vercel.json"
+],
+"RQ-030": [
+"vercel.json"
+],
+"RQ-031": [],
+"RQ-032": [
+"docs/tex/chapters/10_calidad_qa.tex"
+],
+"RQ-033": [],
+"RQ-034": [
+"app/tests/test_secrets.py"
+],
+"RQ-035": [
+"docs/modulo-ia.md",
+"docs/tex/chapters/12_roadmap.tex"
+],
+"RQ-036": [
+"app/routes/auth.py",
+"app/static/app.js",
+"app/static/login.js",
+"docs/tex/chapters/12_roadmap.tex"
+],
+"RQ-037": [
+"api/auth",
+"app/static/app.js",
+"app/static/login.js",
+"app/static/logo.png",
+"app/static/styles.css"
+],
+"RQ-038": [
+"app/routes/hr.py",
+"app/static/app-shell.js",
+"app/static/archive.html",
+"app/static/styles.css"
+],
+"RQ-039": [
+"app/static/admin-edit-hr.js",
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/admin_archive.html",
+"app/static/admin_hr.html",
+"app/static/archive.js"
+],
+"RQ-040": [
+"app/static/admin-edit.js",
+"app/static/admin-monitor.js",
+"app/static/admin-submit.js",
+"app/static/archive.js"
+],
+"RQ-041": [
+"app/static/archive.js"
+],
+"RQ-042": [
+"app/routes/hr.py",
+"app/static/app-choices.js",
+"app/static/archive.html",
+"app/static/hr.html",
+"app/static/styles.css"
+],
+"RQ-043": [
+"app/static/hr.js"
+],
+"RQ-044": [
+"app/main.py",
+"app/models.py",
+"app/routes/admin/stats.py",
+"app/routes/hr.py",
+"app/static/app-shell.js",
+"app/static/archive.js",
+"app/static/hr.html",
+"app/static/hr.js",
+"app/static/styles.css"
+],
+"RQ-045": [
+"app/static/app-shell.js",
+"app/static/app.js",
+"app/static/styles.css"
+],
+"RQ-046": [
+"app/routes/hr.py",
+"app/static/app-shell.js"
+],
+"RQ-047": [
+"app/main.py",
+"app/routes/hr.py",
+"app/static/hr.js"
+],
+"RQ-048": [
+"app/main.py",
+"app/static/investigacion.html"
+],
+"RQ-049": [
+"app/main.py",
+"app/routes/hr_alerts.py"
+],
+"RQ-050": [
+"app/routes/admin/stats.py",
+"app/routes/files.py",
+"app/static/hr.js",
+"app/static/scanner-client.js"
+],
+"RQ-051": [
+"app/routes/files.py",
+"app/static/hr.js"
+],
+"RQ-052": [
+"app/main.py",
+"app/routes/admin/catalog.py",
+"app/routes/lookups.py",
+"app/static/admin-categories.js"
+],
+"RQ-053": [
+"app/static/app-shell.js"
+],
+"RQ-054": [
+"app/routes/pages.py",
+"app/static/app-shell.js",
+"app/static/app.js",
+"app/static/inicio.html",
+"app/tests/test_paginas.py"
+],
+"RQ-055": [
+"app/main.py",
+"app/routes/admin/docs.py",
+"app/routes/archive.py",
+"app/routes/files.py",
+"app/routes/hr.py",
+"app/routes/hr_alerts.py",
+"app/routes/trash.py",
+"app/static/hr.js",
+"app/storage.py",
+"docs/funcionalidades.md"
+],
+"SD-041": [],
+"SD-208": [
+"app/static/styles.css",
+"vercel.json",
+"www/logo.png",
+"www/logoblanco.png",
+"www/styles.css"
+],
+"SD-001": [],
+"SD-228": [
+"vercel.json"
+],
+"SD-003": [],
+"SD-005": [],
+"SD-006": [],
+"SD-007": [],
+"SD-008": [],
+"SD-010": [],
+"SD-190": [],
+"SD-011": [],
+"SD-012": [],
+"SD-013": [],
+"SD-014": [],
+"SD-016": [],
+"SD-017": [],
+"SD-018": [],
+"SD-019": [],
+"SD-192": [],
+"SD-021": [
+"app/static/sistema.html",
+"vercel.json"
+],
+"SD-022": [
+"app/tests/test_contraste.py"
+],
+"SD-024": [],
+"SD-025": [],
+"SD-026": [],
+"SD-027": [],
+"SD-028": [],
+"SD-029": [],
+"SD-030": [],
+"SD-032": [],
+"SD-033": [],
+"SD-034": [],
+"SD-035": [],
+"SD-039": [],
+"SD-040": [],
+"SD-131": [],
+"SD-042": [],
+"SD-043": [],
+"SD-044": [],
+"SD-045": [],
+"SD-046": [],
+"SD-047": [
+"app/tests/test_contraste.py"
+],
+"SD-048": [],
+"SD-049": [],
+"SD-050": [],
+"SD-051": [],
+"SD-052": [],
+"SD-053": [],
+"SD-054": [],
+"SD-055": [],
+"SD-056": [],
+"SD-057": [],
+"SD-058": [],
+"SD-059": [],
+"SD-060": [],
+"SD-061": [],
+"SD-062": [],
+"SD-063": [],
+"SD-064": [],
+"SD-065": [],
+"SD-066": [],
+"SD-067": [],
+"SD-068": [],
+"SD-069": [],
+"SD-070": [],
+"SD-071": [],
+"SD-072": [],
+"SD-215": [],
+"SD-073": [],
+"SD-074": [],
+"SD-075": [],
+"SD-076": [],
+"SD-077": [],
+"SD-078": [],
+"SD-079": [],
+"SD-080": [],
+"SD-081": [],
+"SD-082": [],
+"SD-083": [],
+"SD-084": [],
+"SD-085": [],
+"SD-086": [],
+"SD-087": [],
+"SD-088": [],
+"SD-089": [],
+"SD-090": [],
+"SD-091": [],
+"SD-092": [],
+"SD-093": [],
+"SD-094": [],
+"SD-095": [],
+"SD-096": [],
+"SD-097": [],
+"SD-098": [],
+"SD-099": [],
+"SD-100": [],
+"SD-101": [],
+"SD-102": [],
+"SD-103": [],
+"SD-104": [],
+"SD-105": [],
+"SD-106": [],
+"SD-107": [],
+"SD-108": [],
+"SD-135": [],
+"SD-109": [],
+"SD-110": [],
+"SD-111": [],
+"SD-112": [],
+"SD-113": [],
+"SD-114": [],
+"SD-115": [],
+"SD-116": [],
+"SD-117": [],
+"SD-118": [],
+"SD-119": [],
+"SD-205": [],
+"SD-120": [],
+"SD-121": [],
+"SD-122": [],
+"SD-123": [],
+"SD-124": [],
+"SD-125": [],
+"SD-126": [],
+"SD-127": [],
+"SD-128": [],
+"SD-129": [],
+"SD-130": [],
+"SD-132": [],
+"SD-133": [],
+"SD-134": [],
+"SD-136": [],
+"SD-201": [],
+"SD-137": [],
+"SD-138": [],
+"SD-139": [],
+"SD-140": [],
+"SD-141": [],
+"SD-142": [],
+"SD-143": [],
+"SD-144": [],
+"SD-145": [],
+"SD-146": [],
+"SD-147": [],
+"SD-148": [],
+"SD-149": [],
+"SD-150": [],
+"SD-151": [],
+"SD-152": [],
+"SD-153": [],
+"SD-154": [],
+"SD-155": [],
+"SD-156": [],
+"SD-157": [],
+"SD-158": [],
+"SD-159": [],
+"SD-160": [],
+"SD-161": [],
+"SD-162": [],
+"SD-163": [],
+"SD-164": [],
+"SD-165": [],
+"SD-166": [],
+"SD-167": [],
+"SD-168": [],
+"SD-169": [],
+"SD-170": [],
+"SD-171": [],
+"SD-172": [],
+"SD-173": [],
+"SD-174": [],
+"SD-175": [],
+"SD-176": [],
+"SD-198": [],
+"SD-177": [],
+"SD-178": [],
+"SD-179": [],
+"SD-180": [],
+"SD-181": [],
+"SD-202": [],
+"SD-182": [],
+"SD-183": [],
+"SD-184": [],
+"SD-185": [],
+"SD-186": [],
+"SD-187": [],
+"SD-188": [],
+"SD-189": [],
+"SD-191": [],
+"SD-193": [],
+"SD-194": [],
+"SD-195": [],
+"SD-196": [],
+"SD-197": [],
+"SD-199": [],
+"SD-200": [],
+"SD-203": [],
+"SD-204": [],
+"SD-206": [],
+"SD-209": [],
+"SD-210": [],
+"SD-211": [],
+"SD-212": [],
+"SD-213": [],
+"SD-214": [],
+"SD-216": [],
+"SD-217": [],
+"SD-218": [],
+"SD-219": [],
+"SD-220": [],
+"SD-221": [],
+"SD-222": [],
+"SD-223": [
+"app/static/sistema.html"
+],
+"SD-224": [],
+"SD-225": [],
+"SD-226": [],
+"SD-227": [],
+"SD-229": [],
+"SD-230": [],
+"SD-231": [],
+"SD-232": [],
+"SD-233": [],
+"SD-234": [],
+"SD-235": [
+"app/routes/hr.py",
+"vercel.json"
+],
+"SD-236": [],
+"SI-240": [],
+"SI-003": [
+"app/static/admin_ai.html",
+"app/static/app-shell.js"
+],
+"SI-004": [
+"app/core/ai.py",
+"app/routes/ai.py",
+"app/routes/backup.py",
+"app/tests/test_ia.py",
+"docs/modulo-ia.md"
+],
+"SI-005": [
+"api/ia",
+"app/core/ai.py",
+"app/core/ai_prompts.py",
+"app/routes/ai.py",
+"app/static/ai-widget.js",
+"docs/modulo-ia.md"
+],
+"SI-006": [
+"app/routes/auth.py",
+"app/static/admin_system.html"
+],
+"SI-007": [],
+"SI-158": [],
+"SI-161": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-011": [
+"api/auth",
+"api/ia",
+"app/routes/ai.py",
+"app/routes/auth.py"
+],
+"SI-021": [
+"app/routes/admin/deps.py",
+"app/routes/auth.py"
+],
+"SI-008": [
+"api/admin",
+"app/database.py",
+"app/routes/backup.py"
+],
+"SI-016": [
+"app/main.py",
+"app/routes/backup.py"
+],
+"SI-009": [
+"api/ia",
+"app/core/ai_proposals.py",
+"app/routes/ai.py"
+],
+"SI-010": [
+"api/ia",
+"app/core/ai_proposals.py",
+"app/routes/ai.py"
+],
+"SI-012": [
+"api/auth",
+"api/ia",
+"app/main.py",
+"app/routes/auth.py",
+"app/schema.sql"
+],
+"SI-032": [
+"api/ia"
+],
+"SI-013": [
+"app/routes/ai.py"
+],
+"SI-014": [
+"app/storage.py",
+"app/tests/test_cabeceras.py",
+"vercel.json"
+],
+"SI-015": [
+"app/routes/ai.py"
+],
+"SI-017": [
+"api/files",
+"app/static/ai-widget.css"
+],
+"SI-018": [
+"app/core/ai_prompts.py",
+"app/core/ai_tools.py"
+],
+"SI-019": [
+"app/core/ai_tools.py"
+],
+"SI-020": [
+"app/core/ai_tools.py"
+],
+"SI-022": [
+"app/core/ai_proposals.py"
+],
+"SI-023": [
+"app/core/ai_proposals.py",
+"app/core/ai_tools.py"
+],
+"SI-024": [
+"app/core/ai_tools.py"
+],
+"SI-025": [
+"app/routes/share.py"
+],
+"SI-026": [
+"app/core/security.py",
+"app/main.py",
+"app/routes/share.py"
+],
+"SI-027": [
+"app/core/config.py",
+"app/main.py"
+],
+"SI-028": [
+"api/auth",
+"app/routes/auth.py"
+],
+"SI-029": [
+"app/core/ai.py"
+],
+"SI-030": [
+"app/routes/backup.py",
+"vercel.json"
+],
+"SI-031": [
+"api/auth",
+"app/routes/auth.py"
+],
+"SI-033": [],
+"SI-034": [],
+"SI-035": [
+"app/routes/auth.py"
+],
+"SI-036": [],
+"SI-037": [
+"api/auth",
+"app/models.py",
+"app/routes/auth.py",
+"app/static/app-core.js"
+],
+"SI-038": [
+"app/routes/auth.py"
+],
+"SI-039": [
+"app/core/security.py",
+"app/routes/auth.py",
+"app/schema.sql"
+],
+"SI-040": [
+"app/core/security.py",
+"app/routes/admin/users.py",
+"app/routes/auth.py",
+"app/schema.sql"
+],
+"SI-041": [
+"app/routes/admin/deps.py"
+],
+"SI-042": [
+"api/auth",
+"app/routes/auth.py",
+"app/tests/test_auth.py",
+"app/tests/test_seguridad.py"
+],
+"SI-043": [],
+"SI-044": [
+"api/auth"
+],
+"SI-045": [
+"api/auth",
+"app/routes/auth.py"
+],
+"SI-046": [],
+"SI-047": [
+"app/routes/admin/deps.py",
+"app/routes/ai.py",
+"app/routes/auth.py"
+],
+"SI-048": [
+"api/auth",
+"app/routes/auth.py"
+],
+"SI-050": [],
+"SI-051": [],
+"SI-052": [],
+"SI-053": [],
+"SI-054": [],
+"SI-055": [],
+"SI-056": [
+"app/core/security.py"
+],
+"SI-057": [],
+"SI-058": [],
+"SI-059": [
+"api/auth"
+],
+"SI-060": [],
+"SI-061": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-062": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-063": [
+"app/core/ai.py",
+"vercel.json"
+],
+"SI-064": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-065": [
+"app/routes/ai.py"
+],
+"SI-066": [
+"app/core/ai.py"
+],
+"SI-067": [
+"app/core/ai.py"
+],
+"SI-068": [
+"app/core/ai.py"
+],
+"SI-069": [
+"app/core/ai.py"
+],
+"SI-070": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-071": [
+"app/core/ai.py"
+],
+"SI-072": [
+"api/ia",
+"app/routes/ai.py"
+],
+"SI-073": [
+"app/routes/ai.py"
+],
+"SI-074": [
+"app/main.py",
+"app/routes/ai.py",
+"docs/modulo-ia.md",
+"vercel.json"
+],
+"SI-075": [
+"app/routes/ai.py"
+],
+"SI-076": [
+"api/files",
+"app/routes/ai.py"
+],
+"SI-077": [
+"app/routes/ai.py",
+"app/routes/files.py",
+"app/storage.py"
+],
+"SI-078": [
+"app/routes/ai.py",
+"app/routes/files.py"
+],
+"SI-079": [
+"app/core/ai.py"
+],
+"SI-080": [
+"app/routes/ai.py",
+"docs/modulo-ia.md"
+],
+"SI-081": [
+"app/routes/ai.py"
+],
+"SI-082": [
+"app/main.py",
+"app/routes/ai.py"
+],
+"SI-083": [
+"app/routes/ai.py"
+],
+"SI-084": [
+"app/routes/ai.py"
+],
+"SI-085": [
+"app/core/ai.py"
+],
+"SI-086": [
+"app/core/ai.py"
+],
+"SI-087": [
+"app/routes/ai.py"
+],
+"SI-088": [
+"app/main.py",
+"app/routes/ai.py"
+],
+"SI-089": [
+"app/routes/ai.py"
+],
+"SI-090": [
+"app/core/ai_prompts.py",
+"app/core/ai_tools.py"
+],
+"SI-091": [
+"app/core/ai.py",
+"app/routes/ai.py",
+"docs/modulo-ia.md"
+],
+"SI-092": [
+"app/core/ai.py",
+"app/routes/ai.py"
+],
+"SI-093": [
+"app/core/ai_tools.py"
+],
+"SI-094": [
+"app/core/ai_tools.py",
+"app/routes/archive.py"
+],
+"SI-095": [
+"app/core/ai_tools.py"
+],
+"SI-096": [
+"app/static/login.html"
+],
+"SI-097": [],
+"SI-098": [],
+"SI-099": [],
+"SI-100": [],
+"SI-101": [],
+"SI-102": [],
+"SI-103": [],
+"SI-104": [],
+"SI-105": [],
+"SI-106": [],
+"SI-107": [
+"app/routes/ai.py"
+],
+"SI-108": [
+"app/core/ai_proposals.py",
+"app/core/ai_tools.py",
+"app/routes/ai.py"
+],
+"SI-109": [],
+"SI-110": [],
+"SI-111": [],
+"SI-112": [],
+"SI-113": [],
+"SI-114": [],
+"SI-115": [],
+"SI-116": [],
+"SI-117": [],
+"SI-118": [],
+"SI-119": [],
+"SI-120": [],
+"SI-121": [
+"app/routes/ai.py"
+],
+"SI-122": [
+"api/ia"
+],
+"SI-123": [
+"docs/modulo-ia.md"
+],
+"SI-124": [],
+"SI-125": [],
+"SI-126": [
+"app/database.py",
+"app/routes/backup.py"
+],
+"SI-127": [
+"app/routes/backup.py"
+],
+"SI-128": [
+"app/routes/backup.py"
+],
+"SI-129": [
+"app/routes/backup.py"
+],
+"SI-130": [
+"app/routes/backup.py"
+],
+"SI-131": [
+"app/routes/backup.py"
+],
+"SI-132": [],
+"SI-133": [
+"app/routes/backup.py",
+"app/storage.py"
+],
+"SI-134": [
+"app/routes/backup.py",
+"app/storage.py"
+],
+"SI-135": [
+"app/main.py",
+"app/routes/backup.py"
+],
+"SI-136": [
+"app/routes/backup.py"
+],
+"SI-137": [
+"app/routes/backup.py",
+"app/storage.py"
+],
+"SI-138": [],
+"SI-139": [],
+"SI-140": [],
+"SI-141": [],
+"SI-142": [],
+"SI-143": [
+"app/database.py"
+],
+"SI-144": [
+"app/database.py"
+],
+"SI-145": [
+"app/routes/backup.py"
+],
+"SI-146": [],
+"SI-147": [
+"app/routes/auth.py"
+],
+"SI-148": [
+"api/health",
+"app/main.py"
+],
+"SI-149": [
+"api/health",
+"app/main.py"
+],
+"SI-150": [
+"app/main.py"
+],
+"SI-151": [
+"app/main.py",
+"app/routes/hr_alerts.py"
+],
+"SI-152": [],
+"SI-153": [],
+"SI-154": [],
+"SI-155": [],
+"SI-157": [],
+"SI-159": [],
+"SI-162": [],
+"SI-164": [
+"app/tests/test_paginas.py"
+],
+"SI-165": [],
+"SI-166": [
+"api/compartido",
+"api/files",
+"app/routes/share.py"
+],
+"SI-167": [],
+"SI-168": [],
+"SI-169": [],
+"SI-170": [],
+"SI-175": [],
+"SI-176": [],
+"SI-178": [],
+"SI-179": [],
+"SI-181": [],
+"SI-182": [],
+"SI-183": [],
+"SI-184": [],
+"SI-185": [],
+"SI-187": [],
+"SI-188": [],
+"SI-189": [],
+"SI-191": [],
+"SI-192": [],
+"SI-193": [],
+"SI-194": [],
+"SI-195": [],
+"SI-196": [],
+"SI-197": [],
+"SI-198": [],
+"SI-199": [],
+"SI-200": [],
+"SI-201": [],
+"SI-202": [],
+"SI-203": [],
+"SI-204": [],
+"SI-205": [],
+"SI-206": [
+"app/core/config.py",
+"app/database.py"
+],
+"SI-207": [
+"app/database.py"
+],
+"SI-208": [
+"app/main.py",
+"app/routes/pages.py",
+"app/utils.py",
+"vercel.json"
+],
+"SI-209": [
+"app/main.py",
+"app/schema.sql",
+"docs/modulo-ia.md"
+],
+"SI-210": [
+"app/main.py"
+],
+"SI-211": [],
+"SI-212": [],
+"SI-213": [],
+"SI-214": [
+"app/main.py"
+],
+"SI-215": [
+"app/main.py"
+],
+"SI-216": [
+"app/main.py"
+],
+"SI-217": [
+"api/index.py",
+"app/routes/pages.py",
+"vercel.json"
+],
+"SI-218": [],
+"SI-219": [
+"api/health",
+"app/core/config.py"
+],
+"SI-220": [],
+"SI-221": [
+"app/core/ai.py",
+"app/core/ai_proposals.py",
+"app/core/ai_tools.py",
+"app/routes/ai.py"
+],
+"SI-222": [
+"docs/funcionalidades.md"
+],
+"SI-223": [],
+"SI-224": [],
+"SI-225": [
+"vercel.json"
+],
+"SI-227": [],
+"SI-228": [
+"app/tests/test_ia.py"
+],
+"SI-229": [
+"app/core/ai_tools.py",
+"app/tests/test_ia.py"
+],
+"SI-230": [
+"app/core/ai_tools.py",
+"app/tests/test_ia.py"
+],
+"SI-231": [
+"app/core/ai_proposals.py",
+"app/tests/test_ia.py"
+],
+"SI-232": [
+"app/routes/ai.py"
+],
+"SI-233": [
+"app/tests/test_backup.py"
+],
+"SI-234": [
+"app/tests/test_auth.py"
+],
+"SI-235": [
+"vercel.json"
+],
+"SI-236": [
+"app/tests/test_paginas.py"
+],
+"SI-237": [],
+"SI-238": [
+"app/tests/test_contraste.py"
+]
+}

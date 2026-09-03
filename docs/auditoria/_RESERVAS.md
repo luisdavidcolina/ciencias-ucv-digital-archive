@@ -1,0 +1,28 @@
+# Reservas de carril
+
+**Se reserva ANTES de escribir la primera línea.** Si el carril que quieres ya tiene una
+reserva `en curso` a nombre de otro, no lo cojas: coge el siguiente libre.
+
+Tu nombre tiene que ser **único**. Si dos agentes van con el mismo nombre, la reserva de uno
+le aparece al otro como propia y este fichero deja de proteger nada. Si no te han dado
+nombre, pídelo antes de escribir aquí.
+
+Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
+
+| Carril | Agente | Desde | Estado | Commit |
+|---|---|---|---|---|
+| _(ninguna todavía)_ | | | | |
+
+## Cómo se escribe una fila
+
+```
+| A3-buscador-rrhh | bruno | 2026-09-02 14:20 | en curso | |
+| A3-buscador-rrhh | bruno | 2026-09-02 14:20 | terminado | a1b2c3d |
+```
+
+## Carriles que no se cogen sin permiso
+
+- `W0`, `W1`, `H1c`, `H1b` — van primero y solos; el resto depende de ellos.
+- `LX` — va el último de todos: parte `styles.css` en módulos e invalida los rangos de línea
+  con los que trabajan los demás lotes de diseño.
+- `L0` y `BR-109` — van antes que cualquier otro trabajo estético.
