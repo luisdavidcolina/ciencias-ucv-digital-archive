@@ -14,6 +14,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | W0 | agente-w0-hemorragia | 2026-09-03 | terminado | c54c29c |
 | W1 | agente-w1-redseguridad | 2026-09-03 | terminado (parcial: IN-001) | 3851a1e |
 | W1b | agente-w1b-fixture-ci | 2026-09-03 | terminado | f2a5b10 |
+| O1 (H1c-autorizacion) | agente-o1-autorizacion | 2026-09-03 | en curso | |
+| O2 (H1b-conexion) | agente-o2-transacciones | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
 
