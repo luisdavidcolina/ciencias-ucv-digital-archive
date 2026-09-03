@@ -12,9 +12,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
 from database import db_query, log_event
-from routes.admin.deps import require_session
+from routes.admin.deps import require_session, require_role
 
-router = APIRouter(prefix="/api/rrhh", tags=["rrhh-alertas"], dependencies=[Depends(require_session)])
+# BR-001 / BR-002: mismo criterio que hr.py — sesion + modulo RRHH en todo el
+# router (alertas de jubilacion/pension, vencimientos y historial de cargos).
+router = APIRouter(
+    prefix="/api/rrhh",
+    tags=["rrhh-alertas"],
+    dependencies=[Depends(require_session), Depends(require_role("RRHH"))],
+)
 
 
 # =============================================================================

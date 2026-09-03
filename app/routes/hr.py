@@ -5,12 +5,16 @@ import pandas as pd
 
 from database import db_query, split_terms
 from models import RrhhSearchRequest, RrhhProfileRequest
-from routes.admin.deps import require_session
+from routes.admin.deps import require_session, require_role
 from utils import paginate
 
 router = APIRouter(prefix="/api/rrhh", tags=["rrhh"])
 
-_auth = [Depends(require_session)]
+# BR-001 / BR-002: sin esto, el expediente de personal (cedula, RIF, fecha de
+# nacimiento, sexo, nivel educativo, foto, expediente completo) se podia leer
+# sin sesion, y con sesion desde cualquier modulo. Se aplica a TODOS los
+# endpoints de este router, lectura y escritura.
+_auth = [Depends(require_session), Depends(require_role("RRHH"))]
 
 
 # =============================================================================
@@ -107,7 +111,7 @@ def fetch_hr_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFram
 # ENDPOINTS
 # =============================================================================
 
-@router.post("/buscar", summary="Búsqueda de expedientes de personal")
+@router.post("/buscar", summary="Búsqueda de expedientes de personal", dependencies=_auth)
 def search_hr(req: RrhhSearchRequest):
     """
     Búsqueda de expedientes RRHH sobre la vista agregada `vw_rrhh_persona_index`.
@@ -297,7 +301,7 @@ def search_hr(req: RrhhSearchRequest):
     }
 
 
-@router.post("/person/profile")
+@router.post("/person/profile", dependencies=_auth)
 def get_person_profile(req: RrhhProfileRequest):
     df = fetch_hr_dataframe(
         "e.nombres || ' ' || e.apellidos = %s",
@@ -354,7 +358,7 @@ def get_person_profile(req: RrhhProfileRequest):
     }
 
 
-@router.get("/empleado/por-cedula/{cedula}")
+@router.get("/empleado/por-cedula/{cedula}", dependencies=_auth)
 def get_employee_by_id(cedula: str):
     """Retorna el expediente de un empleado dado su cédula."""
     row = db_query(
