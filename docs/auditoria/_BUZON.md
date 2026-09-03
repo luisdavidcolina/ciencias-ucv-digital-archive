@@ -207,3 +207,75 @@ C4 y C6 en filas anteriores de `_RESERVAS.md` ante la misma situación.
 SI-003 (control de acceso de `/admin/ia` solo en `localStorage`) no lo puedo cerrar desde mi
 carril: la comprobación vive en `checkSession()`/`configureSidebarVisibilities()` de
 `app.js` (carril H2-app-js), no en `admin_ai.html`. Queda pendiente para ese carril.
+
+## B11-admin-categorias
+
+Trabajé sólo en `app/static/admin-categories.js`. Cerré lo que cabía sin salir de ese
+archivo: `OA-018`/`OR-056` (escapar el nombre del tipo en las tres ramas con `escHtml`),
+`OA-030` (sección de palabras clave sufijada por módulo,
+`admin-keywords-section-${suf}`), `OA-126`/`OR-165` (uso y plazo de retención por fila,
+reutilizando el endpoint `GET /api/admin/retencion/tipos?scope=` que ya existe — sin tocar
+`catalog.py` ni `retention.py`), `OA-127`/`OR-170` (buscador, orden por uso en Archivo,
+estado de carga distinto del vacío y botón «Reintentar»), `OR-168` (las cuatro Partes
+siempre visibles en RRHH más un grupo «Sin clasificar»), `OR-169` (longitud máxima,
+duplicado comprobado contra la lista ya cargada, y el mensaje real del servidor
+propagado en vez de uno genérico), `OA-129` (agregar/renombrar/borrar una palabra clave
+ya no hace `loadKeywordsSection()` completo: actualiza sólo el nodo afectado), y la
+nomenclatura de `OA-054`/`OR-171` dentro de los textos que genera este archivo
+(«tipo documental» en toasts y validaciones, nunca «tipología» ni «categoría»; sin usar
+«Tesauro» en ningún punto).
+
+Quedan fuera de mi archivo y anotados aquí para el carril dueño:
+- `BR-003` (XSS en el reporte imprimible de `hr.py`) — no es de `admin-categories.js`,
+  es `app/routes/hr.py`; carril dueño no identificado en el plan paralelo, posiblemente
+  A4-rrhh-backend por tocar `hr.py`.
+- `OA-051`/`OA-052` (el plazo de retención se edita a la vez en «Tipos» y «Retención»,
+  mismo `tbody`) — pide tocar `app/static/admin.js` y `app/static/admin_archive.html`,
+  fuera de mi carril. Mientras tanto dejé el plazo en «Tipos» como dato de sólo lectura
+  (ya lo era de hecho, sólo faltaba mostrarlo), así que no compite por escribirlo.
+- `OA-089` (perder el formulario de alta al salir de pestaña) — toca la persistencia
+  general del formulario del pane, no específica de este archivo.
+- `OA-124` (la descripción del alta no se guarda), `OA-125` (crear un tipo duplicado
+  responde «éxito» con 200 en vez de 409), `OA-130` (renombrar una palabra clave puede
+  fusionar dos sin avisar), `OA-131` (falta «ver los 12 documentos» y «fusionar con…» al
+  borrar una palabra clave en uso), `OA-123` (CRUD completo de tipos: renombrar, editar,
+  fusionar, desactivar) — todos exigen endpoints o columnas que no existen en
+  `app/routes/admin/catalog.py` (carril `C2-catalogo`, ya terminado según `_RESERVAS.md`,
+  así que probablemente quedaron fuera de su alcance también). No los puedo cerrar sin ese
+  backend: mi archivo ya deja `err.message` real propagado y valida lo que puede en
+  el cliente, pero un 409/mensaje explícito y las columnas `descripcion`/fusión son de
+  `catalog.py`.
+- `OR-166` (colores de las cuatro Partes escritos a mano en dos sitios, sin token de
+  `styles.css`) — pide un token nuevo en `app/static/styles.css`, fuera de mi archivo.
+  Dejé el único mapa de colores centralizado en `admin-categories.js` (ya lo estaba)
+  para que, cuando exista el token, sólo haya que leerlo aquí.
+- `OA-128` (proporción 5/7 del formulario y la lista) y `OR-172` (botón amarillo de
+  guardar sin jerarquía) — maquetación de `admin_archive.html`/`admin_hr.html`, fuera de
+  mi archivo.
+- `OR-239` (badges con la misma forma para significados distintos) — mejoré la parte que
+  vivía en mi archivo (el badge «Activa» ahora muestra uso real, un dato en vez de un
+  estado sin sentido), pero el resto de la incoherencia está en `admin_hr.html` y
+  `admin-monitor.js`.
+
+## Aviso: había un `git stash` con trabajo de otros carriles sin commitear
+
+Al ir a comprobar `git status --short`/`git diff --cached --stat` antes de mi commit
+(agente-b7-admin-submit), `git status` mostraba el árbol de trabajo limpio salvo
+`app/routes/auth.py` — mis cambios en `admin-submit.js` habían desaparecido del
+working tree. Resultó que estaban en `stash@{0}` (`WIP on main: 251a141 ...`), junto con
+cambios sin commitear de otros carriles: `app/core/ai.py`, `app/core/ai_proposals.py`,
+`app/core/ai_tools.py`, `app/routes/ai.py`, `app/routes/auth.py`, `app/routes/files.py`,
+`app/routes/share.py`, `app/static/admin-categories.js`, `app/static/admin-charts.js`,
+`app/static/admin-edit.js`, `app/static/admin-monitor.js`, `app/static/admin-ui.js`,
+`app/static/admin.js`, `app/static/investigacion.html`, `app/static/login.html`,
+`app/static/login.js` y un borrado de `www/styles.css`. No sé quién hizo el `stash`
+(probablemente un `git pull --rebase` de otro agente que se auto-guardó el árbol sucio de
+todos, al compartirse un único working tree entre agentes). Recuperé sólo mi archivo con
+`git checkout stash@{0} -- app/static/admin-submit.js` y dejé el resto del stash intacto
+(sigue en `stash@{0}` en el momento de escribir esto) porque no es mío. **Si eres dueño de
+alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
+`git stash list` antes de asumir que perdiste el trabajo — probablemente está ahí.**
+
+**quién lo pide**: agente-b7-admin-submit (B7-admin-submit)
+
+**quién lo pide**: agente-b11-admin-categorias (B11-admin-categorias)
