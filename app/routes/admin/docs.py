@@ -1,12 +1,24 @@
-"""CRUD de documentos y empleados en el panel de administración."""
+"""CRUD de documentos y empleados en el panel de administración.
+
+Autorización (OA-035, IN-131, IN-132): cada endpoint exige `require_role`
+además de `require_session` heredado del router de `/api/admin`. Este
+archivo sirve documentos de dos módulos distintos según el parámetro
+`modulo` de la petición (Archivo o RRHH), así que los endpoints
+compartidos exigen pertenecer a cualquiera de los dos; los que sólo tienen
+sentido para expedientes de personal (`/empleado/*`) exigen "RRHH". Ninguno
+de los borrados de este archivo es definitivo (son soft-delete a
+papelera), así que usan `require_role`, no `require_admin_role` —eso queda
+para purgar en `trash.py`.
+"""
 import re
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from database import db_query, log_event
 from models import DocumentSubmitRequest, DocumentUpdateRequest, EmpleadoUpdateRequest
+from .deps import require_session, require_role
 from .helpers import (
     _resolve_or_create_lookup,
     _resolve_or_create_tipo_documento,
@@ -32,6 +44,8 @@ def list_all_files(
     status_filter: Optional[str] = "",
     page: int = 1,
     per_page: int = 25,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
     if modulo not in ("Archivo", "RRHH"):
         raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
@@ -190,7 +204,12 @@ def list_all_files(
 
 
 @router.get("/documento/{doc_id}")
-def get_documento(doc_id: int, modulo: str = "Archivo"):
+def get_documento(
+    doc_id: int,
+    modulo: str = "Archivo",
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     _require_modulo(modulo)
     if modulo == "Archivo":
         row = db_query(
@@ -243,7 +262,11 @@ def get_documento(doc_id: int, modulo: str = "Archivo"):
 
 
 @router.post("/submit")
-def admin_submit(req: DocumentSubmitRequest):
+def admin_submit(
+    req: DocumentSubmitRequest,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}, Titulo: {(req.titulo or req.empleado or '')[:60]}")
     creado_por = _resolve_user_id(req.usuario)
     fecha_doc  = req.fecha or datetime.now().strftime("%Y-%m-%d")
@@ -344,7 +367,12 @@ def admin_submit(req: DocumentSubmitRequest):
 
 
 @router.put("/documento/{doc_id}")
-def update_documento(doc_id: int, req: DocumentUpdateRequest):
+def update_documento(
+    doc_id: int,
+    req: DocumentUpdateRequest,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     updated_by = _resolve_user_id(req.usuario)
     updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -433,7 +461,13 @@ def update_documento(doc_id: int, req: DocumentUpdateRequest):
 
 
 @router.delete("/documento/{doc_id}")
-def delete_documento(doc_id: int, modulo: str, usuario: str):
+def delete_documento(
+    doc_id: int,
+    modulo: str,
+    usuario: str,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Soft-delete: marca el documento como eliminado (papelera). No borra físicamente."""
     _require_modulo(modulo)
     now = datetime.utcnow().isoformat()
@@ -457,6 +491,8 @@ def update_documento_status(
     status: str = Query(...),
     modulo: str = Query(default="Archivo"),
     requester: str = Query(default=""),
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
     """Cambia el status de un documento: draft → revision → aprobado | rechazado."""
     _require_modulo(modulo)
@@ -477,7 +513,13 @@ def update_documento_status(
 
 
 @router.get("/documentos/pendientes")
-def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: int = 25):
+def get_documentos_pendientes(
+    modulo: str = "Archivo",
+    page: int = 1,
+    per_page: int = 25,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Lista documentos en estado draft o revision para revisión/aprobación."""
     _require_modulo(modulo)
     page, per_page, offset = paginate(page, per_page)
@@ -518,7 +560,13 @@ def get_documentos_pendientes(modulo: str = "Archivo", page: int = 1, per_page: 
 
 
 @router.post("/documento/{doc_id}/upload")
-async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: str = ""):
+async def upload_documento_file(
+    doc_id: int,
+    modulo: str = "Archivo",
+    usuario: str = "",
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Stub para subida de archivos. Implementar cuando se elija proveedor de storage."""
     _require_modulo(modulo)
     return {
@@ -529,7 +577,11 @@ async def upload_documento_file(doc_id: int, modulo: str = "Archivo", usuario: s
 
 
 @router.get("/empleado/{emp_id}")
-def get_empleado(emp_id: int):
+def get_empleado(
+    emp_id: int,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("RRHH")),
+):
     row = db_query(
         """SELECT e.id, e.cedula, e.rif, e.nombres, e.apellidos,
                   COALESCE(c.nombre,'')   AS cargo,
@@ -555,7 +607,12 @@ def get_empleado(emp_id: int):
 
 
 @router.put("/empleado/{emp_id}")
-def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
+def update_empleado(
+    emp_id: int,
+    req: EmpleadoUpdateRequest,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("RRHH")),
+):
     set_clauses, params = [], []
 
     if req.nombres is not None:
@@ -606,7 +663,11 @@ def update_empleado(emp_id: int, req: EmpleadoUpdateRequest):
 
 
 @router.get("/status_counts")
-def get_status_counts(modulo: str = "Archivo"):
+def get_status_counts(
+    modulo: str = "Archivo",
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("Archivo", "RRHH")),
+):
     """Retorna conteo de documentos por status para badges en el monitor."""
     _require_modulo(modulo)
     if modulo == "Archivo":
@@ -627,7 +688,12 @@ def get_status_counts(modulo: str = "Archivo"):
 
 
 @router.delete("/empleado/{emp_id}")
-def delete_empleado(emp_id: int, usuario: str):
+def delete_empleado(
+    emp_id: int,
+    usuario: str,
+    usuario_sesion: str = Depends(require_session),
+    _autorizado: str = Depends(require_role("RRHH")),
+):
     """Soft-delete: envía el empleado a la papelera. No borra físicamente."""
     result = db_query(
         "UPDATE public.empleados SET deleted_at=%s, deleted_by=%s WHERE id=%s AND deleted_at IS NULL RETURNING id",
