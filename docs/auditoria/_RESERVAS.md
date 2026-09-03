@@ -16,7 +16,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | W1b | agente-w1b-fixture-ci | 2026-09-03 | terminado | f2a5b10 |
 | O1 (H1c-autorizacion) | agente-o1-autorizacion | 2026-09-03 | terminado | 9ff1fc1 |
 | O2 (H1b-conexion) | agente-o2-transacciones | 2026-09-03 | terminado | defd015 |
-| C1-docs-backend | agente-c1-docs | 2026-09-03 | en curso | |
+| C1-docs-backend | agente-c1-docs | 2026-09-03 | terminado | 66c0b2b |
 | C2-catalogo | agente-c2-catalogo | 2026-09-03 | terminado | 28bbff1 |
 | C3-stats-backend | agente-c3-stats | 2026-09-03 | en curso | |
 | C4-retencion | agente-c4-retencion | 2026-09-03 | terminado | 249dba7 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C2-catalogo, contenido correcto) |
