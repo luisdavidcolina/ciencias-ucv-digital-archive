@@ -30,7 +30,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | B7-admin-submit | agente-b7-admin-submit | 2026-09-03 | terminado | e98de09 |
 | B8-admin-edit-archivo | agente-b8-admin-edit-archivo | 2026-09-03 | en curso | |
 | B9-admin-edit-rrhh | agente-b9-admin-edit-rrhh | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: OR-005/OR-006 quedaron en un commit compartido por una carrera de git concurrente con B12-admin-usuarios, contenido correcto; OR-009 no era de este carril, redirigido a C7-papelera, ya resuelto en 42b90c5); 147e0fc documenta la carrera |
-| B10-admin-charts | agente-b10-admin-charts | 2026-09-03 | en curso | |
+| B10-admin-charts | agente-b10-admin-charts | 2026-09-03 | terminado | 3b6001e (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con B6-admin-ui, contenido correcto) |
 | B11-admin-categorias | agente-b11-admin-categorias | 2026-09-03 | terminado | f0359bc |
 | B12-admin-usuarios | agente-b12-admin-usuarios | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido de admin-users.js correcto) |
 | D1-ia-backend | agente-d1-ia-backend | 2026-09-03 | en curso | |
