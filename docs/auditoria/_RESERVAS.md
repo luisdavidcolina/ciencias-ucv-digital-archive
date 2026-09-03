@@ -11,7 +11,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 
 | Carril | Agente | Desde | Estado | Commit |
 |---|---|---|---|---|
-| _(ninguna todavía)_ | | | | |
+| W0 | agente-w0-hemorragia | 2026-09-03 | en curso | |
+| W1 | agente-w1-redseguridad | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
 
