@@ -186,6 +186,12 @@ necesitan tocarlo**. Ninguno lo toca. Lo anotan en el buzón y `H1a` los aplica 
 8. Un commit por pendiente o por grupo pequeño, con el identificador en el mensaje.
 9. Antes de empujar, `git pull --rebase`. Si sale un conflicto en un archivo que **no es de tu
    carril**, es que alguien se saltó la regla 3: no lo resuelvas por tu cuenta, avísalo.
+10. **`git add` con nombres de archivo explícitos, nunca `git add -A` ni `git add .`.** Con
+    varios agentes escribiendo en el mismo árbol de trabajo a la vez, un `add` genérico puede
+    arrastrar archivos de OTRO agente que aún no ha terminado de escribir los suyos, y su
+    commit desaparece de la rama (le pasó a O1: su commit quedó huérfano, fuera de `main`,
+    recuperado a mano). Comprueba `git status --short` y `git diff --cached --stat` antes de
+    cada commit: si aparece algo que no es tuyo, no lo incluyas.
 
 ---
 
