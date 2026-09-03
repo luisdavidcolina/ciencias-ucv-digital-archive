@@ -12,12 +12,6 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 # =============================================================================
 # BLOQUEO DE LOGIN (SI-031 / SI-032)
 # =============================================================================
-# Contador de fallos en memoria del proceso, por clave "usuario|ip". No
-# sustituye a un almacén persistente compartido entre instancias (eso exige
-# tocar app/schema.sql y app/database.py, fuera de este carril; anotado en
-# _BUZON.md), pero cierra el hueco de que el bloqueo fuera puramente
-# cosmético en el navegador: un cliente que ignore login.js y ataque
-# /api/auth/login directamente también encuentra el bloqueo aquí.
 _FAILED_ATTEMPTS: dict[str, list[float]] = {}
 _LOCK_THRESHOLD = 5
 _LOCK_WINDOW_SECONDS = 300
@@ -67,7 +61,6 @@ def _build_user_response(rows, username: str) -> dict:
         if mod:
             roles[mod] = rol
 
-    # Si el usuario tiene módulo "Global", expandir a Archivo + RRHH y quitar "Global"
     if "Global" in modules:
         global_role = roles.get("Global", "Admin")
         modules = [m for m in modules if m != "Global"]
@@ -132,11 +125,6 @@ def login(req: LoginRequest, response: Response, request: Request):
     if rows:
         active_rows = [r for r in rows if r.get("is_active", True)]
         for row in active_rows:
-            # No tocar la contraseña: sólo se recorta el usuario. Un espacio
-            # inicial o final en la contraseña es parte de la credencial
-            # (SI-035) — recortarla aquí hace que una contraseña creada con
-            # un espacio (el panel de administración no la recorta) deje de
-            # poder usarse nunca.
             if verify_password(req.password, row["contrasena"]):
                 try:
                     db_query(
@@ -155,8 +143,6 @@ def login(req: LoginRequest, response: Response, request: Request):
 
     _register_failure(key)
     log_event(req.username, "Login Failure", "Auth", "Credenciales incorrectas o cuenta desactivada", "Failure")
-    # Mensaje único e idéntico para usuario inexistente, contraseña
-    # incorrecta y cuenta desactivada: no debe poder distinguirse cuál pasó.
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Usuario o contraseña incorrectos",
@@ -169,8 +155,6 @@ def restore_session(
     response: Response,
     ds_session: Optional[str] = Cookie(default=None),
 ):
-    # Require a valid HMAC session token — otherwise anyone who knows a username
-    # could call this endpoint and obtain a fresh authenticated cookie.
     token_user = verify_session_token(ds_session) if ds_session else None
     if not token_user or token_user.lower() != req.username.strip().lower():
         raise HTTPException(status_code=401, detail="Sesión no válida o expirada")
@@ -207,13 +191,7 @@ def logout(response: Response):
 
 @router.get("/verify")
 def verify_session_endpoint(ds_session: Optional[str] = Cookie(default=None)):
-    """Verifica si la cookie de sesión es válida.
-
-    SI-028 / IN-038: antes aceptaba el token por parámetro de query, un
-    endpoint de depuración expuesto en producción — el token quedaba en el
-    historial del navegador, en los registros de acceso y en el `Referer` de
-    cualquier enlace saliente. Ahora sólo lee la cookie httpOnly.
-    """
+    """Verifica si la cookie de sesión es válida (SI-028/IN-038: ya no acepta el token por query)."""
     username = verify_session_token(ds_session)
     if not username:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")

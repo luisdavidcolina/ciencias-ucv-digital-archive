@@ -2,10 +2,6 @@ const API_BASE   = window.location.origin;
 const SESSION_KEY = "archive_session";
 const LOCK_KEY = "login_lock_until";
 let _loginFailCount = 0;
-// Única fuente de verdad del bloqueo: mientras esté en `true` NINGÚN camino de
-// envío (clic, Enter, submit del formulario) puede llamar a performLogin().
-// SI-032: antes el bloqueo sólo deshabilitaba el botón y un listener de
-// `keydown` en `document` llamaba a performLogin() sin mirar ese estado.
 let _locked = false;
 let _lockTimer = null;
 
@@ -31,9 +27,6 @@ function initLoginPage() {
     toggle.setAttribute("aria-label", showing ? "Ocultar contraseña" : "Mostrar contraseña");
   });
 
-  // CapsLock indicator: reacciona a que se escriba o se pegue en cualquiera
-  // de los dos campos, no sólo a `keyup` sobre la contraseña, y se oculta al
-  // salir del campo.
   const updateCapsWarning = e => {
     const warn = document.getElementById("caps-lock-warning");
     if (warn) warn.style.display = e.getModifierState?.("CapsLock") ? "block" : "none";
@@ -48,16 +41,12 @@ function initLoginPage() {
     el?.addEventListener("blur", hideCapsWarning);
   });
 
-  // Un solo camino de envío: el submit del formulario. Cubre el clic en el
-  // botón (type="submit") y Enter en cualquier campo del formulario, así que
-  // no puede haber un camino que se olvide de comprobar el bloqueo.
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
       performLogin();
     });
   } else {
-    // Red de seguridad si el marcado no trae <form>.
     loginBtn?.addEventListener("click", performLogin);
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter") performLogin();
@@ -108,7 +97,7 @@ function showLoginError(msg) {
     errEl.textContent = msg;
     errEl.style.display = "block";
     errEl.style.animation = "none";
-    errEl.offsetHeight; // trigger reflow
+    errEl.offsetHeight;
     errEl.style.animation = "ds-shake 0.4s ease";
   } else {
     alert(msg);
@@ -121,8 +110,6 @@ function hideLoginError() {
 }
 
 async function performLogin() {
-  // Cerrojo único: si está bloqueado, ningún camino de envío hace la
-  // petición, sin importar cómo se haya disparado performLogin().
   if (_locked) return;
 
   const username = document.getElementById("login_user")?.value.trim();
@@ -145,9 +132,6 @@ async function performLogin() {
       body: JSON.stringify({ username, password })
     });
     if (!res.ok) {
-      // Mensaje genérico siempre, sin importar el detalle que devuelva el
-      // servidor: no debe distinguir usuario inexistente de contraseña
-      // incorrecta ni de cuenta desactivada.
       const err = new Error("Usuario o contraseña incorrectos.");
       err.isAuthError = true;
       throw err;
@@ -186,7 +170,6 @@ function saveSession(user) {
 
 function chooseLandingPage(user) {
   if (!user) return "/archivo";
-  // Global admin → sistema
   if (user.modules?.includes("Archivo") && user.modules?.includes("RRHH")) return "/admin/sistema";
   if (user.modulo === "RRHH" || user.modules?.includes("RRHH")) return "/rrhh";
   return "/archivo";
