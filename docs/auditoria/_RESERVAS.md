@@ -16,6 +16,14 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | W1b | agente-w1b-fixture-ci | 2026-09-03 | terminado | f2a5b10 |
 | O1 (H1c-autorizacion) | agente-o1-autorizacion | 2026-09-03 | terminado | 9ff1fc1 |
 | O2 (H1b-conexion) | agente-o2-transacciones | 2026-09-03 | terminado | defd015 |
+| C1-docs-backend | agente-c1-docs | 2026-09-03 | en curso | |
+| C2-catalogo | agente-c2-catalogo | 2026-09-03 | en curso | |
+| C3-stats-backend | agente-c3-stats | 2026-09-03 | en curso | |
+| C4-retencion | agente-c4-retencion | 2026-09-03 | en curso | |
+| C6-usuarios-backend | agente-c6-usuarios | 2026-09-03 | en curso | |
+| C7-papelera | agente-c7-papelera | 2026-09-03 | en curso | |
+| A2-archivo-backend | agente-a2-archivo-backend | 2026-09-03 | en curso | |
+| A4-rrhh-backend | agente-a4-rrhh-backend | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
 
