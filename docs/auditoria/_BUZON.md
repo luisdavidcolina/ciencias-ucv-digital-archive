@@ -16,13 +16,7 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
 
 ## Pendientes anotados
 
-- [ ] **mojibake en dos documentos de auditoría** · **archivos**: `docs/auditoria/backoffice-rrhh.md`,
-      `docs/auditoria/buscador-archivo.md` · **carril dueño**: ninguno (son documentos, no código)
-      **quién lo pide**: revisión de W0/W1, 2026-09-03
-      **qué hace falta**: `test_static_assets.py::test_sin_mojibake` falla en estos dos archivos
-      (2 secuencias en cada uno, ej. 'é'/'á' doble-codificados). No es una regresión de W0/W1 — ya
-      estaba en el commit de las auditorías. Se repara re-codificando esas líneas a cp1252 y
-      decodificando como UTF-8, igual que documenta la propia guarda.
+_(vacío)_
 
 ## Contexto: los archivos más disputados
 
