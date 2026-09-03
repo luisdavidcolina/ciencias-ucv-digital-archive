@@ -552,3 +552,106 @@ son míos y no los escribí. El contenido de mis tres archivos en `HEAD` es corr
 leyendo `files.py`/`share.py` tras el commit). No reparo el historial, según la regla 10.
 
 **quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
+
+## B5-admin-monitor — pendientes que exigen tocar archivos ajenos
+
+Hice todo lo que cabía sólo en `app/static/admin-monitor.js` de los 38 pendientes del carril
+(OA-029, OA-096, OA-107 parcial, OA-111, OA-115, OA-116, OA-117/OR-129, OA-118/OR-130 parcial,
+OA-119/OR-134, OA-121, OA-122/OR-137, OA-094/OR-098 parcial, OA-015 [pedido por B6], OR-120,
+OR-121 parcial, OR-133, OR-138, OR-139, OR-162, OR-236). El resto necesita un archivo que no es
+mío:
+
+- [ ] `OR-001` · **archivo**: ya corregido del lado que me tocaba (ver más abajo) · **backend**:
+      `app/routes/hr.py:303` (no tocado, según la instrucción explícita de este carril)
+      **qué hace falta**: confirmar que `POST /api/rrhh/person/profile` (o el endpoint que
+      `openRrhhPersonDossier` termine llamando) resuelve por `empleado_id` y no por comparación
+      de cadena de nombre. Mi parte: `admin-monitor.js` ya pasaba `f.empleado_id` a
+      `openEditEmpleadoModal`/`handleDeleteEmpleado`; revisé `openRrhhPersonDossier` (vive en
+      `hr.js`, no es mío) — sigue recibiendo `f.empleado` (la cadena `"Apellidos, Nombres"") en
+      vez de `f.empleado_id`, que es exactamente la causa que describe la ficha. No lo cambié
+      porque la función que arma la petición y el propio endpoint están en `hr.js`/`hr.py`,
+      fuera de este carril.
+
+- [ ] `OA-063` · **archivo**: `app/static/admin_archive.html`, `app/routes/admin/docs.py`
+      **qué hace falta**: la bandeja de pendientes es una vista propia con selección múltiple,
+      no algo que quepa en la tabla del monitor sin una pestaña nueva en el HTML.
+
+- [ ] `OA-103/OR-117` · **archivo**: `app/static/admin_archive.html`/`admin_hr.html`
+      (casillas de selección), `app/routes/admin/docs.py` (endpoint de lote transaccional)
+      **qué hace falta**: selección múltiple con barra de acciones flotante. No cabe sin
+      casillas en el `<thead>`/`<tbody>` que declara el HTML, ni sin un endpoint de lote.
+
+- [ ] `OA-104/OR-128` · **archivo**: `app/routes/admin/docs.py` (parámetros `sort`/`dir` en
+      `/list_all` sobre lista blanca de columnas), `app/static/admin_archive.html`/`admin_hr.html`
+      (`aria-sort` en los `<th>`)
+      **qué hace falta**: orden real server-side; un orden sólo de la página visible en JS sería
+      engañoso (25 de 412 filas) y no es lo que pide la ficha.
+
+- [ ] `OA-105` · no es de este carril (no aparece en la lista de B5) — mencionado sólo para que
+      quien lo tenga sepa que un selector de columnas persistido interactúa con OA-104 y con
+      cualquier columna nueva que yo no pude añadir por lo mismo que OR-121.
+
+- [ ] `OA-118/OR-130` (parcial) · ya añadí salto directo a página inyectando un `<input>` +
+      botón junto al paginador existente (`admin_next-<suf>`) desde JS, sin tocar el HTML. Falta
+      «primera/última página», que preferí no fabricar por completo en runtime porque duplicaría
+      controles si `admin_archive.html`/`admin_hr.html` los agrega también — mejor que quien
+      posea esos HTML decida el marcado definitivo.
+
+- [ ] `OA-150` · **archivo**: `app/routes/admin/docs.py`
+      **qué hace falta**: `list_all` (módulo Archivo) no expone `datos_archivo.disposicion`;
+      sin ese campo en la respuesta no hay nada que pintar como badge en el monitor.
+
+- [ ] `OA-181` · **archivo**: `app/static/admin_archive.html`
+      **qué hace falta**: son los tres botones del *pie del modal de detalle* (Visualizar/
+      Editar/Descargar), marcado fijo en el HTML del modal, no algo que arme
+      `admin-monitor.js`.
+
+- [ ] `OR-001` (backend) — ver primera entrada de este bloque.
+
+- [ ] `OR-119` · **archivo**: `app/routes/admin/docs.py`
+      **qué hace falta**: micro-indicadores por Parte (I·II·III·IV) necesitan que `list_all`
+      agregue el conteo por Parte, no sólo la lista de nombres de tipo en `tipos`. Con lo que
+      hoy llega no se puede reconstruir la Parte de cada tipo en el cliente.
+
+- [ ] `OR-121` (columna completa) · **archivo**: `app/static/admin_hr.html`
+      **qué hace falta**: el dato (`f.doc_count`) ya llega y ya lo muestro como indicador junto
+      al nombre del empleado, pero una columna propia y ordenable exige un `<th>` nuevo en el
+      `<thead>` de `admin_hr.html` — si lo agrego sólo del lado del `<td>` en mi archivo, el
+      `test_admin_panels.py::test_monitor_columnas_y_celdas_cuadran` (cabeceras vs celdas) falla
+      porque contaría una celda de más contra las columnas declaradas en el HTML.
+
+- [ ] `OA-110/OR-136` · **no lo implemento**: intenté que la fila abriera el detalle al hacer
+      clic (excepto en los botones), pero `test_admin_panels.py::_row_template_cells` localiza
+      la plantilla de fila con el literal exacto `<tr class="ds-monitor-row">` (sin atributos)
+      para comparar cabeceras del `<thead>` contra celdas de la fila. Cualquier atributo nuevo en
+      ese `<tr>` (incluido un manejador de clic) rompe ese ancla y tumba
+      `test_monitor_columnas_y_celdas_cuadran` y `test_monitor_ocultamiento_responsive_coherente`
+      para los dos módulos. No toco `app/tests/test_admin_panels.py` porque no es mío. Si algún
+      carril con acceso a ese test quiere relajar el regex (por ejemplo aceptando atributos
+      adicionales en el `<tr>`), esta ficha queda lista para resolverse del lado JS.
+
+- [ ] `OR-135` · **archivo**: `app/static/styles.css`, `app/tests/test_contraste.py`
+      **qué hace falta**: una clase por estado laboral con su variante en modo oscuro y en los
+      once temas de color (`getStatusColor()` en `app-core.js`, tampoco mío, es quien decide el
+      color hoy). Cambiar sólo el consumo en `admin-monitor.js` sin la clase real en `styles.css`
+      dejaría el badge sin ningún color.
+
+- [ ] `OR-237` (avatar con foto) · **archivo**: `app/routes/admin/docs.py`
+      **qué hace falta**: ya muestro el respaldo de iniciales (28px, reutilizando
+      `.ds-person-avatar-sm`/`.ds-person-initials-sm` de `styles.css`) porque no requiere nada
+      fuera de mi archivo. La foto en sí no llega: `list_all` (rama RRHH) no selecciona
+      `e.foto_url`, aunque sí existe la columna (se usa en `GET /rrhh/person/profile`).
+
+- [ ] `OR-241` · **archivo**: `app/static/admin_hr.html`, `app/static/styles.css`
+      **qué hace falta**: tarjetas apiladas en móvil en vez de una tabla con columnas ocultas es
+      un cambio de marcado (HTML) y de reglas de layout (CSS), no de la plantilla de fila JS.
+
+- [ ] `OR-257` · **archivo**: `app/routes/admin/docs.py` (depende de OR-256, no es mía)
+      **qué hace falta**: el porcentaje de completitud por expediente no existe todavía en
+      ningún endpoint; nada que pintar hasta que `list_all` o un endpoint nuevo lo calcule.
+
+- [ ] `OR-277` · **archivo**: `app/main.py` (rutas nuevas), posible tabla en `schema.sql`
+      **qué hace falta**: vistas guardadas con nombre, compartibles por enlace — necesita
+      persistencia server-side que hoy no existe en ningún endpoint de RRHH/Archivo.
+
+**quién lo pide**: agente-b5-admin-monitor (B5-admin-monitor)
