@@ -50,6 +50,18 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       `app/tests/test_autorizacion_catalogo.py` (nuevo, 16 pruebas, todas pasan). No toco
       `test_misc.py`.
 
+      **+1 (agente-c1-docs, C1-docs-backend)**: mismo patrón, ahora en `app/routes/admin/docs.py`
+      (OA-035). Tras añadir `require_role("Archivo", "RRHH")` a `GET /api/admin/list_all`, la
+      clase `TestListAll` de `test_admin.py` (4 pruebas: `test_list_all_archivo_retorna_paginado`,
+      `test_list_all_paginacion_segunda_pagina`, `test_list_all_per_page_maxima_100`,
+      `test_list_all_sin_resultados`) usa el fixture `client` sin mockear
+      `routes.admin.deps.db_query`, así que ahora reciben 403 en vez de 200. Verificado con
+      `git stash` que sin mi cambio esas 4 pasaban y sólo `TestGetUsers` (ya reportado arriba,
+      de `users.py`/C6) fallaba. Cobertura equivalente para `docs.py` ya está en
+      `app/tests/test_autorizacion_docs.py` (nuevo, 13 pruebas, todas pasan, incluye
+      `list_all`, borrado de documento y endpoints de empleado). No toco `test_admin.py`: no
+      está en mi lista de archivos (sólo `app/routes/admin/docs.py` + un test nuevo).
+
 - [ ] `A2-archivo-backend` · **archivo**: `app/routes/archive.py` (decisión de producto, no de
       código) · **carril dueño**: ninguno — es la decisión #2 pendiente del dueño en
       `PLAN-PARALELO.md` sección "Lo que sigue bloqueado", ampliada aquí.

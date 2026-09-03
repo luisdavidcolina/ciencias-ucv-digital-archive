@@ -1,10 +1,22 @@
-"""Gestión de usuarios del sistema."""
-from fastapi import APIRouter, HTTPException
+"""Gestión de usuarios del sistema.
+
+OR-043/044/045: crear, listar, editar, borrar o resetear la contraseña de
+OTRO usuario del sistema es una operación que sólo el administrador Global
+debería poder hacer, sea cual sea el módulo del usuario objetivo — un admin
+de RRHH no debe poder resetear la clave del admin Global y heredar así el
+control del sistema entero (backup, Archivo, todo). `require_admin_role`
+(IN-131/IN-132, `routes/admin/deps.py`) lo exige de verdad para todo el
+router, no sólo en el docstring.
+"""
+from fastapi import APIRouter, Depends, HTTPException
 
 from database import db_query, log_event, hash_password
 from models import UserCreateRequest, PasswordChangeRequest
+from routes.admin.deps import require_session, require_admin_role
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(require_session), Depends(require_admin_role("Global"))]
+)
 
 
 @router.get("/users")
