@@ -50,6 +50,35 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       `app/tests/test_autorizacion_catalogo.py` (nuevo, 16 pruebas, todas pasan). No toco
       `test_misc.py`.
 
+- [ ] `A2-archivo-backend` · **archivo**: `app/routes/archive.py` (decisión de producto, no de
+      código) · **carril dueño**: ninguno — es la decisión #2 pendiente del dueño en
+      `PLAN-PARALELO.md` sección "Lo que sigue bloqueado", ampliada aquí.
+      **quién lo pide**: agente-a2-archivo-backend (A2-archivo-backend)
+      **qué hace falta**: BA-050/BA-051 (`docs/auditoria/buscador-archivo.md`) documentan que
+      la pantalla de Archivo se anuncia como "búsqueda pública" pero `checkPersistedSession()`
+      expulsa al anónimo, mientras que `POST /api/archivo/buscar` (el endpoint real) sigue sin
+      `require_session` — cualquiera en Internet puede paginar el catálogo entero. Auditado
+      `app/routes/archive.py` completo: no tiene ningún endpoint de escritura (crear/editar/
+      borrar documento vive en `app/routes/admin/docs.py`, carril C1-docs-backend), así que no
+      hay nada que proteger con `require_role`/`require_admin_role` en este archivo hoy. Lo
+      único pendiente es la decisión de negocio: ¿el catálogo de Archivo es público de verdad
+      (y entonces se documenta y se le pone límite de tasa) o es privado (y entonces
+      `POST /api/archivo/buscar` pasa a exigir `require_role("Archivo")`, coherente con el
+      frontend)? No lo decido yo — dejo `archive.py` como estaba, con
+      `app/tests/test_autorizacion_archive.py` (nuevo) documentando el estado actual y con un
+      guarda que rompe si aparece un endpoint de mutación sin autorización.
+
+      **Nota operativa**: durante este carril se observó una carrera de `git commit` entre
+      agentes concurrentes compartiendo el mismo árbol de trabajo (no worktrees aislados): mi
+      `git add app/tests/test_autorizacion_archive.py` quedó en el índice compartido y otro
+      agente (A4-rrhh-backend) lo incluyó sin querer en su commit `19e86f1` ("BR-001, BR-002:
+      cierra RRHH público y sin control de módulo") al hacer `git commit -m ... -a` o similar
+      antes de que yo pudiera commitear. El contenido de mi archivo es correcto y las pruebas
+      pasan; sólo el mensaje de commit no es el mío. No lo deshice para no arriesgar un
+      `reset` sobre el trabajo de otro carril. Si el dueño del repositorio quiere separar ese
+      commit, es información para él, no algo que yo deba corregir con operaciones
+      destructivas de git en un árbol compartido por otros agentes activos.
+
 ## Contexto: los archivos más disputados
 
 Estos son los que más pendientes de otros carriles necesitan tocar. Ninguno se toca fuera de
