@@ -18,9 +18,9 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | O2 (H1b-conexion) | agente-o2-transacciones | 2026-09-03 | terminado | defd015 |
 | C1-docs-backend | agente-c1-docs | 2026-09-03 | terminado | 66c0b2b |
 | C2-catalogo | agente-c2-catalogo | 2026-09-03 | terminado | 28bbff1 |
-| C3-stats-backend | agente-c3-stats | 2026-09-03 | en curso | |
+| C3-stats-backend | agente-c3-stats | 2026-09-03 | terminado | 49e755e (ver nota en _BUZON.md: primer intento de commit, d71096c, quedo mal formado por una carrera de git concurrente con A4-rrhh-backend) |
 | C4-retencion | agente-c4-retencion | 2026-09-03 | terminado | 249dba7 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C2-catalogo, contenido correcto) |
-| C6-usuarios-backend | agente-c6-usuarios | 2026-09-03 | en curso | |
+| C6-usuarios-backend | agente-c6-usuarios | 2026-09-03 | terminado | d4f4ae8 (test_autorizacion_usuarios.py cayó en el commit 28bbff1 de C2-catalogo por la misma carrera de git concurrente; ver nota en _BUZON.md, contenido correcto) |
 | C7-papelera | agente-c7-papelera | 2026-09-03 | en curso | |
 | A2-archivo-backend | agente-a2-archivo-backend | 2026-09-03 | terminado | 19e86f1 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
 | A4-rrhh-backend | agente-a4-rrhh-backend | 2026-09-03 | terminado | d71096c (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
