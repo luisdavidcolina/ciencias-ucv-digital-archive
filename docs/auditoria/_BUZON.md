@@ -16,6 +16,37 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
 
 ## Pendientes anotados
 
+- [ ] `DG-081` · **archivo**: `app/routes/files.py` (además `app/storage.py`,
+      `app/static/admin-submit.js`, `app/static/admin-edit.js`) · **carril dueño**: ninguno
+      abierto todavía (fichas marcadas `[CHOCA]`, requiere coordinar varios carriles a la vez)
+      **quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
+      **qué hace falta**: subida por partes directamente a R2 con URL prefirmada, sin pasar el
+      contenido por la función serverless (hoy `contents = await file.read()` carga hasta 25 MB
+      en memoria). Cambio grande que toca el flujo de subida del frontend también; no lo hago en
+      este carril porque `admin-submit.js`/`admin-edit.js` no son míos y el rediseño del endpoint
+      cambiaría su contrato.
+
+- [ ] `DG-083 (parte de escritorio)` · **archivo**: `app/routes/admin/deps.py`,
+      `app/routes/admin/users.py` · **carril dueño**: ninguno abierto todavía
+      **quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
+      **qué hace falta**: la ficha completa pide credencial de aplicación por dispositivo
+      (revocable, ámbito de subida únicamente) para el proceso de escaneo local que no pasa por
+      el navegador. Ya cerré en mi carril la parte que sí me correspondía: `files.py` ya no
+      confía en el campo `usuario` del formulario/`u` de la query para la identidad — usa
+      `require_session` (cookie o `X-Session-Token`) tanto en `/api/admin/upload` como en
+      `/api/files/{key}`. Falta la credencial de dispositivo en sí, que vive en `deps.py`/
+      `users.py`, fuera de mi carril.
+
+- [ ] `DG-169` · **archivo**: `app/tests/test_upload.py` (nuevo), `app/tests/conftest.py`
+      · **carril dueño**: ninguno abierto todavía (archivo de tests, no está en mi lista de
+      archivos)
+      **quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
+      **qué hace falta**: pruebas de `POST /api/admin/upload` contra sus rechazos (extensión,
+      vacío, tamaño, sin sesión) y una que confirme que la identidad ya no se puede falsear desde
+      el campo `usuario` del formulario (ahora usa `require_session`). No creo el archivo porque
+      mi carril declarado es solo `files.py`, `share.py`, `compartido.html`.
+
+
 - [ ] `OR-009` · **archivo**: `app/routes/trash.py`, `app/static/admin_hr.html`,
       `app/static/admin-edit.js` · **carril dueño**: `C7-papelera` (ya está en su lista de
       pendientes en `PLAN-PARALELO.md`, no en la de `B9-admin-edit-rrhh`)
@@ -278,4 +309,164 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
 
 **quién lo pide**: agente-b7-admin-submit (B7-admin-submit)
 
+- [ ] `OA-015` · **archivo**: `app/static/admin-monitor.js` · **carril dueño**: B5-admin-monitor
+      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
+      **qué hace falta**: `admin-ui.js` ya tiene `linkModal(title, body, url)` (con `<input
+      readonly>` y botón «Copiar», maneja el respaldo sin `navigator.clipboard`). El respaldo del
+      enlace de compartición sigue pasando marcado HTML crudo a `confirmModal()`
+      (`admin-monitor.js:336-341`); hay que cambiarlo para llamar a `linkModal(...)` en su lugar.
+
+- [ ] `OA-039/OA-040` · **archivo**: `app/static/admin-users.js` · **carril dueño**: B12-admin-usuarios
+      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
+      **qué hace falta**: `promptModal(title, label, defaultVal, placeholder, type)` ya acepta
+      `type="password"` y agrega un botón de mostrar/ocultar. El cambio de contraseña
+      (`admin-users.js:610`) sigue llamando a `promptModal` sin el quinto argumento; hay que
+      pasarle `"password"`.
+
+- [ ] `OA-093` · **archivo**: `app/static/admin-submit.js` · **carril dueño**: B7-admin-submit
+      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
+      **qué hace falta**: `showProgress(containerId, label, { pct, onCancel })` ahora admite una
+      barra determinada y `updateProgress(containerId, pct, label)` para ir avanzándola. Sigue
+      hace falta cambiar la subida de `fetch` a `XMLHttpRequest` con `upload.onprogress` para
+      alimentar esos números (la infraestructura de UI ya está, falta engancharla).
+
+- [ ] `OA-182` · **archivo**: `app/static/admin-edit.js` (y análogos en `admin-edit-hr.js`,
+      `admin.js`) · **carril dueño**: B8-admin-edit-archivo / B9-admin-edit-rrhh / B4-admin-tabs
+      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
+      **qué hace falta**: el manejador global de Escape en `admin-ui.js` ya confirma antes de
+      cerrar si el modal en pantalla lleva `data-dirty="true"`. Falta que cada formulario marque
+      esa propiedad (`modal.dataset.dirty = "true"`) en el primer `input`/`change` y la limpie
+      (`"false"`) al guardar con éxito, para que "Cancelar", clic fuera y Escape avisen de verdad
+      de los cambios sin guardar.
+
+- [ ] `OR-207` · **archivo**: `app/routes/admin/deps.py`, `app/routes/admin/users.py`,
+      `app/main.py` · **carril dueño**: ninguno abierto todavía (fichas `[CHOCA]`)
+      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
+      **qué hace falta**: roles intermedios entre Normal y Admin (consulta / archivo / aprueba /
+      administra). El `<select>` de rol que genera `admin-ui.js` (`_panelAcceso`) sólo tiene
+      sentido ampliarlo una vez exista el modelo de permisos en el backend; no lo toco porque es
+      trabajo de servidor, fuera de mi carril de utilidades de interfaz.
+
 **quién lo pide**: agente-b11-admin-categorias (B11-admin-categorias)
+
+- [ ] `OA-033`, `OR-018`, `OR-019`, `RQ-012` · **archivo**: `app/routes/admin/stats.py`
+      (además `app/static/admin-stats.js`, `app/static/admin-charts.js` que sí son míos) ·
+      **carril dueño**: C3-stats-backend
+      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
+      **qué hace falta**: los KPIs de la cabecera mezclan cifras filtradas (`/stats`, que sí
+      acepta rango de fechas) con cifras sin filtrar (`/charts`, que lo ignora); RRHH cuenta
+      expedientes vacíos como documentos por el `LEFT JOIN` sin excluir `deleted_at`; y no hay
+      forma de acotar por tipo/departamento. Los tres piden que `/charts` acepte el mismo rango
+      que `/stats` y sea la única fuente de la fila de KPIs — cambio de contrato del endpoint,
+      no lo hago desde el frontend.
+
+- [ ] `OA-079` · **archivo**: `app/routes/admin/stats.py` · **carril dueño**: C3-stats-backend
+      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
+      **qué hace falta**: «Documentos por Tipo» asigna el color por posición en el ranking de
+      volumen, así que dos tipos intercambian color al cambiar su orden — justo lo que
+      `CLAUDE.md` dice que no se hace con los slots `--viz-*`. Necesita que el backend mande un
+      id de tipo estable para asignar el slot por clave, no por posición; ya lo dejé
+      preparado del lado del frontend (`_norm`/mapa por clave en el bloque de soporte), falta
+      el mismo tratamiento en «por tipo» y el id estable viniendo de `stats.py`.
+
+- [ ] `OR-071`, `OR-101`, `OR-106`, `OR-109`, `OR-112`, `OR-124` · **archivo**:
+      `app/routes/admin/imports.py` / `app/routes/admin/docs.py` / `app/static/admin_hr.html`
+      · **carril dueño**: C5-importaciones / A4-rrhh-backend / B2-admin-rrhh-html
+      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
+      **qué hace falta**: previsualización `dry_run` antes de aplicar el CSV, detección de
+      separador con `csv.Sniffer`, mensajes de error en español con descarga de las filas
+      rechazadas, avance real de la importación (o tarea en segundo plano), barra pulsable de
+      cobertura filtrando Expedientes, y un panel de filtros nuevo en RRHH. Cambios grandes en
+      backend/marcado que exceden lo que se puede resolver desde `admin-charts.js`; hice lo que
+      sí cabía puramente en JS (OR-073 estado vacío de cobertura, OR-074 una sola categoría,
+      OR-110 color de la alerta de importación según resultado real).
+
+- [ ] `OA-201`, `OR-234`, `OR-077`, `OA-210`, `OR-280` · **archivo**: `app/static/styles.css` /
+      `app/static/admin.js` / `app/routes/admin/retention.py` / `app/routes/hr_alerts.py` ·
+      **carril dueño**: LX (estilos) / B4-admin-tabs / C4-retencion
+      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
+      **qué hace falta**: esqueleto de carga con estilos propios para las tarjetas KPI
+      (`OR-234`), animación de entrada que sólo debería correr una vez (`OA-201`, necesita una
+      clase en `styles.css`), exportar PNG/CSV por gráfico (`OR-077`, decoración en
+      `styles.css`), y caché de corta duración + endpoints de conteo para las peticiones del
+      Resumen (`OA-210`/`OR-280`, tocan `admin.js` y las rutas de alertas). Ninguno cabe sólo
+      en mis tres archivos.
+
+- [ ] `DG-139` · **archivo**: `app/main.py` (migración), `app/routes/admin/docs.py`,
+      `app/routes/admin/stats.py`, `app/database.py`, `app/schema.sql` ·
+      **carril dueño**: H1a-migraciones / C1-docs-backend / C3-stats-backend
+      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
+      **qué hace falta**: «digitalización a la carta» — estado «pendiente de digitalizar» por
+      documento, cola visible y aviso al solicitante. Es una funcionalidad nueva de backend con
+      su propia migración; no es un ajuste de gráficos, y `admin-charts.js` sólo la tocaría una
+      vez exista el endpoint.
+
+## Pendientes de B8-admin-edit-archivo que tocan archivos ajenos
+
+- [ ] `OA-133` (vaciar papelera / purgar en lote) · **archivos**: `app/routes/trash.py`
+      (endpoint de purga masiva) y `app/static/admin_archive.html` (casillas de selección
+      y botón «Vaciar papelera») · **carriles dueños**: C7-papelera, B1-admin-archivo-html
+      **qué hace falta**: un endpoint que reciba una lista de ids (o `?todos=true`) y
+      checkboxes por fila en la tabla de papelera. El JS que las consume ya puede
+      escribirse en `admin-edit.js` en cuanto existan.
+- [ ] `OA-134`, `OA-135`, `OA-136`, `OA-138`, `OA-139` · **archivo**:
+      `app/static/admin_archive.html` · **carril dueño**: B1-admin-archivo-html
+      **qué hace falta**: caja de búsqueda/filtro de la papelera (OA-134), tarjeta neutra
+      en vez de `card-danger` (OA-139), y un botón «Exportar CSV» que llame a
+      `_exportPapelera('archivo'|'rrhh'|'empleados')` — la función ya existe en
+      `admin-edit.js` (OA-138). `OA-135`/`OA-136` (motivo de borrado, validar conflictos al
+      restaurar) son de `app/routes/admin/docs.py` y `app/routes/trash.py`.
+- [ ] `OR-177`, `OR-179` · **archivos**: `app/main.py` (migración `deleted_reason`),
+      `app/routes/admin/docs.py`, `app/routes/trash.py` · **carriles dueños**:
+      H1a-migraciones, C1-docs-backend, C7-papelera
+      **qué hace falta**: motivo obligatorio al borrar y comprobación de cédula duplicada
+      al restaurar un empleado. `admin-edit.js` ya está listo para mostrar el motivo en
+      cuanto el backend lo sirva.
+- [ ] `OR-123`, `OR-129` (asignados a B8 en `_asignacion.json` pero el código real está en
+      `app/static/admin-monitor.js` y `app/static/admin_hr.html`) · **carril dueño**:
+      B5-admin-monitor
+      **qué hace falta**: OR-123, que la fila del monitor de RRHH se despliegue en sus
+      documentos con las mismas acciones que Archivo (`openEditDocModal`,
+      `handleDeleteDoc`, ya existen y son públicas en `admin-edit.js`, listas para que el
+      monitor las llame); OR-129, «Mostrando N–M de T» en el resumen del monitor (mismo
+      patrón que apliqué en la papelera con `_updatePapeleraPager`).
+- [ ] `OA-190`/`OA-191` (parte del marcado) · **archivos**: `app/static/admin_archive.html`
+      (atributos `ondragover`/`ondragleave` en línea de la zona de arrastre, línea ~680) y
+      `app/static/styles.css` (clases `.is-dragover`, `.is-uploading`, `.is-ok`,
+      `.is-error`, `.ds-edit-preview-frame`, `.ds-edit-preview-img`, `.ds-row-removing`,
+      `is-invalid`/`.invalid-feedback` si no existen ya) · **carriles dueños**:
+      B1-admin-archivo-html, G1-estilos
+      **qué hace falta**: cambié `admin-edit.js` para que la zona de arrastre y los
+      previews del modal de edición usen clases en vez de `style` en línea (mismo problema
+      de fondo que documenta `BR-109` para el dossier de RRHH), y dejé los helpers
+      `_handleEditDocDragOver`/`_handleEditDocDragLeave` listos para que el HTML los llame
+      en vez de escribir `this.style.borderColor=…` a mano. Falta: quitar esos atributos
+      en línea del HTML y definir las clases en `styles.css` (hoy no existen, así que
+      visualmente la zona de arrastre no cambia de color hasta que se añadan).
+- [ ] `OA-027` (parte del monitor) · **archivo**: `app/static/admin-monitor.js`
+      **carril dueño**: B5-admin-monitor
+      **qué hace falta**: estado de error visible y reintento en la tabla cuando
+      `loadMonitorTable()` falla (hoy sólo `console.error`), y actualización optimista de
+      la fila recién editada en vez de depender de una recarga completa que puede fallar
+      en silencio.
+
+**quién lo pide**: agente-b8-admin-edit-archivo (B8-admin-edit-archivo)
+
+## Aviso: mi commit de B8-admin-edit-archivo quedó absorbido por una carrera
+
+Al comprobar `git status --short`/`git diff --cached --stat` antes de comitear (sólo tenía
+en stage `app/static/admin-edit.js`, 259 inserciones/44 borrados, ningún archivo ajeno), el
+primer intento de `git commit` produjo un commit (`1ebc0be`) que en realidad **no contenía
+mis cambios de `admin-edit.js`** sino sólo un cambio en `docs/auditoria/_BUZON.md` que yo no
+había escrito — algo pisó el índice entre el `add` y el `commit`. Mi trabajo real apareció
+después en `git stash show stash@{0} --stat` (un stash `wip-more-live-temp` con
+`admin-edit.js`, `login.html` y `login.js` de tres carriles distintos), señal de que otro
+agente hizo un `git stash` sobre el árbol compartido mientras yo tenía el archivo listo para
+comitear. Lo recuperé con `git checkout stash@{0} -- app/static/admin-edit.js`, volví a
+comprobar que sólo mi archivo estaba en stage, y el segundo `git commit` sí incluyó el
+contenido correcto — pero terminó fusionado dentro de un commit ajeno (`7e2afb6`,
+«chore: reservar H3-pruebas-legacy, C5-importaciones y C8-backup»), no en un commit propio.
+El contenido en `HEAD` es correcto (verificado leyendo el archivo tras el commit), sólo el
+mensaje del commit no es el mío. No reparo el historial, según la regla 10.
+
+**quién lo pide**: agente-b8-admin-edit-archivo (B8-admin-edit-archivo)

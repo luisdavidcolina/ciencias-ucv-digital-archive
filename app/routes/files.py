@@ -5,37 +5,28 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from fastapi.responses import RedirectResponse
 
 import storage
-from database import db_query, log_event
+from database import log_event
 from routes.admin.deps import require_session
 
 router = APIRouter(tags=["files"], dependencies=[Depends(require_session)])
-
-
-def _validate_user(usuario: str) -> None:
-    """Verifica que el usuario exista y esté activo en el sistema."""
-    if not usuario or not usuario.strip():
-        raise HTTPException(status_code=401, detail="Se requiere usuario autenticado")
-    row = db_query(
-        "SELECT id FROM public.usuarios_sistema WHERE usuario = %s AND COALESCE(is_active, TRUE)",
-        [usuario.strip()], fetch="one",
-    )
-    if not row:
-        raise HTTPException(status_code=401, detail="Usuario no autorizado")
 
 
 @router.post("/api/admin/upload")
 async def upload_document(
     file: UploadFile = File(...),
     modulo: str = Form("archivo"),
-    usuario: str = Form(""),
+    usuario: str = Form(""),  # DG-083: ya no se usa para identidad, solo se ignora
+    usuario_sesion: str = Depends(require_session),
 ):
     """Sube un documento digitalizado a R2 y retorna su file_url interno.
 
     El file_url devuelto tiene la forma `/api/files/<key>` y puede guardarse
     directamente en las columnas file_url de datos_archivo / datos_rrhh.
-    """
-    _validate_user(usuario)
 
+    La identidad de quien sube (para auditoría) sale de la sesión verificada
+    por `require_session` (cookie/token), nunca del campo `usuario` del
+    formulario: ese campo lo controla el cliente y no prueba nada (DG-083).
+    """
     if not storage.is_configured():
         raise HTTPException(
             status_code=503,
@@ -67,20 +58,21 @@ async def upload_document(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error subiendo a R2: {type(e).__name__}")
 
-    log_event(usuario or "sistema", "Upload File", modulo, f"key={key} ({len(contents)} bytes)")
+    log_event(usuario_sesion, "Upload File", modulo, f"key={key} ({len(contents)} bytes)")
     return {"success": True, "file_url": f"/api/files/{key}", "key": key}
 
 
 @router.get("/api/files/{key:path}")
-def serve_file(key: str, u: str = Query(default="")):
+def serve_file(key: str, usuario_sesion: str = Depends(require_session), u: str = Query(default="")):
     """Redirige a una URL prefirmada de R2 (válida 1 hora).
 
-    Requiere el parámetro `u` con el nombre de usuario activo de la sesión.
+    La identidad se prueba con la sesión verificada por `require_session`
+    (cookie o token), no con el parámetro `u` de la query, que un cliente
+    podría poner a cualquier nombre de usuario (DG-083). `u` se acepta y se
+    ignora solo por compatibilidad con enlaces/llamadas existentes.
     Así el bucket permanece privado y los enlaces guardados en la base de
     datos (`/api/files/<key>`) son estables y no expiran.
     """
-    _validate_user(u)
-
     if not storage.is_configured():
         raise HTTPException(status_code=503, detail="Almacenamiento no configurado")
     if not key or ".." in key or key.startswith("/"):

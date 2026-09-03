@@ -101,10 +101,23 @@ def _daily_spend() -> float:
 # =============================================================================
 
 def _open_conversation(conv_id, meta: dict) -> int:
-    if conv_id:
+    """Reabre `conv_id` SOLO si pertenece al usuario de la sesión (SI-004).
+
+    Antes se comprobaba que el id existiera, nada más: cualquiera podía mandar
+    `{"conversacion_id": 7}` desde el inspector, colgar sus mensajes del hilo de
+    otra persona y —peor— hacer que `mis_adjuntos` (que filtra por
+    `conversacion_id`) le listara los adjuntos ajenos con nombre y `file_url`.
+
+    Sin usuario de sesión (perfil público) no hay dueño con quien comparar, así
+    que un `conversacion_id` recibido sin sesión NUNCA se reutiliza: se abre
+    siempre un hilo nuevo, aunque el id exista de verdad.
+    """
+    usuario_sesion = meta.get("usuario")
+    if conv_id and usuario_sesion:
         try:
-            existe = db_query("SELECT id FROM public.ia_conversaciones WHERE id = %s",
-                              [int(conv_id)], fetch="one")
+            existe = db_query(
+                "SELECT id FROM public.ia_conversaciones WHERE id = %s AND usuario = %s",
+                [int(conv_id), usuario_sesion], fetch="one")
             if existe:
                 return int(conv_id)
         except (TypeError, ValueError):
@@ -311,7 +324,15 @@ async def adjuntar(
 @router.get("/propuestas")
 def proposals(conversacion_id: int | None = None, estado: str = "pendiente",
                usuario: str = Depends(require_session)):
-    return {"propuestas": ai_proposals.list_proposals(conversacion_id, estado)}
+    """SI-010: sin scope, cualquier usuario con sesión leía la bandeja del sistema
+    entero (con `estado=aprobada` y sin `conversacion_id`, hasta 200 resúmenes de
+    cambios de cualquier módulo, incluido RRHH). Se acota a los módulos del
+    usuario y, salvo Global, a sus propias propuestas — igual que ya hace
+    `_can_view_conversation` con el historial de conversaciones."""
+    ctx = _build_context(usuario)
+    propias = None if _is_global(ctx) else usuario
+    return {"propuestas": ai_proposals.list_proposals(
+        conversacion_id, estado, modulos=ctx["modulos"], usuario=propias)}
 
 
 @router.post("/propuesta/{propuesta_id}/aprobar")
@@ -332,8 +353,15 @@ def approve_proposal(propuesta_id: int, usuario: str = Depends(require_session))
 
 @router.post("/propuesta/{propuesta_id}/rechazar")
 def reject_proposal(propuesta_id: int, usuario: str = Depends(require_session)):
+    # SI-009: este endpoint sólo exigía sesión, ni perfil `editor` ni módulo de la
+    # propuesta. Un usuario Normal cualquiera podía recorrer ids y rechazar TODAS
+    # las propuestas pendientes del sistema. Mismo cerrojo que `approve_proposal`.
+    ctx = _build_context(usuario)
+    if ctx["perfil"] != "editor":
+        raise HTTPException(status_code=403,
+                            detail="Solo un administrador de módulo puede rechazar cambios.")
     try:
-        return ai_proposals.reject(propuesta_id, usuario)
+        return ai_proposals.reject(propuesta_id, usuario, ctx["modulos"])
     except ai_proposals.PropuestaError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -432,8 +460,22 @@ def delete_conversation(conv_id: int, usuario: str = Depends(require_session)):
     return {"ok": True}
 
 
+def _require_global(usuario: str) -> dict:
+    """SI-011: `/config`, `/gastos` y `/modelos` sólo exigían sesión. `GET /config`
+    devuelve el cerebro completo del asistente (identidad, tono, información
+    institucional y reglas), `/gastos` el histórico de gasto y `/modelos` dispara
+    una llamada a OpenRouter por petición con el caché frío. Las tres detrás del
+    mismo cerrojo que ya usa `POST /config`."""
+    ctx = _build_context(usuario)
+    if not _is_global(ctx):
+        raise HTTPException(status_code=403,
+                            detail="Solo un administrador Global puede acceder a esto.")
+    return ctx
+
+
 @router.get("/gastos")
 def spending(dias: int = 30, usuario: str = Depends(require_session)):
+    _require_global(usuario)
     dias = max(1, min(dias, 365))
     por_dia = db_query("""
         SELECT TO_CHAR(created_at::date, 'YYYY-MM-DD') AS dia,
@@ -454,6 +496,7 @@ def spending(dias: int = 30, usuario: str = Depends(require_session)):
 @router.get("/modelos")
 def models(usuario: str = Depends(require_session)):
     """El catálogo real de OpenRouter, con el costo por mil mensajes ya calculado."""
+    _require_global(usuario)
     if not ai.api_key():
         raise HTTPException(status_code=503, detail="Falta OPENROUTER_API_KEY.")
     try:
@@ -471,6 +514,7 @@ _CLAVES_CONFIG = {"modelo", "nombre", "tono", "conocimiento", "reglas",
 
 @router.get("/config")
 def get_config(usuario: str = Depends(require_session)):
+    _require_global(usuario)
     cfg = ai_prompts.config()
     cfg["modelo"] = ai.current_model()
     cfg["tope_diario"] = ai.daily_limit()

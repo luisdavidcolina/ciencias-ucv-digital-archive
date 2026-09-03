@@ -131,12 +131,15 @@ def status() -> dict:
 def current_model() -> str:
     """El modelo elegido desde el panel; si nadie eligió, el de la variable de entorno.
 
-    Prohibido usar Claude/Anthropic (u otro modelo caro no-Mistral): si lo elegido
-    en el panel o en la env var no empieza con "mistralai/", se ignora y se usa el
-    barato por defecto en su lugar.
+    SI-005: antes se descartaba en silencio cualquier slug que no empezara por
+    "mistralai/" y se usaba el barato por defecto en su lugar. El panel valida el
+    slug contra el catálogo real de OpenRouter y lo guarda (`POST /api/ia/config`
+    → `model_exists`), responde "Guardado" — y el chat seguía hablando con otro
+    modelo sin que nadie se enterara. El control de costo real ya no depende de
+    un prefijo de proveedor: es el catálogo (slug válido) más el tope de gasto
+    diario (`daily_limit`). El modelo que se usa es el que de verdad se guardó.
     """
-    elegido = _de_bd("modelo") or _env("OPENROUTER_MODEL", MODELO_POR_DEFECTO)
-    return elegido if elegido.startswith("mistralai/") else MODELO_POR_DEFECTO
+    return _de_bd("modelo") or _env("OPENROUTER_MODEL", MODELO_POR_DEFECTO)
 
 
 def model_exists(slug: str) -> bool:

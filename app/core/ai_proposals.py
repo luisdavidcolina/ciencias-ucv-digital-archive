@@ -45,7 +45,18 @@ def _usuario_id(usuario: str):
     return fila["id"]
 
 
-def list_proposals(conversacion_id=None, estado="pendiente", limite=50):
+def list_proposals(conversacion_id=None, estado="pendiente", limite=50,
+                    modulos=None, usuario=None):
+    """`modulos`/`usuario` acotan la bandeja a lo que le toca a quien pregunta
+    (SI-010): sin esto, cualquier usuario con sesión leía con `estado=aprobada` y
+    sin `conversacion_id` hasta 200 propuestas del sistema entero, resumen
+    incluido, también las de RRHH aunque su usuario no tuviera ese módulo.
+
+    `modulos=None` significa "sin restricción" (uso interno: al abrir una
+    conversación ya autorizada se listan sus propuestas sin repetir el filtro).
+    `usuario=None` con `modulos` puesto es el caso Global: ve todos los módulos
+    que le tocan, de cualquier persona.
+    """
     where, params = [], []
     if conversacion_id is not None:
         where.append("conversacion_id = %s")
@@ -53,6 +64,15 @@ def list_proposals(conversacion_id=None, estado="pendiente", limite=50):
     if estado:
         where.append("estado = %s")
         params.append(estado)
+    if modulos is not None:
+        modulos = list(modulos)
+        if not modulos:
+            return []
+        where.append(f"modulo IN ({', '.join(['%s'] * len(modulos))})")
+        params += modulos
+    if usuario is not None:
+        where.append("usuario = %s")
+        params.append(usuario)
     params.append(max(1, min(limite, 200)))
 
     return db_query(f"""
@@ -65,19 +85,30 @@ def list_proposals(conversacion_id=None, estado="pendiente", limite=50):
     """, params, fetch="all")
 
 
-def reject(propuesta_id: int, usuario: str) -> dict:
-    fila = db_query("SELECT estado FROM public.ia_propuestas WHERE id = %s",
+def reject(propuesta_id: int, usuario: str, modulos: set) -> dict:
+    """SI-009: rechazar exige el mismo módulo que aprobar. Sin esto, cualquier
+    usuario con sesión podía descartar propuestas de un módulo que ni siquiera
+    administra — el trabajo se pierde igual que si lo hubiera aprobado mal."""
+    fila = db_query("SELECT estado, modulo FROM public.ia_propuestas WHERE id = %s",
                     [propuesta_id], fetch="one")
     if not fila:
         raise PropuestaError("Esa propuesta no existe.")
     if fila["estado"] != "pendiente":
         raise PropuestaError(f"Esa propuesta ya está {fila['estado']}.")
+    if fila["modulo"] not in modulos:
+        raise PropuestaError(f"Tu usuario no puede rechazar cambios en {fila['modulo']}.")
 
-    db_query("""
+    # SI-022: la condición sobre 'pendiente' va en el propio WHERE, para que dos
+    # rechazos simultáneos (dos pulsaciones, dos pestañas) no den ambos "ok": sólo
+    # uno actualiza la fila, y ese es el único que cuenta como resuelto.
+    marcada = db_query("""
         UPDATE public.ia_propuestas
            SET estado = 'rechazada', resuelto_por = %s, resuelto_at = NOW()
-         WHERE id = %s
-    """, [usuario, propuesta_id], fetch="none", commit=True)
+         WHERE id = %s AND estado = 'pendiente'
+         RETURNING id
+    """, [usuario, propuesta_id], fetch="one", commit=True)
+    if not marcada:
+        raise PropuestaError("Esa propuesta ya fue resuelta por otra persona.")
     log_event(usuario, "Rechazó propuesta IA", "IA", f"propuesta_id={propuesta_id}")
     return {"ok": True, "estado": "rechazada"}
 
@@ -92,26 +123,47 @@ def approve(propuesta_id: int, usuario: str, modulos: set) -> dict:
     if p["modulo"] not in modulos:
         raise PropuestaError(f"Tu usuario no puede aprobar cambios en {p['modulo']}.")
 
-    try:
-        datos = json.loads(p["datos"] or "{}")
-    except (ValueError, TypeError):
-        raise PropuestaError("La propuesta está corrupta y no se puede ejecutar.")
-
-    accion = p["accion"]
-    if accion == "actualizar":
-        detalle = _actualizar(p, datos, usuario)
-    elif accion == "crear":
-        detalle = _crear(p, datos, usuario)
-    elif accion == "palabras_clave":
-        detalle = _palabras_clave(p, datos)
-    else:
-        raise PropuestaError(f"Acción desconocida: {accion}.")
-
-    db_query("""
+    # SI-022: se reclama la propuesta ANTES de ejecutar el cambio, con la condición
+    # sobre 'pendiente' en el propio WHERE. Antes la marca de "aprobada" llegaba
+    # sólo al final, después de escribir: dos aprobaciones simultáneas (doble clic,
+    # dos pestañas) pasaban ambas el chequeo de arriba y ejecutaban el UPDATE/INSERT
+    # dos veces -- por ejemplo, creaban el documento por duplicado. `db_query` hace
+    # commit por sentencia, así que tampoco había atomicidad entre escribir y marcar.
+    reclamada = db_query("""
         UPDATE public.ia_propuestas
            SET estado = 'aprobada', resuelto_por = %s, resuelto_at = NOW()
-         WHERE id = %s
-    """, [usuario, propuesta_id], fetch="none", commit=True)
+         WHERE id = %s AND estado = 'pendiente'
+         RETURNING id
+    """, [usuario, propuesta_id], fetch="one", commit=True)
+    if not reclamada:
+        raise PropuestaError("Esa propuesta ya fue resuelta por otra persona.")
+
+    accion = p["accion"]
+    try:
+        try:
+            datos = json.loads(p["datos"] or "{}")
+        except (ValueError, TypeError):
+            raise PropuestaError("La propuesta está corrupta y no se puede ejecutar.")
+
+        if accion == "actualizar":
+            detalle = _actualizar(p, datos, usuario)
+        elif accion == "crear":
+            detalle = _crear(p, datos, usuario)
+        elif accion == "palabras_clave":
+            detalle = _palabras_clave(p, datos)
+        else:
+            raise PropuestaError(f"Acción desconocida: {accion}.")
+    except PropuestaError:
+        # No se pudo ejecutar (p.ej. el documento se borró entre proponer y
+        # aprobar, SI-023): se devuelve a 'pendiente' para que quede visible y se
+        # pueda rechazar o reintentar, en vez de quedar "aprobada" sin haber
+        # tocado nada.
+        db_query("""
+            UPDATE public.ia_propuestas
+               SET estado = 'pendiente', resuelto_por = NULL, resuelto_at = NULL
+             WHERE id = %s
+        """, [propuesta_id], fetch="none", commit=True)
+        raise
 
     log_event(usuario, f"Aprobó propuesta IA ({accion})", p["modulo"].upper(),
               f"propuesta_id={propuesta_id} — {p['resumen']}")
@@ -151,11 +203,19 @@ def _actualizar(p, datos, usuario):
     uid = _usuario_id(usuario)
     valores += [uid, p["objetivo_id"]]
 
-    db_query(
+    # SI-023: entre proponer y aprobar puede pasar tiempo de sobra para que alguien
+    # mande el documento a la papelera. Sin este filtro, el UPDATE toca en silencio
+    # una fila que ya nadie ve, y quien aprobó cree que corrigió algo que sigue
+    # invisible. `RETURNING` deja detectar el caso: cero filas, error explícito.
+    fila = db_query(
         f"UPDATE public.{tabla} SET {', '.join(trozos)}, updated_at = NOW(), updated_by = %s "
-        f"WHERE {pk} = %s",
-        valores, fetch="none", commit=True,
+        f"WHERE {pk} = %s AND deleted_at IS NULL RETURNING {pk}",
+        valores, fetch="one", commit=True,
     )
+    if not fila:
+        raise PropuestaError(
+            f"El documento #{p['objetivo_id']} ya no existe o está en la papelera; "
+            "no se aplicó el cambio.")
     return f"{len(trozos)} campo(s) actualizado(s) en {tabla} #{p['objetivo_id']}."
 
 

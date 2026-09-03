@@ -234,7 +234,7 @@ def _get_document(args, ctx):
             LEFT JOIN public.tipo_documento td ON td.id = dr.id_tipo_documento
             LEFT JOIN public.categoria c       ON c.id  = td.id_categoria
             LEFT JOIN public.empleados e       ON e.id  = dr.empleado_id
-            WHERE dr.id_rrhh = %s
+            WHERE dr.id_rrhh = %s AND dr.deleted_at IS NULL
         """, [doc_id], fetch="one")
         return fila or {"error": "No existe un documento de RRHH con ese id."}
 
@@ -396,7 +396,7 @@ def _employee_file(args, ctx):
         JOIN public.empleados e            ON e.id  = dr.empleado_id
         LEFT JOIN public.tipo_documento td ON td.id = dr.id_tipo_documento
         LEFT JOIN public.categoria c       ON c.id  = td.id_categoria
-        WHERE e.cedula = %s
+        WHERE e.cedula = %s AND dr.deleted_at IS NULL
         ORDER BY c.nombre, dr.fecha_documento DESC NULLS LAST
     """, [cedula], fetch="all")
 
@@ -409,7 +409,7 @@ def _employee_file(args, ctx):
 
 def _search_hr_document(args, ctx):
     termino = _text(args, "termino")
-    where = ["1=1"]
+    where = ["dr.deleted_at IS NULL"]
     params = []
     if termino:
         where.append("(dr.titulo ILIKE %s OR dr.abstract ILIKE %s OR dr.notas ILIKE %s)")
@@ -456,7 +456,7 @@ def _expiring_documents(args, ctx):
                    COALESCE(e.nombres || ' ' || e.apellidos, '')
             FROM public.datos_rrhh dr
             LEFT JOIN public.empleados e ON e.id = dr.empleado_id
-            WHERE dr.fecha_vencimiento IS NOT NULL
+            WHERE dr.deleted_at IS NULL AND dr.fecha_vencimiento IS NOT NULL
               AND dr.fecha_vencimiento <= CURRENT_DATE + (%s || ' days')::interval
         ) t
         ORDER BY dias_restantes
@@ -650,7 +650,8 @@ def _propose_attach_file(args, ctx):
                          "Pide al usuario que suba el archivo con el clip del chat."}
 
     tabla, pk = ("datos_archivo", "id_archivo") if modulo == "archivo" else ("datos_rrhh", "id_rrhh")
-    doc = db_query(f"SELECT titulo, file_url FROM public.{tabla} WHERE {pk} = %s",
+    doc = db_query(f"SELECT titulo, file_url FROM public.{tabla} "
+                   f"WHERE {pk} = %s AND deleted_at IS NULL",
                    [objetivo], fetch="one")
     if not doc:
         return {"error": f"No existe el documento {objetivo} en {modulo}."}

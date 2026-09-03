@@ -17,10 +17,15 @@ Decisiones:
   compartir hacia fuera es exactamente lo que un archivo necesita poder rastrear.
 - **Nada de documentos en papelera.** Un documento borrado deja de ser visible
   aunque el enlace siga vigente.
+- **Nada fuera de `status = 'aprobado'`.** Un documento que pasa a borrador,
+  revisión o rechazado deja de ser visible por el enlace, igual que uno
+  enviado a la papelera (IN-147): la comprobación se repite en cada consulta,
+  no sólo al crear el enlace.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 
+import storage
 from core.security import generate_share_token, verify_share_token
 from database import db_query, log_event
 from routes.admin.deps import require_session
@@ -43,7 +48,8 @@ def _leer_documento(modulo: str, doc_id: int) -> dict | None:
                    COALESCE(d.soporte, 'Físico')            AS soporte
             FROM public.{tabla} d
             LEFT JOIN public.tipo_documento td ON d.id_tipo_documento = td.id
-            WHERE d.{pk} = %s AND d.deleted_at IS NULL""",
+            WHERE d.{pk} = %s AND d.deleted_at IS NULL
+              AND COALESCE(d.status, 'aprobado') = 'aprobado'""",
         [doc_id], fetch="one",
     )
 
@@ -96,8 +102,29 @@ def descargar_compartido(token: str):
     modulo, doc_id = datos
 
     doc = _leer_documento(modulo, doc_id)
-    if not doc or not doc.get("file_url"):
+    file_url = doc.get("file_url") if doc else None
+    if not file_url:
         raise HTTPException(404, "El documento no tiene archivo digitalizado")
 
     log_event("enlace-externo", "Descarga por Enlace", modulo, f"doc_id={doc_id}")
-    return RedirectResponse(url=doc["file_url"], status_code=307)
+
+    # `file_url` normalmente es "/api/files/<key>", una ruta que ahora exige
+    # sesión (ver files.py, DG-083) — inservible para quien abre este enlace
+    # sin sesión. Se genera aquí, directo contra R2, la URL prefirmada que
+    # antes daba esa ruta, sin exponer el `file_url` interno ni pasar por
+    # una ruta que requiera autenticación.
+    prefix = "/api/files/"
+    if file_url.startswith(prefix):
+        if not storage.is_configured():
+            raise HTTPException(503, "Almacenamiento no configurado")
+        key = file_url[len(prefix):]
+        try:
+            url = storage.presigned_get_url(key)
+        except storage.StorageNotFoundError:
+            raise HTTPException(404, "El archivo ya no está disponible")
+        except Exception as e:
+            raise HTTPException(502, f"Error al recuperar archivo: {type(e).__name__}")
+        return RedirectResponse(url=url, status_code=307)
+
+    # Caso residual: file_url apunta a una URL externa ya pública.
+    return RedirectResponse(url=file_url, status_code=307)
