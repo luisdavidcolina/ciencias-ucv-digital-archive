@@ -148,53 +148,12 @@ function exportAdminCSV() {
 }
 
 // ─── Drag & Drop en zona de carga ───────────────────────────────────────────
-function initDropZone(suf) {
-  const zone = document.querySelector(`#pane-admin-${suf}-new [style*="dashed"]`);
-  const fileInput = document.getElementById(`file_upload-${suf}`);
-  if (!zone || !fileInput) return;
-
-  const updateLabel = (name) => {
-    const label = zone.querySelector(".ds-drop-label") || zone.querySelector("p.text-muted");
-    if (label) label.textContent = name ? `ðŸ“„ ${name}` : "Arrastra aquí o selecciona archivos";
-    const icon = zone.querySelector(".fa-file-upload");
-    if (icon) {
-      icon.classList.toggle("fa-file-upload", !name);
-      icon.classList.toggle("fa-check-circle", !!name);
-      icon.classList.toggle("text-secondary", !name);
-      icon.classList.toggle("text-success", !!name);
-    }
-    // Rellenar campo file_url en el formulario
-    const fileUrlInput = document.querySelector(`#admin-submit-form-${suf} [id$="file_url"]`) ||
-                         document.getElementById(`field-file_url-${suf}`);
-    if (fileUrlInput && name) fileUrlInput.placeholder = `Archivo seleccionado: ${name}`;
-  };
-
-  zone.addEventListener("dragover", e => {
-    e.preventDefault();
-    zone.style.borderColor = "#0056b3";
-    zone.style.background  = "#e8f0fe";
-  });
-  zone.addEventListener("dragleave", () => {
-    zone.style.borderColor = "#adb5bd";
-    zone.style.background  = "#f8f9fa";
-  });
-  zone.addEventListener("drop", e => {
-    e.preventDefault();
-    zone.style.borderColor = "#adb5bd";
-    zone.style.background  = "#f8f9fa";
-    const files = e.dataTransfer?.files;
-    if (files && files.length > 0) {
-      const dt = new DataTransfer();
-      dt.items.add(files[0]);
-      fileInput.files = dt.files;
-      updateLabel(files[0].name);
-      showToast(`Archivo listo: ${files[0].name}`, "info");
-    }
-  });
-  fileInput.addEventListener("change", () => {
-    if (fileInput.files?.[0]) updateLabel(fileInput.files[0].name);
-  });
-}
+// OR-005/OR-285: este archivo redefinía initDropZone() con una versión vieja que
+// apuntaba a `[style*="dashed"]`, un bloque que ya no existe en admin_hr.html
+// (quedó como `display:none`). Como admin-edit-hr.js se carga DESPUÉS de
+// admin-monitor.js, esta redefinición ganaba y dejaba muerto el arrastre del
+// alta. admin-monitor.js ya trae la versión correcta (apunta a
+// `#dropzone-${suf}` / `.ds-dropzone-compact`), así que aquí no se redefine.
 // =============================================================================
 // HISTORIAL DE CARGOS — gestión desde el admin panel
 // =============================================================================

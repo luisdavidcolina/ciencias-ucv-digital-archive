@@ -58,11 +58,16 @@
   // convierten en enlaces DESPUÉS de escapar, nunca antes: al revés, un título con HTML
   // dentro se ejecutaría en la página.
   //
+  // SI-017: solo se enlazan rutas propias (`/api/files/…`, `/compartido/…`). El texto de
+  // los documentos (título, resumen, notas) lo escribe cualquier admin de módulo, y una
+  // URL externa ahí dentro no lleva el sello de confianza de la institución detrás — se
+  // deja como texto plano, no como enlace pulsable.
+  //
   // A los `/api/files/<key>` hay que añadirles `?u=<usuario>`: ese endpoint lo exige además
   // de la cookie. Sin esto el enlace es correcto, el documento existe, y aun así da 401.
   function formatear(texto) {
     return esc(texto)
-      .replace(/(https?:\/\/[^\s<]+[^\s<.,;:)\]}"']|\/api\/files\/[^\s<]+)/g, function (url) {
+      .replace(/(\/api\/files\/[^\s<]+|\/compartido\/[^\s<]+)/g, function (url) {
         var href = url;
         if (url.indexOf("/api/files/") === 0 && estado.usuario && url.indexOf("?u=") === -1) {
           href = url + "?u=" + encodeURIComponent(estado.usuario);

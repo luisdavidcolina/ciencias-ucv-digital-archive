@@ -354,6 +354,10 @@ function pintarModelos(filtro) {
     '</tbody></table>';
 }
 
+// SI-005: no se asume que el modelo pedido quedó en uso solo porque la petición respondió
+// 200. Se relee `/api/ia/modelos` después de guardar y se pinta el que el servidor confirme
+// como actual — si el backend descarta el slug en silencio, la tabla no miente diciendo
+// "en uso" sobre un modelo que el chat no está usando.
 function elegirModelo(id) {
   const m = modelosCache.find(x => x.id === id);
   if (m && !m.herramientas &&
@@ -363,7 +367,17 @@ function elegirModelo(id) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ modelo: id })
-  }).then(() => { modeloActual = id; pintarModelos(document.getElementById("modelo-filtro").value); });
+  }).then(r => r.json().then(d => ({ ok: r.ok, d: d })))
+    .then(res => api("/api/ia/modelos").then(r => r.ok ? r.json() : { actual: modeloActual }).then(d => {
+      modeloActual = d.actual;
+      pintarModelos(document.getElementById("modelo-filtro").value);
+      if (!res.ok) {
+        alert("No se pudo cambiar el modelo: " + (res.d.detail || "error desconocido") + ".");
+      } else if (modeloActual !== id) {
+        alert("El servidor no aceptó ese modelo: el asistente sigue usando " + modeloActual + ".");
+      }
+    }))
+    .catch(() => alert("Error de red al cambiar el modelo."));
 }
 </script>
 <script src="/static/app-core.js"></script>

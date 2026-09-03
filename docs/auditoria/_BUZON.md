@@ -16,6 +16,17 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
 
 ## Pendientes anotados
 
+- [ ] `OR-009` · **archivo**: `app/routes/trash.py`, `app/static/admin_hr.html`,
+      `app/static/admin-edit.js` · **carril dueño**: `C7-papelera` (ya está en su lista de
+      pendientes en `PLAN-PARALELO.md`, no en la de `B9-admin-edit-rrhh`)
+      **quién lo pide**: agente-b9-admin-edit-rrhh (B9-admin-edit-rrhh)
+      **qué hace falta**: la instrucción que me dieron citaba OR-009 como ficha "muy concreta"
+      de mi carril, pero ninguno de los archivos que toca es `admin-edit-hr.js` — la papelera de
+      RRHH se pinta desde `admin-edit.js` (carril `B8-admin-edit-archivo`) leyendo
+      `app/routes/trash.py` (carril `C7-papelera`), y el marcado es `admin_hr.html` (carril
+      `B2-admin-rrhh-html`). No la toco por regla 3 del plan paralelo. Ya está anotada en el
+      abanico de `C7-papelera` (en curso).
+
 - [ ] `C4-retencion` · **archivo**: `app/tests/test_misc.py` (clase `TestRetencion`, y
       probablemente clases equivalentes de otros carriles del abanico O1: Keywords/Categories en
       `test_misc.py`, y varias en `test_admin.py`) · **carril dueño**: ninguno en
@@ -147,3 +158,12 @@ su carril dueño:
 | `app/static/app.js` | 6 | `H2-app-js` |
 | `app/routes/admin/deps.py` | 2 | `H1c-autorizacion` |
 | `app/database.py` | 2 | `H1b-conexion` |
+
+## agente-f2-cascara — VI-002 no es mío
+
+`showToast()` (VI-002, docs/auditoria/recorrido-visual.md) busca `#ds-toast-container`, que
+sólo existe en `admin_archive.html`, `admin_hr.html` y `admin_system.html`. Ni el contenedor ni
+`showToast()` se generan desde `app-shell.js` — `showToast` está definida en `app-core.js`
+(línea 32) y el contenedor no se inyecta desde ningún script, sólo está escrito a mano en esos
+tres HTML. Carril dueño de `app-core.js`: **H2-app-js**. Falta además inyectarlo (o su
+contenedor) en `archive.html` y `hr.html`, que no están en mi carril tampoco.

@@ -145,22 +145,24 @@
   background: #0b3d2c; color: #fff; cursor: pointer;
 }
 
-/* Tema oscuro: el sistema ya lo alterna con data-theme en <html>. */
-html[data-theme="dark"] #ia-panel { background: #1e2227; }
-html[data-theme="dark"] #ia-mensajes { background: #15181c; }
-html[data-theme="dark"] .ia-msg-bot { background: #262b31; color: #e6e8ea; border-color: #343a41; }
-html[data-theme="dark"] #ia-form { background: #1e2227; border-color: #343a41; }
-html[data-theme="dark"] #ia-input { background: #262b31; border-color: #343a41; color: #e6e8ea; }
-html[data-theme="dark"] .ia-sug { background: #262b31; border-color: #343a41; color: #e6e8ea; }
-html[data-theme="dark"] .ia-propuesta { background: #332d16; border-color: #6b5720; }
-html[data-theme="dark"] .ia-prop-txt { color: #e6e8ea; }
-html[data-theme="dark"] .ia-rechazar { background: #3a4049; color: #e6e8ea; }
-html[data-theme="dark"] #ia-historial { background: #1e2227; }
-html[data-theme="dark"] .ia-hist-cab { border-color: #343a41; }
-html[data-theme="dark"] .ia-hist-item { border-color: #2a2f35; }
-html[data-theme="dark"] .ia-hist-item:hover { background: #262b31; }
-html[data-theme="dark"] .ia-hist-activa { background: #1c3a2e; }
-html[data-theme="dark"] .ia-hist-titulo { color: #e6e8ea; }
+/* Tema oscuro: app-theme.js alterna body.dark-mode, no data-theme en <html> (SD-041:
+   con el selector viejo estas 16 reglas nunca disparaban y el asistente salía blanco
+   puro sobre la app en oscuro). Este es el mismo selector que usa styles.css. */
+body.dark-mode #ia-panel { background: #1e2227; }
+body.dark-mode #ia-mensajes { background: #15181c; }
+body.dark-mode .ia-msg-bot { background: #262b31; color: #e6e8ea; border-color: #343a41; }
+body.dark-mode #ia-form { background: #1e2227; border-color: #343a41; }
+body.dark-mode #ia-input { background: #262b31; border-color: #343a41; color: #e6e8ea; }
+body.dark-mode .ia-sug { background: #262b31; border-color: #343a41; color: #e6e8ea; }
+body.dark-mode .ia-propuesta { background: #332d16; border-color: #6b5720; }
+body.dark-mode .ia-prop-txt { color: #e6e8ea; }
+body.dark-mode .ia-rechazar { background: #3a4049; color: #e6e8ea; }
+body.dark-mode #ia-historial { background: #1e2227; }
+body.dark-mode .ia-hist-cab { border-color: #343a41; }
+body.dark-mode .ia-hist-item { border-color: #2a2f35; }
+body.dark-mode .ia-hist-item:hover { background: #262b31; }
+body.dark-mode .ia-hist-activa { background: #1c3a2e; }
+body.dark-mode .ia-hist-titulo { color: #e6e8ea; }
 
 @media (max-width: 480px) {
   #ia-panel { right: 8px; left: 8px; width: auto; bottom: 80px; }
