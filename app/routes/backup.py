@@ -16,7 +16,7 @@ from typing import Optional
 
 _SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
 
-from routes.admin.deps import require_session
+from routes.admin.deps import require_session, require_role
 
 router = APIRouter(dependencies=[Depends(require_session)])
 
@@ -95,7 +95,7 @@ def get_table_groups():
     return TABLE_GROUPS
 
 
-@router.get("/export")
+@router.get("/export", dependencies=[Depends(require_role("Global"))])
 def export_backup(
     requester: str = Query(default=""),
     tables: Optional[str] = Query(default=None, description="Tablas separadas por coma; omitir = todas"),
@@ -104,6 +104,10 @@ def export_backup(
     Exporta tablas seleccionadas como JSON descargable.
     El parámetro `tables` acepta nombres separados por coma; si se omite se exporta todo.
     Solo se permiten tablas del conjunto EXPORTABLE_TABLES.
+
+    SI-002/IN-129: sólo el administrador Global puede exportar (incluye
+    `usuarios_sistema` con los hashes bcrypt). `require_role("Global")` lo
+    hace cumplir de verdad, no sólo en el docstring.
     """
     if tables:
         requested = [t.strip() for t in tables.split(",") if t.strip()]
@@ -137,7 +141,7 @@ def export_backup(
     )
 
 
-@router.post("/restore")
+@router.post("/restore", dependencies=[Depends(require_role("Global"))])
 async def restore_backup(
     file: UploadFile = File(...),
     requester: str = Query(default=""),
@@ -147,6 +151,10 @@ async def restore_backup(
     Restaura datos desde un JSON de backup.
     mode='merge': INSERT ON CONFLICT DO NOTHING (seguro, no borra datos existentes)
     mode='overwrite': DELETE + INSERT (peligroso, SOLO usar para restauración completa)
+
+    SI-002/IN-130: sólo el administrador Global puede restaurar (puede borrar
+    y reemplazar la base con mode=overwrite). `require_role("Global")` lo
+    hace cumplir de verdad, no sólo en el docstring.
     """
     if mode not in ("merge", "overwrite"):
         raise HTTPException(400, "mode debe ser 'merge' o 'overwrite'")

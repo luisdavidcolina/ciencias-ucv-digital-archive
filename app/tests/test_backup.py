@@ -13,6 +13,19 @@ def _mock_row(**data):
     return row
 
 
+# IN-131/SI-002: desde que /api/admin/backup/{export,restore} exigen
+# require_role("Global"), el fixture `client` (usuario "test_user" sin fila
+# real en usuarios_sistema) necesita que `routes.admin.deps.db_query` devuelva
+# una fila de administrador Global para que las pruebas de sanitización de
+# columnas -que no son sobre autorización- sigan pudiendo ejercitar el
+# endpoint. La autorización en sí (403 sin ese módulo) se prueba aparte en
+# app/tests/test_autorizacion_deps.py.
+# Diccionario simple (no MagicMock): `require_role` llama a `.get()` sobre la
+# fila y un MagicMock sin `.get` explícito devolvería otro Mock "truthy" en
+# vez del valor real, dejando pasar la comparación de módulo por accidente.
+_FILA_ADMIN_GLOBAL = {"modulo": "Global", "rol": "Admin", "is_active": True}
+
+
 class TestColumnSanitization:
     """Verifica que restore rechaza nombres de columna con caracteres peligrosos."""
 
@@ -31,7 +44,8 @@ class TestColumnSanitization:
                 return None
             return None
 
-        with patch("routes.backup.db_query", side_effect=mock_query):
+        with patch("routes.backup.db_query", side_effect=mock_query), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
             import io
             res = client.post(
                 "/api/admin/backup/restore?mode=merge&requester=admin",
@@ -57,7 +71,8 @@ class TestColumnSanitization:
                 inserted_sqls.append(sql)
             return None
 
-        with patch("routes.backup.db_query", side_effect=mock_query):
+        with patch("routes.backup.db_query", side_effect=mock_query), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
             import io
             res = client.post(
                 "/api/admin/backup/restore?mode=merge&requester=admin",
@@ -83,7 +98,8 @@ class TestColumnSanitization:
                 inserted_sqls.append(sql)
             return None
 
-        with patch("routes.backup.db_query", side_effect=mock_query):
+        with patch("routes.backup.db_query", side_effect=mock_query), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
             import io
             res = client.post(
                 "/api/admin/backup/restore?mode=merge&requester=admin",
@@ -96,25 +112,28 @@ class TestColumnSanitization:
 
     def test_json_invalido_retorna_400(self, client):
         import io
-        res = client.post(
-            "/api/admin/backup/restore?mode=merge",
-            files={"file": ("bad.json", io.BytesIO(b"not json at all"), "application/json")},
-        )
+        with patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("bad.json", io.BytesIO(b"not json at all"), "application/json")},
+            )
         assert res.status_code == 400
 
     def test_sin_metadata_retorna_400(self, client):
         import io
         content = json.dumps({"categoria": []}).encode()
-        res = client.post(
-            "/api/admin/backup/restore?mode=merge",
-            files={"file": ("bad.json", io.BytesIO(content), "application/json")},
-        )
+        with patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("bad.json", io.BytesIO(content), "application/json")},
+            )
         assert res.status_code == 400
 
     def test_mode_invalido_retorna_400(self, client):
         import io
-        res = client.post(
-            "/api/admin/backup/restore?mode=drop_all",
-            files={"file": ("x.json", io.BytesIO(b"{}"), "application/json")},
-        )
+        with patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            res = client.post(
+                "/api/admin/backup/restore?mode=drop_all",
+                files={"file": ("x.json", io.BytesIO(b"{}"), "application/json")},
+            )
         assert res.status_code == 400
