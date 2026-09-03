@@ -18,6 +18,9 @@
   const SCANNER_WS_URL = "ws://127.0.0.1:3737";
   const RECONNECT_DELAY_MS = 4000;
   const MAX_RECONNECT_ATTEMPTS = 5;
+  // DG-003: el Scanner Bridge exige un token compartido (SCANNER_TOKEN). Se
+  // guarda solo en localStorage de este navegador, nunca en el código.
+  const LS_TOKEN_KEY = "ds_scanner_token";
 
   let _ws = null;
   let _active = false;
@@ -44,7 +47,9 @@
     if (_ws && (_ws.readyState === WebSocket.CONNECTING || _ws.readyState === WebSocket.OPEN)) return;
 
     _setScannerBtnState("connecting");
-    _ws = new WebSocket(SCANNER_WS_URL);
+    const token = localStorage.getItem(LS_TOKEN_KEY) || "";
+    const url = token ? SCANNER_WS_URL + "?token=" + encodeURIComponent(token) : SCANNER_WS_URL;
+    _ws = new WebSocket(url);
 
     _ws.onopen = () => {
       _reconnectCount = 0;

@@ -20,6 +20,7 @@
  */
 
 const http = require("http");
+const crypto = require("crypto");
 const { WebSocketServer } = require("ws");
 const readline = require("readline");
 
@@ -32,12 +33,20 @@ const getArg = (flag, def = null) => {
 const hasFlag = flag => args.includes(flag);
 
 const PORT     = parseInt(getArg("--port", "3737"), 10);
-const HOST     = getArg("--host", "0.0.0.0");   // 0.0.0.0 = accesible desde la red local
+// DG-003: por defecto solo localhost. 0.0.0.0 (accesible desde toda la red
+// local) hay que pedirlo explícitamente con --host, sabiendo que sin token no
+// hay nada más que lo proteja.
+const HOST     = getArg("--host", "127.0.0.1");
 const MODE     = getArg("--mode", "stdin");
 const DEBUG    = hasFlag("--debug");
 const HID_VID  = getArg("--hid-vid", null);
 const HID_PID  = getArg("--hid-pid", null);
 const LIST_HID = hasFlag("--list-hid");
+
+// DG-003: token compartido. Si no viene en el entorno, se genera uno al
+// arrancar y se imprime en consola — nunca se elige un valor por defecto fijo.
+const TOKEN = process.env.SCANNER_TOKEN || crypto.randomBytes(16).toString("hex");
+const TOKEN_WAS_GENERATED = !process.env.SCANNER_TOKEN;
 
 // ── listar HID y salir ────────────────────────────────────────────────────────
 if (LIST_HID) {
@@ -76,18 +85,37 @@ function broadcast(code) {
   console.log(`📷  ${code.trim()}  →  ${sent} cliente(s) WS`);
 }
 
+// DG-003: comprueba el token compartido en la cabecera X-Scanner-Token o en
+// el parámetro ?token= de la URL. Sin esto, cualquier equipo en la misma red
+// (o cualquier página en el navegador si el host fuera 0.0.0.0) podría leer
+// el registro de escaneos o inyectar uno falso.
+function _tokenValido(req, urlObj) {
+  const header = req.headers["x-scanner-token"];
+  const query = urlObj.searchParams.get("token");
+  return (header || query) === TOKEN;
+}
+
 // ── HTTP REST + WebSocket en el mismo servidor ────────────────────────────────
 const httpServer = http.createServer((req, res) => {
-  // CORS — permite que la web (cualquier origen) consulte el bridge
+  // CORS — permite que la web consulte el bridge. El origen sigue abierto
+  // porque el panel puede servirse desde varios dominios, pero cada llamada
+  // exige el token: sin él no hay respuesta, con origen abierto o no.
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Scanner-Token");
 
   if (req.method === "OPTIONS") {
     res.writeHead(204); res.end(); return;
   }
 
-  const url = req.url.split("?")[0];
+  const urlObj = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  const url = urlObj.pathname;
+
+  if (!_tokenValido(req, urlObj)) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Token inválido o ausente. Envía X-Scanner-Token o ?token=" }));
+    return;
+  }
 
   // GET /status — info del proceso
   if (req.method === "GET" && url === "/status") {
@@ -147,6 +175,12 @@ const httpServer = http.createServer((req, res) => {
 const wss = new WebSocketServer({ server: httpServer });
 
 wss.on("connection", (ws, req) => {
+  const urlObj = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  if (!_tokenValido(req, urlObj)) {
+    if (DEBUG) console.log(`[WS] conexión rechazada (${req.socket.remoteAddress}): token inválido`);
+    ws.close(4401, "Token inválido");
+    return;
+  }
   clients.add(ws);
   if (DEBUG) console.log(`[WS] +cliente (${req.socket.remoteAddress}) — total: ${clients.size}`);
   ws.send(JSON.stringify({ type: "ready", message: "Scanner Bridge conectado", port: PORT }));
@@ -163,6 +197,14 @@ httpServer.listen(PORT, HOST, () => {
   console.log(`    Desde el panel web usa la URL: ws://<IP-de-esta-PC>:${PORT}`);
   if (HOST === "0.0.0.0")
     console.log(`    Para encontrar tu IP: ejecuta "ipconfig" (Windows) o "ip a" (Linux)\n`);
+  if (TOKEN_WAS_GENERATED) {
+    console.log(`    🔑  SCANNER_TOKEN no estaba configurado. Token generado para esta sesión:`);
+    console.log(`        ${TOKEN}`);
+    console.log(`        Pégalo en la configuración del escáner del panel, o define`);
+    console.log(`        SCANNER_TOKEN en el entorno para que no cambie en cada arranque.\n`);
+  } else {
+    console.log(`    🔑  Token requerido (SCANNER_TOKEN del entorno).\n`);
+  }
 });
 
 httpServer.on("error", err => {
@@ -189,15 +231,18 @@ function startHidMode() {
   try { HID = require("node-hid"); } catch {
     console.error("\n❌  node-hid no instalado. Ejecuta: npm install node-hid\n"); process.exit(1);
   }
-  const devices = HID.devices();
-  let vid = HID_VID ? parseInt(HID_VID, 16) : null;
-  let pid = HID_PID ? parseInt(HID_PID, 16) : null;
-  let target;
-  if (vid && pid) {
-    target = devices.find(d => d.vendorId === vid && d.productId === pid);
-  } else {
-    target = devices.find(d => d.usage === 6 || d.usagePage === 1);
+  // DG-029: sin VID/PID explícitos, "el primer teclado" del sistema puede ser
+  // el teclado interno de un portátil — y en ese caso el bridge retransmitiría
+  // cada pulsación por WebSocket. El modo HID exige el dispositivo exacto.
+  if (!HID_VID || !HID_PID) {
+    console.error("\n❌  Modo HID requiere --hid-vid y --hid-pid explícitos.");
+    console.error("    Ejecuta con --list-hid para ver los dispositivos disponibles y sus VID/PID.\n");
+    process.exit(1);
   }
+  const devices = HID.devices();
+  const vid = parseInt(HID_VID, 16);
+  const pid = parseInt(HID_PID, 16);
+  const target = devices.find(d => d.vendorId === vid && d.productId === pid);
   if (!target) {
     console.error("\n❌  No se encontró escáner HID. Ejecuta con --list-hid para ver dispositivos.\n");
     process.exit(1);

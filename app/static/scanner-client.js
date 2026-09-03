@@ -13,11 +13,15 @@
 
   const LS_URL_KEY     = "ds_scanner_url";
   const LS_MODE_KEY    = "ds_scanner_mode";
+  const LS_TOKEN_KEY   = "ds_scanner_token";
   const DEFAULT_WS_URL = "ws://127.0.0.1:3737";
   const MAX_BACKOFF_MS = 30000;
 
   let _wsUrl    = localStorage.getItem(LS_URL_KEY)  || DEFAULT_WS_URL;
   let _mode     = localStorage.getItem(LS_MODE_KEY) || "ws";
+  // DG-003: el Scanner Bridge exige un token compartido (SCANNER_TOKEN en el
+  // servidor). Se guarda solo en localStorage de este navegador, nunca en el código.
+  let _token    = localStorage.getItem(LS_TOKEN_KEY) || "";
   let _ws       = null;
   let _active   = false;
   let _backoff  = 1000;
@@ -33,6 +37,16 @@
 
   function _restBase(url) {
     return (url || _wsUrl).replace(/^ws/, "http").replace(/\/+$/, "");
+  }
+
+  // DG-003: añade el token a una URL de WebSocket como ?token=...
+  function _wsUrlWithToken(url) {
+    const sep = url.includes("?") ? "&" : "?";
+    return _token ? url + sep + "token=" + encodeURIComponent(_token) : url;
+  }
+
+  function _authHeaders() {
+    return _token ? { "X-Scanner-Token": _token } : {};
   }
 
   // ── estado visual botón ──────────────────────────────────────────────────────
@@ -58,7 +72,7 @@
   function _connectWS() {
     if (_ws && (_ws.readyState === 0 || _ws.readyState === 1)) return;
     _setBtnState("connecting");
-    try { _ws = new WebSocket(_wsUrl); } catch (e) {
+    try { _ws = new WebSocket(_wsUrlWithToken(_wsUrl)); } catch (e) {
       _setBtnState("error"); _scheduleReconnect(); return;
     }
     _ws.onopen = () => {
@@ -281,6 +295,10 @@
           </button>
         </div>
         <div style="color:#888;font-size:.7rem;margin-top:.2rem;">Puede ser otra PC de la red local</div>
+        <label style="font-weight:600;display:block;margin:.5rem 0 .2rem;">Token del bridge (SCANNER_TOKEN)</label>
+        <input id="ds-scn-token" type="text" value="${_token}"
+          placeholder="pégalo desde la consola del Scanner Bridge"
+          style="width:100%;padding:.3rem .45rem;border:1px solid #ced4da;border-radius:4px;font-size:.78rem;font-family:monospace;">
         <button onclick="_scnTestScan()"
           style="margin-top:.45rem;width:100%;padding:.3rem;background:#6c757d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.78rem;">
           <i class="fas fa-vial mr-1"></i>Env&#237;ar escaneo de prueba al bridge
@@ -310,8 +328,10 @@
   window._scnSave = function () {
     const m = document.getElementById("ds-scn-mode")?.value;
     const u = document.getElementById("ds-scn-url")?.value?.trim();
+    const t = document.getElementById("ds-scn-token")?.value?.trim();
     if (m) { _mode = m; localStorage.setItem(LS_MODE_KEY, _mode); }
     if (u) { _wsUrl = u; localStorage.setItem(LS_URL_KEY, _wsUrl); }
+    _token = t || ""; localStorage.setItem(LS_TOKEN_KEY, _token);
     if (_active) {
       if (_mode === "camera") { _disconnectWS(); _startCamera(); }
       else { _stopCamera(); _connectWS(); }
@@ -326,7 +346,7 @@
     if (!st) return;
     st.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Probando…';
     try {
-      const r = await fetch(_restBase(u) + "/status", { signal: AbortSignal.timeout(3500) });
+      const r = await fetch(_restBase(u) + "/status", { headers: _authHeaders(), signal: AbortSignal.timeout(3500) });
       const d = await r.json();
       st.innerHTML = `<span style="color:#28a745"><i class="fas fa-check mr-1"></i>Bridge activo — clientes: ${Number(d.clients||0)}, modo: ${escHtml(d.mode||"?")}</span>`;
     } catch (e) {
@@ -341,7 +361,7 @@
     st.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Enviando…';
     try {
       const r = await fetch(_restBase(u) + "/test-scan", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", ..._authHeaders() },
         body: JSON.stringify({ code: "TEST-" + Date.now() }),
         signal: AbortSignal.timeout(3500)
       });

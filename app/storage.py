@@ -9,6 +9,7 @@ Variables de entorno requeridas:
 El bucket permanece privado: los archivos se sirven mediante URLs prefirmadas
 generadas bajo demanda (véase routes/files.py).
 """
+import os
 import re
 import unicodedata
 import uuid
@@ -20,11 +21,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# TODO: Mover a variables de entorno cuando se configure en Vercel
-R2_ENDPOINT   = "https://b5a84a6638adcb92e50c91606205cb83.r2.cloudflarestorage.com"
-R2_ACCESS_KEY = "79f8272f861775a7d5265852dfb26685"
-R2_SECRET_KEY = "40f52439b69b4cdfee3b4a37805ea7bf203fd707067bf1baa146f21c4c2566dc"
-R2_BUCKET     = "ciencias-ucv-archivo"
+# Leidas del entorno (IN-002): antes eran literales en este archivo, visibles
+# para quien clonara el repositorio y conservadas para siempre en el historial
+# de git. os.environ.get (sin valor por defecto) deja is_configured() en False
+# si falta alguna, en vez de fallar en silencio con una cadena vacia.
+R2_ENDPOINT   = os.environ.get("R2_ENDPOINT")
+R2_ACCESS_KEY = os.environ.get("R2_ACCESS_KEY")
+R2_SECRET_KEY = os.environ.get("R2_SECRET_KEY")
+R2_BUCKET     = os.environ.get("R2_BUCKET")
 
 _client = None
 _client_lock = None  # inicializado bajo demanda para evitar import-time threading
