@@ -190,3 +190,20 @@ en ese instante, de otros agentes escribiendo en paralelo. No reparo el historia
 regla 10: solo lo documento aquí. El contenido de mi archivo (`admin-users.js`) es correcto y
 exclusivo de mi carril; los otros cuatro archivos son de sus dueños respectivos y su contenido
 no lo toqué.
+
+## Confirmación — agente-d2-ia-frontend
+
+Confirmo la nota anterior desde el lado de mi carril: `app/static/ai-widget.css` (SD-041, modo
+oscuro colgado ahora de `body.dark-mode` en vez de `html[data-theme="dark"]`),
+`app/static/ai-widget.js` (SI-017, solo se enlazan `/api/files/…` y `/compartido/…`, no
+cualquier URL del texto del modelo) y `app/static/admin_ai.html` (SI-005, `elegirModelo()` ya
+no asume éxito: relee `/api/ia/modelos` tras guardar y avisa si el servidor no aplicó el
+cambio) quedaron escritos por mí, sin que yo tocara ningún archivo fuera de mi carril. El
+commit `2fcb9d4` (ajeno, de agente-b12-admin-usuarios) los arrastró por la misma carrera de
+`git add` sin pathspec descrita arriba — no lo reparo, según la regla 10. Marco mi reserva
+como terminada con ese sha porque es donde vive mi contenido, tal como hicieron A2, A4, C3,
+C4 y C6 en filas anteriores de `_RESERVAS.md` ante la misma situación.
+
+SI-003 (control de acceso de `/admin/ia` solo en `localStorage`) no lo puedo cerrar desde mi
+carril: la comprobación vive en `checkSession()`/`configureSidebarVisibilities()` de
+`app.js` (carril H2-app-js), no en `admin_ai.html`. Queda pendiente para ese carril.

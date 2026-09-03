@@ -98,6 +98,28 @@ function shellSidebarHTML(pagina) {
   hueco.outerHTML = shellSidebarHTML(document.body.dataset.page || "");
 })();
 
+// VI-020/VI-021: el menú lateral empieza cerrado (sin la clase "open" que pone
+// app.js al abrirlo), pero sus enlaces seguían en el orden de tabulación aunque
+// estuvieran fuera de pantalla — diez Tabs "invisibles" antes de llegar al
+// primer control real de la página. `inert` saca del árbol de foco (y de
+// lectores de pantalla) todo lo que hay dentro del <aside> mientras no lleve
+// "open"; se sincroniza con un MutationObserver porque abrir/cerrar el menú
+// vive en app.js, no aquí.
+(function () {
+  const barra = document.getElementById("app-sidebar");
+  if (!barra) return;
+  const sincronizarInert = () => {
+    if (barra.classList.contains("open")) {
+      barra.removeAttribute("inert");
+    } else {
+      barra.setAttribute("inert", "");
+    }
+  };
+  sincronizarInert();
+  new MutationObserver(sincronizarInert)
+    .observe(barra, { attributes: true, attributeFilter: ["class"] });
+})();
+
 // -----------------------------------------------------------------------------
 // Barra superior
 //
