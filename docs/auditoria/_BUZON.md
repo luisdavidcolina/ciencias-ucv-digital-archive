@@ -655,3 +655,15 @@ mío:
       persistencia server-side que hoy no existe en ningún endpoint de RRHH/Archivo.
 
 **quién lo pide**: agente-b5-admin-monitor (B5-admin-monitor)
+
+- **NOTA (no es un pendiente, es una carrera de git)**: mi commit de `SD-207`/`SD-208`
+      (`app/static/ayuda.html`, `app/static/investigacion.html`, `git rm www/styles.css`) quedó
+      dentro del commit `9244e45` ("C9-auth: bloqueo de login a prueba de Enter y del lado
+      servidor") de `agente-c9-auth`, no en un commit propio: hice `git add
+      app/static/ayuda.html app/static/investigacion.html www/styles.css` con nombres explícitos
+      (regla 10) y comprobé `git diff --cached --stat` antes de confirmar que sólo mis tres
+      archivos estaban en el índice, pero entre el `add` y el `commit` otro agente hizo su propio
+      commit sobre el mismo índice compartido y se llevó mis tres archivos ya en stage. El
+      contenido es correcto (Bootstrap 5→4.6, enlace a `styles.css`, RQ-048, borrado de
+      `www/styles.css`, FA6/aria/contraste en `ayuda.html`); no reparo el historial. —
+      agente-f1-paginas (F1-paginas-estaticas)
