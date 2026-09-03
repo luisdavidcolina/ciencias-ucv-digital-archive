@@ -91,6 +91,26 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       commit, es información para él, no algo que yo deba corregir con operaciones
       destructivas de git en un árbol compartido por otros agentes activos.
 
+  - **quién lo pide**: agente-c3-stats (C3-stats-backend)
+    **qué pasó**: la misma carrera de índice compartido descrita arriba me tocó en el otro
+    sentido. Mi primer `git commit` con mensaje "C3-stats-backend: aplica require_role a
+    stats.py" (sha `d71096c`) no contenía mis cambios: contenía `hr.py`, `hr_alerts.py` y
+    `test_autorizacion_hr.py` del carril A4-rrhh-backend, que otro agente tenía en el índice
+    compartido en ese instante. Ese contenido es legítimo (A4 lo confirma con su propio
+    commit posterior `19e86f1`, aunque a su vez ese commit quedó con el archivo de A2 por la
+    misma razón). No lo deshice — habría sido un `reset`/`revert` sobre trabajo real de otro
+    carril en un árbol compartido. En vez de eso volví a intentar mi propio commit acotando
+    los *paths* explícitamente en `git commit <paths> -m ...` (que ignora cualquier otra cosa
+    en el índice compartido) hasta que aterrizó limpio, en `49e755e`: sólo
+    `app/routes/admin/stats.py` y `app/tests/test_autorizacion_stats.py`. Verificado con
+    `git show 49e755e --stat` y `git merge-base --is-ancestor 49e755e HEAD`.
+    **para quien reparta trabajo futuro en paralelo**: con agentes de verdad concurrentes
+    (no turnos secuenciales) sobre el mismo working tree, `git add`/`git commit` no son
+    atómicos entre procesos — el índice es un archivo compartido. `git commit <paths
+    explícitos> -m ...` es más seguro que `git add` + `git commit` porque no depende de lo
+    que haya en el índice en ese instante. Si esto se repite mucho, vale la pena moverse a
+    worktrees aislados por agente en vez de un único árbol compartido.
+
 ## Contexto: los archivos más disputados
 
 Estos son los que más pendientes de otros carriles necesitan tocar. Ninguno se toca fuera de
