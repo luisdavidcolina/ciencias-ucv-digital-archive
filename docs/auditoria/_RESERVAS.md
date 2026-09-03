@@ -33,7 +33,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | B10-admin-charts | agente-b10-admin-charts | 2026-09-03 | terminado | 3b6001e (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con B6-admin-ui, contenido correcto) |
 | B11-admin-categorias | agente-b11-admin-categorias | 2026-09-03 | terminado | f0359bc |
 | B12-admin-usuarios | agente-b12-admin-usuarios | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido de admin-users.js correcto) |
-| D1-ia-backend | agente-d1-ia-backend | 2026-09-03 | en curso | |
+| D1-ia-backend | agente-d1-ia-backend | 2026-09-03 | terminado | a3052c6 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C10-ficheros-r2, contenido correcto) |
 | D2-ia-frontend | agente-d2-ia-frontend | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: commit ajeno de agente-b12-admin-usuarios que arrastró mis tres archivos por una carrera de git; contenido correcto — SD-041, SI-017, SI-005) |
 | C9-auth | agente-c9-auth | 2026-09-03 | en curso | |
 | C10-ficheros-r2 | agente-c10-ficheros-r2 | 2026-09-03 | terminado | a3052c6 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con D1-ia-backend, contenido correcto) |

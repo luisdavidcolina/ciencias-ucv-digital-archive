@@ -667,3 +667,80 @@ mío:
       contenido es correcto (Bootstrap 5→4.6, enlace a `styles.css`, RQ-048, borrado de
       `www/styles.css`, FA6/aria/contraste en `ayuda.html`); no reparo el historial. —
       agente-f1-paginas (F1-paginas-estaticas)
+
+- [ ] `DG-154` · **archivo**: `app/static/admin_qa.html` (nuevo), `app/routes/capture.py`,
+      `app/static/capture.js`, además `admin_archive.html`/`admin_hr.html` · **carril dueño**:
+      ninguno abierto todavía (parte de E1/E2, digitalización)
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: la ficha pide que la digitalización tenga por fin una pantalla propia
+      en el backoffice. Es una función nueva completa (pantalla, ruta y wiring de pestaña) que
+      no cabe dentro de `admin.js` en solitario — depende de archivos nuevos fuera de mi carril
+      y de las decisiones de E1-escaner-puente. No lo implemento; sólo dejo constancia.
+
+- [ ] `OA-055` · **archivo**: `app/static/admin_archive.html:335` · **carril dueño**:
+      B1-admin-archivo-html
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: la ficha pide escribir «Documentos del archivo» directamente en el
+      HTML y borrar la reescritura por JavaScript en `admin.js` (el bloque de `monitorTitle`).
+      No toco `admin_archive.html`, así que dejo la reescritura de `admin.js` intacta — quitarla
+      ahora dejaría el título mostrando «Directorio Activo Local» hasta que B1 corrija el
+      marcado. Cuando B1 cierre su parte, la reescritura de `admin.js:111-114` puede borrarse.
+
+- [ ] `OR-070` / `OR-188` · **archivo**: `app/static/admin_hr.html` · **carril dueño**:
+      B2-admin-rrhh-html / B3-admin-sistema-html
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: RRHH no tiene ninguna pantalla que liste jubilaciones próximas
+      (OR-070) ni una tabla de vencimientos desde la que invocar la disposición documental
+      (OR-188). Ya dejé `abrirDisposicion()`/`_formularioDisposicion()` en `admin.js`
+      genéricos y reutilizables (reciben `docId`/`titulo`, no dependen del módulo), así que en
+      cuanto exista el marcado de esa tabla en `admin_hr.html`, un botón «Disponer» igual al de
+      Archivo ya funciona sin tocar `admin.js` de nuevo. Hasta entonces el banner de
+      jubilaciones en RRHH sólo amplía a 5 nombres en vez de 3, sin prometer un enlace que hoy
+      no lleva a ninguna parte.
+
+- [ ] `OA-053` (parte HTML) · **archivo**: `app/static/admin_archive.html:470,477`,
+      `app/static/admin_hr.html` · **carril dueño**: B1-admin-archivo-html / B2-admin-rrhh-html
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: sufijar `vencimientos-table-body`/`vencimientos-summary` con
+      `-archivo`/`-rrhh`. Ya actualicé `loadVencimientosTable()` en `admin.js` para buscar
+      primero el id sufijado y caer al id sin sufijo si no existe, así que el cambio de HTML es
+      seguro de aplicar en cualquier momento sin coordinar de nuevo conmigo.
+
+- [ ] `OA-106` / `OR-131` (persistencia de filtros en la URL) · **archivo**:
+      `app/static/admin-monitor.js` · **carril dueño**: B5-admin-monitor
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: en mi carril evité que `loadAdminTab("monitor")` reinicie
+      `state.adminTable.page` cuando se re-entra a una pestaña que ya estaba activa, pero la
+      persistencia real de filtros/página en la URL y su restauración vive en
+      `admin-monitor.js`, fuera de mi carril.
+
+- [ ] `OR-223` (patrón de flechas entre pestañas) · **archivo**: `app/static/admin-ui.js` ·
+      **carril dueño**: B6-admin-ui
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: `ArrowRight`/`ArrowLeft` hacen `next.focus()` y `next.click()`, así
+      que recorrer las pestañas con teclado dispara todas sus cargas. Ya dejé `aria-selected`,
+      `aria-controls` y `aria-labelledby` sincronizados en `loadAdminTab()` (OA-178/OR-224), así
+      que el arreglo en `admin-ui.js` sólo necesita separar mover el foco de activar, sin tocar
+      `admin.js` de nuevo.
+
+- [ ] `VI-001` (nota, no bloqueo) · **archivo**: `app/static/app.js:177` (switchTab) ·
+      **carril dueño**: H2-app-js
+      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
+      **qué hace falta**: revisé si algún pendiente de `B4-admin-tabs` dependía de que
+      `switchTab` supiera restaurar la sección de `admin_system.html` (el hallazgo de
+      `/admin/sistema` en blanco). Ninguno depende de eso: `loadAdminTab()` sólo carga
+      contenido *dentro* de una pestaña de Archivo/RRHH que `switchTab` ya deja visible antes de
+      llamarlo. No hace falta que H2 resuelva VI-001 para que este carril funcione.
+
+- **NOTA (no es un pendiente, es una carrera de git)**: mi commit de SI-004/SI-005 y el resto
+      del carril D1-ia-backend (`app/routes/ai.py`, `app/core/ai.py`, `app/core/ai_proposals.py`,
+      `app/core/ai_tools.py`, `app/tests/test_ia_seguridad.py`) quedó dentro del commit `a3052c6`
+      ("C10-ficheros-r2: identidad real en subida/descarga y saneo de compartir") de
+      `agente-c10-ficheros-r2`, no en un commit propio. Hice `git add` con nombres explícitos
+      (regla 10) sólo de mis cinco archivos y comprobé `git diff --cached --stat` dos veces
+      —encontrando de hecho `routes/files.py`/`routes/share.py`/`_BUZON.md` ajenos colados en el
+      índice compartido y sacándolos con `git restore --staged` antes de confirmar—, pero entre
+      ese `add` limpio y el `commit` otro agente hizo su propio commit sobre el mismo índice y se
+      llevó mis cinco archivos ya en stage junto con los suyos. El contenido es correcto (ver
+      `docs/auditoria/_RESERVAS.md`, fila D1-ia-backend); no reparo el historial. —
+      agente-d1-ia-backend (D1-ia-backend)
