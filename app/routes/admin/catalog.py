@@ -1,16 +1,26 @@
 """Categorías, palabras clave y audit log."""
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 
 from database import db_query, log_event
 from models import CategoryCreateRequest, KeywordRequest
 from utils import generate_unique_slug
 from ..lookups import invalidate_choices_cache
+from .deps import require_role, require_admin_role
 
 router = APIRouter()
 
+# Catálogo compartido: tipos documentales, palabras clave y auditoría los usan
+# tanto Archivo como RRHH (pestaña "Tipos" en ambos paneles, OA-123.../OR-163...).
+# Ninguno de estos endpoints toma un parámetro de módulo fiable antes de
+# ejecutarse (add_category recibe `scope` en el cuerpo, no filtra acceso), así
+# que la autorización se hace por pertenencia a cualquiera de los dos módulos,
+# no por adivinar el scope. Crear un tipo documental (add_category) exige
+# además rol Admin: es más sensible porque se propaga a todos los desplegables
+# y documentos (OA-123). Ver `deps.py` para el criterio completo.
 
-@router.get("/keywords")
+
+@router.get("/keywords", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def get_keywords():
     rows = db_query(
         """SELECT dl.id_descriptor AS id, dl.nombre,
@@ -24,7 +34,7 @@ def get_keywords():
     return [dict(r) for r in rows]
 
 
-@router.post("/keywords")
+@router.post("/keywords", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def create_keyword(req: KeywordRequest):
     nombre = (req.nombre or "").strip()
     if not nombre:
@@ -42,7 +52,7 @@ def create_keyword(req: KeywordRequest):
     return {"success": True, "id": row["id"]}
 
 
-@router.put("/keywords/{kid}")
+@router.put("/keywords/{kid}", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def update_keyword(kid: int, req: KeywordRequest):
     nombre = (req.nombre or "").strip()
     if not nombre:
@@ -54,7 +64,7 @@ def update_keyword(kid: int, req: KeywordRequest):
     return {"success": True}
 
 
-@router.delete("/keywords/{kid}")
+@router.delete("/keywords/{kid}", dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
 def delete_keyword(kid: int, force: bool = False):
     uso = db_query(
         "SELECT COUNT(*) AS cnt FROM public.archivo_descriptores WHERE id_descriptor = %s",
@@ -79,7 +89,7 @@ def delete_keyword(kid: int, force: bool = False):
     return {"success": True, "removed_from_docs": uso_count}
 
 
-@router.post("/add_category")
+@router.post("/add_category", dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
 def add_category(req: CategoryCreateRequest):
     log_event(req.usuario, "Create Category", req.scope, f"Nueva Tipología: {req.name}")
     nombre = (req.name or "").strip()
@@ -113,7 +123,7 @@ def add_category(req: CategoryCreateRequest):
     return {"success": True}
 
 
-@router.get("/audit_log")
+@router.get("/audit_log", dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
 def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
     """Retorna el log de auditoría con paginación y búsqueda opcional."""
     page     = max(1, page)
@@ -149,7 +159,7 @@ def get_audit_log(page: int = 1, per_page: int = 50, search: str = ""):
     return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
 
 
-@router.get("/notifications")
+@router.get("/notifications", dependencies=[Depends(require_role("Archivo", "RRHH"))])
 def get_notifications(modulo: Optional[str] = Query(default="")):
     """
     Devuelve un resumen de pendientes para el panel de notificaciones.
