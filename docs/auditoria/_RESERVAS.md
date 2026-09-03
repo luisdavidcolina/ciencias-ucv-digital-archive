@@ -23,7 +23,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | C6-usuarios-backend | agente-c6-usuarios | 2026-09-03 | en curso | |
 | C7-papelera | agente-c7-papelera | 2026-09-03 | en curso | |
 | A2-archivo-backend | agente-a2-archivo-backend | 2026-09-03 | terminado | 19e86f1 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
-| A4-rrhh-backend | agente-a4-rrhh-backend | 2026-09-03 | en curso | |
+| A4-rrhh-backend | agente-a4-rrhh-backend | 2026-09-03 | terminado | d71096c (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
 
 ## Cómo se escribe una fila
 
