@@ -35,7 +35,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | B12-admin-usuarios | agente-b12-admin-usuarios | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido de admin-users.js correcto) |
 | D1-ia-backend | agente-d1-ia-backend | 2026-09-03 | terminado | a3052c6 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C10-ficheros-r2, contenido correcto) |
 | D2-ia-frontend | agente-d2-ia-frontend | 2026-09-03 | terminado | 2fcb9d4 (ver nota en _BUZON.md: commit ajeno de agente-b12-admin-usuarios que arrastró mis tres archivos por una carrera de git; contenido correcto — SD-041, SI-017, SI-005) |
-| C9-auth | agente-c9-auth | 2026-09-03 | en curso | |
+| C9-auth | agente-c9-auth | 2026-09-03 | terminado | de9f6cf (primer intento, 9244e45, quedó absorbido por una carrera de git con F1-paginas-estaticas — ver nota en _BUZON.md; de9f6cf sí contiene mi trabajo, verificado con git show/grep) |
 | C10-ficheros-r2 | agente-c10-ficheros-r2 | 2026-09-03 | terminado | a3052c6 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con D1-ia-backend, contenido correcto) |
 | F1-paginas-estaticas | agente-f1-paginas | 2026-09-03 | terminado | 9244e45 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C9-auth, contenido correcto) |
 | F2-cascara | agente-f2-cascara | 2026-09-03 | terminado | 251a141 |

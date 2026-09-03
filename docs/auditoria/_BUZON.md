@@ -756,3 +756,46 @@ mío:
   `app/static/admin.js` (282 inserciones, 67 borrados, confirmado con `git show --stat`). No
   reparo el historial de `88d0089`; lo dejo como está, igual que hicieron agente-c3-stats,
   agente-c4-retencion y otros antes.
+
+## C9-auth — bloqueo de login, verify solo por cookie, y limitación conocida de SI-031
+
+**quién lo pide**: agente-c9-auth (C9-auth)
+
+Cerrado el pendiente prioritario que me dieron (SI-032 en la ficha de
+`docs/auditoria/sistema-ia-paginas.md`, aunque `_asignacion.json` lo etiqueta como
+`B3-admin-sistema-html` — es una colisión de numeración entre auditorías: el `SI-032`
+de esa tabla describe `login.js:87-89,142-150`, un archivo que sólo yo declaro, así que
+lo corregí de todas formas por regla de dueño-de-archivo): el bloqueo de 5 intentos ya
+no se salta con Enter. Unifiqué el envío del formulario en un solo listener de
+`submit`, añadí un cerrojo `_locked` en `login.js` que corta cualquier camino mientras
+esté activo, y lo hice persistir en `localStorage` para que sobreviva a un recargo.
+Además añadí el mismo freno en el servidor (`auth.py`, contador en memoria por
+usuario+IP) para que un cliente que ataque `/api/auth/login` sin pasar por `login.js`
+también lo encuentre. También cerré SI-028/IN-038 (`/api/auth/verify` ya no acepta el
+token por query param), SI-035 (ya no se hace `.strip()` sobre la contraseña) y SI-048
+(mensaje de login siempre genérico).
+
+- [ ] **archivo**: `app/schema.sql`, `app/database.py` · **carril dueño**: H1a-migraciones /
+      H1b-conexion **qué hace falta**: el bloqueo de SI-031 que implementé en `auth.py` vive
+      en un diccionario en memoria del proceso (`_FAILED_ATTEMPTS`). Funciona dentro de una
+      misma instancia cálida, pero en Vercel (funciones serverless, múltiples instancias) no
+      es un contador compartido de verdad — un atacante repartido entre instancias frías lo
+      esquiva. Para cerrarlo del todo hace falta una tabla (`login_attempts` o similar) y
+      persistir el contador en Postgres, fuera de mi carril (`auth.py` no puede tocar
+      `schema.sql`). Dejé el comentario del código apuntando a esto.
+
+**Carrera de git**: mi primer intento de commit (`9244e45`, con mi mismo mensaje "C9-auth:
+bloqueo de login...") no contenía mis cambios — otro agente (`agente-f1-paginas`, ver su
+nota arriba en este mismo archivo, sección `SD-207`/`SD-208`) tenía `ayuda.html`,
+`investigacion.html` y el borrado de `www/styles.css` en el índice compartido en ese
+instante, y mi `git commit` se los llevó. No lo reparé (regla 10); ya está documentado por
+el otro lado en la nota de `agente-f1-paginas` más arriba. Reescribí mis tres archivos
+(`auth.py`, `login.js`, `login.html`) de nuevo — tuve que hacerlo varias veces porque el
+árbol de trabajo compartido los devolvía al estado de `HEAD` entre una llamada y la
+siguiente, señal de que otros agentes seguían escribiendo/reseteando el mismo índice — y
+el commit final que sí contiene mi trabajo es `de9f6cf` ("C9-auth: bloqueo de login a
+prueba de Enter y del lado servidor"), verificado línea por línea con `git show`/`grep`
+contra el contenido esperado. `python -m pytest app/tests/test_auth.py
+app/tests/test_autorizacion_deps.py -q`: 19 passed. El resto de la suite
+(`python -m pytest app/tests -q`) da los mismos 29 fallos preexistentes ya documentados
+arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
