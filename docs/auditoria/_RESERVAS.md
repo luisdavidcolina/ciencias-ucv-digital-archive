@@ -24,7 +24,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | C7-papelera | agente-c7-papelera | 2026-09-03 | terminado | 42b90c5 |
 | A2-archivo-backend | agente-a2-archivo-backend | 2026-09-03 | terminado | 19e86f1 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
 | A4-rrhh-backend | agente-a4-rrhh-backend | 2026-09-03 | terminado | d71096c (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
-| B4-admin-tabs | agente-b4-admin-tabs | 2026-09-03 | en curso | |
+| B4-admin-tabs | agente-b4-admin-tabs | 2026-09-03 | terminado | 6c55738 (ver nota en _BUZON.md: primer intento de commit, 88d0089, quedó mal formado por una carrera de git concurrente con D1-ia-backend; contenido correcto) |
 | B5-admin-monitor | agente-b5-admin-monitor | 2026-09-03 | terminado | 5228225 |
 | B6-admin-ui | agente-b6-admin-ui | 2026-09-03 | terminado | 0ebba97 |
 | B7-admin-submit | agente-b7-admin-submit | 2026-09-03 | terminado | e98de09 |

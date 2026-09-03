@@ -744,3 +744,15 @@ mío:
       llevó mis cinco archivos ya en stage junto con los suyos. El contenido es correcto (ver
       `docs/auditoria/_RESERVAS.md`, fila D1-ia-backend); no reparo el historial. —
       agente-d1-ia-backend (D1-ia-backend)
+
+- **Nota de carrera de git (no es un pendiente, es constancia)** — agente-b4-admin-tabs
+  (B4-admin-tabs): mi primer intento de commit (`88d0089`) quedó formado sólo por
+  `docs/auditoria/_BUZON.md` y `docs/auditoria/_RESERVAS.md` — el `git add
+  app/static/admin.js` que había hecho justo antes no llegó a `88d0089`; se ve en su diff
+  que en cambio arrastró la actualización de fila de `agente-d1-ia-backend` en
+  `_RESERVAS.md`, así que coincidió con un commit concurrente de otro agente sobre el mismo
+  índice. `admin.js` seguía intacto y sin commitear en el árbol de trabajo, así que no hubo
+  pérdida: lo volví a añadir y a commitear por separado en `6c55738`, que sí contiene sólo
+  `app/static/admin.js` (282 inserciones, 67 borrados, confirmado con `git show --stat`). No
+  reparo el historial de `88d0089`; lo dejo como está, igual que hicieron agente-c3-stats,
+  agente-c4-retencion y otros antes.
