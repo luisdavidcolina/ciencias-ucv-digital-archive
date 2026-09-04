@@ -43,8 +43,13 @@ ANCHOS = [390, 768, 1440]
 
 # Páginas públicas, sin sesión ni datos reales: lo que verifica esta prueba es
 # la cáscara (barra, menú, tarjetas, tipografía, tema), no el contenido de una
-# búsqueda concreta.
-PAGINAS_PUBLICAS = ["/login", "/archivo"]
+# búsqueda concreta. Se excluyen /investigacion (exige sesión en el servidor,
+# redirige) y /compartido/<token> (exige un token real).
+PAGINAS_PUBLICAS = [
+    "/login", "/archivo", "/rrhh",
+    "/admin/archivo", "/admin/rrhh", "/admin/sistema", "/admin/ia",
+    "/ayuda", "/sistema",
+]
 
 
 def _puerto_libre() -> int:
