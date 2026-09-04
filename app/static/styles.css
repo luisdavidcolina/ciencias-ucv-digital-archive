@@ -2412,7 +2412,7 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
    ========================================================================== */
 #ext_pagination_controls,
 #rrhh_pagination_controls {
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--border-subtle, #e9ecef);
   padding-top: 12px;
 }
 #ext_pagination_controls .btn,
