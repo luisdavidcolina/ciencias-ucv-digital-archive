@@ -40,13 +40,31 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | F1-paginas-estaticas | agente-f1-paginas | 2026-09-03 | terminado | 9244e45 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con C9-auth, contenido correcto) |
 | F2-cascara | agente-f2-cascara | 2026-09-03 | terminado | 251a141 |
 | E2-escaner-cliente | agente-e2-escaner-cliente | 2026-09-03 | terminado | 56e7be0725f24bdf4e61442b57eb0525b0f26fa |
-| H3-pruebas-legacy | agente-h3b-legacy-fixtures | 2026-09-03 | en curso | |
+| H3-pruebas-legacy | agente-h3b-legacy-fixtures | 2026-09-03 | terminado | a4d7913 (test_admin.py en b1793c2) |
 | C5-importaciones | agente-c5b-importaciones | 2026-09-03 | en curso | |
 | C8-backup | agente-c8b-backup | 2026-09-03 | terminado | f989f19 |
 | BR-109 | agente-br109-dossier-estilos | 2026-09-03 | terminado | 6284460 |
 | L0-tokens | agente-l0-tokens | 2026-09-03 | terminado | 3b6e18b (ver nota en _BUZON.md: commit ajeno de agente-h2-app-js que arrastró mi styles.css por una carrera de git concurrente; contenido correcto, verificado con git show) |
 | H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
 | verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | en curso | |
+| L1-estilos | agente-l1-estilos | 2026-09-03 | en curso | |
+| L2-estilos | agente-l2-estilos | 2026-09-03 | en curso | |
+| L3-estilos | agente-l3-estilos | 2026-09-03 | en curso | |
+| L4-estilos | agente-l4-estilos | 2026-09-03 | en curso | |
+| L5-estilos | agente-l5-estilos | 2026-09-03 | en curso | |
+| L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
+| L7-estilos | agente-l7-estilos | 2026-09-03 | en curso | |
+| L8-estilos | agente-l8-estilos | 2026-09-03 | en curso | |
+| L9-estilos | agente-l9-estilos | 2026-09-03 | en curso | |
+| L10-estilos | agente-l10-estilos | 2026-09-03 | en curso | |
+| L11-estilos | agente-l11-estilos | 2026-09-03 | en curso | |
+| L12-estilos | agente-l12-estilos | 2026-09-03 | en curso | |
+| L13-estilos | agente-l13-estilos | 2026-09-03 | en curso | |
+| L14-estilos | agente-l14-estilos | 2026-09-03 | en curso | |
+| L15-estilos | agente-l15-estilos | 2026-09-03 | en curso | |
+| LH-paginas | agente-lh-paginas | 2026-09-03 | en curso | |
+| LA-asistente | agente-la-asistente | 2026-09-03 | en curso | |
+| LW-www | agente-lw-www | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
 
