@@ -72,7 +72,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | terminado | (ver commit en _BUZON.md) |
 | SWEEP-admin-js | agente-sweep-admin-js | 2026-09-03 | en curso | |
 | SWEEP-misc-paginas | agente-sweep-misc-paginas | 2026-09-03 | en curso | |
-| SWEEP-tests-nuevos | agente-sweep-tests-nuevos | 2026-09-03 | en curso | |
+| SWEEP-tests-nuevos | agente-sweep-tests-nuevos | 2026-09-03 | terminado | ff4c076 (nota en `_BUZON.md` quedó en el commit `5ac751c` de agente-sweep-main por una carrera de git concurrente, contenido correcto) |
 | L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | 2bc5690 (ver nota en _BUZON.md: mi cambio de styles.css quedó arrastrado por el commit de agente-la-asistente por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 2bc5690 -- app/static/styles.css`) |
 | L8-estilos | agente-l8-estilos | 2026-09-03 | terminado | ada29aa |
 | L9-estilos | agente-l9-estilos | 2026-09-03 | terminado | 6ca0fc7 (ver nota en _BUZON.md: mi trabajo quedó absorbido por el commit "L3-estilos" de otro agente por una carrera de git concurrente en el árbol compartido; mi propio intento de commit, 7194678, sólo capturó 1 línea residual. Contenido verificado con grep de mis marcadores SD- en HEAD tras 6ca0fc7 y con `python -m pytest app/tests -q` en 713/0) |
