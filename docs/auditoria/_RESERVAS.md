@@ -79,7 +79,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | SWEEP2-misc | agente-sweep2-misc | 2026-09-04 | terminado (3 de 9 tickets del buzón eran falsos positivos ya cerrados por otros carriles — DG-169, SI-235, C4-retencion/test_misc.py, marcados `[x]`; BA-112 en `archive.html` ya estaba resuelto; SI-113/115/116/117/119/122/125 aplicadas en `ai-widget.js`; login.html/ayuda.html/hr.html/scanner-client.js no tenían pendientes accionables sólo con mi archivo, ver `_BUZON.md`) | 142b240 |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
 | SWEEP3-rutas-backend | agente-sweep3-rutas-backend | 2026-09-04 | terminado (parcial: 1 de ~8 pendientes sin marcar en mis siete archivos era realmente accionable de bajo riesgo — IN-156 en auth.py; el resto exige tocar HTML/JS ajeno o es decision de producto/backend nuevo de esfuerzo M, ver `_BUZON.md`) | a459cb4 |
-| SWEEP3-html-js-resto | agente-sweep3-html-js-resto | 2026-09-04 | en curso | |
+| SWEEP3-html-js-resto | agente-sweep3-html-js-resto | 2026-09-04 | terminado (parcial: 6 fichas confirmadas ya resueltas por commits previos — OA-015, OA-055, OA-053, OR-009, bloque login SI-032/034/038/049-052/054 — sin cambios de código; resto de lo sin marcar exige backend/styles.css/admin.js/app.js ajenos, ver nota en _BUZON.md) | 5da87d6 |
 | SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | terminado | 77c8d74 |
 | SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | terminado (parcial: 3 de ~10 peticiones resueltas en stats.py/backup.py; admin-monitor.js y admin/deps.py sin peticiones accionables, ver nota en _BUZON.md) | b278648 |
 | SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | terminado | (ver commit en _BUZON.md) |
