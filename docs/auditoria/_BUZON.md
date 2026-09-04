@@ -1261,12 +1261,9 @@ hace falta en cada uno, para quien tenga esos carriles:
       agente-sweep2-admin-html (SWEEP2-admin-html): `admin_archive.html` ya no tenía el bloque
       duplicado (verificado, sin coincidencias de `.ds-skeleton`/`ds-shimmer` en su `<style>`);
       `admin_hr.html` sí lo tenía (líneas 924-925) — borrado, `styles.css` ya define
-      `.ds-skeleton` con variante oscura (línea ~2375). `admin_system.html` queda fuera de mi
-      zona (carril `B3-admin-sistema-html`), sigue pendiente ahí si aplica.
-      **nota histórica (parte HTML, `admin_archive.html`)** — dejaba sólo `#session-warning-banner` en su
-      `<style>`; `styles.css` ya define `.ds-skeleton`/`ds-shimmer` con su variante bajo
-      `body.dark-mode` (línea ~2672 y 3272), así que no hay pérdida visual. Quedan
-      `admin_archive.html`, `admin_hr.html`, `admin_system.html` para el carril LH.
+      `.ds-skeleton` con variante oscura (línea ~2375, también ~2672/3272 para
+      `ds-shimmer`). `admin_system.html` queda fuera de mi zona (carril
+      `B3-admin-sistema-html`), sigue pendiente ahí si el bloque duplicado existe.
 - [ ] `SD-201` · **archivo**: `app/static/admin-monitor.js` (posiciona el menú por JS con
       coordenadas calculadas) · **carril dueño**: B5-admin-monitor `[CHOCA]`
       **qué hace falta**: `anchor-name`/`position-anchor` con `position-try` para el volteo
@@ -1997,8 +1994,10 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       **carril dueño**: H2-app-js `[CHOCA]` — SI-058 ya tiene su mitad resuelta por
       **agente-h2-app-js** (VI-001, commit `5b566e4`): `switchTab` ya conoce `admin-sistema`.
       Queda la otra mitad (una sola función de control de acceso, llamada una vez) sin hacer.
-- [ ] `SI-097`–`SI-106`, `SI-109` · **archivo**: `app/static/admin_ai.html` · **carril dueño**:
-      no listado explícitamente en `PLAN-PARALELO.md`, exclusivo de esa página.
+- [x] `SI-097`–`SI-106`, `SI-109` · marcado por agente-sweep2-admin-html (SWEEP2-admin-html):
+      entrada duplicada — ya resueltas por agente-sweep-admin-html (`admin_ai.html`, ver nota
+      "SWEEP-admin-html" más abajo en este mismo archivo, ~línea 2636), salvo la mitad backend
+      de SI-097/SI-098 que sigue anotada aparte.
 - [ ] `SI-110`–`SI-120`, `SI-122`–`SI-125` · **archivo**: `app/static/ai-widget.js` ·
       **carril dueño**: exclusivo de ese fichero, no asignado en `PLAN-PARALELO.md`.
       **Parcial (agente-sweep-misc-paginas, SWEEP-misc-paginas)**: SI-112 (la burbuja no

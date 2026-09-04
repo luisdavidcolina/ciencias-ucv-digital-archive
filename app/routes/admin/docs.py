@@ -34,6 +34,31 @@ router = APIRouter()
 
 VALID_STATUS = ("draft", "revision", "aprobado", "rechazado")
 
+# OA-104/OR-128: orden real server-side sobre /list_all. Lista blanca de
+# columnas ordenables por módulo — nunca se interpola `sort` directo en el
+# SQL, sólo se usa para elegir una expresión ya escrita aquí. Un valor fuera
+# de la lista cae al orden por defecto de siempre, en vez de dar 400: el
+# frontend puede mandar un `sort` obsoleto sin romper la página.
+_SORT_COLUMNS = {
+    "Archivo": {
+        "titulo": "da.titulo",
+        "autor": "da.autor",
+        "fecha": "da.fecha_documento",
+        "doc_type": "da.tesauro_primario",
+        "status": "da.status",
+        "soporte": "da.soporte",
+    },
+    "RRHH": {
+        "empleado": "e.apellidos, e.nombres",
+        "cedula": "e.cedula",
+        "departamento": "d.nombre",
+        "estado": "el.estados",
+        "cargo": "c.nombre",
+        "fecha_ingreso": "e.fecha_ingreso",
+        "doc_count": "COUNT(DISTINCT dr.id_rrhh)",
+    },
+}
+
 
 @router.get("/list_all")
 def list_all_files(
@@ -42,6 +67,8 @@ def list_all_files(
     type_filter: Optional[str] = "",
     person_filter: Optional[str] = "",
     status_filter: Optional[str] = "",
+    sort: Optional[str] = None,
+    dir: Optional[str] = "asc",
     page: int = 1,
     per_page: int = 25,
     usuario_sesion: str = Depends(require_session),
@@ -51,6 +78,15 @@ def list_all_files(
         raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
 
     page, per_page, offset = paginate(page, per_page)
+
+    sort_dir = "DESC" if (dir or "").lower() == "desc" else "ASC"
+    sort_expr = _SORT_COLUMNS.get(modulo, {}).get(sort or "")
+    # `empleado` son dos columnas (apellidos, nombres): la dirección se aplica
+    # a cada una, si no la segunda quedaría siempre en ASC.
+    order_by = (
+        ", ".join(f"{col.strip()} {sort_dir}" for col in sort_expr.split(","))
+        if sort_expr else None
+    )
 
     if modulo == "Archivo":
         conditions, params = ["da.deleted_at IS NULL"], []
@@ -106,7 +142,7 @@ def list_all_files(
                 COALESCE(da.disposicion, '')       AS disposicion
             FROM public.datos_archivo da
             {where}
-            ORDER BY da.fecha_documento DESC NULLS LAST
+            ORDER BY {order_by or "da.fecha_documento DESC"} NULLS LAST
             LIMIT %s OFFSET %s
             """,
             (params + [per_page, offset]) if params else [per_page, offset],
@@ -191,7 +227,7 @@ def list_all_files(
             GROUP BY e.id, e.cedula, e.apellidos, e.nombres, e.rif, d.nombre,
                      el.estados, c.nombre, e.fecha_ingreso, e.fecha_nacimiento,
                      e.nivel_educativo, e.sexo, e.updated_at, e.foto_url
-            ORDER BY e.apellidos ASC, e.nombres ASC
+            ORDER BY {order_by or "e.apellidos ASC, e.nombres ASC"}
             LIMIT %s OFFSET %s
             """,
             (params + [per_page, offset]) if params else [per_page, offset],
