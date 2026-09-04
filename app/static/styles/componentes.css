@@ -8,38 +8,43 @@
    tarjeta. Elevación: reposo con `--shadow-sm` en vez de "sin sombra nunca",
    y un hover que sube un nivel, para que el rol de tarjeta interactiva se
    note incluso donde no hay una variante `:hover` propia (SD-059). */
+/* SD-211: Bootstrap vive en su propia layer (SD-187), así que la capa `app`
+   ya le gana por orden de capa — el `!important` que copiaba aquí la nota
+   histórica de `admin_archive.html`/`admin_hr.html` (SD-083) no hace falta
+   contra Bootstrap. Se retira en este bloque; queda si algún día se vuelve
+   a necesitar contra un estilo en línea o una tercera hoja sin layer. */
 .card {
-    box-shadow: var(--shadow-sm) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     margin-bottom: var(--space-4);
 }
 
 .card-header {
-    background-color: var(--surface-3) !important;
-    border-bottom: 1px solid var(--border-subtle) !important;
-    color: var(--text) !important;
-    font-weight: var(--font-weight-semibold) !important;
-    font-size: var(--font-size-base) !important;
-    padding: var(--space-3) var(--space-5) !important;
-    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+    background-color: var(--surface-3);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .card-title {
-    font-size: var(--font-size-base) !important;
-    font-weight: var(--font-weight-semibold) !important;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
 }
 
 .card-body {
-    padding: var(--space-5) !important;
-    font-size: var(--font-size-sm) !important;
+    padding: var(--space-5);
+    font-size: var(--font-size-sm);
 }
 
 /* `.card-outline`: quince usos en admin_*.html sin ninguna regla propia
    (SD-152, SD-216) — el nombre promete un borde superior de acento que
    nunca existió. */
 .card-outline {
-    border-top: 3px solid var(--color-primary) !important;
+    border-top: 3px solid var(--color-primary);
 }
 
 /* === Breadcrumb (SD-101) ---
