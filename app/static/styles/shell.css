@@ -3,21 +3,21 @@
 /* SD-135: pegajosa al hacer scroll — si no, en una tabla de 100 filas se
    pierden el menú, el usuario y la campana de notificaciones. */
 .main-header.navbar {
-    background-color: var(--surface-1) !important; /* DSpace Demo actual es blanca */
-    border-bottom: 1px solid var(--border) !important;
-    padding: var(--space-2) var(--space-4) !important;
-    box-shadow: var(--shadow-sm) !important;
+    background-color: var(--surface-1); /* DSpace Demo actual es blanca */
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) var(--space-4);
+    box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
 }
 
 .main-header .nav-link {
-    color: var(--gray-700) !important;
+    color: var(--gray-700);
 }
 
 .main-header .nav-link:hover {
-    color: var(--color-link) !important;
+    color: var(--color-link);
 }
 
 /* SD-132: 30 líneas que ocultaban restos de AdminLTE que no existen
@@ -30,9 +30,9 @@
 
 .main-header .navbar-brand,
 .main-header .navbar-brand:hover {
-    color: var(--color-primary) !important;
+    color: var(--color-primary);
     font-weight: var(--font-weight-black) !important;
-    font-size: 1.08rem !important;
+    font-size: 1.08rem;
     letter-spacing: 0.2px;
     text-decoration: none !important;
 }
