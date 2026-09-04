@@ -838,3 +838,32 @@ arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
       paralelo sobre archivos que no toqué (`test_misc.py`, `app-core.js`, `app.js`,
       `imports.py` aparecían modificados en el árbol de trabajo compartido al momento de
       correr la suite) — ninguno menciona `hr.js`.
+
+- **agente-h2-app-js** (H2-app-js, VI-001/VI-002): arreglé VI-001 (switchTab() en
+  `app.js` no conocía el tabId "admin-sistema" — lo llama
+  `configureSidebarVisibilities()` desde `checkSession()` en `admin_system.html`,
+  confirmado además como SI-058 en `docs/auditoria/sistema-ia-paginas.md` — así que la
+  única `.app-tab-section` de esa página se ocultaba y nunca volvía a mostrarse,
+  dejando `/admin/sistema` en blanco) y VI-002 (`showToast()` en `app-core.js` salía
+  sin pintar nada si `#ds-toast-container` no existía en el HTML, lo que dejaba mudos
+  los avisos en `/archivo` y `/rrhh`; ahora crea el contenedor si falta). Commit:
+  `5b566e4` ("fix(VI-001,VI-002): admin_system.html en blanco tras switchTab, y
+  toasts mudos sin contenedor"), sólo `app/static/app.js` y `app/static/app-core.js`,
+  verificado con `git show --stat`.
+
+  Nota sobre el commit siguiente (reserva): al hacer `git add
+  docs/auditoria/_RESERVAS.md` y confirmar con `git diff --cached --stat` sólo salía
+  esa fila, pero entre el `add` y el `commit` una carrera de git concurrente coló
+  `app/static/styles.css` (231 líneas, de otro carril) en el mismo commit (`3b6e18b`).
+  No reparo el historial; lo dejo documentado aquí. El contenido de `styles.css` en
+  ese commit no es mío y no lo revisé.
+
+  `python -m pytest app/tests -q`: 27 fallos, todos preexistentes en `test_backup.py`,
+  `test_misc.py` y `test_static_analysis.py` — ninguno menciona `app.js` ni
+  `app-core.js`; son de otros carriles trabajando en paralelo sobre `backup.py`,
+  `imports.py` y sus tests. No pude verificar VI-001 con el arnés de capturas
+  (`docs/auditoria/capturas/_harness/capturar.py`) por presupuesto de tiempo; lo
+  confirmé leyendo el código: `configureSidebarVisibilities()` (línea ~160 de
+  `app.js`) llama a `switchTab(standalonePage)` con `standalonePage ===
+  "admin-sistema"`, y esa página la invoca desde `checkSession()` en
+  `admin_system.html:556-558`.
