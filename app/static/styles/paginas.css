@@ -1,0 +1,823 @@
+/* === Visualizacion de datos, movimiento, info-box/KPI, doc compartido, contraste === */
+   CAPA DE VISUALIZACIÓN DE DATOS
+   Paleta categórica validada (contraste + separación para daltonismo) en ambos
+   modos. Los gráficos leen estos tokens en runtime, así que el tema oscuro y los
+   temas de color no requieren una segunda tabla de colores en JS.
+   ========================================================================== */
+/* SD-013: --viz-surface/--viz-ink/--viz-ink-muted/--viz-grid eran la única
+   capa semántica de superficie/tinta/borde del sistema, atrapada en los
+   gráficos. Ahora son alias de los tokens de sistema que L0 definió al
+   principio del archivo (--surface-1/--text/--text-muted/--border) — con
+   los mismos valores exactos en claro y oscuro, así que esto no cambia nada
+   visualmente — para que `viz-tokens.js` siga leyendo el mismo nombre sin
+   tocarlo. Los slots --viz-1…--viz-8 NO se tocan: su orden está validado
+   contra daltonismo y es un mecanismo de seguridad (ver CLAUDE.md). */
+:root {
+  --viz-surface:    var(--surface-1);
+  --viz-ink:        var(--text);
+  --viz-ink-muted:  var(--text-muted);
+  --viz-grid:       var(--border);
+  --viz-axis:       #c3c2b7;
+  --viz-1: #2a78d6;  --viz-2: #eb6834;  --viz-3: #1baf7a;  --viz-4: #eda100;
+  --viz-5: #e87ba4;  --viz-6: #008300;  --viz-7: #4a3aa7;  --viz-8: #e34948;
+  --viz-good: #0ca30c;  --viz-warning: #fab219;
+  --viz-serious: #ec835a;  --viz-critical: #d03b3b;
+}
+body.dark-mode {
+  --viz-surface:    var(--surface-1);
+  --viz-ink:        var(--text);
+  --viz-ink-muted:  var(--text-muted);
+  --viz-grid:       var(--border);
+  --viz-axis:       #3e4660;
+  --viz-1: #3987e5;  --viz-2: #d95926;  --viz-3: #199e70;  --viz-4: #c98500;
+  --viz-5: #d55181;  --viz-6: #008300;  --viz-7: #9085e9;  --viz-8: #e66767;
+}
+
+/* SD-014: theme-manila es el único de los once temas que cambia el fondo de
+   página (.content-wrapper -> #f5ead0, ver línea ~1603); sin esto la tarjeta
+   de gráfico se recortaba en blanco sobre el crema. Los otros nueve temas
+   sólo cambian barra lateral/acento (SD-033) y dejan el fondo de página en
+   blanco, así que --viz-surface blanco ya es coherente ahí — no se les añade
+   una redefinición sin un caso real que la justifique (ver nota en
+   _BUZON.md). */
+body.theme-manila {
+  --viz-surface: #fdf6e3;
+  --viz-grid:    #e0d3ad;
+}
+
+/* Rejilla de KPIs: se reacomoda sola en cualquier ancho, sin col-* que cuadrar.
+   SD-193: container-type la convierte en contenedor de tamaño — así el tamaño
+   de cifra de cada `.ds-kpi-mini` (más abajo) puede depender del ancho real de
+   su celda dentro de la rejilla `auto-fit`, no del ancho de la pantalla. El
+   reflujo de columnas en sí (cuántas caben) sigue siendo un `@media`: eso es
+   ancho de viewport de verdad, no ancho de contenedor. */
+.ds-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  gap: 0.75rem;
+  container-type: inline-size;
+  container-name: ds-kpi-grid;
+}
+.ds-kpi-grid .ds-kpi-mini { margin-bottom: 0; height: 100%; }
+@media (max-width: 400px) {
+  .ds-kpi-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+}
+@container ds-kpi-grid (max-width: 400px) {
+  .ds-kpi-mini h3 { font-size: 1.1rem !important; }
+}
+
+/* Contenedor de gráfico: Chart.js con maintainAspectRatio:false toma la altura
+   del padre, así que aquí se fija explícitamente.
+   SD-194: en vez de tres alturas fijas sin relación entre sí, una proporción
+   por `aspect-ratio` (con `min-height` como piso para columnas muy angostas o
+   contenedores muy bajos, donde una proporción pura dejaría el gráfico
+   ilegible). Las proporciones están calculadas para reproducir la altura
+   original sobre el ancho típico de columna en cada punto de corte. */
+.ds-chart-box {
+  position: relative;
+  aspect-ratio: 5 / 3;
+  min-height: 200px;
+}
+.ds-chart-box-wide { aspect-ratio: 7 / 2; min-height: 160px; }
+@media (max-width: 575.98px) {
+  .ds-chart-box      { aspect-ratio: 6 / 5; }   /* la leyenda pasa abajo y necesita aire */
+  .ds-chart-box-wide { aspect-ratio: 8 / 5; }
+}
+.ds-chart-box > canvas { max-width: 100%; }
+
+/* Separador entre grupos de pestañas del panel de administración.
+   Las pestañas están agrupadas por intención — operación diaria, configuración,
+   gobernanza documental — y el separador es lo que hace visible esa agrupación. */
+.ds-tab-sep {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 1px;
+  margin: 6px 8px;
+  background: #dee2e6;
+  list-style: none;
+}
+body.dark-mode .ds-tab-sep { background: #2e3342; }
+
+/* La barra de pestañas hace scroll horizontal; sin una pista visual el usuario
+   no sabe que hay más pestañas fuera de vista. */
+.ds-admin-card-header {
+  position: relative;
+}
+.ds-admin-card-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 28px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--viz-surface));
+  opacity: 0;
+  transition: opacity .2s;
+}
+.ds-admin-card-header.ds-has-overflow::after { opacity: 1; }
+
+@media (max-width: 575.98px) {
+  .ds-admin-tabs .nav-link { padding: 8px 11px; font-size: 0.8rem; }
+  .ds-tab-sep { margin: 6px 5px; }
+}
+
+/* =============================================================================
+   CAPA DE MOVIMIENTO
+   Duraciones cortas y salidas suaves: el movimiento aquí sirve para explicar de
+   dónde viene el contenido, no para decorar. Todo se apaga con la preferencia
+   del sistema o con el interruptor de la app.
+
+   Duraciones y curva salen de los tokens de L0 (--duration-fast/base/slow,
+   --ease-out/--ease-spring, definidos al principio de este archivo): SD-017 y
+   SD-173 piden que ninguna transición de esta capa escriba un número de
+   milisegundos suelto. --ds-stagger-step es el único token propio de este
+   bloque: el paso del escalonado de entrada (SD-175), para que las once
+   demoras salgan de un solo valor en vez de ser once números sueltos.
+   ========================================================================== */
+
+:root { --ds-stagger-step: 22ms; }
+
+@keyframes ds-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes ds-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Entrada del contenido al cambiar de pestaña en el panel de administración.
+   SD-181: el panel entrante subía y el saliente desaparecía de golpe, con
+   paneles de altura muy distinta el salto se notaba. Donde el navegador
+   soporta `@starting-style` + `transition-behavior: allow-discrete` (SD-202),
+   la pestaña cruza con una transición real en vez de una animación que se
+   queda "aplicada" para siempre; donde no hay soporte, sigue con la animación
+   de antes. */
+.tab-pane.show.active { animation: ds-rise var(--duration-base) var(--ease-out) both; }
+@supports (transition-behavior: allow-discrete) {
+  .tab-pane.show.active {
+    animation: none;
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-out),
+                display var(--duration-base) allow-discrete;
+  }
+  @starting-style {
+    .tab-pane.show.active { opacity: 0; }
+  }
+}
+
+/* Resultados de búsqueda y filas de tablas: aparición escalonada.
+   El escalonado se corta a los 12 primeros — más allá, la espera acumulada se
+   nota más que el efecto. */
+.ds-item-card,
+.ds-monitor-row {
+  animation: ds-rise var(--duration-slow) var(--ease-out) both;
+}
+.ds-item-card:nth-child(1),  .ds-monitor-row:nth-child(1)  { animation-delay: calc(var(--ds-stagger-step) * 0); }
+.ds-item-card:nth-child(2),  .ds-monitor-row:nth-child(2)  { animation-delay: calc(var(--ds-stagger-step) * 1); }
+.ds-item-card:nth-child(3),  .ds-monitor-row:nth-child(3)  { animation-delay: calc(var(--ds-stagger-step) * 2); }
+.ds-item-card:nth-child(4),  .ds-monitor-row:nth-child(4)  { animation-delay: calc(var(--ds-stagger-step) * 3); }
+.ds-item-card:nth-child(5),  .ds-monitor-row:nth-child(5)  { animation-delay: calc(var(--ds-stagger-step) * 4); }
+.ds-item-card:nth-child(6),  .ds-monitor-row:nth-child(6)  { animation-delay: calc(var(--ds-stagger-step) * 5); }
+.ds-item-card:nth-child(7),  .ds-monitor-row:nth-child(7)  { animation-delay: calc(var(--ds-stagger-step) * 6); }
+.ds-item-card:nth-child(8),  .ds-monitor-row:nth-child(8)  { animation-delay: calc(var(--ds-stagger-step) * 7); }
+.ds-item-card:nth-child(9),  .ds-monitor-row:nth-child(9)  { animation-delay: calc(var(--ds-stagger-step) * 8); }
+.ds-item-card:nth-child(10), .ds-monitor-row:nth-child(10) { animation-delay: calc(var(--ds-stagger-step) * 9); }
+.ds-item-card:nth-child(11), .ds-monitor-row:nth-child(11) { animation-delay: calc(var(--ds-stagger-step) * 10); }
+.ds-item-card:nth-child(n+12), .ds-monitor-row:nth-child(n+12) { animation-delay: calc(var(--ds-stagger-step) * 11); }
+
+/* SD-198/SD-176: `animation-fill-mode: both` deja la regla de arriba
+   "aplicada" para siempre, así que cada repintado de la lista (paginar,
+   filtrar, ordenar, cambiar de pestaña) hace que las mismas filas vuelvan a
+   entrar. Donde el navegador soporta `@starting-style`, se sustituye por una
+   transición que sólo se dispara cuando el elemento aparece de verdad — se
+   inserta en el árbol o pasa de no representado a representado — y no cuando
+   uno que ya estaba ahí simplemente se reordena o se vuelve a pintar. */
+@supports (transition-behavior: allow-discrete) {
+  .ds-item-card,
+  .ds-monitor-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--duration-slow) var(--ease-out),
+                transform var(--duration-slow) var(--ease-out);
+  }
+  @starting-style {
+    .ds-item-card,
+    .ds-monitor-row {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+}
+
+/* Tarjetas KPI: entran juntas, sin escalonar — son una sola lectura. */
+.ds-kpi-grid .ds-kpi-mini { animation: ds-fade var(--duration-base) var(--ease-out) both; }
+@supports (transition-behavior: allow-discrete) {
+  .ds-kpi-grid .ds-kpi-mini {
+    animation: none;
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  @starting-style {
+    .ds-kpi-grid .ds-kpi-mini { opacity: 0; }
+  }
+}
+
+/* Realce al pasar por encima de lo que es accionable.
+   SD-184: la salida es más corta que la entrada — es lo que hace que responda
+   rápido sin dejar de suavizar la llegada. La transición del selector base
+   gobierna la vuelta al reposo (se aplica al salir del hover); la de
+   `:hover` gobierna la llegada, deliberadamente más lenta. */
+.ds-item-card {
+  transition: transform var(--duration-fast) ease-out, box-shadow var(--duration-fast) ease-out;
+}
+.ds-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+}
+.ds-kpi-mini { transition: transform var(--duration-fast) ease-out, box-shadow var(--duration-fast) ease-out; }
+.ds-kpi-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+}
+
+/* Botones: respuesta táctil al pulsar.
+   SD-159: el estado desactivado no siempre es el `:disabled` nativo — algunos
+   controles siguen en el DOM marcados sólo con `aria-disabled="true"`. Ambos
+   quedan excluidos de la respuesta al pulsar, no sólo el primero. */
+.btn { transition: background-color var(--duration-base), border-color var(--duration-base), box-shadow var(--duration-base), transform var(--duration-fast); }
+.btn:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(1px); }
+
+/* La preferencia del sistema pesa tanto como el interruptor de la app: hasta
+   ahora sólo la respetaba una regla suelta. `animation-iteration-count: 1`
+   corta cualquier animación `infinite` a una sola vuelta casi instantánea
+   (0.01ms), así que ninguna queda latiendo para siempre bajo esta preferencia
+   (SD-179) — las que además necesitan quedarse quietas del todo, no sólo
+   rápidas, llevan su propia regla junto a su animación (ver `.ds-status-revision`). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* SD-202: transición de vista para la navegación entre las siete páginas del
+   sistema, que hoy son recargas completas y secas. El cambio de pestaña (ya
+   tratado arriba) y el cambio de tema podrían cruzar también con
+   `document.startViewTransition`, pero eso exige que `admin.js` y
+   `app-theme.js` inicien la transición desde JavaScript — fuera de esta hoja
+   y de este carril; anotado en docs/auditoria/_BUZON.md. Esta regla no
+   necesita JavaScript y degrada a nada donde no hay soporte. */
+@view-transition {
+  navigation: auto;
+}
+
+/* La barra superior no cabía en pantallas angostas: la credencial completa más
+   el botón de salir desbordaban el documento ~90px, y el desborde arrastraba a
+   todas las páginas con sesión iniciada. Se pliega lo prescindible. */
+.main-header .navbar-nav.ml-auto { min-width: 0; }
+#nav_username {
+  display: inline-block;
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+@media (max-width: 767.98px) {
+  .ds-nav-user-ctx { display: none; }        /* el módulo ya lo dice el propio panel */
+}
+/* El logo institucional es una imagen ancha (~240px): a 390px de viewport se
+   comia dos tercios de la barra y empujaba fuera al usuario y al boton. */
+@media (max-width: 767.98px) {
+  .ds-navbar-logo-img { height: 30px; max-width: 44vw; object-fit: contain;
+                        object-position: left center; }
+  .main-header .navbar-nav:first-child { min-width: 0; }
+  .main-header .ds-navbar-logo { min-width: 0; overflow: hidden; }
+}
+@media (max-width: 575.98px) {
+  .ds-btn-label { display: none; }           /* el botón queda sólo con su icono */
+  #logout_btn { margin-right: 4px !important; padding: 4px 9px; }
+  .ds-nav-user { margin-right: 0 !important; }
+  #nav_username { max-width: 30vw; font-size: 0.8rem; }
+  .ds-navbar-logo-img { height: 27px; max-width: 38vw; }
+  .main-header.navbar { padding-left: 6px; padding-right: 6px; }
+}
+
+/* Tarjetas de gráfico: marco neutro. Cada una llevaba una banda de color
+   distinta (azul, verde, ámbar, turquesa) que no codificaba nada y competía con
+   los colores de los datos. El color pertenece al gráfico, no al marco. */
+.ds-chart-card {
+  border-top: 3px solid var(--viz-grid) !important;
+}
+.ds-chart-card > .card-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--viz-grid);
+}
+.ds-chart-card > .card-header .card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--viz-ink);
+}
+.ds-chart-card > .card-header .card-title i { color: var(--viz-ink-muted); }
+
+/* Tarjeta de filtros: es un control, no un dato. Marco neutro como el de los
+   gráficos, para que no compita con ellos ni desentone en modo oscuro. */
+.ds-filter-card > .card-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--viz-grid);
+}
+.ds-filter-card > .card-header .card-title { color: var(--viz-ink); font-size: 0.92rem; }
+.ds-filter-card > .card-header .card-title i { color: var(--viz-ink-muted); }
+
+/* =============================================================================
+   INFO-BOX Y TARJETA KPI
+   El marcado usa el componente info-box de AdminLTE, pero AdminLTE nunca se
+   carga (solo Bootstrap): las cajas salian sin estructura, con el fondo del
+   icono ocupando el ancho completo y el texto encima, ilegible. Aqui se
+   implementa el componente con los tokens propios.
+
+   SD-151: info-box y .ds-kpi-mini son el mismo componente resuelto dos veces
+   («etiqueta + cifra + icono»), pero unificar la clase exige tocar el
+   marcado de otros carriles (admin_*.html, hr.js, archive.js) que este lote
+   no toca (regla 1 del plan paralelo). Decisión conservadora: no se fusiona
+   la clase; se alinean sus valores compartidos (radio, versalitas, cifras
+   tabulares, tipografía fluida) para que ambos lean como un solo sistema sin
+   cambiar el resultado visual de ninguno de los dos salvo donde una ficha
+   pide explícitamente el cambio (SD-065, SD-074, SD-192). Las definiciones
+   duplicadas de .ds-kpi-label/.ds-kpi-value fuera de este rango (fuera de
+   L14, SD-071/SD-072) quedan anotadas en _BUZON.md para quien tenga ese
+   archivo en su carril. */
+.info-box {
+  display: flex;
+  align-items: stretch;
+  min-height: 62px;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-md, 0.5rem); /* SD-096: mismo radio que la tarjeta KPI */
+  background: var(--viz-surface);
+  border: 1px solid var(--viz-grid);
+  overflow: hidden;
+}
+.info-box-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 58px;
+  width: 58px;
+  font-size: 1.35rem;
+  color: #fff;
+  background: var(--viz-1);
+}
+.info-box-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 12px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.info-box-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-wide, .04em); /* SD-074: misma calibración de versalitas que .ds-kpi-label */
+  text-transform: uppercase;
+  color: var(--viz-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.info-box-number {
+  font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); /* SD-192: tipografía fluida */
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
+}
+
+/* SD-082: cifra vacía/nula/cero — no se pinta igual que un dato real. Otros
+   carriles (tabla, dosier, ficha) aplican esta clase a su propio marcado;
+   aquí sólo se define, porque su ficha sólo etiqueta L14. */
+.ds-nulo {
+  color: var(--viz-ink-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+.ds-nulo:empty::before { content: "\2014"; } /* guión largo cuando no hay texto */
+
+/* Las utilidades bg-* teñian la caja entera de color saturado. El color pasa al
+   cuadro del icono: la cifra se lee sobre superficie neutra, igual que en los
+   paneles de Archivo y RRHH. */
+.info-box.bg-info,
+.info-box.bg-success,
+.info-box.bg-warning,
+.info-box.bg-secondary,
+.info-box.bg-primary,
+.info-box.bg-danger {
+  background: var(--viz-surface) !important;
+  color: var(--viz-ink) !important;
+}
+.info-box.bg-info      .info-box-icon { background: var(--viz-1); }
+.info-box.bg-success   .info-box-icon { background: var(--viz-3); }
+.info-box.bg-warning   .info-box-icon { background: var(--viz-4); }
+.info-box.bg-secondary .info-box-icon { background: var(--viz-ink-muted); }
+.info-box.bg-primary   .info-box-icon { background: var(--viz-1); }
+.info-box.bg-danger    .info-box-icon { background: var(--viz-8); }
+
+.info-box-icon.bg-primary   { background: var(--viz-1) !important; }
+.info-box-icon.bg-success   { background: var(--viz-3) !important; }
+.info-box-icon.bg-warning   { background: var(--viz-4) !important; }
+.info-box-icon.bg-info      { background: var(--viz-1) !important; }
+.info-box-icon.bg-danger    { background: var(--viz-8) !important; }
+.info-box-icon.bg-secondary { background: var(--viz-ink-muted) !important; }
+
+@media (max-width: 575.98px) {
+  .info-box-icon { flex: 0 0 46px; width: 46px; font-size: 1.1rem; }
+  .info-box-number { font-size: 1.1rem; }
+}
+
+/* El panel de Sistema mezclaba filas de col-md-3 y col-md-4, asi que los bordes
+   no alineaban entre filas. La rejilla auto-fit las cuadra sin tocar el
+   marcado: las columnas de Bootstrap ceden su ancho a la celda. */
+.ds-kpi-grid > [class*="col-"] {
+  flex: none;
+  max-width: none;
+  width: auto;
+  padding-left: 0;
+  padding-right: 0;
+}
+.ds-kpi-grid.row { margin-left: 0; margin-right: 0; }
+.ds-kpi-grid .info-box { margin-bottom: 0; height: 100%; }
+
+/* Etiquetas de palabras clave en los resultados de búsqueda. Estaban con el
+   color escrito en cada plantilla; aquí siguen al acento del tema. */
+.ds-kw-badge {
+  background: var(--ds-accent);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-right: 4px;
+  font-weight: 600;
+}
+.ds-kw-badge-more { background: var(--viz-ink-muted); }
+
+/* Tarjeta KPI: etiqueta, cifra y una línea de contexto opcional. El contexto
+   es lo que convierte un número en una lectura — "412" no dice nada, "412 ·
+   68% del fondo" sí. */
+.ds-kpi-body { min-width: 0; }
+.ds-kpi-label {
+  font-size: 0.66rem !important;
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-wide, .04em); /* SD-074: misma calibración que .info-box-text */
+  text-transform: uppercase;
+  color: var(--viz-ink-muted);
+  margin-bottom: 2px;
+  white-space: normal;
+  line-height: 1.2;
+  min-height: 2.4em;          /* dos líneas: mantiene las cifras alineadas */
+  display: flex;
+  align-items: flex-start;
+}
+.ds-kpi-value {
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.35rem) !important; /* SD-192: tipografía fluida */
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
+}
+.ds-kpi-sub {
+  font-size: 0.68rem;
+  line-height: 1.25;
+  margin-top: 3px;
+  color: var(--viz-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-kpi-icon { color: var(--viz-ink-muted); opacity: .45; font-size: 1.1rem; margin-left: 8px; }
+
+/* Un contador de alerta en cero no es una alerta: solo se tiñe cuando hay algo
+   que atender, y siempre con icono y etiqueta, nunca con el color solo. */
+.ds-kpi-mini.ds-kpi-alerta .ds-kpi-value { color: var(--viz-critical); }
+.ds-kpi-mini.ds-kpi-alerta .ds-kpi-icon  { color: var(--viz-critical); opacity: .8; }
+.ds-kpi-mini.ds-kpi-aviso  .ds-kpi-value { color: var(--viz-serious); }
+.ds-kpi-mini.ds-kpi-aviso  .ds-kpi-icon  { color: var(--viz-serious); opacity: .8; }
+
+/* OA-069: sustituyen al `border-left` con un `--viz-N` distinto en línea de
+   las 8 tarjetas KPI de admin_archive.html — sólo tres estados semánticos,
+   no ocho colores decorativos. `.ds-kpi-neutral` es el reposo. */
+.ds-kpi-mini { border-left: 4px solid var(--border-strong); }
+.ds-kpi-mini.ds-kpi-neutral { border-left-color: var(--border-strong); }
+.ds-kpi-mini.ds-kpi-alerta  { border-left-color: var(--viz-critical); }
+.ds-kpi-mini.ds-kpi-aviso   { border-left-color: var(--viz-serious); }
+
+/* OA-065: jerarquía visual para las 2-3 cifras principales del resumen
+   frente al resto de KPIs secundarios */
+.ds-kpi-mini.ds-kpi-principal .ds-kpi-value { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.85rem) !important; }
+.ds-kpi-mini.ds-kpi-principal .ds-kpi-label { font-weight: var(--font-weight-bold); }
+
+@media (max-width: 400px) {
+  .ds-kpi-value { font-size: 1.15rem !important; }
+}
+
+/* Estado vacío de un gráfico. Una tarjeta en blanco no comunica "no hay datos",
+   comunica "esto está roto". */
+.ds-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 120px;
+  color: var(--viz-ink-muted);
+  font-size: 0.86rem;
+  text-align: center;
+  padding: 12px;
+}
+.ds-chart-empty i { opacity: .6; }
+
+/* SD-137: el estado vacío no es siempre el mismo vacío. Tres variantes sobre
+   el mismo componente en vez de otro distinto: sin resultados con los
+   filtros actuales, sin datos con acción para crear el primero, y error de
+   carga. `.ds-empty` (fuera de este rango) queda pendiente de la misma
+   revisión — anotado en _BUZON.md para quien tenga esa clase en su carril. */
+.ds-chart-empty--sin-resultados { color: var(--viz-ink-muted); }
+.ds-chart-empty--error { color: var(--viz-critical); }
+.ds-chart-empty--error i { opacity: .8; }
+.ds-chart-empty--accion { flex-direction: column; gap: 10px; }
+.ds-chart-empty--accion .ds-chart-empty-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ds-link, var(--color-link, #0056b3));
+  background: none;
+  border: 1px solid var(--viz-grid);
+  border-radius: var(--radius-sm, 4px);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.ds-chart-empty--accion .ds-chart-empty-btn:hover { background: var(--viz-grid); }
+
+/* Avance de digitalización: una proporción sobre un total se lee como barra,
+   no como dona — a 0% una dona es un círculo entero que no dice nada. */
+.ds-avance-cifra {
+  font-size: clamp(1.8rem, 1.4rem + 1.8vw, 2.4rem); /* SD-192: tipografía fluida */
+  font-weight: 700;
+  line-height: 1;
+  color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
+}
+.ds-avance-cifra span { font-size: 1.1rem; font-weight: 600; color: var(--viz-ink-muted); }
+.ds-avance-pie { font-size: 0.82rem; color: var(--viz-ink-muted); margin: 4px 0 12px; }
+.ds-avance-barra {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--viz-grid);
+  gap: 2px;                     /* separación de superficie entre tramos */
+}
+.ds-avance-tramo { height: 100%; }
+.ds-avance-leyenda {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--viz-ink-muted);
+}
+.ds-avance-leyenda b { color: var(--viz-ink); margin-left: 3px; }
+.ds-avance-punto {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* Estado de carga de un gráfico. Sin esto, los segundos que tarda la API se ven
+   igual que un panel roto. */
+.ds-chart-cargando {
+  position: absolute;
+  inset: 0;
+  background: var(--viz-surface);
+}
+.ds-chart-cargando i { opacity: .55; }
+
+/* La tarjeta de digitalización no es un canvas, así que necesita su propio alto
+   mínimo: vacía se veía como una franja fina en vez de una tarjeta. */
+#soporte-archivo, #soporte-rrhh { position: relative; min-height: 200px; }
+
+/* =============================================================================
+   PÁGINA DE DOCUMENTO COMPARTIDO
+   La ve gente de fuera de la institución, sin sesión y probablemente desde el
+   móvil: sobria, sin menú y sin nada en lo que perderse.
+   ========================================================================== */
+.ds-compartido-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 18px 40px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.ds-compartido-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ds-compartido-logo { height: 40px; max-width: 60vw; object-fit: contain; }
+.ds-compartido-sello {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--viz-ink-muted);
+  border: 1px solid var(--viz-grid);
+  border-radius: 20px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+.ds-compartido-caja {
+  flex: 1;
+  /* Sin medida de línea máxima, un resumen largo llega a 180 caracteres por
+     línea en una pantalla ancha. 70ch es el máximo legible en prosa (SD-066). */
+  max-width: 70ch;
+  background: var(--viz-surface);
+  border: 1px solid var(--viz-grid);
+  border-radius: 12px;
+  padding: 26px;
+  box-shadow: 0 2px 14px rgba(0,0,0,.05);
+}
+.ds-compartido-modulo {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #fff;
+  background: var(--ds-accent);
+  border-radius: 4px;
+  padding: 3px 9px;
+  margin-bottom: 10px;
+}
+.ds-compartido-titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--viz-ink);
+  margin: 0 0 18px;
+}
+.ds-compartido-datos { margin: 0 0 22px; }
+.ds-compartido-fila {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--viz-grid);
+}
+.ds-compartido-fila dt {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--viz-ink-muted);
+  margin: 0;
+}
+.ds-compartido-fila dd { margin: 0; color: var(--viz-ink); font-size: .9rem; }
+.ds-compartido-acciones { margin-bottom: 18px; }
+.ds-compartido-sinarchivo {
+  font-size: .86rem;
+  color: var(--viz-ink-muted);
+  background: rgba(var(--ds-accent-rgb), .06);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ds-compartido-nota {
+  font-size: .76rem;
+  color: var(--viz-ink-muted);
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--viz-grid);
+}
+.ds-compartido-aviso { text-align: center; padding: 40px 16px; color: var(--viz-ink-muted); }
+.ds-compartido-aviso i { font-size: 2.2rem; opacity: .5; margin-bottom: 14px; }
+.ds-compartido-aviso h2 { font-size: 1.1rem; color: var(--viz-ink); margin-bottom: 8px; }
+.ds-compartido-aviso p { font-size: .88rem; margin: 0; }
+.ds-compartido-pie {
+  margin-top: 22px;
+  text-align: center;
+  font-size: .74rem;
+  color: var(--viz-ink-muted);
+}
+@media (max-width: 575.98px) {
+  .ds-compartido-caja { padding: 18px; }
+  .ds-compartido-fila { grid-template-columns: 1fr; gap: 2px; }
+  .ds-compartido-titulo { font-size: 1.15rem; }
+}
+
+/* Es la vista que ve alguien de fuera de la institución y la que más
+   probablemente acabe en papel o en PDF. Sin esto sale con el min-height:
+   100dvh del contenedor (una página en blanco al final) y con el botón de
+   descarga incluido (SD-234). */
+@media print {
+  .ds-compartido-wrap { min-height: 0; padding: 0; }
+  .ds-compartido-caja { box-shadow: none; border: none; max-width: none; }
+  .ds-compartido-acciones { display: none; }
+}
+
+/* El buscador de auditoría iba con w-25, que en móvil deja un campo de 90px
+   inservible. */
+.ds-audit-buscador { width: 260px; max-width: 100%; }
+@media (max-width: 767.98px) { .ds-audit-buscador { width: 100%; margin-top: 8px; } }
+
+/* =============================================================================
+   CONTRASTE — WCAG 2.1 AA
+   Una auditoría con axe-core sobre el despliegue encontró 42 nodos por debajo
+   del mínimo de 4,5:1. Los valores de abajo son los mínimos calculados que
+   cumplen contra el fondo real sobre el que se pintan, no aproximaciones: el
+   gris de Bootstrap se quedaba en 4,45 — a un pelo, pero por debajo.
+   ========================================================================== */
+:root {
+  --ds-muted-aa: #6a737b;    /* 4,58:1 sobre #f8f9fa */
+  --ds-muted-aa-oscuro: #636b73;  /* 4,56:1 sobre #e9ecef */
+}
+body:not(.dark-mode) .text-muted,
+body:not(.dark-mode) small.text-muted,
+body:not(.dark-mode) .ds-pagination-info { color: var(--ds-muted-aa) !important; }
+
+/* La migaja va sobre un gris más oscuro, así que necesita bajar un paso más. */
+body:not(.dark-mode) .ds-breadcrumb { color: var(--ds-muted-aa-oscuro) !important; }
+
+/* Blanco sobre el verde de Bootstrap daba 3,13:1. */
+body:not(.dark-mode) .badge-success,
+body:not(.dark-mode) .bg-success { background-color: #208838 !important; }
+
+/* El azul primario daba 3,97:1, tanto de texto como de fondo. */
+body:not(.dark-mode) .btn-primary { background-color: #0072ed; border-color: #0072ed; }
+body:not(.dark-mode) .btn-outline-primary,
+body:not(.dark-mode) a.text-primary,
+body:not(.dark-mode) .text-primary { color: #0072ed !important; }
+
+/* .btn-outline-secondary hereda #6c757d, que sobre el gris de la barra de
+   paginación (#f8f9fa) da 4,44:1 — por debajo del mínimo por poco. */
+body:not(.dark-mode) .btn-outline-secondary { color: #6a737b; border-color: #adb5bd; }
+body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
+
+/* Enlace para saltar la navegación (WCAG 2.4.1). Oculto hasta que recibe el
+   foco: quien usa ratón no lo ve nunca, quien usa teclado lo encuentra en la
+   primera pulsación de Tab. No se usa display:none — eso lo sacaría del orden
+   de tabulación y lo dejaría inservible. */
+.ds-skip-link {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  z-index: 2000;
+  padding: 10px 18px;
+  background: var(--ds-accent);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  /* transform en vez de top: animar top fuerza layout en cada fotograma
+     (SD-185); translateY solo compone. */
+  transform: translateY(-100%);
+  transition: transform .16s ease-out;
+}
+.ds-skip-link:focus {
+  transform: translateY(0);
+  color: #fff;
+  outline: 3px solid #fff;
+  outline-offset: -6px;
+}
+/* El destino recibe el foco por script; su contorno no aporta nada. */
+#contenido-principal:focus { outline: none; }
+
+/* La barra superior aún no es fija, pero el enlace de salto y las anclas de
+   ayuda.html apuntan aquí: en cuanto se haga pegajosa, un scroll normal la
+   dejaría tapada. scroll-margin-top ya está listo para ese día (SD-108). */
+#contenido-principal, :target { scroll-margin-top: 1rem; }
+
+/* :target no se usaba: quien llega por una ancla de ayuda.html no tenía
+   ninguna señal de a qué sección llegó (SD-161). Resalte temporal, se apaga
+   solo y respeta el interruptor de movimiento reducido. */
+:target {
+  animation: ds-target-flash 2.4s ease-out;
+}
+@keyframes ds-target-flash {
+  0%   { background-color: rgba(var(--ds-accent-rgb), .16); }
+  100% { background-color: transparent; }
+}
+body.ds-no-anim :target { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  :target { animation: none; }
+}

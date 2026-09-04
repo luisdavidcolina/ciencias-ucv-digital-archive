@@ -1,0 +1,1160 @@
+/* === Panel de personalizacion, panel admin, acentos y estilos visuales === */
+   PANEL DE PERSONALIZACIÓN — secciones nuevas
+   ============================================================ */
+.ds-theme-panel { width:340px; right:-360px; }
+.ds-theme-panel-body { overflow-y:auto; padding:0; flex:1; display:block; }
+
+.ds-panel-section {
+  padding:16px 18px 12px;
+  border-bottom:1px solid #eee;
+}
+.ds-panel-label {
+  font-size:0.72rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:#6c757d; margin-bottom:10px;
+  display:flex; align-items:center; gap:4px;
+}
+.ds-font-current {
+  margin-left:auto; font-size:0.75rem; font-weight:600;
+  background:#e9ecef; border-radius:4px; padding:2px 7px; color:#495057; text-transform:none; letter-spacing:0;
+}
+
+/* Botón segmentado del panel de personalización — SD-148: .ds-dark-btn,
+   .ds-font-btn, .ds-ff-btn y .ds-reset-btn eran "botón de opción con estado
+   activo" repetido con radio y azul de activo distintos cada vez. Una sola
+   base compartida por selector agrupado (sin tocar el marcado, que no es de
+   este carril); cada clase sólo ajusta tamaño/alineación encima de la base.
+   SD-174: transiciones explícitas, no `all`. SD-112: estado deshabilitado,
+   ausente hasta ahora en los cuatro. */
+.ds-dark-btn,
+.ds-font-btn,
+.ds-reset-btn {
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--gray-50);
+  color: var(--gray-700);
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+.ds-dark-btn:hover,
+.ds-font-btn:hover {
+  border-color: var(--gray-500);
+  background: var(--gray-200);
+}
+.ds-dark-btn.active,
+.ds-font-btn.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+.ds-dark-btn:disabled, .ds-dark-btn[aria-disabled="true"],
+.ds-font-btn:disabled, .ds-font-btn[aria-disabled="true"],
+.ds-reset-btn:disabled, .ds-reset-btn[aria-disabled="true"] {
+  opacity: .6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.ds-dark-btn:disabled:hover, .ds-dark-btn[aria-disabled="true"]:hover,
+.ds-font-btn:disabled:hover, .ds-font-btn[aria-disabled="true"]:hover {
+  border-color: var(--border);
+  background: var(--gray-50);
+}
+
+/* Dark mode buttons */
+.ds-dark-toggle {
+  display:flex; gap:6px;
+}
+.ds-dark-btn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:7px 6px; font-size:0.78rem;
+}
+
+/* Font size buttons */
+.ds-font-row {
+  display:flex; align-items:center; gap:6px;
+}
+.ds-font-btn {
+  width:42px; height:38px; display:flex;
+  align-items:center; justify-content:center;
+}
+
+/* Theme grid */
+.ds-theme-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+}
+
+/* Reset button */
+.ds-panel-reset { border-bottom:none; padding-bottom:18px; }
+.ds-reset-btn {
+  width:100%; padding:8px; font-size:0.8rem;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.ds-reset-btn:hover { border-color:#c0392b; color:#c0392b; background:#fff5f5; }
+.ds-reset-btn:disabled:hover, .ds-reset-btn[aria-disabled="true"]:hover {
+  border-color: var(--border);
+  color: var(--gray-600);
+  background: var(--gray-50);
+}
+
+/* SD-036: duplicado exacto de la regla ya tokenizada más arriba
+   (bloque "MODO OSCURO"), retirado por agente-l8-estilos. */
+
+/* Status badges */
+.ds-status-badge { font-size: 0.72rem !important; letter-spacing: 0.01em; }
+
+/* OR-135: una clase por estado laboral (hoy `getStatusColor()` en
+   app-core.js sólo devuelve un hex para `style="background:..."` en línea).
+   Reutiliza tokens semánticos ya redefinidos en modo oscuro y en los once
+   temas de color, así que no hace falta declarar variante aparte aquí. */
+.ds-status-activo     { background: var(--color-success) !important; color: var(--text-inverse) !important; }
+.ds-status-retirado   { background: var(--color-danger)  !important; color: var(--text-inverse) !important; }
+.ds-status-jubilado   { background: var(--viz-2)          !important; color: var(--text-inverse) !important; }
+.ds-status-pensionado { background: var(--viz-1)          !important; color: var(--text-inverse) !important; }
+.ds-status-otro        { background: var(--text-muted)    !important; color: var(--text-inverse) !important; }
+@keyframes ds-pulse-warning {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0); }
+}
+/* SD-178: igual que SD-177 — una insignia que late para siempre está bien,
+   quince en la misma tabla latiendo a la vez y desincronizadas para siempre
+   no lo está. Tres ciclos (~6s) bastan para llamar la atención sobre una fila
+   nueva sin convertir la tabla en un parpadeo permanente. */
+.ds-status-revision {
+  animation: ds-pulse-warning 2s ease-in-out 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-status-revision { animation: none; }
+}
+
+/* ── Notification panel ────────────────────────────────────────────────── */
+.ds-notif-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: -8px;
+  width: 320px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.14);
+  z-index: 1050;
+  overflow: hidden;
+}
+.ds-notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f2f5;
+  font-size: 0.88rem;
+}
+/* SD-162: uno de los cinco contenedores desplazables que no tenían ningún
+   estilo de barra propio (los otros cuatro — .ds-sidebar-nav, #ia-mensajes,
+   .rrhh-person-modal .modal-body, .ds-table-wrap — no son de este carril). */
+.ds-notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.ds-notif-list::-webkit-scrollbar { width: 6px; }
+.ds-notif-list::-webkit-scrollbar-track { background: transparent; }
+.ds-notif-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-pill); }
+body.dark-mode .ds-notif-list { scrollbar-color: var(--border-strong) transparent; }
+.ds-notif-empty {
+  padding: 20px;
+  text-align: center;
+  color: #adb5bd;
+  font-size: 0.83rem;
+}
+.ds-notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid #f8f9fa;
+  text-decoration: none !important;
+  color: inherit;
+  transition: background 0.1s;
+}
+.ds-notif-item:hover { background: #f8f9fa; }
+.ds-notif-item-body  { flex-grow: 1; min-width: 0; }
+.ds-notif-item-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #212529;
+}
+.ds-notif-item-meta {
+  font-size: 0.70rem;
+  color: #adb5bd;
+  margin-top: 1px;
+}
+.ds-notif-footer {
+  padding: 8px 14px;
+  border-top: 1px solid #f0f2f5;
+  text-align: right;
+  background: #f8f9fa;
+}
+
+body.dark-mode .ds-notif-panel      { background:#1e222b; border-color:#2e3342; }
+body.dark-mode .ds-notif-header     { border-color:#2e3342; color:#c0cce0; }
+body.dark-mode .ds-notif-item       { border-color:#252b35; color:#c0cce0; }
+body.dark-mode .ds-notif-item:hover { background:#252b35; }
+body.dark-mode .ds-notif-item-label { color:#d8e0f0; }
+body.dark-mode .ds-notif-footer     { background:#1a1d23; border-color:#2e3342; }
+
+/* Dark mode adjustments for the panel itself */
+body.dark-mode .ds-theme-panel         { background:#1e222b !important; }
+body.dark-mode .ds-panel-section       { border-color:#2e3342 !important; }
+body.dark-mode .ds-panel-label         { color:#7880a0 !important; }
+body.dark-mode .ds-font-current        { background:#2e3342 !important; color:#b8c0d0 !important; }
+body.dark-mode .ds-dark-btn            { background:#2a2e3a !important; border-color:#3c4257 !important; color:#b8c0d0 !important; }
+body.dark-mode .ds-dark-btn:hover      { background:#2e3342 !important; }
+body.dark-mode .ds-dark-btn.active     { background:#2b4e72 !important; border-color:#2b4e72 !important; color:#fff !important; }
+body.dark-mode .ds-font-btn            { background:#2a2e3a !important; border-color:#3c4257 !important; color:#b8c0d0 !important; }
+body.dark-mode .ds-font-btn:hover      { background:#2e3342 !important; }
+body.dark-mode .ds-font-btn.active     { background:#2b4e72 !important; border-color:#2b4e72 !important; color:#fff !important; }
+body.dark-mode .ds-reset-btn           { background:#2a2e3a !important; border-color:#3c4257 !important; color:#7880a0 !important; }
+body.dark-mode .ds-reset-btn:hover     { border-color:#e74c3c !important; color:#e74c3c !important; background:#2e2030 !important; }
+body.dark-mode .ds-theme-card          { border-color:#2e3342 !important; background:#1e222b !important; }
+body.dark-mode .ds-theme-card:hover    { border-color:#5b7bbf !important; }
+body.dark-mode .ds-style-card          { background:#2a2e3a !important; border-color:#3c4257 !important; }
+body.dark-mode .ds-style-card:hover    { border-color:#5b7bbf !important; }
+body.dark-mode .ds-style-card.active   { border-color:var(--ds-accent,#2b4e72) !important; }
+body.dark-mode .ds-style-name          { color:#b8c0d0 !important; }
+body.dark-mode .ds-theme-card.active   { border-color:#4a90d9 !important; background:#1a2744 !important; }
+body.dark-mode .ds-theme-name          { color:#b8c0d0 !important; }
+
+/* ============================================================
+   ADMIN PANEL — navegación compacta y flujos mejorados
+   ============================================================ */
+
+/* Tab nav compacta para paneles admin */
+.ds-admin-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  gap: 2px;
+  padding-bottom: 0;
+}
+.ds-admin-tabs::-webkit-scrollbar { display: none; }
+
+.ds-admin-tabs .nav-link {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  border-radius: 6px;
+  color: #5a6478;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ds-admin-tabs .nav-link i { font-size: 0.85rem; }
+.ds-admin-tabs .nav-link:hover { background: #e9ecef; color: #343a40; }
+.ds-admin-tabs .nav-link.active {
+  background: #2b4e72 !important;
+  color: #fff !important;
+}
+
+/* Separador visual entre grupos de tabs */
+.ds-tab-sep {
+  width: 1px;
+  background: #dee2e6;
+  margin: 4px 8px;
+  flex-shrink: 0;
+}
+
+/* Cabecera de la card admin — más compacta */
+.ds-admin-card-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 8px 14px;
+}
+
+/* KPI mini-cards — más compactas */
+.ds-kpi-mini {
+  padding: 10px 14px !important;
+}
+.ds-kpi-mini h3 { font-size: 1.3rem !important; }
+.ds-kpi-mini h6 { font-size: 0.68rem !important; }
+
+/* Filtros del monitor en una sola línea */
+.ds-monitor-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.ds-monitor-filters .form-control-sm { min-width: 120px; flex: 1; }
+
+/* SD-215: .ds-tbl-btn no aparece en ningún HTML/JS del repositorio — regla
+   muerta, se borra en vez de arrastrarla. */
+
+/* Formulario de nuevo ingreso — más denso */
+.ds-submit-form .form-group { margin-bottom: 0.6rem !important; }
+.ds-submit-form label { margin-bottom: 2px !important; font-size: 0.8rem !important; }
+.ds-submit-form .form-control { font-size: 0.85rem !important; }
+
+/* Dark mode para el admin nav */
+body.dark-mode .ds-admin-tabs .nav-link { color: #9aa0b8; }
+body.dark-mode .ds-admin-tabs .nav-link:hover { background: #2e3342 !important; color: #e0e4ee; }
+body.dark-mode .ds-admin-tabs .nav-link.active { background: #2b4e72 !important; color: #fff !important; }
+body.dark-mode .ds-tab-sep { background: #2e3342; }
+body.dark-mode .ds-admin-card-header { background: #1e222b; border-color: #2e3342; }
+
+/* Responsive: en pantallas pequeñas las pestañas se reducen a su icono, salvo
+   la activa — con nueve pestañas, una fila de iconos sueltos no dice en cual
+   estas. Las demas conservan su nombre en title/aria-label. */
+@media (max-width: 576px) {
+  .ds-admin-tabs .nav-link:not(.active) span { display: none; }
+  .ds-admin-tabs .nav-link:not(.active) i { margin: 0; font-size: 1rem; }
+  .ds-admin-tabs .nav-link:not(.active) { padding: 8px 10px; }
+  .ds-admin-tabs .nav-link.active { padding: 8px 12px; }
+  .ds-admin-tabs .nav-link.active i { margin-right: 6px; }
+}
+
+/* ============================================================
+   IMPORT BAR COMPACTA + DROP ZONE COMPACTA
+   ============================================================ */
+
+/* Barra de importación inline */
+.ds-import-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+.ds-import-bar-label {
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap;
+  min-width: 80px;
+}
+.ds-import-file-input { display: none; }
+.ds-import-file-label {
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  padding: 3px 10px;
+  color: #6c757d;
+  font-size: 0.8rem;
+  flex: 1;
+  min-width: 120px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: border-color 0.15s;
+}
+.ds-import-file-label:hover { border-color: #0056b3; color: #0056b3; }
+.ds-import-btn { white-space: nowrap; }
+.ds-import-hint { line-height: 1; }
+.ds-import-result { font-size: 0.78rem; flex: 1 0 100%; }
+
+/* Drop zone compacta en el formulario — SD-143: la versión grande
+   (`.ds-dropzone`, fuera de este carril) tiene estado de error y de
+   progreso; esta no tenía ninguno de los dos. SD-092: discontinuo
+   reservado a "vacío/arrastrable", tokenizado en vez de a pelo. */
+.ds-dropzone-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  background: var(--gray-50);
+  font-size: 0.82rem;
+  transition: border-color var(--duration-base), background var(--duration-base);
+  cursor: default;
+}
+.ds-dropzone-compact.drag-over {
+  border-color: var(--color-link);
+  background: #e8f0fe;
+}
+.ds-dropzone-compact.has-error {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+.ds-dropzone-compact.is-uploading {
+  border-style: solid;
+  border-color: var(--color-link);
+  background: #e8f0fe;
+  cursor: progress;
+}
+.ds-dropzone-compact i { color: #adb5bd; font-size: 1.1rem; }
+.ds-dropzone-compact.has-file i { color: var(--color-success); }
+.ds-dropzone-compact.has-error i { color: var(--color-danger); }
+.ds-drop-label { flex: 1; color: #6c757d; }
+.ds-dropzone-compact.has-error .ds-drop-label { color: var(--color-danger); }
+
+/* Dark mode */
+body.dark-mode .ds-import-bar { background: #1e222b; border-color: #2e3342; }
+body.dark-mode .ds-import-bar-label { color: #b8c0d0; }
+body.dark-mode .ds-import-file-label { background: #2a2e3a; border-color: #3c4257; color: #9aa0b8; }
+body.dark-mode .ds-import-file-label:hover { border-color: #6fa3d8; color: #6fa3d8; }
+body.dark-mode .ds-dropzone-compact { background: #1e222b; border-color: #3c4257; }
+body.dark-mode .ds-dropzone-compact.drag-over { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+body.dark-mode .ds-dropzone-compact.has-error { background: rgba(208,59,59,0.15); border-color: #e57373; }
+body.dark-mode .ds-dropzone-compact.is-uploading { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+
+/* OA-190/OA-191: zona de arrastre y previsualizaciones del modal de edición
+   (admin-edit.js), reemplazan `this.style.borderColor=...` y `style="..."`
+   en línea del HTML por clases de estado consumidas ya desde el JS. */
+#edit-doc-dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  background: var(--gray-50);
+  cursor: pointer;
+  transition: border-color var(--duration-base), background var(--duration-base);
+}
+#edit-doc-dropzone.is-dragover {
+  border-color: var(--color-link);
+  background: #e8f0fe;
+}
+#edit-doc-dropzone.is-uploading {
+  border-style: solid;
+  border-color: var(--color-link);
+  background: #e8f0fe;
+  cursor: progress;
+}
+#edit-doc-dropzone.is-ok {
+  border-style: solid;
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
+}
+#edit-doc-dropzone.is-error {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+body.dark-mode #edit-doc-dropzone { background: #1e222b; border-color: #3c4257; }
+body.dark-mode #edit-doc-dropzone.is-dragover,
+body.dark-mode #edit-doc-dropzone.is-uploading { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+body.dark-mode #edit-doc-dropzone.is-ok { background: rgba(43,120,73,0.18); border-color: var(--color-success); }
+body.dark-mode #edit-doc-dropzone.is-error { background: rgba(208,59,59,0.15); border-color: #e57373; }
+
+.ds-edit-preview-frame { width: 100%; min-height: 280px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+.ds-edit-preview-img { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); }
+
+/* Fila de la tabla de papelera/edición que se anima al desaparecer tras una
+   acción (restaurar, borrar) en vez de saltar de golpe */
+.ds-row-removing {
+  animation: ds-row-removing var(--duration-base) var(--ease-out) forwards;
+}
+@keyframes ds-row-removing {
+  to { opacity: 0; transform: scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce), body.ds-no-anim {
+  .ds-row-removing { animation: none; opacity: 0; }
+}
+
+/* ==========================================================================
+   PERSONALIZACIÓN — DENSITY, FONT FAMILY, ANIMATIONS
+   ========================================================================== */
+
+/* CSS custom property for font family (set via JS) */
+:root { --ds-font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+body { font-family: var(--ds-font-family); }
+
+/* Densidad — SD-103: la compacta tocaba diez selectores sueltos, con valores
+   escritos a mano que no tenían relación con la escala de espaciado. Ahora
+   es un multiplicador (--density-scale) sobre los tokens --space-* de L0:
+   añadir un onceavo selector es cambiar qué propiedad usa el multiplicador,
+   no inventar un valor nuevo. SD-104: tres pasos (cómodo/normal/compacto),
+   los dos primeros con el mismo interlineado que el resto de la app y sólo
+   el compacto lo reduce — un archivero revisando 400 filas gana también
+   altura de fila, no sólo padding. La clase que activa cada paso la pone
+   `app-theme.js` (carril H2-app-js, fuera de este archivo); `ds-density-cozy`
+   queda lista para cuando ese carril agregue el tercer botón. */
+:root { --density-scale: 1; }
+body.ds-density-compact { --density-scale: 0.55; }
+body.ds-density-cozy    { --density-scale: 1.4; }
+
+body.ds-density-compact .card-body,
+body.ds-density-cozy .card-body        { padding: calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .card-header,
+body.ds-density-cozy .card-header      { padding: calc(var(--space-3) * var(--density-scale)) calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .form-group,
+body.ds-density-cozy .form-group       { margin-bottom: calc(var(--space-4) * var(--density-scale)); }
+body.ds-density-compact .table td,
+body.ds-density-compact .table th,
+body.ds-density-cozy .table td,
+body.ds-density-cozy .table th         { padding: calc(var(--space-2) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .btn-sm,
+body.ds-density-cozy .btn-sm           { padding: calc(var(--space-1) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .ds-item-card,
+body.ds-density-cozy .ds-item-card     { padding: calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .modal-body,
+body.ds-density-cozy .modal-body       { padding: calc(var(--space-3) * var(--density-scale) * 1.5) !important; }
+body.ds-density-compact .ds-kpi-mini,
+body.ds-density-cozy .ds-kpi-mini      { padding: calc(var(--space-2) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .ds-panel-section,
+body.ds-density-cozy .ds-panel-section { padding: calc(var(--space-4) * var(--density-scale)) calc(var(--space-4) * var(--density-scale) * 1.2) !important; }
+
+/* SD-104: sólo el paso compacto aprieta el interlineado — cómodo/normal
+   comparten --line-height-base. */
+body.ds-density-compact .table td,
+body.ds-density-compact .table th,
+body.ds-density-compact .ds-item-card,
+body.ds-density-compact .modal-body { line-height: var(--line-height-tight); }
+
+/* Modo sin animación — SD-179 (prioridad de este lote): acelerar la
+   animación a 0,01ms NO la apaga, la deja corriendo a frecuencia de
+   parpadeo — justo lo contrario de lo que pide quien lo activa por
+   fotosensibilidad, y un riesgo real con `.ds-status-revision` (late a
+   frecuencia de vídeo en vez de quedarse quieta). Se detiene la
+   animación en sí (`animation-play-state: paused` para las que tienen
+   estado inicial visible que conservar; `animation: none` cuando no lo
+   hay) y sólo se acelera la transición, que sí tiene un fin claro. */
+body.ds-no-anim *,
+body.ds-no-anim *::before,
+body.ds-no-anim *::after {
+  animation-play-state: paused !important;
+  transition-duration: 0.01ms !important;
+}
+body.ds-no-anim .ds-status-revision,
+body.ds-no-anim .ds-skeleton {
+  animation: none !important;
+}
+
+/* Theme panel: font family row — SD-148 (misma base que .ds-dark-btn /
+   .ds-font-btn / .ds-reset-btn más arriba: antes tenía su propio radio de
+   6px y su propio azul #0056b3, distintos de los otros tres). */
+.ds-ff-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ds-ff-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease;
+}
+.ds-ff-btn:hover  { border-color: var(--gray-500); }
+.ds-ff-btn.active { border-color: var(--color-primary); background: #e8f0fe; color: var(--color-primary); font-weight: 600; }
+.ds-ff-btn:disabled, .ds-ff-btn[aria-disabled="true"] {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+body.dark-mode .ds-ff-btn { background: #2a2e3a; border-color: #3c4257; color: #b8c0d0; }
+body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color: #6fa3d8; color: #6fa3d8; }
+
+/* ==========================================================================
+   RESPONSIVE ADMIN PANELS
+   ========================================================================== */
+
+/* Tables in monitor/papelera/audit get a scrollable wrapper */
+.ds-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Edit/view modals become full-screen on phones */
+@media (max-width: 575px) {
+  .modal-xl, .modal-lg { max-width: 100% !important; margin: 0; }
+  .modal-xl .modal-content, .modal-lg .modal-content {
+    border-radius: 0;
+    min-height: 100dvh;
+  }
+  /* Submit form: all col-md-* become full-width */
+  .ds-submit-form .col-md-6,
+  .ds-submit-form .col-md-4,
+  .ds-submit-form .col-md-8 { flex: 0 0 100%; max-width: 100%; }
+
+  /* Barra de filtros del monitor: los campos se apilan, pero los botones de
+     accion son iconos — estirarlos a todo el ancho los dejaba enormes y vacios.
+     Se agrupan en una fila propia al final. */
+  /* Fila que envuelve en vez de columna: los campos ocupan el ancho completo y
+     los botones de icono se agrupan juntos en la ultima linea, en vez de
+     estirarse cada uno a todo el ancho. */
+  .ds-monitor-filters { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .ds-monitor-filters .form-control { flex: 1 1 100%; width: 100%; }
+  .ds-monitor-filters .btn { flex: 0 0 auto; width: auto; }
+
+  /* Los tres botones de accion caben en una linea si se compactan; sin esto la
+     papelera saltaba de renglon y doblaba el alto de cada fila. */
+  .ds-monitor-row td:last-child { white-space: nowrap; }
+  .ds-monitor-row td:last-child .btn {
+    margin-bottom: 0;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+  }
+  .ds-monitor-row td:last-child .btn.mr-1 { margin-right: 2px !important; }
+
+  /* Import bar: stack on very small screens */
+  .ds-import-bar { flex-direction: column; align-items: stretch; }
+  .ds-import-file-label { max-width: 100%; }
+
+  /* KPI mini: 2 per row on phones (already 50% via col-6 col-md-3) */
+  .ds-kpi-mini { min-height: 0; }
+
+  /* Papelera / audit: hide less important cols */
+  .ds-hide-xs { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  /* Modal footers with many buttons: wrap and stack */
+  .modal-footer { flex-wrap: wrap; gap: 6px; }
+  .modal-footer .btn { flex: 1 1 auto; }
+
+  /* Admin submit form two-col → single col */
+  .ds-submit-form .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+
+  /* Papelera/audit row: hide secondary cols */
+  .ds-hide-sm { display: none !important; }
+}
+
+/* Make monitor table controls inline on medium screens */
+@media (min-width: 576px) and (max-width: 991px) {
+  .ds-monitor-filters { gap: 5px; }
+  .ds-monitor-filters .form-control { width: auto; flex: 1; }
+}
+
+/* Content wrapper padding on mobile */
+@media (max-width: 575px) {
+  .content-wrapper { padding: 10px !important; }
+  .content-header { padding: 10px 10px 0 !important; }
+  /* SD-105: uno de los cuatro puntos donde se declara el padding de tarjeta
+     con !important (los otros: styles.css ~355 [L2], ~2828-2837 [L9]). Aquí
+     sólo se tokeniza el valor (0.75rem = --space-3, ya el mismo número que
+     usaban las otras declaraciones) para que dejar de ser un !important
+     cruzado sea un cambio de un solo sitio cuando L2/L9 lo unifiquen. */
+  .card-body { padding: var(--space-3) !important; }
+}
+
+/* ============================================================
+   SISTEMA DE ACENTO Y TEMAS DE ESTILO
+
+   SD-032 (nota de interpretación, agente-l11-estilos): la ficha describe dos
+   ejes de color paralelos —once temas (L5, styles.css:1308-1634 en el
+   original) y siete acentos (aquí)— que no se comunican, y su arreglo
+   propuesto ("el tema ES el acento") exige fusionar ambos sistemas: tocaría
+   la lista de temas y `app-theme.js`, ninguno de los dos en mi carril. No lo
+   implemento — sería escribir fuera de mi zona. Lo que sí hago en L11 es
+   dejar el eje de acentos internamente consistente (SD-010, SD-011, SD-048,
+   SD-190) para que, decida quien decida sobre SD-032, la fusión no herede
+   los mismos problemas de contraste. Anotado también en _BUZON.md.
+   ============================================================ */
+
+:root {
+  --ds-accent:       #2b4e72;
+  --ds-accent-hover: #1d3a55;
+  --ds-accent-light: #d4e5f7;
+  --ds-accent-rgb:   43,78,114;   /* SD-011: aún en uso fuera de mi zona (styles.css ~4115, L14/L15) — no se retira. */
+  /* SD-048: color de texto seguro sobre `--ds-accent` de fondo. Blanco pasa
+     AA (>=4.5:1) contra los siete acentos salvo accent-amber (~3.6:1),
+     comprobado con la fórmula WCAG de luminancia relativa; ese caso se
+     invierte más abajo. */
+  --ds-accent-on:    #ffffff;
+  /* SD-010: `--ds-accent` usado como TEXTO (no como fondo) pierde contraste
+     en modo oscuro — el valor de acento está pensado para pintarse sobre
+     superficie clara. `--ds-accent-ink` es la variante segura para texto;
+     en claro es el acento tal cual (ya pasa AA sobre --surface-0/1), en
+     oscuro se aclara con `color-mix()` (SD-190) en vez de escribir una
+     segunda tabla de siete hex a mano. Los consumidores de esto (p.ej.
+     `.ds-kw-badge`, `.ds-compartido-modulo`) viven fuera de mi zona; quedan
+     anotados en _BUZON.md para que cambien `color: var(--ds-accent)` por
+     `color: var(--ds-accent-ink)`. */
+  --ds-accent-ink:   var(--ds-accent);
+}
+
+body.dark-mode { --ds-accent-ink: color-mix(in oklab, var(--ds-accent) 62%, white); }
+
+body[data-accent="accent-teal"]    { --ds-accent:#0d7377; --ds-accent-hover:#095e61; --ds-accent-light:#c4eef0; --ds-accent-rgb:13,115,119; }
+body[data-accent="accent-emerald"] { --ds-accent:#1a7f4b; --ds-accent-hover:#125835; --ds-accent-light:#c6edd8; --ds-accent-rgb:26,127,75; }
+body[data-accent="accent-crimson"] { --ds-accent:#c62828; --ds-accent-hover:#951d1d; --ds-accent-light:#fcd5d5; --ds-accent-rgb:198,40,40; }
+body[data-accent="accent-amber"]   { --ds-accent:#b7791f; --ds-accent-hover:#8f5e17; --ds-accent-light:#fef3c7; --ds-accent-rgb:183,121,31; --ds-accent-on:#212529; }
+body[data-accent="accent-purple"]  { --ds-accent:#7c3aed; --ds-accent-hover:#5b21b6; --ds-accent-light:#ede9fe; --ds-accent-rgb:124,58,237; }
+body[data-accent="accent-rose"]    { --ds-accent:#be185d; --ds-accent-hover:#9d174d; --ds-accent-light:#fce7f3; --ds-accent-rgb:190,24,93; }
+body[data-accent="accent-slate"]   { --ds-accent:#475569; --ds-accent-hover:#334155; --ds-accent-light:#e2e8f0; --ds-accent-rgb:71,85,105; }
+
+/* --ds-panel-item-bg (SD-012): la tarjeta de estilo (línea ~3562 más abajo)
+   la consumía con un valor de respaldo porque el token nunca se declaraba
+   —una indirección que aparentaba ser configurable y no lo era—. Se define
+   aquí como alias de la superficie 3 (cabecera de tarjeta sobre superficie 1,
+   SD-004/L0), que es el mismo gris que traía el respaldo (#f0f4f8 ~= --gray-100
+   sobre --surface-1). El bloque `body.dark-mode .ds-style-card` de la línea
+   ~2876 (fuera de mi zona) sigue fijando su propio fondo oscuro con
+   `!important`, así que este token gobierna sólo el modo claro por ahora. */
+:root { --ds-panel-item-bg: var(--surface-3, #f0f4f8); }
+
+/* ============================================================
+   1. GLASSMORPHISM
+
+   SD-054: este estilo (y Liquid Glass, más abajo) sustituyen el fondo de
+   página por un degradado saturado y la tarjeta por un cristal translúcido,
+   pero el texto sigue siendo `--text`/#212529 fijo. El mismo texto da entre
+   3,9:1 y 6,1:1 según el punto del degradado en el que caiga la tarjeta —
+   ninguna de las correcciones de contraste del resto del sistema aplica
+   aquí. La ficha ofrece dos salidas: redefinir también los tokens de tinta
+   para estos dos estilos (repintar cada superficie de texto, cambio grande,
+   fuera de lo razonable en un lote S/M), o marcarlos como decorativos y
+   excluirlos de la garantía AA, dejándolo dicho en el panel. Tomo la
+   segunda: es la que no exige inventar una segunda escala de color por
+   estilo. El texto que sí anuncia esto en el panel de personalización vive
+   en `app-theme.js` (fuera de mi carril) — anotado en _BUZON.md.
+   ============================================================ */
+body[data-style="glassmorphism"] {
+  background: linear-gradient(135deg, #1a2a4a 0%, #2d4060 55%, #1a2535 100%) !important;
+  min-height: 100vh;
+}
+body:not(.dark-mode)[data-style="glassmorphism"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 55%, #4facfe 100%) !important;
+}
+body[data-style="glassmorphism"] .card,
+body[data-style="glassmorphism"] .ds-item-card {
+  background: rgba(255,255,255,0.09) !important;
+  /* SD-221: 28px/18px de desenfoque por tarjeta es una capa de composición
+     cara repetida en cada una; 10px conserva el efecto de vidrio esmerilado
+     con un coste de repintado mucho menor en listas largas. */
+  backdrop-filter: blur(10px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.14) !important;
+  border-radius: 18px !important;
+}
+body:not(.dark-mode)[data-style="glassmorphism"] .card,
+body:not(.dark-mode)[data-style="glassmorphism"] .ds-item-card {
+  background: rgba(255,255,255,0.24) !important;
+  border: 1px solid rgba(255,255,255,0.42) !important;
+  box-shadow: 0 8px 32px rgba(31,38,135,0.14), inset 0 1px 0 rgba(255,255,255,0.42) !important;
+}
+body[data-style="glassmorphism"] .card-header {
+  background: rgba(255,255,255,0.07) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 18px 18px 0 0 !important;
+}
+body:not(.dark-mode)[data-style="glassmorphism"] .card-header {
+  background: rgba(255,255,255,0.18) !important;
+}
+body[data-style="glassmorphism"] .ds-sidebar {
+  background: rgba(255,255,255,0.07) !important;
+  backdrop-filter: blur(22px) !important;
+  border-right: 1px solid rgba(255,255,255,0.12) !important;
+}
+body[data-style="glassmorphism"] .form-control,
+body[data-style="glassmorphism"] .custom-select {
+  background: rgba(255,255,255,0.10) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  border-radius: 10px !important;
+}
+body[data-style="glassmorphism"] .badge-primary,
+body[data-style="glassmorphism"] .nav-pills .nav-link.active {
+  /* SD-190/SD-011: derivación mecánica del acento con color-mix() en vez
+     del triplete `--ds-accent-rgb` (el token sigue declarado porque otra
+     zona del archivo, fuera de L11, aún lo consume — ver nota junto a su
+     definición). */
+  background: color-mix(in srgb, var(--ds-accent) 50%, transparent) !important;
+  backdrop-filter: blur(6px) !important;
+  border: 1px solid color-mix(in srgb, var(--ds-accent) 40%, transparent) !important;
+}
+
+/* ============================================================
+   2. CLAYMORPHISM
+   ============================================================ */
+body[data-style="claymorphism"] {
+  background: #eef1f8 !important;
+}
+body.dark-mode[data-style="claymorphism"] {
+  background: #181e2c !important;
+}
+body[data-style="claymorphism"] .card,
+body[data-style="claymorphism"] .ds-item-card {
+  border-radius: 24px !important;
+  border: none !important;
+  box-shadow:
+    8px 8px 18px rgba(163,177,198,0.52),
+    -6px -6px 16px rgba(255,255,255,0.92),
+    inset 0 2px 0 rgba(255,255,255,0.75) !important;
+}
+body.dark-mode[data-style="claymorphism"] .card,
+body.dark-mode[data-style="claymorphism"] .ds-item-card {
+  box-shadow:
+    6px 6px 16px rgba(0,0,0,0.5),
+    -2px -2px 8px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.07) !important;
+  border: none !important;
+  border-radius: 24px !important;
+}
+body[data-style="claymorphism"] .card-header {
+  border-radius: 24px 24px 0 0 !important;
+  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  background: rgba(255,255,255,0.35) !important;
+}
+body.dark-mode[data-style="claymorphism"] .card-header {
+  background: rgba(255,255,255,0.04) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+}
+body[data-style="claymorphism"] .btn {
+  border-radius: 50px !important;
+  border: none !important;
+  box-shadow: 4px 4px 9px rgba(163,177,198,0.5), -2px -2px 7px rgba(255,255,255,0.8) !important;
+}
+body.dark-mode[data-style="claymorphism"] .btn {
+  box-shadow: 4px 4px 9px rgba(0,0,0,0.4), -1px -1px 5px rgba(255,255,255,0.05) !important;
+}
+body[data-style="claymorphism"] .form-control,
+body[data-style="claymorphism"] .custom-select {
+  border-radius: 16px !important;
+  border: none !important;
+  box-shadow: inset 4px 4px 9px rgba(163,177,198,0.42), inset -2px -2px 5px rgba(255,255,255,0.72) !important;
+}
+body.dark-mode[data-style="claymorphism"] .form-control,
+body.dark-mode[data-style="claymorphism"] .custom-select {
+  box-shadow: inset 4px 4px 9px rgba(0,0,0,0.4), inset -1px -1px 4px rgba(255,255,255,0.04) !important;
+}
+body[data-style="claymorphism"] .badge {
+  border-radius: 50px !important;
+  box-shadow: 2px 2px 6px rgba(163,177,198,0.4) !important;
+}
+
+/* ============================================================
+   3. MINIMALISMO
+   ============================================================ */
+body[data-style="minimalism"] .card,
+body[data-style="minimalism"] .ds-item-card {
+  border-radius: 4px !important;
+  border: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: none !important;
+}
+body.dark-mode[data-style="minimalism"] .card,
+body.dark-mode[data-style="minimalism"] .ds-item-card {
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: none !important;
+}
+body[data-style="minimalism"] .card-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+  border-radius: 0 !important;
+  padding: 10px 16px !important;
+  box-shadow: none !important;
+}
+body.dark-mode[data-style="minimalism"] .card-header {
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+}
+body[data-style="minimalism"] .btn {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+body[data-style="minimalism"] .badge { border-radius: 3px !important; }
+body[data-style="minimalism"] .ds-sidebar {
+  border-right: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: none !important;
+}
+body.dark-mode[data-style="minimalism"] .ds-sidebar {
+  border-right: 1px solid rgba(255,255,255,0.07) !important;
+}
+body[data-style="minimalism"] .ds-item-card:hover {
+  box-shadow: none !important;
+  /* SD-190/SD-011: color-mix() en vez del triplete --ds-accent-rgb. */
+  border-color: color-mix(in srgb, var(--ds-accent) 40%, transparent) !important;
+}
+
+/* ============================================================
+   4. MAXIMALISMO
+   ============================================================ */
+body[data-style="maximalism"] .card {
+  border-radius: 16px !important;
+  border: 2.5px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent, #2b4e72) !important;
+  transition: transform .14s, box-shadow .14s !important;
+}
+body[data-style="maximalism"] .card:hover {
+  transform: translate(-2px,-2px) !important;
+  box-shadow: 8px 8px 0 var(--ds-accent, #2b4e72) !important;
+}
+body[data-style="maximalism"] .ds-item-card {
+  border-radius: 16px !important;
+  border: 2.5px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 5px 5px 0 var(--ds-accent, #2b4e72) !important;
+  transition: transform .14s, box-shadow .14s !important;
+}
+body[data-style="maximalism"] .ds-item-card:hover {
+  transform: translate(-2px,-2px) !important;
+  box-shadow: 7px 7px 0 var(--ds-accent, #2b4e72) !important;
+}
+body[data-style="maximalism"] .card-header {
+  border-radius: 13px 13px 0 0 !important;
+}
+body[data-style="maximalism"] .btn {
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.2) !important;
+  transition: transform .1s, box-shadow .1s !important;
+}
+body[data-style="maximalism"] .btn:active {
+  transform: translate(2px,2px) !important;
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.2) !important;
+}
+body[data-style="maximalism"] .badge {
+  border-radius: 4px !important;
+  border: 1.5px solid rgba(0,0,0,0.15) !important;
+}
+
+/* ============================================================
+   5. BRUTALISMO
+
+   SD-055: era el único de los seis estilos que no consumía --ds-accent
+   (usaba #111/#e8e8e8 a pelo en catorce reglas), mientras Maximalismo sí lo
+   hace para el mismo tipo de borde/sombra "offset". La ficha deja elegir
+   entre "todos lo consumen" o "ninguno"; opto por que todos lo consuman,
+   igual que Maximalismo, para que cambiar de acento tenga efecto visible en
+   los seis estilos y no en cinco. El contraste alto/duro del brutalismo se
+   conserva porque los siete acentos son suficientemente oscuros/saturados
+   (ninguno es un pastel claro); en oscuro se aclara con color-mix() (SD-190)
+   en vez de un segundo hex fijo, igual que --ds-accent-ink más arriba.
+   ============================================================ */
+body[data-style="brutalism"] .card,
+body[data-style="brutalism"] .ds-item-card {
+  border-radius: 0 !important;
+  border: 3px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent, #2b4e72) !important;
+}
+body.dark-mode[data-style="brutalism"] .card,
+body.dark-mode[data-style="brutalism"] .ds-item-card {
+  border: 3px solid var(--ds-accent-ink) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent-ink) !important;
+}
+body[data-style="brutalism"] .card-header {
+  border-radius: 0 !important;
+  border-bottom: 3px solid var(--ds-accent, #2b4e72) !important;
+}
+body.dark-mode[data-style="brutalism"] .card-header {
+  border-bottom: 3px solid var(--ds-accent-ink) !important;
+}
+body[data-style="brutalism"] .btn {
+  border-radius: 0 !important;
+  border: 2px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 4px 4px 0 var(--ds-accent, #2b4e72) !important;
+  font-weight: 700 !important;
+  transition: transform .1s, box-shadow .1s !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+}
+body[data-style="brutalism"] .btn:hover {
+  transform: translate(-2px,-2px) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent, #2b4e72) !important;
+}
+body[data-style="brutalism"] .btn:active {
+  transform: translate(2px,2px) !important;
+  box-shadow: 2px 2px 0 var(--ds-accent, #2b4e72) !important;
+}
+body.dark-mode[data-style="brutalism"] .btn {
+  border: 2px solid var(--ds-accent-ink) !important;
+  box-shadow: 4px 4px 0 var(--ds-accent-ink) !important;
+}
+body.dark-mode[data-style="brutalism"] .btn:hover {
+  box-shadow: 6px 6px 0 var(--ds-accent-ink) !important;
+}
+body[data-style="brutalism"] .form-control,
+body[data-style="brutalism"] .custom-select {
+  border-radius: 0 !important;
+  border: 2px solid var(--ds-accent, #2b4e72) !important;
+}
+body.dark-mode[data-style="brutalism"] .form-control,
+body.dark-mode[data-style="brutalism"] .custom-select {
+  border: 2px solid var(--ds-accent-ink) !important;
+}
+body[data-style="brutalism"] .badge {
+  border-radius: 0 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .04em !important;
+}
+body[data-style="brutalism"] .ds-item-card:hover {
+  transform: translate(-2px,-2px) !important;
+  box-shadow: 8px 8px 0 var(--ds-accent, #2b4e72) !important;
+}
+body.dark-mode[data-style="brutalism"] .ds-item-card:hover {
+  box-shadow: 8px 8px 0 var(--ds-accent-ink) !important;
+}
+
+/* ============================================================
+   6. LIQUID GLASS
+   ============================================================ */
+body[data-style="liquid-glass"] {
+  background: radial-gradient(ellipse at 20% 20%, #1a2b4a 0%, #0f1628 45%, #1e1245 80%, #0a0f1e 100%) !important;
+  min-height: 100vh;
+}
+body:not(.dark-mode)[data-style="liquid-glass"] {
+  background: radial-gradient(ellipse at 20% 20%, #c8d8f0 0%, #dce8fa 45%, #e8dcf5 80%, #f0eafc 100%) !important;
+}
+body[data-style="liquid-glass"] .card,
+body[data-style="liquid-glass"] .ds-item-card {
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.17) 0%,
+    rgba(255,255,255,0.06) 50%,
+    rgba(255,255,255,0.11) 100%) !important;
+  /* SD-221: igual que en Glassmorphism, 28px por tarjeta es la variante más
+     cara de las seis; 14px conserva el aspecto "liquid glass" con la mitad
+     del coste de composición. */
+  backdrop-filter: blur(14px) saturate(180%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) brightness(1.08) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 4px 6px rgba(0,0,0,0.10),
+    0 20px 50px rgba(0,0,0,0.26),
+    inset 0 1.5px 0 rgba(255,255,255,0.26),
+    inset 0 -1px 0 rgba(0,0,0,0.08) !important;
+}
+body:not(.dark-mode)[data-style="liquid-glass"] .card,
+body:not(.dark-mode)[data-style="liquid-glass"] .ds-item-card {
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.56) 0%,
+    rgba(255,255,255,0.36) 50%,
+    rgba(255,255,255,0.46) 100%) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.52),
+    0 4px 6px rgba(0,0,0,0.05),
+    0 20px 50px rgba(31,38,135,0.12),
+    inset 0 1.5px 0 rgba(255,255,255,0.72),
+    inset 0 -1px 0 rgba(0,0,0,0.04) !important;
+}
+body[data-style="liquid-glass"] .card-header {
+  background: rgba(255,255,255,0.06) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 22px 22px 0 0 !important;
+}
+body:not(.dark-mode)[data-style="liquid-glass"] .card-header {
+  background: rgba(255,255,255,0.22) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.4) !important;
+}
+body[data-style="liquid-glass"] .btn {
+  border-radius: 13px !important;
+  background: rgba(255,255,255,0.13) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.22), 0 4px 12px rgba(0,0,0,0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  /* SD-174: lista explícita en vez de `transition: all` — sólo `background`
+     y `box-shadow` cambian entre reposo y :hover en este botón. */
+  transition: background .2s, box-shadow .2s !important;
+}
+body[data-style="liquid-glass"] .btn:hover {
+  background: rgba(255,255,255,0.22) !important;
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.32), 0 6px 18px rgba(0,0,0,0.22) !important;
+}
+/* SD-095: Maximalismo, Brutalismo y Liquid Glass fijan `box-shadow` en
+   `.btn` con `!important` en todos los estados, incluido el foco — eso
+   deja el anillo de foco (que en el resto del sistema combina `outline` +
+   `box-shadow`, styles.css ~1657) reducido a un contorno de 2px que sobre
+   un fondo de vidrio translúcido casi no se distingue. En vez de tocar el
+   mecanismo global de foco (fuera de mi zona), refuerzo el contorno sólo
+   en estos tres estilos con un `outline` más grueso y separado, que ningún
+   `box-shadow` de la regla puede pisar. */
+body[data-style="maximalism"] .btn:focus-visible,
+body[data-style="brutalism"] .btn:focus-visible,
+body[data-style="liquid-glass"] .btn:focus-visible {
+  outline: 3px solid var(--ds-accent, #2b4e72) !important;
+  outline-offset: 2px !important;
+}
+body.dark-mode[data-style="maximalism"] .btn:focus-visible,
+body.dark-mode[data-style="brutalism"] .btn:focus-visible,
+body.dark-mode[data-style="liquid-glass"] .btn:focus-visible {
+  outline-color: var(--ds-accent-ink) !important;
+}
+body[data-style="liquid-glass"] .ds-sidebar {
+  background: rgba(255,255,255,0.06) !important;
+  backdrop-filter: blur(24px) !important;
+  border-right: 1px solid rgba(255,255,255,0.10) !important;
+}
+body[data-style="liquid-glass"] .form-control,
+body[data-style="liquid-glass"] .custom-select {
+  border-radius: 13px !important;
+  background: rgba(255,255,255,0.09) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ============================================================
+   PANEL DE PERSONALIZACIÓN — temas de estilo y acento
+
+   SD-149/SD-150 (nota, agente-l11-estilos): la ficha pide `<button
+   role="radio">` en `role="radiogroup"` con estado por `[aria-checked]` en
+   vez de los `<div onclick>` de hoy, cuya única señal de selección es
+   `border-color`. El marcado y el manejo de teclado viven en
+   `app-theme.js` (fuera de mi carril — anotado en _BUZON.md). Lo que sí
+   cabe en L11 es la mitad de CSS de ese arreglo, hecha ya para que cuando
+   `app-theme.js` cambie a `role="radio"`/`aria-checked` no haga falta
+   tocar esta hoja otra vez: `[aria-checked="true"]` recibe el mismo
+   estilo que `.active` (sin quitar `.active`, que sigue funcionando
+   mientras tanto) y se añade `:focus-visible`, ausente hasta ahora en
+   los tres selectores del panel. */
+.ds-style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+.ds-style-card {
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color .15s, transform .12s;
+  background: var(--ds-panel-item-bg, #f0f4f8);
+}
+.ds-style-card:hover { transform: scale(1.04); }
+.ds-style-card.active,
+.ds-style-card[aria-checked="true"] { border-color: var(--ds-accent, #2b4e72); }
+.ds-style-card:focus-visible {
+  outline: 2px solid var(--ds-accent, #2b4e72);
+  outline-offset: 2px;
+}
+.ds-style-card-preview {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+}
+.ds-style-name {
+  font-size: 0.66rem;
+  text-align: center;
+  padding: 3px 4px 5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.ds-accent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.ds-accent-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color .14s, transform .12s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.ds-accent-swatch:hover { transform: scale(1.12); }
+.ds-accent-swatch.active,
+.ds-accent-swatch[aria-checked="true"] { border-color: #fff; box-shadow: 0 0 0 2px var(--ds-accent, #2b4e72), 0 2px 6px rgba(0,0,0,0.18); }
+.ds-accent-swatch:focus-visible {
+  outline: 2px solid var(--ds-accent, #2b4e72);
+  outline-offset: 3px;
+}
+
+/* =============================================================================

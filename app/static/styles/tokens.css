@@ -1,0 +1,231 @@
+/* === Tokens (SD-001..SD-030) === */
+/* ==========================================================================
+   SISTEMA DE TOKENS (L0) — agente-l0-tokens, SD-001 a SD-030 (sistema-diseno.md)
+   ==========================================================================
+   Bloque añadido AL PRINCIPIO del archivo, sin tocar ninguna regla existente.
+   Ninguna regla de abajo se ha reescrito todavía para consumir estos tokens
+   —eso es trabajo de los lotes L1-L15—; este bloque sólo declara la fuente
+   de verdad para que esos lotes no inventen valores nuevos.
+
+   Regla para todo el que edite `styles.css` a partir de aquí (SD-021, SD-022):
+   **ningún color, tamaño, radio, sombra, duración o z-index nuevo se escribe
+   a pelo si ya existe un token aquí que lo cubre.** Si hace falta un valor que
+   no está, se añade a este bloque con su justificación, no suelto en la regla.
+
+   Tres niveles, de abajo arriba:
+     1. Primitivos  (--c-*, --sp-*, --fs-*...)  — la escala cruda, sin significado.
+     2. Semánticos  (--surface-*, --text-*, --ds-ok...) — lo que light-dark()
+        resolvería si el navegador objetivo lo soportara ya (SD-189); aquí se
+        resuelve a mano con un segundo bloque bajo `body.dark-mode`.
+     3. Los tokens de componente ya existentes más abajo en el archivo
+        (--ds-accent, --viz-*, --ds-muted-aa) NO se tocan ni se duplican: son
+        parte de este mismo sistema y ya siguen esta convención.
+   ========================================================================== */
+
+:root {
+  /* --------------------------------------------------------------------
+     1. COLOR — primitivos de gris/neutro
+     Extraídos de los grises que YA usa el archivo: fondo de tarjeta
+     #f8f9fa (SD-004), migaja #e9ecef, borde #ced4da/#dee2e6, texto
+     #212529, silenciado #6c757d/#6a737b (--ds-muted-aa ya calculado).
+     Es la escala que sustituye a los doce grises de borde casi-iguales
+     de SD-018 y a los catorce valores de superficie de SD-004.
+     -------------------------------------------------------------------- */
+  --gray-50:  #f8f9fa;
+  --gray-100: #f1f3f5;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+
+  /* Primitivos de marca y acción, ya en uso real (SD-002, SD-003):
+     #2b4e72 82 veces (identidad, cabeceras/insignias) y #0056b3 27 veces
+     (acción, enlaces/foco/botón primario). Los tokens semánticos de más
+     abajo (--color-primary, --ds-link) son alias con nombre de éstos;
+     el token de componente --ds-accent (línea ~2968) ya vale #2b4e72 y
+     sigue siendo la fuente de verdad para el acento — éste es su primitivo. */
+  --c-brand-700: #2b4e72;
+  --c-brand-800: #1d3a55;
+  --c-link-600:  #0056b3;
+  --c-link-700:  #003d82;
+
+  /* Primitivos de estado, tomados de los valores que YA pasan contraste
+     en el archivo (SD-023, SD-024): el verde correcto es #208838, no
+     #28a745 (3,13:1 con texto blanco, no pasa AA); el resto ya se usaban
+     así en `--viz-good/warning/serious/critical` y en showToast. */
+  --c-green-600:  #208838;
+  --c-amber-500:  #fab219;
+  --c-red-600:    #d03b3b;
+  --c-cyan-600:   #17a2b8;
+
+  /* --------------------------------------------------------------------
+     2. COLOR — semánticos, modo claro (ver bloque body.dark-mode abajo
+     para el par oscuro). SD-004 (superficies), SD-023 (estado como
+     token único en vez de cuatro paletas paralelas).
+     -------------------------------------------------------------------- */
+  --surface-0: var(--gray-50);   /* fondo de página — ya en body (línea 10) */
+  --surface-1: #ffffff;          /* tarjeta */
+  --surface-2: var(--gray-200);  /* migaja, zona hundida */
+  --surface-3: var(--gray-100);  /* cabecera de tarjeta sobre superficie 1 */
+
+  --text:        var(--gray-900);
+  --text-muted:  #6a737b;   /* = --ds-muted-aa, 4,58:1 sobre --surface-0 (SD-015) */
+  --text-inverse: #ffffff;
+
+  --border:        var(--gray-300);
+  --border-strong: var(--gray-400);
+  --border-subtle: var(--gray-200);
+
+  --color-primary:      var(--c-brand-700);  /* identidad — alias de --ds-accent */
+  --color-primary-hover: var(--c-brand-800);
+  --color-link:          var(--c-link-600);   /* acción — SD-003 separa identidad de acción */
+  --color-link-hover:    var(--c-link-700);
+
+  --color-success:      var(--c-green-600);
+  --color-success-bg:   #d4edda;
+  --color-warning:      var(--c-amber-500);
+  --color-warning-bg:   #fff3cd;
+  --color-danger:       var(--c-red-600);
+  --color-danger-bg:    #f8d7da;
+  --color-info:         var(--c-cyan-600);
+  --color-info-bg:      #d1ecf1;
+
+  /* --------------------------------------------------------------------
+     3. TIPOGRAFÍA (SD-008 unifica 46 tamaños; SD-016 añade peso,
+     interlineado y tracking, ausentes hoy salvo como valores sueltos).
+     Escala de siete pasos. Base efectiva: con --ds-font-scale:0.93 (línea 6)
+     el 1rem real son 14,88px, no 16px — ver SD-019. Los tamaños de aquí
+     están en rem para heredar ese factor, como el resto del archivo.
+     -------------------------------------------------------------------- */
+  --font-size-xs:   0.75rem;   /* ~11px */
+  --font-size-sm:   0.875rem;  /* ~13px */
+  --font-size-base: 1rem;      /* ~15px, = body (línea 13) */
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.375rem;
+  --font-size-2xl:  1.75rem;
+  --font-size-3xl:  2.25rem;   /* cifras de KPI/avance */
+
+  --font-weight-normal:   400;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --font-weight-black:    800;  /* SD-028: NUNCA 900 — esa familia no se carga */
+
+  --line-height-tight:  1.2;
+  --line-height-base:   1.5;   /* = body (línea 14) */
+  --line-height-loose:  1.65;
+
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-base:  normal;
+  --letter-spacing-wide:  0.04em;  /* insignias, etiquetas en mayúsculas */
+
+  /* --------------------------------------------------------------------
+     4. ESPACIADO — escala de 4px (SD-005). Sustituye los padding/gap/
+     margin mezclados en rem y px sin patrón, y el ritmo vertical de
+     catorce valores de SD-099. En rem sobre la base de 16px del navegador
+     (no la efectiva de --ds-font-scale), para que la retícula no se mueva
+     si --ds-font-scale cambia.
+     -------------------------------------------------------------------- */
+  --space-1: 0.25rem;  /*  4px */
+  --space-2: 0.5rem;   /*  8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-5: 1.5rem;   /* 24px */
+  --space-6: 2rem;     /* 32px */
+  --space-7: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+
+  /* --------------------------------------------------------------------
+     5. RADIOS — cinco pasos (SD-006 reduce 37 valores a esto).
+     -------------------------------------------------------------------- */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   14px;   /* modal, línea 613 */
+  --radius-pill: 999px;  /* insignias/píldoras */
+
+  /* --------------------------------------------------------------------
+     6. SOMBRAS — cinco niveles de elevación (SD-007 reduce 113 valores
+     únicos a esto). Jerarquía declarada de menor a mayor altura:
+     reposo (1) < hover (2) < desplegable (3) < panel (4) < modal (5).
+     -------------------------------------------------------------------- */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08);                 /* reposo: tarjeta, botón */
+  --shadow-md: 0 4px 12px rgba(0,0,0,.12);                /* hover: tarjeta elevada */
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.14);                /* desplegable, tooltip */
+  --shadow-xl: 6px 0 25px rgba(0,0,0,.15);                /* panel: barra lateral, panel de temas */
+  --shadow-2xl: 0 18px 40px rgba(16,24,40,.2);            /* modal: por encima de todo lo anterior */
+
+  /* --------------------------------------------------------------------
+     7. DURACIONES Y CURVAS (SD-017 reduce 34 valores a esto).
+     -------------------------------------------------------------------- */
+  --duration-fast: 0.12s;
+  --duration-base: 0.2s;
+  --duration-slow: 0.35s;
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --------------------------------------------------------------------
+     8. Z-INDEX — escala nombrada (SD-009 desempata los cinco 9999 y
+     documenta qué va sobre qué; SD-098 pide justo este comentario).
+     Pila, de abajo arriba:
+       base < sticky (cabecera pegajosa) < dropdown (menús propios) <
+       overlay (fondo del login, paneles deslizantes) < modal (Bootstrap
+       y propios) < toast (notificaciones) < skip-link (foco de teclado,
+       siempre visible por encima de cualquier otra capa).
+     -------------------------------------------------------------------- */
+  --z-base:     1;
+  --z-sticky:   50;
+  --z-dropdown: 1040;
+  --z-overlay:  1050;
+  --z-modal:    1060;
+  --z-toast:    9999;
+  --z-skip:     10000;
+
+  /* --------------------------------------------------------------------
+     9. Varios de una línea que SD- señala como ausentes por completo
+     (SD-030, SD-153, SD-156, SD-205): declarados aquí para que L1-L15
+     los apliquen donde corresponda sin decidir el valor otra vez.
+     -------------------------------------------------------------------- */
+  color-scheme: light;
+}
+
+body.dark-mode {
+  /* --------------------------------------------------------------------
+     Pares oscuros de los semánticos de arriba. Mismos nombres de token,
+     valores tomados de los que YA usa el bloque "MODO OSCURO" más abajo
+     (línea ~2292: fondo #1a1d23, superficie #23272f/#1e222b, borde
+     #2e3342), para que L8 (que tokeniza ese bloque) no tenga que inventar
+     nada nuevo — sólo sustituir el hex por el var().
+     -------------------------------------------------------------------- */
+  --surface-0: #1a1d23;
+  --surface-1: #23272f;
+  --surface-2: #1e222b;
+  --surface-3: #2a2e3a;
+
+  --text:         #e0e4ee;
+  --text-muted:   #7880a0;
+  --text-inverse: #1a1d23;
+
+  --border:        #2e3342;
+  --border-strong: #3e4660;
+  --border-subtle: #262b38;
+
+  --color-primary:       #2b4e72;
+  --color-primary-hover: #6fa3d8;
+  --color-link:          #6fa3d8;
+  --color-link-hover:    #9ec6e8;
+
+  /* Sombras más marcadas sobre fondo oscuro (ya así en el bloque de la
+     barra lateral, línea 2304: `6px 0 25px rgba(0,0,0,0.4)`). */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.35);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.4);
+  --shadow-xl: 6px 0 25px rgba(0,0,0,.4);
+  --shadow-2xl: 0 18px 40px rgba(0,0,0,.5);
+
+  color-scheme: dark;
+}
+/* ========================================================================== */

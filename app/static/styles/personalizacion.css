@@ -1,0 +1,426 @@
+/* === Personalizacion: panel de temas, temas (11) === */
+   MODERN UI/UX UPGRADES (GLASSMORPHISM & AUTH)
+   ======================================================== */
+body[data-page="login"] {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: none !important;
+}
+
+.ds-login-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--z-overlay);
+    /* SD-052: derivado del acento de marca (no un azul marino ajeno a los
+       once temas), un solo alfa en vez de dos apilados sin efecto visible. */
+    background-color: color-mix(in srgb, var(--c-brand-800) 88%, black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.ds-login-card {
+    width: 450px;
+    max-width: 90%;
+    margin: 0 auto;
+    text-align: center;
+    /* SD-053: sin backdrop-filter — el fondo de .ds-login-backdrop es un
+       color sólido, así que el desenfoque no difuminaba nada y sólo
+       forzaba una capa de composición a pantalla completa. */
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    border-top: 5px solid var(--c-brand-700) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--shadow-2xl) !important;
+    transition: transform var(--duration-slow) var(--ease-out), box-shadow var(--duration-slow) var(--ease-out);
+    padding: 2.5rem !important;
+}
+
+.ds-login-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.45) !important;
+}
+
+/* Modificar los tags de div para inputs para que se adapten al flexbox */
+.ds-login-card .form-group, .ds-login-card .shiny-input-container {
+    width: 100% !important;
+    margin-bottom: 20px !important;
+}
+
+.ds-login-card input {
+    border-radius: 25px !important;
+    padding-left: 45px !important;
+    height: 52px !important;
+    font-size: 1.1rem !important;
+    border: 1px solid #ced4da !important;
+    width: 100% !important;
+    display: block !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+.ds-login-card .auth-icon {
+    position: absolute;
+    left: 15px;
+    top: 42px; /* Alineado con el input debajo del label */
+    z-index: 10;
+    color: var(--c-brand-700);
+    font-size: 1.2rem;
+}
+
+.ds-password-wrap {
+    position: relative;
+}
+
+.ds-password-wrap .shiny-input-container {
+    margin-bottom: 0 !important;
+}
+
+.ds-pass-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #5c6f82;
+    font-size: 1.1rem;
+    padding: 0.35rem;
+    line-height: 1;
+    z-index: 15;
+}
+
+.ds-pass-toggle:hover,
+.ds-pass-toggle:focus {
+    color: var(--c-brand-700);
+    outline: none;
+}
+
+.ds-login-hint {
+    margin-top: 0.55rem;
+    font-size: 0.82rem;
+    color: #5f6c7a;
+    text-align: left;
+}
+
+.ds-login-hint i {
+    margin-right: 0.25rem;
+}
+
+/* Ocultar Sidebar/Navbar cuando el login está activo para que no se vean por detrás */
+.ds-login-backdrop ~ .main-header,
+.ds-login-backdrop ~ .main-sidebar {
+    display: none !important;
+}
+
+.ds-login-backdrop ~ .content-wrapper {
+    margin-left: 0 !important;
+}
+
+/* Evita que los listados de seleccion multiple se recorten en filtros. */
+#ext_filters_acc,
+#rrhh_filters_acc,
+#ext_filters_acc .card,
+#rrhh_filters_acc .card,
+#ext_filters_acc .card-body,
+#rrhh_filters_acc .card-body,
+#ext_filters_acc .collapse,
+#rrhh_filters_acc .collapse {
+    overflow: visible !important;
+}
+
+#ext_filters_acc .selectize-control,
+#rrhh_filters_acc .selectize-control {
+    position: relative;
+    z-index: 50;
+}
+
+#ext_filters_acc .selectize-dropdown,
+#rrhh_filters_acc .selectize-dropdown {
+    z-index: 9999 !important;
+}
+
+/* --- ESTILOS INTERACTIVOS PARA ETIQUETAS DE SELECCIÓN MÚLTIPLE ---
+   SD-141: misma forma de "píldora seleccionable" que .ds-date-chip
+   (styles.css, zona L7). Tokenizado aquí para que ambas partan de los
+   mismos primitivos; unificar en un solo componente queda pendiente de
+   coordinar con L7 (ver _BUZON.md). */
+.select-tag {
+    display: inline-block;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: var(--radius-pill);
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+    margin-right: var(--space-1);
+    margin-bottom: var(--space-1);
+    cursor: pointer;
+    border: 1px solid var(--gray-300);
+    /* SD-174: lista explícita en vez de `transition: all`. */
+    transition: background-color var(--duration-base) ease-in-out,
+                color var(--duration-base) ease-in-out,
+                border-color var(--duration-base) ease-in-out,
+                box-shadow var(--duration-base) ease-in-out;
+}
+
+.select-tag:hover {
+    background-color: var(--gray-200);
+    color: var(--color-link);
+    border-color: var(--color-link);
+    text-decoration: none !important;
+}
+
+.select-tag.active {
+    background-color: var(--color-link) !important;
+    color: var(--text-inverse) !important;
+    border-color: var(--color-link) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   PERSONALIZACIÓN — Panel de temas y favicon sidebar
+   ========================================================================== */
+.ds-sidebar-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-right: 5px;
+  opacity: 0.88;
+  flex-shrink: 0;
+}
+.ds-sidebar-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  color: #6c757d;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.25s ease;
+  border-top: 1px solid #f0f0f0;
+  border-left: 4px solid transparent;
+  text-decoration: none !important;
+}
+.ds-sidebar-theme-btn i { font-size:1.1rem; width:22px; text-align:center; color:#adb5bd; transition:color 0.25s; }
+.ds-sidebar-theme-btn span { flex-grow:1; }
+.ds-sidebar-theme-btn:hover { background:linear-gradient(90deg,#f5f0ff,#f8f9fa); color:#6f42c1; border-left-color:#6f42c1; }
+.ds-sidebar-theme-btn:hover i { color:#6f42c1; }
+
+.ds-theme-panel {
+  position:fixed; top:0; right:-340px; width:320px; height:100vh;
+  background:#fff; z-index:1060;
+  /* SD-087: mismo nivel de elevación que la barra lateral (--shadow-xl,
+     definido para ambas en el bloque de tokens L0), sólo con el offset
+     invertido porque el panel entra por la derecha. */
+  box-shadow:-6px 0 25px rgba(0,0,0,.15);
+  display:flex; flex-direction:column;
+  /* SD-182: misma duración/curva que el resto de superposiciones deslizantes
+     (tokens L0). El cajón lateral (fuera de mi zona, L1) sigue con su propia
+     curva copiada a mano; sincronizarlo exige que ese lote adopte estos
+     mismos tokens — anotado en _BUZON.md. */
+  transition:right var(--duration-slow) var(--ease-out); overflow:hidden;
+}
+.ds-theme-panel.open { right:0; }
+.ds-theme-panel-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px 14px; background:linear-gradient(135deg,#2b4e72,#1a3a5c);
+  color:#fff; flex-shrink:0;
+}
+.ds-theme-panel-header h6 { margin:0; font-weight:700; font-size:1rem; color:#fff; }
+.ds-theme-panel-close {
+  background:rgba(255,255,255,0.15); border:none; color:#fff;
+  width:32px; height:32px; border-radius:8px; display:inline-flex;
+  align-items:center; justify-content:center; cursor:pointer;
+  font-size:1rem; transition:background 0.2s;
+}
+/* SD-183: el giro de 90° era decoración pura, sin significado de origen —
+   se retira, sólo queda el cambio de fondo al pasar el ratón. */
+.ds-theme-panel-close:hover { background:rgba(255,255,255,0.3); }
+.ds-theme-panel-body {
+  flex:1; padding:16px; overflow-y:auto;
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:start;
+}
+.ds-theme-card {
+  cursor:pointer; border:2px solid #dee2e6; border-radius:10px;
+  padding:8px 6px 6px; text-align:center; transition:all 0.2s;
+  background:#fff; position:relative;
+}
+.ds-theme-card:hover { border-color:#0056b3; box-shadow:0 4px 12px rgba(0,86,179,0.15); transform:translateY(-2px); }
+.ds-theme-card.active { border-color:var(--color-success,#208838); box-shadow:0 4px 12px rgba(32,136,56,0.2); }
+/* SD-165: el check ya no depende de un carácter Unicode ni de la fuente/
+   codificación del archivo (el proyecto ya tuvo ficheros rotos por esto,
+   ver CLAUDE.md "Convenciones") — se dibuja con bordes, sin texto. */
+.ds-theme-card.active::after {
+  content:"";
+  position:absolute; top:6px; right:9px;
+  width:9px; height:5px;
+  border-left:2px solid var(--color-success,#208838);
+  border-bottom:2px solid var(--color-success,#208838);
+  transform:rotate(-45deg);
+}
+.ds-theme-preview { display:flex; height:50px; border-radius:6px; overflow:hidden; margin-bottom:5px; border:1px solid rgba(0,0,0,0.08); }
+.ds-theme-preview-sidebar { width:34px; height:100%; flex-shrink:0; }
+.ds-theme-preview-content { flex:1; height:100%; display:flex; flex-direction:column; padding:5px 4px; gap:3px; }
+.ds-theme-preview-bar { border-radius:2px; }
+.ds-theme-name { font-size:0.68rem; font-weight:700; color:#495057; line-height:1.2; }
+
+/* ==========================================================================
+   TEMAS (SD-031): antes, ~330 líneas de 8-17 reglas por tema con el hex
+   escrito a mano y repetido en cada una — añadir un componente al sistema
+   de temas eran once reglas nuevas, y olvidarse de una dejaba ese
+   componente en azul dentro de un tema granate (síntoma real: SD-038,
+   SD-061, SD-089 antes de este cambio). Ahora cada tema declara sólo su
+   paleta — cuatro colores de acento y un par de tintes para fondos claros
+   (identificados, no "cuatro variables" a rajatabla: la fidelidad exacta de
+   once paletas hechas a mano necesitaba algunas más de las cuatro que
+   sugiere la ficha; sigue siendo una reducción de ~15 declaraciones por
+   componente a 1) — y un único bloque de reglas compartidas, más abajo,
+   las consume. Añadir el componente #12 ya es una regla, no once.
+
+   Medianoche (`theme-noche`) es la única excepción real: su barra lateral
+   es oscura, así que el patrón se invierte (texto claro sobre fondo oscuro)
+   y necesita sus propias reglas para el encabezado y los enlaces de la
+   barra — el resto de sus componentes (botones, insignias, tarjetas...)
+   viven sobre fondo claro igual que los otros diez temas y sí usan la
+   paleta compartida. */
+body.theme-dorado         { --tt-accent:#9a7017; --tt-accent-hover:#7B5800; --tt-accent-light:#B8860B; --tt-accent-rgb:154,112,23; --tt-tint-1:#fef3cd; --tt-tint-2:#fff8e7; --tt-tint-border:#e8d08a; }
+body.theme-manila         { --tt-accent:#8B7355; --tt-accent-hover:#5C4A2A; --tt-accent-light:#A0856A; --tt-accent-rgb:139,115,85; --tt-tint-1:#ede0c4; --tt-tint-2:#f5ead0; --tt-tint-border:#d5c8a0; }
+body.theme-esmeralda      { --tt-accent:#2d6a4f; --tt-accent-hover:#1b4332; --tt-accent-light:#40916c; --tt-accent-rgb:45,106,79; --tt-tint-1:#d8f3dc; --tt-tint-2:#f0faf2; --tt-tint-border:#aadcb8; }
+body.theme-noche          { --tt-accent:#4a90d9; --tt-accent-hover:#1a3a6b; --tt-accent-light:#6aafd9; --tt-accent-rgb:74,144,217; --tt-tint-1:#d0e8f7; --tt-tint-2:#eaf4ff; --tt-tint-border:#a0ccee; }
+body.theme-granate        { --tt-accent:#7c2d3c; --tt-accent-hover:#5a1e2b; --tt-accent-light:#a03048; --tt-accent-rgb:124,45,60; --tt-tint-1:#fce4e9; --tt-tint-2:#fff0f2; --tt-tint-border:#f0b4bf; }
+body.theme-carbon         { --tt-accent:#444444; --tt-accent-hover:#1a1a1a; --tt-accent-light:#555555; --tt-accent-rgb:68,68,68; --tt-tint-1:#e8e8e8; --tt-tint-2:#f2f2f2; --tt-tint-border:#cccccc; }
+body.theme-lavanda        { --tt-accent:#4a3570; --tt-accent-hover:#2d1b5c; --tt-accent-light:#7c5cbf; --tt-accent-rgb:74,53,112; --tt-tint-1:#e8dff5; --tt-tint-2:#f2ecff; --tt-tint-border:#c4aee8; }
+body.theme-terracota      { --tt-accent:#b5451b; --tt-accent-hover:#7a2d10; --tt-accent-light:#d4623a; --tt-accent-rgb:181,69,27; --tt-tint-1:#fde9e0; --tt-tint-2:#fff5f0; --tt-tint-border:#f0b89a; }
+body.theme-azul-profundo  { --tt-accent:#0f3460; --tt-accent-hover:#0a2040; --tt-accent-light:#1a5fa0; --tt-accent-rgb:15,52,96;  --tt-tint-1:#d0e4f7; --tt-tint-2:#e8f3ff; --tt-tint-border:#aacbee; }
+body.theme-cian           { --tt-accent:#0d6e7c; --tt-accent-hover:#074a55; --tt-accent-light:#13a0b4; --tt-accent-rgb:13,110,124; --tt-tint-1:#c7f0f5; --tt-tint-2:#e8fafc; --tt-tint-border:#8ddce8; }
+body.theme-oliva          { --tt-accent:#5a6b2a; --tt-accent-hover:#3a4517; --tt-accent-light:#7a9040; --tt-accent-rgb:90,107,42;  --tt-tint-1:#e8f0d0; --tt-tint-2:#f2f8e0; --tt-tint-border:#c0d490; }
+
+/* Encabezado de barra lateral y del propio panel de temas: degradado
+   acento → acento-oscuro, igual en los once. */
+body.theme-dorado .ds-sidebar-header, body.theme-dorado .ds-theme-panel-header,
+body.theme-manila .ds-sidebar-header, body.theme-manila .ds-theme-panel-header,
+body.theme-esmeralda .ds-sidebar-header, body.theme-esmeralda .ds-theme-panel-header,
+body.theme-granate .ds-sidebar-header, body.theme-granate .ds-theme-panel-header,
+body.theme-carbon .ds-sidebar-header, body.theme-carbon .ds-theme-panel-header,
+body.theme-lavanda .ds-sidebar-header, body.theme-lavanda .ds-theme-panel-header,
+body.theme-terracota .ds-sidebar-header, body.theme-terracota .ds-theme-panel-header,
+body.theme-azul-profundo .ds-sidebar-header, body.theme-azul-profundo .ds-theme-panel-header,
+body.theme-cian .ds-sidebar-header, body.theme-cian .ds-theme-panel-header,
+body.theme-oliva .ds-sidebar-header, body.theme-oliva .ds-theme-panel-header {
+  background: linear-gradient(135deg, var(--tt-accent), var(--tt-accent-hover)) !important;
+}
+/* Medianoche: barra oscura propia (SD-034/035 documentan que este tema no
+   sigue el patrón claro de los otros diez; no se fuerza aquí, es una
+   decisión de producto pendiente en sistema-diseno.md). */
+body.theme-noche .ds-sidebar { background:#111d2e !important; }
+body.theme-noche .ds-sidebar-header, body.theme-noche .ds-theme-panel-header { background:linear-gradient(135deg,#0d1b2a,#1a2744) !important; }
+body.theme-noche .ds-sidebar-link { color:#8896a5; }
+body.theme-noche .ds-sidebar-link.active { background:linear-gradient(90deg,#1e3a5f,#243b5c) !important; color:#8bb8e8 !important; border-left-color:var(--tt-accent) !important; }
+body.theme-noche .ds-sidebar-link.active i { color:var(--tt-accent) !important; }
+body.theme-noche .ds-sidebar-link:hover { background:linear-gradient(90deg,#1a3352,#1f3859) !important; color:#a0c8f0 !important; border-left-color:var(--tt-accent-light) !important; }
+body.theme-noche .ds-sidebar-link:hover i { color:var(--tt-accent-light) !important; }
+body.theme-noche .ds-sidebar-footer { border-top-color:#1e3358; color:#5a7a9a; }
+
+/* Manila: la única otra excepción estructural (SD-033: sólo dos de once
+   temas tocan la superficie de la página; no se generaliza aquí, es la
+   misma decisión de producto pendiente). */
+body.theme-manila, body.theme-manila .content-wrapper { background-color:#f5ead0 !important; }
+body.theme-manila .ds-sidebar { background:#fdf6e3 !important; }
+body.theme-manila .ds-sidebar-link { color:#5c4a2a; }
+body.theme-manila .card { background:#fdf6e3 !important; border-color:var(--tt-tint-border) !important; }
+body.theme-manila .ds-breadcrumb-wrapper { background-color:var(--tt-tint-1) !important; }
+
+/* Enlace de la barra lateral (activo/hover): fondo de tinte claro, texto y
+   borde del acento oscuro/claro. Los diez temas de fondo claro comparten
+   esta única regla; Medianoche queda fuera, definida arriba. */
+body.theme-dorado .ds-sidebar-link.active, body.theme-manila .ds-sidebar-link.active,
+body.theme-esmeralda .ds-sidebar-link.active, body.theme-granate .ds-sidebar-link.active,
+body.theme-carbon .ds-sidebar-link.active, body.theme-lavanda .ds-sidebar-link.active,
+body.theme-terracota .ds-sidebar-link.active, body.theme-azul-profundo .ds-sidebar-link.active,
+body.theme-cian .ds-sidebar-link.active, body.theme-oliva .ds-sidebar-link.active {
+  background: linear-gradient(90deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  color: var(--tt-accent-hover) !important;
+  border-left-color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-sidebar-link.active i, body.theme-manila .ds-sidebar-link.active i,
+body.theme-esmeralda .ds-sidebar-link.active i, body.theme-granate .ds-sidebar-link.active i,
+body.theme-carbon .ds-sidebar-link.active i, body.theme-lavanda .ds-sidebar-link.active i,
+body.theme-terracota .ds-sidebar-link.active i, body.theme-azul-profundo .ds-sidebar-link.active i,
+body.theme-cian .ds-sidebar-link.active i, body.theme-oliva .ds-sidebar-link.active i {
+  color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-sidebar-link:hover, body.theme-manila .ds-sidebar-link:hover,
+body.theme-esmeralda .ds-sidebar-link:hover, body.theme-granate .ds-sidebar-link:hover,
+body.theme-carbon .ds-sidebar-link:hover, body.theme-lavanda .ds-sidebar-link:hover,
+body.theme-terracota .ds-sidebar-link:hover, body.theme-azul-profundo .ds-sidebar-link:hover,
+body.theme-cian .ds-sidebar-link:hover, body.theme-oliva .ds-sidebar-link:hover {
+  background: linear-gradient(90deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  color: var(--tt-accent-hover) !important;
+  border-left-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .ds-sidebar-link:hover i, body.theme-manila .ds-sidebar-link:hover i,
+body.theme-esmeralda .ds-sidebar-link:hover i, body.theme-granate .ds-sidebar-link:hover i,
+body.theme-carbon .ds-sidebar-link:hover i, body.theme-lavanda .ds-sidebar-link:hover i,
+body.theme-terracota .ds-sidebar-link:hover i, body.theme-azul-profundo .ds-sidebar-link:hover i,
+body.theme-cian .ds-sidebar-link:hover i, body.theme-oliva .ds-sidebar-link:hover i {
+  color: var(--tt-accent-light) !important;
+}
+
+/* Título de resultado, cabecera de página, insignia lateral: mismo par
+   acento/acento-oscuro en los once temas (Medianoche incluido: éstos viven
+   sobre el fondo claro del contenido, no sobre la barra oscura). */
+body.theme-dorado .ds-item-title, body.theme-manila .ds-item-title,
+body.theme-esmeralda .ds-item-title, body.theme-noche .ds-item-title,
+body.theme-granate .ds-item-title, body.theme-carbon .ds-item-title,
+body.theme-lavanda .ds-item-title, body.theme-terracota .ds-item-title,
+body.theme-azul-profundo .ds-item-title, body.theme-cian .ds-item-title,
+body.theme-oliva .ds-item-title,
+body.theme-dorado .ds-doc-modal-head i, body.theme-dorado .ds-doc-modal-head h4, body.theme-dorado .ds-doc-panel h5, body.theme-dorado .ds-category-title,
+body.theme-manila .ds-doc-modal-head i, body.theme-manila .ds-doc-modal-head h4, body.theme-manila .ds-doc-panel h5, body.theme-manila .ds-category-title,
+body.theme-esmeralda .ds-doc-modal-head i, body.theme-esmeralda .ds-doc-modal-head h4, body.theme-esmeralda .ds-doc-panel h5, body.theme-esmeralda .ds-category-title,
+body.theme-noche .ds-doc-modal-head i, body.theme-noche .ds-doc-modal-head h4, body.theme-noche .ds-doc-panel h5, body.theme-noche .ds-category-title,
+body.theme-granate .ds-doc-modal-head i, body.theme-granate .ds-doc-modal-head h4, body.theme-granate .ds-doc-panel h5, body.theme-granate .ds-category-title,
+body.theme-carbon .ds-doc-modal-head i, body.theme-carbon .ds-doc-modal-head h4, body.theme-carbon .ds-doc-panel h5, body.theme-carbon .ds-category-title,
+body.theme-lavanda .ds-doc-modal-head i, body.theme-lavanda .ds-doc-modal-head h4, body.theme-lavanda .ds-doc-panel h5, body.theme-lavanda .ds-category-title,
+body.theme-terracota .ds-doc-modal-head i, body.theme-terracota .ds-doc-modal-head h4, body.theme-terracota .ds-doc-panel h5, body.theme-terracota .ds-category-title,
+body.theme-azul-profundo .ds-doc-modal-head i, body.theme-azul-profundo .ds-doc-modal-head h4, body.theme-azul-profundo .ds-doc-panel h5, body.theme-azul-profundo .ds-category-title,
+body.theme-cian .ds-doc-modal-head i, body.theme-cian .ds-doc-modal-head h4, body.theme-cian .ds-doc-panel h5, body.theme-cian .ds-category-title,
+body.theme-oliva .ds-doc-modal-head i, body.theme-oliva .ds-doc-modal-head h4, body.theme-oliva .ds-doc-panel h5, body.theme-oliva .ds-category-title {
+  color: var(--tt-accent-hover) !important;
+}
+body.theme-dorado .ds-page-header, body.theme-manila .ds-page-header,
+body.theme-esmeralda .ds-page-header, body.theme-noche .ds-page-header,
+body.theme-granate .ds-page-header, body.theme-carbon .ds-page-header,
+body.theme-lavanda .ds-page-header, body.theme-terracota .ds-page-header,
+body.theme-azul-profundo .ds-page-header, body.theme-cian .ds-page-header,
+body.theme-oliva .ds-page-header {
+  border-left-color: var(--tt-accent) !important;
+  color: var(--tt-accent-hover) !important;
+}
+body.theme-manila .ds-page-header { background:#fdf6e3 !important; }
+body.theme-dorado .ds-sidebar-badge, body.theme-manila .ds-sidebar-badge,
+body.theme-esmeralda .ds-sidebar-badge, body.theme-noche .ds-sidebar-badge,
+body.theme-granate .ds-sidebar-badge, body.theme-carbon .ds-sidebar-badge,
+body.theme-lavanda .ds-sidebar-badge, body.theme-terracota .ds-sidebar-badge,
+body.theme-azul-profundo .ds-sidebar-badge, body.theme-cian .ds-sidebar-badge,
+body.theme-oliva .ds-sidebar-badge {
+  background: var(--tt-accent) !important;
+}
+
+/* ==========================================================================

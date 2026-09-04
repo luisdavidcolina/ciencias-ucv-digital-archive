@@ -1,0 +1,861 @@
+/* === Componentes de administracion: KPI, tabs, tabla, upload, estados === */
+   Botones, tarjetas, insignias, modales — la parte que antes vivía en el
+   bloque "Extensión completa" (SD-089: la sombra de hover pasa a ser una
+   sola declaración con el color del tema, no trece repartidas).
+   ========================================================================== */
+body.theme-dorado .ds-btn-primary, body.theme-manila .ds-btn-primary,
+body.theme-esmeralda .ds-btn-primary, body.theme-noche .ds-btn-primary,
+body.theme-granate .ds-btn-primary, body.theme-carbon .ds-btn-primary,
+body.theme-lavanda .ds-btn-primary, body.theme-terracota .ds-btn-primary,
+body.theme-azul-profundo .ds-btn-primary, body.theme-cian .ds-btn-primary,
+body.theme-oliva .ds-btn-primary,
+body.theme-dorado .btn.btn-primary:not(.ds-btn-primary), body.theme-manila .btn.btn-primary:not(.ds-btn-primary),
+body.theme-esmeralda .btn.btn-primary:not(.ds-btn-primary), body.theme-noche .btn.btn-primary:not(.ds-btn-primary),
+body.theme-granate .btn.btn-primary:not(.ds-btn-primary), body.theme-carbon .btn.btn-primary:not(.ds-btn-primary),
+body.theme-lavanda .btn.btn-primary:not(.ds-btn-primary), body.theme-terracota .btn.btn-primary:not(.ds-btn-primary),
+body.theme-azul-profundo .btn.btn-primary:not(.ds-btn-primary), body.theme-cian .btn.btn-primary:not(.ds-btn-primary),
+body.theme-oliva .btn.btn-primary:not(.ds-btn-primary),
+body.theme-dorado .select-tag.active, body.theme-manila .select-tag.active,
+body.theme-esmeralda .select-tag.active, body.theme-noche .select-tag.active,
+body.theme-granate .select-tag.active, body.theme-carbon .select-tag.active,
+body.theme-lavanda .select-tag.active, body.theme-terracota .select-tag.active,
+body.theme-azul-profundo .select-tag.active, body.theme-cian .select-tag.active,
+body.theme-oliva .select-tag.active,
+body.theme-dorado .ds-badge, body.theme-manila .ds-badge,
+body.theme-esmeralda .ds-badge, body.theme-noche .ds-badge,
+body.theme-granate .ds-badge, body.theme-carbon .ds-badge,
+body.theme-lavanda .ds-badge, body.theme-terracota .ds-badge,
+body.theme-azul-profundo .ds-badge, body.theme-cian .ds-badge,
+body.theme-oliva .ds-badge,
+body.theme-dorado .rrhh-person-modal .nav-pills .nav-link.active, body.theme-manila .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-esmeralda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-noche .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-granate .rrhh-person-modal .nav-pills .nav-link.active, body.theme-carbon .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-lavanda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-terracota .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-azul-profundo .rrhh-person-modal .nav-pills .nav-link.active, body.theme-cian .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-oliva .rrhh-person-modal .nav-pills .nav-link.active {
+  background-color: var(--tt-accent) !important;
+  border-color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-btn-primary:hover, body.theme-manila .ds-btn-primary:hover,
+body.theme-esmeralda .ds-btn-primary:hover, body.theme-noche .ds-btn-primary:hover,
+body.theme-granate .ds-btn-primary:hover, body.theme-carbon .ds-btn-primary:hover,
+body.theme-lavanda .ds-btn-primary:hover, body.theme-terracota .ds-btn-primary:hover,
+body.theme-azul-profundo .ds-btn-primary:hover, body.theme-cian .ds-btn-primary:hover,
+body.theme-oliva .ds-btn-primary:hover {
+  background-color: var(--tt-accent-hover) !important;
+  border-color: var(--tt-accent-hover) !important;
+  box-shadow: 0 4px 12px rgba(var(--tt-accent-rgb), .4) !important;
+}
+body.theme-dorado .ds-item-card:hover, body.theme-manila .ds-item-card:hover,
+body.theme-esmeralda .ds-item-card:hover, body.theme-noche .ds-item-card:hover,
+body.theme-granate .ds-item-card:hover, body.theme-carbon .ds-item-card:hover,
+body.theme-lavanda .ds-item-card:hover, body.theme-terracota .ds-item-card:hover,
+body.theme-azul-profundo .ds-item-card:hover, body.theme-cian .ds-item-card:hover,
+body.theme-oliva .ds-item-card:hover {
+  border-left-color: var(--tt-accent-light) !important;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,.12)), 0 0 0 1px rgba(var(--tt-accent-rgb), .07) !important;
+}
+body.theme-dorado .ds-search-input:focus, body.theme-manila .ds-search-input:focus,
+body.theme-esmeralda .ds-search-input:focus, body.theme-noche .ds-search-input:focus,
+body.theme-granate .ds-search-input:focus, body.theme-carbon .ds-search-input:focus,
+body.theme-lavanda .ds-search-input:focus, body.theme-terracota .ds-search-input:focus,
+body.theme-azul-profundo .ds-search-input:focus, body.theme-cian .ds-search-input:focus,
+body.theme-oliva .ds-search-input:focus {
+  border-color: var(--tt-accent-light) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--tt-accent-rgb), .25) !important;
+}
+body.theme-dorado .ds-results-header, body.theme-manila .ds-results-header,
+body.theme-esmeralda .ds-results-header, body.theme-noche .ds-results-header,
+body.theme-granate .ds-results-header, body.theme-carbon .ds-results-header,
+body.theme-lavanda .ds-results-header, body.theme-terracota .ds-results-header,
+body.theme-azul-profundo .ds-results-header, body.theme-cian .ds-results-header,
+body.theme-oliva .ds-results-header {
+  border-bottom-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .select-tag:hover, body.theme-manila .select-tag:hover,
+body.theme-esmeralda .select-tag:hover, body.theme-noche .select-tag:hover,
+body.theme-granate .select-tag:hover, body.theme-carbon .select-tag:hover,
+body.theme-lavanda .select-tag:hover, body.theme-terracota .select-tag:hover,
+body.theme-azul-profundo .select-tag:hover, body.theme-cian .select-tag:hover,
+body.theme-oliva .select-tag:hover {
+  color: var(--tt-accent-hover) !important;
+  border-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .ds-doc-thumb-badge, body.theme-manila .ds-doc-thumb-badge,
+body.theme-esmeralda .ds-doc-thumb-badge, body.theme-granate .ds-doc-thumb-badge,
+body.theme-carbon .ds-doc-thumb-badge, body.theme-lavanda .ds-doc-thumb-badge,
+body.theme-terracota .ds-doc-thumb-badge, body.theme-azul-profundo .ds-doc-thumb-badge,
+body.theme-cian .ds-doc-thumb-badge, body.theme-oliva .ds-doc-thumb-badge {
+  background: var(--tt-accent) !important;
+}
+body.theme-noche .ds-doc-thumb-badge { background: var(--tt-accent-hover) !important; }
+body.theme-dorado .ds-doc-thumb i, body.theme-manila .ds-doc-thumb i,
+body.theme-esmeralda .ds-doc-thumb i, body.theme-noche .ds-doc-thumb i,
+body.theme-granate .ds-doc-thumb i, body.theme-carbon .ds-doc-thumb i,
+body.theme-lavanda .ds-doc-thumb i, body.theme-terracota .ds-doc-thumb i,
+body.theme-azul-profundo .ds-doc-thumb i, body.theme-cian .ds-doc-thumb i,
+body.theme-oliva .ds-doc-thumb i {
+  color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-doc-modal-head, body.theme-manila .ds-doc-modal-head,
+body.theme-esmeralda .ds-doc-modal-head, body.theme-noche .ds-doc-modal-head,
+body.theme-granate .ds-doc-modal-head, body.theme-carbon .ds-doc-modal-head,
+body.theme-lavanda .ds-doc-modal-head, body.theme-terracota .ds-doc-modal-head,
+body.theme-azul-profundo .ds-doc-modal-head, body.theme-cian .ds-doc-modal-head,
+body.theme-oliva .ds-doc-modal-head {
+  background: linear-gradient(135deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  border-color: var(--tt-tint-border) !important;
+}
+body.theme-dorado .rrhh-person-photo-initials, body.theme-manila .rrhh-person-photo-initials,
+body.theme-esmeralda .rrhh-person-photo-initials, body.theme-granate .rrhh-person-photo-initials,
+body.theme-carbon .rrhh-person-photo-initials, body.theme-lavanda .rrhh-person-photo-initials,
+body.theme-terracota .rrhh-person-photo-initials, body.theme-azul-profundo .rrhh-person-photo-initials,
+body.theme-cian .rrhh-person-photo-initials, body.theme-oliva .rrhh-person-photo-initials {
+  background: var(--tt-accent) !important;
+}
+body.theme-noche .rrhh-person-photo-initials { background: var(--tt-accent-hover) !important; }
+body.theme-dorado .ds-login-card, body.theme-manila .ds-login-card,
+body.theme-esmeralda .ds-login-card, body.theme-granate .ds-login-card,
+body.theme-carbon .ds-login-card, body.theme-lavanda .ds-login-card,
+body.theme-terracota .ds-login-card, body.theme-azul-profundo .ds-login-card,
+body.theme-cian .ds-login-card, body.theme-oliva .ds-login-card {
+  border-top-color: var(--tt-accent) !important;
+}
+body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
+
+/* ==========================================================================
+   UI/UX — ACCESIBILIDAD, RESPONSIVE & COMPONENTES MEJORADOS
+   ========================================================================== */
+
+/* Skip nav (accessibility) */
+.ds-skip-nav {
+  position: absolute;
+  top: -50px;
+  left: 12px;
+  background: #0056b3;
+  color: #fff !important;
+  padding: 8px 18px;
+  border-radius: 0 0 8px 8px;
+  z-index: 9999;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none !important;
+  transition: top 0.2s;
+}
+.ds-skip-nav:focus { top: 0; color: #fff !important; }
+
+/* Better focus rings
+   SD-093: había dos definiciones de foco incompatibles (ésta y la de más
+   abajo en el archivo, fuera de esta zona); ganaba ésta por `!important`,
+   pero arrastraba un `border-radius: 4px` parásito que redondeaba
+   cualquier elemento enfocado, no sólo su contorno. Se retira ese radio
+   y se pasa al token de acento. */
+/* SD-095: Maximalismo, Brutalismo y Liquid Glass fijan `box-shadow` en `.btn`
+   con `!important`, y ese `!important` empataba en especificidad con el de
+   aquí y a veces ganaba por orden — el anillo de foco se reducía al contorno
+   de 2px, invisible sobre el propio glass. El foco depende sólo de `outline`,
+   que ningún estilo visual toca; el resplandor es un añadido, no la señal. */
+*:focus-visible {
+  outline: 2px solid var(--color-link) !important;
+  outline-offset: 2px !important;
+}
+:where(*:focus-visible) {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 15%, transparent);
+}
+
+/* ==========================================================================
+   KPI CARDS (Panel de administración)
+   SD-071/SD-072: .ds-kpi-label y .ds-kpi-value estaban definidas dos veces
+   (aquí y en el bloque de info-box/.ds-kpi-mini, más abajo en el archivo);
+   la segunda ganaba siempre por orden de cascada, así que la de aquí eran
+   líneas muertas. SD-215: .ds-kpi-card y .ds-kpi-value-sm no aparecen en
+   ningún HTML/JS del proyecto — el marcado real usa `.card.ds-kpi-mini`.
+   Se retira todo este bloque duplicado/no usado; la definición viva sigue
+   en el bloque de info-box/KPI más adelante en el archivo (fuera de esta
+   zona), que ya usa tokens `--viz-*`.
+   ========================================================================== */
+
+/* ==========================================================================
+   ADMIN NAV TABS (scrollable, themed)
+   SD-130: `.ds-admin-tabs` está definida dos veces (aquí y más abajo en el
+   archivo, fuera de esta zona — "ADMIN PANEL — navegación compacta"); la
+   segunda gana por orden de cascada en toda propiedad que las dos declaran
+   con la misma especificidad. Se retiran de aquí las declaraciones que la
+   segunda ya cubre (contenedor: flex-wrap/overflow-x/gap/padding-bottom/
+   scrollbar-*, incluidas las reglas `::-webkit-scrollbar` — la segunda las
+   oculta con `display:none`, que gana siempre sobre cualquier estilo de
+   barra de aquí, SD-162; enlace: font-size/color/padding/white-space/
+   transition/:hover; activo: background-color/color, que la segunda
+   también fija con `!important` y gana por orden). Queda sólo lo que la
+   segunda definición NO declara, más lo que gana aquí por `!important`
+   con mayor especificidad de todas formas — consolidar en una sola regla
+   de verdad exige tocar esa segunda definición, fuera del carril L6.
+   ========================================================================== */
+.ds-admin-tabs { display: flex; }
+.ds-admin-tabs .nav-item { flex-shrink: 0; }
+.ds-admin-tabs .nav-link {
+  border-radius: 8px !important;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.ds-admin-tabs .nav-link i { margin-right: 5px; opacity: 0.7; }
+.ds-admin-tabs .nav-link.active {
+  border-color: transparent !important;
+  box-shadow: 0 3px 10px rgba(0,86,179,0.28);
+}
+.ds-admin-tabs .nav-link.active i { opacity: 1; }
+
+/* Theme overrides for admin tabs active state */
+body.theme-azul-profundo .ds-admin-tabs .nav-link.active { background-color:#0f3460 !important; box-shadow:0 3px 10px rgba(15,52,96,0.3); }
+body.theme-dorado         .ds-admin-tabs .nav-link.active { background-color:#9a7017 !important; box-shadow:0 3px 10px rgba(154,112,23,0.3); }
+body.theme-manila         .ds-admin-tabs .nav-link.active { background-color:#8B7355 !important; box-shadow:0 3px 10px rgba(139,115,85,0.3); }
+body.theme-esmeralda      .ds-admin-tabs .nav-link.active { background-color:#2d6a4f !important; box-shadow:0 3px 10px rgba(45,106,79,0.3); }
+body.theme-cian           .ds-admin-tabs .nav-link.active { background-color:#0d6e7c !important; box-shadow:0 3px 10px rgba(13,110,124,0.3); }
+body.theme-lavanda        .ds-admin-tabs .nav-link.active { background-color:#4a3570 !important; box-shadow:0 3px 10px rgba(74,53,112,0.3); }
+body.theme-granate        .ds-admin-tabs .nav-link.active { background-color:#7c2d3c !important; box-shadow:0 3px 10px rgba(124,45,60,0.3); }
+body.theme-terracota      .ds-admin-tabs .nav-link.active { background-color:#b5451b !important; box-shadow:0 3px 10px rgba(181,69,27,0.3); }
+body.theme-noche          .ds-admin-tabs .nav-link.active { background-color:#4a90d9 !important; box-shadow:0 3px 10px rgba(74,144,217,0.3); }
+body.theme-carbon         .ds-admin-tabs .nav-link.active { background-color:#444    !important; box-shadow:0 3px 10px rgba(68,68,68,0.3); }
+body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a6b2a !important; box-shadow:0 3px 10px rgba(90,107,42,0.3); }
+
+/* ==========================================================================
+   ADMIN TABLE
+   SD-081: las mayúsculas forzadas de la cabecera ensanchaban columnas largas
+   («Fecha de vencimiento») y obligaban al `white-space: nowrap` que causaba
+   el desborde horizontal (OA-195) — capitalización normal, mismo peso.
+   SD-122: cabecera pegajosa: el monitor y la auditoría muestran hasta 100
+   filas y se perdía de vista qué columna era cuál al bajar.
+   SD-204: `content-visibility` en filas — se pintaban las 100 aunque sólo
+   se vean seis.
+   ========================================================================== */
+.ds-admin-table { font-size: 0.83rem; margin-bottom: 0 !important; }
+.ds-admin-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky, 50);
+  background: #eef1f7 !important;
+  color: #3a4f66 !important;
+  font-weight: 700;
+  font-size: 0.73rem;
+  letter-spacing: 0.6px;
+  border-bottom: 2px solid #cdd8e8 !important;
+  border-top: none !important;
+  white-space: nowrap;
+  padding: 10px 12px !important;
+}
+.ds-admin-table tbody tr {
+  transition: background 0.15s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 42px;
+}
+.ds-admin-table tbody tr:hover,
+.ds-admin-table tbody tr:focus-within { background-color: #f0f7ff !important; }
+.ds-admin-table td { vertical-align: middle !important; padding: 8px 12px !important; }
+/* SD-065: sin números tabulares, los dígitos de fecha/cédula bailan columna
+   a columna en vez de alinearse como una columna real. */
+.ds-admin-table td, .ds-admin-table thead th { font-variant-numeric: tabular-nums; }
+.ds-admin-table .ds-tbl-actions { white-space: nowrap; }
+.ds-admin-table .ds-tbl-actions .btn { margin: 1px; }
+
+/* ==========================================================================
+   UPLOAD ZONE (Nuevo Ingreso)
+   SD-092: el discontinuo se reserva para "vacío/arrastrable" — aquí es
+   exactamente ese caso, se tokeniza el color de borde para que sea el mismo
+   gris que el resto de bordes discontinuos del sistema.
+   ========================================================================== */
+.ds-upload-zone {
+  border: 2px dashed var(--border-strong, #ced4da);
+  border-radius: 12px;
+  padding: 28px 16px;
+  background: #f9fafb;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.ds-upload-zone:hover, .ds-upload-zone.drag-over {
+  border-color: var(--color-link, #0056b3);
+  background: #eef4fb;
+  box-shadow: 0 4px 16px rgba(0,86,179,0.1);
+}
+.ds-upload-zone .ds-upload-icon {
+  font-size: 2.4rem;
+  color: #adb5bd;
+  margin-bottom: 10px;
+  display: block;
+  transition: color 0.25s, transform 0.25s;
+}
+.ds-upload-zone:hover .ds-upload-icon { color: var(--color-link, #0056b3); transform: translateY(-4px); }
+.ds-upload-zone h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.ds-upload-zone p { font-size: 0.8rem; color: #6c757d; margin-bottom: 10px; }
+
+/* ==========================================================================
+   ITEM CARDS — clases CSS para reemplazar inline styles del JS
+   ========================================================================== */
+.ds-item-type-badge {
+  font-size: 0.73rem;
+  color: #2b4e72;
+  font-weight: 700;
+  border: 1px solid #d9e6f4;
+  border-radius: 12px;
+  padding: 3px 10px;
+  background: #eef4fb;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ds-item-date-text { font-size: 0.78rem; color: #6c757d; }
+.ds-item-kw-badge {
+  background-color: #2b4e72;
+  color: white;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.ds-item-kw-more {
+  background-color: #6c757d;
+  color: white;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* Avatar pequeño en resultados RRHH */
+.ds-person-avatar-sm {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef4fb;
+  border: 2px solid #dee2e6;
+  flex-shrink: 0;
+}
+.ds-person-avatar-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ds-person-initials-sm {
+  width: 100%; height: 100%;
+  background: #2b4e72;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.88rem;
+  border-radius: 50%;
+}
+
+/* ==========================================================================
+   ESTADOS VACÍO / CARGANDO
+   ========================================================================== */
+.ds-empty {
+  text-align: center;
+  padding: 3.5rem 1rem;
+  color: #6c757d;
+}
+.ds-empty i { font-size: 3rem; opacity: 0.25; display: block; margin-bottom: 1rem; }
+.ds-empty h5 { font-weight: 700; color: #495057; margin-bottom: 6px; }
+.ds-empty p { font-size: 0.88rem; margin: 0; }
+
+/* SD-137: mismas tres variantes que ya tiene `.ds-chart-empty` (fuera de
+   este carril, ver ese comentario) — sin resultados con los filtros
+   actuales, sin datos con una acción para crear el primero, y error de
+   carga. Antes era un único vacío para los tres casos. */
+.ds-empty--accion .ds-empty-btn {
+  margin-top: 4px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-link);
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.ds-empty--accion .ds-empty-btn:hover { background: var(--surface-2); }
+.ds-empty--error i, .ds-empty--error h5 { color: var(--color-danger); opacity: 1; }
+
+/* SD-140: FontAwesome gira a 2s con otro grosor; el spinner propio gira a
+   0.7s. Igualar la velocidad de fa-spin evita dos ritmos de espera en la
+   misma pantalla mientras el marcado migra a `.ds-spinner`. */
+.fa-spin { animation-duration: 0.7s; }
+
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+.ds-spinner {
+  width: 22px; height: 22px;
+  border: 3px solid var(--border, #dee2e6);
+  border-top-color: var(--color-link, #0056b3);
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* SD-113: ningún botón tenía estado de carga — Guardar, importar, exportar y
+   restaurar copia tardan segundos y el botón se queda igual. Variante con
+   `.ds-spinner` en línea (mismo giro de 0.7s que el resto del sistema,
+   SD-140) y ancho estable: el texto se oculta mediante `visibility` en vez
+   de `display`, así la caja del botón no cambia de tamaño al activarse. */
+.btn.is-loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+.btn.is-loading > * { visibility: hidden; }
+.btn.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+.btn-outline-secondary.is-loading::after,
+.btn-light.is-loading::after {
+  border-color: var(--border-strong, #ced4da);
+  border-top-color: var(--text, #212529);
+}
+
+/* ==========================================================================
+   BREADCRUMB — acento izquierdo
+   ========================================================================== */
+.ds-breadcrumb-wrapper {
+  border-left: 4px solid #2b4e72;
+}
+/* Breadcrumb themed */
+body.theme-azul-profundo .ds-breadcrumb-wrapper { border-left-color: #0f3460 !important; }
+body.theme-dorado         .ds-breadcrumb-wrapper { border-left-color: #9a7017 !important; }
+body.theme-manila         .ds-breadcrumb-wrapper { border-left-color: #8B7355 !important; }
+body.theme-esmeralda      .ds-breadcrumb-wrapper { border-left-color: #2d6a4f !important; }
+body.theme-cian           .ds-breadcrumb-wrapper { border-left-color: #0d6e7c !important; }
+body.theme-lavanda        .ds-breadcrumb-wrapper { border-left-color: #4a3570 !important; }
+body.theme-granate        .ds-breadcrumb-wrapper { border-left-color: #7c2d3c !important; }
+body.theme-terracota      .ds-breadcrumb-wrapper { border-left-color: #b5451b !important; }
+body.theme-noche          .ds-breadcrumb-wrapper { border-left-color: #4a90d9 !important; }
+body.theme-carbon         .ds-breadcrumb-wrapper { border-left-color: #555    !important; }
+body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !important; }
+
+/* ==========================================================================
+   MOBILE — Toggle de filtros en buscadores
+   ========================================================================== */
+.ds-filter-toggle-btn {
+  display: none;
+  width: 100%;
+  margin-bottom: 14px;
+  font-weight: 600;
+  border-radius: 8px !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+@media (max-width: 767px) {
+  .ds-filter-toggle-btn { display: flex; }
+  .ds-filter-col-mobile { display: none; }
+  .ds-filter-col-mobile.open { display: block; }
+}
+
+/* ==========================================================================
+   RESPONSIVE GENERAL
+   ========================================================================== */
+@media (max-width: 575px) {
+  .app-tab-section { padding: 0.85rem !important; }
+  .ds-search-bar { margin-bottom: 1.25rem; }
+  .ds-results-title { font-size: 1.1rem; }
+  .ds-item-card { padding: 0.65rem 0.5rem; }
+  /* SD-215: `.ds-kpi-row` no aparece en ningún HTML/JS del proyecto — el
+     marcado real usa `.ds-kpi-grid` (con su propia regla responsive más
+     abajo en el archivo). Regla muerta retirada. */
+}
+
+/* ==========================================================================
+   ADMIN CARD HEADERS — limpiar inline colors, mejor visual
+   SD-058: seis degradados de dos paradas casi idénticas por seis colores de
+   tarjeta; ninguno significaba nada que un color plano no dijera igual, así
+   que se aplanan. SD-045 (retirar del todo estas seis variantes en favor de
+   `.ds-chart-card`/`.ds-filter-card` neutras) queda sin tocar: son quince
+   usos en tres páginas admin fuera de este carril, y decidir qué tarjeta usa
+   cuál color es una decisión de marcado, no de esta hoja — anotado en
+   `_BUZON.md`.
+   ========================================================================== */
+.card.card-primary .card-header  { background:#e3eefa !important; color:#0f3460 !important; border-bottom-color:#b8d5ef !important; }
+.card.card-success .card-header  { background:#deefe3 !important; color:#1a5c30 !important; border-bottom-color:#b5d9c5 !important; }
+.card.card-info    .card-header  { background:#daf0f4 !important; color:#0c545d !important; border-bottom-color:#aadfe7 !important; }
+.card.card-warning .card-header  { background:#fff5d6 !important; color:#7B5800 !important; border-bottom-color:#eedfa0 !important; }
+.card.card-danger  .card-header  { background:#fbdfe2 !important; color:#7c2d3c !important; border-bottom-color:#f0b4bf !important; }
+.card.card-secondary .card-header { background:#eef0f1 !important; color:#495057 !important; }
+.card.card-primary .card-header .card-title  { color: #0f3460 !important; }
+.card.card-success .card-header .card-title  { color: #1a5c30 !important; }
+.card.card-info    .card-header .card-title  { color: #0c545d !important; }
+.card.card-warning .card-header .card-title  { color: #7B5800 !important; }
+.card.card-danger  .card-header .card-title  { color: #7c2d3c !important; }
+
+/* ==========================================================================
+   PAGINATION CONTROLS — visual mejorado
+   ========================================================================== */
+#ext_pagination_controls,
+#rrhh_pagination_controls {
+  border-top: 1px solid var(--border-subtle, #e9ecef);
+  padding-top: 12px;
+}
+#ext_pagination_controls .btn,
+#rrhh_pagination_controls .btn,
+[id^="admin_prev-"], [id^="admin_next-"] {
+  border-radius: 8px !important;
+  font-weight: 600;
+  font-size: 0.84rem;
+  padding: 6px 14px;
+  transition: all 0.2s;
+}
+#ext_pagination_controls .btn:hover:not(:disabled),
+#rrhh_pagination_controls .btn:hover:not(:disabled) {
+  background: #f0f4f8;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   NAVBAR — username badge (SD-040: app-shell.js pinta el nombre con un
+   style en línea en rojo en vez de usar esta clase — anotado en el buzón,
+   app-shell.js no es mío)
+   ========================================================================== */
+.ds-nav-user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  padding: var(--space-1) var(--space-3);
+  background: #eef4fb;
+  border-radius: var(--radius-pill);
+  border: 1px solid #d9e6f4;
+  margin-right: var(--space-2);
+  margin-top: 2px;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-nav-user-badge i { color: var(--color-primary); opacity: 0.8; flex-shrink: 0; }
+
+/* ==========================================================================
+   FLATPICKR DATE RANGE PICKER — Integración sidebar (SD-120: reescrito
+   sobre los tokens del sistema en vez de #2b4e72 a pelo once veces)
+   ========================================================================== */
+.flatpickr-calendar {
+    font-family: var(--ds-font-family, 'Nunito', sans-serif);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid #d6e4f0;
+}
+.flatpickr-months {
+    background: var(--color-primary);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    padding: 4px 0;
+}
+.flatpickr-months .flatpickr-month,
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+    color: var(--text-inverse);
+    fill: var(--text-inverse);
+}
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+    color: #a8d4f5;
+    fill: #a8d4f5;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: var(--color-primary);
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-bold);
+    font-size: 0.85rem;
+}
+.flatpickr-current-month input.cur-year {
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-bold);
+}
+.flatpickr-weekdays { background: #eef4fb; }
+span.flatpickr-weekday {
+    background: #eef4fb;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xs);
+}
+.flatpickr-day {
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: #2f3943;
+}
+.flatpickr-day:hover,
+.flatpickr-day:focus {
+    background: #d6e9f8;
+    border-color: #d6e9f8;
+    color: var(--color-primary);
+}
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: var(--text-inverse) !important;
+    font-weight: var(--font-weight-bold);
+}
+.flatpickr-day.inRange {
+    background: #d6e9f8 !important;
+    border-color: #d6e9f8 !important;
+    color: var(--color-primary);
+    /* El rango se dibuja con una sombra lateral del mismo tono de fondo:
+       si el fondo cambia (tema/oscuro), esto se rompe salvo que ambos
+       lados sigan el mismo token — ver SD-120. */
+    box-shadow: -5px 0 0 #d6e9f8, 5px 0 0 #d6e9f8;
+}
+.flatpickr-day.today {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+.flatpickr-day.today:hover {
+    background: var(--color-primary);
+    color: var(--text-inverse);
+}
+.flatpickr-day.disabled,
+.flatpickr-day.disabled:hover {
+    color: #ccc;
+}
+
+/* ==========================================================================
+   DATE SLICER — chips de preset (SD-141: misma forma de "píldora
+   seleccionable" que .select-tag, con su propia calibración justificada
+   por el contexto — filtro de fecha, no filtro de facetas)
+   ========================================================================== */
+.ds-date-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+.ds-date-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    border: 1px solid #d1dbe8;
+    background: #f8fbff;
+    color: #5a7a9a;
+    cursor: pointer;
+    transition: background var(--duration-base) ease,
+                border-color var(--duration-base) ease,
+                color var(--duration-base) ease,
+                transform var(--duration-base) ease;
+    white-space: nowrap;
+    line-height: var(--line-height-loose);
+}
+@media (hover: hover) and (pointer: fine) {
+    .ds-date-chip:hover {
+        background: #e8f2ff;
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        transform: translateY(-1px);
+    }
+}
+.ds-date-chip.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-inverse);
+    box-shadow: var(--shadow-sm);
+}
+.ds-date-chip i {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+.ds-date-active-label {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    min-height: 1.2em;
+    margin-top: var(--space-2);
+}
+
+/* ── Quick-Status Button ── */
+.ds-status-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform var(--duration-fast);
+}
+@media (hover: hover) and (pointer: fine) {
+    .ds-status-btn:hover { transform: scale(1.15); }
+}
+.ds-status-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+/* ==========================================================================
+   SKELETON LOADER (SD-138, SD-139) — definición única y reutilizable.
+   Las cinco páginas que redefinían `.ds-skeleton` en un <style> propio
+   (admin_archive, admin_hr, admin_system, archive, hr) deben borrar ese
+   bloque y usar sólo esta clase — anotado en el buzón para el lote LH,
+   `styles.css` no puede borrar un <style> que vive en otro archivo.
+   Variantes con la forma del contenido: fila, tarjeta y KPI.
+   ========================================================================== */
+.ds-skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-50) 50%, var(--gray-200) 75%);
+    background-size: 200% 100%;
+    animation: ds-shimmer 1.4s infinite;
+    border-radius: var(--radius-sm);
+    display: block;
+}
+@keyframes ds-shimmer {
+    0%  { background-position: 200% 0; }
+    100%{ background-position: -200% 0; }
+}
+/* Fila de tabla: una barra por celda, altura de línea de texto */
+.ds-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-2) var(--space-3);
+}
+.ds-skeleton-row .ds-skeleton { height: 14px; flex: 1; }
+/* Tarjeta de resultado: título + dos líneas de cuerpo */
+.ds-skeleton-card {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-1);
+}
+.ds-skeleton-card .ds-skeleton { height: 12px; margin-bottom: var(--space-2); }
+.ds-skeleton-card .ds-skeleton:first-child { height: 16px; width: 60%; margin-bottom: var(--space-3); }
+.ds-skeleton-card .ds-skeleton:last-child { width: 40%; margin-bottom: 0; }
+/* KPI: etiqueta corta + cifra grande */
+.ds-skeleton-kpi .ds-skeleton { height: 10px; width: 70px; margin-bottom: var(--space-2); }
+.ds-skeleton-kpi .ds-skeleton:last-child { height: 26px; width: 90px; margin-bottom: 0; }
+
+/* ── Focus visible para accesibilidad ── */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── Mark highlight de búsqueda (SD-050: par claro/oscuro con contraste
+   suficiente en vez de un amarillo fijo con `color: inherit`) ── */
+mark {
+    --mark-bg: #fff176;
+    --mark-text: #3d3d00;
+    background: var(--mark-bg);
+    color: var(--mark-text);
+    border-radius: var(--radius-xs);
+    padding: 0 1px;
+}
+body.dark-mode mark {
+    --mark-bg: #cca300;
+    --mark-text: #1a1d23;
+}
+
+/* ── Session warning banner ── */
+#session-warning-banner {
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    border-radius: 0;
+    border-left: 4px solid var(--color-danger);
+}
+
+/* ── Código / identificadores (SD-079): sólo había regla oscura suelta
+   para `pre, code`; aquí el componente base en ambos modos ── */
+code, .ds-mono {
+    font-family: 'Consolas', 'SFMono-Regular', Menlo, Monaco, monospace;
+    font-size: 0.9em;
+    background: var(--surface-2);
+    color: var(--text);
+    border-radius: var(--radius-xs);
+    padding: 0.1em 0.35em;
+}
+body.dark-mode code, body.dark-mode .ds-mono {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+/* ── Info-box clickable (SD-217): clase explícita en vez de un selector
+   atado a la cadena exacta de un style en línea. Se conserva el selector
+   [style*="cursor:pointer"] como respaldo mientras admin-stats.js (fuera
+   de este carril, anotado en el buzón) empieza a escribir `.is-clickable`. ── */
+.info-box.is-clickable,
+.info-box[style*="cursor:pointer"] { transition: box-shadow var(--duration-base), transform var(--duration-fast); }
+.info-box.is-clickable:hover,
+.info-box[style*="cursor:pointer"]:hover {
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-2px);
+}
+
+/* ── Monitor admin table: compact ── */
+#admin_control_table-archivo,
+#admin_control_table-rrhh {
+    font-size: var(--font-size-sm);
+}
+#admin_control_table-archivo td,
+#admin_control_table-rrhh td {
+    vertical-align: middle;
+    padding: var(--space-2) var(--space-2);
+}
+
+/* ── Dossier RRHH ── */
+.ds-dossier-section-title {
+    font-size: 0.72rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin-bottom: var(--space-1);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border-subtle);
+}
+.ds-dossier-item {
+    background: var(--surface-1);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-2);
+    transition: box-shadow var(--duration-fast);
+}
+/* SD-160: redondear el primer y último elemento de la lista en vez de
+   depender de overflow:hidden en el contenedor */
+.ds-dossier-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+.ds-dossier-item:last-child { margin-bottom: 0; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+.ds-dossier-item:hover { box-shadow: var(--shadow-sm); }
+.ds-dossier-item-title { font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
+.ds-dossier-item-meta  { font-size: 0.75rem; color: var(--gray-600); }
+
+/* BR-109: clases que reemplazan los ~15 `style="..."` del modal de dossier
+   de empleado (hr.js, renderRrhhDossierModal y helpers). Valores tomados de
+   la nota de agente-br109-dossier-estilos en _BUZON.md (commit 76186a9, lado
+   hr.js ya hecho), quedaba sólo el lado de styles.css. */
+.ds-dossier-avatar-wrap { width: 150px; min-width: 150px; }
+.ds-dossier-subheading  { font-size: 0.78rem; }
+.ds-dossier-historial-inline { font-size: 0.82rem; }
+.ds-dossier-historial-table { font-size: 0.8rem; }
+.ds-dossier-parte-tab   { font-size: 0.82rem; padding: 6px 12px; }
+.ds-dossier-parte-icon  { color: var(--ds-parte-color, inherit); }
+.ds-dossier-parte-badge { background: var(--ds-parte-color, #6c757d); color: #fff; font-size: 0.68rem; }
+
+/* ── Responsive card grid for search results ── */
+@media (max-width: 576px) {
+    .ds-result-card { margin-bottom: var(--space-2); }
+    .ds-result-card .card-body { padding: var(--space-3); }
+    .info-box .info-box-number { font-size: 1.2rem; }
+}
+
+/* ==========================================================================

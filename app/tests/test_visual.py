@@ -146,3 +146,4 @@ def test_pagina_publica_sin_desborde_ni_errores(servidor_vivo, navegador, ruta, 
         f"{ruta} a {ancho}px ({'oscuro' if oscuro else 'claro'}) tira errores "
         f"de consola: {errores_reales}"
     )
+

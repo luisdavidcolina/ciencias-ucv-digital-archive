@@ -1,0 +1,366 @@
+/* === Cascara: navbar + sidebar === */
+/* --- OVERRIDES BS4DASH NAVBAR (HEADER) --- */
+/* SD-135: pegajosa al hacer scroll — si no, en una tabla de 100 filas se
+   pierden el menú, el usuario y la campana de notificaciones. */
+.main-header.navbar {
+    background-color: var(--surface-1) !important; /* DSpace Demo actual es blanca */
+    border-bottom: 1px solid var(--border) !important;
+    padding: var(--space-2) var(--space-4) !important;
+    box-shadow: var(--shadow-sm) !important;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+}
+
+.main-header .nav-link {
+    color: var(--gray-700) !important;
+}
+
+.main-header .nav-link:hover {
+    color: var(--color-link) !important;
+}
+
+/* SD-132: 30 líneas que ocultaban restos de AdminLTE que no existen
+   ([data-widget="control-sidebar"], [data-widget="fullscreen"],
+   #help_switch, y dos :not() encadenados) se retiraron — AdminLTE no se
+   carga en este proyecto (CLAUDE.md), así que ninguno de esos elementos
+   aparece nunca, y el :not() doble era una trampa: cualquier elemento
+   nuevo añadido a la derecha de la barra habría desaparecido sin
+   explicación. */
+
+.main-header .navbar-brand,
+.main-header .navbar-brand:hover {
+    color: var(--color-primary) !important;
+    font-weight: var(--font-weight-black) !important;
+    font-size: 1.08rem !important;
+    letter-spacing: 0.2px;
+    text-decoration: none !important;
+}
+
+.ds-navbar-logo i {
+    color: var(--color-link);
+    margin-right: var(--space-1);
+}
+
+.ds-navbar-logo-img {
+    display: block;
+    height: 34px;
+    width: auto;
+    margin-left: var(--space-1);
+}
+
+.main-header .ds-navbar-logo {
+    text-align: left !important;
+    font-weight: var(--font-weight-black);
+    color: var(--color-primary) !important;
+    white-space: nowrap;
+    padding-left: var(--space-1) !important;
+    padding-right: var(--space-1) !important;
+}
+
+/* SD-085: el acento de borde izquierdo se reserva para «elemento activo»
+   (enlace de barra lateral); la cabecera de página lo llevaba de forma
+   permanente, uno de los cinco usos distintos del mismo gesto en el
+   sistema. SD-086: ese borde de 4px + el borde completo + el radio de 6px
+   dejaban una esquina con un bisel que no cuadraba con nada — se
+   simplifica a un borde uniforme sin acento lateral.
+   SD-100: el margen lateral propio desalineaba la cabecera 1px respecto a
+   las tarjetas de abajo, que viven dentro de `.container-fluid`
+   (`padding:0 15px`); se retira el margen lateral y sólo se deja el
+   vertical. */
+.ds-page-header {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-black);
+    font-size: 1.15rem;
+    padding: var(--space-3) var(--space-4);
+    margin: var(--space-4) 0 var(--space-1) 0;
+    border-radius: var(--radius-sm);
+}
+
+.ds-page-header i {
+    color: var(--color-link);
+    margin-right: 0.45rem;
+}
+
+/* SD-107: sin ancho máximo, en pantallas de 2.560px la tabla de auditoría
+   y las tarjetas de resultado se estiran de borde a borde. */
+.content-wrapper {
+    max-width: 1600px;
+    margin-left: auto !important;
+    margin-right: auto;
+}
+
+/* SD-134: `.ds-sidebar` pasa a `position:sticky` (fija) en ≥1200px más
+   abajo en este mismo archivo; como es un `<aside>` independiente del
+   flujo de `.content-wrapper` (no un hijo del mismo contenedor flex), sin
+   este margen el contenido quedaría tapado detrás de la barra fija. */
+@media (min-width: 1200px) {
+    .content-wrapper {
+        margin-left: 280px !important;
+    }
+}
+
+/* --- SIDEBAR COLAPSABLE CON ANIMACIONES --- */
+/* SD-221: el velo llevaba blur(2px) además de oscurecer — un desenfoque
+   apenas perceptible que igual fuerza una capa de composición a pantalla
+   completa en cada apertura. Se retira; el oscurecimiento por sí solo ya
+   separa el cajón del contenido. */
+.ds-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0);
+    z-index: var(--z-overlay);
+    pointer-events: none;
+    transition: background var(--duration-slow) var(--ease-out);
+}
+
+.ds-sidebar-overlay.open {
+    background: rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+}
+
+/* SD-134: fija en escritorio (≥1200px) en vez de seguir siendo un cajón
+   modal que tapa el contenido y hay que cerrar; por debajo de ese ancho
+   sigue como cajón. SD-182: la curva del cajón y la del velo pasan a
+   compartir duración/curva (--duration-slow/--ease-out) en vez de
+   `.35s cubic-bezier(...)` aquí y `.35s ease` en el velo por separado.
+   SD-185: anima `transform: translateX()` en vez de `left`, que fuerza
+   recálculo de layout en cada fotograma. */
+.ds-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface-1);
+    z-index: var(--z-overlay);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform var(--duration-slow) var(--ease-out);
+    overflow: hidden;
+}
+
+.ds-sidebar.open {
+    transform: translateX(0);
+}
+
+@media (min-width: 1200px) {
+    .ds-sidebar {
+        position: sticky;
+        top: 0;
+        transform: none;
+        transition: none;
+        box-shadow: none;
+        border-right: 1px solid var(--border);
+    }
+
+    .ds-sidebar-overlay {
+        display: none;
+    }
+}
+
+.ds-sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 20px 14px;
+    /* SD-058: excepción declarada — es la única cabecera de marca, el
+       resto de degradados casi-planos del archivo se aplanaron. */
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+.ds-sidebar-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    object-fit: contain;
+    background: rgba(255,255,255,0.15);
+    padding: 3px;
+}
+
+/* SD-027: Outfit se cargaba entera (dos ficheros de fuente) para este
+   único selector de trece caracteres; se retira y el titular pasa a
+   apoyarse en Nunito, ya cargada para todo lo demás. */
+.ds-sidebar-brand {
+    font-family: var(--ds-font-family, 'Nunito'), sans-serif;
+    font-size: 1.15rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-inverse);
+    letter-spacing: 0.3px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex-grow: 0;
+}
+
+/* SD-183: el giro de 90° en el botón de cerrar es decoración pura — el
+   propio CLAUDE.md fija que el movimiento explica de dónde viene el
+   contenido, no decora. Se retira; queda sólo el cambio de fondo. */
+.ds-sidebar-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: var(--text-inverse);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--duration-base) var(--ease-out);
+    font-size: 1rem;
+}
+
+.ds-sidebar-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* SD-058: el degradado de dos paradas casi idénticas no aportaba nada que
+   un color plano no diera ya; se deja plano salvo donde el degradado
+   comunica identidad de marca (la cabecera de la barra lateral, arriba). */
+.ds-sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+}
+
+.ds-sidebar-section-label {
+    font-size: 0.66rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+    color: var(--gray-500);
+    padding: 14px 24px 4px;
+    user-select: none;
+}
+
+/* SD-133: además del enlace activo, se resalta también la etiqueta de la
+   sección que lo contiene — con nueve enlaces en tres secciones, un solo
+   enlace resaltado no bastaba para orientarse. `app.js` (otro carril) es
+   quien alterna esta clase al marcar el enlace activo; ver nota en
+   _BUZON.md. */
+.ds-sidebar-section-label.ds-section-active {
+    color: var(--color-primary);
+}
+
+.ds-sidebar-nav {
+    flex-grow: 1;
+    padding: 12px 0;
+    overflow-y: auto;
+}
+
+/* SD-174: `transition: all` obliga a interpolar cualquier propiedad que
+   cambie, incluidas las compuestas (box-shadow). Lista explícita. */
+.ds-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    color: var(--gray-700);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    position: relative;
+    transition: background var(--duration-slow) var(--ease-out),
+                color var(--duration-slow) var(--ease-out),
+                border-color var(--duration-slow) var(--ease-out);
+    border-left: 4px solid transparent;
+}
+
+/* SD-094: el `:focus-visible` de este enlace (más abajo en el archivo,
+   lote L6) sólo corrige el radio del contorno; el lado derecho seguía
+   cortado por el `overflow:hidden` del contenedor `.ds-sidebar` de
+   arriba. `outline-offset` negativo mete el contorno dentro del propio
+   enlace para que no dependa de ese recorte. */
+.ds-sidebar-link:focus-visible {
+    outline-offset: -3px;
+}
+
+.ds-sidebar-link i {
+    font-size: 1.15rem;
+    width: 22px;
+    text-align: center;
+    color: var(--gray-600);
+    transition: color var(--duration-slow) var(--ease-out),
+                transform var(--duration-slow) var(--ease-out);
+}
+
+.ds-sidebar-link span {
+    flex-grow: 1;
+}
+
+.ds-sidebar-link:hover {
+    background: var(--surface-3);
+    color: var(--color-primary);
+    border-left-color: var(--color-link);
+    text-decoration: none !important;
+}
+
+.ds-sidebar-link:hover i {
+    color: var(--color-link);
+    transform: scale(1.15);
+}
+
+.ds-sidebar-link.active {
+    background: var(--surface-3);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    border-left-color: var(--color-primary);
+}
+
+.ds-sidebar-link.active i {
+    color: var(--color-primary);
+}
+
+/* SD-177: un pulso infinito en la periferia del campo visual es una
+   fuente de distracción permanente; se anima tres veces y se detiene. */
+.ds-sidebar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-pill);
+    background: var(--color-success);
+    color: var(--text-inverse);
+    font-size: 0.7rem;
+    font-weight: var(--font-weight-black);
+    animation: ds-badge-pulse 2s ease-out 3;
+}
+
+/* SD-051: `#e74c3c`/`#ff6b5b` eran de la paleta Flat UI, un tercer rojo
+   de «peligro» que no es ni `--color-danger` (`#dc3545`) ni
+   `--viz-critical`. Se tokeniza al único rojo del sistema. */
+/* Botón Sistema Global — destacado con borde superior y color especial */
+.ds-sidebar-sistema {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.10) !important;
+  padding-top: 10px !important;
+}
+.ds-sidebar-sistema i { color: var(--color-danger) !important; }
+.ds-sidebar-sistema:hover { background: rgba(208,59,59,0.18) !important; border-left-color: var(--color-danger) !important; }
+.ds-sidebar-sistema:hover i { color: var(--color-danger) !important; }
+
+@keyframes ds-badge-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(32, 136, 56, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(32, 136, 56, 0); }
+}
+
+.ds-sidebar-footer {
+    padding: 14px 24px;
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    border-top: 1px solid var(--border-subtle);
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}

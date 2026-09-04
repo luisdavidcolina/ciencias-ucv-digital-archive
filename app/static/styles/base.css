@@ -1,0 +1,50 @@
+/* === Base / reset === */
+/* DSpace 7 Pixel-Perfect SCSS/CSS Extracted Emulation */
+/* Combinado con anulación de estilos AdminLTE/bs4Dash */
+
+/* SD-026: el @import se retiró de aquí — bloqueaba el render de toda la
+   hoja hasta resolver la fuente, y siete de las diez páginas ya traían el
+   mismo <link> en el <head>. La carga vive sólo en el <head> de cada
+   página (preconnect + <link>), lote LH. SD-028: pedir los cortes
+   400;600;700;800 (nunca 900 — ver --font-weight-black en el bloque de
+   tokens) para que el navegador no sintetice el negrita. */
+
+:root { --ds-font-scale: 0.93; }
+html  { font-size: calc(16px * var(--ds-font-scale)); }
+
+body, .content-wrapper {
+    background-color: var(--surface-0) !important;
+    font-family: var(--ds-font-family, 'Nunito'), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    color: var(--text);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+a {
+    color: var(--color-link);
+    text-decoration: none;
+    background-color: transparent;
+}
+
+/* SD-172: el subrayado global en :hover obligaba a catorce reglas
+   `text-decoration: none !important` a deshacerlo (botones, enlaces de
+   barra lateral, chips, tarjetas...). Se restringe a los enlaces de
+   prosa; el resto no necesita ya la excepción. */
+a:hover {
+    color: var(--color-link-hover);
+}
+
+a.ds-link:hover,
+.ds-doc-abstract a:hover,
+.ds-compartido-cuerpo a:hover {
+    text-decoration: underline;
+}
+
+/* SD-170: sin :visited no hay forma de saber, a simple vista, qué
+   documentos del catálogo ya se abrieron — información de trabajo, no
+   decoración, en un archivo documental. Tratamiento discreto: mismo
+   tono, un pelo más apagado. */
+.ds-item-title a:visited,
+.ds-search-result a:visited {
+    color: var(--color-link-hover);
+}

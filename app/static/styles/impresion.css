@@ -1,0 +1,90 @@
+/* === Impresion (SD-229..SD-233) === */
+   IMPRESIÓN (SD-229 a SD-233, sub-lote completo) — el archivo no tenía
+   hoja de impresión de verdad: cinco líneas con lista negra que ocultaban
+   elementos que no existen y dejaban visible la burbuja del asistente,
+   los desplegables y los paneles fijos. Reescrita como lista blanca:
+   se oculta toda navegación y todo lo que sea `position: fixed`.
+
+   SD-235: el informe PDF de RRHH se genera aparte, en el servidor
+   (`app/routes/hr.py`), por un camino que no pasa por esta hoja — así que
+   la versión impresa desde el navegador y la generada no van a coincidir
+   hasta que alguien unifique los dos caminos o le dé al HTML del reporte
+   una clase que esta hoja pueda reconocer. `hr.py` no es mío: anotado en
+   el buzón lo que hace falta ahí.
+   ========================================================================== */
+@media print {
+    /* SD-229: cáscara de navegación y cualquier capa flotante o fija */
+    .main-header, #app-sidebar, .ds-sidebar, .ds-sidebar-overlay,
+    .ds-breadcrumb-wrapper, .nav-pills, .ds-admin-tabs,
+    .btn, .card-header .card-tools,
+    #ds-toast-container, #ia-burbuja, #ia-widget-panel,
+    .ds-quick-status-dropdown, .ds-quick-status-menu,
+    .ds-notif-panel, .ds-theme-panel, .dropdown-menu,
+    #skip-link, .ds-skip-nav, #session-warning-banner,
+    [style*="position: fixed"], [style*="position:fixed"] {
+        display: none !important;
+    }
+    /* Nadie debería seguir flotando sobre el papel */
+    * { position: static !important; }
+
+    .content-wrapper { margin: 0 !important; padding: 0 !important; }
+    .card { box-shadow: none !important; border: 1px solid #000 !important; }
+
+    /* SD-230: forzar colores donde el color es información (insignias,
+       barra de avance, estado), y modo claro siempre — imprimir en
+       modo oscuro no debe dar texto claro sobre papel blanco */
+    html, body, .content-wrapper, .card {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    * {
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+    .badge, .ds-badge, .ds-status-badge, .ds-item-type-badge,
+    .ds-kw-badge, .ds-item-kw-badge {
+        border: 1px solid #000 !important;
+    }
+
+    /* SD-231: paginación de tablas largas — cabecera repetida en cada
+       hoja, filas y tarjetas que no se cortan a la mitad */
+    table { break-inside: auto; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+    tr, .card, .ds-dossier-item, .ds-result-card { break-inside: avoid; }
+    p, .ds-doc-abstract, .ds-dossier-item-meta { orphans: 3; widows: 3; }
+
+    /* SD-232: un enlace impreso no lleva a ningún sitio en papel —
+       mostrar el destino junto al texto, sólo en prosa */
+    .ds-doc-abstract a[href^="http"]::after,
+    .ds-dossier-item a[href^="http"]::after,
+    .ds-compartido-titulo a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.75em;
+        color: #333 !important;
+    }
+}
+
+/* SD-233: @page — márgenes fijos y tamaño A4 en vez de depender de lo
+   que traiga cada navegador por defecto. `.ds-print-header`/`.ds-print-footer`
+   quedan preparados por si una página añade el marcado de identificación
+   institucional (sello, fecha, folio) — hoy no existe ese marcado en
+   ningún *.html, así que sólo se activan si aparece. */
+@page {
+    size: A4;
+    margin: 18mm 15mm;
+}
+.ds-print-header, .ds-print-footer { display: none; }
+@media print {
+    .ds-print-header, .ds-print-footer { display: block !important; }
+}
+
+/* ── Shake animation (login error) — definida aquí, sin uso todavía en
+   login.js (SD-180); anotado en el buzón, login.js no es mío ── */
+@keyframes ds-shake {
+    0%,100% { transform: translateX(0); }
+    15%,45%,75% { transform: translateX(-6px); }
+    30%,60%,90% { transform: translateX(6px); }
+}
+
+/* ==========================================================================

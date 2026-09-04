@@ -1,0 +1,105 @@
+/* === Responsive & mobile overrides === */
+/* --- RESPONSIVE & MOBILE CSS OVERRIDES --- */
+/* ========================================= */
+@media (max-width: 768px) {
+    /* Ajustes flexbox para evitar amontonamiento en móviles */
+    .ds-item-card {
+        padding: 0.75rem 0;
+    }
+    
+    .ds-item-thumbnail {
+        width: 60px;
+        min-width: 60px;
+    }
+    .ds-item-thumbnail i {
+        font-size: 2rem; /* SD-076 */
+    }
+
+    .ds-item-actions {
+        width: 44px;
+        min-width: 44px;
+        margin-left: 0.4rem;
+        gap: 0.4rem;
+    }
+
+    .ds-action-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .ds-doc-modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ds-doc-meta-row {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+    }
+
+    .ds-doc-thumb {
+        max-height: 120px; /* SD-194: sigue el aspect-ratio de la regla base */
+    }
+
+    .rrhh-person-photo-card {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .rrhh-person-photo {
+        width: 100%;
+        height: 100%;
+    }
+
+    .rrhh-person-photo-initials {
+        font-size: 2.2rem;
+    }
+
+    .ds-person-profile-header .d-flex {
+        align-items: center !important;
+        text-align: center;
+    }
+
+    .ds-person-info .row .col-sm-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .ds-person-info .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+        border-bottom: none !important;
+    }
+
+    .rrhh-person-file-head {
+        flex-direction: column;
+    }
+    
+    .ds-item-title {
+        font-size: 1rem !important;
+    }
+    .ds-item-abstract {
+        -webkit-line-clamp: 2; /* Reduce el resumen en pantallas pequeñas */
+        line-clamp: 2;
+    }
+
+    /* Romper cabeceras y centrar textos pequeños */
+    .ds-results-header {
+        flex-direction: column;
+        align-items:flex-start;
+    }
+    .ds-results-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Botones de search full-width si llegan a encogerse */
+    .ds-btn-primary {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+/* ========================================================

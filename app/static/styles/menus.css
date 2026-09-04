@@ -1,0 +1,141 @@
+/* === Menu desplegable, toast, TomSelect === */
+   MENÚ DESPLEGABLE — componente único (SD-125, SD-126, SD-215): el
+   marcado real de admin_archive.html/admin_hr.html usa la clase
+   `.ds-quick-status-menu` (definida antes sólo en el <style> de esas dos
+   páginas); la que traía esta hoja, `.ds-quick-status-dropdown`, no la
+   usaba nadie. Unificado bajo un solo nombre — el que el marcado ya
+   consume — para que la regla deje de estar muerta.
+   ========================================================================== */
+.ds-menu,
+.ds-quick-status-menu,
+.ds-quick-status-dropdown {
+    position: absolute;
+    z-index: var(--z-dropdown);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-1) 0;
+    min-width: 160px;
+}
+.ds-menu-item,
+.ds-quick-status-option {
+    display: block;
+    width: 100%;
+    padding: var(--space-2) var(--space-4);
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: background var(--duration-fast);
+}
+.ds-menu-item:first-child,
+.ds-quick-status-option:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+.ds-menu-item:last-child,
+.ds-quick-status-option:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+.ds-menu-item:hover,
+.ds-quick-status-option:hover { background: var(--surface-0); }
+.ds-menu-item[disabled], .ds-menu-item[aria-disabled="true"],
+.ds-quick-status-option[disabled], .ds-quick-status-option[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.ds-menu-item[disabled]:hover, .ds-menu-item[aria-disabled="true"]:hover,
+.ds-quick-status-option[disabled]:hover, .ds-quick-status-option[aria-disabled="true"]:hover {
+    background: none;
+}
+
+/* ---- Viewer de archivo en modal ---- */
+.ds-viewer-img {
+  max-width: 100%;
+  max-height: 500px;
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+}
+
+/* ==========================================================================
+   TOAST (SD-039, SD-129) — el toast en sí lo pintaba `app-core.js` con un
+   `style` en línea (cuatro tripletes hex, sin clase, sin modo oscuro, sin
+   tema, sin densidad). Aquí queda el componente completo, consumiendo los
+   tokens semánticos de SD-023; `app-core.js` (H2-app-js, [CHOCA], anotado
+   en el buzón) es quien tiene que dejar de escribir el `style` en línea y
+   usar estas clases (`ds-toast ds-toast--success|error|warning|info`).
+   ========================================================================== */
+#ds-toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+#ds-toast-container > * { pointer-events: all; }
+/* SD-129: tope de pila — más de cinco toasts a la vez no se ven */
+#ds-toast-container > :nth-child(n+6) { display: none; }
+
+.ds-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  max-width: 320px;
+  border: 1px solid transparent;
+  animation: ds-toast-in var(--duration-base) var(--ease-out);
+}
+@keyframes ds-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ds-toast--success { background: var(--color-success-bg); color: #155724; border-color: var(--color-success); }
+.ds-toast--error,
+.ds-toast--danger   { background: var(--color-danger-bg);  color: #721c24; border-color: var(--color-danger); }
+.ds-toast--warning  { background: var(--color-warning-bg); color: #856404; border-color: var(--color-warning); }
+.ds-toast--info     { background: var(--color-info-bg);    color: #0c5460; border-color: var(--color-info); }
+
+body.dark-mode .ds-toast--success { background: rgba(32,136,56,.18); color: #6ddb8a; border-color: rgba(32,136,56,.4); }
+body.dark-mode .ds-toast--error,
+body.dark-mode .ds-toast--danger  { background: rgba(208,59,59,.18); color: #f0a3a3; border-color: rgba(208,59,59,.4); }
+body.dark-mode .ds-toast--warning { background: rgba(250,178,25,.18); color: #f5cf7a; border-color: rgba(250,178,25,.4); }
+body.dark-mode .ds-toast--info    { background: rgba(23,162,184,.18); color: #8fd6e2; border-color: rgba(23,162,184,.4); }
+
+/* SD-159: estado deshabilitado explícito, no sólo en paginación/botón */
+[disabled], [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   TOM SELECT — base clara (SD-118)
+   Antes: cero reglas en claro (se usaba el tema `bootstrap4` del CDN
+   tal cual) y catorce reglas SÓLO en oscuro. El campo de palabras
+   clave no se parecía a ningún otro del sistema. Ahora hay una base
+   en ambos modos, y el bloque oscuro de abajo sólo redefine tokens.
+   ============================================================ */
+.ts-control {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.ts-control input { color: var(--text); }
+.ts-control input::placeholder { color: var(--text-muted); }
+.ts-dropdown { background: var(--surface-1); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+.ts-dropdown-content .option { color: var(--text); }
+.ts-dropdown-content .option:hover,
+.ts-dropdown-content .option.active { background: var(--color-primary); color: #fff; }
+.ts-dropdown-content .optgroup-header { color: var(--text-muted); background: var(--surface-2); }
+.ts-control .item { background: var(--color-primary); color: #fff; border-color: var(--color-primary-hover); }
+.ts-control .item .remove { color: #fff; }
+
+/* ── Progress bars — base clara (SD-144) ──────────────────────────────── */
+.progress { background: var(--surface-2); border-radius: var(--radius-sm); }
+
+/* ============================================================

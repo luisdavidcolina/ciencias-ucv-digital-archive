@@ -1,0 +1,778 @@
+/* === Componentes: tarjeta, campo, boton, resultados, item cards === */
+/* --- OVERRIDES BS4CARD (Quitar estetica Dashboard) --- */
+/* --- TARJETA (SD-127, SD-083, SD-059, SD-152) ---
+   `.card` sigue siendo el punto de entrada (Bootstrap ya lo usa en todo el
+   marcado); aquí se resuelve con los tokens de L0 en vez de valores sueltos.
+   Radio: `--radius-md` (8px) es la misma decisión de facto que ya tomaron
+   admin_archive.html/admin_hr.html a mano con `0.5rem !important` (SD-083):
+   se generaliza aquí y deja de haber dos decisiones distintas para la misma
+   tarjeta. Elevación: reposo con `--shadow-sm` en vez de "sin sombra nunca",
+   y un hover que sube un nivel, para que el rol de tarjeta interactiva se
+   note incluso donde no hay una variante `:hover` propia (SD-059). */
+.card {
+    box-shadow: var(--shadow-sm) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: var(--space-4);
+}
+
+.card-header {
+    background-color: var(--surface-3) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    color: var(--text) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    font-size: var(--font-size-base) !important;
+    padding: var(--space-3) var(--space-5) !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+}
+
+.card-title {
+    font-size: var(--font-size-base) !important;
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+.card-body {
+    padding: var(--space-5) !important;
+    font-size: var(--font-size-sm) !important;
+}
+
+/* `.card-outline`: quince usos en admin_*.html sin ninguna regla propia
+   (SD-152, SD-216) — el nombre promete un borde superior de acento que
+   nunca existió. */
+.card-outline {
+    border-top: 3px solid var(--color-primary) !important;
+}
+
+/* --- BREADCRUMB (SD-101) ---
+   4,5rem de aire vertical para dos palabras: se ata a la escala de
+   espaciado en vez de un valor suelto de 1.5rem por lado. */
+.ds-breadcrumb-wrapper {
+    background-color: var(--surface-2);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    margin-top: var(--space-3);
+    border-radius: var(--radius-sm);
+}
+
+.ds-breadcrumb {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* --- SEARCH MAIN BAR --- */
+.ds-search-bar {
+    margin-bottom: var(--space-6);
+}
+
+/* `:focus-within` (SD-154): el grupo completo (campo + botones) se resalta
+   como unidad al enfocar cualquiera de sus controles, no sólo el campo. */
+.ds-search-bar:focus-within {
+    outline: 2px solid var(--color-link);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+}
+
+/* --- CAMPO (SD-115, SD-116, SD-171) ---
+   Único campo propio de la hoja hasta ahora era el buscador, con su altura
+   escrita a mano; queda como declaración base para que el resto de campos
+   (`.form-control` de Bootstrap, sin tocar) puedan alinearse con ella. */
+.ds-search-input {
+    border-radius: var(--radius-sm) !important;
+    border-color: var(--border-strong);
+    height: calc(1.5em + 1rem + 2px) !important;
+    transition: border-color var(--duration-fast) var(--ease-out),
+                box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.ds-search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25) !important;
+    border-color: #80bdff !important;
+}
+
+/* Estado de error/validación (SD-116): no existía ninguno en todo el
+   sistema. `.is-invalid` como clase explícita para cuando el JS la marca, y
+   `:user-invalid` para los navegadores que ya lo resuelven solos. */
+.ds-search-input.is-invalid,
+.ds-search-input:user-invalid {
+    border-color: var(--color-danger) !important;
+    box-shadow: 0 0 0 0.2rem rgba(208, 59, 59, 0.2) !important;
+}
+
+/* Campo obligatorio (SD-171): la etiqueta que lo precede gana un asterisco
+   sin que el marcado tenga que escribirlo a mano. */
+label:has(+ :required)::after {
+    content: " *";
+    color: var(--color-danger);
+}
+
+/* --- BOTÓN: BASE COMÚN (SD-109, SD-110, SD-111, SD-112, SD-114, SD-174) ---
+   Trece implementaciones sin base común, la mitad por `id`. Sustituir el
+   `id` por clase exige tocar el marcado (fuera de este carril: ver
+   `_BUZON.md`), así que aquí se les da la misma base tokenizada: transición
+   explícita (nunca `all`, SD-174) y, sobre todo, un estado
+   `:disabled`/`[aria-disabled]` que hoy no existía para ninguno de ellos
+   salvo el botón de exportación. */
+.ds-btn-primary,
+.ds-search-action-btn,
+#btn_s_archivo,
+#btn_s_rrhh,
+#btn_clear_archivo,
+#btn_clear_rrhh,
+.ds-btn-export,
+#btn-archivo-prev,
+#btn-archivo-next,
+#btn-rrhh-prev,
+#btn-rrhh-next,
+#download_ext_xls,
+#download_rrhh_xls {
+    transition: background-color var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out),
+                box-shadow var(--duration-base) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
+}
+
+.ds-btn-primary:disabled, .ds-btn-primary[aria-disabled="true"],
+.ds-search-action-btn:disabled, .ds-search-action-btn[aria-disabled="true"],
+#btn_s_archivo:disabled, #btn_s_archivo[aria-disabled="true"],
+#btn_s_rrhh:disabled, #btn_s_rrhh[aria-disabled="true"],
+#btn_clear_archivo:disabled, #btn_clear_archivo[aria-disabled="true"],
+#btn_clear_rrhh:disabled, #btn_clear_rrhh[aria-disabled="true"],
+.ds-btn-export:disabled, .ds-btn-export[aria-disabled="true"],
+#btn-archivo-prev:disabled, #btn-archivo-prev[aria-disabled="true"],
+#btn-archivo-next:disabled, #btn-archivo-next[aria-disabled="true"],
+#btn-rrhh-prev:disabled, #btn-rrhh-prev[aria-disabled="true"],
+#btn-rrhh-next:disabled, #btn-rrhh-next[aria-disabled="true"] {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Alias de tamaño (SD-111): la hoja no definía `.btn-xs`, usado 27 veces en
+   el resto del producto. Un paso por debajo de `.btn-sm` de Bootstrap. */
+.btn-xs {
+    padding: 0.1rem 0.4rem;
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+    line-height: var(--line-height-tight);
+}
+
+.ds-btn-primary {
+    background-color: var(--color-link) !important;
+    border-color: var(--color-link) !important;
+    color: var(--text-inverse) !important;
+    border-radius: var(--radius-sm) !important;
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+}
+.ds-btn-primary:hover {
+    background-color: #004494 !important;
+    border-color: var(--color-link-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Botón de icono (SD-114): 44px ya es el mínimo táctil correcto — queda
+   como el tamaño de referencia del que derivan los tamaños menores en
+   otros lotes. */
+.ds-search-action-btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: calc(1.5em + 1rem + 2px) !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Search button: filled primary, slight shadow on hover */
+#btn_s_archivo,
+#btn_s_rrhh {
+    border-radius: var(--radius-sm) !important;
+    font-size: var(--font-size-base) !important;
+}
+#btn_s_archivo:hover,
+#btn_s_rrhh:hover {
+    box-shadow: 0 3px 8px rgba(0,86,179,0.35) !important;
+    transform: translateY(-1px);
+}
+#btn_s_archivo:active,
+#btn_s_rrhh:active {
+    transform: translateY(0);
+    box-shadow: none !important;
+}
+
+/* Clear button: subtle ghost style */
+#btn_clear_archivo,
+#btn_clear_rrhh {
+    color: var(--text-muted) !important;
+    border-color: var(--border-strong) !important;
+    background: transparent !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.9rem !important;
+}
+#btn_clear_archivo:hover,
+#btn_clear_rrhh:hover {
+    color: var(--color-danger) !important;
+    border-color: var(--color-danger) !important;
+    background: rgba(208,59,59,0.06) !important;
+}
+
+/* Export button: teal/info instead of loud green, compact */
+.ds-btn-export {
+    background-color: var(--color-info) !important;
+    border-color: var(--color-info) !important;
+    color: var(--text-inverse) !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    font-size: 0.85rem !important;
+}
+
+.ds-btn-export i,
+.ds-btn-export .fa,
+.ds-btn-export .fas {
+    color: var(--text-inverse) !important;
+}
+
+.ds-btn-export:hover,
+.ds-btn-export:focus,
+.ds-btn-export:active {
+    background-color: #138496 !important;
+    border-color: #117a8b !important;
+    color: var(--text-inverse) !important;
+    box-shadow: 0 3px 8px rgba(23,162,184,0.3) !important;
+}
+
+/* Pagination buttons: consistent outline style (SD-123: un solo radio,
+   tokenizado, en vez de los tres criterios que conviven en la hoja). */
+#btn-archivo-prev, #btn-archivo-next,
+#btn-rrhh-prev, #btn-rrhh-next {
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.82rem;
+    padding: 0.25rem 0.6rem;
+}
+
+.ds-search-bar .input-group .input-group-append {
+    margin-left: var(--space-2);
+}
+
+.ds-search-bar .input-group .input-group-append > .btn {
+    margin-left: var(--space-2);
+}
+
+.ds-search-bar .input-group .input-group-append > .btn:first-child {
+    margin-left: 0;
+}
+
+#admin_workspace_tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+#admin_workspace_tabs.nav-pills {
+    overflow-x: auto;
+    padding-bottom: var(--space-1);
+}
+
+/* SD-219: estos dos ids ya comparten regla vía selector combinado en vez de
+   duplicarla por módulo (`_archivo`/`_rrhh`) — patrón a seguir cuando entre
+   un tercer módulo. SD-023/SD-024: verde correcto es `--color-success`
+   (#208838), no `#28a745`, que no pasa contraste AA con texto blanco. */
+#download_ext_xls,
+#download_rrhh_xls {
+    background-color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    color: var(--text-inverse) !important;
+}
+
+#download_ext_xls i,
+#download_rrhh_xls i,
+#download_ext_xls .fa,
+#download_rrhh_xls .fa,
+#download_ext_xls .fas,
+#download_rrhh_xls .fas {
+    color: var(--text-inverse) !important;
+}
+
+#download_ext_xls:hover,
+#download_rrhh_xls:hover,
+#download_ext_xls:focus,
+#download_rrhh_xls:focus,
+#download_ext_xls:active,
+#download_rrhh_xls:active {
+    background-color: #218838 !important;
+    border-color: #1e7e34 !important;
+    color: var(--text-inverse) !important;
+}
+
+#download_ext_xls.disabled,
+#download_rrhh_xls.disabled,
+#download_ext_xls[disabled],
+#download_rrhh_xls[disabled] {
+    background-color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    color: var(--text-inverse) !important;
+    opacity: 0.75 !important;
+}
+
+/* --- RESULTS HEADER --- */
+.ds-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ced4da;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.ds-results-title {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #212529;
+    margin: 0;
+}
+
+.ds-pagination-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* --- ITEM CARDS (ds-item-list-element) ---
+   SD-060/SD-089/SD-090/SD-167/SD-204/SD-220 (L3): superficie estable en vez
+   de "aparece al pasar el ratón"; una sola regla de hover con la sombra y el
+   desplazamiento canónicos (--shadow-md / -4px), transición de propiedades
+   explícitas en vez de `all`, y `content-visibility` para las listas largas.
+   NOTA para quien reserve la capa de movimiento (L13): sigue existiendo una
+   segunda definición de `.ds-item-card:hover` más abajo (transform -2px +
+   sombra distinta) fuera de esta zona — anotado en _BUZON.md, no se toca
+   desde aquí. */
+.ds-item-card {
+    display: flex;
+    padding: 1rem;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--surface-1);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    border-left: 4px solid transparent;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--duration-slow) var(--ease-out),
+                box-shadow var(--duration-slow) var(--ease-out),
+                border-color var(--duration-slow) var(--ease-out);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 140px;
+}
+
+.ds-item-card:visited .ds-item-title a,
+.ds-item-card a.ds-item-title:visited {
+    color: var(--color-link-hover);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .ds-item-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-left-color: var(--color-link);
+    }
+}
+
+.ds-item-card:focus-within {
+    border-left-color: var(--color-link);
+    box-shadow: var(--shadow-md);
+}
+
+.ds-item-thumbnail {
+    width: 90px;
+    min-width: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 0.5rem;
+}
+
+.ds-item-thumbnail i {
+    font-size: 3rem; /* SD-076: era 48px fijo, no escalaba con el ajuste de tamaño de texto */
+    color: var(--gray-600);
+}
+
+
+.ds-item-metadata {
+    flex-grow: 1;
+    padding-left: 1rem;
+}
+
+.ds-item-actions {
+    width: 54px;
+    min-width: 54px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.75rem;
+}
+
+.ds-item-actions:empty,
+.ds-item-tags:empty {
+    display: none; /* SD-155: no ocupar hueco ni borde cuando el JS no ha escrito nada */
+}
+
+/* SD-142: faceta con los cinco estados (reposo, hover, activo, foco, táctil) */
+.ds-facet-row {
+    min-height: 34px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--duration-fast) ease-out;
+}
+.ds-facet-row:hover { background: var(--surface-3); }
+.ds-facet-row:focus-within,
+.ds-facet-row:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: -2px;
+}
+.ds-facet-active { background: #d0e4f7; font-weight: var(--font-weight-semibold); }
+body.dark-mode .ds-facet-active { background: var(--surface-2); }
+.ds-facet-active .badge { background: var(--color-primary) !important; }
+
+.ds-action-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50% !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ds-doc-modal .modal-content {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-2xl);
+}
+
+.ds-doc-modal .modal-body {
+    padding: 1.1rem 1.25rem 1.3rem 1.25rem;
+}
+
+.ds-doc-modal-head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #eef4fb, #f8fbff);
+    border: 1px solid #d9e6f4;
+    margin-bottom: 0.95rem;
+}
+
+.ds-doc-modal-head i {
+    color: #0056b3;
+    font-size: 1.2rem;
+}
+
+.ds-doc-modal-head h4 {
+    margin: 0;
+    color: #1f3f63;
+    font-size: 1.05rem;
+    font-weight: var(--font-weight-bold); /* SD-063: era 800, sin ese corte cargado */
+}
+
+.ds-doc-modal-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.ds-doc-panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.85rem;
+}
+
+.ds-doc-thumb-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.ds-doc-thumb {
+    /* SD-194: proporción en vez de altura fija (antes 165px, redefinida otra
+       vez en móvil a 120px sin relación entre sí). */
+    aspect-ratio: 4 / 3;
+    max-height: 165px;
+    border-radius: 10px;
+    border: 1px dashed var(--border-strong); /* SD-092: discontinuo = vacío/marcador */
+    background: linear-gradient(160deg, #f4f9ff, #eef4fb);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 10px;
+}
+
+.ds-doc-thumb i {
+    font-size: 2.6rem;
+    color: #2b4e72;
+}
+
+.ds-doc-thumb-badge {
+    display: inline-block;
+    background: #2b4e72;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    max-width: 95%;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.ds-doc-panel h5 {
+    font-size: 0.95rem;
+    font-weight: var(--font-weight-bold); /* SD-063 */
+    color: #2b4e72;
+    margin-bottom: 0.65rem;
+    word-break: break-word;
+}
+
+.ds-doc-meta-row {
+    display: flex;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border-subtle); /* SD-092: discontinuo reservado a vacío */
+    word-break: break-word;
+}
+
+/* SD-160: redondear extremos de la lista al radio del panel contenedor (10px) */
+.ds-doc-meta-row:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.ds-doc-meta-row:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.ds-doc-meta-row .k {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.82rem;
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.ds-doc-meta-row .v {
+    color: var(--text);
+    font-size: 0.88rem;
+    flex: 1;
+    min-width: 0;
+    padding-left: 8px;
+    overflow-wrap: break-word;
+}
+
+.ds-doc-abstract {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.45;
+    font-size: 0.92rem;
+    max-width: 70ch; /* SD-066: sin tope, un resumen en 1920px son líneas de 180 caracteres */
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.rrhh-person-modal .modal-dialog {
+    max-width: 1080px;
+}
+
+.rrhh-person-modal .modal-body {
+    max-height: 78vh;
+    overflow-y: auto;
+}
+
+.rrhh-person-files {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rrhh-person-photo-card {
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(160deg, #f6f9fc, #eef4fb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    box-shadow: var(--shadow-sm);
+}
+
+.rrhh-person-photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%; /* SD-097: el radio del hijo también, o Safari lo saca del recorte */
+    object-fit: cover;
+    display: block;
+}
+
+.rrhh-person-photo-fallback {
+    color: #2b4e72;
+}
+
+.rrhh-person-photo-initials {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #2b4e72;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: var(--font-weight-bold); /* SD-063 */
+    letter-spacing: 0.05em;
+}
+
+.rrhh-person-photo-icon {
+    display: none;
+}
+
+.rrhh-person-summary p {
+    font-size: 0.88rem;
+}
+
+.rrhh-person-modal .nav-pills .nav-link {
+    border-radius: 999px;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.rrhh-person-modal .nav-pills .nav-link.active {
+    background-color: #2b4e72;
+}
+
+.rrhh-person-category-panel {
+    margin-top: 0.75rem;
+}
+
+.rrhh-person-file-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.rrhh-person-file-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.rrhh-person-file-sub {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.rrhh-person-file-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.8rem;
+    margin-top: 0.65rem;
+    font-size: 0.84rem;
+    color: #485463;
+}
+
+.rrhh-person-file-item {
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 0.85rem 0.95rem;
+    box-shadow: var(--shadow-sm); /* SD-088/SD-091: mismo patrón de tarjeta que .ds-item-card */
+}
+
+.rrhh-person-file-item .ds-item-tags {
+    margin-top: 0.55rem;
+}
+
+.rrhh-person-file-item .btn.btn-outline-info {
+    white-space: nowrap;
+}
+
+.rrhh-person-modal .tab-content {
+    margin-top: 0.75rem;
+}
+
+.ds-modal-filters-wrap {
+    border-radius: 8px;
+}
+
+.ds-category-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2b4e72;
+}
+
+.ds-person-name {
+    font-size: 1.4rem;
+}
+
+.ds-person-cargo {
+    font-size: 1rem;
+}
+
+.ds-item-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
+.ds-item-authors {
+    font-size: 0.9rem;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.ds-item-publisher, .ds-item-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.ds-item-abstract {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #495057;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.ds-badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: var(--font-size-xs); /* SD-075: era 75% relativo, 13.7px o 9.9px según el contexto */
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    background-color: #2b4e72;
+    color: #fff;
+    margin-top: 0.5rem;
+}
+
+/* ========================================= */
