@@ -3564,28 +3564,70 @@ body.dark-mode .ds-dropzone-compact.is-uploading { background: rgba(43,78,114,0.
 :root { --ds-font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
 body { font-family: var(--ds-font-family); }
 
-/* Compact density mode */
-body.ds-density-compact .card-body     { padding: 0.5rem !important; }
-body.ds-density-compact .card-header   { padding: 0.4rem 0.75rem !important; }
-body.ds-density-compact .form-group    { margin-bottom: 0.5rem; }
-body.ds-density-compact .table td,
-body.ds-density-compact .table th      { padding: 0.25rem 0.5rem !important; font-size: 0.8rem; }
-body.ds-density-compact .btn-sm        { padding: 0.15rem 0.5rem !important; font-size: 0.78rem; }
-body.ds-density-compact .ds-item-card  { padding: 0.5rem !important; }
-body.ds-density-compact .modal-body    { padding: 0.75rem !important; }
-body.ds-density-compact .ds-kpi-mini   { padding: 6px 10px !important; }
-body.ds-density-compact .ds-panel-section { padding: 0.5rem 0.75rem !important; }
+/* Densidad — SD-103: la compacta tocaba diez selectores sueltos, con valores
+   escritos a mano que no tenían relación con la escala de espaciado. Ahora
+   es un multiplicador (--density-scale) sobre los tokens --space-* de L0:
+   añadir un onceavo selector es cambiar qué propiedad usa el multiplicador,
+   no inventar un valor nuevo. SD-104: tres pasos (cómodo/normal/compacto),
+   los dos primeros con el mismo interlineado que el resto de la app y sólo
+   el compacto lo reduce — un archivero revisando 400 filas gana también
+   altura de fila, no sólo padding. La clase que activa cada paso la pone
+   `app-theme.js` (carril H2-app-js, fuera de este archivo); `ds-density-cozy`
+   queda lista para cuando ese carril agregue el tercer botón. */
+:root { --density-scale: 1; }
+body.ds-density-compact { --density-scale: 0.55; }
+body.ds-density-cozy    { --density-scale: 1.4; }
 
-/* No-animation mode */
+body.ds-density-compact .card-body,
+body.ds-density-cozy .card-body        { padding: calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .card-header,
+body.ds-density-cozy .card-header      { padding: calc(var(--space-3) * var(--density-scale)) calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .form-group,
+body.ds-density-cozy .form-group       { margin-bottom: calc(var(--space-4) * var(--density-scale)); }
+body.ds-density-compact .table td,
+body.ds-density-compact .table th,
+body.ds-density-cozy .table td,
+body.ds-density-cozy .table th         { padding: calc(var(--space-2) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .btn-sm,
+body.ds-density-cozy .btn-sm           { padding: calc(var(--space-1) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .ds-item-card,
+body.ds-density-cozy .ds-item-card     { padding: calc(var(--space-4) * var(--density-scale)) !important; }
+body.ds-density-compact .modal-body,
+body.ds-density-cozy .modal-body       { padding: calc(var(--space-3) * var(--density-scale) * 1.5) !important; }
+body.ds-density-compact .ds-kpi-mini,
+body.ds-density-cozy .ds-kpi-mini      { padding: calc(var(--space-2) * var(--density-scale)) calc(var(--space-3) * var(--density-scale)) !important; }
+body.ds-density-compact .ds-panel-section,
+body.ds-density-cozy .ds-panel-section { padding: calc(var(--space-4) * var(--density-scale)) calc(var(--space-4) * var(--density-scale) * 1.2) !important; }
+
+/* SD-104: sólo el paso compacto aprieta el interlineado — cómodo/normal
+   comparten --line-height-base. */
+body.ds-density-compact .table td,
+body.ds-density-compact .table th,
+body.ds-density-compact .ds-item-card,
+body.ds-density-compact .modal-body { line-height: var(--line-height-tight); }
+
+/* Modo sin animación — SD-179 (prioridad de este lote): acelerar la
+   animación a 0,01ms NO la apaga, la deja corriendo a frecuencia de
+   parpadeo — justo lo contrario de lo que pide quien lo activa por
+   fotosensibilidad, y un riesgo real con `.ds-status-revision` (late a
+   frecuencia de vídeo en vez de quedarse quieta). Se detiene la
+   animación en sí (`animation-play-state: paused` para las que tienen
+   estado inicial visible que conservar; `animation: none` cuando no lo
+   hay) y sólo se acelera la transición, que sí tiene un fin claro. */
 body.ds-no-anim *,
 body.ds-no-anim *::before,
 body.ds-no-anim *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
+  animation-play-state: paused !important;
   transition-duration: 0.01ms !important;
 }
+body.ds-no-anim .ds-status-revision,
+body.ds-no-anim .ds-skeleton {
+  animation: none !important;
+}
 
-/* Theme panel: font family row */
+/* Theme panel: font family row — SD-148 (misma base que .ds-dark-btn /
+   .ds-font-btn / .ds-reset-btn más arriba: antes tenía su propio radio de
+   6px y su propio azul #0056b3, distintos de los otros tres). */
 .ds-ff-row {
   display: flex;
   gap: 6px;
@@ -3593,16 +3635,20 @@ body.ds-no-anim *::after {
 }
 .ds-ff-btn {
   padding: 4px 10px;
-  border: 1.5px solid #dee2e6;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
   background: #fff;
   font-size: 0.78rem;
   cursor: pointer;
-  color: #495057;
-  transition: border-color 0.15s, background 0.15s;
+  color: var(--gray-700);
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease;
 }
-.ds-ff-btn:hover  { border-color: #0056b3; }
-.ds-ff-btn.active { border-color: #0056b3; background: #e8f0fe; color: #0056b3; font-weight: 600; }
+.ds-ff-btn:hover  { border-color: var(--gray-500); }
+.ds-ff-btn.active { border-color: var(--color-primary); background: #e8f0fe; color: var(--color-primary); font-weight: 600; }
+.ds-ff-btn:disabled, .ds-ff-btn[aria-disabled="true"] {
+  opacity: .6;
+  cursor: not-allowed;
+}
 
 body.dark-mode .ds-ff-btn { background: #2a2e3a; border-color: #3c4257; color: #b8c0d0; }
 body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color: #6fa3d8; color: #6fa3d8; }
@@ -3745,6 +3791,19 @@ body[data-accent="accent-slate"]   { --ds-accent:#475569; --ds-accent-hover:#334
 
 /* ============================================================
    1. GLASSMORPHISM
+
+   SD-054: este estilo (y Liquid Glass, más abajo) sustituyen el fondo de
+   página por un degradado saturado y la tarjeta por un cristal translúcido,
+   pero el texto sigue siendo `--text`/#212529 fijo. El mismo texto da entre
+   3,9:1 y 6,1:1 según el punto del degradado en el que caiga la tarjeta —
+   ninguna de las correcciones de contraste del resto del sistema aplica
+   aquí. La ficha ofrece dos salidas: redefinir también los tokens de tinta
+   para estos dos estilos (repintar cada superficie de texto, cambio grande,
+   fuera de lo razonable en un lote S/M), o marcarlos como decorativos y
+   excluirlos de la garantía AA, dejándolo dicho en el panel. Tomo la
+   segunda: es la que no exige inventar una segunda escala de color por
+   estilo. El texto que sí anuncia esto en el panel de personalización vive
+   en `app-theme.js` (fuera de mi carril) — anotado en _BUZON.md.
    ============================================================ */
 body[data-style="glassmorphism"] {
   background: linear-gradient(135deg, #1a2a4a 0%, #2d4060 55%, #1a2535 100%) !important;
