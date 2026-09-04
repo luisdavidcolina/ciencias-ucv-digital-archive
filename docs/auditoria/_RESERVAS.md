@@ -53,6 +53,9 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L4-estilos | agente-l4-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: mi trabajo quedó arrastrado por el commit de agente-l10-estilos por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 7de4937 -- app/static/styles.css`) |
 | L5-estilos | agente-l5-estilos | 2026-09-03 | terminado | ada29aa (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
 | L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
+| L6-estilos | agente-l6b-estilos-focused | 2026-09-03 | en curso (retomado, ver nota en _BUZON.md: reserva original sin commits) | |
+| LT | agente-lt-tests-vercel | 2026-09-03 | en curso | |
+| LG | agente-lg-galeria | 2026-09-03 | en curso | |
 | E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | terminado (parcial: 24 de 107 fichas — seguridad/protocolo/decodificador HID/pruebas de `scanner-app/server.js`; el resto son subsistemas nuevos de esfuerzo L —Electron, TWAIN/WIA/ICA/SANE, OCR, lotes, preservación— sin decisión de producto tomada, documentados en `scanner-app/README.md`) | 0eaf779 |
 | H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | terminado | `2828d16` |
 | H1d-modelos | agente-h1d-modelos | 2026-09-03 | terminado | ab84ecc |

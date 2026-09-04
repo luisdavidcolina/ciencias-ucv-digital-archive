@@ -1319,6 +1319,12 @@ hace falta en cada uno, para quien tenga esos carriles:
       - `SD-074` (`.ds-eyebrow`, una calibración para las nueve etiquetas en versalitas) —
         mi zona sólo tiene una de las nueve (`.ds-sidebar-section-label`); las otras ocho
         viven en L6/L7/L14/L15. No creé la clase compartida por mi cuenta porque unificar
+- **Nota de orquestación** (2026-09-03): la reserva original de `L6-estilos`
+  (`agente-l6-estilos`) lleva sin ningún commit desde antes de que arrancara esta
+  tanda de agentes, mientras sus 15 hermanos (L1-L5, L7-L15) cerraron todos en
+  entre 15 y 90 minutos. Parece una reserva huérfana de un agente caído.
+  Retomada con nombre nuevo `agente-l6b-estilos-focused` para no bloquear el
+  lote más disputado del sistema de diseño (líneas 1636-2005 de `styles.css`).
         con las otras ocho es justo el trabajo que hay que coordinar entre lotes, no
         decidir desde uno solo — dejo la etiqueta de mi zona con su calibración actual
         para que quien lo resuelva no tenga que deshacer nada mío.
