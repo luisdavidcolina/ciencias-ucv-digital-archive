@@ -1679,6 +1679,112 @@ L7/L10/L11/L12/L13 arriba.
 
 **quién lo pide**: agente-l9-estilos (L9-estilos)
 
+## A1-buscador-archivo
+
+Trabajé sólo en `app/static/archive.js` y `app/static/archive.html`. Cerré, entre
+otros: BA-001/BA-070 (facetas por delegación `data-facet-type`/`data-facet-year`,
+botones reales con `aria-pressed`, nada de `onclick` con `JSON.stringify`),
+BA-006/007 (estado de error visible con reintento, `AbortController` +
+contador de secuencia para descartar respuestas obsoletas), BA-011 (icono
+`fa-scanner` inexistente → `fa-print`), BA-012/013 (clic en faceta de año
+activa el panel de fecha vía `applyDatePreset`; sincronía de facetas usa
+`tsInstances`, no la API de Choices.js que no se usa en el proyecto), BA-017
+(botón Editar condicionado a `state.user.roles.Archivo === "Admin"`, enlaza a
+la ruta enrutada `/admin/archivo`), BA-018 (retirado el botón "Descargar",
+muerto desde siempre), BA-021 (con `total=0` y `page>1` se reintenta en la
+página 1 en vez de mostrar un vacío falso), BA-022 (`changeArchivoPage` acota
+1..páginas y hace scroll a la cabecera de resultados), BA-023/056 (`hasFilter`
+incluye fecha y soporte, y el estado vacío distingue "sin filtros" de "con
+filtros"), BA-024/089 (un solo paginador — retirada la barra
+Anterior/Siguiente duplicada — y una sola región `aria-live`), BA-025 (añadido
+el filtro de Soporte que faltaba en el marcado), BA-029/093 (quitado
+`data-parent` del acordeón para que varios filtros queden abiertos a la vez, y
+añadidos `aria-expanded`/`aria-controls`), BA-042 (retirada la definición
+duplicada de `.ds-skeleton` en un `<style>` de la página; `styles.css` ya la
+cubre completa, con oscuro y `ds-no-anim`), BA-043/044/104 (el modal usa
+`class="ds-doc-modal"` y se retiraron los estilos en línea que duplicaban lo
+que esa clase ya define en `styles.css`, incluida su variante oscura), BA-045
+(una sola insignia de soporte, ya no dos diciendo "Digital" con colores
+distintos), BA-047 (retirada la migaja escrita a mano
+"Comunidades/Archivo/Búsqueda"; queda sólo la que gestiona `app.js` vía
+`#nav-section-breadcrumb`), BA-048/049 (título "Filtros" en vez de "Filtros
+Académicos"; un solo color de encabezado con `text-primary`, clases de
+AdminLTE que no se cargan retiradas), BA-053/054 (esqueleto isomorfo a la
+tarjeta real, tantos bloques como `perPage`, y esqueleto también para el panel
+de facetas), BA-057 (pluralización con un helper local, `_pluralArchivo`),
+BA-061 (retirado el botón "Aplicar", que no aplicaba nada — todo ya busca al
+cambiar), BA-062/065/066 (usa clases ya existentes `ds-item-title`,
+`ds-item-authors`, `ds-item-publisher`, `ds-item-abstract`, `ds-badge` en vez
+de tamaños y colores sueltos en `style=""`, con el título primero y con más
+peso que la insignia de tipología), BA-068 (la miniatura del modal ya no
+arranca con el texto literal "N/A"), BA-071/080 (el título de la tarjeta es un
+`<button>` real enfocable y con foco propio; los botones de acción llevan
+`aria-label` con el título del documento, no sólo `title`), BA-073/074/075/179
+(el modal admite Escape y cierre por telón, tiene `aria-labelledby`/
+`aria-modal`, y el `<iframe>` lleva `title`, `sandbox` y
+`referrerpolicy="no-referrer"`), BA-076 (el foco vuelve al disparador al
+cerrar el modal, guardado en `document.activeElement`), BA-077 (`aria-busy` y
+"Buscando…" mientras carga), BA-078 (la columna de resultados precede a la de
+filtros en el DOM — `order-md-1`/`order-md-2` para mantener el layout
+visual), BA-079/086 (`aria-label` en el botón × de fecha; `<label
+class="sr-only">` en el campo de búsqueda con placeholder descriptivo),
+BA-081/082 (paginación con `aria-label="Página N"`, `aria-current="page"`, y
+`disabled`/`aria-disabled` en el `<button>`, no en el `<li>`), BA-092/BA-187
+(el scroll del visor respeta `prefers-reduced-motion`/`ds-no-anim`, y un
+cambio de tema en curso vuelve a pintar la lista escuchando
+`ds:theme-change`), BA-094 (`role="radiogroup"` y `aria-checked` inicial en
+los chips de fecha), BA-108 (visor a `min(70vh,520px)` en vez de 520px fijos),
+BA-112/175 (`flatpickr` sin versión fijada → `@4.6.13`, tanto CSS como JS),
+BA-178 (comprobación defensiva antes de `$(...).modal("show")`, con
+`showToast` si jQuery/Bootstrap no cargó).
+
+`python -m pytest app/tests -q` antes y después: 713 passed en ambos casos.
+
+Quedan fuera de mi zona y anotados aquí:
+
+- `BA-002`/`BA-003`/`BA-166`/`BA-168` y el resto de `archive.py` — no es mío
+  (carril `A2-archivo-backend`, ya terminado según `_RESERVAS.md`, sha
+  `19e86f1`; no verifiqué si esos puntos quedaron resueltos ahí).
+- `BA-005` (el orden se ignora al haber texto): añadí la opción "Relevancia"
+  al `<select>` de orden en `archive.html` para que la interfaz tenga dónde
+  aterrizar el arreglo, pero `archive.py:154-161` sigue forzando
+  `relevance DESC` en cuanto hay término, sin mirar `sort_mode`. Backend fuera
+  de mi carril.
+- `BA-016` (facet "Sin tipo" no filtra nada): necesita un valor centinela que
+  `archive.py` traduzca a `tesauro_primario IS NULL/''`. No lo implemento
+  hasta que el backend lo soporte, dejé la faceta como estaba (etiqueta "Sin
+  tipo" que hoy no filtra).
+- `BA-046` (colores de tipo por catálogo, no por `includes()` en texto libre):
+  necesita columna de icono/color en `tipo_documento`, expuesta por
+  `lookups.py` — **carril dueño**: `lookups.py` no tiene carril propio en
+  `PLAN-PARALELO.md`, está marcado `[CHOCA]` en la auditoría.
+- `BA-020` (`_secureFileUrl` no protege nada, usa `?u=<usuario>` como si fuera
+  autenticación) — vive en `app-core.js`, **carril dueño**: `H2-app-js`, ya
+  terminado (sha `5b566e4`); no verifiqué si sigue así.
+- `BA-041` (resaltado `<mark>` sin contraste en oscuro) — `highlightTerms`
+  vive en `app-core.js` (`H2-app-js`), no en mi archivo; dejé el color de
+  fondo del `<mark>` como estaba.
+- `BA-063` (`gap-1` no existe en Bootstrap 4) — puse `style="gap:4px"` en el
+  contenedor de insignias de mi archivo (`.ds-item-badges`) directamente en
+  línea, ya que no puedo añadir la regla a `styles.css`; si alguien define
+  `.ds-item-badges{gap:4px}` ahí, este `style=""` puntual sobra.
+- `BA-101`/`BA-145`/`BA-198` (`/api/choices` sin sesión, expone el padrón de
+  RRHH completo a cualquier pantalla de Archivo) — es `lookups.py`, marcado
+  `[CHOCA]` en la auditoría, sin carril propio.
+- Accesibilidad y estética que exigen `styles.css` (`BA-040` completo,
+  `BA-058`, `BA-059`, `BA-060`, `BA-083`-`BA-091`, `BA-100`-`BA-111`,
+  `BA-113`, `BA-151`) — carril dueño `G1-estilos`/`LX`; usé las clases que ya
+  existen ahí (`ds-item-*`, `ds-badge`, `ds-doc-*`, `ds-facet-*`) donde ya
+  estaban definidas, pero no puedo añadir clases nuevas ni tocar el archivo.
+- Funcionalidad ausente de mayor esfuerzo (`BA-059` vista de tabla,
+  `BA-120`/`BA-121` permalinks, `BA-122`-`BA-140` búsqueda avanzada/OCR/OAI-PMH,
+  `BA-126` búsquedas guardadas, `BA-130` exportación EAD/Dublin Core) — quedan
+  sin tocar por esfuerzo L y por tocar `archive.py`/`main.py` fuera de mi
+  carril.
+- `BA-190`-`BA-200` (pruebas) — `app/tests/` no es mi zona declarada.
+
+**quién lo pide**: agente-a1-buscador-archivo (A1-buscador-archivo)
+
 ## B2-admin-rrhh-html
 
 Resueltas en `app/static/admin_hr.html` (marcado puro, sin tocar JS/backend/styles.css):
@@ -1811,3 +1917,85 @@ hizo falta tocar `styles.css`— con un `<label for=...>` asociado), `OA-108`,
       móvil es un cambio de `styles.css` (media query), no de marcado.
 
 **quién lo pide**: agente-b1-admin-archivo-html (B1-admin-archivo-html)
+
+## B3-admin-sistema-html — resuelto en admin_system.html, y lo que no era mi archivo
+
+**quién lo pide**: agente-b3-admin-sistema-html (B3-admin-sistema-html)
+
+De los 114 tickets asignados (`docs/auditoria/sistema-ia-paginas.md`), mi zona exclusiva es
+`app/static/admin_system.html`. Resolví ahí: SI-006, SI-007, SI-036 (parte cliente), SI-055,
+SI-057, SI-059, SI-132, SI-141, SI-142, SI-152, SI-154, SI-182, SI-186, SI-187, SI-188,
+SI-189, SI-190, SI-192, SI-193, SI-194, SI-195, SI-196, SI-197, SI-198, SI-199, SI-203,
+SI-204, SI-212, SI-213 (29 tickets). Commit `d5477fe`. `python -m pytest app/tests -q`:
+713 passed antes y después.
+
+El resto de mis 114 asignados **no tocan `admin_system.html`** — según el propio "Mapa de
+colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No los toqué
+(regla de zona exclusiva). Quedan así, agrupados por archivo dueño real:
+
+- [ ] `SI-032`–`SI-034`, `SI-038`, `SI-049`–`SI-054` · **archivo**: `login.html`, `login.js` ·
+      **carril dueño**: ninguno declarado en `PLAN-PARALELO.md` para este bloque (tocan sólo
+      `login.*`) — nota: SI-032/SI-035/SI-028/SI-048 ya aparecen resueltos por
+      **agente-c9-auth** más arriba en este mismo `_BUZON.md` (commit `de9f6cf`); el resto
+      (SI-033 formulario real, SI-038 recuperación, SI-050–054 accesibilidad del login) sigue
+      pendiente.
+- [ ] `SI-043`–`SI-046`, `SI-058` (parte de `app.js`) · **archivo**: `app/static/app.js` ·
+      **carril dueño**: H2-app-js `[CHOCA]` — SI-058 ya tiene su mitad resuelta por
+      **agente-h2-app-js** (VI-001, commit `5b566e4`): `switchTab` ya conoce `admin-sistema`.
+      Queda la otra mitad (una sola función de control de acceso, llamada una vez) sin hacer.
+- [ ] `SI-097`–`SI-106`, `SI-109` · **archivo**: `app/static/admin_ai.html` · **carril dueño**:
+      no listado explícitamente en `PLAN-PARALELO.md`, exclusivo de esa página.
+- [ ] `SI-110`–`SI-120`, `SI-122`–`SI-125` · **archivo**: `app/static/ai-widget.js` ·
+      **carril dueño**: exclusivo de ese fichero, no asignado en `PLAN-PARALELO.md`.
+- [ ] `SI-157`–`SI-159`, `SI-162`–`SI-165`, `SI-167`–`SI-170` · **archivo**: `ayuda.html`,
+      `investigacion.html`, `compartido.html` · **carril dueño**: exclusivo de esas tres
+      páginas.
+- [ ] `SI-175`, `SI-176`, `SI-178`, `SI-179` · **archivo**: `app/static/scanner-client.js`,
+      `scanner-app/` · **carril dueño**: exclusivo de ese bloque.
+- [ ] `SI-181`, `SI-183`–`SI-185`, `SI-200`–`SI-202` · **archivo**: `app/static/app-shell.js`,
+      `app-theme.js`, `styles.css` · **carril dueño**: cáscara compartida `[CHOCA]` — SI-181
+      (telón del menú lateral) y SI-183-185 (nombre accesible del menú, botón sin estado) son
+      del mismo fichero que uso yo sólo de lectura.
+- [ ] `SI-205` · **archivo**: `app/static/admin_ai.html` · igual que el bloque de arriba.
+- [ ] `SI-211` · **archivo**: multi-archivo (`app-core.js`, `app.js`, todas las páginas) ·
+      cambio arquitectónico (migrar a módulos ES), no tiene sentido resolverlo tocando un solo
+      HTML.
+- [ ] `SI-218`, `SI-220`, `SI-222`, `SI-223`, `SI-224` · **archivo**: `.env.example`,
+      `app/static/robots.txt` (nuevo), `docs/funcionalidades.md`, `CLAUDE.md`, `README.md` ·
+      documentación y despliegue, fuera de mi zona.
+- [ ] `SI-226`–`SI-228`, `SI-233`, `SI-234`, `SI-236`–`SI-240` · **archivo**: `app/tests/*` ·
+      pruebas nuevas o de otros módulos (`conftest.py` es `[CHOCA]`), fuera de mi zona.
+
+En `admin_system.html` quedan también, de la lista que sí toca mi archivo, sin resolver por
+requerir backend o `[CHOCA]` con otros ficheros — los dejo explícitos porque el "Mapa de
+colisiones" sí los pone en mi zona:
+
+- [ ] `SI-058` (mitad HTML) · ya cubierta arriba junto con `app.js`.
+- [ ] `SI-129`, `SI-131`, `SI-135`–`SI-137`, `SI-145`, `SI-147`, `SI-148`, `SI-150`, `SI-151` ·
+      no estaban en mi lista de 114 asignados — los dejo para quien los tenga asignados.
+- [ ] `SI-138` (exportación bloquea el navegador) · **archivo**: `app/routes/backup.py`
+      (streaming) + `admin_system.html` (barra de progreso) `[CHOCA]` · sólo pude anotarlo:
+      sin cambio en el backend (respuesta por partes), no hay bytes que contar en el cliente.
+- [ ] `SI-139` (filtros de auditoría por fecha/usuario/módulo/evento/resultado) · **archivo**:
+      `app/routes/admin/helpers.py` (el endpoint sólo acepta `page`/`per_page`/`search`) +
+      `admin_system.html` (UI) · no añadí los controles porque sin los parámetros nuevos en el
+      backend serían controles decorativos.
+- [ ] `SI-140` (exportar auditoría a CSV) · **archivo**: `app/routes/admin/helpers.py`
+      (no existe endpoint de exportación) + `admin_system.html` (botón) · mismo motivo.
+- [ ] `SI-146` (alta/baja/cambio de rol de usuarios desde el panel Global) · **archivo**:
+      `app/routes/admin/users.py` (sólo expone cambio de contraseña) + `admin-users.js` +
+      `admin_system.html` · esfuerzo **M**, requiere las mismas guardas que ya existen en el
+      panel de módulo (OA-037); no lo intenté a medias.
+- [ ] `SI-153` (vista previa de impacto antes de cambiar el plazo de retención) · **archivo**:
+      `app/routes/admin/retention.py` (no hay endpoint de "cuántos documentos cambiarían") +
+      `admin_system.html` · sin ese conteo del servidor no hay vista previa real que mostrar.
+- [ ] `SI-155` (acciones en lote sobre documentos vencidos) · **archivo**:
+      `app/routes/admin/retention.py` (el flujo de disposición ya existe para otro caso, según
+      OA-147/OA-062, pero no expuesto aquí) + `admin_system.html` · esfuerzo **M**, no lo hice
+      a medias sin la ruta del backend.
+
+Nota sobre `SI-191` ("gráfica de usuarios prometida no existe"): al revisar el HTML actual el
+título de esa tarjeta ya usa `fas fa-users` (icono de personas), no un icono de gráfico —
+puede que ya lo haya corregido otro agente antes que yo, o que la ficha esté describiendo un
+estado anterior. La tarjeta sigue siendo una tabla, no una gráfica; lo dejo anotado por si
+alguien decide sí ponerle una gráfica real.

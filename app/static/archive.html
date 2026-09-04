@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap4.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
   <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/icons/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/icons/favicon-16x16.png">
@@ -34,24 +34,19 @@
   <div class="content-wrapper">
     <section id="tab-archivo" class="app-tab-section p-4">
       <div class="row">
-        <div class="col-12">
-          <div class="ds-breadcrumb-wrapper">
-            <div class="ds-breadcrumb">Comunidades / Archivo / Búsqueda</div>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <!-- Filtros -->
-        <div class="col-md-3">
+        <!-- Filtros: BA-078, va después de los resultados en el DOM (el
+             campo de búsqueda es lo primero que se usa por teclado) y se
+             reordena visualmente con las clases order-md-*. -->
+        <div class="col-md-3 order-md-2">
           <div class="card card-secondary">
-            <div class="card-header"><h3 class="card-title">Filtros Académicos</h3></div>
+            <div class="card-header"><h3 class="card-title">Filtros</h3></div>
             <div class="card-body">
-              <div class="accordion" id="ext_filters_acc">
+              <div id="ext_filters_acc">
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-arch-type">
-                    <button class="btn btn-link btn-block text-left text-lightblue font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-type">Tipología</button>
+                    <button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-type" aria-expanded="true" aria-controls="collapse-arch-type">Tipología</button>
                   </div>
-                  <div id="collapse-arch-type" class="collapse show" data-parent="#ext_filters_acc">
+                  <div id="collapse-arch-type" class="collapse show">
                     <div class="card-body p-2">
                       <select id="choice-archivo-doc-type" multiple aria-label="Filtrar por tipología documental" placeholder="Buscar tipología..."></select>
                     </div>
@@ -59,16 +54,17 @@
                 </div>
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-arch-date">
-                    <button class="btn btn-link btn-block text-left text-teal font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-date">Fecha</button>
+                    <button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-date" aria-expanded="false" aria-controls="collapse-arch-date">Fecha</button>
                   </div>
-                  <div id="collapse-arch-date" class="collapse" data-parent="#ext_filters_acc">
+                  <div id="collapse-arch-date" class="collapse">
                     <div class="card-body p-2">
-                      <div class="ds-date-chips mb-2">
-                        <button class="ds-date-chip active" data-module="archivo" data-preset="all">Todo</button>
-                        <button class="ds-date-chip" data-module="archivo" data-preset="year"><i class="fas fa-hashtag"></i> Año</button>
-                        <button class="ds-date-chip" data-module="archivo" data-preset="custom"><i class="fas fa-sliders-h"></i> Rango</button>
+                      <div class="ds-date-chips mb-2" role="radiogroup" aria-label="Rango de fecha">
+                        <button class="ds-date-chip active" data-module="archivo" data-preset="all" role="radio" aria-checked="true">Todo</button>
+                        <button class="ds-date-chip" data-module="archivo" data-preset="year" role="radio" aria-checked="false"><i class="fas fa-hashtag" aria-hidden="true"></i> Año</button>
+                        <button class="ds-date-chip" data-module="archivo" data-preset="custom" role="radio" aria-checked="false"><i class="fas fa-sliders-h" aria-hidden="true"></i> Rango</button>
                       </div>
                       <div id="year-panel-archivo" style="display:none;" class="mb-1">
+                        <label for="year-select-archivo" class="sr-only">Año</label>
                         <select id="year-select-archivo" class="form-control form-control-sm">
                           <option value="">Seleccionar año…</option>
                         </select>
@@ -76,11 +72,12 @@
                       <div id="range-panel-archivo" style="display:none;" class="mb-1">
                         <div class="input-group input-group-sm">
                           <div class="input-group-prepend">
-                            <span class="input-group-text" style="background:#f4f9ff;"><i class="fas fa-calendar-alt text-primary"></i></span>
+                            <span class="input-group-text" style="background:#f4f9ff;"><i class="fas fa-calendar-alt text-primary" aria-hidden="true"></i></span>
                           </div>
+                          <label for="fp-archivo-range" class="sr-only">Rango de fechas (desde – hasta)</label>
                           <input type="text" id="fp-archivo-range" class="form-control form-control-sm" placeholder="Desde → Hasta" readonly style="cursor:pointer;background:#fff;">
                           <div class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" id="fp-archivo-clear" title="Volver a Todo"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="fp-archivo-clear" aria-label="Volver a Todo"><i class="fas fa-times" aria-hidden="true"></i></button>
                           </div>
                         </div>
                       </div>
@@ -90,16 +87,31 @@
                 </div>
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-arch-tesauro">
-                    <button class="btn btn-link btn-block text-left text-indigo font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-tesauro">Palabras Clave</button>
+                    <button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-tesauro" aria-expanded="false" aria-controls="collapse-arch-tesauro">Palabras Clave</button>
                   </div>
-                  <div id="collapse-arch-tesauro" class="collapse" data-parent="#ext_filters_acc">
+                  <div id="collapse-arch-tesauro" class="collapse">
                     <div class="card-body p-2">
                       <select id="choice-archivo-tesauro" multiple aria-label="Filtrar por palabras clave" placeholder="Buscar palabras clave..."></select>
                     </div>
                   </div>
                 </div>
+                <div class="card mb-1">
+                  <div class="card-header p-2" id="heading-arch-soporte">
+                    <button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-arch-soporte" aria-expanded="false" aria-controls="collapse-arch-soporte">Soporte</button>
+                  </div>
+                  <div id="collapse-arch-soporte" class="collapse">
+                    <div class="card-body p-2">
+                      <label for="soporte_archivo" class="sr-only">Filtrar por soporte</label>
+                      <select id="soporte_archivo" class="form-control form-control-sm" aria-label="Filtrar por soporte">
+                        <option value="">Todos los soportes</option>
+                        <option value="Físico">Físico</option>
+                        <option value="Digital">Digital</option>
+                        <option value="Digitalizado">Digitalizado</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <button id="btn_update_archivo" class="btn ds-btn-primary w-100 mt-2">Aplicar</button>
             </div>
           </div>
           <!-- Facetas dinámicas (se rellena desde archive.js) -->
@@ -115,6 +127,7 @@
                   <option value="Alfabético (Z-A)">Alfabético (Z-A)</option>
                   <option value="Más recientes primero">Más recientes primero</option>
                   <option value="Más antiguos primero">Más antiguos primero</option>
+                  <option value="Relevancia">Relevancia (con texto de búsqueda)</option>
                 </select>
               </div>
               <div class="form-group mb-0">
@@ -130,15 +143,17 @@
           </div>
         </div>
 
-        <!-- Resultados -->
-        <div class="col-md-9">
+        <!-- Resultados: primero en el DOM (BA-078), aunque visualmente sigue
+             a la derecha por order-md-1. -->
+        <div class="col-md-9 order-md-1">
           <div class="ds-search-bar">
             <div class="input-group">
-              <input type="text" id="search_archivo" class="form-control ds-search-input" placeholder="Buscar...">
+              <label for="search_archivo" class="sr-only">Buscar por título, autor, resumen o palabras clave</label>
+              <input type="text" id="search_archivo" class="form-control ds-search-input" placeholder="Título, autor, resumen, palabras clave…">
               <div class="input-group-append">
-                <button id="btn_s_archivo" class="btn ds-btn-primary ds-search-action-btn" title="Buscar"><i class="fas fa-search"></i></button>
-                <button id="btn_clear_archivo" class="btn btn-outline-secondary ds-search-action-btn" title="Limpiar filtros"><i class="fas fa-eraser"></i></button>
-                <button id="download_archivo_xls" class="btn ds-btn-export ds-search-action-btn" title="Exportar XLS"><i class="fas fa-file-excel"></i></button>
+                <button id="btn_s_archivo" class="btn ds-btn-primary ds-search-action-btn" aria-label="Buscar"><i class="fas fa-search" aria-hidden="true"></i></button>
+                <button id="btn_clear_archivo" class="btn btn-outline-secondary ds-search-action-btn" aria-label="Limpiar filtros"><i class="fas fa-eraser" aria-hidden="true"></i></button>
+                <button id="download_archivo_xls" class="btn ds-btn-export ds-search-action-btn" aria-label="Exportar XLS"><i class="fas fa-file-excel" aria-hidden="true"></i></button>
               </div>
             </div>
           </div>
@@ -148,31 +163,26 @@
           </div>
           <div id="list_archivo" role="list"></div>
           <div id="archivo-pagination"></div>
-          <div id="ext_pagination_controls" class="d-flex justify-content-between align-items-center mt-3" role="navigation" aria-label="Paginación de resultados">
-            <button id="btn-archivo-prev" class="btn btn-outline-secondary btn-sm" aria-label="Página anterior"><i class="fas fa-chevron-left"></i> Anterior</button>
-            <span id="info-archivo-pagination" class="text-muted" style="font-size:0.85rem;" aria-live="polite">Pág 1 de 1</span>
-            <button id="btn-archivo-next" class="btn btn-outline-secondary btn-sm" aria-label="Página siguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
-          </div>
         </div>
       </div>
     </section>
   </div>
 
   <!-- Modal Documento -->
-  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div id="doc-modal" class="modal fade ds-doc-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="modal-doc-title" aria-modal="true">
     <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content" style="border-radius:14px; border:1px solid #d6dbe1; box-shadow:0 18px 40px rgba(16,24,40,0.2);">
+      <div class="modal-content">
         <div class="modal-body p-4">
           <div class="ds-doc-modal-head mb-3">
-            <i class="fas fa-file-alt"></i>
+            <i class="fas fa-file-alt" aria-hidden="true"></i>
             <h4 id="modal-doc-title" class="m-0 text-primary font-weight-bold">Detalle de Documento</h4>
           </div>
           <div class="ds-doc-modal-grid">
             <div class="ds-doc-panel ds-doc-thumb-panel">
               <h5 class="font-weight-bold text-primary mb-2">Miniatura</h5>
               <div class="ds-doc-thumb">
-                <i id="modal-doc-thumb-icon" class="fas fa-file-alt"></i>
-                <span id="modal-doc-thumb-badge" class="ds-doc-thumb-badge">N/A</span>
+                <i id="modal-doc-thumb-icon" class="fas fa-file-alt" aria-hidden="true"></i>
+                <span id="modal-doc-thumb-badge" class="ds-doc-thumb-badge"></span>
               </div>
             </div>
             <div class="ds-doc-panel">
@@ -187,30 +197,26 @@
           <!-- Visor de Documento Digitalizado -->
           <div id="modal-doc-viewer-section" class="d-none mt-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="font-weight-bold text-primary mb-0"><i class="fas fa-file-pdf mr-2"></i>Visor de Documento</h5>
-              <button onclick="closeDocViewer()" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times mr-1"></i>Cerrar Visor</button>
+              <h5 class="font-weight-bold text-primary mb-0"><i class="fas fa-file-pdf mr-2" aria-hidden="true"></i>Visor de Documento</h5>
+              <button type="button" onclick="closeDocViewer()" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times mr-1" aria-hidden="true"></i>Cerrar Visor</button>
             </div>
             <div style="border:1px solid #dee2e6;border-radius:8px;overflow:hidden;background:#f8f9fa;">
-              <iframe id="modal-doc-iframe" src="" style="width:100%;height:520px;border:none;display:block;" allowfullscreen></iframe>
+              <iframe id="modal-doc-iframe" src="" title="Vista previa del documento"
+                style="width:100%;height:min(70vh,520px);border:none;display:block;"
+                sandbox="allow-same-origin allow-scripts allow-popups" referrerpolicy="no-referrer"></iframe>
             </div>
           </div>
         </div>
         <div class="modal-footer border-top-0 d-flex justify-content-end p-3">
           <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeDocViewer()">Cerrar</button>
-          <button id="btn-modal-view" class="btn btn-outline-info" title="Visualizar"><i class="fas fa-eye mr-1"></i>Ver</button>
-          <button id="btn-modal-edit" class="btn btn-outline-warning d-none" title="Editar"><i class="fas fa-pen"></i></button>
-          <button id="btn-modal-download" class="btn btn-outline-primary d-none" title="Descargar"><i class="fas fa-download"></i></button>
+          <button id="btn-modal-view" type="button" class="btn btn-outline-info"><i class="fas fa-eye mr-1" aria-hidden="true"></i>Ver</button>
+          <button id="btn-modal-edit" type="button" class="btn btn-outline-warning d-none" aria-label="Editar documento"><i class="fas fa-pen" aria-hidden="true"></i></button>
         </div>
       </div>
     </div>
   </div>
 
-  <style>
-    .ds-skeleton { background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 50%,#e9ecef 75%);background-size:200% 100%;animation:ds-shimmer 1.4s infinite;border-radius:4px; }
-    @keyframes ds-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-    #session-warning-banner { font-family:inherit; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13"></script>
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>

@@ -2,29 +2,80 @@
 // BÚSQUEDA Y RENDER — ARCHIVO INSTITUCIONAL
 // ==========================================================================
 
-// Skeleton de carga para resultados
-function showArchivoSkeleton() {
-  const container = document.getElementById("list_archivo");
-  if (!container) return;
-  container.innerHTML = Array.from({ length: 4 }, () => `
-    <div class="ds-item-card" style="pointer-events:none;opacity:0.7;">
-      <div class="ds-item-thumbnail"><div style="width:40px;height:50px;background:#e9ecef;border-radius:6px;"></div></div>
-      <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
-        <div class="ds-skeleton mb-2" style="width:30%;height:16px;"></div>
-        <div class="ds-skeleton mb-2" style="width:80%;height:20px;"></div>
-        <div class="ds-skeleton mb-1" style="width:50%;height:13px;"></div>
-        <div class="ds-skeleton"      style="width:40%;height:13px;"></div>
-      </div>
-    </div>`).join("");
+let _archivoSearchSeq = 0;
+let _archivoAbortController = null;
+let _archivoModalTrigger = null;
+
+function _pluralArchivo(n, singular, pluralWord) {
+  return `${n} ${n === 1 ? singular : pluralWord}`;
 }
 
-const _debouncedArchivoSearch = (() => {
-  let timer;
-  return () => { clearTimeout(timer); timer = setTimeout(triggerArchivoSearch, 420); };
-})();
+function _archivoMotionBehavior() {
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return (document.body.classList.contains("ds-no-anim") || reduced) ? "auto" : "smooth";
+}
+
+// Esqueleto de carga: isomorfo a la tarjeta real (BA-053) y con tantos
+// bloques como perPage, para no dar un salto de altura al llegar los datos.
+function showArchivoSkeleton() {
+  const container = document.getElementById("list_archivo");
+  if (container) {
+    const count = Math.min(state.archivo.perPage || 10, 12);
+    container.innerHTML = Array.from({ length: count }, () => `
+      <div class="ds-item-card ds-skeleton-card" aria-hidden="true">
+        <div class="ds-item-thumbnail"><div class="ds-skeleton" style="width:40px;height:50px;"></div></div>
+        <div class="ds-item-metadata">
+          <div class="ds-skeleton mb-2" style="width:30%;height:16px;"></div>
+          <div class="ds-skeleton mb-2" style="width:80%;height:20px;"></div>
+          <div class="ds-skeleton mb-1" style="width:50%;height:13px;"></div>
+          <div class="ds-skeleton"      style="width:40%;height:13px;"></div>
+        </div>
+      </div>`).join("");
+  }
+  _renderArchivoFacetsSkeleton();
+}
+
+function _renderArchivoFacetsSkeleton() {
+  const el = document.getElementById("archivo-facets-panel");
+  if (!el) return;
+  el.innerHTML = `
+    <div class="card card-secondary mt-2" aria-hidden="true">
+      <div class="card-body p-2">
+        <div class="ds-skeleton mb-2" style="width:70%;height:12px;"></div>
+        <div class="ds-skeleton mb-1" style="width:100%;height:20px;"></div>
+        <div class="ds-skeleton mb-1" style="width:100%;height:20px;"></div>
+        <div class="ds-skeleton" style="width:100%;height:20px;"></div>
+      </div>
+    </div>`;
+}
+
+function _renderArchivoError(message) {
+  const container = document.getElementById("list_archivo");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="alert alert-danger text-center p-4">
+      <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+      <p class="mb-2">${escHtml(message || "No se pudo cargar el archivo. Compruebe su conexión.")}</p>
+      <button type="button" class="btn btn-sm btn-outline-danger" onclick="triggerArchivoSearch()">Reintentar</button>
+    </div>`;
+  const countEl = document.getElementById("count-archivo-results");
+  if (countEl) countEl.innerText = "Error al cargar";
+  const facetsEl = document.getElementById("archivo-facets-panel");
+  if (facetsEl) facetsEl.innerHTML = "";
+}
 
 async function triggerArchivoSearch() {
   showArchivoSkeleton();
+  const seq = ++_archivoSearchSeq;
+  if (_archivoAbortController) _archivoAbortController.abort();
+  const controller = new AbortController();
+  _archivoAbortController = controller;
+
+  const listEl  = document.getElementById("list_archivo");
+  const countEl = document.getElementById("count-archivo-results");
+  if (listEl)  listEl.setAttribute("aria-busy", "true");
+  if (countEl) countEl.innerText = "Buscando…";
+
   try {
     const res = await fetch(`${API_BASE}/api/archivo/buscar`, {
       method: "POST",
@@ -39,9 +90,11 @@ async function triggerArchivoSearch() {
         soporte:       document.getElementById("soporte_archivo")?.value || "",
         page:          state.archivo.page,
         per_page:      state.archivo.perPage
-      })
+      }),
+      signal: controller.signal
     });
-    if (!res.ok) throw new Error();
+    if (seq !== _archivoSearchSeq) return;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     // Retrocompatibilidad: si la respuesta es un array (formato viejo), tratar como antes
     if (Array.isArray(data)) {
@@ -51,11 +104,25 @@ async function triggerArchivoSearch() {
       state.archivo.results = data.records || [];
       state.archivo.total   = data.total   || state.archivo.results.length;
     }
+    // BA-021: un offset más allá del final devuelve total=0 sin filas, y la
+    // pantalla mentiría "0 resultados". Si eso pasa con page>1, se vuelve a
+    // la página 1 (siempre válida) en vez de mostrar el vacío falso.
+    if (!Array.isArray(data) && (data.total || 0) === 0 && state.archivo.page > 1) {
+      state.archivo.page = 1;
+      if (listEl) listEl.removeAttribute("aria-busy");
+      triggerArchivoSearch();
+      return;
+    }
     renderArchivoList();
     renderArchivoPagination();
     _renderArchivoFacets(data.facets || null);
   } catch (e) {
+    if (e.name === "AbortError" || seq !== _archivoSearchSeq) return;
     console.error("Error buscando archivo:", e);
+    _renderArchivoError();
+    showToast("No se pudo cargar el archivo. Intente de nuevo.", "error");
+  } finally {
+    if (seq === _archivoSearchSeq && listEl) listEl.removeAttribute("aria-busy");
   }
 }
 
@@ -74,31 +141,34 @@ function renderArchivoPagination() {
   for (let i = startPage; i <= endPage; i++) pageNums.push(i);
 
   container.innerHTML = `
-    <nav class="mt-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:6px;">
-      <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
+    <nav class="mt-3 d-flex align-items-center justify-content-center" aria-label="Paginación de resultados">
       <ul class="pagination pagination-sm mb-0">
-        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(1)" title="Primera" aria-label="Primera página"><i class="fas fa-angle-double-left"></i></button>
+        <li class="page-item ${page <= 1 ? "disabled" : ""}">
+          <button class="page-link" type="button" onclick="changeArchivoPage(1)" ${page <= 1 ? 'disabled aria-disabled="true"' : ""} aria-label="Primera página"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
         </li>
-        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${page - 1})" aria-label="Página anterior"><i class="fas fa-chevron-left"></i></button>
+        <li class="page-item ${page <= 1 ? "disabled" : ""}">
+          <button class="page-link" type="button" onclick="changeArchivoPage(${page - 1})" ${page <= 1 ? 'disabled aria-disabled="true"' : ""} aria-label="Página anterior"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
         </li>
-        ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${p})">${p}</button>
+        ${pageNums.map(p => `<li class="page-item ${p === page ? "active" : ""}">
+          <button class="page-link" type="button" onclick="changeArchivoPage(${p})" aria-label="Página ${p}"${p === page ? ' aria-current="page"' : ""}>${p}</button>
         </li>`).join("")}
-        <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${page + 1})" aria-label="Página siguiente"><i class="fas fa-chevron-right"></i></button>
+        <li class="page-item ${page >= pages ? "disabled" : ""}">
+          <button class="page-link" type="button" onclick="changeArchivoPage(${page + 1})" ${page >= pages ? 'disabled aria-disabled="true"' : ""} aria-label="Página siguiente"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
         </li>
-        <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeArchivoPage(${pages})" title="Última" aria-label="Última página"><i class="fas fa-angle-double-right"></i></button>
+        <li class="page-item ${page >= pages ? "disabled" : ""}">
+          <button class="page-link" type="button" onclick="changeArchivoPage(${pages})" ${page >= pages ? 'disabled aria-disabled="true"' : ""} aria-label="Última página"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </li>
       </ul>
     </nav>`;
 }
 
 function changeArchivoPage(p) {
-  state.archivo.page = p;
+  const total   = state.archivo.total || state.archivo.results.length;
+  const pages   = Math.max(1, Math.ceil(total / (state.archivo.perPage || 10)));
+  state.archivo.page = Math.max(1, Math.min(p, pages));
   triggerArchivoSearch();
+  const header = document.querySelector(".ds-results-header");
+  if (header) header.scrollIntoView({ behavior: _archivoMotionBehavior(), block: "start" });
 }
 
 function getDocumentIcon(docType) {
@@ -121,97 +191,109 @@ function getDocumentIcon(docType) {
   return { icon: "fas fa-file-alt", color: "#2b4e72" }; // default blue-grey
 }
 
+function hasArchivoActiveFilters() {
+  const s = state.archivo;
+  return !!(
+    (s.search && s.search.trim()) ||
+    (s.selectedTypes && s.selectedTypes.length) ||
+    (s.selectedTesauro && s.selectedTesauro.length) ||
+    (document.getElementById("soporte_archivo")?.value) ||
+    _archivoDateFilterActive()
+  );
+}
+
+function _archivoDateFilterActive() {
+  const lim = state.choices?.archivo;
+  if (!lim) return false;
+  return state.archivo.dateStart !== lim.min_date || state.archivo.dateEnd !== lim.max_date;
+}
+
+function _clearArchivoFilters() {
+  document.getElementById("btn_clear_archivo")?.click();
+}
+
 function renderArchivoList() {
   const container = document.getElementById("list_archivo");
+  if (!container) return;
   const results   = state.archivo.results;
   const total     = state.archivo.total || results.length;
-  const hasFilter = !!(state.archivo.search || (state.archivo.selectedTypes && state.archivo.selectedTypes.length) || (state.archivo.selectedTesauro && state.archivo.selectedTesauro.length));
-  document.getElementById("count-archivo-results").innerText =
-    hasFilter ? `${total} Resultados` : `${total} Registros`;
+  const hasFilter = hasArchivoActiveFilters();
+  const perPage    = state.archivo.perPage || 10;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+  const countEl = document.getElementById("count-archivo-results");
+  if (countEl) {
+    countEl.innerText = `${_pluralArchivo(total, hasFilter ? "Resultado" : "Registro", hasFilter ? "Resultados" : "Registros")} — Pág. ${state.archivo.page} de ${totalPages}`;
+  }
 
   if (results.length === 0) {
     const emptyMsg = hasFilter
-      ? `No se encontraron documentos con los filtros aplicados.
-         <br><small class="text-muted">Intente ampliar la búsqueda o limpiar los filtros.</small>`
-      : `El archivo no contiene documentos registrados aún.`;
-    container.innerHTML = `<div class="alert alert-secondary text-center p-4">
-      <i class="fas fa-folder-open fa-2x mb-2 text-muted"></i>
-      <p class="mb-0">${emptyMsg}</p>
-    </div>`;
-    document.getElementById("info-archivo-pagination").innerText = "Pág 1 de 1";
-    const prevBtn = document.getElementById("btn-archivo-prev");
-    const nextBtn = document.getElementById("btn-archivo-next");
-    if (prevBtn) prevBtn.disabled = true;
-    if (nextBtn) nextBtn.disabled = true;
+      ? "No se encontraron documentos con los filtros aplicados."
+      : "El archivo no contiene documentos publicados que cumplan estos criterios.";
+    container.innerHTML = `
+      <div class="alert alert-secondary text-center p-4">
+        <i class="fas fa-folder-open fa-2x mb-2 text-muted"></i>
+        <p class="mb-2">${emptyMsg}</p>
+        ${hasFilter ? `<button type="button" class="btn btn-sm btn-outline-secondary" onclick="_clearArchivoFilters()">Limpiar filtros</button>` : ""}
+      </div>`;
     return;
   }
-
-  const totalPages = Math.ceil(total / state.archivo.perPage) || 1;
-  document.getElementById("info-archivo-pagination").innerText = `Pág ${state.archivo.page} de ${totalPages}`;
-  const prevBtnA = document.getElementById("btn-archivo-prev");
-  const nextBtnA = document.getElementById("btn-archivo-next");
-  if (prevBtnA) prevBtnA.disabled = state.archivo.page <= 1;
-  if (nextBtnA) nextBtnA.disabled = state.archivo.page >= totalPages;
 
   const searchTerms = (state.archivo.search || "").trim().split(/\s+/).filter(t => t.length > 1);
 
   container.innerHTML = results.map(doc => {
     const iconData = getDocumentIcon(doc.doc_type);
-    const hl = txt => typeof highlightTerms === "function" ? highlightTerms(txt, searchTerms) : (txt || "");
+    const hl = txt => typeof highlightTerms === "function" ? highlightTerms(txt, searchTerms) : (escHtml(txt) || "");
     const hasFile = !!(doc.file_url);
 
-    const soporteIcon = {"Físico":"fa-archive","Digital":"fa-laptop","Digitalizado":"fa-scanner"}[doc.soporte] || "fa-archive";
-    const soporteColor = {"Físico":"#6c757d","Digital":"#17a2b8","Digitalizado":"#fd7e14"}[doc.soporte] || "#6c757d";
+    // Una sola insignia de soporte; tener fichero se expresa con el icono de
+    // acción de "Abrir archivo digital", no con una segunda insignia (BA-045).
+    const soporteIcon  = { "Físico": "fa-archive", "Digital": "fa-laptop", "Digitalizado": "fa-print" }[doc.soporte] || "fa-archive";
+    const soporteLabel = doc.soporte || (hasFile ? "Digital" : "");
 
     // Sin el `|| []`, un registro sin tesauro_badges lanza dentro del .map() y
     // se queda en blanco la lista entera, no solo esa tarjeta.
     const badges = (doc.tesauro_badges || [])
       .filter(b => b !== doc.tesauro_primario && b !== doc.doc_type);
 
+    const titleText = escHtml(doc.titulo || "Documento sin título");
+
     return `
-    <div class="ds-item-card" role="listitem" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;border-left:3px solid ${iconData.color};">
-      <div class="ds-item-thumbnail" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <i class="${iconData.icon}" style="font-size:36px;color:${iconData.color};"></i>
-        ${hasFile ? `<span class="badge badge-info" style="font-size:0.6rem;padding:2px 5px;"><i class="fas fa-file mr-1"></i>Digital</span>` : ""}
-        ${doc.soporte ? `<span class="badge" style="font-size:0.55rem;padding:2px 5px;background:${soporteColor};color:#fff;"><i class="fas ${soporteIcon} mr-1"></i>${escHtml(doc.soporte)}</span>` : ""}
+    <div class="ds-item-card" role="listitem" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;">
+      <div class="ds-item-thumbnail">
+        <i class="${iconData.icon}" style="color:${iconData.color};" aria-hidden="true"></i>
+        ${soporteLabel ? `<span class="badge ds-badge mt-1" style="font-size:0.6rem;"><i class="fas ${soporteIcon} mr-1" aria-hidden="true"></i>${escHtml(soporteLabel)}</span>` : ""}
       </div>
-      <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <span class="badge badge-light" style="font-size:0.75rem;color:#2b4e72;font-weight:bold;border:1px solid #d9e6f4;border-radius:12px;padding:3px 10px;">
-            <i class="fas fa-bookmark mr-1"></i> ${escHtml(doc.tesauro_primario || doc.doc_type)}
-          </span>
-          <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1"></i> ${escHtml(formatISOToSpanish(doc.fecha))}</span>
+      <div class="ds-item-metadata">
+        <button type="button" class="ds-item-title btn btn-link p-0 text-left" onclick="event.stopPropagation();openArchivoModal(${doc.__idx})">${hl(doc.titulo)}</button>
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:6px;">
+          <span class="badge ds-badge" style="margin-top:0;"><i class="fas fa-bookmark mr-1" aria-hidden="true"></i>${escHtml(doc.tesauro_primario || doc.doc_type)}</span>
+          <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1" aria-hidden="true"></i>${escHtml(formatISOToSpanish(doc.fecha))}</span>
         </div>
-        <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:4px 0;">${hl(doc.titulo)}</h4>
-        <div class="ds-item-authors" style="font-size:0.82rem;color:#495057;margin-bottom:2px;">
-          <i class="fas fa-user-edit mr-1"></i> <strong>${hl(doc.autor)}</strong>
+        <div class="ds-item-authors"><i class="fas fa-user-edit mr-1" aria-hidden="true"></i>${hl(doc.autor)}</div>
+        <div class="ds-item-publisher">
+          <i class="fas fa-map-marker-alt mr-1" aria-hidden="true"></i>${escHtml(doc.ubicacion)}
+          ${doc.numero_folio ? `<span class="ml-2"><i class="fas fa-hashtag mr-1" aria-hidden="true"></i>${escHtml(doc.numero_folio)}</span>` : ""}
+          ${doc.numero_paginas ? `<span class="ml-2"><i class="fas fa-file-alt mr-1" aria-hidden="true"></i>${escHtml(String(doc.numero_paginas))} p.</span>` : ""}
         </div>
-        <div class="ds-item-publisher" style="font-size:0.82rem;color:#6a737b;margin-bottom:4px;">
-          <i class="fas fa-map-marker-alt mr-1"></i> <strong>${escHtml(doc.ubicacion)}</strong>
-          ${doc.numero_folio ? `<span class="ml-2 text-muted"><i class="fas fa-hashtag mr-1"></i>${escHtml(doc.numero_folio)}</span>` : ""}
-          ${doc.numero_paginas ? `<span class="ml-2 text-muted"><i class="fas fa-file-alt mr-1"></i>${escHtml(String(doc.numero_paginas))} p.</span>` : ""}
-        </div>
-        ${doc.resumen ? `<p class="ds-item-abstract text-muted m-0 mt-1" style="font-size:0.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${hl(doc.resumen)}</p>` : ""}
-        <div class="ds-item-badges d-flex flex-wrap gap-1 mt-2">
+        ${doc.resumen ? `<p class="ds-item-abstract m-0">${hl(doc.resumen)}</p>` : ""}
+        <div class="ds-item-badges d-flex flex-wrap mt-2" style="gap:4px;">
           ${badges.slice(0, 4).map(b => `<span class="badge ds-kw-badge">${escHtml(b)}</span>`).join("")}
           ${badges.length > 4 ? `<span class="badge ds-kw-badge ds-kw-badge-more">+${badges.length - 4}</span>` : ""}
         </div>
       </div>
-      <div class="ds-item-actions" style="margin-left:15px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
-        <button class="btn btn-primary ds-action-btn" title="Ver detalle"
-          onclick="event.stopPropagation();openArchivoModal(${doc.__idx})"
-          style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
-          <i class="fas fa-eye"></i>
+      <div class="ds-item-actions">
+        <button class="btn btn-primary ds-action-btn" aria-label="Ver detalle de «${titleText}»"
+          onclick="event.stopPropagation();openArchivoModal(${doc.__idx})">
+          <i class="fas fa-eye" aria-hidden="true"></i>
         </button>
-        ${hasFile ? `<a href="${_secureFileUrl(doc.file_url)}" target="_blank" class="btn btn-outline-info ds-action-btn" title="Abrir archivo digital"
-          onclick="event.stopPropagation()"
-          style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
-          <i class="fas fa-file-pdf" style="font-size:0.8rem;"></i>
+        ${hasFile ? `<a href="${_secureFileUrl(doc.file_url)}" target="_blank" rel="noopener" class="btn btn-outline-info ds-action-btn" aria-label="Abrir archivo digital de «${titleText}»"
+          onclick="event.stopPropagation()">
+          <i class="fas fa-file-pdf" style="font-size:0.8rem;" aria-hidden="true"></i>
         </a>` : ""}
-        ${state.user ? `<a href="/static/admin_archive.html?docId=${doc.id}" class="btn btn-outline-warning ds-action-btn" title="Editar documento (Admin)"
-          onclick="event.stopPropagation()"
-          style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
-          <i class="fas fa-pen" style="font-size:0.8rem;"></i>
+        ${(state.user && state.user.roles && state.user.roles.Archivo === "Admin") ? `<a href="/admin/archivo?docId=${doc.id}" class="btn btn-outline-warning ds-action-btn" aria-label="Editar documento «${titleText}» (Admin)"
+          onclick="event.stopPropagation()">
+          <i class="fas fa-pen" style="font-size:0.8rem;" aria-hidden="true"></i>
         </a>` : ""}
       </div>
     </div>
@@ -222,6 +304,7 @@ function renderArchivoList() {
 function openArchivoModal(idxReal) {
   const doc = state.archivo.results.find(d => d.__idx == idxReal);
   if (!doc) return;
+  _archivoModalTrigger = document.activeElement;
   openDocModalWithRecord(doc);
 }
 
@@ -230,7 +313,7 @@ function openDocModalWithRecord(doc) {
   document.getElementById("modal-doc-title").innerText       = doc.titulo;
   document.getElementById("modal-doc-thumb-icon").className  = iconData.icon;
   document.getElementById("modal-doc-thumb-icon").style.color = iconData.color;
-  document.getElementById("modal-doc-thumb-badge").innerText = doc.doc_type;
+  document.getElementById("modal-doc-thumb-badge").innerText = doc.doc_type || "";
 
   const isActa   = /^acta|^resoluc/i.test(doc.doc_type);
   const isPlano  = /plano/i.test(doc.doc_type);
@@ -284,16 +367,32 @@ function openDocModalWithRecord(doc) {
     viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
     viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
   }
-  document.getElementById("btn-modal-download").classList.add("d-none");
   const editBtn = document.getElementById("btn-modal-edit");
-  if (state.user && doc.id) {
+  if (state.user && state.user.roles && state.user.roles.Archivo === "Admin" && doc.id) {
     editBtn.classList.remove("d-none");
-    editBtn.onclick = () => { window.location.href = `/static/admin_archive.html?docId=${doc.id}`; };
+    editBtn.onclick = () => { window.location.href = `/admin/archivo?docId=${doc.id}`; };
   } else {
     editBtn.classList.add("d-none");
   }
 
+  if (typeof $ === "undefined" || !$.fn || !$.fn.modal) {
+    console.error("jQuery/Bootstrap modal no disponible");
+    showToast("No se pudo abrir el detalle: los recursos de la página no cargaron. Recargue e intente de nuevo.", "error");
+    return;
+  }
   $("#doc-modal").modal("show");
+}
+
+if (typeof $ !== "undefined" && $.fn && $.fn.modal) {
+  // BA-076: Bootstrap sólo devuelve el foco al disparador si el modal se abrió
+  // desde un elemento declarado con data-toggle; aquí se abre por JS, así que
+  // el foco se restaura a mano al cerrar.
+  $("#doc-modal").on("hidden.bs.modal", () => {
+    if (_archivoModalTrigger && typeof _archivoModalTrigger.focus === "function") {
+      _archivoModalTrigger.focus();
+    }
+    _archivoModalTrigger = null;
+  });
 }
 
 // ==========================================================================
@@ -318,7 +417,7 @@ function toggleDocViewer(fileUrl) {
       iframe.src = fileUrl;
     }
     section.classList.remove("d-none");
-    section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    section.scrollIntoView({ behavior: _archivoMotionBehavior(), block: "nearest" });
   } else {
     closeDocViewer();
   }
@@ -347,31 +446,46 @@ function _renderArchivoFacets(facets) {
 
   const typeRows = byType.map(f => {
     const active = selectedTypes.includes(f.name);
-    return `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row${active ? " ds-facet-active" : ""}"
-                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetTypeClick(${JSON.stringify(f.name)})">
+    return `<button type="button" class="ds-facet-row w-100 d-flex justify-content-between align-items-center py-1 px-1${active ? " ds-facet-active" : ""}"
+                 data-facet-type="${escHtml(f.name)}" aria-pressed="${active}"
+                 style="font-size:0.78rem;border:none;background:transparent;text-align:left;">
       <span class="text-truncate" style="max-width:140px;" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
-    </div>`;
+    </button>`;
   }).join("");
 
   const yearRows = byYear.map(f =>
-    `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row"
-          style="cursor:pointer;font-size:0.78rem;" onclick="_facetYearClick(${f.year})">
+    `<button type="button" class="ds-facet-row w-100 d-flex justify-content-between align-items-center py-1 px-1"
+          data-facet-year="${f.year}" aria-pressed="false"
+          style="font-size:0.78rem;border:none;background:transparent;text-align:left;">
       <span>${f.year}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
-    </div>`
+    </button>`
   ).join("");
 
   el.innerHTML = `
     <div class="card card-secondary mt-2" style="font-size:0.82rem;">
       <div class="card-header py-1 px-2" style="background:#f4f9ff;">
-        <span class="font-weight-bold text-primary" style="font-size:0.8rem;"><i class="fas fa-chart-bar mr-1"></i>Distribución</span>
+        <span class="font-weight-bold text-primary" style="font-size:0.8rem;"><i class="fas fa-chart-bar mr-1" aria-hidden="true"></i>Distribución</span>
       </div>
       <div class="card-body p-2">
         ${byType.length ? `<p class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">Por Tipo</p>${typeRows}` : ""}
         ${byYear.length ? `<p class="text-muted mb-1 mt-2" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">Por Año</p>${yearRows}` : ""}
       </div>
     </div>`;
+
+  // BA-001/BA-070: delegación de eventos por data-*, nada de handlers en
+  // línea con nombres inyectados por JSON.stringify (rompía con comillas en
+  // el atributo) ni divs sin semántica de botón (inalcanzables por teclado).
+  if (!el.dataset.delegated) {
+    el.dataset.delegated = "1";
+    el.addEventListener("click", e => {
+      const typeBtn = e.target.closest("[data-facet-type]");
+      if (typeBtn) { _facetTypeClick(typeBtn.dataset.facetType); return; }
+      const yearBtn = e.target.closest("[data-facet-year]");
+      if (yearBtn) { _facetYearClick(yearBtn.dataset.facetYear); }
+    });
+  }
 }
 
 function _facetTypeClick(name) {
@@ -379,26 +493,31 @@ function _facetTypeClick(name) {
   const idx = state.archivo.selectedTypes.indexOf(name);
   if (idx >= 0) state.archivo.selectedTypes.splice(idx, 1);
   else state.archivo.selectedTypes.push(name);
-  // Sync Choices.js control if present
-  try {
-    const choiceEl = document.getElementById("choice-archivo-doc-type");
-    if (choiceEl && choiceEl._choices) {
-      state.archivo.selectedTypes.length
-        ? choiceEl._choices.setChoiceByValue(state.archivo.selectedTypes)
-        : choiceEl._choices.removeActiveItems();
-    }
-  } catch {}
+  // BA-013: el proyecto usa TomSelect (tsInstances), no Choices.js.
+  const ts = tsInstances["choice-archivo-doc-type"];
+  if (ts) ts.setValue(state.archivo.selectedTypes, true);
   state.archivo.page = 1;
   triggerArchivoSearch();
 }
 
 function _facetYearClick(year) {
   const y = String(year);
+  // BA-012: activar la pestaña "Año" del acordeón y su panel, no sólo cambiar
+  // el estado interno, para que el usuario vea de dónde salió el filtro.
+  if (typeof applyDatePreset === "function") applyDatePreset("archivo", "year");
   state.archivo.dateStart = y + "-01-01";
   state.archivo.dateEnd   = y + "-12-31";
-  // Sync year-select control if present
   const ys = document.getElementById("year-select-archivo");
   if (ys) ys.value = y;
+  const lbl = document.getElementById("fp-archivo-label");
+  if (lbl) lbl.innerText = `Año ${y}`;
   state.archivo.page = 1;
   triggerArchivoSearch();
 }
+
+// BA-187: como los colores de la tarjeta viven en el marcado generado, un
+// cambio de tema con la lista ya pintada dejaba las tarjetas con los colores
+// anteriores hasta la siguiente búsqueda.
+document.addEventListener("ds:theme-change", () => {
+  if (state.archivo.results && state.archivo.results.length) renderArchivoList();
+});
