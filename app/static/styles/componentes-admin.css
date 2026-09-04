@@ -366,7 +366,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 .btn.is-loading {
   position: relative;
   pointer-events: none;
-  color: transparent !important;
+  color: transparent;
 }
 .btn.is-loading > * { visibility: hidden; }
 .btn.is-loading::after {
@@ -415,7 +415,7 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
   width: 100%;
   margin-bottom: 14px;
   font-weight: 600;
-  border-radius: 8px !important;
+  border-radius: 8px;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -449,17 +449,17 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
    cuál color es una decisión de marcado, no de esta hoja — anotado en
    `_BUZON.md`.
    ========================================================================== */
-.card.card-primary .card-header  { background:#e3eefa !important; color:#0f3460 !important; border-bottom-color:#b8d5ef !important; }
-.card.card-success .card-header  { background:#deefe3 !important; color:#1a5c30 !important; border-bottom-color:#b5d9c5 !important; }
-.card.card-info    .card-header  { background:#daf0f4 !important; color:#0c545d !important; border-bottom-color:#aadfe7 !important; }
-.card.card-warning .card-header  { background:#fff5d6 !important; color:#7B5800 !important; border-bottom-color:#eedfa0 !important; }
-.card.card-danger  .card-header  { background:#fbdfe2 !important; color:#7c2d3c !important; border-bottom-color:#f0b4bf !important; }
-.card.card-secondary .card-header { background:#eef0f1 !important; color:#495057 !important; }
-.card.card-primary .card-header .card-title  { color: #0f3460 !important; }
-.card.card-success .card-header .card-title  { color: #1a5c30 !important; }
-.card.card-info    .card-header .card-title  { color: #0c545d !important; }
-.card.card-warning .card-header .card-title  { color: #7B5800 !important; }
-.card.card-danger  .card-header .card-title  { color: #7c2d3c !important; }
+.card.card-primary .card-header  { background:#e3eefa; color:#0f3460; border-bottom-color:#b8d5ef; }
+.card.card-success .card-header  { background:#deefe3; color:#1a5c30; border-bottom-color:#b5d9c5; }
+.card.card-info    .card-header  { background:#daf0f4; color:#0c545d; border-bottom-color:#aadfe7; }
+.card.card-warning .card-header  { background:#fff5d6; color:#7B5800; border-bottom-color:#eedfa0; }
+.card.card-danger  .card-header  { background:#fbdfe2; color:#7c2d3c; border-bottom-color:#f0b4bf; }
+.card.card-secondary .card-header { background:#eef0f1; color:#495057; }
+.card.card-primary .card-header .card-title  { color: #0f3460; }
+.card.card-success .card-header .card-title  { color: #1a5c30; }
+.card.card-info    .card-header .card-title  { color: #0c545d; }
+.card.card-warning .card-header .card-title  { color: #7B5800; }
+.card.card-danger  .card-header .card-title  { color: #7c2d3c; }
 
 /* ==========================================================================
    PAGINATION CONTROLS — visual mejorado
@@ -472,7 +472,7 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
 #ext_pagination_controls .btn,
 #rrhh_pagination_controls .btn,
 [id^="admin_prev-"], [id^="admin_next-"] {
-  border-radius: 8px !important;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 0.84rem;
   padding: 6px 14px;
