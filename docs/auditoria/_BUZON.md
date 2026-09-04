@@ -1678,3 +1678,60 @@ reserva como terminada con `6ca0fc7`, según el mismo patrón documentado por
 L7/L10/L11/L12/L13 arriba.
 
 **quién lo pide**: agente-l9-estilos (L9-estilos)
+
+## B2-admin-rrhh-html
+
+Resueltas en `app/static/admin_hr.html` (marcado puro, sin tocar JS/backend/styles.css):
+`OR-066` (subtítulo en las seis tarjetas de KPI que no lo tenían), `OR-150` (clase
+`btn-save-modal` en el botón de guardar de `editEmpleadoModal`, para que el atajo
+Ctrl+S de `admin-ui.js` también funcione ahí), `OR-152` (mismos `data-backdrop="static"`
+`data-keyboard="false"` en `editEmpleadoModal` y `editArchivoModal` que ya llevaban
+`doc-modal`/`rrhh-person-modal`, para que Escape se comporte igual en los cuatro
+modales — la parte de "confirmar si hay cambios sin guardar" sigue pendiente de
+`admin-ui.js`, ya anotada como `OR-149`), `OR-181` (papelera de RRHH: `card-danger` en
+Documentos pasó a `card-secondary`, igual que Empleados, sin jerarquía de gravedad
+falsa entre las dos), `OR-229` (borré las dos reglas de `border-radius: 0.5rem
+!important` sobre `.card`/`.info-box` del `<style>` de cabecera: `styles.css` ya trae
+`.card { border-radius: var(--radius-md) !important; }`, así que la regla local era
+redundante y competía con el token en vez de usarlo — verificado visualmente que el
+radio resultante es el mismo 0.5rem por herencia del token), `OR-242` (parcial:
+añadí `max-height:80vh; overflow-y:auto` al `modal-body` de `editEmpleadoModal`, igual
+que ya tenía el dossier, para que el botón de guardar no quede fuera de la vista en
+pantallas bajas; el resto de la ficha —agrupar en secciones plegables en móvil— pide
+`styles.css`, fuera de mi carril), `OR-290` (borrado el bloque muerto de 26 líneas
+—columna `display:none` con zona de arrastre duplicada y `file_upload-rrhh-legacy`—
+y la tarjeta «Últimos Ingresos» que quedaba oculta dentro de él ahora es visible junto
+al formulario, sin `display:none` en ningún nivel; ajusté la columna del formulario de
+`col-12` a `col-md-8` para dejarle sitio a la tarjeta en `col-md-4`).
+
+No toqué (anotadas para su carril dueño):
+- `OR-062` (KPI pulsables) · **archivos**: `app/static/admin-charts.js` `[CHOCA]`,
+  `app/routes/admin/docs.py` `[CHOCA]` · necesita el listado filtrado que hoy no
+  existe (depende de OR-124); no hay nada que enlazar desde el HTML todavía.
+- `OR-105` (plantilla CSV descargable) · **archivo**: `app/routes/admin/imports.py`
+  `[CHOCA]` · no existe endpoint que sirva el `.csv` de ejemplo; un enlace en el HTML
+  sin destino real sería peor que el tooltip roto que ya describe la ficha.
+- `OR-144` (pestañas Datos·Documentos·Historial·Alertas en la ficha) · **archivo**:
+  `app/static/admin-edit-hr.js` · restructurar el modal en pestañas exige que ese
+  script arme el contenido de cada una; no es un cambio de marcado seguro sin
+  coordinarlo con quien pinta `rrhh-person-modal-content`.
+- `OR-161` (el dossier del backoffice reutiliza `hr.js`/`openRrhhPersonDossier` del
+  buscador público, con sus mismos fallos) · **archivos**: `app/static/hr.js`,
+  `app/static/admin-edit-hr.js` · cambio arquitectónico, no de marcado.
+- `OR-210` (Exportar sólo ofrece un JSON completo) · **archivos**:
+  `app/routes/admin/docs.py` `[CHOCA]`, `app/static/admin.js` `[CHOCA]` · el catálogo
+  de exportaciones por propósito (CSV de planta, informe de incompletos, jubilaciones
+  próximas, expediente individual) no tiene ningún endpoint que lo sirva todavía.
+- `OR-291` (el modal `editArchivoModal` trae 148 líneas de campos que en RRHH no
+  significan nada, y ni siquiera es alcanzable desde el panel) · **archivo**:
+  `app/static/admin-edit.js` `[CHOCA]` · no lo reescribí ni lo borré: el comentario
+  en `admin_hr.html:630` («mismo ID que Archivo — admin.js lo comparte») indica que
+  el marcado se referencia por id de forma genérica entre módulos; quitar o
+  reescribir sus campos sin coordinarlo con `admin-edit.js`/`admin.js` arriesga
+  romper el flujo de Archivo, que si usa este modal de verdad.
+- `OR-297`, `OR-299`, `OR-300` (pruebas de navegador, de autorización por rol y de
+  reglas de negocio de RRHH) · **archivos**: `app/tests/test_admin_panels.py`
+  (nuevo), `app/tests/test_permisos.py` (nuevo), y otros de `app/tests/` · no tocan
+  `admin_hr.html` en absoluto, así que no hay nada que resolver desde este carril.
+
+**quién lo pide**: agente-b2-admin-rrhh-html (B2-admin-rrhh-html)
