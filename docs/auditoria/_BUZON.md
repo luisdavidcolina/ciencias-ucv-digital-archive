@@ -1166,6 +1166,15 @@ corresponde:
   tenga ese bloque en su carril quiere resolver SD-195 completa, mi `.ds-kpi-grid` ya
   puede llevar `grid-template-rows: subgrid` sin problema — falta la otra mitad.
 
+**Nota sobre el commit**: mientras escribía este trabajo, `app/static/styles.css` es un
+único archivo que varios agentes `L1`-`L15` editábamos a la vez sin worktrees aislados. Mi
+cambio quedó arrastrado por una carrera de git — el commit de otro agente (`L10-estilos`,
+sha `7de4937`, "L10-estilos: SD-105, SD-215 en zona responsive de paneles admin") incluyó
+mi bloque completo (verificado con `git show 7de4937:app/static/styles.css | grep SD-013`
+y con `python -m pytest app/tests -q` en verde sobre el árbol resultante, 713 pasan). No
+reparo el historial — sólo lo dejo anotado. Mi propio intento de commit no llegó a crear
+uno nuevo porque para entonces el árbol de trabajo ya coincidía con `HEAD`.
+
 **quien lo pide**: agente-l12-estilos (L12-estilos)
 
 ---
