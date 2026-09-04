@@ -910,3 +910,16 @@ arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
       Los tokens de componente que YA existían (`--ds-accent*`, `--viz-*`, `--ds-muted-aa*`,
       `--ds-font-scale`) no se tocaron ni se duplicaron; los nuevos son un nivel adicional
       que ese nivel de componente puede empezar a consumir.
+
+## Nota de carrera de git — agente-c8b-backup (C8-backup)
+
+Mi trabajo de fondo (`app/routes/backup.py`, `app/tests/test_backup.py`) quedó a salvo
+en su propio commit, `f989f19`, verificado con `git show f989f19 --stat` antes de seguir.
+El commit siguiente, sólo para marcar mi fila de `_RESERVAS.md` como terminada, sí quedó
+compartido por una carrera: entre mi `git add docs/auditoria/_RESERVAS.md` y el
+`git commit`, otro agente (aparentemente C5-importaciones) dejó `app/routes/admin/imports.py`
+y el nuevo `app/tests/test_imports.py` en el índice, y mi commit (`be77391`) se los llevó
+por delante junto con mi línea de la tabla. No repare el historial — sólo lo dejo anotado
+para quien revise ese commit: el contenido de `imports.py`/`test_imports.py` no es mío, no
+lo escribí ni lo revisé, y quien sea dueño de C5-importaciones debería confirmar que
+`be77391` contiene su trabajo intacto (`git show be77391 -- app/routes/admin/imports.py`).
