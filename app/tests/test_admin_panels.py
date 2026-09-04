@@ -13,6 +13,8 @@ from pathlib import Path
 
 import pytest
 
+from ._styles_helper import leer_css_ensamblado
+
 STATIC = Path(__file__).resolve().parents[1] / "static"
 
 PANELS = {
@@ -291,7 +293,7 @@ def test_el_enlace_de_salto_es_el_primer_elemento():
 
 def test_el_enlace_de_salto_no_se_oculta_con_display_none():
     """display:none lo saca del orden de tabulación y lo vuelve inservible."""
-    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    css = leer_css_ensamblado()
     i = css.index(".ds-skip-link {")
     bloque = css[i:css.index("}", i)]
     assert "display: none" not in bloque and "display:none" not in bloque

@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from ._styles_helper import leer_css_ensamblado
+
 APP = Path(__file__).resolve().parents[1]
 STATIC = APP / "static"
 
@@ -75,7 +77,7 @@ GRISES = [
 
 @pytest.mark.parametrize("token,fondo", GRISES)
 def test_los_grises_de_texto_cumplen(token, fondo):
-    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    css = leer_css_ensamblado()
     m = re.search(re.escape(token) + r":\s*(#[0-9a-fA-F]{6})", css)
     assert m, f"el token {token} ya no está declarado en styles.css"
     color = m.group(1)
@@ -109,7 +111,7 @@ def _color_de_regla(css: str, selector_regex: str, propiedad: str) -> str | None
 def _pares_tema_fondo_texto():
     """(tema, selector de texto, fondo, texto) para los temas que redefinen
     tanto el fondo de la barra lateral como el color de sus enlaces."""
-    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    css = leer_css_ensamblado()
     temas = re.findall(r"body\.(theme-[\w-]+)\s*\{\s*--tt-accent", css)
     pares = []
     for tema in temas:

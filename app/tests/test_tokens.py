@@ -14,13 +14,15 @@ from pathlib import Path
 
 import pytest
 
+from ._styles_helper import leer_css_ensamblado
+
 APP = Path(__file__).resolve().parents[1]
 STATIC = APP / "static"
 STYLES = STATIC / "styles.css"
 
 
 def _css_texto():
-    return STYLES.read_text(encoding="utf-8")
+    return leer_css_ensamblado()
 
 
 def _bloque_tokens_l0(css: str) -> tuple[int, int]:

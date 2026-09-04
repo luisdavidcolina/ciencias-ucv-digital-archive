@@ -11,6 +11,8 @@ no se vuelva a perder.
 import re
 from pathlib import Path
 
+from ._styles_helper import leer_css_ensamblado
+
 APP = Path(__file__).resolve().parents[1]
 STATIC = APP / "static"
 STYLES = STATIC / "styles.css"
@@ -33,7 +35,7 @@ def _bloques_print(css: str) -> list[str]:
 
 
 def test_existe_al_menos_un_bloque_de_impresion():
-    css = STYLES.read_text(encoding="utf-8")
+    css = leer_css_ensamblado()
     assert _bloques_print(css), "no hay ningún @media print en styles.css"
 
 
@@ -42,7 +44,7 @@ def test_todo_position_fixed_tiene_contrapartida_en_impresion():
     `position: fixed` de forma universal (`* { position: static }`), o que
     cada selector que declara `position: fixed` fuera de un bloque de
     impresión aparezca también dentro de alguno."""
-    css = STYLES.read_text(encoding="utf-8")
+    css = leer_css_ensamblado()
     bloques = _bloques_print(css)
     texto_print = "\n".join(bloques)
 

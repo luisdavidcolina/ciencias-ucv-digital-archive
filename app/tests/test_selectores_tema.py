@@ -11,6 +11,8 @@ todas las hojas propias y exige que formen el mismo conjunto.
 import re
 from pathlib import Path
 
+from ._styles_helper import leer_css_ensamblado
+
 APP = Path(__file__).resolve().parents[1]
 STATIC = APP / "static"
 
@@ -52,7 +54,7 @@ def test_dark_mode_se_escribe_igual_en_todas_las_hojas():
     no reconocía, así que el CSS nunca se aplicaba."""
     por_hoja = {}
     for hoja in _hojas_propias():
-        css = hoja.read_text(encoding="utf-8")
+        css = leer_css_ensamblado(hoja)
         selectores = {
             s for s in _selectores_de_estado(css)
             if s.startswith("body.dark-mode")
@@ -69,7 +71,7 @@ def test_dark_mode_se_escribe_igual_en_todas_las_hojas():
     # "body.dark-mode". Si una hoja usara otra forma (".dark", "[data-dark]"),
     # sus reglas nunca se activarían y quedarían muertas como en SD-041.
     for hoja in _hojas_propias():
-        css = hoja.read_text(encoding="utf-8")
+        css = leer_css_ensamblado(hoja)
         formas_alternativas = re.findall(
             r"\bbody\.(?!dark-mode\b)[\w-]*dark[\w-]*", css, flags=re.IGNORECASE
         )
