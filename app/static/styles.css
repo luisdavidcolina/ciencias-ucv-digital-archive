@@ -2800,6 +2800,18 @@ body.dark-mode code, body.dark-mode .ds-mono {
 .ds-dossier-item-title { font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
 .ds-dossier-item-meta  { font-size: 0.75rem; color: var(--gray-600); }
 
+/* BR-109: clases que reemplazan los ~15 `style="..."` del modal de dossier
+   de empleado (hr.js, renderRrhhDossierModal y helpers). Valores tomados de
+   la nota de agente-br109-dossier-estilos en _BUZON.md (commit 76186a9, lado
+   hr.js ya hecho), quedaba sólo el lado de styles.css. */
+.ds-dossier-avatar-wrap { width: 150px; min-width: 150px; }
+.ds-dossier-subheading  { font-size: 0.78rem; }
+.ds-dossier-historial-inline { font-size: 0.82rem; }
+.ds-dossier-historial-table { font-size: 0.8rem; }
+.ds-dossier-parte-tab   { font-size: 0.82rem; padding: 6px 12px; }
+.ds-dossier-parte-icon  { color: var(--ds-parte-color, inherit); }
+.ds-dossier-parte-badge { background: var(--ds-parte-color, #6c757d); color: #fff; font-size: 0.68rem; }
+
 /* ── Responsive card grid for search results ── */
 @media (max-width: 576px) {
     .ds-result-card { margin-bottom: var(--space-2); }
@@ -3404,6 +3416,16 @@ body.dark-mode mark                      { background: #6b5a00 !important; color
 
 /* Status badges */
 .ds-status-badge { font-size: 0.72rem !important; letter-spacing: 0.01em; }
+
+/* OR-135: una clase por estado laboral (hoy `getStatusColor()` en
+   app-core.js sólo devuelve un hex para `style="background:..."` en línea).
+   Reutiliza tokens semánticos ya redefinidos en modo oscuro y en los once
+   temas de color, así que no hace falta declarar variante aparte aquí. */
+.ds-status-activo     { background: var(--color-success) !important; color: var(--text-inverse) !important; }
+.ds-status-retirado   { background: var(--color-danger)  !important; color: var(--text-inverse) !important; }
+.ds-status-jubilado   { background: var(--viz-2)          !important; color: var(--text-inverse) !important; }
+.ds-status-pensionado { background: var(--viz-1)          !important; color: var(--text-inverse) !important; }
+.ds-status-otro        { background: var(--text-muted)    !important; color: var(--text-inverse) !important; }
 @keyframes ds-pulse-warning {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.5); }
   50%       { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0); }
@@ -3702,6 +3724,59 @@ body.dark-mode .ds-dropzone-compact { background: #1e222b; border-color: #3c4257
 body.dark-mode .ds-dropzone-compact.drag-over { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
 body.dark-mode .ds-dropzone-compact.has-error { background: rgba(208,59,59,0.15); border-color: #e57373; }
 body.dark-mode .ds-dropzone-compact.is-uploading { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+
+/* OA-190/OA-191: zona de arrastre y previsualizaciones del modal de edición
+   (admin-edit.js), reemplazan `this.style.borderColor=...` y `style="..."`
+   en línea del HTML por clases de estado consumidas ya desde el JS. */
+#edit-doc-dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  background: var(--gray-50);
+  cursor: pointer;
+  transition: border-color var(--duration-base), background var(--duration-base);
+}
+#edit-doc-dropzone.is-dragover {
+  border-color: var(--color-link);
+  background: #e8f0fe;
+}
+#edit-doc-dropzone.is-uploading {
+  border-style: solid;
+  border-color: var(--color-link);
+  background: #e8f0fe;
+  cursor: progress;
+}
+#edit-doc-dropzone.is-ok {
+  border-style: solid;
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
+}
+#edit-doc-dropzone.is-error {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+body.dark-mode #edit-doc-dropzone { background: #1e222b; border-color: #3c4257; }
+body.dark-mode #edit-doc-dropzone.is-dragover,
+body.dark-mode #edit-doc-dropzone.is-uploading { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+body.dark-mode #edit-doc-dropzone.is-ok { background: rgba(43,120,73,0.18); border-color: var(--color-success); }
+body.dark-mode #edit-doc-dropzone.is-error { background: rgba(208,59,59,0.15); border-color: #e57373; }
+
+.ds-edit-preview-frame { width: 100%; min-height: 280px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+.ds-edit-preview-img { max-width: 100%; max-height: 280px; border-radius: var(--radius-sm); }
+
+/* Fila de la tabla de papelera/edición que se anima al desaparecer tras una
+   acción (restaurar, borrar) en vez de saltar de golpe */
+.ds-row-removing {
+  animation: ds-row-removing var(--duration-base) var(--ease-out) forwards;
+}
+@keyframes ds-row-removing {
+  to { opacity: 0; transform: scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce), body.ds-no-anim {
+  .ds-row-removing { animation: none; opacity: 0; }
+}
 
 /* ==========================================================================
    PERSONALIZACIÓN — DENSITY, FONT FAMILY, ANIMATIONS
@@ -4909,6 +4984,19 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 .ds-kpi-mini.ds-kpi-alerta .ds-kpi-icon  { color: var(--viz-critical); opacity: .8; }
 .ds-kpi-mini.ds-kpi-aviso  .ds-kpi-value { color: var(--viz-serious); }
 .ds-kpi-mini.ds-kpi-aviso  .ds-kpi-icon  { color: var(--viz-serious); opacity: .8; }
+
+/* OA-069: sustituyen al `border-left` con un `--viz-N` distinto en línea de
+   las 8 tarjetas KPI de admin_archive.html — sólo tres estados semánticos,
+   no ocho colores decorativos. `.ds-kpi-neutral` es el reposo. */
+.ds-kpi-mini { border-left: 4px solid var(--border-strong); }
+.ds-kpi-mini.ds-kpi-neutral { border-left-color: var(--border-strong); }
+.ds-kpi-mini.ds-kpi-alerta  { border-left-color: var(--viz-critical); }
+.ds-kpi-mini.ds-kpi-aviso   { border-left-color: var(--viz-serious); }
+
+/* OA-065: jerarquía visual para las 2-3 cifras principales del resumen
+   frente al resto de KPIs secundarios */
+.ds-kpi-mini.ds-kpi-principal .ds-kpi-value { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 1.85rem) !important; }
+.ds-kpi-mini.ds-kpi-principal .ds-kpi-label { font-weight: var(--font-weight-bold); }
 
 @media (max-width: 400px) {
   .ds-kpi-value { font-size: 1.15rem !important; }
