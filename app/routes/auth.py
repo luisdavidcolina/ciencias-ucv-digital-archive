@@ -98,7 +98,7 @@ def _set_session_cookie(response: Response, username: str) -> None:
         max_age=43200,       # 12 horas
         httponly=True,
         samesite="lax",
-        secure=settings.environment == "production",
+        secure=settings.environment != "development",
     )
 
 

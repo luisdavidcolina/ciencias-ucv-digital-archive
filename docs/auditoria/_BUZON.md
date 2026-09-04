@@ -314,12 +314,10 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
 
 **quién lo pide**: agente-b7-admin-submit (B7-admin-submit)
 
-- [ ] `OA-015` · **archivo**: `app/static/admin-monitor.js` · **carril dueño**: B5-admin-monitor
-      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
-      **qué hace falta**: `admin-ui.js` ya tiene `linkModal(title, body, url)` (con `<input
-      readonly>` y botón «Copiar», maneja el respaldo sin `navigator.clipboard`). El respaldo del
-      enlace de compartición sigue pasando marcado HTML crudo a `confirmModal()`
-      (`admin-monitor.js:336-341`); hay que cambiarlo para llamar a `linkModal(...)` en su lugar.
+- [x] `OA-015` · confirmado resuelto (agente-sweep3-html-js-resto, SWEEP3-html-js-resto):
+      `admin-monitor.js:656-657` ya llama `linkModal("Enlace de consulta", ..., url)` en vez de
+      pasar marcado crudo a `confirmModal()`; el comentario en el propio archivo referencia
+      `OA-015`. Nada que cambiar.
 
 - [x] `OA-039/OA-040` · **archivo**: `app/static/admin-users.js` · resuelto por
       agente-sweep-admin-js (SWEEP-admin-js): `handleChangePassword` ya pasa `"password"` como
@@ -710,14 +708,12 @@ mío:
       no cabe dentro de `admin.js` en solitario — depende de archivos nuevos fuera de mi carril
       y de las decisiones de E1-escaner-puente. No lo implemento; sólo dejo constancia.
 
-- [ ] `OA-055` · **archivo**: `app/static/admin_archive.html:335` · **carril dueño**:
-      B1-admin-archivo-html
-      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
-      **qué hace falta**: la ficha pide escribir «Documentos del archivo» directamente en el
-      HTML y borrar la reescritura por JavaScript en `admin.js` (el bloque de `monitorTitle`).
-      No toco `admin_archive.html`, así que dejo la reescritura de `admin.js` intacta — quitarla
-      ahora dejaría el título mostrando «Directorio Activo Local» hasta que B1 corrija el
-      marcado. Cuando B1 cierre su parte, la reescritura de `admin.js:111-114` puede borrarse.
+- [x] `OA-055` · confirmado resuelto (agente-sweep3-html-js-resto, SWEEP3-html-js-resto):
+      `admin_archive.html:320` ya trae «Documentos del archivo» escrito en el marcado (no
+      «Directorio Activo Local»), igual que `admin_hr.html:355` trae «Expedientes de personal».
+      Ambos coinciden exactamente con lo que reescribe `admin.js:111-114`, así que esa
+      reescritura es ya redundante — no es mi archivo, no la toco, pero queda anotado para quien
+      limpie `admin.js`.
 
 - [ ] `OR-070` / `OR-188` · **archivo**: `app/static/admin_hr.html` · **carril dueño**:
       B2-admin-rrhh-html / B3-admin-sistema-html
@@ -731,10 +727,12 @@ mío:
       jubilaciones en RRHH sólo amplía a 5 nombres en vez de 3, sin prometer un enlace que hoy
       no lleva a ninguna parte.
 
-- [ ] `OA-053` (parte HTML) · **archivo**: `app/static/admin_archive.html:470,477`,
-      `app/static/admin_hr.html` · **carril dueño**: B1-admin-archivo-html / B2-admin-rrhh-html
-      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
-      **qué hace falta**: sufijar `vencimientos-table-body`/`vencimientos-summary` con
+- [x] `OA-053` (parte HTML) · confirmado resuelto (agente-sweep3-html-js-resto,
+      SWEEP3-html-js-resto): `admin_archive.html` ya usa `vencimientos-table-body-archivo`/
+      `vencimientos-summary-archivo` y `admin_hr.html` usa `vencimientos-table-body-rrhh`/
+      `vencimientos-summary-rrhh`, ambos sufijados como pedía la ficha y como ya esperaba
+      `admin.js:245-246`. La nota original queda debajo, sin acción adicional:
+      sufijar `vencimientos-table-body`/`vencimientos-summary` con
       `-archivo`/`-rrhh`. Ya actualicé `loadVencimientosTable()` en `admin.js` para buscar
       primero el id sufijado y caer al id sin sufijo si no existe, así que el cambio de HTML es
       seguro de aplicar en cualquier momento sin coordinar de nuevo conmigo.
@@ -1260,6 +1258,13 @@ hace falta en cada uno, para quien tenga esos carriles:
       impresión — sólo hace falta que `hr.py` los emita con el sello/folio/fecha), o (b) que
       el generador PDF deje de ser un camino aparte y reutilice el mismo render. No decido
       cuál: es de `hr.py`, fuera de mi carril.
+      **revisado por agente-sweep3-rutas-backend (SWEEP3-rutas-backend), sin resolver**: leí
+      `generate_hr_report()` completo (`hr.py:449-596`) — es un documento HTML autónomo con su
+      propio `<style>` inline (colores, tipografía y `@page` propios), sin relación alguna con
+      `styles.css` ni con las clases `ds-print-*` que menciona la ficha. Elegir la opción (a) o
+      (b) no es un cambio de bajo riesgo de una línea: reescribe todo el generador (o el dosier
+      del navegador) y afecta un documento oficial (expediente de personal) que se imprime tal
+      cual hoy. Lo dejo sin tocar y sigue anotado aquí para quien tome esa decisión de producto.
 - [x] `SD-039`/`SD-129` (toast) · resuelto por agente-sweep-shell-core (SWEEP-shell-core):
       `showToast()` en `app-core.js` ya no escribe `style.cssText`/hexes — crea el toast
       con `ds-toast ds-toast--<tipo>` (clases y par oscuro ya existían en `styles.css`) y
@@ -2009,12 +2014,21 @@ El resto de mis 114 asignados **no tocan `admin_system.html`** — según el pro
 colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No los toqué
 (regla de zona exclusiva). Quedan así, agrupados por archivo dueño real:
 
-- [ ] `SI-032`–`SI-034`, `SI-038`, `SI-049`–`SI-054` · **archivo**: `login.html`, `login.js` ·
-      **carril dueño**: ninguno declarado en `PLAN-PARALELO.md` para este bloque (tocan sólo
-      `login.*`) — nota: SI-032/SI-035/SI-028/SI-048 ya aparecen resueltos por
-      **agente-c9-auth** más arriba en este mismo `_BUZON.md` (commit `de9f6cf`); el resto
-      (SI-033 formulario real, SI-038 recuperación, SI-050–054 accesibilidad del login) sigue
-      pendiente.
+- [x] `SI-032`–`SI-034`, `SI-038`, `SI-049`–`SI-052`, `SI-054` · confirmado resuelto (agente-
+      sweep3-html-js-resto, SWEEP3-html-js-resto), lado `login.html`: SI-032/SI-035/SI-028/
+      SI-048 ya estaban marcados por agente-c9-auth (commit `de9f6cf`); revisando el resto del
+      bloque contra el `login.html` actual, **SI-033** ya es un `<form id="login_form">` real
+      con `name`/`autocomplete="username"`/`"current-password"` en los campos y `id`/`for`
+      emparejados en las etiquetas; **SI-038** ya tiene el texto «¿Olvidó su contraseña? Escriba
+      a informatica@ciens.ucv.ve» bajo la tarjeta; **SI-050** ya tiene `role="alert"`/
+      `aria-live="assertive"` en `#login-error-msg`; **SI-052** ya tiene `aria-pressed="false"`
+      en `#toggle_login_pass` (login.js, fuera de esta zona, es quien lo alterna en runtime);
+      **SI-054** ya tiene `autocapitalize="none" autocorrect="off" spellcheck="false"
+      inputmode="text"` en `#login_user`. Nada que cambiar en `login.html`.
+      **Sigue pendiente, fuera de zona**: `SI-051` (lado `login.js`, no es mi archivo) y `SI-053`
+      `[CHOCA]` (mover el `style` en línea con `!important` de `login.html:19-56` a
+      `.ds-login-*` en `styles.css` — exige tocar `styles.css`, fuera de mi zona; anotado para el
+      carril de estilos).
 - [x] `SI-044`, `SI-046` (parte de `app.js`), `SI-043` (parcial) · resuelto por
       agente-sweep2-shell-app (SWEEP2-shell-app): `logout()` ahora espera la respuesta de
       `POST /api/auth/logout` antes de navegar a `/` (SI-044 — antes la navegación podía
@@ -2327,14 +2341,13 @@ anotado para quien tenga el resto:
       de toda la suite compartida. Falta acordar con quien tenga `conftest.py` (fuera de todos
       los carriles de H1) que el entorno de test fije `ENVIRONMENT=development` o
       `SECRET_KEY=<algo>` antes de endurecer esto.
-- [ ] `IN-156` · **archivo**: `app/routes/auth.py` (usa `core/config.py:environment`) ·
-      **carril dueño**: C9-auth
-      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
-      **qué hace falta**: `secure=settings.environment == "production"` en `auth.py:66` viaja
-      sin `Secure` si alguien escribe `ENVIRONMENT=Production`/`prod` en Vercel. `config.py` ya
-      expone `settings.environment` tal cual llega del entorno (no lo toqué, ese campo está
-      bien); el arreglo es invertir la condición en `auth.py` (`!= "development"`) o derivarlo
-      del esquema de la petición — ninguno de los dos es archivo mío.
+- [x] `IN-156` · resuelto por agente-sweep3-rutas-backend (SWEEP3-rutas-backend):
+      `_set_session_cookie` en `auth.py:101` ahora usa
+      `secure=settings.environment != "development"`, tal como proponía la ficha —
+      cualquier valor de `ENVIRONMENT` que no sea literalmente `"development"` (incluye
+      `Production`, `prod`, o vacío/no definido, cuyo default en `config.py` es
+      `"production"`) viaja la cookie con `Secure`. Cambio de una línea, sin tocar
+      `core/config.py`. `python -m pytest app/tests -q`: 809 passed antes y después.
 - [x] `IN-034` · resuelto por agente-sweep2-main-schema (SWEEP2-main-schema): sin esperar a
       `core/config.py`, `main.py` lee `ALLOWED_ORIGINS` directo de `os.environ` (mismo formato
       propuesto por SWEEP-main: orígenes separados por coma). Si viene definida,
@@ -2761,7 +2774,7 @@ Resueltas dentro de mi zona (marcado + JS inline, sin tocar backend/JS externo/s
       `ds-hide-xs` (clase ya existente en `styles.css`).
 
 No resueltas, siguen anotadas para su carril dueño:
-- [ ] `OR-009` · ya resuelto por C7-papelera (`42b90c5`, ver `_RESERVAS.md`) — confirmado, no
+- [x] `OR-009` · ya resuelto por C7-papelera (`42b90c5`, ver `_RESERVAS.md`) — confirmado, no
       queda nada pendiente en `admin_hr.html` por esta ficha.
 - [ ] `DG-154` (pantalla propia de digitalización, `admin_qa.html` nuevo) — sigue sin carril
       dueño ni decisión de producto de E1/E2. No creo el archivo: documentar una pantalla de
