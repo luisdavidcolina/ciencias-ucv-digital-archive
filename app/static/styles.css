@@ -232,131 +232,151 @@ body.dark-mode {
 /* DSpace 7 Pixel-Perfect SCSS/CSS Extracted Emulation */
 /* Combinado con anulación de estilos AdminLTE/bs4Dash */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+/* SD-026: el @import se retiró de aquí — bloqueaba el render de toda la
+   hoja hasta resolver la fuente, y siete de las diez páginas ya traían el
+   mismo <link> en el <head>. La carga vive sólo en el <head> de cada
+   página (preconnect + <link>), lote LH. SD-028: pedir los cortes
+   400;600;700;800 (nunca 900 — ver --font-weight-black en el bloque de
+   tokens) para que el navegador no sintetice el negrita. */
 
 :root { --ds-font-scale: 0.93; }
 html  { font-size: calc(16px * var(--ds-font-scale)); }
 
 body, .content-wrapper {
-    background-color: #f8f9fa !important;
-    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-    color: #212529;
-    font-size: 1rem;
-    line-height: 1.5;
+    background-color: var(--surface-0) !important;
+    font-family: var(--ds-font-family, 'Nunito'), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    color: var(--text);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
 }
 
 a {
-    color: #0056b3;
+    color: var(--color-link);
     text-decoration: none;
     background-color: transparent;
 }
 
+/* SD-172: el subrayado global en :hover obligaba a catorce reglas
+   `text-decoration: none !important` a deshacerlo (botones, enlaces de
+   barra lateral, chips, tarjetas...). Se restringe a los enlaces de
+   prosa; el resto no necesita ya la excepción. */
 a:hover {
-    color: #003d82;
+    color: var(--color-link-hover);
+}
+
+a.ds-link:hover,
+.ds-doc-abstract a:hover,
+.ds-compartido-cuerpo a:hover {
     text-decoration: underline;
 }
 
+/* SD-170: sin :visited no hay forma de saber, a simple vista, qué
+   documentos del catálogo ya se abrieron — información de trabajo, no
+   decoración, en un archivo documental. Tratamiento discreto: mismo
+   tono, un pelo más apagado. */
+.ds-item-title a:visited,
+.ds-search-result a:visited {
+    color: var(--color-link-hover);
+}
+
 /* --- OVERRIDES BS4DASH NAVBAR (HEADER) --- */
+/* SD-135: pegajosa al hacer scroll — si no, en una tabla de 100 filas se
+   pierden el menú, el usuario y la campana de notificaciones. */
 .main-header.navbar {
-    background-color: #ffffff !important; /* DSpace Demo actual es blanca */
-    border-bottom: 1px solid #dee2e6 !important;
-    padding: 0.5rem 1rem !important;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    background-color: var(--surface-1) !important; /* DSpace Demo actual es blanca */
+    border-bottom: 1px solid var(--border) !important;
+    padding: var(--space-2) var(--space-4) !important;
+    box-shadow: var(--shadow-sm) !important;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
 }
 
 .main-header .nav-link {
-    color: #495057 !important;
+    color: var(--gray-700) !important;
 }
 
 .main-header .nav-link:hover {
-    color: #0056b3 !important;
+    color: var(--color-link) !important;
 }
 
-/* Oculta el switch extra del panel derecho y deja solo el hamburguesa */
-.main-header .nav-link[data-widget="control-sidebar"] {
-    display: none !important;
-}
-
-.main-header .nav-link[data-widget="fullscreen"] {
-    display: none !important;
-}
-
-/* Mantener limpia la derecha del header: solo usuario + boton Cerrar. */
-.main-header .navbar-nav.ml-auto > .nav-item:not(.ds-nav-user):not(.ds-nav-logout) {
-    display: none !important;
-}
-
-.main-header .navbar-nav.ml-auto > *:not(.ds-nav-user):not(.ds-nav-logout) {
-    display: none !important;
-}
-
-.main-header .navbar-nav.ml-auto .ds-nav-logout ~ * {
-    display: none !important;
-}
-
-.main-header .navbar-nav.ml-auto .dropdown-toggle::after {
-    display: none !important;
-}
-
-/* Oculta switch de ayuda inyectado (help_switch). */
-.main-header .custom-control.custom-switch.mx-2.mt-2,
-.main-header #help_switch,
-.main-header label[for="help_switch"] {
-    display: none !important;
-}
+/* SD-132: 30 líneas que ocultaban restos de AdminLTE que no existen
+   ([data-widget="control-sidebar"], [data-widget="fullscreen"],
+   #help_switch, y dos :not() encadenados) se retiraron — AdminLTE no se
+   carga en este proyecto (CLAUDE.md), así que ninguno de esos elementos
+   aparece nunca, y el :not() doble era una trampa: cualquier elemento
+   nuevo añadido a la derecha de la barra habría desaparecido sin
+   explicación. */
 
 .main-header .navbar-brand,
 .main-header .navbar-brand:hover {
-    color: #2b4e72 !important;
-    font-weight: 800 !important;
+    color: var(--color-primary) !important;
+    font-weight: var(--font-weight-black) !important;
     font-size: 1.08rem !important;
     letter-spacing: 0.2px;
     text-decoration: none !important;
 }
 
 .ds-navbar-logo i {
-    color: #0056b3;
-    margin-right: 0.35rem;
+    color: var(--color-link);
+    margin-right: var(--space-1);
 }
 
 .ds-navbar-logo-img {
     display: block;
     height: 34px;
     width: auto;
-    margin-left: 0.35rem;
+    margin-left: var(--space-1);
 }
 
 .main-header .ds-navbar-logo {
     text-align: left !important;
-    font-weight: 800;
-    color: #2b4e72 !important;
+    font-weight: var(--font-weight-black);
+    color: var(--color-primary) !important;
     white-space: nowrap;
-    padding-left: 0.25rem !important;
-    padding-right: 0.25rem !important;
+    padding-left: var(--space-1) !important;
+    padding-right: var(--space-1) !important;
 }
 
+/* SD-085: el acento de borde izquierdo se reserva para «elemento activo»
+   (enlace de barra lateral); la cabecera de página lo llevaba de forma
+   permanente, uno de los cinco usos distintos del mismo gesto en el
+   sistema. SD-086: ese borde de 4px + el borde completo + el radio de 6px
+   dejaban una esquina con un bisel que no cuadraba con nada — se
+   simplifica a un borde uniforme sin acento lateral.
+   SD-100: el margen lateral propio desalineaba la cabecera 1px respecto a
+   las tarjetas de abajo, que viven dentro de `.container-fluid`
+   (`padding:0 15px`); se retira el margen lateral y sólo se deja el
+   vertical. */
 .ds-page-header {
-    background: #ffffff;
-    border: 1px solid #dee2e6;
-    border-left: 4px solid #2b4e72;
-    color: #2b4e72;
-    font-weight: 800;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-black);
     font-size: 1.15rem;
-    padding: 0.8rem 1rem;
-    margin: 1rem 1rem 0.25rem 1rem;
-    border-radius: 6px;
+    padding: var(--space-3) var(--space-4);
+    margin: var(--space-4) 0 var(--space-1) 0;
+    border-radius: var(--radius-sm);
 }
 
 .ds-page-header i {
-    color: #0056b3;
+    color: var(--color-link);
     margin-right: 0.45rem;
 }
 
-.brand-link {
-    display: none !important;
+/* SD-107: sin ancho máximo, en pantallas de 2.560px la tabla de auditoría
+   y las tarjetas de resultado se estiran de borde a borde. */
+.content-wrapper {
+    max-width: 1600px;
+    margin-left: auto !important;
+    margin-right: auto;
 }
 
 /* --- SIDEBAR COLAPSABLE CON ANIMACIONES --- */
+/* SD-221: el velo llevaba blur(2px) además de oscurecer — un desenfoque
+   apenas perceptible que igual fuerza una capa de composición a pantalla
+   completa en cada apertura. Se retira; el oscurecimiento por sí solo ya
+   separa el cajón del contenido. */
 .ds-sidebar-overlay {
     position: fixed;
     top: 0;
@@ -364,35 +384,56 @@ a:hover {
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0);
-    z-index: 1040;
+    z-index: var(--z-overlay);
     pointer-events: none;
-    transition: background 0.35s ease;
+    transition: background var(--duration-slow) var(--ease-out);
 }
 
 .ds-sidebar-overlay.open {
     background: rgba(0, 0, 0, 0.45);
     pointer-events: auto;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
 }
 
+/* SD-134: fija en escritorio (≥1200px) en vez de seguir siendo un cajón
+   modal que tapa el contenido y hay que cerrar; por debajo de ese ancho
+   sigue como cajón. SD-182: la curva del cajón y la del velo pasan a
+   compartir duración/curva (--duration-slow/--ease-out) en vez de
+   `.35s cubic-bezier(...)` aquí y `.35s ease` en el velo por separado.
+   SD-185: anima `transform: translateX()` en vez de `left`, que fuerza
+   recálculo de layout en cada fotograma. */
 .ds-sidebar {
     position: fixed;
     top: 0;
-    left: -290px;
+    left: 0;
     width: 280px;
     height: 100vh;
-    background: #ffffff;
-    z-index: 1050;
-    box-shadow: 6px 0 25px rgba(0, 0, 0, 0.15);
+    background: var(--surface-1);
+    z-index: var(--z-overlay);
+    box-shadow: var(--shadow-xl);
     display: flex;
     flex-direction: column;
-    transition: left 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateX(-100%);
+    transition: transform var(--duration-slow) var(--ease-out);
     overflow: hidden;
 }
 
 .ds-sidebar.open {
-    left: 0;
+    transform: translateX(0);
+}
+
+@media (min-width: 1200px) {
+    .ds-sidebar {
+        position: sticky;
+        top: 0;
+        transform: none;
+        transition: none;
+        box-shadow: none;
+        border-right: 1px solid var(--border);
+    }
+
+    .ds-sidebar-overlay {
+        display: none;
+    }
 }
 
 .ds-sidebar-header {
@@ -400,66 +441,85 @@ a:hover {
     align-items: center;
     gap: 10px;
     padding: 18px 20px 14px;
-    background: linear-gradient(135deg, #2b4e72, #1a3a5c);
+    /* SD-058: excepción declarada — es la única cabecera de marca, el
+       resto de degradados casi-planos del archivo se aplanaron. */
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
 }
 
 .ds-sidebar-logo {
     width: 38px;
     height: 38px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     object-fit: contain;
     background: rgba(255,255,255,0.15);
     padding: 3px;
 }
 
+/* SD-027: Outfit se cargaba entera (dos ficheros de fuente) para este
+   único selector de trece caracteres; se retira y el titular pasa a
+   apoyarse en Nunito, ya cargada para todo lo demás. */
 .ds-sidebar-brand {
-    font-family: 'Outfit', 'Nunito', sans-serif;
+    font-family: var(--ds-font-family, 'Nunito'), sans-serif;
     font-size: 1.15rem;
-    font-weight: 700;
-    color: #ffffff;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-inverse);
     letter-spacing: 0.3px;
 
     display: flex;
     align-items: center;
     gap: 10px;
 
-    flex-grow: 0; 
+    flex-grow: 0;
 }
 
+/* SD-183: el giro de 90° en el botón de cerrar es decoración pura — el
+   propio CLAUDE.md fija que el movimiento explica de dónde viene el
+   contenido, no decora. Se retira; queda sólo el cambio de fondo. */
 .ds-sidebar-close {
     background: rgba(255,255,255,0.15);
     border: none;
-    color: #ffffff;
+    color: var(--text-inverse);
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
+    transition: background var(--duration-base) var(--ease-out);
     font-size: 1rem;
 }
 
 .ds-sidebar-close:hover {
     background: rgba(255,255,255,0.3);
-    transform: rotate(90deg);
 }
 
+/* SD-058: el degradado de dos paradas casi idénticas no aportaba nada que
+   un color plano no diera ya; se deja plano salvo donde el degradado
+   comunica identidad de marca (la cabecera de la barra lateral, arriba). */
 .ds-sidebar-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent, #dee2e6, transparent);
+    background: var(--border);
     margin: 0;
 }
 
 .ds-sidebar-section-label {
     font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
     text-transform: uppercase;
-    color: #adb5bd;
+    color: var(--gray-500);
     padding: 14px 24px 4px;
     user-select: none;
+}
+
+/* SD-133: además del enlace activo, se resalta también la etiqueta de la
+   sección que lo contiene — con nueve enlaces en tres secciones, un solo
+   enlace resaltado no bastaba para orientarse. `app.js` (otro carril) es
+   quien alterna esta clase al marcar el enlace activo; ver nota en
+   _BUZON.md. */
+.ds-sidebar-section-label.ds-section-active {
+    color: var(--color-primary);
 }
 
 .ds-sidebar-nav {
@@ -468,26 +528,40 @@ a:hover {
     overflow-y: auto;
 }
 
+/* SD-174: `transition: all` obliga a interpolar cualquier propiedad que
+   cambie, incluidas las compuestas (box-shadow). Lista explícita. */
 .ds-sidebar-link {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 14px 24px;
-    color: #495057;
+    color: var(--gray-700);
     font-size: 0.95rem;
     font-weight: 600;
     text-decoration: none !important;
     position: relative;
-    transition: all 0.25s ease;
+    transition: background var(--duration-slow) var(--ease-out),
+                color var(--duration-slow) var(--ease-out),
+                border-color var(--duration-slow) var(--ease-out);
     border-left: 4px solid transparent;
+}
+
+/* SD-094: el `:focus-visible` de este enlace (más abajo en el archivo,
+   lote L6) sólo corrige el radio del contorno; el lado derecho seguía
+   cortado por el `overflow:hidden` del contenedor `.ds-sidebar` de
+   arriba. `outline-offset` negativo mete el contorno dentro del propio
+   enlace para que no dependa de ese recorte. */
+.ds-sidebar-link:focus-visible {
+    outline-offset: -3px;
 }
 
 .ds-sidebar-link i {
     font-size: 1.15rem;
     width: 22px;
     text-align: center;
-    color: #6c757d;
-    transition: color 0.25s, transform 0.25s;
+    color: var(--gray-600);
+    transition: color var(--duration-slow) var(--ease-out),
+                transform var(--duration-slow) var(--ease-out);
 }
 
 .ds-sidebar-link span {
@@ -495,128 +569,155 @@ a:hover {
 }
 
 .ds-sidebar-link:hover {
-    background: linear-gradient(90deg, #eef4fb, #f8f9fa);
-    color: #2b4e72;
-    border-left-color: #0056b3;
+    background: var(--surface-3);
+    color: var(--color-primary);
+    border-left-color: var(--color-link);
     text-decoration: none !important;
 }
 
 .ds-sidebar-link:hover i {
-    color: #0056b3;
+    color: var(--color-link);
     transform: scale(1.15);
 }
 
 .ds-sidebar-link.active {
-    background: linear-gradient(90deg, #dce9f7, #eef4fb);
-    color: #2b4e72;
-    font-weight: 700;
-    border-left-color: #2b4e72;
+    background: var(--surface-3);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    border-left-color: var(--color-primary);
 }
 
 .ds-sidebar-link.active i {
-    color: #2b4e72;
+    color: var(--color-primary);
 }
 
+/* SD-177: un pulso infinito en la periferia del campo visual es una
+   fuente de distracción permanente; se anima tres veces y se detiene. */
 .ds-sidebar-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 22px;
     height: 22px;
-    border-radius: 50%;
-    background: #28a745;
-    color: #fff;
+    border-radius: var(--radius-pill);
+    background: var(--color-success);
+    color: var(--text-inverse);
     font-size: 0.7rem;
-    font-weight: 800;
-    animation: ds-badge-pulse 2s infinite;
+    font-weight: var(--font-weight-black);
+    animation: ds-badge-pulse 2s ease-out 3;
 }
 
+/* SD-051: `#e74c3c`/`#ff6b5b` eran de la paleta Flat UI, un tercer rojo
+   de «peligro» que no es ni `--color-danger` (`#dc3545`) ni
+   `--viz-critical`. Se tokeniza al único rojo del sistema. */
 /* Botón Sistema Global — destacado con borde superior y color especial */
 .ds-sidebar-sistema {
   margin-top: 8px;
   border-top: 1px solid rgba(255,255,255,0.10) !important;
   padding-top: 10px !important;
 }
-.ds-sidebar-sistema i { color: #e74c3c !important; }
-.ds-sidebar-sistema:hover { background: linear-gradient(90deg, rgba(231,76,60,0.18), transparent) !important; border-left-color: #e74c3c !important; }
-.ds-sidebar-sistema:hover i { color: #ff6b5b !important; }
+.ds-sidebar-sistema i { color: var(--color-danger) !important; }
+.ds-sidebar-sistema:hover { background: rgba(208,59,59,0.18) !important; border-left-color: var(--color-danger) !important; }
+.ds-sidebar-sistema:hover i { color: var(--color-danger) !important; }
 
 @keyframes ds-badge-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(32, 136, 56, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(32, 136, 56, 0); }
 }
 
 .ds-sidebar-footer {
     padding: 14px 24px;
     font-size: 0.78rem;
-    color: #adb5bd;
-    border-top: 1px solid #e9ecef;
+    color: var(--gray-500);
+    border-top: 1px solid var(--border-subtle);
     text-align: center;
     font-weight: 600;
     letter-spacing: 0.3px;
 }
 
-/* Ocultar el sidebar AdminLTE antiguo */
-.main-sidebar {
-    display: none !important;
-}
-
-/* Asegurar que el content-wrapper ocupe todo el ancho */
-.content-wrapper {
-    margin-left: 0 !important;
-}
-
 /* --- OVERRIDES BS4CARD (Quitar estetica Dashboard) --- */
+/* --- TARJETA (SD-127, SD-083, SD-059, SD-152) ---
+   `.card` sigue siendo el punto de entrada (Bootstrap ya lo usa en todo el
+   marcado); aquí se resuelve con los tokens de L0 en vez de valores sueltos.
+   Radio: `--radius-md` (8px) es la misma decisión de facto que ya tomaron
+   admin_archive.html/admin_hr.html a mano con `0.5rem !important` (SD-083):
+   se generaliza aquí y deja de haber dos decisiones distintas para la misma
+   tarjeta. Elevación: reposo con `--shadow-sm` en vez de "sin sombra nunca",
+   y un hover que sube un nivel, para que el rol de tarjeta interactiva se
+   note incluso donde no hay una variante `:hover` propia (SD-059). */
 .card {
-    box-shadow: none !important; /* DSpace no usa sombras de adminLTE */
-    border: 1px solid #dee2e6 !important;
-    border-radius: 0 !important; /* Cuadrado absoluto */
-    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: var(--space-4);
 }
 
 .card-header {
-    background-color: #f8f9fa !important;
-    border-bottom: 1px solid rgba(0,0,0,.125) !important;
-    color: #212529 !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    padding: 0.75rem 1.25rem !important;
-    border-radius: 0 !important;
+    background-color: var(--surface-3) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    color: var(--text) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    font-size: var(--font-size-base) !important;
+    padding: var(--space-3) var(--space-5) !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
 }
 
 .card-title {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
+    font-size: var(--font-size-base) !important;
+    font-weight: var(--font-weight-semibold) !important;
 }
 
 .card-body {
-    padding: 1.25rem !important;
-    font-size: 0.875rem !important;
+    padding: var(--space-5) !important;
+    font-size: var(--font-size-sm) !important;
 }
 
-/* --- BREADCRUMB --- */
+/* `.card-outline`: quince usos en admin_*.html sin ninguna regla propia
+   (SD-152, SD-216) — el nombre promete un borde superior de acento que
+   nunca existió. */
+.card-outline {
+    border-top: 3px solid var(--color-primary) !important;
+}
+
+/* --- BREADCRUMB (SD-101) ---
+   4,5rem de aire vertical para dos palabras: se ata a la escala de
+   espaciado en vez de un valor suelto de 1.5rem por lado. */
 .ds-breadcrumb-wrapper {
-    background-color: #e9ecef;
-    padding: 0.75rem 1rem;
-    margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
-    border-radius: 0;
+    background-color: var(--surface-2);
+    padding: var(--space-3) var(--space-4);
+    margin-bottom: var(--space-4);
+    margin-top: var(--space-3);
+    border-radius: var(--radius-sm);
 }
 
 .ds-breadcrumb {
-    color: #6c757d;
-    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
 }
 
 /* --- SEARCH MAIN BAR --- */
 .ds-search-bar {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-6);
 }
 
+/* `:focus-within` (SD-154): el grupo completo (campo + botones) se resalta
+   como unidad al enfocar cualquiera de sus controles, no sólo el campo. */
+.ds-search-bar:focus-within {
+    outline: 2px solid var(--color-link);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+}
+
+/* --- CAMPO (SD-115, SD-116, SD-171) ---
+   Único campo propio de la hoja hasta ahora era el buscador, con su altura
+   escrita a mano; queda como declaración base para que el resto de campos
+   (`.form-control` de Bootstrap, sin tocar) puedan alinearse con ella. */
 .ds-search-input {
-    border-radius: 0 !important;
-    border-color: #ced4da;
+    border-radius: var(--radius-sm) !important;
+    border-color: var(--border-strong);
     height: calc(1.5em + 1rem + 2px) !important;
+    transition: border-color var(--duration-fast) var(--ease-out),
+                box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .ds-search-input:focus {
@@ -624,22 +725,92 @@ a:hover {
     border-color: #80bdff !important;
 }
 
+/* Estado de error/validación (SD-116): no existía ninguno en todo el
+   sistema. `.is-invalid` como clase explícita para cuando el JS la marca, y
+   `:user-invalid` para los navegadores que ya lo resuelven solos. */
+.ds-search-input.is-invalid,
+.ds-search-input:user-invalid {
+    border-color: var(--color-danger) !important;
+    box-shadow: 0 0 0 0.2rem rgba(208, 59, 59, 0.2) !important;
+}
+
+/* Campo obligatorio (SD-171): la etiqueta que lo precede gana un asterisco
+   sin que el marcado tenga que escribirlo a mano. */
+label:has(+ :required)::after {
+    content: " *";
+    color: var(--color-danger);
+}
+
+/* --- BOTÓN: BASE COMÚN (SD-109, SD-110, SD-111, SD-112, SD-114, SD-174) ---
+   Trece implementaciones sin base común, la mitad por `id`. Sustituir el
+   `id` por clase exige tocar el marcado (fuera de este carril: ver
+   `_BUZON.md`), así que aquí se les da la misma base tokenizada: transición
+   explícita (nunca `all`, SD-174) y, sobre todo, un estado
+   `:disabled`/`[aria-disabled]` que hoy no existía para ninguno de ellos
+   salvo el botón de exportación. */
+.ds-btn-primary,
+.ds-search-action-btn,
+#btn_s_archivo,
+#btn_s_rrhh,
+#btn_clear_archivo,
+#btn_clear_rrhh,
+.ds-btn-export,
+#btn-archivo-prev,
+#btn-archivo-next,
+#btn-rrhh-prev,
+#btn-rrhh-next,
+#download_ext_xls,
+#download_rrhh_xls {
+    transition: background-color var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out),
+                box-shadow var(--duration-base) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
+}
+
+.ds-btn-primary:disabled, .ds-btn-primary[aria-disabled="true"],
+.ds-search-action-btn:disabled, .ds-search-action-btn[aria-disabled="true"],
+#btn_s_archivo:disabled, #btn_s_archivo[aria-disabled="true"],
+#btn_s_rrhh:disabled, #btn_s_rrhh[aria-disabled="true"],
+#btn_clear_archivo:disabled, #btn_clear_archivo[aria-disabled="true"],
+#btn_clear_rrhh:disabled, #btn_clear_rrhh[aria-disabled="true"],
+.ds-btn-export:disabled, .ds-btn-export[aria-disabled="true"],
+#btn-archivo-prev:disabled, #btn-archivo-prev[aria-disabled="true"],
+#btn-archivo-next:disabled, #btn-archivo-next[aria-disabled="true"],
+#btn-rrhh-prev:disabled, #btn-rrhh-prev[aria-disabled="true"],
+#btn-rrhh-next:disabled, #btn-rrhh-next[aria-disabled="true"] {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Alias de tamaño (SD-111): la hoja no definía `.btn-xs`, usado 27 veces en
+   el resto del producto. Un paso por debajo de `.btn-sm` de Bootstrap. */
+.btn-xs {
+    padding: 0.1rem 0.4rem;
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+    line-height: var(--line-height-tight);
+}
+
 .ds-btn-primary {
-    background-color: #0056b3 !important;
-    border-color: #0056b3 !important;
-    color: white !important;
-    border-radius: 0 !important;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    transition: all 0.3s ease;
+    background-color: var(--color-link) !important;
+    border-color: var(--color-link) !important;
+    color: var(--text-inverse) !important;
+    border-radius: var(--radius-sm) !important;
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
 }
 .ds-btn-primary:hover {
     background-color: #004494 !important;
-    border-color: #003d82 !important;
+    border-color: var(--color-link-hover) !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(43, 78, 114, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
+/* Botón de icono (SD-114): 44px ya es el mínimo táctil correcto — queda
+   como el tamaño de referencia del que derivan los tamaños menores en
+   otros lotes. */
 .ds-search-action-btn {
     width: 44px !important;
     min-width: 44px !important;
@@ -648,50 +819,54 @@ a:hover {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 /* Search button: filled primary, slight shadow on hover */
 #btn_s_archivo,
 #btn_s_rrhh {
-    border-radius: 0 !important;
-    font-size: 1rem !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: var(--font-size-base) !important;
 }
 #btn_s_archivo:hover,
 #btn_s_rrhh:hover {
     box-shadow: 0 3px 8px rgba(0,86,179,0.35) !important;
     transform: translateY(-1px);
 }
+#btn_s_archivo:active,
+#btn_s_rrhh:active {
+    transform: translateY(0);
+    box-shadow: none !important;
+}
 
 /* Clear button: subtle ghost style */
 #btn_clear_archivo,
 #btn_clear_rrhh {
-    color: #6c757d !important;
-    border-color: #ced4da !important;
+    color: var(--text-muted) !important;
+    border-color: var(--border-strong) !important;
     background: transparent !important;
-    border-radius: 0 !important;
+    border-radius: var(--radius-sm) !important;
     font-size: 0.9rem !important;
 }
 #btn_clear_archivo:hover,
 #btn_clear_rrhh:hover {
-    color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    background: rgba(220,53,69,0.06) !important;
+    color: var(--color-danger) !important;
+    border-color: var(--color-danger) !important;
+    background: rgba(208,59,59,0.06) !important;
 }
 
 /* Export button: teal/info instead of loud green, compact */
 .ds-btn-export {
-    background-color: #17a2b8 !important;
-    border-color: #17a2b8 !important;
-    color: #ffffff !important;
-    border-radius: 0 4px 4px 0 !important;
+    background-color: var(--color-info) !important;
+    border-color: var(--color-info) !important;
+    color: var(--text-inverse) !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
     font-size: 0.85rem !important;
 }
 
 .ds-btn-export i,
 .ds-btn-export .fa,
 .ds-btn-export .fas {
-    color: #ffffff !important;
+    color: var(--text-inverse) !important;
 }
 
 .ds-btn-export:hover,
@@ -699,24 +874,25 @@ a:hover {
 .ds-btn-export:active {
     background-color: #138496 !important;
     border-color: #117a8b !important;
-    color: #ffffff !important;
+    color: var(--text-inverse) !important;
     box-shadow: 0 3px 8px rgba(23,162,184,0.3) !important;
 }
 
-/* Pagination buttons: consistent outline style */
+/* Pagination buttons: consistent outline style (SD-123: un solo radio,
+   tokenizado, en vez de los tres criterios que conviven en la hoja). */
 #btn-archivo-prev, #btn-archivo-next,
 #btn-rrhh-prev, #btn-rrhh-next {
-    border-radius: 4px !important;
+    border-radius: var(--radius-sm) !important;
     font-size: 0.82rem;
     padding: 0.25rem 0.6rem;
 }
 
 .ds-search-bar .input-group .input-group-append {
-    margin-left: 6px;
+    margin-left: var(--space-2);
 }
 
 .ds-search-bar .input-group .input-group-append > .btn {
-    margin-left: 6px;
+    margin-left: var(--space-2);
 }
 
 .ds-search-bar .input-group .input-group-append > .btn:first-child {
@@ -726,19 +902,23 @@ a:hover {
 #admin_workspace_tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: var(--space-2);
 }
 
 #admin_workspace_tabs.nav-pills {
     overflow-x: auto;
-    padding-bottom: 0.25rem;
+    padding-bottom: var(--space-1);
 }
 
+/* SD-219: estos dos ids ya comparten regla vía selector combinado en vez de
+   duplicarla por módulo (`_archivo`/`_rrhh`) — patrón a seguir cuando entre
+   un tercer módulo. SD-023/SD-024: verde correcto es `--color-success`
+   (#208838), no `#28a745`, que no pasa contraste AA con texto blanco. */
 #download_ext_xls,
 #download_rrhh_xls {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: #ffffff !important;
+    background-color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    color: var(--text-inverse) !important;
 }
 
 #download_ext_xls i,
@@ -747,7 +927,7 @@ a:hover {
 #download_rrhh_xls .fa,
 #download_ext_xls .fas,
 #download_rrhh_xls .fas {
-    color: #ffffff !important;
+    color: var(--text-inverse) !important;
 }
 
 #download_ext_xls:hover,
@@ -758,16 +938,16 @@ a:hover {
 #download_rrhh_xls:active {
     background-color: #218838 !important;
     border-color: #1e7e34 !important;
-    color: #ffffff !important;
+    color: var(--text-inverse) !important;
 }
 
 #download_ext_xls.disabled,
 #download_rrhh_xls.disabled,
 #download_ext_xls[disabled],
 #download_rrhh_xls[disabled] {
-    background-color: #28a745 !important;
-    border-color: #28a745 !important;
-    color: #ffffff !important;
+    background-color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    color: var(--text-inverse) !important;
     opacity: 0.75 !important;
 }
 
@@ -793,23 +973,47 @@ a:hover {
     font-size: 0.9rem;
 }
 
-/* --- ITEM CARDS (ds-item-list-element) --- */
+/* --- ITEM CARDS (ds-item-list-element) ---
+   SD-060/SD-089/SD-090/SD-167/SD-204/SD-220 (L3): superficie estable en vez
+   de "aparece al pasar el ratón"; una sola regla de hover con la sombra y el
+   desplazamiento canónicos (--shadow-md / -4px), transición de propiedades
+   explícitas en vez de `all`, y `content-visibility` para las listas largas.
+   NOTA para quien reserve la capa de movimiento (L13): sigue existiendo una
+   segunda definición de `.ds-item-card:hover` más abajo (transform -2px +
+   sombra distinta) fuera de esta zona — anotado en _BUZON.md, no se toca
+   desde aquí. */
 .ds-item-card {
     display: flex;
     padding: 1rem;
-    border-bottom: 1px solid #dee2e6;
-    background-color: transparent;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--surface-1);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
     border-left: 4px solid transparent;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--duration-slow) var(--ease-out),
+                box-shadow var(--duration-slow) var(--ease-out),
+                border-color var(--duration-slow) var(--ease-out);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 140px;
 }
 
-.ds-item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.06);
-    background-color: #ffffff;
-    border-left: 4px solid #0056b3;
+.ds-item-card:visited .ds-item-title a,
+.ds-item-card a.ds-item-title:visited {
+    color: var(--color-link-hover);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .ds-item-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-left-color: var(--color-link);
+    }
+}
+
+.ds-item-card:focus-within {
+    border-left-color: var(--color-link);
+    box-shadow: var(--shadow-md);
 }
 
 .ds-item-thumbnail {
@@ -822,8 +1026,8 @@ a:hover {
 }
 
 .ds-item-thumbnail i {
-    font-size: 48px;
-    color: #6c757d;
+    font-size: 3rem; /* SD-076: era 48px fijo, no escalaba con el ajuste de tamaño de texto */
+    color: var(--gray-600);
 }
 
 
@@ -843,10 +1047,26 @@ a:hover {
     margin-left: 0.75rem;
 }
 
-.ds-facet-row { transition: background .15s; }
-.ds-facet-row:hover { background: #e8f0fb; }
-.ds-facet-active { background: #d0e4f7; font-weight: 600; }
-.ds-facet-active .badge { background: #2b4e72 !important; }
+.ds-item-actions:empty,
+.ds-item-tags:empty {
+    display: none; /* SD-155: no ocupar hueco ni borde cuando el JS no ha escrito nada */
+}
+
+/* SD-142: faceta con los cinco estados (reposo, hover, activo, foco, táctil) */
+.ds-facet-row {
+    min-height: 34px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--duration-fast) ease-out;
+}
+.ds-facet-row:hover { background: var(--surface-3); }
+.ds-facet-row:focus-within,
+.ds-facet-row:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: -2px;
+}
+.ds-facet-active { background: #d0e4f7; font-weight: var(--font-weight-semibold); }
+body.dark-mode .ds-facet-active { background: var(--surface-2); }
+.ds-facet-active .badge { background: var(--color-primary) !important; }
 
 .ds-action-btn {
     width: 34px;
@@ -859,9 +1079,9 @@ a:hover {
 }
 
 .ds-doc-modal .modal-content {
-    border-radius: 14px;
-    border: 1px solid #d6dbe1;
-    box-shadow: 0 18px 40px rgba(16, 24, 40, 0.2);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-2xl);
 }
 
 .ds-doc-modal .modal-body {
@@ -888,7 +1108,7 @@ a:hover {
     margin: 0;
     color: #1f3f63;
     font-size: 1.05rem;
-    font-weight: 800;
+    font-weight: var(--font-weight-bold); /* SD-063: era 800, sin ese corte cargado */
 }
 
 .ds-doc-modal-grid {
@@ -900,8 +1120,8 @@ a:hover {
 }
 
 .ds-doc-panel {
-    background: #ffffff;
-    border: 1px solid #e1e6ec;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
     border-radius: 10px;
     padding: 0.85rem;
 }
@@ -915,9 +1135,12 @@ a:hover {
 }
 
 .ds-doc-thumb {
-    height: 165px;
+    /* SD-194: proporción en vez de altura fija (antes 165px, redefinida otra
+       vez en móvil a 120px sin relación entre sí). */
+    aspect-ratio: 4 / 3;
+    max-height: 165px;
     border-radius: 10px;
-    border: 1px dashed #bfd2e7;
+    border: 1px dashed var(--border-strong); /* SD-092: discontinuo = vacío/marcador */
     background: linear-gradient(160deg, #f4f9ff, #eef4fb);
     display: flex;
     flex-direction: column;
@@ -949,7 +1172,7 @@ a:hover {
 
 .ds-doc-panel h5 {
     font-size: 0.95rem;
-    font-weight: 800;
+    font-weight: var(--font-weight-bold); /* SD-063 */
     color: #2b4e72;
     margin-bottom: 0.65rem;
     word-break: break-word;
@@ -958,16 +1181,24 @@ a:hover {
 .ds-doc-meta-row {
     display: flex;
     padding: 0.3rem 0;
-    border-bottom: 1px dashed #e6ebf1;
+    border-bottom: 1px solid var(--border-subtle); /* SD-092: discontinuo reservado a vacío */
     word-break: break-word;
+}
+
+/* SD-160: redondear extremos de la lista al radio del panel contenedor (10px) */
+.ds-doc-meta-row:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .ds-doc-meta-row:last-child {
     border-bottom: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
 }
 
 .ds-doc-meta-row .k {
-    color: #6a7786;
+    color: var(--text-muted);
     font-weight: 700;
     font-size: 0.82rem;
     min-width: 110px;
@@ -975,7 +1206,7 @@ a:hover {
 }
 
 .ds-doc-meta-row .v {
-    color: #2f3943;
+    color: var(--text);
     font-size: 0.88rem;
     flex: 1;
     min-width: 0;
@@ -985,9 +1216,10 @@ a:hover {
 
 .ds-doc-abstract {
     margin: 0;
-    color: #485463;
+    color: var(--text-muted);
     line-height: 1.45;
     font-size: 0.92rem;
+    max-width: 70ch; /* SD-066: sin tope, un resumen en 1920px son líneas de 180 caracteres */
     overflow-wrap: break-word;
     word-break: break-word;
 }
@@ -1017,12 +1249,13 @@ a:hover {
     justify-content: center;
     width: 150px;
     height: 150px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .rrhh-person-photo {
     width: 100%;
     height: 100%;
+    border-radius: 50%; /* SD-097: el radio del hijo también, o Safari lo saca del recorte */
     object-fit: cover;
     display: block;
 }
@@ -1041,7 +1274,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: var(--font-weight-bold); /* SD-063 */
     letter-spacing: 0.05em;
 }
 
@@ -1095,11 +1328,11 @@ a:hover {
 }
 
 .rrhh-person-file-item {
-    background: #ffffff;
-    border: 1px solid #dfe6ee;
+    background: var(--surface-1);
+    border: 1px solid var(--border-subtle);
     border-radius: 10px;
     padding: 0.85rem 0.95rem;
-    box-shadow: 0 6px 16px rgba(16, 24, 40, 0.05);
+    box-shadow: var(--shadow-sm); /* SD-088/SD-091: mismo patrón de tarjeta que .ds-item-card */
 }
 
 .rrhh-person-file-item .ds-item-tags {
@@ -1166,7 +1399,7 @@ a:hover {
 .ds-badge {
     display: inline-block;
     padding: 0.25em 0.4em;
-    font-size: 75%;
+    font-size: var(--font-size-xs); /* SD-075: era 75% relativo, 13.7px o 9.9px según el contexto */
     font-weight: 700;
     line-height: 1;
     text-align: center;
@@ -1298,11 +1531,10 @@ body[data-page="login"] {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9999;
-    background-image: linear-gradient(rgba(10, 25, 47, 0.8), rgba(10, 25, 47, 0.88));
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    z-index: var(--z-overlay);
+    /* SD-052: derivado del acento de marca (no un azul marino ajeno a los
+       once temas), un solo alfa en vez de dos apilados sin efecto visible. */
+    background-color: color-mix(in srgb, var(--c-brand-800) 88%, black);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1315,14 +1547,15 @@ body[data-page="login"] {
     max-width: 90%;
     margin: 0 auto;
     text-align: center;
+    /* SD-053: sin backdrop-filter — el fondo de .ds-login-backdrop es un
+       color sólido, así que el desenfoque no difuminaba nada y sólo
+       forzaba una capa de composición a pantalla completa. */
     background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
     border: 1px solid rgba(255,255,255,0.4) !important;
-    border-top: 5px solid #2b4e72 !important;
+    border-top: 5px solid var(--c-brand-700) !important;
     border-radius: 20px !important;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.35) !important;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow-2xl) !important;
+    transition: transform var(--duration-slow) var(--ease-out), box-shadow var(--duration-slow) var(--ease-out);
     padding: 2.5rem !important;
 }
 
@@ -1353,7 +1586,7 @@ body[data-page="login"] {
     left: 15px;
     top: 42px; /* Alineado con el input debajo del label */
     z-index: 10;
-    color: #2b4e72;
+    color: var(--c-brand-700);
     font-size: 1.2rem;
 }
 
@@ -1381,7 +1614,7 @@ body[data-page="login"] {
 
 .ds-pass-toggle:hover,
 .ds-pass-toggle:focus {
-    color: #2b4e72;
+    color: var(--c-brand-700);
     outline: none;
 }
 
@@ -1429,38 +1662,46 @@ body[data-page="login"] {
     z-index: 9999 !important;
 }
 
-/* --- ESTILOS INTERACTIVOS PARA ETIQUETAS DE SELECCIÓN MÚLTIPLE --- */
+/* --- ESTILOS INTERACTIVOS PARA ETIQUETAS DE SELECCIÓN MÚLTIPLE ---
+   SD-141: misma forma de "píldora seleccionable" que .ds-date-chip
+   (styles.css, zona L7). Tokenizado aquí para que ambas partan de los
+   mismos primitivos; unificar en un solo componente queda pendiente de
+   coordinar con L7 (ver _BUZON.md). */
 .select-tag {
     display: inline-block;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     line-height: 1;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    border-radius: 20px;
-    background-color: #f1f3f5;
-    color: #495057;
-    margin-right: 0.25rem;
-    margin-bottom: 0.25rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+    margin-right: var(--space-1);
+    margin-bottom: var(--space-1);
     cursor: pointer;
-    border: 1px solid #dee2e6;
-    transition: all 0.2s ease-in-out;
+    border: 1px solid var(--gray-300);
+    /* SD-174: lista explícita en vez de `transition: all`. */
+    transition: background-color var(--duration-base) ease-in-out,
+                color var(--duration-base) ease-in-out,
+                border-color var(--duration-base) ease-in-out,
+                box-shadow var(--duration-base) ease-in-out;
 }
 
 .select-tag:hover {
-    background-color: #e9ecef;
-    color: #0056b3;
-    border-color: #0056b3;
+    background-color: var(--gray-200);
+    color: var(--color-link);
+    border-color: var(--color-link);
     text-decoration: none !important;
 }
 
 .select-tag.active {
-    background-color: #0056b3 !important;
-    color: #ffffff !important;
-    border-color: #0056b3 !important;
-    box-shadow: 0 3px 8px rgba(0, 86, 179, 0.3);
+    background-color: var(--color-link) !important;
+    color: var(--text-inverse) !important;
+    border-color: var(--color-link) !important;
+    box-shadow: var(--shadow-sm);
 }
 
 /* ==========================================================================
@@ -1896,44 +2137,15 @@ body.theme-oliva          .btn.btn-primary:not(.ds-btn-primary) { background-col
 
 /* ==========================================================================
    KPI CARDS (Panel de administración)
+   SD-071/SD-072: .ds-kpi-label y .ds-kpi-value estaban definidas dos veces
+   (aquí y en el bloque de info-box/.ds-kpi-mini, más abajo en el archivo);
+   la segunda ganaba siempre por orden de cascada, así que la de aquí eran
+   líneas muertas. SD-215: .ds-kpi-card y .ds-kpi-value-sm no aparecen en
+   ningún HTML/JS del proyecto — el marcado real usa `.card.ds-kpi-mini`.
+   Se retira todo este bloque duplicado/no usado; la definición viva sigue
+   en el bloque de info-box/KPI más adelante en el archivo (fuera de esta
+   zona), que ya usa tokens `--viz-*`.
    ========================================================================== */
-.ds-kpi-card {
-  border-radius: 12px !important;
-  border: none !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
-  margin-bottom: 1rem;
-}
-.ds-kpi-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.13) !important;
-}
-.ds-kpi-icon {
-  opacity: 0.5;
-  transition: opacity 0.2s, transform 0.2s;
-  flex-shrink: 0;
-}
-.ds-kpi-card:hover .ds-kpi-icon { opacity: 0.75; transform: scale(1.12); }
-.ds-kpi-label {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.9px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: #6c757d;
-}
-.ds-kpi-value {
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-  color: #212529;
-}
-.ds-kpi-value-sm {
-  font-size: 1.1rem;
-  font-weight: 700;
-  line-height: 1.4;
-  color: #212529;
-}
 
 /* ==========================================================================
    ADMIN NAV TABS (scrollable, themed)
@@ -2209,48 +2421,51 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
 }
 
 /* ==========================================================================
-   NAVBAR — username badge
+   NAVBAR — username badge (SD-040: app-shell.js pinta el nombre con un
+   style en línea en rojo en vez de usar esta clase — anotado en el buzón,
+   app-shell.js no es mío)
    ========================================================================== */
 .ds-nav-user-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 700;
-  font-size: 0.88rem;
-  color: #2b4e72;
-  padding: 5px 10px;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  padding: var(--space-1) var(--space-3);
   background: #eef4fb;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   border: 1px solid #d9e6f4;
-  margin-right: 8px;
+  margin-right: var(--space-2);
   margin-top: 2px;
   white-space: nowrap;
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ds-nav-user-badge i { color: #2b4e72; opacity: 0.8; flex-shrink: 0; }
+.ds-nav-user-badge i { color: var(--color-primary); opacity: 0.8; flex-shrink: 0; }
 
 /* ==========================================================================
-   FLATPICKR DATE RANGE PICKER — Integración sidebar
+   FLATPICKR DATE RANGE PICKER — Integración sidebar (SD-120: reescrito
+   sobre los tokens del sistema en vez de #2b4e72 a pelo once veces)
    ========================================================================== */
 .flatpickr-calendar {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.82rem;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+    font-family: var(--ds-font-family, 'Nunito', sans-serif);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     border: 1px solid #d6e4f0;
 }
 .flatpickr-months {
-    background: #2b4e72;
-    border-radius: 10px 10px 0 0;
+    background: var(--color-primary);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
     padding: 4px 0;
 }
 .flatpickr-months .flatpickr-month,
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month {
-    color: #fff;
-    fill: #fff;
+    color: var(--text-inverse);
+    fill: var(--text-inverse);
 }
 .flatpickr-months .flatpickr-prev-month:hover,
 .flatpickr-months .flatpickr-next-month:hover {
@@ -2258,106 +2473,117 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
     fill: #a8d4f5;
 }
 .flatpickr-current-month .flatpickr-monthDropdown-months {
-    background: #2b4e72;
-    color: #fff;
-    font-weight: 700;
+    background: var(--color-primary);
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-bold);
     font-size: 0.85rem;
 }
 .flatpickr-current-month input.cur-year {
-    color: #fff;
-    font-weight: 700;
+    color: var(--text-inverse);
+    font-weight: var(--font-weight-bold);
 }
 .flatpickr-weekdays { background: #eef4fb; }
 span.flatpickr-weekday {
     background: #eef4fb;
-    color: #2b4e72;
-    font-weight: 700;
-    font-size: 0.78rem;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xs);
 }
 .flatpickr-day {
-    border-radius: 6px;
-    font-size: 0.82rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
     color: #2f3943;
 }
 .flatpickr-day:hover,
 .flatpickr-day:focus {
     background: #d6e9f8;
     border-color: #d6e9f8;
-    color: #2b4e72;
+    color: var(--color-primary);
 }
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
 .flatpickr-day.endRange {
-    background: #2b4e72 !important;
-    border-color: #2b4e72 !important;
-    color: #fff !important;
-    font-weight: 700;
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: var(--text-inverse) !important;
+    font-weight: var(--font-weight-bold);
 }
 .flatpickr-day.inRange {
     background: #d6e9f8 !important;
     border-color: #d6e9f8 !important;
-    color: #2b4e72;
+    color: var(--color-primary);
+    /* El rango se dibuja con una sombra lateral del mismo tono de fondo:
+       si el fondo cambia (tema/oscuro), esto se rompe salvo que ambos
+       lados sigan el mismo token — ver SD-120. */
     box-shadow: -5px 0 0 #d6e9f8, 5px 0 0 #d6e9f8;
 }
 .flatpickr-day.today {
-    border-color: #2b4e72;
-    color: #2b4e72;
-    font-weight: 700;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
 }
 .flatpickr-day.today:hover {
-    background: #2b4e72;
-    color: #fff;
+    background: var(--color-primary);
+    color: var(--text-inverse);
 }
 .flatpickr-day.disabled,
 .flatpickr-day.disabled:hover {
     color: #ccc;
 }
+
 /* ==========================================================================
-   DATE SLICER — chips de preset (modernizados)
+   DATE SLICER — chips de preset (SD-141: misma forma de "píldora
+   seleccionable" que .select-tag, con su propia calibración justificada
+   por el contexto — filtro de fecha, no filtro de facetas)
    ========================================================================== */
 .ds-date-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: var(--space-2);
 }
 .ds-date-chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 5px 11px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
     border: 1px solid #d1dbe8;
     background: #f8fbff;
     color: #5a7a9a;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background var(--duration-base) ease,
+                border-color var(--duration-base) ease,
+                color var(--duration-base) ease,
+                transform var(--duration-base) ease;
     white-space: nowrap;
-    line-height: 1.4;
+    line-height: var(--line-height-loose);
 }
-.ds-date-chip:hover {
-    background: #e8f2ff;
-    border-color: #2b4e72;
-    color: #2b4e72;
-    transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+    .ds-date-chip:hover {
+        background: #e8f2ff;
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        transform: translateY(-1px);
+    }
 }
 .ds-date-chip.active {
-    background: #2b4e72;
-    border-color: #2b4e72;
-    color: #fff;
-    box-shadow: 0 3px 8px rgba(43,78,114,0.3);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-inverse);
+    box-shadow: var(--shadow-sm);
 }
 .ds-date-chip i {
     font-size: 0.7rem;
     opacity: 0.9;
 }
 .ds-date-active-label {
-    color: #2b4e72;
-    font-weight: 600;
-    font-size: 0.8rem;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
     min-height: 1.2em;
-    margin-top: 6px;
+    margin-top: var(--space-2);
 }
 
 /* ── Quick-Status Button ── */
@@ -2366,27 +2592,57 @@ span.flatpickr-weekday {
     background: none;
     cursor: pointer;
     padding: 0;
-    transition: transform 0.12s;
+    transition: transform var(--duration-fast);
 }
-.ds-status-btn:hover { transform: scale(1.15); }
-.ds-status-btn:focus { outline: 2px solid #2b4e72; outline-offset: 2px; border-radius: 4px; }
+@media (hover: hover) and (pointer: fine) {
+    .ds-status-btn:hover { transform: scale(1.15); }
+}
+.ds-status-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: var(--radius-sm); }
 
-/* ── Skeleton Loader ── */
+/* ==========================================================================
+   SKELETON LOADER (SD-138, SD-139) — definición única y reutilizable.
+   Las cinco páginas que redefinían `.ds-skeleton` en un <style> propio
+   (admin_archive, admin_hr, admin_system, archive, hr) deben borrar ese
+   bloque y usar sólo esta clase — anotado en el buzón para el lote LH,
+   `styles.css` no puede borrar un <style> que vive en otro archivo.
+   Variantes con la forma del contenido: fila, tarjeta y KPI.
+   ========================================================================== */
 .ds-skeleton {
-    background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-50) 50%, var(--gray-200) 75%);
     background-size: 200% 100%;
     animation: ds-shimmer 1.4s infinite;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     display: block;
 }
 @keyframes ds-shimmer {
     0%  { background-position: 200% 0; }
     100%{ background-position: -200% 0; }
 }
+/* Fila de tabla: una barra por celda, altura de línea de texto */
+.ds-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-2) var(--space-3);
+}
+.ds-skeleton-row .ds-skeleton { height: 14px; flex: 1; }
+/* Tarjeta de resultado: título + dos líneas de cuerpo */
+.ds-skeleton-card {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-1);
+}
+.ds-skeleton-card .ds-skeleton { height: 12px; margin-bottom: var(--space-2); }
+.ds-skeleton-card .ds-skeleton:first-child { height: 16px; width: 60%; margin-bottom: var(--space-3); }
+.ds-skeleton-card .ds-skeleton:last-child { width: 40%; margin-bottom: 0; }
+/* KPI: etiqueta corta + cifra grande */
+.ds-skeleton-kpi .ds-skeleton { height: 10px; width: 70px; margin-bottom: var(--space-2); }
+.ds-skeleton-kpi .ds-skeleton:last-child { height: 26px; width: 90px; margin-bottom: 0; }
 
 /* ── Focus visible para accesibilidad ── */
 :focus-visible {
-    outline: 2px solid #2b4e72;
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 button:focus:not(:focus-visible),
@@ -2394,108 +2650,237 @@ a:focus:not(:focus-visible) {
     outline: none;
 }
 
-/* ── Mark highlight de búsqueda ── */
+/* ── Mark highlight de búsqueda (SD-050: par claro/oscuro con contraste
+   suficiente en vez de un amarillo fijo con `color: inherit`) ── */
 mark {
-    background: #fff176;
-    border-radius: 2px;
+    --mark-bg: #fff176;
+    --mark-text: #3d3d00;
+    background: var(--mark-bg);
+    color: var(--mark-text);
+    border-radius: var(--radius-xs);
     padding: 0 1px;
-    color: inherit;
+}
+body.dark-mode mark {
+    --mark-bg: #cca300;
+    --mark-text: #1a1d23;
 }
 
 /* ── Session warning banner ── */
 #session-warning-banner {
     font-family: inherit;
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
     border-radius: 0;
-    border-left: 4px solid #dc3545;
+    border-left: 4px solid var(--color-danger);
 }
 
-/* ── Info-box clickable (cursor pointer) ── */
-.info-box[style*="cursor:pointer"] { transition: box-shadow 0.15s, transform 0.12s; }
+/* ── Código / identificadores (SD-079): sólo había regla oscura suelta
+   para `pre, code`; aquí el componente base en ambos modos ── */
+code, .ds-mono {
+    font-family: 'Consolas', 'SFMono-Regular', Menlo, Monaco, monospace;
+    font-size: 0.9em;
+    background: var(--surface-2);
+    color: var(--text);
+    border-radius: var(--radius-xs);
+    padding: 0.1em 0.35em;
+}
+body.dark-mode code, body.dark-mode .ds-mono {
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+/* ── Info-box clickable (SD-217): clase explícita en vez de un selector
+   atado a la cadena exacta de un style en línea. Se conserva el selector
+   [style*="cursor:pointer"] como respaldo mientras admin-stats.js (fuera
+   de este carril, anotado en el buzón) empieza a escribir `.is-clickable`. ── */
+.info-box.is-clickable,
+.info-box[style*="cursor:pointer"] { transition: box-shadow var(--duration-base), transform var(--duration-fast); }
+.info-box.is-clickable:hover,
 .info-box[style*="cursor:pointer"]:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.13) !important;
+    box-shadow: var(--shadow-md) !important;
     transform: translateY(-2px);
 }
 
 /* ── Monitor admin table: compact ── */
 #admin_control_table-archivo,
 #admin_control_table-rrhh {
-    font-size: 0.82rem;
+    font-size: var(--font-size-sm);
 }
 #admin_control_table-archivo td,
 #admin_control_table-rrhh td {
     vertical-align: middle;
-    padding: 0.35rem 0.5rem;
+    padding: var(--space-2) var(--space-2);
 }
 
 /* ── Dossier RRHH ── */
 .ds-dossier-section-title {
     font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-wide);
     text-transform: uppercase;
-    color: #6c757d;
-    margin-bottom: 4px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #e9ecef;
+    color: var(--gray-600);
+    margin-bottom: var(--space-1);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border-subtle);
 }
 .ds-dossier-item {
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    transition: box-shadow 0.12s;
+    background: var(--surface-1);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-2);
+    transition: box-shadow var(--duration-fast);
 }
-.ds-dossier-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.ds-dossier-item-title { font-weight: 600; font-size: 0.85rem; }
-.ds-dossier-item-meta  { font-size: 0.75rem; color: #6c757d; }
+/* SD-160: redondear el primer y último elemento de la lista en vez de
+   depender de overflow:hidden en el contenedor */
+.ds-dossier-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+.ds-dossier-item:last-child { margin-bottom: 0; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+.ds-dossier-item:hover { box-shadow: var(--shadow-sm); }
+.ds-dossier-item-title { font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
+.ds-dossier-item-meta  { font-size: 0.75rem; color: var(--gray-600); }
 
 /* ── Responsive card grid for search results ── */
 @media (max-width: 576px) {
-    .ds-result-card { margin-bottom: 8px; }
-    .ds-result-card .card-body { padding: 0.75rem; }
+    .ds-result-card { margin-bottom: var(--space-2); }
+    .ds-result-card .card-body { padding: var(--space-3); }
     .info-box .info-box-number { font-size: 1.2rem; }
 }
 
-/* ── Print styles (for PDF report) ── */
+/* ==========================================================================
+   IMPRESIÓN (SD-229 a SD-233, sub-lote completo) — el archivo no tenía
+   hoja de impresión de verdad: cinco líneas con lista negra que ocultaban
+   elementos que no existen y dejaban visible la burbuja del asistente,
+   los desplegables y los paneles fijos. Reescrita como lista blanca:
+   se oculta toda navegación y todo lo que sea `position: fixed`.
+
+   SD-235: el informe PDF de RRHH se genera aparte, en el servidor
+   (`app/routes/hr.py`), por un camino que no pasa por esta hoja — así que
+   la versión impresa desde el navegador y la generada no van a coincidir
+   hasta que alguien unifique los dos caminos o le dé al HTML del reporte
+   una clase que esta hoja pueda reconocer. `hr.py` no es mío: anotado en
+   el buzón lo que hace falta ahí.
+   ========================================================================== */
 @media print {
-    .main-header, #app-sidebar, .ds-breadcrumb-wrapper,
-    .nav-pills, .btn, .card-header .card-tools { display: none !important; }
+    /* SD-229: cáscara de navegación y cualquier capa flotante o fija */
+    .main-header, #app-sidebar, .ds-sidebar, .ds-sidebar-overlay,
+    .ds-breadcrumb-wrapper, .nav-pills, .ds-admin-tabs,
+    .btn, .card-header .card-tools,
+    #ds-toast-container, #ia-burbuja, #ia-widget-panel,
+    .ds-quick-status-dropdown, .ds-quick-status-menu,
+    .ds-notif-panel, .ds-theme-panel, .dropdown-menu,
+    #skip-link, .ds-skip-nav, #session-warning-banner,
+    [style*="position: fixed"], [style*="position:fixed"] {
+        display: none !important;
+    }
+    /* Nadie debería seguir flotando sobre el papel */
+    * { position: static !important; }
+
     .content-wrapper { margin: 0 !important; padding: 0 !important; }
-    .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+    .card { box-shadow: none !important; border: 1px solid #000 !important; }
+
+    /* SD-230: forzar colores donde el color es información (insignias,
+       barra de avance, estado), y modo claro siempre — imprimir en
+       modo oscuro no debe dar texto claro sobre papel blanco */
+    html, body, .content-wrapper, .card {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    * {
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+    }
+    .badge, .ds-badge, .ds-status-badge, .ds-item-type-badge,
+    .ds-kw-badge, .ds-item-kw-badge {
+        border: 1px solid #000 !important;
+    }
+
+    /* SD-231: paginación de tablas largas — cabecera repetida en cada
+       hoja, filas y tarjetas que no se cortan a la mitad */
+    table { break-inside: auto; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+    tr, .card, .ds-dossier-item, .ds-result-card { break-inside: avoid; }
+    p, .ds-doc-abstract, .ds-dossier-item-meta { orphans: 3; widows: 3; }
+
+    /* SD-232: un enlace impreso no lleva a ningún sitio en papel —
+       mostrar el destino junto al texto, sólo en prosa */
+    .ds-doc-abstract a[href^="http"]::after,
+    .ds-dossier-item a[href^="http"]::after,
+    .ds-compartido-titulo a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.75em;
+        color: #333 !important;
+    }
 }
 
-/* ── Shake animation (login error) ── */
+/* SD-233: @page — márgenes fijos y tamaño A4 en vez de depender de lo
+   que traiga cada navegador por defecto. `.ds-print-header`/`.ds-print-footer`
+   quedan preparados por si una página añade el marcado de identificación
+   institucional (sello, fecha, folio) — hoy no existe ese marcado en
+   ningún *.html, así que sólo se activan si aparece. */
+@page {
+    size: A4;
+    margin: 18mm 15mm;
+}
+.ds-print-header, .ds-print-footer { display: none; }
+@media print {
+    .ds-print-header, .ds-print-footer { display: block !important; }
+}
+
+/* ── Shake animation (login error) — definida aquí, sin uso todavía en
+   login.js (SD-180); anotado en el buzón, login.js no es mío ── */
 @keyframes ds-shake {
     0%,100% { transform: translateX(0); }
     15%,45%,75% { transform: translateX(-6px); }
     30%,60%,90% { transform: translateX(6px); }
 }
 
-/* ── Quick status menu dropdown ── */
+/* ==========================================================================
+   MENÚ DESPLEGABLE — componente único (SD-125, SD-126, SD-215): el
+   marcado real de admin_archive.html/admin_hr.html usa la clase
+   `.ds-quick-status-menu` (definida antes sólo en el <style> de esas dos
+   páginas); la que traía esta hoja, `.ds-quick-status-dropdown`, no la
+   usaba nadie. Unificado bajo un solo nombre — el que el marcado ya
+   consume — para que la regla deje de estar muerta.
+   ========================================================================== */
+.ds-menu,
+.ds-quick-status-menu,
 .ds-quick-status-dropdown {
     position: absolute;
-    z-index: 9999;
-    background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    padding: 4px 0;
+    z-index: var(--z-dropdown);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-1) 0;
     min-width: 160px;
 }
+.ds-menu-item,
 .ds-quick-status-option {
     display: block;
     width: 100%;
-    padding: 7px 14px;
+    padding: var(--space-2) var(--space-4);
     border: none;
     background: none;
     text-align: left;
-    font-size: 0.83rem;
+    font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background var(--duration-fast);
 }
-.ds-quick-status-option:hover { background: #f8f9fa; }
+.ds-menu-item:first-child,
+.ds-quick-status-option:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+.ds-menu-item:last-child,
+.ds-quick-status-option:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+.ds-menu-item:hover,
+.ds-quick-status-option:hover { background: var(--surface-0); }
+.ds-menu-item[disabled], .ds-menu-item[aria-disabled="true"],
+.ds-quick-status-option[disabled], .ds-quick-status-option[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.ds-menu-item[disabled]:hover, .ds-menu-item[aria-disabled="true"]:hover,
+.ds-quick-status-option[disabled]:hover, .ds-quick-status-option[aria-disabled="true"]:hover {
+    background: none;
+}
 
 /* ---- Viewer de archivo en modal ---- */
 .ds-viewer-img {
@@ -2503,22 +2888,65 @@ mark {
   max-height: 500px;
   display: block;
   margin: 0 auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
 }
 
-/* ---- Toast container mejorado ---- */
+/* ==========================================================================
+   TOAST (SD-039, SD-129) — el toast en sí lo pintaba `app-core.js` con un
+   `style` en línea (cuatro tripletes hex, sin clase, sin modo oscuro, sin
+   tema, sin densidad). Aquí queda el componente completo, consumiendo los
+   tokens semánticos de SD-023; `app-core.js` (H2-app-js, [CHOCA], anotado
+   en el buzón) es quien tiene que dejar de escribir el `style` en línea y
+   usar estas clases (`ds-toast ds-toast--success|error|warning|info`).
+   ========================================================================== */
 #ds-toast-container {
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
-  z-index: 9999;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
   pointer-events: none;
 }
-#ds-toast-container > div { pointer-events: all; }
+#ds-toast-container > * { pointer-events: all; }
+/* SD-129: tope de pila — más de cinco toasts a la vez no se ven */
+#ds-toast-container > :nth-child(n+6) { display: none; }
+
+.ds-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  max-width: 320px;
+  border: 1px solid transparent;
+  animation: ds-toast-in var(--duration-base) var(--ease-out);
+}
+@keyframes ds-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ds-toast--success { background: var(--color-success-bg); color: #155724; border-color: var(--color-success); }
+.ds-toast--error,
+.ds-toast--danger   { background: var(--color-danger-bg);  color: #721c24; border-color: var(--color-danger); }
+.ds-toast--warning  { background: var(--color-warning-bg); color: #856404; border-color: var(--color-warning); }
+.ds-toast--info     { background: var(--color-info-bg);    color: #0c5460; border-color: var(--color-info); }
+
+body.dark-mode .ds-toast--success { background: rgba(32,136,56,.18); color: #6ddb8a; border-color: rgba(32,136,56,.4); }
+body.dark-mode .ds-toast--error,
+body.dark-mode .ds-toast--danger  { background: rgba(208,59,59,.18); color: #f0a3a3; border-color: rgba(208,59,59,.4); }
+body.dark-mode .ds-toast--warning { background: rgba(250,178,25,.18); color: #f5cf7a; border-color: rgba(250,178,25,.4); }
+body.dark-mode .ds-toast--info    { background: rgba(23,162,184,.18); color: #8fd6e2; border-color: rgba(23,162,184,.4); }
+
+/* SD-159: estado deshabilitado explícito, no sólo en paginación/botón */
+[disabled], [aria-disabled="true"] {
+  cursor: not-allowed;
+}
 
 /* ============================================================
    MODO OSCURO — body.dark-mode
@@ -2734,30 +3162,65 @@ body.dark-mode .ds-skeleton           { background:linear-gradient(90deg,#23272f
   background:#e9ecef; border-radius:4px; padding:2px 7px; color:#495057; text-transform:none; letter-spacing:0;
 }
 
+/* Botón segmentado del panel de personalización — SD-148: .ds-dark-btn,
+   .ds-font-btn, .ds-ff-btn y .ds-reset-btn eran "botón de opción con estado
+   activo" repetido con radio y azul de activo distintos cada vez. Una sola
+   base compartida por selector agrupado (sin tocar el marcado, que no es de
+   este carril); cada clase sólo ajusta tamaño/alineación encima de la base.
+   SD-174: transiciones explícitas, no `all`. SD-112: estado deshabilitado,
+   ausente hasta ahora en los cuatro. */
+.ds-dark-btn,
+.ds-font-btn,
+.ds-reset-btn {
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--gray-50);
+  color: var(--gray-700);
+  cursor: pointer;
+  font-weight: var(--font-weight-semibold);
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+.ds-dark-btn:hover,
+.ds-font-btn:hover {
+  border-color: var(--gray-500);
+  background: var(--gray-200);
+}
+.ds-dark-btn.active,
+.ds-font-btn.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--text-inverse);
+}
+.ds-dark-btn:disabled, .ds-dark-btn[aria-disabled="true"],
+.ds-font-btn:disabled, .ds-font-btn[aria-disabled="true"],
+.ds-reset-btn:disabled, .ds-reset-btn[aria-disabled="true"] {
+  opacity: .6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.ds-dark-btn:disabled:hover, .ds-dark-btn[aria-disabled="true"]:hover,
+.ds-font-btn:disabled:hover, .ds-font-btn[aria-disabled="true"]:hover {
+  border-color: var(--border);
+  background: var(--gray-50);
+}
+
 /* Dark mode buttons */
 .ds-dark-toggle {
   display:flex; gap:6px;
 }
 .ds-dark-btn {
   flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
-  padding:7px 6px; border-radius:8px; border:1.5px solid #dee2e6;
-  background:#f8f9fa; color:#495057; cursor:pointer; font-size:0.78rem;
-  font-weight:600; transition:all 0.18s ease;
+  padding:7px 6px; font-size:0.78rem;
 }
-.ds-dark-btn:hover { border-color:#adb5bd; background:#e9ecef; }
-.ds-dark-btn.active { border-color:#2b4e72; background:#2b4e72; color:#fff; }
 
 /* Font size buttons */
 .ds-font-row {
   display:flex; align-items:center; gap:6px;
 }
 .ds-font-btn {
-  width:42px; height:38px; border-radius:8px; border:1.5px solid #dee2e6;
-  background:#f8f9fa; color:#495057; cursor:pointer; display:flex;
-  align-items:center; justify-content:center; transition:all 0.18s ease;
+  width:42px; height:38px; display:flex;
+  align-items:center; justify-content:center;
 }
-.ds-font-btn:hover { border-color:#adb5bd; background:#e9ecef; }
-.ds-font-btn.active { border-color:#2b4e72; background:#2b4e72; color:#fff; }
 
 /* Theme grid */
 .ds-theme-grid {
@@ -2767,11 +3230,15 @@ body.dark-mode .ds-skeleton           { background:linear-gradient(90deg,#23272f
 /* Reset button */
 .ds-panel-reset { border-bottom:none; padding-bottom:18px; }
 .ds-reset-btn {
-  width:100%; padding:8px; border-radius:8px; border:1.5px solid #dee2e6;
-  background:#f8f9fa; color:#6c757d; cursor:pointer; font-size:0.8rem;
-  font-weight:600; transition:all 0.18s ease; display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; padding:8px; font-size:0.8rem;
+  display:flex; align-items:center; justify-content:center; gap:6px;
 }
 .ds-reset-btn:hover { border-color:#c0392b; color:#c0392b; background:#fff5f5; }
+.ds-reset-btn:disabled:hover, .ds-reset-btn[aria-disabled="true"]:hover {
+  border-color: var(--border);
+  color: var(--gray-600);
+  background: var(--gray-50);
+}
 
 body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
 
@@ -2781,8 +3248,12 @@ body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.5); }
   50%       { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0); }
 }
+/* SD-178: igual que SD-177 — una insignia que late para siempre está bien,
+   quince en la misma tabla latiendo a la vez y desincronizadas para siempre
+   no lo está. Tres ciclos (~6s) bastan para llamar la atención sobre una fila
+   nueva sin convertir la tabla en un parpadeo permanente. */
 .ds-status-revision {
-  animation: ds-pulse-warning 2s ease-in-out infinite;
+  animation: ds-pulse-warning 2s ease-in-out 3;
 }
 @media (prefers-reduced-motion: reduce) {
   .ds-status-revision { animation: none; }
@@ -2809,10 +3280,19 @@ body.dark-mode .ds-sidebar-section-label { color:#3e4660 !important; }
   border-bottom: 1px solid #f0f2f5;
   font-size: 0.88rem;
 }
+/* SD-162: uno de los cinco contenedores desplazables que no tenían ningún
+   estilo de barra propio (los otros cuatro — .ds-sidebar-nav, #ia-mensajes,
+   .rrhh-person-modal .modal-body, .ds-table-wrap — no son de este carril). */
 .ds-notif-list {
   max-height: 320px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
+.ds-notif-list::-webkit-scrollbar { width: 6px; }
+.ds-notif-list::-webkit-scrollbar-track { background: transparent; }
+.ds-notif-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-pill); }
+body.dark-mode .ds-notif-list { scrollbar-color: var(--border-strong) transparent; }
 .ds-notif-empty {
   padding: 20px;
   text-align: center;
@@ -3161,22 +3641,6 @@ body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color
 
   /* Papelera/audit row: hide secondary cols */
   .ds-hide-sm { display: none !important; }
-
-  /* Dossier RRHH parts header: stack */
-  .ds-dossier-part-header { flex-direction: column; gap: 4px; }
-}
-
-/* Sticky first column in wide tables */
-@media (max-width: 767px) {
-  .ds-table-sticky-col { overflow-x: auto; }
-  .ds-table-sticky-col th:first-child,
-  .ds-table-sticky-col td:first-child {
-    position: sticky;
-    left: 0;
-    background: inherit;
-    z-index: 1;
-    box-shadow: 2px 0 4px rgba(0,0,0,0.06);
-  }
 }
 
 /* Make monitor table controls inline on medium screens */
@@ -3189,27 +3653,69 @@ body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color
 @media (max-width: 575px) {
   .content-wrapper { padding: 10px !important; }
   .content-header { padding: 10px 10px 0 !important; }
-  .card-body { padding: 0.75rem !important; }
+  /* SD-105: uno de los cuatro puntos donde se declara el padding de tarjeta
+     con !important (los otros: styles.css ~355 [L2], ~2828-2837 [L9]). Aquí
+     sólo se tokeniza el valor (0.75rem = --space-3, ya el mismo número que
+     usaban las otras declaraciones) para que dejar de ser un !important
+     cruzado sea un cambio de un solo sitio cuando L2/L9 lo unifiquen. */
+  .card-body { padding: var(--space-3) !important; }
 }
 
 /* ============================================================
    SISTEMA DE ACENTO Y TEMAS DE ESTILO
+
+   SD-032 (nota de interpretación, agente-l11-estilos): la ficha describe dos
+   ejes de color paralelos —once temas (L5, styles.css:1308-1634 en el
+   original) y siete acentos (aquí)— que no se comunican, y su arreglo
+   propuesto ("el tema ES el acento") exige fusionar ambos sistemas: tocaría
+   la lista de temas y `app-theme.js`, ninguno de los dos en mi carril. No lo
+   implemento — sería escribir fuera de mi zona. Lo que sí hago en L11 es
+   dejar el eje de acentos internamente consistente (SD-010, SD-011, SD-048,
+   SD-190) para que, decida quien decida sobre SD-032, la fusión no herede
+   los mismos problemas de contraste. Anotado también en _BUZON.md.
    ============================================================ */
 
 :root {
   --ds-accent:       #2b4e72;
   --ds-accent-hover: #1d3a55;
   --ds-accent-light: #d4e5f7;
-  --ds-accent-rgb:   43,78,114;
+  --ds-accent-rgb:   43,78,114;   /* SD-011: aún en uso fuera de mi zona (styles.css ~4115, L14/L15) — no se retira. */
+  /* SD-048: color de texto seguro sobre `--ds-accent` de fondo. Blanco pasa
+     AA (>=4.5:1) contra los siete acentos salvo accent-amber (~3.6:1),
+     comprobado con la fórmula WCAG de luminancia relativa; ese caso se
+     invierte más abajo. */
+  --ds-accent-on:    #ffffff;
+  /* SD-010: `--ds-accent` usado como TEXTO (no como fondo) pierde contraste
+     en modo oscuro — el valor de acento está pensado para pintarse sobre
+     superficie clara. `--ds-accent-ink` es la variante segura para texto;
+     en claro es el acento tal cual (ya pasa AA sobre --surface-0/1), en
+     oscuro se aclara con `color-mix()` (SD-190) en vez de escribir una
+     segunda tabla de siete hex a mano. Los consumidores de esto (p.ej.
+     `.ds-kw-badge`, `.ds-compartido-modulo`) viven fuera de mi zona; quedan
+     anotados en _BUZON.md para que cambien `color: var(--ds-accent)` por
+     `color: var(--ds-accent-ink)`. */
+  --ds-accent-ink:   var(--ds-accent);
 }
+
+body.dark-mode { --ds-accent-ink: color-mix(in oklab, var(--ds-accent) 62%, white); }
 
 body[data-accent="accent-teal"]    { --ds-accent:#0d7377; --ds-accent-hover:#095e61; --ds-accent-light:#c4eef0; --ds-accent-rgb:13,115,119; }
 body[data-accent="accent-emerald"] { --ds-accent:#1a7f4b; --ds-accent-hover:#125835; --ds-accent-light:#c6edd8; --ds-accent-rgb:26,127,75; }
 body[data-accent="accent-crimson"] { --ds-accent:#c62828; --ds-accent-hover:#951d1d; --ds-accent-light:#fcd5d5; --ds-accent-rgb:198,40,40; }
-body[data-accent="accent-amber"]   { --ds-accent:#b7791f; --ds-accent-hover:#8f5e17; --ds-accent-light:#fef3c7; --ds-accent-rgb:183,121,31; }
+body[data-accent="accent-amber"]   { --ds-accent:#b7791f; --ds-accent-hover:#8f5e17; --ds-accent-light:#fef3c7; --ds-accent-rgb:183,121,31; --ds-accent-on:#212529; }
 body[data-accent="accent-purple"]  { --ds-accent:#7c3aed; --ds-accent-hover:#5b21b6; --ds-accent-light:#ede9fe; --ds-accent-rgb:124,58,237; }
 body[data-accent="accent-rose"]    { --ds-accent:#be185d; --ds-accent-hover:#9d174d; --ds-accent-light:#fce7f3; --ds-accent-rgb:190,24,93; }
 body[data-accent="accent-slate"]   { --ds-accent:#475569; --ds-accent-hover:#334155; --ds-accent-light:#e2e8f0; --ds-accent-rgb:71,85,105; }
+
+/* --ds-panel-item-bg (SD-012): la tarjeta de estilo (línea ~3562 más abajo)
+   la consumía con un valor de respaldo porque el token nunca se declaraba
+   —una indirección que aparentaba ser configurable y no lo era—. Se define
+   aquí como alias de la superficie 3 (cabecera de tarjeta sobre superficie 1,
+   SD-004/L0), que es el mismo gris que traía el respaldo (#f0f4f8 ~= --gray-100
+   sobre --surface-1). El bloque `body.dark-mode .ds-style-card` de la línea
+   ~2876 (fuera de mi zona) sigue fijando su propio fondo oscuro con
+   `!important`, así que este token gobierna sólo el modo claro por ahora. */
+:root { --ds-panel-item-bg: var(--surface-3, #f0f4f8); }
 
 /* ============================================================
    1. GLASSMORPHISM
@@ -3224,8 +3730,11 @@ body:not(.dark-mode)[data-style="glassmorphism"] {
 body[data-style="glassmorphism"] .card,
 body[data-style="glassmorphism"] .ds-item-card {
   background: rgba(255,255,255,0.09) !important;
-  backdrop-filter: blur(18px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  /* SD-221: 28px/18px de desenfoque por tarjeta es una capa de composición
+     cara repetida en cada una; 10px conserva el efecto de vidrio esmerilado
+     con un coste de repintado mucho menor en listas largas. */
+  backdrop-filter: blur(10px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
   border: 1px solid rgba(255,255,255,0.16) !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.14) !important;
   border-radius: 18px !important;
@@ -3602,11 +4111,19 @@ body[data-style="liquid-glass"] .custom-select {
    modos. Los gráficos leen estos tokens en runtime, así que el tema oscuro y los
    temas de color no requieren una segunda tabla de colores en JS.
    ========================================================================== */
+/* SD-013: --viz-surface/--viz-ink/--viz-ink-muted/--viz-grid eran la única
+   capa semántica de superficie/tinta/borde del sistema, atrapada en los
+   gráficos. Ahora son alias de los tokens de sistema que L0 definió al
+   principio del archivo (--surface-1/--text/--text-muted/--border) — con
+   los mismos valores exactos en claro y oscuro, así que esto no cambia nada
+   visualmente — para que `viz-tokens.js` siga leyendo el mismo nombre sin
+   tocarlo. Los slots --viz-1…--viz-8 NO se tocan: su orden está validado
+   contra daltonismo y es un mecanismo de seguridad (ver CLAUDE.md). */
 :root {
-  --viz-surface:    #ffffff;
-  --viz-ink:        #212529;
-  --viz-ink-muted:  #6c757d;
-  --viz-grid:       #e6e6e2;
+  --viz-surface:    var(--surface-1);
+  --viz-ink:        var(--text);
+  --viz-ink-muted:  var(--text-muted);
+  --viz-grid:       var(--border);
   --viz-axis:       #c3c2b7;
   --viz-1: #2a78d6;  --viz-2: #eb6834;  --viz-3: #1baf7a;  --viz-4: #eda100;
   --viz-5: #e87ba4;  --viz-6: #008300;  --viz-7: #4a3aa7;  --viz-8: #e34948;
@@ -3614,37 +4131,64 @@ body[data-style="liquid-glass"] .custom-select {
   --viz-serious: #ec835a;  --viz-critical: #d03b3b;
 }
 body.dark-mode {
-  --viz-surface:    #23272f;
-  --viz-ink:        #e0e4ee;
-  --viz-ink-muted:  #7880a0;
-  --viz-grid:       #2e3342;
+  --viz-surface:    var(--surface-1);
+  --viz-ink:        var(--text);
+  --viz-ink-muted:  var(--text-muted);
+  --viz-grid:       var(--border);
   --viz-axis:       #3e4660;
   --viz-1: #3987e5;  --viz-2: #d95926;  --viz-3: #199e70;  --viz-4: #c98500;
   --viz-5: #d55181;  --viz-6: #008300;  --viz-7: #9085e9;  --viz-8: #e66767;
 }
 
-/* Rejilla de KPIs: se reacomoda sola en cualquier ancho, sin col-* que cuadrar */
+/* SD-014: theme-manila es el único de los once temas que cambia el fondo de
+   página (.content-wrapper -> #f5ead0, ver línea ~1603); sin esto la tarjeta
+   de gráfico se recortaba en blanco sobre el crema. Los otros nueve temas
+   sólo cambian barra lateral/acento (SD-033) y dejan el fondo de página en
+   blanco, así que --viz-surface blanco ya es coherente ahí — no se les añade
+   una redefinición sin un caso real que la justifique (ver nota en
+   _BUZON.md). */
+body.theme-manila {
+  --viz-surface: #fdf6e3;
+  --viz-grid:    #e0d3ad;
+}
+
+/* Rejilla de KPIs: se reacomoda sola en cualquier ancho, sin col-* que cuadrar.
+   SD-193: container-type la convierte en contenedor de tamaño — así el tamaño
+   de cifra de cada `.ds-kpi-mini` (más abajo) puede depender del ancho real de
+   su celda dentro de la rejilla `auto-fit`, no del ancho de la pantalla. El
+   reflujo de columnas en sí (cuántas caben) sigue siendo un `@media`: eso es
+   ancho de viewport de verdad, no ancho de contenedor. */
 .ds-kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
   gap: 0.75rem;
+  container-type: inline-size;
+  container-name: ds-kpi-grid;
 }
 .ds-kpi-grid .ds-kpi-mini { margin-bottom: 0; height: 100%; }
 @media (max-width: 400px) {
   .ds-kpi-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+}
+@container ds-kpi-grid (max-width: 400px) {
   .ds-kpi-mini h3 { font-size: 1.1rem !important; }
 }
 
 /* Contenedor de gráfico: Chart.js con maintainAspectRatio:false toma la altura
-   del padre, así que aquí se fija explícitamente. */
+   del padre, así que aquí se fija explícitamente.
+   SD-194: en vez de tres alturas fijas sin relación entre sí, una proporción
+   por `aspect-ratio` (con `min-height` como piso para columnas muy angostas o
+   contenedores muy bajos, donde una proporción pura dejaría el gráfico
+   ilegible). Las proporciones están calculadas para reproducir la altura
+   original sobre el ancho típico de columna en cada punto de corte. */
 .ds-chart-box {
   position: relative;
-  height: 268px;
+  aspect-ratio: 5 / 3;
+  min-height: 200px;
 }
-.ds-chart-box-wide { height: 200px; }
+.ds-chart-box-wide { aspect-ratio: 7 / 2; min-height: 160px; }
 @media (max-width: 575.98px) {
-  .ds-chart-box      { height: 300px; }   /* la leyenda pasa abajo y necesita aire */
-  .ds-chart-box-wide { height: 210px; }
+  .ds-chart-box      { aspect-ratio: 6 / 5; }   /* la leyenda pasa abajo y necesita aire */
+  .ds-chart-box-wide { aspect-ratio: 8 / 5; }
 }
 .ds-chart-box > canvas { max-width: 100%; }
 
@@ -3690,7 +4234,16 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
    Duraciones cortas y salidas suaves: el movimiento aquí sirve para explicar de
    dónde viene el contenido, no para decorar. Todo se apaga con la preferencia
    del sistema o con el interruptor de la app.
+
+   Duraciones y curva salen de los tokens de L0 (--duration-fast/base/slow,
+   --ease-out/--ease-spring, definidos al principio de este archivo): SD-017 y
+   SD-173 piden que ninguna transición de esta capa escriba un número de
+   milisegundos suelto. --ds-stagger-step es el único token propio de este
+   bloque: el paso del escalonado de entrada (SD-175), para que las once
+   demoras salgan de un solo valor en vez de ser once números sueltos.
    ========================================================================== */
+
+:root { --ds-stagger-step: 22ms; }
 
 @keyframes ds-rise {
   from { opacity: 0; transform: translateY(6px); }
@@ -3701,49 +4254,117 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   to   { opacity: 1; }
 }
 
-/* Entrada del contenido al cambiar de pestaña en el panel de administración. */
-.tab-pane.show.active { animation: ds-rise .22s ease-out both; }
+/* Entrada del contenido al cambiar de pestaña en el panel de administración.
+   SD-181: el panel entrante subía y el saliente desaparecía de golpe, con
+   paneles de altura muy distinta el salto se notaba. Donde el navegador
+   soporta `@starting-style` + `transition-behavior: allow-discrete` (SD-202),
+   la pestaña cruza con una transición real en vez de una animación que se
+   queda "aplicada" para siempre; donde no hay soporte, sigue con la animación
+   de antes. */
+.tab-pane.show.active { animation: ds-rise var(--duration-base) var(--ease-out) both; }
+@supports (transition-behavior: allow-discrete) {
+  .tab-pane.show.active {
+    animation: none;
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-out),
+                display var(--duration-base) allow-discrete;
+  }
+  @starting-style {
+    .tab-pane.show.active { opacity: 0; }
+  }
+}
 
 /* Resultados de búsqueda y filas de tablas: aparición escalonada.
    El escalonado se corta a los 12 primeros — más allá, la espera acumulada se
    nota más que el efecto. */
 .ds-item-card,
 .ds-monitor-row {
-  animation: ds-rise .26s ease-out both;
+  animation: ds-rise var(--duration-slow) var(--ease-out) both;
 }
-.ds-item-card:nth-child(1),  .ds-monitor-row:nth-child(1)  { animation-delay: 0ms; }
-.ds-item-card:nth-child(2),  .ds-monitor-row:nth-child(2)  { animation-delay: 22ms; }
-.ds-item-card:nth-child(3),  .ds-monitor-row:nth-child(3)  { animation-delay: 44ms; }
-.ds-item-card:nth-child(4),  .ds-monitor-row:nth-child(4)  { animation-delay: 66ms; }
-.ds-item-card:nth-child(5),  .ds-monitor-row:nth-child(5)  { animation-delay: 88ms; }
-.ds-item-card:nth-child(6),  .ds-monitor-row:nth-child(6)  { animation-delay: 110ms; }
-.ds-item-card:nth-child(7),  .ds-monitor-row:nth-child(7)  { animation-delay: 132ms; }
-.ds-item-card:nth-child(8),  .ds-monitor-row:nth-child(8)  { animation-delay: 154ms; }
-.ds-item-card:nth-child(9),  .ds-monitor-row:nth-child(9)  { animation-delay: 176ms; }
-.ds-item-card:nth-child(10), .ds-monitor-row:nth-child(10) { animation-delay: 198ms; }
-.ds-item-card:nth-child(11), .ds-monitor-row:nth-child(11) { animation-delay: 220ms; }
-.ds-item-card:nth-child(n+12), .ds-monitor-row:nth-child(n+12) { animation-delay: 242ms; }
+.ds-item-card:nth-child(1),  .ds-monitor-row:nth-child(1)  { animation-delay: calc(var(--ds-stagger-step) * 0); }
+.ds-item-card:nth-child(2),  .ds-monitor-row:nth-child(2)  { animation-delay: calc(var(--ds-stagger-step) * 1); }
+.ds-item-card:nth-child(3),  .ds-monitor-row:nth-child(3)  { animation-delay: calc(var(--ds-stagger-step) * 2); }
+.ds-item-card:nth-child(4),  .ds-monitor-row:nth-child(4)  { animation-delay: calc(var(--ds-stagger-step) * 3); }
+.ds-item-card:nth-child(5),  .ds-monitor-row:nth-child(5)  { animation-delay: calc(var(--ds-stagger-step) * 4); }
+.ds-item-card:nth-child(6),  .ds-monitor-row:nth-child(6)  { animation-delay: calc(var(--ds-stagger-step) * 5); }
+.ds-item-card:nth-child(7),  .ds-monitor-row:nth-child(7)  { animation-delay: calc(var(--ds-stagger-step) * 6); }
+.ds-item-card:nth-child(8),  .ds-monitor-row:nth-child(8)  { animation-delay: calc(var(--ds-stagger-step) * 7); }
+.ds-item-card:nth-child(9),  .ds-monitor-row:nth-child(9)  { animation-delay: calc(var(--ds-stagger-step) * 8); }
+.ds-item-card:nth-child(10), .ds-monitor-row:nth-child(10) { animation-delay: calc(var(--ds-stagger-step) * 9); }
+.ds-item-card:nth-child(11), .ds-monitor-row:nth-child(11) { animation-delay: calc(var(--ds-stagger-step) * 10); }
+.ds-item-card:nth-child(n+12), .ds-monitor-row:nth-child(n+12) { animation-delay: calc(var(--ds-stagger-step) * 11); }
+
+/* SD-198/SD-176: `animation-fill-mode: both` deja la regla de arriba
+   "aplicada" para siempre, así que cada repintado de la lista (paginar,
+   filtrar, ordenar, cambiar de pestaña) hace que las mismas filas vuelvan a
+   entrar. Donde el navegador soporta `@starting-style`, se sustituye por una
+   transición que sólo se dispara cuando el elemento aparece de verdad — se
+   inserta en el árbol o pasa de no representado a representado — y no cuando
+   uno que ya estaba ahí simplemente se reordena o se vuelve a pintar. */
+@supports (transition-behavior: allow-discrete) {
+  .ds-item-card,
+  .ds-monitor-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--duration-slow) var(--ease-out),
+                transform var(--duration-slow) var(--ease-out);
+  }
+  @starting-style {
+    .ds-item-card,
+    .ds-monitor-row {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+}
 
 /* Tarjetas KPI: entran juntas, sin escalonar — son una sola lectura. */
-.ds-kpi-grid .ds-kpi-mini { animation: ds-fade .3s ease-out both; }
+.ds-kpi-grid .ds-kpi-mini { animation: ds-fade var(--duration-base) var(--ease-out) both; }
+@supports (transition-behavior: allow-discrete) {
+  .ds-kpi-grid .ds-kpi-mini {
+    animation: none;
+    opacity: 1;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+  @starting-style {
+    .ds-kpi-grid .ds-kpi-mini { opacity: 0; }
+  }
+}
 
-/* Realce al pasar por encima de lo que es accionable. */
+/* Realce al pasar por encima de lo que es accionable.
+   SD-184: la salida es más corta que la entrada — es lo que hace que responda
+   rápido sin dejar de suavizar la llegada. La transición del selector base
+   gobierna la vuelta al reposo (se aplica al salir del hover); la de
+   `:hover` gobierna la llegada, deliberadamente más lenta. */
 .ds-item-card {
-  transition: transform .15s ease-out, box-shadow .15s ease-out;
+  transition: transform var(--duration-fast) ease-out, box-shadow var(--duration-fast) ease-out;
 }
 .ds-item-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
 }
-.ds-kpi-mini { transition: transform .15s ease-out, box-shadow .15s ease-out; }
-.ds-kpi-mini:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.09); }
+.ds-kpi-mini { transition: transform var(--duration-fast) ease-out, box-shadow var(--duration-fast) ease-out; }
+.ds-kpi-mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+}
 
-/* Botones: respuesta táctil al pulsar. */
-.btn { transition: background-color .15s, border-color .15s, box-shadow .15s, transform .08s; }
-.btn:active:not(:disabled) { transform: translateY(1px); }
+/* Botones: respuesta táctil al pulsar.
+   SD-159: el estado desactivado no siempre es el `:disabled` nativo — algunos
+   controles siguen en el DOM marcados sólo con `aria-disabled="true"`. Ambos
+   quedan excluidos de la respuesta al pulsar, no sólo el primero. */
+.btn { transition: background-color var(--duration-base), border-color var(--duration-base), box-shadow var(--duration-base), transform var(--duration-fast); }
+.btn:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(1px); }
 
 /* La preferencia del sistema pesa tanto como el interruptor de la app: hasta
-   ahora sólo la respetaba una regla suelta. */
+   ahora sólo la respetaba una regla suelta. `animation-iteration-count: 1`
+   corta cualquier animación `infinite` a una sola vuelta casi instantánea
+   (0.01ms), así que ninguna queda latiendo para siempre bajo esta preferencia
+   (SD-179) — las que además necesitan quedarse quietas del todo, no sólo
+   rápidas, llevan su propia regla junto a su animación (ver `.ds-status-revision`). */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -3751,6 +4372,17 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* SD-202: transición de vista para la navegación entre las siete páginas del
+   sistema, que hoy son recargas completas y secas. El cambio de pestaña (ya
+   tratado arriba) y el cambio de tema podrían cruzar también con
+   `document.startViewTransition`, pero eso exige que `admin.js` y
+   `app-theme.js` inicien la transición desde JavaScript — fuera de esta hoja
+   y de este carril; anotado en docs/auditoria/_BUZON.md. Esta regla no
+   necesita JavaScript y degrada a nada donde no hay soporte. */
+@view-transition {
+  navigation: auto;
 }
 
 /* La barra superior no cabía en pantallas angostas: la credencial completa más
@@ -3812,18 +4444,29 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 .ds-filter-card > .card-header .card-title i { color: var(--viz-ink-muted); }
 
 /* =============================================================================
-   INFO-BOX
+   INFO-BOX Y TARJETA KPI
    El marcado usa el componente info-box de AdminLTE, pero AdminLTE nunca se
    carga (solo Bootstrap): las cajas salian sin estructura, con el fondo del
    icono ocupando el ancho completo y el texto encima, ilegible. Aqui se
    implementa el componente con los tokens propios.
-   ========================================================================== */
+
+   SD-151: info-box y .ds-kpi-mini son el mismo componente resuelto dos veces
+   («etiqueta + cifra + icono»), pero unificar la clase exige tocar el
+   marcado de otros carriles (admin_*.html, hr.js, archive.js) que este lote
+   no toca (regla 1 del plan paralelo). Decisión conservadora: no se fusiona
+   la clase; se alinean sus valores compartidos (radio, versalitas, cifras
+   tabulares, tipografía fluida) para que ambos lean como un solo sistema sin
+   cambiar el resultado visual de ninguno de los dos salvo donde una ficha
+   pide explícitamente el cambio (SD-065, SD-074, SD-192). Las definiciones
+   duplicadas de .ds-kpi-label/.ds-kpi-value fuera de este rango (fuera de
+   L14, SD-071/SD-072) quedan anotadas en _BUZON.md para quien tenga ese
+   archivo en su carril. */
 .info-box {
   display: flex;
   align-items: stretch;
   min-height: 62px;
   margin-bottom: 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md, 0.5rem); /* SD-096: mismo radio que la tarjeta KPI */
   background: var(--viz-surface);
   border: 1px solid var(--viz-grid);
   overflow: hidden;
@@ -3850,7 +4493,7 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 .info-box-text {
   font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: .02em;
+  letter-spacing: var(--letter-spacing-wide, .04em); /* SD-074: misma calibración de versalitas que .ds-kpi-label */
   text-transform: uppercase;
   color: var(--viz-ink-muted);
   white-space: nowrap;
@@ -3858,11 +4501,22 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   text-overflow: ellipsis;
 }
 .info-box-number {
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); /* SD-192: tipografía fluida */
   font-weight: 700;
   line-height: 1.15;
   color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
 }
+
+/* SD-082: cifra vacía/nula/cero — no se pinta igual que un dato real. Otros
+   carriles (tabla, dosier, ficha) aplican esta clase a su propio marcado;
+   aquí sólo se define, porque su ficha sólo etiqueta L14. */
+.ds-nulo {
+  color: var(--viz-ink-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+.ds-nulo:empty::before { content: "\2014"; } /* guión largo cuando no hay texto */
 
 /* Las utilidades bg-* teñian la caja entera de color saturado. El color pasa al
    cuadro del icono: la cifra se lee sobre superficie neutra, igual que en los
@@ -3928,7 +4582,7 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 .ds-kpi-label {
   font-size: 0.66rem !important;
   font-weight: 700;
-  letter-spacing: .03em;
+  letter-spacing: var(--letter-spacing-wide, .04em); /* SD-074: misma calibración que .info-box-text */
   text-transform: uppercase;
   color: var(--viz-ink-muted);
   margin-bottom: 2px;
@@ -3939,11 +4593,12 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   align-items: flex-start;
 }
 .ds-kpi-value {
-  font-size: 1.35rem !important;
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.35rem) !important; /* SD-192: tipografía fluida */
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
   color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
 }
 .ds-kpi-sub {
   font-size: 0.68rem;
@@ -4068,6 +4723,9 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 }
 .ds-compartido-caja {
   flex: 1;
+  /* Sin medida de línea máxima, un resumen largo llega a 180 caracteres por
+     línea en una pantalla ancha. 70ch es el máximo legible en prosa (SD-066). */
+  max-width: 70ch;
   background: var(--viz-surface);
   border: 1px solid var(--viz-grid);
   border-radius: 12px;
@@ -4139,6 +4797,16 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   .ds-compartido-titulo { font-size: 1.15rem; }
 }
 
+/* Es la vista que ve alguien de fuera de la institución y la que más
+   probablemente acabe en papel o en PDF. Sin esto sale con el min-height:
+   100dvh del contenedor (una página en blanco al final) y con el botón de
+   descarga incluido (SD-234). */
+@media print {
+  .ds-compartido-wrap { min-height: 0; padding: 0; }
+  .ds-compartido-caja { box-shadow: none; border: none; max-width: none; }
+  .ds-compartido-acciones { display: none; }
+}
+
 /* El buscador de auditoría iba con w-25, que en móvil deja un campo de 90px
    inservible. */
 .ds-audit-buscador { width: 260px; max-width: 100%; }
@@ -4184,7 +4852,7 @@ body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
 .ds-skip-link {
   position: absolute;
   left: 12px;
-  top: -60px;
+  top: 0;
   z-index: 2000;
   padding: 10px 18px;
   background: var(--ds-accent);
@@ -4192,13 +4860,36 @@ body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
   font-weight: 700;
   border-radius: 0 0 8px 8px;
   text-decoration: none;
-  transition: top .16s ease-out;
+  /* transform en vez de top: animar top fuerza layout en cada fotograma
+     (SD-185); translateY solo compone. */
+  transform: translateY(-100%);
+  transition: transform .16s ease-out;
 }
 .ds-skip-link:focus {
-  top: 0;
+  transform: translateY(0);
   color: #fff;
   outline: 3px solid #fff;
   outline-offset: -6px;
 }
 /* El destino recibe el foco por script; su contorno no aporta nada. */
 #contenido-principal:focus { outline: none; }
+
+/* La barra superior aún no es fija, pero el enlace de salto y las anclas de
+   ayuda.html apuntan aquí: en cuanto se haga pegajosa, un scroll normal la
+   dejaría tapada. scroll-margin-top ya está listo para ese día (SD-108). */
+#contenido-principal, :target { scroll-margin-top: 1rem; }
+
+/* :target no se usaba: quien llega por una ancla de ayuda.html no tenía
+   ninguna señal de a qué sección llegó (SD-161). Resalte temporal, se apaga
+   solo y respeta el interruptor de movimiento reducido. */
+:target {
+  animation: ds-target-flash 2.4s ease-out;
+}
+@keyframes ds-target-flash {
+  0%   { background-color: rgba(var(--ds-accent-rgb), .16); }
+  100% { background-color: transparent; }
+}
+body.ds-no-anim :target { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  :target { animation: none; }
+}

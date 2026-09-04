@@ -932,3 +932,36 @@ git de `agente-c8b-backup` entre mi `git add` y su `git commit`. Verificado con
 `git diff be77391 -- app/routes/admin/imports.py app/tests/test_imports.py` (sin
 diferencias contra mi copia local) y con `python -m pytest app/tests -q` en verde
 (713 passed) después del commit. No reparo el historial.
+
+## L10-estilos — SD-105, SD-121, SD-128, SD-215, SD-218
+
+Lote pequeño: zona "RESPONSIVE ADMIN PANELS" de `app/static/styles.css` (~3105-3217 tras
+L0-tokens; era ~2873-2965 antes de que L0 añadiera 231 líneas al principio).
+
+Hecho, dentro de mi zona:
+- **SD-215** (reglas muertas): confirmado con `grep` sobre `app/` que `.ds-dossier-part-header`
+  y `.ds-table-sticky-col` no aparecen en ningún HTML/JS del proyecto, sólo en `styles.css`.
+  Borradas ambas reglas (y el `@media` que sólo contenía la segunda).
+- **SD-105** (padding de tarjeta con `!important` cruzado, cuatro puntos de declaración):
+  tokenizado el de mi zona — `.card-body { padding: var(--space-3) !important; }` en vez de
+  `0.75rem` suelto — y dejado un comentario señalando los otros dos puntos (`styles.css:355`
+  [L2], `~2828-2837` [L9]) para cuando se unifiquen en un solo punto real.
+- **SD-128** (modal sin componente propio): la parte de mi zona ya resolvía el caso móvil
+  (`.modal-xl`/`.modal-lg` a pantalla completa bajo 575px, `.modal-footer` con wrap); no
+  necesitó cambios, se deja como referencia de que el comportamiento responsive ya existía.
+
+No hecho, fuera de mi zona real (documentado, no tocado):
+- **SD-121** (componente de tabla con variantes: densidad, columna numérica, fila
+  seleccionable, cebra, cabecera pegajosa) es una ficha `L` que toca `styles.css:1759-1776`,
+  `2201-2209`, `2714-2721` — fuera de mi rango de líneas (L6/L7/L9 también listados en la
+  ficha). Mi zona sólo tenía la parte muerta (`.ds-table-sticky-col`, ya borrada por SD-215)
+  y el wrapper de scroll (`.ds-table-wrap`), que ya estaba bien.
+- **SD-218** (selectores atados a columnas de Bootstrap): en mi zona sólo aparecen
+  `.ds-submit-form .col-md-6/-4/-8` (dos reglas, una por breakpoint). El arreglo real es
+  clases semánticas en el marcado (`admin_archive.html`/`admin_hr.html`, carril `LH`, fuera
+  de mi alcance) — no invento una clase CSS nueva sin que exista quien la use en el HTML.
+  Dejo la nota aquí para cuando `LH-paginas` reestructure esos formularios.
+
+`python -m pytest app/tests -q` → 713 passed antes y después del cambio.
+
+**quién lo pide**: agente-l10-estilos (L10-estilos)
