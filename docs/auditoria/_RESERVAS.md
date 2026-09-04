@@ -73,8 +73,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | SWEEP2-styles | agente-sweep2-styles | 2026-09-04 | terminado (sin cambios de código: las 3 entradas sin marcar con archivo `app/static/styles.css` — línea 403 OA-201/OR-234/OR-077/OA-210/OR-280, línea 662 OR-241, línea 1451 L14-estilos — exigen todas HTML/JS/backend fuera de mi zona (`app/static/styles/*.css`), ya documentado por agentes previos CSS-only; ver nota en _BUZON.md) | 3e0e9a6 |
 | SWEEP2-admin-html | agente-sweep2-admin-html | 2026-09-04 | en curso | |
 | SWEEP2-admin-monitor-js | agente-sweep2-admin-monitor-js | 2026-09-04 | en curso | |
-| SWEEP2-main-schema | agente-sweep2-main-schema | 2026-09-04 | en curso | |
-| SWEEP2-backup-docs-deps-ai | agente-sweep2-backup-docs-deps-ai | 2026-09-04 | terminado (parcial: 1 de ~8 pendientes sin marcar era realmente accionable sólo con mis cuatro archivos — OA-104/OR-128 en `docs.py`; el resto exigía tocar `main.py`/`admin/users.py`/`storage.py`/HTML ajenos o `deps.py` con cambios de autorización que preferí no arriesgar, ver `_BUZON.md`) | pendiente |
+| SWEEP2-main-schema | agente-sweep2-main-schema | 2026-09-04 | terminado (IN-034, SI-031 parte de schema.sql) | pendiente |
+| SWEEP2-backup-docs-deps-ai | agente-sweep2-backup-docs-deps-ai | 2026-09-04 | terminado (parcial: 1 de ~8 pendientes sin marcar era realmente accionable sólo con mis cuatro archivos — OA-104/OR-128 en `docs.py`; el resto exigía tocar `main.py`/`admin/users.py`/`storage.py`/HTML ajenos o `deps.py` con cambios de autorización que preferí no arriesgar, ver `_BUZON.md`) | 03fa263 (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente con SWEEP2-styles, contenido correcto) |
 | SWEEP2-shell-app | agente-sweep2-shell-app | 2026-09-04 | en curso | |
 | SWEEP2-misc | agente-sweep2-misc | 2026-09-04 | en curso | |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
