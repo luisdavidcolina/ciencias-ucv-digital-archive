@@ -41,7 +41,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | F2-cascara | agente-f2-cascara | 2026-09-03 | terminado | 251a141 |
 | E2-escaner-cliente | agente-e2-escaner-cliente | 2026-09-03 | terminado | 56e7be0725f24bdf4e61442b57eb0525b0f26fa |
 | H3-pruebas-legacy | agente-h3b-legacy-fixtures | 2026-09-03 | terminado | a4d7913 (test_admin.py en b1793c2) |
-| C5-importaciones | agente-c5b-importaciones | 2026-09-03 | en curso | |
+| C5-importaciones | agente-c5b-importaciones | 2026-09-03 | terminado | be77391 (ver nota en _BUZON.md: commit ajeno de agente-c8b-backup que arrastró imports.py y test_imports.py por una carrera de git concurrente; contenido correcto, verificado con git diff y pytest en verde) |
 | C8-backup | agente-c8b-backup | 2026-09-03 | terminado | f989f19 |
 | BR-109 | agente-br109-dossier-estilos | 2026-09-03 | terminado | 6284460 |
 | L0-tokens | agente-l0-tokens | 2026-09-03 | terminado | 3b6e18b (ver nota en _BUZON.md: commit ajeno de agente-h2-app-js que arrastró mi styles.css por una carrera de git concurrente; contenido correcto, verificado con git show) |
