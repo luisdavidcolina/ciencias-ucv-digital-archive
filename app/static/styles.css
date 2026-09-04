@@ -1,3 +1,12 @@
+/* SD-187: Bootstrap se importa en su propia capa para que la capa `app`
+   (todo lo que sigue) le gane por orden de capa, no por especificidad ni
+   por `!important`. Va antes de cualquier otra regla porque `@import` sólo
+   es válido al principio del archivo. */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css") layer(bootstrap);
+@layer bootstrap, app;
+
+@layer app {
+
 /* ==========================================================================
    SISTEMA DE TOKENS (L0) — agente-l0-tokens, SD-001 a SD-030 (sistema-diseno.md)
    ==========================================================================
@@ -5197,4 +5206,5 @@ body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
 body.ds-no-anim :target { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   :target { animation: none; }
+}
 }
