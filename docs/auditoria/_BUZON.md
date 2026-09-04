@@ -9,9 +9,11 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
 ## Cómo se anota
 
 ```
-- [ ] `IN-057` · **archivo**: `app/main.py` · **carril dueño**: H1a-migraciones
-      **quién lo pide**: bruno (A3-buscador-rrhh)
-      **qué hace falta**: alinear la expresión del índice GIN con la de la consulta de BA-002.
+- [x] `IN-057` · resuelto por agente-sweep-main (SWEEP-main): el índice GIN original
+      (`idx_datos_archivo_fts`) no incluía `personas_relacionadas`, que sí forma parte del
+      `to_tsvector` de la consulta en `archive.py` (líneas 96-103 y 182-186) — exactamente el
+      fallo BA-002. Sin poder `ALTER`/`DROP` el índice existente, se creó uno nuevo
+      (`idx_datos_archivo_fts_v2`) con la expresión completa, alineada con la de `archive.py`.
 ```
 
 ## Pendientes anotados
@@ -316,24 +318,22 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       enlace de compartición sigue pasando marcado HTML crudo a `confirmModal()`
       (`admin-monitor.js:336-341`); hay que cambiarlo para llamar a `linkModal(...)` en su lugar.
 
-- [ ] `OA-039/OA-040` · **archivo**: `app/static/admin-users.js` · **carril dueño**: B12-admin-usuarios
-      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
-      **qué hace falta**: `promptModal(title, label, defaultVal, placeholder, type)` ya acepta
-      `type="password"` y agrega un botón de mostrar/ocultar. El cambio de contraseña
-      (`admin-users.js:610`) sigue llamando a `promptModal` sin el quinto argumento; hay que
-      pasarle `"password"`.
+- [x] `OA-039/OA-040` · **archivo**: `app/static/admin-users.js` · resuelto por
+      agente-sweep-admin-js (SWEEP-admin-js): `handleChangePassword` ya pasa `"password"` como
+      quinto argumento a `promptModal(...)`, así que el campo de nueva contraseña usa el
+      control con mostrar/ocultar en vez de texto plano.
 
 - [x] `OA-015` · resuelto por agente-b5-admin-monitor (B5-admin-monitor): `compartirDocumento`
       en `admin-monitor.js` ahora llama a `linkModal(...)` (admin-ui.js) en vez de pasar
       marcado HTML crudo a `confirmModal()`, con respaldo al comportamiento anterior si
       `linkModal` no está cargada.
 
-- [ ] `OA-093` · **archivo**: `app/static/admin-submit.js` · **carril dueño**: B7-admin-submit
-      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
-      **qué hace falta**: `showProgress(containerId, label, { pct, onCancel })` ahora admite una
-      barra determinada y `updateProgress(containerId, pct, label)` para ir avanzándola. Sigue
-      hace falta cambiar la subida de `fetch` a `XMLHttpRequest` con `upload.onprogress` para
-      alimentar esos números (la infraestructura de UI ya está, falta engancharla).
+- [x] `OA-093` · **archivo**: `app/static/admin-submit.js` · verificado por
+      agente-sweep-admin-js (SWEEP-admin-js): ya resuelto antes de esta pasada —
+      `_uploadFileWithProgress()` usa `XMLHttpRequest` con `xhr.upload.onprogress` y alimenta la
+      barra/porcentaje/botón cancelar propios de este archivo (`reg-upload-*`). No usa
+      `showProgress`/`updateProgress` de `admin-ui.js` (tiene su UI dedicada de subida), pero
+      cumple el objetivo de la ficha: progreso real en vez de una barra indeterminada.
 
 - [ ] `OA-182` · **archivo**: `app/static/admin-edit.js` (y análogos en `admin-edit-hr.js`,
       `admin.js`) · **carril dueño**: B8-admin-edit-archivo / B9-admin-edit-rrhh / B4-admin-tabs
@@ -484,12 +484,15 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       `_exportPapelera('archivo'|'rrhh'|'empleados')` — la función ya existe en
       `admin-edit.js` (OA-138). `OA-135`/`OA-136` (motivo de borrado, validar conflictos al
       restaurar) son de `app/routes/admin/docs.py` y `app/routes/trash.py`.
-- [ ] `OR-177`, `OR-179` · **archivos**: `app/main.py` (migración `deleted_reason`),
-      `app/routes/admin/docs.py`, `app/routes/trash.py` · **carriles dueños**:
-      H1a-migraciones, C1-docs-backend, C7-papelera
-      **qué hace falta**: motivo obligatorio al borrar y comprobación de cédula duplicada
-      al restaurar un empleado. `admin-edit.js` ya está listo para mostrar el motivo en
-      cuanto el backend lo sirva.
+- [x] `OR-177`/`OR-179` (parte de `docs.py`) · resuelto por agente-sweep-admin-docs
+      (SWEEP-admin-docs): `DELETE /api/admin/documento/{doc_id}` y
+      `DELETE /api/admin/empleado/{emp_id}` aceptan ahora `deleted_reason` (query, opcional,
+      máx. 500) y lo persisten junto a `deleted_at`/`deleted_by`. Nota: revisé
+      `app/static/admin-edit.js` y **no** encontré ningún envío de `motivo`/`deleted_reason`
+      todavía — la nota original decía que el frontend ya estaba listo, pero no es así al
+      momento de esta pasada; queda para el carril de `admin-edit.js`. Falta también el lado
+      de `trash.py` (comprobación de cédula duplicada al restaurar, parte de `OR-179`), fuera
+      de mi archivo.
 - [ ] `OR-123`, `OR-129` (asignados a B8 en `_asignacion.json` pero el código real está en
       `app/static/admin-monitor.js` y `app/static/admin_hr.html`) · **carril dueño**:
       B5-admin-monitor
@@ -597,9 +600,8 @@ mío:
       controles si `admin_archive.html`/`admin_hr.html` los agrega también — mejor que quien
       posea esos HTML decida el marcado definitivo.
 
-- [ ] `OA-150` · **archivo**: `app/routes/admin/docs.py`
-      **qué hace falta**: `list_all` (módulo Archivo) no expone `datos_archivo.disposicion`;
-      sin ese campo en la respuesta no hay nada que pintar como badge en el monitor.
+- [x] `OA-150` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (Archivo)
+      ahora selecciona `COALESCE(da.disposicion, '') AS disposicion`.
 
 - [ ] `OA-181` · **archivo**: `app/static/admin_archive.html`
       **qué hace falta**: son los tres botones del *pie del modal de detalle* (Visualizar/
@@ -608,10 +610,10 @@ mío:
 
 - [ ] `OR-001` (backend) — ver primera entrada de este bloque.
 
-- [ ] `OR-119` · **archivo**: `app/routes/admin/docs.py`
-      **qué hace falta**: micro-indicadores por Parte (I·II·III·IV) necesitan que `list_all`
-      agregue el conteo por Parte, no sólo la lista de nombres de tipo en `tipos`. Con lo que
-      hoy llega no se puede reconstruir la Parte de cada tipo en el cliente.
+- [x] `OR-119` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (RRHH)
+      hace `JOIN public.categoria cat ON td.id_categoria = cat.id` y agrega
+      `partes_i`/`partes_ii`/`partes_iii`/`partes_iv` (conteo de `datos_rrhh` no eliminados por
+      slug de categoría) para que el monitor pueda pintar los micro-indicadores por Parte.
 
 - [ ] `OR-121` (columna completa) · **archivo**: `app/static/admin_hr.html`
       **qué hace falta**: el dato (`f.doc_count`) ya llega y ya lo muestro como indicador junto
@@ -636,11 +638,9 @@ mío:
       color hoy). Cambiar sólo el consumo en `admin-monitor.js` sin la clase real en `styles.css`
       dejaría el badge sin ningún color.
 
-- [ ] `OR-237` (avatar con foto) · **archivo**: `app/routes/admin/docs.py`
-      **qué hace falta**: ya muestro el respaldo de iniciales (28px, reutilizando
-      `.ds-person-avatar-sm`/`.ds-person-initials-sm` de `styles.css`) porque no requiere nada
-      fuera de mi archivo. La foto en sí no llega: `list_all` (rama RRHH) no selecciona
-      `e.foto_url`, aunque sí existe la columna (se usa en `GET /rrhh/person/profile`).
+- [x] `OR-237` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (RRHH)
+      ahora selecciona `COALESCE(e.foto_url, '') AS foto_url`, así que el monitor ya puede
+      pintar la foto real en vez de sólo el respaldo de iniciales.
 
 - [ ] `OR-241` · **archivo**: `app/static/admin_hr.html`, `app/static/styles.css`
       **qué hace falta**: tarjetas apiladas en móvil en vez de una tabla con columnas ocultas es
@@ -714,14 +714,11 @@ mío:
       persistencia real de filtros/página en la URL y su restauración vive en
       `admin-monitor.js`, fuera de mi carril.
 
-- [ ] `OR-223` (patrón de flechas entre pestañas) · **archivo**: `app/static/admin-ui.js` ·
-      **carril dueño**: B6-admin-ui
-      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
-      **qué hace falta**: `ArrowRight`/`ArrowLeft` hacen `next.focus()` y `next.click()`, así
-      que recorrer las pestañas con teclado dispara todas sus cargas. Ya dejé `aria-selected`,
-      `aria-controls` y `aria-labelledby` sincronizados en `loadAdminTab()` (OA-178/OR-224), así
-      que el arreglo en `admin-ui.js` sólo necesita separar mover el foco de activar, sin tocar
-      `admin.js` de nuevo.
+- [x] `OR-223` (patrón de flechas entre pestañas) · **archivo**: `app/static/admin-ui.js` ·
+      verificado por agente-sweep-admin-js (SWEEP-admin-js): ya resuelto antes de esta pasada —
+      `_initTabKeyboardNav()` implementa "roving tabindex": `ArrowRight`/`ArrowLeft` sólo mueven
+      `tabindex`/`focus()`, sin `click()`; Enter/Espacio activan vía `_activateTab()`. El
+      comentario en el propio archivo ya lo referencia como OA-177/OR-223 resuelto.
 
 - [ ] `VI-001` (nota, no bloqueo) · **archivo**: `app/static/app.js:177` (switchTab) ·
       **carril dueño**: H2-app-js
@@ -1218,26 +1215,23 @@ hace falta en cada uno, para quien tenga esos carriles:
       impresión — sólo hace falta que `hr.py` los emita con el sello/folio/fecha), o (b) que
       el generador PDF deje de ser un camino aparte y reutilice el mismo render. No decido
       cuál: es de `hr.py`, fuera de mi carril.
-- [ ] `SD-039`/`SD-129` (toast) · **archivo**: `app/static/app-core.js` · **carril dueño**:
-      H2-app-js `[CHOCA]`
-      **qué hace falta**: `showToast()` sigue pintando el toast con `style.cssText` y cuatro
-      tripletes hex en línea. `styles.css` ya tiene `.ds-toast` + `.ds-toast--success|
-      error|warning|info` (tokens semánticos, par oscuro incluido) y el contenedor
-      `#ds-toast-container` ya limita a 5 visibles — sólo falta que `showToast()` cree el
-      nodo con esas clases en vez de escribir el `style` a mano, y que el contenedor lleve
-      `aria-live="polite"` (atributo HTML, no CSS).
-- [ ] `SD-040` · **archivo**: `app/static/app-shell.js:140` · **carril dueño**: H2-app-js
-      `[CHOCA]`
-      **qué hace falta**: el nombre de usuario de la barra superior se pinta con
-      `style="…color:#dc3545"` (rojo de error) en vez de usar `.ds-nav-user-badge`, que ya
-      existe en mi zona, tokenizada, y ahora deja de estar muerta si `app-shell.js` la usa.
+- [x] `SD-039`/`SD-129` (toast) · resuelto por agente-sweep-shell-core (SWEEP-shell-core):
+      `showToast()` en `app-core.js` ya no escribe `style.cssText`/hexes — crea el toast
+      con `ds-toast ds-toast--<tipo>` (clases y par oscuro ya existían en `styles.css`) y
+      el contenedor `#ds-toast-container` lleva `aria-live="polite"`/`aria-atomic="true"`.
+- [x] `SD-040` · resuelto por agente-sweep-shell-core (SWEEP-shell-core): el nombre de
+      usuario de la barra superior (`app-shell.js`) ya usa `.ds-nav-user-badge` en vez de
+      `style="…color:#dc3545"` en línea.
 - [ ] `SD-217` (mitad backend) · **archivo**: `app/static/admin-stats.js` · **carril dueño**:
       B10-admin-charts (según el mapa de pendientes) `[CHOCA]`
-      **qué hace falta**: `styles.css` ya acepta `.info-box.is-clickable` además del
-      selector viejo `[style*="cursor:pointer"]` (que se deja como respaldo). Falta que
-      `admin-stats.js` añada la clase `is-clickable` en vez de (o adicionalmente a) escribir
-      `cursor:pointer` en el `style` en línea, para no depender de que la cadena exacta no
-      cambie nunca.
+      **revisado por agente-sweep-admin-js (SWEEP-admin-js), sin resolver**: hoy
+      `admin-stats.js` no aplica `cursor:pointer` a ningún `.info-box` — el único
+      `el.style.cursor = "pointer"` del archivo es de `_kpiError()` (icono de reintento de un
+      KPI en error, sin relación con SD-217/`.info-box`). Los KPIs pulsables que menciona la
+      ficha (`OR-062`) todavía no existen: dependen del listado filtrado de `docs.py` que
+      documenta `OR-062`/`OR-124` en este mismo buzón, fuera de mi archivo. No hay `style`
+      inline que reemplazar por `.is-clickable` hasta que ese backend exista; dejo la nota tal
+      cual para quien implemente los KPIs pulsables.
 - [ ] `SD-180` · **archivo**: `app/static/login.js` · **carril dueño**: (no listado en
       `PLAN-PARALELO.md` como carril propio; toca sólo `login.js`) `[CHOCA]`
       **qué hace falta**: `@keyframes ds-shake` sigue definida y sin un solo uso. O
@@ -2050,12 +2044,11 @@ Pendientes de mi lote que necesitan un archivo que no es mío, anotados aquí en
       `main.py` y el endpoint real en `backup.py` a la vez que el `path` en el cron de
       `vercel.json` — no lo hago solo porque cambiar sólo `vercel.json` rompería el cron (la
       ruta dejaría de existir en la app).
-- [ ] `IN-113`/`IN-114` · **archivo**: `app/main.py` (el middleware de caché) ·
-      **carril dueño**: H1a-migraciones o quien tenga `main.py`
-      **qué hace falta**: `main.py:83-86` pone `no-cache, must-revalidate` a todo `/static/`
-      que termine en `.js/.css/.html`, contradiciendo el `max-age=3600` que ya declara
-      `vercel.json`. La cabecera de `vercel.json` ya es la política correcta (la dejé como
-      estaba); falta retirar la de `main.py` para que no compitan. No toco `main.py`.
+- [x] `IN-113`/`IN-114` · resuelto por agente-sweep-main (SWEEP-main): `add_no_cache_header`
+      en `main.py` ya no fija `Cache-Control` para `/static/*.js`/`.css`/`.html` — se quitó la
+      rama `else` que la aplicaba a esas rutas (las de `/api/` y el resto de páginas siguen
+      igual). La política vigente para esos tres tipos es sólo la de `vercel.json`
+      (`max-age=3600`), que no se tocó.
 - [ ] `IN-124` · **fuera de alcance de este carril**: pide una CDN de Cloudflare delante del
       bucket de R2 y límite de tasa — configuración externa del proveedor, no algo que viva en
       `vercel.json`/`api/*`.
@@ -2171,13 +2164,18 @@ anotado para quien tenga el resto:
       expone `settings.environment` tal cual llega del entorno (no lo toqué, ese campo está
       bien); el arreglo es invertir la condición en `auth.py` (`!= "development"`) o derivarlo
       del esquema de la petición — ninguno de los dos es archivo mío.
-- [ ] `IN-034` · **archivo**: `app/main.py:70-76` (CORS) · **carril dueño**: H1a-migraciones
+- [ ] `IN-034` · **archivo**: `app/main.py:70-76` (CORS), `app/core/config.py` ·
+      **carril dueño**: H1a-migraciones (main.py) + H1f-rutas-pagina (config.py)
       **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
-      **qué hace falta**: `allow_origins=["*"]` junto con `allow_credentials=True` es
-      contradictorio. Si quieren que la lista de orígenes salga de `config.py` (nueva variable
-      `ALLOWED_ORIGINS`), lo añado yo en cuanto alguien de H1a confirme el nombre/formato que
-      espera leer en `main.py` — no quise adivinar la forma y dejar un campo "decorativo" como
-      ya denuncia `IN-108` con `DB_POOL_MIN`/`DB_POOL_MAX`.
+      **qué hace falta**: `allow_origins=["*"]` junto con `allow_credentials=True` sigue
+      contradictorio. Confirmado por agente-sweep-main (SWEEP-main): mi carril de esta pasada
+      es exclusivamente `main.py`/`schema.sql`, así que no puedo añadir la variable
+      `ALLOWED_ORIGINS` en `config.py` yo mismo. Propuesta de formato para quien tenga
+      `config.py`: `ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "")` con orígenes
+      separados por coma; `main.py` la parsea y, si viene vacía, cae a `allow_origins=["*"]`
+      con `allow_credentials=False` (nunca `True` con `*`, para no dejar el arranque sin CORS
+      del todo mientras no haya lista configurada). En cuanto `config.py` exponga el campo, el
+      cambio en `main.py` es de una línea.
 - [ ] `IN-107`/`IN-108` · **archivo**: `app/database.py:31-42` · **carril dueño**: H1b-conexion
       **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
       **qué hace falta**: nota informativa, no bloqueo: `core/config.py:25-26` ya declara
@@ -2501,3 +2499,42 @@ No resueltos, fuera de `app/models.py`:
     editándolo activamente** (ver arriba) para que la siguiente pasada de LX
     pueda continuar por SD-211 con el terreno ya preparado, sin tener que
     rehacer este paso.
+
+## Tanda de SWEEP-tests-nuevos (2026-09-03)
+
+Cierro las tres peticiones de pruebas nuevas anotadas en este buzón:
+
+- **`DG-169`** (agente-c10-ficheros-r2): creado `app/tests/test_upload.py`, 9
+  pruebas contra `POST /api/admin/upload` — sin sesión (401), extensión no
+  permitida, sin extensión, archivo vacío, tamaño por encima de 25 MB,
+  almacenamiento no configurado, fallo al subir a R2 (502), subida válida, y
+  la prueba de DG-083: `client_as` con un usuario de sesión distinto del
+  campo `usuario` del formulario confirma que `log_event` recibe el usuario
+  de la sesión, nunca el del formulario. No tocó `conftest.py`: no hacía
+  falta ningún fixture nuevo, `client`/`anon_client`/`client_as` ya alcanzan.
+- **`SI-235`** (agente-h4-despliegue): creado `app/tests/test_cabeceras.py`,
+  12 pruebas que leen `vercel.json` directamente (sin levantar servidor) y
+  confirman que los bloques `/(.*)` y `/api/(.*)` llevan
+  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
+  `Strict-Transport-Security` (con `includeSubDomains`/`preload`) y
+  `Permissions-Policy`, y que `X-XSS-Protection` (retirada en IN-154) no
+  reaparece.
+- **`C4-retencion`** (agente-c4-retencion, con adiciones de agente-c6-usuarios,
+  agente-c2-catalogo, agente-c1-docs, agente-c7-papelera): revisé
+  `app/tests/test_misc.py` esperando migrar `TestRetencion`/`TestKeywords`/
+  `TestCategories`/`TestPapelera`/`TestAuditLog`/`TestNotifications` de
+  `client` a `client_as` + mock de `routes.admin.deps.db_query`, pero el
+  archivo ya está migrado (usa `client_as` y `_fila_usuario()` en las 24
+  pruebas) — lo hizo `agente-h3b-legacy-fixtures` (carril `H3-pruebas-legacy`,
+  commit `a4d7913`) en una tanda posterior a estas notas. `python -m pytest
+  app/tests/test_misc.py -q` da 24/24 en verde. No hizo falta ningún cambio
+  aquí; dejo la nota para que quien lea el buzón no repita la comprobación.
+  El mismo patrón en `test_admin.py` (`TestGetUsers`, `TestListAll`, citadas
+  en las notas de arriba) también está resuelto: forma parte del mismo
+  commit `a4d7913`.
+
+`python -m pytest app/tests -q` antes de esta tanda: en verde (mismo recuento
+que documentan las notas de arriba, sin los 29-30 fallos de C4-retencion que
+ya estaban resueltos). Después, con las 21 pruebas nuevas (9 + 12) añadidas:
+en verde también — ver commit. — agente-sweep-tests-nuevos
+(SWEEP-tests-nuevos)

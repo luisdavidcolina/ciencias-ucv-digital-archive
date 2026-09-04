@@ -102,7 +102,8 @@ def list_all_files(
                 COALESCE(da.status, 'aprobado')   AS status,
                 COALESCE(da.numero_folio,'')       AS numero_folio,
                 COALESCE(da.soporte,'Físico')      AS soporte,
-                da.numero_paginas
+                da.numero_paginas,
+                COALESCE(da.disposicion, '')       AS disposicion
             FROM public.datos_archivo da
             {where}
             ORDER BY da.fecha_documento DESC NULLS LAST
@@ -150,6 +151,7 @@ def list_all_files(
             LEFT JOIN public.estados_laborales el ON e.estado_id = el.id
             LEFT JOIN public.datos_rrhh dr ON dr.empleado_id = e.id AND dr.deleted_at IS NULL
             LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+            LEFT JOIN public.categoria cat ON td.id_categoria = cat.id
         """
         conditions.insert(0, "e.deleted_at IS NULL")
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
@@ -178,12 +180,17 @@ def list_all_files(
                 COUNT(DISTINCT dr.id_rrhh)             AS doc_count,
                 COALESCE(STRING_AGG(DISTINCT COALESCE(td.nombre_corto, td.nombre), '; '), '')
                                                        AS tipos,
-                COALESCE(MIN(dr.ubicacion), '')        AS ubicacion
+                COALESCE(MIN(dr.ubicacion), '')        AS ubicacion,
+                COALESCE(e.foto_url, '')               AS foto_url,
+                COUNT(DISTINCT dr.id_rrhh) FILTER (WHERE cat.slug = 'parte-i')   AS partes_i,
+                COUNT(DISTINCT dr.id_rrhh) FILTER (WHERE cat.slug = 'parte-ii')  AS partes_ii,
+                COUNT(DISTINCT dr.id_rrhh) FILTER (WHERE cat.slug = 'parte-iii') AS partes_iii,
+                COUNT(DISTINCT dr.id_rrhh) FILTER (WHERE cat.slug = 'parte-iv')  AS partes_iv
             {join}
             {where}
             GROUP BY e.id, e.cedula, e.apellidos, e.nombres, e.rif, d.nombre,
                      el.estados, c.nombre, e.fecha_ingreso, e.fecha_nacimiento,
-                     e.nivel_educativo, e.sexo, e.updated_at
+                     e.nivel_educativo, e.sexo, e.updated_at, e.foto_url
             ORDER BY e.apellidos ASC, e.nombres ASC
             LIMIT %s OFFSET %s
             """,
@@ -465,6 +472,7 @@ def delete_documento(
     doc_id: int,
     modulo: str,
     usuario: str,
+    deleted_reason: Optional[str] = Query(default=None, max_length=500),
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
@@ -473,8 +481,9 @@ def delete_documento(
     now = datetime.utcnow().isoformat()
     table, pk = module_meta(modulo)
     result = db_query(
-        f"UPDATE public.{table} SET deleted_at=%s, deleted_by=%s WHERE {pk}=%s AND deleted_at IS NULL RETURNING {pk}",
-        [now, usuario, doc_id], fetch="one", commit=True,
+        f"UPDATE public.{table} SET deleted_at=%s, deleted_by=%s, deleted_reason=%s "
+        f"WHERE {pk}=%s AND deleted_at IS NULL RETURNING {pk}",
+        [now, usuario, (deleted_reason or None), doc_id], fetch="one", commit=True,
     )
 
     if not result:
@@ -691,13 +700,15 @@ def get_status_counts(
 def delete_empleado(
     emp_id: int,
     usuario: str,
+    deleted_reason: Optional[str] = Query(default=None, max_length=500),
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("RRHH")),
 ):
     """Soft-delete: envía el empleado a la papelera. No borra físicamente."""
     result = db_query(
-        "UPDATE public.empleados SET deleted_at=%s, deleted_by=%s WHERE id=%s AND deleted_at IS NULL RETURNING id",
-        [datetime.utcnow().isoformat(), usuario, emp_id], fetch="one", commit=True,
+        "UPDATE public.empleados SET deleted_at=%s, deleted_by=%s, deleted_reason=%s "
+        "WHERE id=%s AND deleted_at IS NULL RETURNING id",
+        [datetime.utcnow().isoformat(), usuario, (deleted_reason or None), emp_id], fetch="one", commit=True,
     )
     if not result:
         raise HTTPException(404, "Empleado no encontrado o ya eliminado")
