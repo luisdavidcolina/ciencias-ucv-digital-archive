@@ -2000,6 +2000,105 @@ puede que ya lo haya corregido otro agente antes que yo, o que la ficha esté de
 estado anterior. La tarjeta sigue siendo una tabla, no una gráfica; lo dejo anotado por si
 alguien decide sí ponerle una gráfica real.
 
+## H4-despliegue — lo que hice y lo que queda fuera de `vercel.json`/`api/*`
+
+Hecho, sólo en mi zona:
+- **IN-154**: retirado `X-XSS-Protection` de las cabeceras de `/api/`.
+- **IN-153** (parcial) / **SI-014** (parcial): cabeceras de seguridad ahora también en
+  `/(.*)` (antes sólo en `/api/`): `X-Frame-Options`, `Referrer-Policy`,
+  `Strict-Transport-Security` con `preload`, `Permissions-Policy`. **No añadí
+  `Content-Security-Policy`**: la app carga PDFs/imágenes por redirección a un dominio de R2
+  que no conozco desde este carril (no tengo credenciales para verlo) y varias páginas los
+  muestran en `<iframe>`; una CSP mal calibrada en `img-src`/`frame-src` rompería la
+  visualización de documentos en todo el sistema, y `CLAUDE.md` pide levantar la página y
+  mirarla antes de dar algo por terminado — cosa que no puedo hacer sin las credenciales de
+  R2/Neon reales. Queda la CSP como pendiente para quien pueda desplegar a una vista previa y
+  verificarla con datos reales. Cierra también **BA-174** en la parte de `vercel.json` (queda
+  su mitad de `archive.html`, SRI, que no es mío).
+- **SI-217**: `/login`, `/archivo`, `/rrhh`, `/admin/archivo`, `/admin/rrhh`,
+  `/admin/sistema`, `/admin/ia`, `/ayuda` y `/compartido/<token>` ahora resuelven por rutas
+  estáticas de `vercel.json` en vez de pasar por `api/index.py`. No toqué `/investigacion`
+  (necesita `require_session`+rol Global, lógica real en `app/routes/pages.py`) ni `/`
+  (sólo un redirect). `python -m pytest app/tests -q` sigue en verde porque los tests usan el
+  `TestClient` de FastAPI directamente, sin pasar por el enrutado de Vercel — pero no puedo
+  confirmar visualmente en un navegador real que el `@vercel/static` sirva estos ficheros con
+  el `Content-Type` correcto; pido que alguien lo confirme en la próxima vista previa antes de
+  producción.
+- **IN-003/IN-208** (parcial): confirmado que `api/requirements.txt` ya incluye `boto3` (lo
+  arregló otro carril antes que yo, probablemente W1). No hice nada ahí, sólo lo verifiqué.
+- **IN-209** (parcial): fijé `pydantic`, `mangum` y `boto3` con `==` en `api/requirements.txt`
+  a las versiones que de hecho hay instaladas y con las que pasa la suite
+  (`pydantic==2.13.4`, `mangum==0.21.0`, `boto3==1.43.65`). No toqué `app/requirements.txt`
+  (fuera de mi zona) ni generé fichero de bloqueo (`pip-compile`/`uv`) porque eso excede lo
+  que puedo verificar sólo con `pytest`.
+
+Pendientes de mi lote que necesitan un archivo que no es mío, anotados aquí en vez de tocarlos:
+
+- [ ] `IN-001` · ya resuelto, no por mí: confirmado en `app/main.py:31-68` que la migración
+      corre a nivel de módulo (fuera de `_lifespan`) precisamente por este ticket, con
+      comentario explícito citando IN-001. No hace falta nada en `vercel.json`.
+- [ ] `IN-063` · **archivo**: `app/main.py`, `app/routes/backup.py` · **carril dueño**:
+      H1a-migraciones / C8-backup (ambos con trabajo ya cerrado o en curso)
+      **qué hace falta**: mover el prefijo del router de cron a `/api/cron/...` para que se
+      distinga a simple vista del router con sesión. Exige cambiar el `include_router` en
+      `main.py` y el endpoint real en `backup.py` a la vez que el `path` en el cron de
+      `vercel.json` — no lo hago solo porque cambiar sólo `vercel.json` rompería el cron (la
+      ruta dejaría de existir en la app).
+- [ ] `IN-113`/`IN-114` · **archivo**: `app/main.py` (el middleware de caché) ·
+      **carril dueño**: H1a-migraciones o quien tenga `main.py`
+      **qué hace falta**: `main.py:83-86` pone `no-cache, must-revalidate` a todo `/static/`
+      que termine en `.js/.css/.html`, contradiciendo el `max-age=3600` que ya declara
+      `vercel.json`. La cabecera de `vercel.json` ya es la política correcta (la dejé como
+      estaba); falta retirar la de `main.py` para que no compitan. No toco `main.py`.
+- [ ] `IN-124` · **fuera de alcance de este carril**: pide una CDN de Cloudflare delante del
+      bucket de R2 y límite de tasa — configuración externa del proveedor, no algo que viva en
+      `vercel.json`/`api/*`.
+- [ ] `IN-138` · **fuera de alcance de este carril**: límite de tasa "en el borde (Vercel)" no
+      es un campo de `vercel.json` en el plan que usa este proyecto (necesitaría Vercel Edge
+      Middleware/WAF configurado desde el panel, fuera del repositorio). La mitad de `main.py`
+      (límites por endpoint) tampoco es mía.
+- [ ] `IN-212` · **archivo**: `.python-version` (raíz, no es `api/*` ni `vercel.json`) ·
+      **carril dueño**: ninguno abierto
+      **qué hace falta**: el fichero dice `3.11` pero el árbol de trabajo tiene bytecode
+      compilado con 3.12 (`app/**/__pycache__/*.cpython-312.pyc`). Vercel ya respeta
+      `.python-version` sin que haga falta nada en `vercel.json` para pinearlo, así que mi
+      zona no tiene nada que tocar aquí; falta decidir 3.11 vs 3.12 y limpiar el `__pycache__`
+      —trabajo de quien tenga ese archivo.
+- [ ] `RQ-018` · **archivo**: `app/routes/backup.py` (segundo destino, rotación de
+      generaciones) · **carril dueño**: C8-backup (terminado, habría que reabrirlo)
+      **qué hace falta**: la parte de `vercel.json` (el cron) ya está bien; lo que falta es
+      lógica real de subir a un segundo destino y no vive en mi zona.
+- [ ] `RQ-029`/`SI-225` · **decisión de infraestructura, no de código**: un entorno de
+      vista previa con rama de Neon se configura en el panel de Vercel/Neon (integración
+      Neon↔Vercel) y en GitHub Actions, no con más contenido en `vercel.json`. Dejo la
+      constancia aquí para quien tenga acceso a esos paneles.
+- [ ] `RQ-030` · **archivo**: `.github/workflows/` (nuevo) · **carril dueño**: ninguno abierto
+      **qué hace falta**: prueba de humo post-despliegue (login, buscar, abrir documento,
+      health) — vive en integración continua, fuera de `vercel.json`/`api/*`.
+- [ ] `SD-228` · **archivo**: `app/static/*.html` (partir/precargar `styles.css`), paso de
+      compilación nuevo · **carril dueño**: LX/H1a (según `PLAN-PARALELO.md`)
+      **qué hace falta**: CSS crítico en línea y `preload` del resto exige tocar cada HTML;
+      lo único que le tocaba a `vercel.json` (servir minificado) depende de que exista un paso
+      de compilación (`IN-203`), que no existe. No invento un pipeline de build nuevo desde
+      este carril de sólo despliegue.
+- [ ] `SI-030` · **archivo**: `app/routes/backup.py`, `app/database.py` · **carril dueño**:
+      C8-backup / H1b-conexion (ambos terminados)
+      **qué hace falta**: validar `_metadata.version` y columnas antes de restaurar, dentro de
+      una transacción. Es lógica de aplicación, no de despliegue.
+- [ ] `SI-235` · **archivo**: `app/tests/test_cabeceras.py` (nuevo) · **carril dueño**: ninguno
+      abierto (ficheros de test no están en mi lista de archivos)
+      **qué hace falta**: una prueba que lea `vercel.json` y confirme que `/(.*)` lleva las
+      cabeceras de seguridad. Ya añadí esas cabeceras (ver arriba); falta el guarda. No creo
+      ficheros de test fuera de mi zona declarada (`vercel.json`, `api/*`).
+- [ ] `BA-112`/`SD-021`/`SD-235` · **archivo**: `app/static/archive.html` (BA-112, preconnect
+      de fuentes), `CLAUDE.md`/`styles.css` (SD-021, documentar tokens), `app/routes/hr.py`
+      (SD-235, impresión) · no tocan `vercel.json`/`api/*`, quedan fuera de mi carril.
+- [ ] `BR-160` · no encontrado en `docs/auditoria/backoffice-rrhh.md` con ese identificador
+      exacto al momento de revisar; puede ser un error de trascripción en `PLAN-PARALELO.md`
+      o estar en un documento que no revisé línea por línea. No lo puedo cerrar sin localizarlo.
+
+**quién lo pide**: agente-h4-despliegue (H4-despliegue)
+
 ## Tanda de H1a-migraciones (2026-09-03)
 
 Aplicadas en `app/main.py` (`run_migrations()`), idempotentes, `python -m pytest app/tests -q`

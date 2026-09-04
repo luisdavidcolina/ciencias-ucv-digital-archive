@@ -19,6 +19,42 @@
       "dest": "/app/static/$1"
     },
     {
+      "src": "/login",
+      "dest": "/app/static/login.html"
+    },
+    {
+      "src": "/archivo",
+      "dest": "/app/static/archive.html"
+    },
+    {
+      "src": "/rrhh",
+      "dest": "/app/static/hr.html"
+    },
+    {
+      "src": "/admin/archivo",
+      "dest": "/app/static/admin_archive.html"
+    },
+    {
+      "src": "/admin/rrhh",
+      "dest": "/app/static/admin_hr.html"
+    },
+    {
+      "src": "/admin/sistema",
+      "dest": "/app/static/admin_system.html"
+    },
+    {
+      "src": "/admin/ia",
+      "dest": "/app/static/admin_ai.html"
+    },
+    {
+      "src": "/ayuda",
+      "dest": "/app/static/ayuda.html"
+    },
+    {
+      "src": "/compartido/(.*)",
+      "dest": "/app/static/compartido.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "api/index.py"
     }
@@ -40,8 +76,25 @@
           "value": "strict-origin-when-cross-origin"
         },
         {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
         },
         {
           "key": "Permissions-Policy",
