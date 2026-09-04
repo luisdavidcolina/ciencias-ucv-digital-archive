@@ -34,9 +34,11 @@
       <div class="row">
         <div class="col-12">
           <div class="ds-breadcrumb-wrapper">
-            <div class="ds-breadcrumb">
-              <i class="fas fa-server"></i> Panel de Control / Sistema Global
-            </div>
+            <nav class="ds-breadcrumb" aria-label="Ruta de navegación">
+              <a href="/archivo"><i class="fas fa-home"></i> Panel de Control</a>
+              <span aria-hidden="true"> / </span>
+              <span aria-current="page"><i class="fas fa-server"></i> Sistema Global</span>
+            </nav>
           </div>
         </div>
       </div>
@@ -45,29 +47,29 @@
       <div class="card">
         <div class="card-header p-2 bg-light">
           <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item">
-              <a class="nav-link active" data-toggle="pill" href="#pane-sistema" role="tab">
+            <li class="nav-item" role="presentation">
+              <a id="tab-admin-sistema-1" class="nav-link active" data-toggle="pill" href="#pane-sistema" role="tab" aria-selected="true" aria-controls="pane-sistema">
                 <i class="fas fa-server"></i> Sistema
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-backup" role="tab" onclick="loadBackupHistory(); loadBackupGroups();">
+            <li class="nav-item" role="presentation">
+              <a id="tab-admin-sistema-2" class="nav-link" data-toggle="pill" href="#pane-backup" role="tab" aria-selected="false" aria-controls="pane-backup" onclick="_loadTabOnce('pane-backup')">
                 <i class="fas fa-database"></i> Backup
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-auditoria" role="tab" onclick="loadAuditLog()">
+            <li class="nav-item" role="presentation">
+              <a id="tab-admin-sistema-3" class="nav-link" data-toggle="pill" href="#pane-auditoria" role="tab" aria-selected="false" aria-controls="pane-auditoria" onclick="_loadTabOnce('pane-auditoria')">
                 <i class="fas fa-history"></i> Auditoría
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-alertas" role="tab" onclick="loadAlertasJubilaciones()">
+            <li class="nav-item" role="presentation">
+              <a id="tab-admin-sistema-4" class="nav-link" data-toggle="pill" href="#pane-alertas" role="tab" aria-selected="false" aria-controls="pane-alertas" onclick="_loadTabOnce('pane-alertas')">
                 <i class="fas fa-bell text-warning"></i> Alertas
                 <span id="badge-alertas" class="badge badge-danger ml-1" style="display:none;font-size:0.65rem;"></span>
               </a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="pill" href="#pane-retencion" role="tab" onclick="loadRetencionTipos(); loadVencimientosRetencion();">
+            <li class="nav-item" role="presentation">
+              <a id="tab-admin-sistema-5" class="nav-link" data-toggle="pill" href="#pane-retencion" role="tab" aria-selected="false" aria-controls="pane-retencion" onclick="_loadTabOnce('pane-retencion')">
                 <i class="fas fa-clock"></i> Retención
               </a>
             </li>
@@ -78,38 +80,38 @@
           <div class="tab-content">
 
             <!-- TAB: SISTEMA -->
-            <div class="tab-pane fade show active" id="pane-sistema" role="tabpanel">
-              <div class="row ds-kpi-grid">
-                <div class="col-md-3">
-                  <div class="info-box bg-info">
-                    <span class="info-box-icon"><i class="fas fa-database"></i></span>
+            <div class="tab-pane fade show active" id="pane-sistema" role="tabpanel" aria-labelledby="tab-admin-sistema-1">
+              <div class="row ds-kpi-grid" aria-live="polite">
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-database"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Total Documentos</span>
                       <span id="sys-total-docs" class="info-box-number">—</span>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <div class="info-box bg-success">
-                    <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Empleados</span>
                       <span id="sys-total-emp" class="info-box-number">—</span>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <div class="info-box bg-warning">
-                    <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-user-shield"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Usuarios Sistema</span>
                       <span id="sys-total-users" class="info-box-number">—</span>
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <div class="info-box bg-secondary">
-                    <span class="info-box-icon"><i class="fas fa-history"></i></span>
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-history"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Eventos Auditoría</span>
                       <span id="sys-total-audit" class="info-box-number">—</span>
@@ -119,7 +121,7 @@
               </div>
               <!-- Más stats detalladas -->
               <div class="row mt-3" id="sys-extended-stats">
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                   <div class="info-box shadow-sm">
                     <span class="info-box-icon bg-primary elevation-1"><i class="fas fa-file-alt"></i></span>
                     <div class="info-box-content">
@@ -128,7 +130,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                   <div class="info-box shadow-sm">
                     <span class="info-box-icon bg-success elevation-1"><i class="fas fa-id-card"></i></span>
                     <div class="info-box-content">
@@ -137,7 +139,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                   <div class="info-box shadow-sm">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-file-archive"></i></span>
                     <div class="info-box-content">
@@ -146,7 +148,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-6 col-md-3">
                   <div class="info-box shadow-sm">
                     <span class="info-box-icon bg-info elevation-1"><i class="fas fa-key"></i></span>
                     <div class="info-box-content">
@@ -155,37 +157,55 @@
                     </div>
                   </div>
                 </div>
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-user-check"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Empleados Activos</span>
+                      <span class="info-box-number" id="sys-emp-activos">—</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6 col-md-3">
+                  <div class="info-box shadow-sm">
+                    <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-hdd"></i></span>
+                    <div class="info-box-content">
+                      <span class="info-box-text">Backups Realizados</span>
+                      <span class="info-box-number" id="sys-total-backups">—</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Alertas de pendientes -->
-              <div class="row mt-2 ds-kpi-grid" id="sys-pending-alerts">
-                <div class="col-md-4">
-                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/archivo'">
+              <div class="row mt-2 ds-kpi-grid" id="sys-pending-alerts" aria-live="polite">
+                <div class="col-6 col-md-4">
+                  <a class="info-box shadow-sm ds-kpi-link" href="/admin/archivo">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Archivo en Revisión</span>
                       <span class="info-box-number" id="sys-arch-revision">—</span>
-                      <span class="info-box-text" style="font-size:0.72rem;opacity:0.8;">Click para gestionar</span>
+                      <span class="info-box-text" style="font-size:0.72rem;opacity:0.8;">Ir a gestionar</span>
                     </div>
-                  </div>
+                  </a>
                 </div>
-                <div class="col-md-4">
-                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/archivo'">
+                <div class="col-6 col-md-4">
+                  <a class="info-box shadow-sm ds-kpi-link" href="/admin/archivo">
                     <span class="info-box-icon bg-secondary elevation-1"><i class="fas fa-edit"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">Borradores Archivo</span>
                       <span class="info-box-number" id="sys-arch-draft">—</span>
                     </div>
-                  </div>
+                  </a>
                 </div>
-                <div class="col-md-4">
-                  <div class="info-box shadow-sm" style="cursor:pointer;" onclick="window.location.href='/admin/rrhh'">
+                <div class="col-6 col-md-4">
+                  <a class="info-box shadow-sm ds-kpi-link" href="/admin/rrhh">
                     <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-user-clock"></i></span>
                     <div class="info-box-content">
                       <span class="info-box-text">RRHH en Revisión</span>
                       <span class="info-box-number" id="sys-rrhh-revision">—</span>
                     </div>
-                  </div>
+                  </a>
                 </div>
               </div>
 
@@ -201,10 +221,12 @@
                   <div class="card card-outline ds-chart-card shadow-sm">
                     <div class="card-header"><h3 class="card-title"><i class="fas fa-users mr-2"></i>Usuarios del Sistema</h3></div>
                     <div class="card-body p-0">
+                      <div class="table-responsive">
                       <table class="table table-sm mb-0" style="font-size:.83rem">
-                        <thead class="bg-light"><tr><th>Usuario</th><th>Módulo</th><th>Rol</th><th>Último Acceso</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <thead class="bg-light"><tr><th>Usuario</th><th class="ds-hide-sm">Módulo</th><th>Rol</th><th class="ds-hide-sm">Último Acceso</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody id="sys-users-tbody"></tbody>
                       </table>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -214,16 +236,16 @@
             </div>
 
             <!-- TAB: BACKUP -->
-            <div class="tab-pane fade" id="pane-backup" role="tabpanel">
+            <div class="tab-pane fade" id="pane-backup" role="tabpanel" aria-labelledby="tab-admin-sistema-2">
 
               <div class="card card-warning">
                 <div class="card-header d-flex align-items-center justify-content-between">
                   <h3 class="card-title mb-0"><i class="fas fa-download mr-2"></i>Exportar Backup</h3>
                   <div>
-                    <button class="btn btn-sm btn-outline-light mr-1" onclick="backupSelectAll(true)" title="Seleccionar todo">
+                    <button class="btn btn-sm btn-outline-light mr-1" onclick="backupSelectAll(true)" aria-label="Seleccionar todos los grupos de backup">
                       <i class="fas fa-check-square mr-1"></i>Todo
                     </button>
-                    <button class="btn btn-sm btn-outline-light" onclick="backupSelectAll(false)" title="Deseleccionar todo">
+                    <button class="btn btn-sm btn-outline-light" onclick="backupSelectAll(false)" aria-label="Deseleccionar todos los grupos de backup">
                       <i class="fas fa-square mr-1"></i>Ninguno
                     </button>
                   </div>
@@ -286,7 +308,7 @@
             </div>
 
             <!-- TAB: AUDITORÍA -->
-            <div class="tab-pane fade" id="pane-auditoria" role="tabpanel">
+            <div class="tab-pane fade" id="pane-auditoria" role="tabpanel" aria-labelledby="tab-admin-sistema-3">
               <div class="card card-secondary">
                 <div class="card-header d-flex justify-content-between align-items-center">
                   <h3 class="card-title"><i class="fas fa-history mr-2"></i>Registro de Auditoría — Todos los Módulos</h3>
@@ -312,10 +334,10 @@
                 <div class="card-footer d-flex justify-content-between align-items-center">
                   <small class="text-muted" id="audit-page-info"></small>
                   <div>
-                    <button id="audit-prev-btn" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)">
+                    <button id="audit-prev-btn" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)" aria-label="Página anterior de auditoría">
                       <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button id="audit-next-btn" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)">
+                    <button id="audit-next-btn" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)" aria-label="Página siguiente de auditoría">
                       <i class="fas fa-chevron-right"></i>
                     </button>
                   </div>
@@ -324,7 +346,7 @@
             </div>
 
             <!-- TAB: ALERTAS -->
-            <div class="tab-pane fade" id="pane-alertas" role="tabpanel">
+            <div class="tab-pane fade" id="pane-alertas" role="tabpanel" aria-labelledby="tab-admin-sistema-4">
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label class="font-weight-bold text-muted small">Horizonte de alerta</label>
@@ -375,7 +397,7 @@
             </div>
 
             <!-- TAB: RETENCIÓN DOCUMENTAL -->
-            <div class="tab-pane fade" id="pane-retencion" role="tabpanel">
+            <div class="tab-pane fade" id="pane-retencion" role="tabpanel" aria-labelledby="tab-admin-sistema-5">
               <div class="alert alert-info mb-3" style="font-size:0.85rem;">
                 <i class="fas fa-info-circle mr-1"></i>
                 <strong>ISO 15489-1:2016 §8.3 — Calendario de Retención:</strong>
@@ -455,7 +477,7 @@
   <div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
 
   <!-- Modal: Cambio de Contraseña (Sistema Global) -->
-  <div class="modal fade" id="sys-change-pw-modal" tabindex="-1" role="dialog" data-backdrop="static">
+  <div class="modal fade" id="sys-change-pw-modal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="sys-pw-modal-label" aria-modal="true">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
       <div class="modal-content" style="border-radius:12px;">
         <div class="modal-header bg-secondary text-white border-bottom-0">
@@ -465,12 +487,23 @@
         <div class="modal-body">
           <input type="hidden" id="sys-pw-uid">
           <div class="form-group mb-2">
-            <label class="font-weight-bold small text-muted">Nueva contraseña</label>
-            <input type="password" id="sys-pw-input" class="form-control" placeholder="Mín. 6 caracteres" autocomplete="new-password">
+            <label class="font-weight-bold small text-muted" for="sys-pw-input">Nueva contraseña</label>
+            <div class="input-group">
+              <input type="password" id="sys-pw-input" class="form-control" placeholder="Mín. 12 caracteres" autocomplete="new-password" minlength="12">
+              <div class="input-group-append">
+                <button type="button" class="btn btn-outline-secondary" id="sys-pw-toggle-btn" aria-pressed="false" aria-label="Mostrar contraseña" onclick="_toggleSysPwVisibility()">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" aria-label="Generar contraseña segura" title="Generar contraseña segura" onclick="_generateSysPw()">
+                  <i class="fas fa-dice"></i>
+                </button>
+              </div>
+            </div>
+            <small class="form-text text-muted" id="sys-pw-strength"></small>
           </div>
           <div class="form-group mb-0">
-            <label class="font-weight-bold small text-muted">Confirmar contraseña</label>
-            <input type="password" id="sys-pw-confirm" class="form-control" placeholder="Repetir contraseña" autocomplete="new-password">
+            <label class="font-weight-bold small text-muted" for="sys-pw-confirm">Confirmar contraseña</label>
+            <input type="password" id="sys-pw-confirm" class="form-control" placeholder="Repetir contraseña" autocomplete="new-password" minlength="12">
           </div>
         </div>
         <div class="modal-footer border-top-0 pt-0">
@@ -484,8 +517,27 @@
   </div>
 
   <style>
-    .ds-skeleton{background:linear-gradient(90deg,#e9ecef 25%,#f8f9fa 50%,#e9ecef 75%);background-size:200% 100%;animation:ds-shimmer 1.4s infinite;border-radius:4px;}
-    @keyframes ds-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* .ds-skeleton vive en styles.css (SD-138/SI-186): esta página no la
+       redefine para no pisar su variante de modo oscuro. */
+    .ds-kpi-link { display: block; text-decoration: none; color: inherit; }
+    .ds-kpi-link:hover, .ds-kpi-link:focus { text-decoration: none; color: inherit; }
+    .ds-audit-row { cursor: pointer; }
+    .ds-audit-detail-cell {
+      max-width: 320px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    @media (max-width: 480px) {
+      .ds-audit-detail-cell { max-width: 160px; }
+    }
+    @media print {
+      #app-shell-navbar, #app-shell-sidebar, .nav-pills, #ds-toast-container,
+      .btn, button, #sidebar-overlay { display: none !important; }
+      .content-wrapper { margin-left: 0 !important; }
+      .table-responsive { overflow: visible !important; }
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
@@ -502,29 +554,51 @@
 // API_BASE ya está definido globalmente por app.js — no redeclarar (causa SyntaxError)
 let auditState = { page: 1, perPage: 50, total: 0 };
 
-// Fallback: showToast se define en admin.js, que no se carga en esta página
-if (typeof window.showToast !== "function") {
-  window.showToast = function(msg, type) {
-    const c = document.getElementById("ds-toast-container");
-    if (!c) return;
-    const colors = { success:"#198754", error:"#dc3545", warning:"#fd7e14", info:"#0dcaf0" };
-    const d = document.createElement("div");
-    d.style.cssText = `background:${colors[type]||"#333"};color:#fff;padding:10px 18px;border-radius:8px;margin-bottom:8px;font-size:.88rem;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:fadeIn .2s`;
-    d.textContent = msg;
-    c.appendChild(d);
-    setTimeout(() => d.remove(), 4000);
-  };
+// showToast ya lo define app-core.js, que sí se carga en esta página — el
+// respaldo local quedó muerto y con otra estética (SI-212); se retira.
+
+// Qué pestañas ya cargaron sus datos, para no relanzar peticiones cada vez
+// que se vuelve a una pestaña ya visitada (SI-199).
+const _loadedTabs = new Set(["pane-sistema", "pane-alertas"]);
+const _tabLoaders = {
+  "pane-backup": () => { loadBackupHistory(); loadBackupGroups(); },
+  "pane-auditoria": () => loadAuditLog(),
+  "pane-alertas": () => loadAlertasJubilaciones(),
+  "pane-retencion": () => { loadRetencionTipos(); loadVencimientosRetencion(); },
+};
+
+function _loadTabOnce(paneId) {
+  if (_loadedTabs.has(paneId)) return;
+  _loadedTabs.add(paneId);
+  _tabLoaders[paneId]?.();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   checkSession();
   loadSystemStats();
   loadBackupHistory();
+  // Insignia de alertas visible desde que carga la página, no sólo al abrir
+  // la pestaña (SI-152).
+  loadAlertasJubilaciones();
 
   document.getElementById("audit-search-input")?.addEventListener("input", () => {
     auditState.page = 1;
     loadAuditLog();
   });
+
+  // Persistir la pestaña activa en la URL (SI-198) y no repetir la carga de
+  // una pestaña ya visitada al volver a ella (SI-199).
+  $('.nav-pills a[data-toggle="pill"]').on("shown.bs.tab", function (e) {
+    document.querySelectorAll('.nav-pills a[role="tab"]').forEach(a => a.setAttribute("aria-selected", "false"));
+    e.target.setAttribute("aria-selected", "true");
+    const paneId = e.target.getAttribute("href")?.slice(1);
+    if (paneId) history.replaceState(null, "", `#${paneId}`);
+  });
+  const hashId = (location.hash || "").slice(1);
+  if (hashId) {
+    const tabLink = document.querySelector(`.nav-pills a[href="#${hashId}"]`);
+    if (tabLink) { $(tabLink).tab("show"); _loadTabOnce(hashId); }
+  }
 
   // Sidebar toggle
   document.getElementById("sidebar-toggle-btn")?.addEventListener("click", () => {
@@ -551,6 +625,16 @@ async function checkSession() {
       window.location.href = "/";
       return;
     }
+    // A diferencia del resto de páginas, ésta no pasaba por checkPersistedSession()
+    // de app.js (SI-059): valida contra el servidor antes de pintar nada sensible.
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: s.username }),
+      });
+      if (!res.ok) { window.location.href = "/"; return; }
+    } catch { /* red caída: se sigue con la sesión en cache, como el resto del sistema */ }
     document.getElementById("nav_username").innerText = `${s.username} (Global Admin)`;
     // Esta página valida la sesión por su cuenta y no pasa por el flujo de
     // app.js, así que tiene que pedir explícitamente la configuración del menú:
@@ -568,11 +652,28 @@ function getCurrentUser() {
 let _sysChartModulos = null;
 
 async function loadSystemStats() {
+  const errBox = document.getElementById("sys-stats-error");
+  if (errBox) errBox.remove();
+  let summaryFailed = false, usersFailed = false;
   try {
     const [summary, usersRow] = await Promise.all([
-      apiFetchJSON(`${API_BASE}/api/admin/global_summary`).catch(()=>({})),
-      apiFetchJSON(`${API_BASE}/api/admin/users`).catch(()=>[]),
+      apiFetchJSON(`${API_BASE}/api/admin/global_summary`).catch(()=>{ summaryFailed = true; return {}; }),
+      apiFetchJSON(`${API_BASE}/api/admin/users`).catch(()=>{ usersFailed = true; return []; }),
     ]);
+
+    if (summaryFailed || usersFailed) {
+      const grid = document.getElementById("sys-pending-alerts");
+      if (grid) {
+        const div = document.createElement("div");
+        div.id = "sys-stats-error";
+        div.className = "col-12 mt-2";
+        div.innerHTML = `<div class="alert alert-danger d-flex justify-content-between align-items-center">
+          <span><i class="fas fa-exclamation-triangle mr-2"></i>No se pudieron cargar todas las estadísticas del sistema.</span>
+          <button class="btn btn-sm btn-outline-danger" onclick="loadSystemStats()"><i class="fas fa-sync-alt mr-1"></i>Reintentar</button>
+        </div>`;
+        grid.parentNode.insertBefore(div, grid);
+      }
+    }
 
     const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
 
@@ -589,14 +690,6 @@ async function loadSystemStats() {
     setEl("sys-rrhh-revision", summary.rrhh_en_revision || 0);
     setEl("sys-emp-activos",   summary.empleados_activos != null ? summary.empleados_activos : "—");
     setEl("sys-total-backups", summary.total_backups != null ? summary.total_backups : "—");
-
-    // Resaltar tarjeta si hay pendientes
-    if ((summary.arch_en_revision || 0) > 0) {
-      document.querySelector("#sys-arch-revision")?.closest(".info-box")?.classList.add("bg-warning");
-    }
-    if ((summary.rrhh_en_revision || 0) > 0) {
-      document.querySelector("#sys-rrhh-revision")?.closest(".info-box")?.classList.add("bg-warning");
-    }
 
     // Chart: distribución por módulo
     const archDocs = summary.total_docs || 0;
@@ -633,16 +726,19 @@ async function loadSystemStats() {
       tbody.innerHTML = usersRow.map(u => {
         const active = u.is_active !== false;
         const lastLogin = u.last_login ? String(u.last_login).substring(0,16).replace("T"," ") : "Nunca";
+        const usuario = escHtml(u.usuario || "");
+        const modulo = escHtml(u.modulo || "—");
+        const rol = escHtml(u.rol || "—");
         return `<tr>
-          <td class="font-weight-bold">${u.usuario}</td>
-          <td><span class="badge badge-secondary">${u.modulo||"—"}</span></td>
-          <td>${u.rol||"—"}</td>
-          <td class="text-muted small">${lastLogin}</td>
+          <td class="font-weight-bold">${usuario}</td>
+          <td class="ds-hide-sm"><span class="badge badge-secondary">${modulo}</span></td>
+          <td>${rol}</td>
+          <td class="text-muted small ds-hide-sm">${escHtml(lastLogin)}</td>
           <td><span class="badge badge-${active?"success":"secondary"}">${active?"Activo":"Inactivo"}</span></td>
           <td>
-            <button class="btn btn-xs btn-outline-secondary sys-change-pw-btn"
-                    data-uid="${u.id}" data-uname="${u.usuario.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
-                    title="Cambiar contraseña">
+            <button class="btn btn-sm btn-outline-secondary sys-change-pw-btn"
+                    data-uid="${u.id}" data-uname="${usuario}"
+                    aria-label="Cambiar contraseña de ${usuario}">
               <i class="fas fa-key"></i> Clave
             </button>
           </td>
@@ -664,16 +760,42 @@ document.addEventListener("click", function(e) {
 function _openSysChangePwModal(uid, username) {
   document.getElementById("sys-pw-modal-label").textContent = `Cambiar clave: ${username}`;
   document.getElementById("sys-pw-input").value = "";
+  document.getElementById("sys-pw-input").type = "password";
+  document.getElementById("sys-pw-toggle-btn")?.setAttribute("aria-pressed", "false");
   document.getElementById("sys-pw-confirm").value = "";
   document.getElementById("sys-pw-uid").value = uid;
+  document.getElementById("sys-pw-strength").textContent = "";
   $("#sys-change-pw-modal").modal("show");
+}
+
+function _toggleSysPwVisibility() {
+  const input = document.getElementById("sys-pw-input");
+  const btn = document.getElementById("sys-pw-toggle-btn");
+  const showing = input.type === "text";
+  input.type = showing ? "password" : "text";
+  btn.setAttribute("aria-pressed", String(!showing));
+  btn.setAttribute("aria-label", showing ? "Mostrar contraseña" : "Ocultar contraseña");
+  btn.querySelector("i").className = showing ? "fas fa-eye" : "fas fa-eye-slash";
+}
+
+function _generateSysPw() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+  const bytes = new Uint32Array(16);
+  crypto.getRandomValues(bytes);
+  const pass = Array.from(bytes, b => chars[b % chars.length]).join("");
+  const input = document.getElementById("sys-pw-input");
+  input.type = "text";
+  input.value = pass;
+  document.getElementById("sys-pw-confirm").value = pass;
+  document.getElementById("sys-pw-toggle-btn")?.setAttribute("aria-pressed", "true");
+  document.getElementById("sys-pw-strength").textContent = "Contraseña generada: 16 caracteres, copie antes de guardar.";
 }
 
 async function _submitSysChangePw() {
   const uid     = parseInt(document.getElementById("sys-pw-uid").value, 10);
   const newPass = document.getElementById("sys-pw-input").value.trim();
   const confirm = document.getElementById("sys-pw-confirm").value.trim();
-  if (newPass.length < 6) { showToast("Mínimo 6 caracteres.", "warning"); return; }
+  if (newPass.length < 12) { showToast("Mínimo 12 caracteres.", "warning"); return; }
   if (newPass !== confirm) { showToast("Las contraseñas no coinciden.", "warning"); return; }
   try {
     await apiFetchJSON(`${API_BASE}/api/admin/users/${uid}/password`, {
@@ -772,10 +894,29 @@ async function handleRestoreBackup() {  // async para confirmModal
     return;
   }
 
+  // Leer _metadata en el navegador antes de confirmar, para que el diálogo
+  // diga qué contiene el archivo y no sólo el modo elegido (SI-132).
+  let metaLine = "";
+  try {
+    const text = await fileInput.files[0].text();
+    const parsed = JSON.parse(text);
+    const meta = parsed._metadata;
+    if (meta) {
+      const fecha = meta.exported_at || meta.fecha || meta.created_at || "fecha desconocida";
+      const tablas = Object.keys(parsed).filter(k => k !== "_metadata" && !k.startsWith("_error_"));
+      const filas = tablas.reduce((sum, t) => sum + (Array.isArray(parsed[t]) ? parsed[t].length : 0), 0);
+      metaLine = ` Contenido del archivo: exportado ${fecha}, ${tablas.length} tabla(s), ${filas} fila(s) en total.`;
+    } else {
+      metaLine = ' El archivo no trae "_metadata": no se puede confirmar su origen.';
+    }
+  } catch {
+    metaLine = ' El archivo no es un JSON válido.';
+  }
+
   const confirmTitle = mode === "overwrite" ? "Restauración DESTRUCTIVA" : "Confirmar Restauración";
-  const confirmMsg   = mode === "overwrite"
+  const confirmMsg   = (mode === "overwrite"
     ? "PELIGROSO: Esto borrará y reemplazará datos existentes. ¿Estás completamente seguro?"
-    : "¿Confirmar restauración en modo merge? Los datos existentes no serán borrados.";
+    : "¿Confirmar restauración en modo merge? Los datos existentes no serán borrados.") + metaLine;
   const btnLabel = mode === "overwrite" ? "Sí, sobreescribir" : "Sí, restaurar";
   const btnClass = mode === "overwrite" ? "btn-danger" : "btn-warning";
   const confirmed = await confirmModal(confirmTitle, confirmMsg, btnLabel, btnClass);
@@ -828,6 +969,17 @@ async function loadBackupHistory() {
   }
 }
 
+// Registros de la página actual de auditoría, indexados para la delegación de
+// eventos del modal de detalle (SI-007: nada de JSON.stringify() en onclick).
+let _auditRows = [];
+
+function _formatAuditTs(ts) {
+  if (!ts) return "—";
+  const d = new Date(/Z$|[+-]\d\d:?\d\d$/.test(ts) ? ts : ts + "Z");
+  if (isNaN(d.getTime())) return escHtml(String(ts).replace("T"," ").slice(0,19));
+  return d.toLocaleString("es-VE", { dateStyle: "short", timeStyle: "medium" });
+}
+
 async function loadAuditLog() {
   const tbody = document.getElementById("audit-tbody");
   const search = document.getElementById("audit-search-input")?.value || "";
@@ -839,23 +991,24 @@ async function loadAuditLog() {
     document.getElementById("audit-page-info").innerText = `Pag ${auditState.page} / ${pages} (${data.total} eventos)`;
     document.getElementById("audit-prev-btn").disabled = auditState.page <= 1;
     document.getElementById("audit-next-btn").disabled = auditState.page >= pages;
-    tbody.innerHTML = data.records.length === 0
+    _auditRows = data.records || [];
+    tbody.innerHTML = _auditRows.length === 0
       ? '<tr><td colspan="6" class="text-center text-muted p-3">Sin eventos.</td></tr>'
-      : data.records.map(r => {
+      : _auditRows.map((r, idx) => {
           const res  = (r.resultado||"ok").toLowerCase();
           const resBadge = res === "success" || res === "ok"
             ? `<span class="badge badge-success">OK</span>`
             : res === "failure" || res === "error"
             ? `<span class="badge badge-danger">Error</span>`
-            : `<span class="badge badge-secondary">${r.resultado||"—"}</span>`;
-          const detEsc = (r.detalle||"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-          const tsShort = (r.timestamp||"").replace("T"," ").slice(0,19);
-          return `<tr style="cursor:pointer;" onclick="_showAuditDetail(${JSON.stringify(r)})" title="Clic para ver detalle completo">
-            <td class="text-muted small text-nowrap">${tsShort}</td>
-            <td class="font-weight-bold">${r.usuario||""}</td>
-            <td>${r.evento||""}</td>
-            <td><span class="badge badge-secondary">${r.modulo||""}</span></td>
-            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${detEsc}</td>
+            : `<span class="badge badge-secondary">${escHtml(r.resultado||"—")}</span>`;
+          const detEsc = escHtml(r.detalle||"");
+          const tsFmt = _formatAuditTs(r.timestamp);
+          return `<tr class="ds-audit-row" data-audit-idx="${idx}" tabindex="0" role="button" aria-label="Ver detalle del evento" title="Clic para ver detalle completo">
+            <td class="text-muted small text-nowrap">${tsFmt}</td>
+            <td class="font-weight-bold">${escHtml(r.usuario||"")}</td>
+            <td>${escHtml(r.evento||"")}</td>
+            <td><span class="badge badge-secondary">${escHtml(r.modulo||"")}</span></td>
+            <td class="text-muted ds-audit-detail-cell">${detEsc}</td>
             <td>${resBadge}</td>
           </tr>`;
         }).join("");
@@ -863,6 +1016,21 @@ async function loadAuditLog() {
     if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-danger p-3">Error cargando auditoria.</td></tr>';
   }
 }
+
+document.addEventListener("click", function(e) {
+  const row = e.target.closest(".ds-audit-row");
+  if (!row) return;
+  const idx = parseInt(row.dataset.auditIdx, 10);
+  if (_auditRows[idx]) _showAuditDetail(_auditRows[idx]);
+});
+document.addEventListener("keydown", function(e) {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest(".ds-audit-row");
+  if (!row) return;
+  e.preventDefault();
+  const idx = parseInt(row.dataset.auditIdx, 10);
+  if (_auditRows[idx]) _showAuditDetail(_auditRows[idx]);
+});
 
 function changeAuditPage(delta) {
   const pages = Math.ceil(auditState.total / auditState.perPage) || 1;
@@ -873,28 +1041,28 @@ function changeAuditPage(delta) {
 function _showAuditDetail(r) {
   const existing = document.getElementById("audit-detail-modal");
   if (existing) existing.remove();
-  const ts = (r.timestamp||"").replace("T"," ").slice(0,19);
-  const detEsc = (r.detalle||"—").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const ts = _formatAuditTs(r.timestamp);
+  const detEsc = escHtml(r.detalle || "—");
   const res = (r.resultado||"ok").toLowerCase();
   const resBadge = res === "success" || res === "ok"
     ? `<span class="badge badge-success">OK</span>`
     : res === "failure" || res === "error"
     ? `<span class="badge badge-danger">Error</span>`
-    : `<span class="badge badge-secondary">${r.resultado||"—"}</span>`;
+    : `<span class="badge badge-secondary">${escHtml(r.resultado||"—")}</span>`;
   const html = `
-  <div class="modal fade" id="audit-detail-modal" tabindex="-1" role="dialog">
+  <div class="modal fade" id="audit-detail-modal" tabindex="-1" role="dialog" aria-labelledby="audit-detail-modal-label" aria-modal="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header bg-dark text-white py-2">
-          <h6 class="modal-title mb-0"><i class="fas fa-clipboard-list mr-2"></i>Detalle de Evento</h6>
-          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+          <h6 class="modal-title mb-0" id="audit-detail-modal-label"><i class="fas fa-clipboard-list mr-2"></i>Detalle de Evento</h6>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
         </div>
         <div class="modal-body p-3">
           <table class="table table-sm table-borderless mb-0">
-            <tr><th class="text-muted" width="120">Fecha</th><td>${ts}</td></tr>
-            <tr><th class="text-muted">Usuario</th><td><strong>${r.usuario||"—"}</strong></td></tr>
-            <tr><th class="text-muted">Evento</th><td>${r.evento||"—"}</td></tr>
-            <tr><th class="text-muted">Módulo</th><td><span class="badge badge-secondary">${r.modulo||"—"}</span></td></tr>
+            <tr><th class="text-muted" width="120">Fecha</th><td>${escHtml(ts)}</td></tr>
+            <tr><th class="text-muted">Usuario</th><td><strong>${escHtml(r.usuario||"—")}</strong></td></tr>
+            <tr><th class="text-muted">Evento</th><td>${escHtml(r.evento||"—")}</td></tr>
+            <tr><th class="text-muted">Módulo</th><td><span class="badge badge-secondary">${escHtml(r.modulo||"—")}</span></td></tr>
             <tr><th class="text-muted">Resultado</th><td>${resBadge}</td></tr>
             <tr><th class="text-muted">Detalle</th><td class="text-break"><small>${detEsc}</small></td></tr>
           </table>
@@ -906,19 +1074,16 @@ function _showAuditDetail(r) {
     </div>
   </div>`;
   document.body.insertAdjacentHTML("beforeend", html);
-  $("#audit-detail-modal").modal("show");
-  document.getElementById("audit-detail-modal").addEventListener("hidden.bs.modal", () => {
-    document.getElementById("audit-detail-modal")?.remove();
+  // Bootstrap 4 dispara los eventos de modal sobre jQuery, no sobre el
+  // elemento nativo (SI-196): hay que escucharlos con $(...).on(...).
+  $("#audit-detail-modal").on("hidden.bs.modal", function () {
+    $(this).remove();
   });
+  $("#audit-detail-modal").modal("show");
 }
 
-// Theme panel support (from app.js)
-function openThemePanel() {
-  let panel = document.getElementById("ds-theme-panel");
-  if (!panel) { panel = createThemePanel(); document.body.appendChild(panel); }
-  else { panel.remove(); panel = createThemePanel(); document.body.appendChild(panel); }
-  requestAnimationFrame(() => panel.classList.add("open"));
-}
+// openThemePanel() ya la define app-theme.js, que se carga en esta página —
+// la copia local quedaba desincronizada de esa versión (SI-213); se retira.
 
 // =============================================================================
 // ALERTAS (jubilaciones y documentos vencidos)
@@ -985,17 +1150,23 @@ async function loadVencimientosRetencion() {
     } else {
       vencTbody.innerHTML = vencidos.map(v => {
         const diasV = parseInt(v.dias_vencido) || 0;
+        const titulo = escHtml(v.titulo || "—");
         return `<tr>
-          <td class="font-weight-bold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(v.titulo||'').replace(/"/g,'&quot;')}">${v.titulo || "—"}</td>
-          <td><span class="badge badge-light border">${v.tipo_documento || "—"}</span></td>
-          <td class="text-muted small">${v.fecha_documento || "—"}</td>
+          <td class="font-weight-bold" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${titulo}">${titulo}</td>
+          <td><span class="badge badge-light border">${escHtml(v.tipo_documento || "—")}</span></td>
+          <td class="text-muted small">${escHtml(v.fecha_documento || "—")}</td>
           <td class="text-center">${v.plazo_anios || 5}</td>
-          <td class="text-muted small">${v.fecha_vencimiento || "—"}</td>
+          <td class="text-muted small">${escHtml(v.fecha_vencimiento || "—")}</td>
           <td><span class="badge badge-danger">${diasV} días</span></td>
-          <td><span class="badge ${v.soporte === 'Digital' || v.soporte === 'Digitalizado' ? 'badge-info' : 'badge-secondary'}">${v.soporte || 'Físico'}</span></td>
-          <td class="text-muted small">${v.ubicacion || "—"}</td>
+          <td><span class="badge ${v.soporte === 'Digital' || v.soporte === 'Digitalizado' ? 'badge-info' : 'badge-secondary'}">${escHtml(v.soporte || 'Físico')}</span></td>
+          <td class="text-muted small">${escHtml(v.ubicacion || "—")}</td>
         </tr>`;
       }).join("");
+      // SI-154: el límite es fijo (30) y sin paginación real; al menos no se
+      // esconde que puede haber más.
+      if (vencidos.length >= 30) {
+        vencTbody.insertAdjacentHTML("beforeend", `<tr><td colspan="8" class="text-center text-muted small p-2"><i class="fas fa-info-circle mr-1"></i>Mostrando los 30 primeros. Puede haber más documentos vencidos no listados aquí.</td></tr>`);
+      }
     }
   }
   } catch (err) {
@@ -1027,7 +1198,7 @@ async function loadRetencionTipos() {
         <td><span class="badge badge-secondary">${t.categoria || "—"}</span></td>
         <td>
           <span class="badge badge-${badge} mr-1">${t.plazo_retencion_anios} año${t.plazo_retencion_anios !== 1 ? 's' : ''}</span>
-          <button class="btn btn-xs btn-link p-0 text-muted" title="Editar plazo"
+          <button class="btn btn-sm btn-link p-0 text-muted" aria-label="Editar plazo de retención de ${escHtml(t.nombre_corto||t.nombre||"")}"
             onclick="_editRetencion(${t.id},'${(t.nombre_corto||t.nombre||'').replace(/'/g,"\\'")}',${t.plazo_retencion_anios})">
             <i class="fas fa-pencil-alt"></i>
           </button>
