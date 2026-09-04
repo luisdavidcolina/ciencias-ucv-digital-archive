@@ -1,11 +1,13 @@
 {
   "name": "ciencias-ucv-scanner-bridge",
-  "version": "1.0.0",
-  "description": "Puente WebSocket para escáner de códigos de barras/QR — Archivo Ciencias UCV",
+  "version": "1.1.0",
+  "description": "Puente local para lector de códigos de barras/QR — Archivo Ciencias UCV. No adquiere imágenes de escáner (ver README, sección \"Qué es y qué no es\").",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js --debug"
+    "dev": "node server.js --debug --dev",
+    "test": "node --test test/run.js",
+    "audit": "npm audit"
   },
   "dependencies": {
     "ws": "^8.17.1"
