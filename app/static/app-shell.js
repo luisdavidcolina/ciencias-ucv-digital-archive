@@ -40,6 +40,8 @@ const SHELL_SECCIONES = [
   {
     label: "Utilidades",
     links: [
+      { href: "/sistema", icon: "fa-palette", label: "Sistema de Diseño",
+        page: "sistema" },
       { href: "/ayuda", icon: "fa-life-ring", label: "Ayuda", page: "ayuda" },
       { href: "/investigacion", icon: "fa-flask", label: "Investigación",
         page: "investigacion" },
@@ -75,12 +77,12 @@ function shellSidebarHTML(pagina) {
            style="height:28px;width:28px;display:inline-block;vertical-align:middle;">
       <span style="vertical-align:middle;">Ciencias UCV</span>
     </div>
-    <button id="sidebar-close-btn" class="ds-sidebar-close" title="Cerrar menú">
-      <i class="fas fa-times"></i>
+    <button id="sidebar-close-btn" class="ds-sidebar-close" title="Cerrar menú" aria-label="Cerrar menú">
+      <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </div>
   <div class="ds-sidebar-divider"></div>
-  <nav class="ds-sidebar-nav">
+  <nav class="ds-sidebar-nav" aria-label="Menú principal">
     ${secciones}
     <button class="ds-sidebar-theme-btn" onclick="openThemePanel()">
       <i class="fas fa-palette"></i><span>Personalización</span>
@@ -89,7 +91,8 @@ function shellSidebarHTML(pagina) {
   <div class="ds-sidebar-footer">
     <i class="fas fa-shield-alt mr-1"></i> Intranet Cifrada
   </div>
-</aside>`;
+</aside>
+<div id="sidebar-overlay" class="ds-sidebar-overlay"></div>`;
 }
 
 (function () {
@@ -133,21 +136,15 @@ const SHELL_INICIO = { "rrhh": "/rrhh", "admin-rrhh": "/rrhh" };
 
 function shellNavbarHTML(pagina) {
   const inicio = SHELL_INICIO[pagina] || "/archivo";
-  const volver = pagina === "admin-sistema" || pagina === "admin-ia"
-    ? `<li class="nav-item">
-         <a href="/archivo" class="btn btn-outline-secondary btn-sm" style="margin-top:5px;margin-right:8px;">
-           <i class="fas fa-arrow-left"></i> <span class="ds-btn-label">Volver al Inicio</span>
-         </a>
-       </li>`
-    : "";
 
   return `
-<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+<nav class="main-header navbar navbar-expand navbar-white navbar-light" aria-label="Barra superior">
   <ul class="navbar-nav">
     <li class="nav-item">
-      <button id="sidebar-toggle-btn" class="btn btn-link nav-link px-2" title="Menú"
-              style="font-size:1.3rem;color:var(--ds-accent);">
-        <i class="fas fa-bars"></i>
+      <button id="sidebar-toggle-btn" class="btn btn-link nav-link px-2"
+              style="font-size:1.3rem;color:var(--ds-accent);"
+              aria-label="Abrir menú" aria-expanded="false" aria-controls="app-sidebar">
+        <i class="fas fa-bars" aria-hidden="true"></i>
       </button>
     </li>
     <li class="nav-item dropdown">
@@ -157,10 +154,9 @@ function shellNavbarHTML(pagina) {
     </li>
   </ul>
   <ul class="navbar-nav ml-auto">
-    ${volver}
     <li class="nav-item dropdown ds-nav-user">
-      <span style="padding-top:10px;display:inline-block;margin-right:8px;font-weight:bold;color:#dc3545;">
-        <i class="fas fa-user-circle"></i> <span id="nav_username">ID: anonymous</span>
+      <span class="ds-nav-user-badge">
+        <i class="fas fa-user-circle" aria-hidden="true"></i> <span id="nav_username">ID: anonymous</span>
       </span>
     </li>
     <li class="nav-item dropdown ds-nav-logout">

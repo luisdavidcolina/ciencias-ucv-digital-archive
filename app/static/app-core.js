@@ -36,37 +36,38 @@ function showToast(message, type, duration) {
   // en /archivo y /rrhh (páginas públicas) no existe y los avisos —incluida la
   // de sesión expirada— se perdían en silencio. Se crea aquí si falta, así el
   // arreglo vale para cualquier página presente o futura sin tocar cada HTML.
+  // El posicionamiento y los colores por tipo (SD-039/SD-129) viven en
+  // styles.css (#ds-toast-container, .ds-toast, .ds-toast--<tipo>), con su
+  // par oscuro — aquí sólo se aplican las clases.
   let container = document.getElementById("ds-toast-container");
   if (!container) {
     container = document.createElement("div");
     container.id = "ds-toast-container";
-    container.style.cssText = "position:fixed;top:70px;right:20px;z-index:99999;";
+    container.setAttribute("aria-live", "polite");
+    container.setAttribute("aria-atomic", "true");
     document.body.appendChild(container);
+  } else if (!container.hasAttribute("aria-live")) {
+    container.setAttribute("aria-live", "polite");
+    container.setAttribute("aria-atomic", "true");
   }
 
-  const colors = {
-    success: { bg: "#d4edda", color: "#155724", border: "#c3e6cb", icon: "fas fa-check-circle" },
-    error:   { bg: "#f8d7da", color: "#721c24", border: "#f5c6cb", icon: "fas fa-times-circle" },
-    warning: { bg: "#fff3cd", color: "#856404", border: "#ffeeba", icon: "fas fa-exclamation-triangle" },
-    info:    { bg: "#d1ecf1", color: "#0c5460", border: "#bee5eb", icon: "fas fa-info-circle" },
+  const icons = {
+    success: "fas fa-check-circle",
+    error:   "fas fa-times-circle",
+    warning: "fas fa-exclamation-triangle",
+    info:    "fas fa-info-circle",
   };
-  const cfg = colors[type] || colors.info;
+  const icon = icons[type] || icons.info;
 
   const toast = document.createElement("div");
-  toast.style.cssText = `background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border};border-radius:8px;padding:10px 14px;margin-bottom:8px;min-width:260px;max-width:380px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:0.87rem;transition:opacity 0.4s,transform 0.3s;transform:translateX(20px);`;
-  toast.innerHTML = `<i class="${cfg.icon}" style="font-size:1rem;flex-shrink:0;margin-top:2px;"></i><span style="flex:1;"></span><button style="background:none;border:none;padding:0 0 0 8px;cursor:pointer;opacity:0.6;color:inherit;font-size:1rem;" onclick="this.closest('div').remove()">✕</button>`;
-  toast.querySelector("span").textContent = message;
+  toast.className = `ds-toast ds-toast--${type}`;
+  toast.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span class="ds-toast-msg"></span><button type="button" class="ds-toast-close" aria-label="Cerrar aviso">✕</button>`;
+  toast.querySelector(".ds-toast-msg").textContent = message;
   container.appendChild(toast);
 
-  requestAnimationFrame(() => { toast.style.transform = "translateX(0)"; });
-
-  const dismiss = () => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateX(20px)";
-    setTimeout(() => toast.remove(), 400);
-  };
+  const dismiss = () => toast.remove();
   const timer = setTimeout(dismiss, ttl);
-  toast.querySelector("button").addEventListener("click", () => clearTimeout(timer));
+  toast.querySelector(".ds-toast-close").addEventListener("click", () => { clearTimeout(timer); dismiss(); });
 }
 
 // ==========================================================================

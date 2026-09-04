@@ -198,13 +198,27 @@ function switchTab(tabId) {
   }
 }
 
+// SI-185: el botón que abre/cierra el menú avisa de su estado
+// (aria-expanded) y el foco entra al menú al abrirlo y vuelve al botón al
+// cerrarlo — sin esto, quien navega por teclado o lector de pantalla no
+// sabe si el menú está abierto ni dónde quedó el foco tras cerrarlo.
 function openSidebar() {
   document.getElementById("app-sidebar")?.classList.add("open");
   document.getElementById("sidebar-overlay")?.classList.add("open");
+  const toggleBtn = document.getElementById("sidebar-toggle-btn");
+  toggleBtn?.setAttribute("aria-expanded", "true");
+  toggleBtn?.setAttribute("aria-label", "Cerrar menú");
+  document.getElementById("app-sidebar")?.querySelector("a, button")?.focus();
 }
 function closeSidebar() {
   document.getElementById("app-sidebar")?.classList.remove("open");
   document.getElementById("sidebar-overlay")?.classList.remove("open");
+  const toggleBtn = document.getElementById("sidebar-toggle-btn");
+  toggleBtn?.setAttribute("aria-expanded", "false");
+  toggleBtn?.setAttribute("aria-label", "Abrir menú");
+  if (toggleBtn && document.activeElement && document.getElementById("app-sidebar")?.contains(document.activeElement)) {
+    toggleBtn.focus();
+  }
 }
 
 // ==========================================================================
