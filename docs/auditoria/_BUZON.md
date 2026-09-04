@@ -799,3 +799,42 @@ contra el contenido esperado. `python -m pytest app/tests/test_auth.py
 app/tests/test_autorizacion_deps.py -q`: 19 passed. El resto de la suite
 (`python -m pytest app/tests -q`) da los mismos 29 fallos preexistentes ya documentados
 arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
+
+- [ ] `BR-109` · **archivo**: `app/static/styles.css` · **carril dueño**: G1-estilos
+      **quién lo pide**: agente-br109-dossier-estilos (BR-109)
+      **qué hace falta**: definir en `styles.css` las clases nuevas que `hr.js` ya emite
+      en el dossier de empleado (`renderRrhhDossierModal`, `filterInnerDossier`,
+      `_renderDossierFileList`, `_toggleHistorialCargos`) en vez de los ~15 atributos
+      `style="..."` que tenía ese bloque. Sin estas clases el dossier queda sin estilo
+      visual hasta que las añadan — es un paso intermedio necesario, no un olvido.
+      Lista exacta, con las propiedades que tenían los `style` que quité:
+
+      - `.ds-dossier-avatar-wrap` → `width:150px; min-width:150px;`
+      - `.ds-dossier-subheading` → `font-size:0.78rem;` (se usa en dos `<h6>` del dossier:
+        "Documentos de Identidad" e "Historial de Cargos")
+      - `.ds-dossier-historial-inline` → `font-size:0.82rem;` (el `display:none` inicial
+        ya no hace falta como propiedad propia: la clase Bootstrap `d-none` lo cubre y
+        `hr.js` la añade/quita con `classList`, así que sólo falta el `font-size`)
+      - `.ds-dossier-historial-table` → `font-size:0.8rem;`
+      - `.ds-dossier-parte-tab` → `font-size:0.82rem; padding:6px 12px;`
+      - `.ds-dossier-parte-icon` → `color: var(--ds-parte-color, inherit);` (la variable
+        `--ds-parte-color` la pone `hr.js` inline por elemento, con el color propio de
+        cada una de las 4 partes del expediente — `RRHH_PARTES` en `hr.js` — así que la
+        regla debe leer la variable, no un color fijo)
+      - `.ds-dossier-parte-badge` → `background: var(--ds-parte-color, #6c757d); color:#fff;
+        font-size:0.68rem;`
+
+      Nota: quedan fuera de este pendiente (y siguen con `style=` en línea) el listado de
+      resultados de búsqueda (`renderRrhhList`/`showRrhhSkeleton`, líneas ~1-172 de
+      `hr.js`) y el panel de facetas (`_renderRrhhFacets`, líneas ~620-660): no son el
+      dossier de un empleado sino la pantalla de búsqueda, y BR-109 según la ficha
+      (`docs/auditoria/buscador-rrhh.md`) se limita al bloque del dossier. Si algún otro
+      pendiente cubre ese listado, que revise esos mismos `style=` — no los toqué por no
+      ser mi carril declarado.
+
+      Commit: `76186a9` ("BR-109: sacar estilos en linea del dossier de empleado en
+      hr.js"). `python -m pytest app/tests -q`: los fallos que hay (`test_misc.py`,
+      `test_static_analysis.py`, `test_imports.py`) son de otros agentes trabajando en
+      paralelo sobre archivos que no toqué (`test_misc.py`, `app-core.js`, `app.js`,
+      `imports.py` aparecían modificados en el árbol de trabajo compartido al momento de
+      correr la suite) — ninguno menciona `hr.js`.
