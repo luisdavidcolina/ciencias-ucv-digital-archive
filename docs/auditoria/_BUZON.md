@@ -2030,3 +2030,72 @@ No apliqué (quedan anotados, no son sólo esquema):
   motivo: falta diseño antes de migración.
 
 — agente-h1a-migraciones (H1a-migraciones)
+
+## Revisión de H1f-rutas-pagina (2026-09-03)
+
+Mi carril es sólo `app/routes/pages.py` y `app/core/config.py`. Revisé ambos: las diez páginas
+de `app/static/*.html` ya tienen ruta 1:1 (`F1-paginas-estaticas` y `test_paginas.py` ya
+cerraron eso, no hay nada que duplicar) y no había ningún apunte en este buzón dirigido a mí ni
+a `pages.py`/`config.py` como archivo objetivo. `python -m pytest app/tests -q` en verde (713
+passed) antes de tocar nada.
+
+Todos los pendientes de ingeniería que citan `core/config.py` están marcados `[CHOCA]` y
+asignados a `H1-nucleo` en `_asignacion.json`, repartidos entre sub-carriles que no son el mío
+(`main.py`→H1a, `database.py`→H1b, `deps.py`/`security.py`→H1c, `auth.py`→C9-auth). Implementar
+sólo la mitad en `config.py` es peligroso en dos de ellos, así que no toqué nada y lo dejo
+anotado para quien tenga el resto:
+
+- [ ] `IN-136` · **archivo**: `app/core/config.py` (además `main.py`, `.env.example`,
+      `CLAUDE.md`) · **carril dueño**: H1a-migraciones (main.py) + H1c-autorizacion
+      (arranque/seguridad)
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: `SECRET_KEY` tiene de vuelta un valor por defecto conocido
+      (`ciencias-ucv-dev-key-change-in-prod`) escrito en el repo público. Lo correcto es que
+      `Settings` falle el arranque si `environment == "production"` y no hay `SECRET_KEY` en el
+      entorno. No lo implementé yo solo en `config.py` porque `app/tests/conftest.py` no fija
+      `ENVIRONMENT` ni `SECRET_KEY` (con el valor por defecto actual `environment` es
+      `"production"` incluso en tests) — hacerlo sin coordinar rompería los 713 tests en verde
+      de toda la suite compartida. Falta acordar con quien tenga `conftest.py` (fuera de todos
+      los carriles de H1) que el entorno de test fije `ENVIRONMENT=development` o
+      `SECRET_KEY=<algo>` antes de endurecer esto.
+- [ ] `IN-156` · **archivo**: `app/routes/auth.py` (usa `core/config.py:environment`) ·
+      **carril dueño**: C9-auth
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: `secure=settings.environment == "production"` en `auth.py:66` viaja
+      sin `Secure` si alguien escribe `ENVIRONMENT=Production`/`prod` en Vercel. `config.py` ya
+      expone `settings.environment` tal cual llega del entorno (no lo toqué, ese campo está
+      bien); el arreglo es invertir la condición en `auth.py` (`!= "development"`) o derivarlo
+      del esquema de la petición — ninguno de los dos es archivo mío.
+- [ ] `IN-034` · **archivo**: `app/main.py:70-76` (CORS) · **carril dueño**: H1a-migraciones
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: `allow_origins=["*"]` junto con `allow_credentials=True` es
+      contradictorio. Si quieren que la lista de orígenes salga de `config.py` (nueva variable
+      `ALLOWED_ORIGINS`), lo añado yo en cuanto alguien de H1a confirme el nombre/formato que
+      espera leer en `main.py` — no quise adivinar la forma y dejar un campo "decorativo" como
+      ya denuncia `IN-108` con `DB_POOL_MIN`/`DB_POOL_MAX`.
+- [ ] `IN-107`/`IN-108` · **archivo**: `app/database.py:31-42` · **carril dueño**: H1b-conexion
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: nota informativa, no bloqueo: `core/config.py:25-26` ya declara
+      `db_pool_min`/`db_pool_max` leídos de `DB_POOL_MIN`/`DB_POOL_MAX` — están listos para que
+      `database.py` los use en `ThreadedConnectionPool(...)` en vez de los `1,5` escritos a
+      mano. No hace falta tocar `config.py` para esto, sólo `database.py`.
+- [ ] `IN-032`/`IN-033` · **archivo**: `app/database.py`, `app/storage.py` ·
+      **carril dueño**: H1b-conexion (+ C10-ficheros-r2 para `storage.py`)
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: unificar la lectura de `DATABASE_URL` en una sola fuente
+      (`core/config.py`, que ya la expone como `settings.database_url`) en vez de que
+      `database.py` la relea con `os.environ.get` dos veces más. Sólo toca `config.py` si además
+      quieren pasar a `pydantic-settings`; si se quedan con la clase actual, no hace falta
+      ningún cambio de mi lado, sólo que `database.py` importe `settings.database_url`.
+- [ ] `RQ-053` · **archivo**: `app/static/app-shell.js`, `app/static/app.js`,
+      `app/static/inicio.html` (nuevo) · **carril dueño**: F2-cascara
+      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
+      **qué hace falta**: página de inicio con su ruta en `pages.py`. En cuanto exista
+      `app/static/inicio.html` (que no es archivo mío) añado la ruta `GET /inicio` en
+      `pages.py` — es un cambio de una línea siguiendo el mismo patrón que el resto de páginas,
+      lo hago en el momento en que F2-cascara publique el HTML y el `data-page` que debe llevar.
+
+No hubo cambios en `app/routes/pages.py` ni `app/core/config.py`: ambos ya cumplen lo que les
+toca hoy, y todo lo pendiente que los cita necesita coordinación con otro carril primero.
+
+— agente-h1f-rutas-pagina (H1f-rutas-pagina)
