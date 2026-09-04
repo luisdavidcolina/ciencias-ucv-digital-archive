@@ -37,12 +37,15 @@ async function checkPersistedSession() {
 
 function loginSuccess(user) {
   const pageAttr = document.body.dataset.page;
-  // La página manda sobre el módulo activo. Las dos búsquedas públicas faltaban,
-  // así que en /rrhh la credencial seguía diciendo "Archivo".
-  if      (pageAttr === "admin-archivo" || pageAttr === "archivo") user.modulo = "Archivo";
-  else if (pageAttr === "admin-rrhh"    || pageAttr === "rrhh")    user.modulo = "RRHH";
-
   user.modules = user.modules || (user.modulo ? [user.modulo] : []);
+  // La página sólo decide el módulo activo si el usuario de verdad lo tiene.
+  // Antes se reescribía user.modulo con el de la página aunque no estuviera
+  // en sus módulos reales, y esa mentira quedaba persistida en localStorage:
+  // quien sólo tenía RRHH y visitaba /archivo (antes del rebote) se quedaba
+  // con la credencial diciendo "Archivo" hasta el siguiente login (SI-046).
+  if      ((pageAttr === "admin-archivo" || pageAttr === "archivo") && user.modules.includes("Archivo")) user.modulo = "Archivo";
+  else if ((pageAttr === "admin-rrhh"    || pageAttr === "rrhh")    && user.modules.includes("RRHH"))    user.modulo = "RRHH";
+
   user.roles = user.roles || {};
   if (Object.keys(user.roles).length === 0 && user.modulo) {
     user.roles[user.modulo] = user.rol || "Normal";
@@ -68,6 +71,7 @@ function loginSuccess(user) {
   loadDynamicChoices();
   configureSidebarVisibilities(user);
   _initNotificationBell(user);
+  _startSessionExpiryWatch();
 
   // Auto-open edit modal when navigating from public search (?docId= / ?empId=)
   const _page = document.body.dataset.page;
@@ -86,8 +90,37 @@ function loginSuccess(user) {
   }
 }
 
-function logout() {
-  fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+// SI-043: nada avisaba antes de que la sesión caducara — quien llevaba rato
+// redactando una ficha recibía un 401 sin aviso y perdía el trabajo al
+// guardar. Avisa 5 minutos antes; el guardado del borrador en sí depende de
+// cada formulario (admin-submit.js/admin-edit.js, fuera de este archivo).
+let _sessionExpiryTimer = null;
+let _sessionWarnShown = false;
+function _startSessionExpiryWatch() {
+  if (_sessionExpiryTimer) clearInterval(_sessionExpiryTimer);
+  _sessionWarnShown = false;
+  _sessionExpiryTimer = setInterval(() => {
+    const raw = localStorage.getItem("archive_session");
+    if (!raw) { clearInterval(_sessionExpiryTimer); return; }
+    let saved;
+    try { saved = JSON.parse(raw); } catch { return; }
+    if (!saved || !saved.ts) return;
+    const ttlMs = 12 * 60 * 60 * 1000;
+    const remaining = ttlMs - (Date.now() - saved.ts);
+    if (remaining <= 0) { clearInterval(_sessionExpiryTimer); return; }
+    if (remaining <= 5 * 60 * 1000 && !_sessionWarnShown) {
+      _sessionWarnShown = true;
+      showToast("Tu sesión expira en unos minutos. Guarda lo que estés editando.", "warning");
+    }
+  }, 30000);
+}
+
+async function logout() {
+  // Antes se lanzaba sin esperar y se navegaba enseguida: la navegación
+  // podía cancelar la petición, la cookie sobrevivía, y quien abriera el
+  // navegador después entraba directamente (SI-044).
+  try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+  if (_sessionExpiryTimer) clearInterval(_sessionExpiryTimer);
   state.user = null;
   localStorage.removeItem("archive_session");
   // Antes había una rama para ocultar el portal de la SPA sin navegar; esa

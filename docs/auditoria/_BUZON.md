@@ -39,7 +39,7 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       `/api/files/{key}`. Falta la credencial de dispositivo en sí, que vive en `deps.py`/
       `users.py`, fuera de mi carril.
 
-- [ ] `DG-169` · **archivo**: `app/tests/test_upload.py` (nuevo), `app/tests/conftest.py`
+- [x] `DG-169` · **archivo**: `app/tests/test_upload.py` (nuevo), `app/tests/conftest.py`
       · **carril dueño**: ninguno abierto todavía (archivo de tests, no está en mi lista de
       archivos)
       **quién lo pide**: agente-c10-ficheros-r2 (C10-ficheros-r2)
@@ -47,6 +47,9 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       vacío, tamaño, sin sesión) y una que confirme que la identidad ya no se puede falsear desde
       el campo `usuario` del formulario (ahora usa `require_session`). No creo el archivo porque
       mi carril declarado es solo `files.py`, `share.py`, `compartido.html`.
+      **Confirmado resuelto (agente-sweep2-misc, SWEEP2-misc)**: `app/tests/test_upload.py` ya
+      existe (creado por `agente-sweep-tests-nuevos`, ver tanda `SWEEP-tests-nuevos` más abajo en
+      este archivo), 9 pruebas, incluida la de DG-083. No hizo falta ningún cambio.
 
 
 - [x] `OR-009` · confirmado por agente-sweep2-admin-html (SWEEP2-admin-html): ya resuelto por
@@ -63,7 +66,7 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       contenido es correcto (initDropZone duplicado eliminado, mojibake corregido), no reparo el
       historial. — agente-b9-admin-edit-rrhh (B9-admin-edit-rrhh)
 
-- [ ] `C4-retencion` · **archivo**: `app/tests/test_misc.py` (clase `TestRetencion`, y
+- [x] `C4-retencion` · **archivo**: `app/tests/test_misc.py` (clase `TestRetencion`, y
       probablemente clases equivalentes de otros carriles del abanico O1: Keywords/Categories en
       `test_misc.py`, y varias en `test_admin.py`) · **carril dueño**: ninguno en
       `PLAN-PARALELO.md` — es un archivo de pruebas legado, no aparece en la tabla de carriles.
@@ -130,6 +133,12 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       documento el hueco en un comentario dentro de
       `app/tests/test_autorizacion_papelera.py::TestPurgarDocumento`. Queda pendiente para quien
       toque `deps.py` (o para una vuelta posterior de este carril si se reabre).
+
+      **Confirmado resuelto (agente-sweep2-misc, SWEEP2-misc)**: `app/tests/test_misc.py` ya
+      usa `client_as` + `_fila_usuario()` en sus 24 pruebas (migración hecha por
+      `agente-h3b-legacy-fixtures`, commit `a4d7913`, ver también la nota de
+      `agente-sweep-tests-nuevos` más abajo en este mismo archivo). `python -m pytest
+      app/tests/test_misc.py -q` da 24/24 en verde. No hizo falta ningún cambio.
 
 - [ ] `A2-archivo-backend` · **archivo**: `app/routes/archive.py` (decisión de producto, no de
       código) · **carril dueño**: ninguno — es la decisión #2 pendiente del dueño en
@@ -1990,10 +1999,22 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       **agente-c9-auth** más arriba en este mismo `_BUZON.md` (commit `de9f6cf`); el resto
       (SI-033 formulario real, SI-038 recuperación, SI-050–054 accesibilidad del login) sigue
       pendiente.
-- [ ] `SI-043`–`SI-046`, `SI-058` (parte de `app.js`) · **archivo**: `app/static/app.js` ·
-      **carril dueño**: H2-app-js `[CHOCA]` — SI-058 ya tiene su mitad resuelta por
-      **agente-h2-app-js** (VI-001, commit `5b566e4`): `switchTab` ya conoce `admin-sistema`.
-      Queda la otra mitad (una sola función de control de acceso, llamada una vez) sin hacer.
+- [x] `SI-044`, `SI-046` (parte de `app.js`), `SI-043` (parcial) · resuelto por
+      agente-sweep2-shell-app (SWEEP2-shell-app): `logout()` ahora espera la respuesta de
+      `POST /api/auth/logout` antes de navegar a `/` (SI-044 — antes la navegación podía
+      cancelar la petición y la cookie sobrevivía). `loginSuccess()` ya no reescribe
+      `user.modulo` con el módulo de la página si el usuario no lo tiene realmente en
+      `user.modules` (SI-046 — antes un usuario sólo-RRHH que visitaba `/archivo` quedaba con
+      la credencial persistida diciendo "Archivo" hasta el siguiente login). SI-043 (aviso
+      antes de que expire la sesión): añadido `_startSessionExpiryWatch()`, temporizador que
+      avisa por toast cuando quedan ≤5 minutos de TTL; **parcial** — no incluye botón de
+      renovar ni guardado de borrador, que dependen de cada formulario
+      (`admin-submit.js`/`admin-edit.js`, fuera de este archivo).
+      **`SI-045`, `SI-058` (mitad de `app.js`) — no resueltos**: SI-045 (una sola fuente de
+      verdad entre cookie y `localStorage`, vía `/api/auth/me`) y la mitad de SI-058 que exige
+      coordinar con `admin_system.html` (su `checkSession()` duplica el control de acceso, y
+      ese HTML no es de mi carril) quedan pendientes — cambios más grandes que tocan el
+      contrato con el backend o con un HTML ajeno, fuera de esta pasada.
 - [x] `SI-097`–`SI-106`, `SI-109` · marcado por agente-sweep2-admin-html (SWEEP2-admin-html):
       entrada duplicada — ya resueltas por agente-sweep-admin-html (`admin_ai.html`, ver nota
       "SWEEP-admin-html" más abajo en este mismo archivo, ~línea 2636), salvo la mitad backend
@@ -2047,7 +2068,8 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       **queda pendiente**, fuera de mi zona: `SI-184` (lista/encabezados semánticos, pide
       además `styles.css`), `SI-201`/`SI-202` (`app-theme.js`/`styles.css`, preferencia de
       sistema y `forced-colors`) — no toqué ninguno de los dos archivos.
-- [ ] `SI-205` · **archivo**: `app/static/admin_ai.html` · igual que el bloque de arriba.
+- [x] `SI-205` · marcado por agente-sweep2-admin-html (SWEEP2-admin-html): entrada duplicada —
+      ya resuelta por agente-sweep-admin-html (ver ~línea 2684 de este mismo archivo).
 - [ ] `SI-211` · **archivo**: multi-archivo (`app-core.js`, `app.js`, todas las páginas) ·
       cambio arquitectónico (migrar a módulos ES), no tiene sentido resolverlo tocando un solo
       HTML.
@@ -2182,14 +2204,22 @@ Pendientes de mi lote que necesitan un archivo que no es mío, anotados aquí en
       entre tablas es un cambio de contrato de ese módulo) — el comportamiento actual ya es "por
       tabla, todo o nada", no "fila por fila a medias". `python -m pytest
       app/tests/test_backup.py app/tests/test_backup_programado.py -q` en verde antes y después.
-- [ ] `SI-235` · **archivo**: `app/tests/test_cabeceras.py` (nuevo) · **carril dueño**: ninguno
+- [x] `SI-235` · **archivo**: `app/tests/test_cabeceras.py` (nuevo) · **carril dueño**: ninguno
       abierto (ficheros de test no están en mi lista de archivos)
       **qué hace falta**: una prueba que lea `vercel.json` y confirme que `/(.*)` lleva las
       cabeceras de seguridad. Ya añadí esas cabeceras (ver arriba); falta el guarda. No creo
       ficheros de test fuera de mi zona declarada (`vercel.json`, `api/*`).
-- [ ] `BA-112`/`SD-021`/`SD-235` · **archivo**: `app/static/archive.html` (BA-112, preconnect
+      **Confirmado resuelto (agente-sweep2-misc, SWEEP2-misc)**: `app/tests/test_cabeceras.py`
+      ya existe (creado por `agente-sweep-tests-nuevos`), 12 pruebas. No hizo falta ningún
+      cambio.
+- [x] `BA-112` (parcial, resto sin marcar) /`SD-021`/`SD-235` · **archivo**: `app/static/archive.html` (BA-112, preconnect
       de fuentes), `CLAUDE.md`/`styles.css` (SD-021, documentar tokens), `app/routes/hr.py`
       (SD-235, impresión) · no tocan `vercel.json`/`api/*`, quedan fuera de mi carril.
+      **Confirmado (agente-sweep2-misc, SWEEP2-misc)**: `app/static/archive.html:7-8` ya tiene
+      `<link rel="preconnect" href="https://fonts.googleapis.com">` y el mismo para
+      `fonts.gstatic.com` con `crossorigin` — BA-112 ya estaba resuelto, no hizo falta ningún
+      cambio en mi archivo. SD-021 (`CLAUDE.md`/`styles.css`) y SD-235 (`hr.py`) siguen sin
+      tocar: no son de mi zona (`archive.html` no es dueño de ninguno de los dos).
 - [ ] `BR-160` · no encontrado en `docs/auditoria/backoffice-rrhh.md` con ese identificador
       exacto al momento de revisar; puede ser un error de trascripción en `PLAN-PARALELO.md`
       o estar en un documento que no revisé línea por línea. No lo puedo cerrar sin localizarlo.
