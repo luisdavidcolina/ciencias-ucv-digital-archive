@@ -32,7 +32,17 @@
   </style>
 </head>
 <body data-page="admin-ia"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
-<div class="container-fluid py-4" style="max-width:1200px">
+
+<!-- Barra superior: definida en app-shell.js. -->
+<div id="app-shell-navbar"></div>
+
+<!-- Menú lateral: se renderiza desde app-shell.js, que es donde vive su única definición. -->
+<div id="app-shell-sidebar"></div>
+<script src="/static/app-shell.js"></script>
+
+<div id="ds-toast-container" style="position:fixed;top:70px;right:20px;z-index:99999;"></div>
+
+<div class="container-fluid py-4" role="main" style="max-width:1200px">
 
   <div class="ds-breadcrumb-wrapper mb-3">
     <div class="ds-breadcrumb"><i class="fas fa-robot"></i> Panel de Control / Asistente IA</div>
@@ -223,10 +233,16 @@ api("/api/ia/disponible").then(r => r.json()).then(d => {
     el.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> ' +
       esc(d.motivo) + ' El asistente está apagado y la burbuja de chat no aparece en el sistema.</div>';
   }
+}).catch(() => {
+  document.getElementById("estado-alerta").innerHTML =
+    '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> No se pudo consultar el estado del asistente.</div>';
 });
 
 // --- config ---------------------------------------------------------------
-api("/api/ia/config").then(r => r.json()).then(c => {
+api("/api/ia/config").then(r => {
+  if (!r.ok) throw new Error();
+  return r.json();
+}).then(c => {
   document.getElementById("cfg-nombre").value = c.nombre || "";
   document.getElementById("cfg-tono").value = c.tono || "institucional";
   document.getElementById("cfg-conocimiento").value = c.conocimiento || "";
@@ -234,6 +250,10 @@ api("/api/ia/config").then(r => r.json()).then(c => {
   document.getElementById("cfg-tope").value = c.tope_diario;
   document.getElementById("cfg-maxtok").value = c.max_tokens;
   modeloActual = c.modelo || "";
+}).catch(() => {
+  if (typeof showToast === "function") {
+    showToast("No se pudo cargar la configuración del asistente.", "error");
+  }
 });
 
 document.getElementById("btn-guardar").addEventListener("click", () => {
@@ -256,7 +276,15 @@ document.getElementById("btn-guardar").addEventListener("click", () => {
 });
 
 // --- gasto ----------------------------------------------------------------
-api("/api/ia/gastos?dias=30").then(r => r.json()).then(d => {
+document.getElementById("gasto-resumen").innerHTML =
+  '<div class="ds-skeleton" style="width:70%"></div><div class="ds-skeleton mt-2" style="width:40%"></div>';
+document.getElementById("gasto-tabla").innerHTML =
+  '<tr><td colspan="4"><div class="ds-skeleton"></div></td></tr>';
+
+api("/api/ia/gastos?dias=30").then(r => {
+  if (!r.ok) throw new Error();
+  return r.json();
+}).then(d => {
   const pct = d.tope_diario ? Math.min(100, (d.hoy / d.tope_diario) * 100) : 0;
   document.getElementById("gasto-resumen").innerHTML =
     '<div class="d-flex justify-content-between"><span>Hoy</span>' +
@@ -273,48 +301,89 @@ api("/api/ia/gastos?dias=30").then(r => r.json()).then(d => {
     '</td><td class="text-right">' + (f.tokens || 0).toLocaleString() +
     '</td><td class="text-right">$' + Number(f.costo || 0).toFixed(4) + '</td></tr>'
   ).join("") || '<tr><td colspan="4" class="text-muted">Sin actividad todavía.</td></tr>';
+}).catch(() => {
+  document.getElementById("gasto-resumen").innerHTML = '<div class="text-danger small">No se pudo cargar el gasto.</div>';
+  document.getElementById("gasto-tabla").innerHTML = '<tr><td colspan="4" class="text-danger">Error al cargar.</td></tr>';
 });
 
 // --- conversaciones -------------------------------------------------------
-api("/api/ia/conversaciones?limite=40").then(r => r.json()).then(d => {
-  document.getElementById("conv-tabla").innerHTML = (d.conversaciones || []).map(c =>
-    '<tr><td><div class="text-truncate" style="max-width:230px">' + esc(c.titulo || "(sin título)") +
+document.getElementById("conv-tabla").innerHTML =
+  '<tr><td class="p-2"><div class="ds-skeleton"></div></td></tr>';
+
+function pintarConversaciones(lista) {
+  document.getElementById("conv-tabla").innerHTML = (lista || []).map(c =>
+    '<tr data-conv-id="' + c.id + '"><td><div class="text-truncate" style="max-width:230px">' + esc(c.titulo || "(sin título)") +
     '</div><small class="text-muted">' + esc(c.ultima || "") + ' · ' + esc(c.perfil) + ' · ' +
     esc(c.usuario || "público") + ' · ' + c.mensajes + ' msgs · $' +
     Number(c.costo || 0).toFixed(4) + '</small></td>' +
     '<td class="text-right align-middle"><button class="btn btn-sm btn-link text-danger" ' +
     'onclick="borrarConv(' + c.id + ')"><i class="fas fa-trash"></i></button></td></tr>'
   ).join("") || '<tr><td class="text-muted p-3">Sin conversaciones.</td></tr>';
-});
+}
+
+api("/api/ia/conversaciones?limite=40").then(r => {
+  if (!r.ok) throw new Error();
+  return r.json();
+}).then(d => pintarConversaciones(d.conversaciones))
+  .catch(() => {
+    document.getElementById("conv-tabla").innerHTML =
+      '<tr><td class="text-danger p-3">No se pudieron cargar las conversaciones.</td></tr>';
+  });
 
 function borrarConv(id) {
-  if (!confirm("¿Borrar esta conversación y todos sus mensajes?")) return;
-  api("/api/ia/conversacion/" + id, { method: "DELETE" }).then(() => location.reload());
+  const fila = document.querySelector('#conv-tabla tr[data-conv-id="' + id + '"]');
+  const hacerBorrado = () => api("/api/ia/conversacion/" + id, { method: "DELETE" }).then(r => {
+    if (!r.ok) throw new Error();
+    if (fila) fila.remove();
+    if (typeof showToast === "function") showToast("Conversación borrada.", "success");
+    else if (!document.getElementById("conv-tabla").children.length) location.reload();
+  }).catch(() => {
+    if (typeof showToast === "function") showToast("No se pudo borrar la conversación.", "error");
+    else alert("No se pudo borrar la conversación.");
+  });
+
+  if (typeof confirmModal === "function") {
+    confirmModal("Borrar conversación", "¿Borrar esta conversación y todos sus mensajes?", "Borrar", "btn-danger")
+      .then(ok => { if (ok) hacerBorrado(); });
+  } else if (confirm("¿Borrar esta conversación y todos sus mensajes?")) {
+    hacerBorrado();
+  }
 }
 
 // --- propuestas -----------------------------------------------------------
 function cargarPropuestas() {
   const estado = document.getElementById("prop-estado").value;
-  api("/api/ia/propuestas?estado=" + encodeURIComponent(estado)).then(r => r.json()).then(d => {
+  document.getElementById("prop-tabla").innerHTML = '<div class="ds-skeleton"></div>';
+  api("/api/ia/propuestas?estado=" + encodeURIComponent(estado)).then(r => {
+    if (!r.ok) throw new Error();
+    return r.json();
+  }).then(d => {
     const filas = d.propuestas || [];
     document.getElementById("prop-tabla").innerHTML = filas.length
-      ? '<table class="table table-sm"><thead class="thead-light"><tr>' +
-        '<th>Qué</th><th>Módulo</th><th>Pidió</th><th>Resolvió</th><th>Fecha</th>' +
+      ? '<div class="table-responsive"><table class="table table-sm"><thead class="thead-light"><tr>' +
+        '<th>Qué</th><th>Módulo</th><th>Pidió</th><th class="ds-hide-xs">Resolvió</th><th class="ds-hide-xs">Fecha</th>' +
         '</tr></thead><tbody>' +
         filas.map(p =>
           '<tr><td>' + esc(p.resumen || p.accion) + '</td>' +
           '<td><span class="badge badge-secondary">' + esc(p.modulo) + '</span></td>' +
           '<td>' + esc(p.usuario || "—") + '</td>' +
-          '<td>' + esc(p.resuelto_por || "—") + '</td>' +
-          '<td><small>' + esc(p.resuelta || p.creada || "") + '</small></td></tr>'
-        ).join("") + '</tbody></table>'
+          '<td class="ds-hide-xs">' + esc(p.resuelto_por || "—") + '</td>' +
+          '<td class="ds-hide-xs"><small>' + esc(p.resuelta || p.creada || "") + '</small></td></tr>'
+        ).join("") + '</tbody></table></div>'
       : '<div class="text-muted">Sin propuestas en este estado.</div>';
+  }).catch(() => {
+    document.getElementById("prop-tabla").innerHTML =
+      '<div class="text-danger">No se pudieron cargar las propuestas.</div>';
   });
 }
 document.getElementById("prop-estado").addEventListener("change", cargarPropuestas);
 cargarPropuestas();
 
 // --- modelos --------------------------------------------------------------
+let ordenModelos = { campo: "costo_mil", dir: 1 };
+let filtroSoloHerramientas = false;
+let filtroSoloCache = false;
+
 api("/api/ia/modelos").then(r => {
   if (!r.ok) throw new Error();
   return r.json();
@@ -327,20 +396,75 @@ api("/api/ia/modelos").then(r => {
     '<div class="text-danger">No se pudo consultar el catálogo de OpenRouter.</div>';
 });
 
-document.getElementById("modelo-filtro").addEventListener("input", e => pintarModelos(e.target.value));
+// SI-104: sin retardo, cada tecla reconstruía hasta 250 filas de golpe.
+let _filtroModelosTimer = null;
+document.getElementById("modelo-filtro").addEventListener("input", e => {
+  const valor = e.target.value;
+  clearTimeout(_filtroModelosTimer);
+  _filtroModelosTimer = setTimeout(() => pintarModelos(valor), 200);
+});
 
+function _ordenarModelos(lista) {
+  const campo = ordenModelos.campo;
+  return lista.slice().sort((a, b) => {
+    const av = a[campo], bv = b[campo];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === "string") return ordenModelos.dir * av.localeCompare(bv);
+    return ordenModelos.dir * (av - bv);
+  });
+}
+
+function ordenarModelosPor(campo) {
+  if (ordenModelos.campo === campo) ordenModelos.dir *= -1;
+  else { ordenModelos.campo = campo; ordenModelos.dir = 1; }
+  pintarModelos(document.getElementById("modelo-filtro").value);
+}
+
+function toggleFiltroModelos(cual) {
+  if (cual === "herramientas") filtroSoloHerramientas = !filtroSoloHerramientas;
+  else filtroSoloCache = !filtroSoloCache;
+  pintarModelos(document.getElementById("modelo-filtro").value);
+}
+
+function _flechaOrden(campo) {
+  if (ordenModelos.campo !== campo) return "";
+  return ' <i class="fas fa-sort-' + (ordenModelos.dir === 1 ? "up" : "down") + '"></i>';
+}
+
+// SI-105/SI-106: cabeceras ordenables (por defecto, $/1000 msgs, que es la que
+// decide de verdad), dos filtros de casilla y el total real cuando el filtro
+// corta la lista, para no esconder un modelo que sí existe.
 function pintarModelos(filtro) {
   const f = (filtro || "").toLowerCase();
-  const lista = modelosCache.filter(m =>
+  let lista = modelosCache.filter(m =>
     !f || m.nombre.toLowerCase().includes(f) || m.empresa.toLowerCase().includes(f) ||
     m.id.toLowerCase().includes(f)
-  ).slice(0, 250);
+  );
+  if (filtroSoloHerramientas) lista = lista.filter(m => m.herramientas);
+  if (filtroSoloCache) lista = lista.filter(m => m.cache);
+  const total = lista.length;
+  lista = _ordenarModelos(lista).slice(0, 250);
+
+  const cab = (campo, label, alinDer) =>
+    '<th style="cursor:pointer" class="' + (alinDer ? "text-right" : "") + '" onclick="ordenarModelosPor(\'' + campo + '\')">' +
+    label + _flechaOrden(campo) + '</th>';
 
   document.getElementById("modelos-tabla").innerHTML =
-    '<table class="table table-sm table-hover"><thead class="thead-light"><tr>' +
-    '<th>Modelo</th><th>Herram.</th><th>Caché</th>' +
-    '<th class="text-right">$/M in</th><th class="text-right">$/M out</th>' +
-    '<th class="text-right">$ / 1000 msgs</th></tr></thead><tbody>' +
+    '<div class="mb-2">' +
+      '<label class="mr-3"><input type="checkbox" ' + (filtroSoloHerramientas ? "checked" : "") +
+        ' onchange="toggleFiltroModelos(\'herramientas\')"> Sólo con herramientas</label>' +
+      '<label><input type="checkbox" ' + (filtroSoloCache ? "checked" : "") +
+        ' onchange="toggleFiltroModelos(\'cache\')"> Sólo con caché</label>' +
+    '</div>' +
+    (total > lista.length
+      ? '<p class="text-muted small mb-2">Mostrando ' + lista.length + ' de ' + total + '. Afina el filtro para ver el resto.</p>'
+      : '') +
+    '<div class="table-responsive"><table class="table table-sm table-hover"><thead class="thead-light"><tr>' +
+    cab("nombre", "Modelo") + cab("herramientas", "Herram.") + cab("cache", "Caché") +
+    cab("precio_in", "$/M in", true) + cab("precio_out", "$/M out", true) +
+    cab("costo_mil", "$ / 1000 msgs", true) + '</tr></thead><tbody>' +
     lista.map(m =>
       '<tr class="modelo-fila' + (m.id === modeloActual ? ' activo' : '') +
       '" onclick="elegirModelo(\'' + esc(m.id) + '\')">' +
@@ -353,7 +477,7 @@ function pintarModelos(filtro) {
       '<td class="text-right">' + (m.precio_out != null ? m.precio_out : "—") + '</td>' +
       '<td class="text-right"><strong>' + (m.costo_mil != null ? "$" + m.costo_mil : "—") + '</strong></td>' +
       '</tr>').join("") +
-    '</tbody></table>';
+    '</tbody></table></div>';
 }
 
 // SI-005: no se asume que el modelo pedido quedó en uso solo porque la petición respondió
@@ -362,9 +486,25 @@ function pintarModelos(filtro) {
 // "en uso" sobre un modelo que el chat no está usando.
 function elegirModelo(id) {
   const m = modelosCache.find(x => x.id === id);
-  if (m && !m.herramientas &&
-      !confirm("Este modelo NO soporta herramientas: el asistente no podrá consultar el archivo " +
-               "y solo podrá conversar. ¿Usarlo igual?")) return;
+  const continuar = () => _aplicarModelo(id);
+  if (m && !m.herramientas) {
+    const msg = "Este modelo NO soporta herramientas: el asistente no podrá consultar el archivo " +
+                "y solo podrá conversar. ¿Usarlo igual?";
+    if (typeof confirmModal === "function") {
+      confirmModal("Modelo sin herramientas", msg, "Usar igual", "btn-warning").then(ok => { if (ok) continuar(); });
+    } else if (confirm(msg)) {
+      continuar();
+    }
+    return;
+  }
+  continuar();
+}
+
+function _aplicarModelo(id) {
+  const avisar = (msg, tipo) => {
+    if (typeof showToast === "function") showToast(msg, tipo || "error");
+    else alert(msg);
+  };
   api("/api/ia/config", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -374,15 +514,21 @@ function elegirModelo(id) {
       modeloActual = d.actual;
       pintarModelos(document.getElementById("modelo-filtro").value);
       if (!res.ok) {
-        alert("No se pudo cambiar el modelo: " + (res.d.detail || "error desconocido") + ".");
+        avisar("No se pudo cambiar el modelo: " + (res.d.detail || "error desconocido") + ".");
       } else if (modeloActual !== id) {
-        alert("El servidor no aceptó ese modelo: el asistente sigue usando " + modeloActual + ".");
+        avisar("El servidor no aceptó ese modelo: el asistente sigue usando " + modeloActual + ".");
+      } else {
+        avisar("Modelo actualizado.", "success");
       }
     }))
-    .catch(() => alert("Error de red al cambiar el modelo."));
+    .catch(() => avisar("Error de red al cambiar el modelo."));
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/static/app-core.js"></script>
 <script src="/static/app-theme.js"></script>
+<script src="/static/admin-ui.js"></script>
+<script src="/static/app.js"></script>
 </body>
 </html>

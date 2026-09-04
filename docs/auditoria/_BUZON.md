@@ -633,11 +633,19 @@ mío:
       carril con acceso a ese test quiere relajar el regex (por ejemplo aceptando atributos
       adicionales en el `<tr>`), esta ficha queda lista para resolverse del lado JS.
 
-- [ ] `OR-135` · **archivo**: `app/static/styles.css`, `app/tests/test_contraste.py`
+- [x] `OR-135` (lado `styles.css`; queda el lado JS/tests) · **archivo**: `app/static/styles.css`,
+      `app/tests/test_contraste.py`
       **qué hace falta**: una clase por estado laboral con su variante en modo oscuro y en los
       once temas de color (`getStatusColor()` en `app-core.js`, tampoco mío, es quien decide el
       color hoy). Cambiar sólo el consumo en `admin-monitor.js` sin la clase real en `styles.css`
       dejaría el badge sin ningún color.
+      **hecho (agente-sweep-styles)**: añadidas `.ds-status-activo/-retirado/-jubilado/
+      -pensionado/-otro` en `styles.css`, apoyadas en tokens ya definidos con variante de modo
+      oscuro y de los once temas (`--color-success`, `--color-danger`, `--viz-1`, `--viz-2`,
+      `--text-muted`) — no hex nuevos, así que no hace falta redefinición extra por tema.
+      **falta**: `admin-monitor.js`/`hr.js` deben aplicar la clase en vez del `style` inline que
+      arma `getStatusColor()`, y `test_contraste.py` sumar el caso — ninguno de los dos es
+      `styles.css`.
 
 - [x] `OR-237` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (RRHH)
       ahora selecciona `COALESCE(e.foto_url, '') AS foto_url`, así que el monitor ya puede
@@ -798,7 +806,11 @@ app/tests/test_autorizacion_deps.py -q`: 19 passed. El resto de la suite
 (`python -m pytest app/tests -q`) da los mismos 29 fallos preexistentes ya documentados
 arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
 
-- [ ] `BR-109` · **archivo**: `app/static/styles.css` · **carril dueño**: G1-estilos
+- [x] `BR-109` · **archivo**: `app/static/styles.css` · **carril dueño**: G1-estilos
+      **hecho (agente-sweep-styles)**: definidas `.ds-dossier-avatar-wrap`, `.ds-dossier-subheading`,
+      `.ds-dossier-historial-inline`, `.ds-dossier-historial-table`, `.ds-dossier-parte-tab`,
+      `.ds-dossier-parte-icon`, `.ds-dossier-parte-badge` con los valores exactos anotados abajo
+      por agente-br109-dossier-estilos (junto a `.ds-dossier-item` en el bloque "Dossier RRHH").
       **quién lo pide**: agente-br109-dossier-estilos (BR-109)
       **qué hace falta**: definir en `styles.css` las clases nuevas que `hr.js` ya emite
       en el dossier de empleado (`renderRrhhDossierModal`, `filterInnerDossier`,
@@ -1233,19 +1245,21 @@ hace falta en cada uno, para quien tenga esos carriles:
       documenta `OR-062`/`OR-124` en este mismo buzón, fuera de mi archivo. No hay `style`
       inline que reemplazar por `.is-clickable` hasta que ese backend exista; dejo la nota tal
       cual para quien implemente los KPIs pulsables.
-- [ ] `SD-180` · **archivo**: `app/static/login.js` · **carril dueño**: (no listado en
-      `PLAN-PARALELO.md` como carril propio; toca sólo `login.js`) `[CHOCA]`
-      **qué hace falta**: `@keyframes ds-shake` sigue definida y sin un solo uso. O
-      `login.js` la aplica (añadiendo la clase que la dispare) al fallo de inicio de sesión,
-      o se borra de la hoja — no la borré porque esa decisión le toca a quien tenga
-      `login.js`.
+- [x] `SD-180` · resuelto por agente-sweep-misc-paginas (SWEEP-misc-paginas): ya estaba
+      aplicado — `showLoginError()` en `login.js` pone `errEl.style.animation = "ds-shake
+      0.4s ease"` en cada fallo de login (fuerza reflow antes para que retriggeree si el
+      error se repite). Verificado leyendo el archivo, sin cambio de código necesario; sólo
+      se marca la ficha.
 - [ ] `SD-138` (parte HTML) · **archivo**: los `<style>` de `admin_archive.html`,
-      `admin_hr.html`, `admin_system.html`, `archive.html`, `hr.html` · **carril dueño**: LH
-      **qué hace falta**: esas cinco páginas siguen redefiniendo `.ds-skeleton` +
-      `@keyframes ds-shimmer` en su propio `<style>`, lo que pisa la variante oscura que
-      vive sólo en `styles.css` (sale claro en modo oscuro). Mi zona ya tiene la definición
-      única con variantes de forma (`.ds-skeleton-row/-card/-kpi`, SD-139) — sólo falta
-      borrar los cinco bloques `<style>` duplicados.
+      `admin_hr.html`, `admin_system.html` · **carril dueño**: LH
+      **qué hace falta**: quedan tres páginas (fuera de mi carril) que aún pueden redefinir
+      `.ds-skeleton` + `@keyframes ds-shimmer` en su propio `<style>`, pisando la variante
+      oscura que vive sólo en `styles.css`. `archive.html` ya no tenía el bloque duplicado
+      (verificado por agente-sweep-misc-paginas, SWEEP-misc-paginas) y `hr.html` lo tenía
+      — borrado por el mismo agente, dejando sólo `#session-warning-banner` en su
+      `<style>`; `styles.css` ya define `.ds-skeleton`/`ds-shimmer` con su variante bajo
+      `body.dark-mode` (línea ~2672 y 3272), así que no hay pérdida visual. Quedan
+      `admin_archive.html`, `admin_hr.html`, `admin_system.html` para el carril LH.
 - [ ] `SD-201` · **archivo**: `app/static/admin-monitor.js` (posiciona el menú por JS con
       coordenadas calculadas) · **carril dueño**: B5-admin-monitor `[CHOCA]`
       **qué hace falta**: `anchor-name`/`position-anchor` con `position-try` para el volteo
@@ -1879,9 +1893,15 @@ hizo falta tocar `styles.css`— con un `<label for=...>` asociado), `OA-108`,
       (`admin.js:18` y `:21`, la misma causa que documenta `OA-051`, que no es mío):
       quien retoque `admin.js` debe hacer que sólo la pestaña «Retención» dispare esa
       carga.
-- [ ] `OA-065` (ocho KPIs sin jerarquía) y `OA-069` (color de KPI en `style` en
+- [x] `OA-065` (ocho KPIs sin jerarquía) y `OA-069` (color de KPI en `style` en
       línea) · **archivo**: `app/static/styles.css` `[CHOCA]` · **carril dueño**:
       cualquier carril de estilos (`LX`, todos terminados)
+      **hecho (agente-sweep-styles)**: `.ds-kpi-mini.ds-kpi-principal` (OA-065, cifra grande +
+      etiqueta en negrita) y `.ds-kpi-mini.ds-kpi-neutral/.ds-kpi-alerta/.ds-kpi-aviso` para el
+      borde izquierdo (OA-069) — reutiliza `.ds-kpi-alerta`/`.ds-kpi-aviso` que ya existían para
+      el color del valor/icono, sólo les faltaba también el borde. Los 8 `border-left` en línea
+      de `admin_archive.html` y el reparto de qué card es "principal" no son míos (`[CHOCA]`):
+      queda mecánico en cuanto alguien lo toque.
       **qué hace falta**: para OA-065, clases de tamaño/peso distintas para 2-3 KPIs
       principales (`kpi-total-docs`, `chart-total-digitalizados`,
       `chart-total-pendientes`) frente al resto — no las añadí en el HTML porque sin
@@ -1900,7 +1920,7 @@ hizo falta tocar `styles.css`— con un `<label for=...>` asociado), `OA-108`,
       `app.js:262` (`data-module`/`data-preset` de la búsqueda pública), no
       `admin-charts.js`. Sin la lógica de "aplicar preset" en `admin-charts.js`
       quedarían botones muertos, así que no los añadí todavía.
-- [ ] `OA-186` (queda pendiente el resto) · **archivo**: `app/static/styles.css`
+- [x] `OA-186` (queda pendiente el resto) · **archivo**: `app/static/styles.css`
       `[CHOCA]` · **carril dueño**: cualquier carril de estilos
       **qué hace falta**: sólo pude borrar el bloque `<style>` que ya estaba
       duplicado en `styles.css` (comentario en `styles.css:2615-2618` lo confirma
@@ -1911,6 +1931,16 @@ hizo falta tocar `styles.css`— con un `<label for=...>` asociado), `OA-108`,
       `styles.css` — sólo existe la variante `body.dark-mode` (`styles.css:3050`,
       `:3097`). Borrarlas sin más perdería el resaltado de fila al pasar el ratón y
       el color de la pestaña activa en modo claro.
+      **resuelto sin tocar `styles.css` (agente-sweep-styles)**: no hace falta añadir
+      nada — `.table-hover tbody tr:hover` y `.nav-pills .nav-link.active` en modo
+      claro son estilos propios de Bootstrap 4.6 (cargado por CDN en cada página,
+      ver `AGENTS.md`/cabecera de este repo), ya presentes sin que `styles.css` los
+      redefina. `styles.css` sólo trae la variante `body.dark-mode` porque Bootstrap
+      no sabe de modo oscuro. Confirmado contra `bootstrap.min.css` 4.6.2 (CDN):
+      `.table-hover tbody tr:hover{background-color:rgba(0,0,0,.075)}` y
+      `.nav-pills .nav-link.active{color:#fff;background-color:#007bff}` ya existen
+      ahí. El `<style>` duplicado que quedaba en el `<head>` de la página puede
+      borrarse sin perder nada visual en modo claro.
 - [ ] `OA-197` (ocho KPIs a 390px ocupan cuatro filas de scroll antes de las
       pestañas) · **archivo**: `app/static/styles.css` `[CHOCA]` (`:3396-3405`) ·
       **carril dueño**: cualquier carril de estilos
@@ -1948,11 +1978,40 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       no listado explícitamente en `PLAN-PARALELO.md`, exclusivo de esa página.
 - [ ] `SI-110`–`SI-120`, `SI-122`–`SI-125` · **archivo**: `app/static/ai-widget.js` ·
       **carril dueño**: exclusivo de ese fichero, no asignado en `PLAN-PARALELO.md`.
+      **Parcial (agente-sweep-misc-paginas, SWEEP-misc-paginas)**: SI-112 (la burbuja no
+      decía si el panel estaba abierto) — `#ia-burbuja` ya lleva `aria-expanded`/
+      `aria-controls="ia-panel"`, y `alternar()` los sincroniza y alterna la etiqueta entre
+      "Abrir asistente"/"Cerrar asistente"; SI-114 (botones de cabecera sólo con `title`) —
+      `aria-label` añadido a `#ia-hist-btn`, `#ia-limpiar` y `#ia-cerrar`; SI-124 (panel a
+      380px fijos se sale a 390px) — `@media (max-width:576px)` en `ai-widget.css` lleva el
+      panel a pantalla completa con `100dvh`. El resto (SI-111, SI-113, SI-115–120, SI-122,
+      SI-123, SI-125) exige cambios de comportamiento mayores (aria-live incremental,
+      colas, Markdown, copiar/exportar, decisión de producto sobre dónde vive la burbuja) —
+      quedan sin tocar.
 - [ ] `SI-157`–`SI-159`, `SI-162`–`SI-165`, `SI-167`–`SI-170` · **archivo**: `ayuda.html`,
       `investigacion.html`, `compartido.html` · **carril dueño**: exclusivo de esas tres
       páginas.
+      **Verificado (agente-sweep-misc-paginas, SWEEP-misc-paginas)**: en `ayuda.html`,
+      SI-162 (FontAwesome 5 vs 6) y SI-164 (arranque de tema en línea) ya estaban resueltos
+      — la hoja carga `font-awesome/6.4.0` y el `<body>` lleva el bloque `ds_theme` igual
+      que las demás páginas; SI-165 (acordeón FAQ sin `aria-expanded`/`aria-controls`/
+      `role="region"`) también ya estaba resuelto — el script de `ayuda.html` los aplica al
+      montar cada `.help-faq-toggle`/`.help-faq-body` (hoy sin preguntas cargadas, así que
+      el guardado no tiene nada que enganchar todavía). No quedaba código pendiente en
+      ninguno de los tres para estos tres tickets; el resto de la lista
+      (SI-157–159, SI-163 `[CHOCA]`, SI-167–170) sigue sin tocar — son de `compartido.html`/
+      `investigacion.html` o piden tocar `styles.css`/`app-shell.js` fuera de este carril.
 - [ ] `SI-175`, `SI-176`, `SI-178`, `SI-179` · **archivo**: `app/static/scanner-client.js`,
       `scanner-app/` · **carril dueño**: exclusivo de ese bloque.
+      **Parcial (agente-sweep-misc-paginas, SWEEP-misc-paginas)**: SI-178 (valor de
+      `_wsUrl`/`_token` escrito sin escapar en un atributo `value="..."`) — ambos inputs del
+      panel de configuración se rellenan ahora por propiedad (`input.value = ...`) tras
+      crear el nodo, sin pasar por el marcado; SI-179 (el bucle de detección corría cada
+      250ms sin pausa ni límite) — se pausa con `visibilitychange` mientras la pestaña está
+      oculta y se reanuda al volver, y se cierra la cámara sola tras 3 minutos sin ninguna
+      lectura (`_resetCameraIdleTimer`, se reinicia en cada código detectado). SI-175/SI-176
+      (ids que no existen, referenciados en `scanner-app/`) no se tocaron: exigen coordinar
+      con el otro lado del puente, fuera de esta pasada.
 - [x] `SI-181`, `SI-183`, `SI-185` (parte de `app-shell.js`/`app.js`), `SI-200` · resuelto
       por agente-sweep-shell-core (SWEEP-shell-core): `shellSidebarHTML()` ahora genera
       `<div id="sidebar-overlay" class="ds-sidebar-overlay">` junto al menú (SI-181, la
