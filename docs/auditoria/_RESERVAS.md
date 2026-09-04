@@ -64,6 +64,15 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | terminado (sin cambios de código: `pages.py`/`config.py` ya cumplían, todo lo pendiente es `[CHOCA]` y quedó anotado en `_BUZON.md`) | e5a7696 |
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | terminado (parcial: 6 de 37 fichas resueltas de config/despliegue real; el resto exige main.py/database.py/backup.py/.python-version/CI/paneles externos, ver nota en _BUZON.md) | 8a98120 |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
+| SWEEP-styles | agente-sweep-styles | 2026-09-03 | en curso | |
+| SWEEP-main | agente-sweep-main | 2026-09-03 | en curso | |
+| SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | en curso | |
+| SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | en curso | |
+| SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | en curso | |
+| SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | en curso | |
+| SWEEP-admin-js | agente-sweep-admin-js | 2026-09-03 | en curso | |
+| SWEEP-misc-paginas | agente-sweep-misc-paginas | 2026-09-03 | en curso | |
+| SWEEP-tests-nuevos | agente-sweep-tests-nuevos | 2026-09-03 | en curso | |
 | L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | 2bc5690 (ver nota en _BUZON.md: mi cambio de styles.css quedó arrastrado por el commit de agente-la-asistente por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 2bc5690 -- app/static/styles.css`) |
 | L8-estilos | agente-l8-estilos | 2026-09-03 | terminado | ada29aa |
 | L9-estilos | agente-l9-estilos | 2026-09-03 | terminado | 6ca0fc7 (ver nota en _BUZON.md: mi trabajo quedó absorbido por el commit "L3-estilos" de otro agente por una carrera de git concurrente en el árbol compartido; mi propio intento de commit, 7194678, sólo capturó 1 línea residual. Contenido verificado con grep de mis marcadores SD- en HEAD tras 6ca0fc7 y con `python -m pytest app/tests -q` en 713/0) |
