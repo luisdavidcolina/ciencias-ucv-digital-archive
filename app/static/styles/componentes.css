@@ -1,6 +1,5 @@
 /* === Componentes: tarjeta, campo, boton, resultados, item cards === */
-/* --- OVERRIDES BS4CARD (Quitar estetica Dashboard) --- */
-/* --- TARJETA (SD-127, SD-083, SD-059, SD-152) ---
+/* === Tarjeta (SD-127, SD-083, SD-059, SD-152) ---
    `.card` sigue siendo el punto de entrada (Bootstrap ya lo usa en todo el
    marcado); aquí se resuelve con los tokens de L0 en vez de valores sueltos.
    Radio: `--radius-md` (8px) es la misma decisión de facto que ya tomaron
@@ -43,7 +42,7 @@
     border-top: 3px solid var(--color-primary) !important;
 }
 
-/* --- BREADCRUMB (SD-101) ---
+/* === Breadcrumb (SD-101) ---
    4,5rem de aire vertical para dos palabras: se ata a la escala de
    espaciado en vez de un valor suelto de 1.5rem por lado. */
 .ds-breadcrumb-wrapper {
@@ -59,7 +58,7 @@
     font-size: var(--font-size-sm);
 }
 
-/* --- SEARCH MAIN BAR --- */
+/* === Barra de búsqueda === */
 .ds-search-bar {
     margin-bottom: var(--space-6);
 }
@@ -72,7 +71,7 @@
     border-radius: var(--radius-sm);
 }
 
-/* --- CAMPO (SD-115, SD-116, SD-171) ---
+/* === Campo (SD-115, SD-116, SD-171) ---
    Único campo propio de la hoja hasta ahora era el buscador, con su altura
    escrita a mano; queda como declaración base para que el resto de campos
    (`.form-control` de Bootstrap, sin tocar) puedan alinearse con ella. */
@@ -105,7 +104,7 @@ label:has(+ :required)::after {
     color: var(--color-danger);
 }
 
-/* --- BOTÓN: BASE COMÚN (SD-109, SD-110, SD-111, SD-112, SD-114, SD-174) ---
+/* === Botón (SD-109, SD-110, SD-111, SD-112, SD-114, SD-174) ---
    Trece implementaciones sin base común, la mitad por `id`. Sustituir el
    `id` por clase exige tocar el marcado (fuera de este carril: ver
    `_BUZON.md`), así que aquí se les da la misma base tokenizada: transición
@@ -274,6 +273,8 @@ label:has(+ :required)::after {
     padding-bottom: var(--space-1);
 }
 
+/* === Pestañas de espacio de trabajo (admin) === */
+
 /* SD-219: estos dos ids ya comparten regla vía selector combinado en vez de
    duplicarla por módulo (`_archivo`/`_rrhh`) — patrón a seguir cuando entre
    un tercer módulo. SD-023/SD-024: verde correcto es `--color-success`
@@ -315,7 +316,7 @@ label:has(+ :required)::after {
     opacity: 0.75 !important;
 }
 
-/* --- RESULTS HEADER --- */
+/* === Cabecera de resultados === */
 .ds-results-header {
     display: flex;
     justify-content: space-between;
@@ -337,7 +338,7 @@ label:has(+ :required)::after {
     font-size: 0.9rem;
 }
 
-/* --- ITEM CARDS (ds-item-list-element) ---
+/* === Tarjetas de resultado (ds-item-list-element) ---
    SD-060/SD-089/SD-090/SD-167/SD-204/SD-220 (L3): superficie estable en vez
    de "aparece al pasar el ratón"; una sola regla de hover con la sombra y el
    desplazamiento canónicos (--shadow-md / -4px), transición de propiedades
@@ -442,6 +443,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
     justify-content: center;
 }
 
+/* === Modal de detalle de documento === */
 .ds-doc-modal .modal-content {
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-strong);
@@ -588,6 +590,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
     word-break: break-word;
 }
 
+/* === Modal de expediente de persona (RRHH) === */
 .rrhh-person-modal .modal-dialog {
     max-width: 1080px;
 }
@@ -715,6 +718,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
     border-radius: 8px;
 }
 
+/* === Textos de tarjeta de resultado === */
 .ds-category-title {
     font-size: 1rem;
     font-weight: 700;
@@ -760,6 +764,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
     overflow: hidden;
 }
 
+/* === Insignia === */
 .ds-badge {
     display: inline-block;
     padding: 0.25em 0.4em;
