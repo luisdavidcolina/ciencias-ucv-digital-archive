@@ -65,7 +65,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | terminado (parcial: 6 de 37 fichas resueltas de config/despliegue real; el resto exige main.py/database.py/backup.py/.python-version/CI/paneles externos, ver nota en _BUZON.md) | 8a98120 |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
-| LX-2 | agente-lx2-modularizacion | 2026-09-03 | en curso | |
+| LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
 | SWEEP-main | agente-sweep-main | 2026-09-03 | terminado | 5ac751c |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
 | SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | terminado | 77c8d74 |
