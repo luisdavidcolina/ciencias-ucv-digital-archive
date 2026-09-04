@@ -2703,3 +2703,79 @@ No resueltas, siguen anotadas para su carril dueño:
 completa en curso al cerrar esta nota).
 
 **quién lo pide/resuelve**: agente-sweep-admin-html (SWEEP-admin-html)
+
+## Tanda de LX-2 (2026-09-03) — continuación de SD-211/212/213/206/214
+
+Retomo el carril LX (SD-187, `ee18da7`) para cerrar SD-211/212/213/206/214 sobre
+`styles.css`. Verifiqué el archivo quieto antes de empezar: `git log --oneline -10
+-- app/static/styles.css` no mostraba commits de los últimos minutos (el último es
+`d07452e`, un barrido de buzón, no de `styles.css` en sí), y en `_RESERVAS.md` la
+única fila "en curso" real sobre `styles.css` era la mía.
+
+**Lo que encontré al medir de nuevo** (los números de la auditoría están basados en
+una versión de 3.973 líneas; hoy son 5.298 — los dieciséis lotes L0-L15 más SWEEP-*
+siguieron creciendo el archivo mientras la auditoría se escribía):
+
+- `!important`: 627 (no 1.117 — SD-036, el modo oscuro tokenizado, ya se comió buena
+  parte antes de que yo llegara).
+- `body.dark-mode`: 250 apariciones, la inmensa mayoría **intercaladas junto al
+  componente al que pertenecen** (p. ej. `.ds-facet-active` en la línea 1087 con su
+  variante oscura ahí mismo), no sólo en el bloque dedicado "MODO OSCURO (SD-036)"
+  de ~730 líneas.
+
+**SD-214 — hecho.** Añadida la convención de nombres (`ds-bloque__elemento--modificador`,
+prefijo `ds-` obligatorio) a `CLAUDE.md`, con nota explícita de que el archivo hoy no
+la cumple de forma uniforme y de que renombrar clases existentes es un cambio de
+HTML+JS+CSS a la vez, no una pasada cosmética suelta. `pytest app/tests -q` en verde
+tras el cambio (782 passed, igual que antes: es un cambio de documentación).
+
+**SD-211, SD-212, SD-213, SD-206 — no hechos esta pasada tampoco.** Con más detalle
+del que dejó la nota de `agente-lx-reestructuracion` porque ahora tengo los números
+reales:
+
+- **SD-212 (reordenar)**: mover selectores para agrupar por categoría (p. ej. los 250
+  `body.dark-mode`) es peligroso precisamente *dentro* de la capa `app` — `@layer`
+  fija el orden **entre** capas, pero dentro de la misma capa la cascada normal
+  (orden de aparición) sigue decidiendo los empates de especificidad. Mover una
+  regla de dark-mode lejos del componente al que anula puede invertir en silencio
+  cuál gana si hay otra regla de igual especificidad entre medias — que es
+  exactamente el riesgo que ya advertía la nota anterior, y que verificar de verdad
+  exige una carga visual (claro/oscuro/tema, 390/768/1440px) por cada bloque movido,
+  no una al final. Con 627 `!important` y 250 apariciones de dark-mode reales, eso es
+  muchísimas más verificaciones de las que caben en esta pasada.
+- **SD-213 (partir en archivos reales)**: intenté diseñar el split y encontré un
+  bloqueo estructural, no sólo de presupuesto: cinco pruebas leen `styles.css` por
+  ruta directa y entera —`test_tokens.py`, `test_impresion.py`,
+  `test_selectores_tema.py`, `test_contraste.py`, `test_admin_panels.py`— con
+  `STYLES = STATIC / "styles.css"; STYLES.read_text(...)`. Si `styles.css` pasa a
+  ser sólo el punto de entrada con `@import ... layer(app)` hacia
+  `app/static/styles/*.css`, esas cinco pruebas dejan de ver tokens, bloque
+  `body.dark-mode`, `@media print`, etc., y hay que enseñarles a resolver los
+  imports (concatenar en orden) antes de tocar un solo `@import`. Esos cinco
+  archivos de test **no son de mi carril** (uno de ellos, `test_admin_panels.py`, ya
+  quedó anotado por otro agente como "no es mío" en una tanda anterior de este mismo
+  buzón) — tocarlos sin coordinación es el tipo exacto de colisión que
+  `_RESERVAS.md` existe para evitar. Lo dejo anotado aquí en vez de ampliar mi zona
+  por mi cuenta.
+- **SD-206** (`:is()`/`:where()`): las líneas que citaba la auditoría (`2417-2418`,
+  `51-61`, `1146-1155`) están desactualizadas — el archivo creció 1.325 líneas desde
+  que se escribieron y ya no apuntan a selectores de reseteo, sino a tokens sueltos.
+  Como SD-206 depende de que SD-212 esté hecho para que el `:where()` no cambie
+  ganadores de especificidad sin querer, lo dejo también para la misma pasada futura.
+
+**Para quien retome esto**: antes de intentar SD-213, coordinar con quien tenga
+`test_tokens.py`/`test_impresion.py`/`test_selectores_tema.py`/`test_contraste.py`/
+`test_admin_panels.py` en su carril (o reservar esos cinco archivos explícitamente
+en `_RESERVAS.md` junto con `styles.css`) para poder cambiarles el helper `STYLES`/
+`css = (STATIC/"styles.css").read_text()` por una función que resuelva los
+`@import` locales en orden. Sin eso, partir el archivo rompe cinco suites a la vez.
+Antes de SD-212, presupuestar verificación visual real (Playwright, `test_visual.py`)
+por bloque movido, no al final — con 250 apariciones de dark-mode y 627
+`!important` intercalados con sus componentes, mover a ciegas es la forma en la que
+esto se convierte en una regresión visual que ninguna de las 782 pruebas actuales
+detecta.
+
+`python -m pytest app/tests -q` antes de esta tanda: 782 passed (igual que dejó
+`ee18da7`). Después del único cambio real (CLAUDE.md, SD-214): 782 passed también.
+
+**quién lo pide/resuelve**: agente-lx2-modularizacion (LX-2)

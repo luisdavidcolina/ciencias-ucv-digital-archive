@@ -332,6 +332,30 @@ existen escribe una regla sin variante oscura, o un tema que nadie prueba:
    igual en todas las hojas propias (`styles.css`, `ai-widget.css`, las que
    vengan). Cruzarlo a mano es como se perdió SD-041.
 
+### Convención de nombres de clases CSS (SD-214)
+
+Toda clase propia nueva lleva el prefijo `ds-` y sigue
+`ds-bloque__elemento--modificador` (BEM con prefijo):
+
+- **Bloque**: el componente (`ds-tarjeta`, `ds-modal`, `ds-tabla`).
+- **`__elemento`**: una parte suya que no tiene sentido fuera de él
+  (`ds-tarjeta__titulo`, `ds-modal__cierre`).
+- **`--modificador`**: una variante del bloque o del elemento
+  (`ds-tarjeta--compacta`, `ds-boton--primario`).
+
+Nada sin prefijo (`select-tag`, `help-*`, `modelo-fila`, `badge-si`/`badge-no`
+son deuda anterior a esta convención, no el modelo a copiar), y las clases de
+AdminLTE/Bootstrap reimplementadas (`info-box`, `content-wrapper`,
+`card-outline`) no se extienden con más reglas propias bajo su nombre
+original: la clase nueva que las reemplace ya nace en `ds-`.
+
+Esta convención es la meta; el archivo hoy no la cumple de forma uniforme
+(mezcla `ds-kpi-mini`, `ds-item-kw-more`, `ds-btn-primary` sin el mismo
+patrón separador — ver SD-214 en `docs/auditoria/sistema-diseno.md`).
+Renombrar lo existente es un cambio de HTML+JS+CSS a la vez y no se hace
+suelto: se aplica cuando se toque ese componente por otro motivo, no en una
+pasada aparte que arriesgue las diez páginas por un cambio cosmético.
+
 ### Colores de datos (tokens `--viz-*`)
 La paleta de gráficos vive en `styles.css` como tokens `--viz-1` … `--viz-8`,
 con su equivalente para `body.dark-mode`. `viz-tokens.js` los lee en runtime y
