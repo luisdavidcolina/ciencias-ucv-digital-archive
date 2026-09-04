@@ -28,7 +28,7 @@
     * { position: static !important; }
 
     .content-wrapper { margin: 0 !important; padding: 0 !important; }
-    .card { box-shadow: none !important; border: 1px solid #000 !important; }
+    .card { box-shadow: none; border: 1px solid #000; }
 
     /* SD-230: forzar colores donde el color es información (insignias,
        barra de avance, estado), y modo claro siempre — imprimir en
