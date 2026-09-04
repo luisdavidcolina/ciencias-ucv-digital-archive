@@ -1999,3 +1999,34 @@ título de esa tarjeta ya usa `fas fa-users` (icono de personas), no un icono de
 puede que ya lo haya corregido otro agente antes que yo, o que la ficha esté describiendo un
 estado anterior. La tarjeta sigue siendo una tabla, no una gráfica; lo dejo anotado por si
 alguien decide sí ponerle una gráfica real.
+
+## Tanda de H1a-migraciones (2026-09-03)
+
+Aplicadas en `app/main.py` (`run_migrations()`), idempotentes, `python -m pytest app/tests -q`
+en verde (713 passed) antes y después:
+
+- **`OR-177`/`OR-179`** (motivo obligatorio al enviar a la papelera): añadida la columna
+  `deleted_reason TEXT` a `datos_archivo`, `datos_rrhh` y `empleados`, en el mismo bloque que
+  `deleted_at`/`deleted_by`. Falta que `app/routes/admin/docs.py` y `app/routes/trash.py`
+  (carriles C1-docs-backend / C7-papelera) la reciban en el body del borrado y la persistan; y
+  que `admin-edit.js` la muestre (ya está listo según la nota original de OA-134/135/136).
+  La comprobación de cédula duplicada al restaurar un empleado (parte de OR-179) es lógica de
+  endpoint, no de esquema — sigue pendiente en `trash.py`.
+- **`SI-031`** (contador de intentos fallidos de login compartido entre instancias Vercel):
+  creada `public.login_attempts` (usuario, ip, intentos, primer_intento_at, ultimo_intento_at,
+  bloqueado_hasta) con índice único `(usuario, ip)`. `auth.py` (carril C9-auth / H1b-conexion)
+  sigue usando el diccionario en memoria `_FAILED_ATTEMPTS`; la tabla ya existe para que ese
+  carril cambie a `db_query` con `ON CONFLICT (usuario, ip) DO UPDATE`.
+
+No apliqué (quedan anotados, no son sólo esquema):
+
+- **`DG-138`/`DG-139`** (digitalización a la carta: estado "pendiente de digitalizar" + cola +
+  aviso al solicitante). No hay endpoint ni panel diseñado todavía (`docs.py`, `stats.py`,
+  `admin_archive.html` son de otros carriles) — adivinar el nombre/forma de la columna sin ese
+  diseño arriesga tener que revertirla. Necesita que C1-docs-backend/C3-stats-backend/
+  B1-admin-archivo-html acuerden la forma del estado antes de que yo la migre.
+- **`OR-277`** (vistas guardadas con nombre, compartibles por enlace): "posible tabla" sin
+  columnas propuestas por quien lo pidió (B5-admin-monitor) ni endpoint consumidor. Mismo
+  motivo: falta diseño antes de migración.
+
+— agente-h1a-migraciones (H1a-migraciones)

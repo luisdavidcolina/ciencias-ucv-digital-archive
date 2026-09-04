@@ -587,6 +587,33 @@ def run_migrations():
          "ON public.datos_archivo(disposicion) WHERE disposicion IS NOT NULL"),
         ("idx ia_adjuntos conv",
          "CREATE INDEX IF NOT EXISTS idx_ia_adj_conv ON public.ia_adjuntos(conversacion_id, id DESC)"),
+
+        # ── OR-177/OR-179: motivo obligatorio al enviar a la papelera ─────────
+        ("deleted_reason en datos_archivo",
+         "ALTER TABLE public.datos_archivo ADD COLUMN IF NOT EXISTS deleted_reason TEXT"),
+        ("deleted_reason en datos_rrhh",
+         "ALTER TABLE public.datos_rrhh ADD COLUMN IF NOT EXISTS deleted_reason TEXT"),
+        ("deleted_reason en empleados",
+         "ALTER TABLE public.empleados ADD COLUMN IF NOT EXISTS deleted_reason TEXT"),
+
+        # ── SI-031: contador de intentos fallidos persistente entre instancias ─
+        # auth.py usaba un diccionario en memoria (_FAILED_ATTEMPTS): funciona
+        # dentro de una instancia calida pero en Vercel cada instancia fria
+        # arranca su propio contador, asi que un atacante repartido entre
+        # instancias lo esquiva. Esta tabla lo hace compartido de verdad.
+        ("tabla login_attempts", """
+            CREATE TABLE IF NOT EXISTS public.login_attempts (
+                id            SERIAL PRIMARY KEY,
+                usuario       VARCHAR(100) NOT NULL,
+                ip            VARCHAR(64)  NOT NULL,
+                intentos      INTEGER      NOT NULL DEFAULT 1,
+                primer_intento_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                ultimo_intento_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                bloqueado_hasta   TIMESTAMPTZ NULL
+            )"""),
+        ("idx login_attempts usuario_ip",
+         "CREATE UNIQUE INDEX IF NOT EXISTS idx_login_attempts_usuario_ip "
+         "ON public.login_attempts(usuario, ip)"),
     ]
     # En serverless esta funcion corre en CADA arranque en frio. Son ~80 viajes
     # de ida y vuelta a Neon antes de poder responder la primera peticion, y el
