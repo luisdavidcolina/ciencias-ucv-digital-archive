@@ -66,7 +66,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
 | LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
-| LX-3 | agente-lx3-modularizacion | 2026-09-04 | en curso | |
+| LX-3 | agente-lx3-modularizacion | 2026-09-04 | terminado (SD-213 completo: 12 modulos reales bajo app/static/styles/, mas un bug real de @layer que invalidaba los @import corregido por el orquestador tras el corte de sesion — ver commit; SD-212/SD-211/SD-206 quedan para otra pasada) | 9991649 |
 | SWEEP-main | agente-sweep-main | 2026-09-03 | terminado | 5ac751c |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
 | SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | terminado | 77c8d74 |

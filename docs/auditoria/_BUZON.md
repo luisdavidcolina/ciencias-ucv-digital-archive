@@ -1336,6 +1336,22 @@ hace falta en cada uno, para quien tenga esos carriles:
       - `SD-074` (`.ds-eyebrow`, una calibración para las nueve etiquetas en versalitas) —
         mi zona sólo tiene una de las nueve (`.ds-sidebar-section-label`); las otras ocho
         viven en L6/L7/L14/L15. No creé la clase compartida por mi cuenta porque unificar
+- **Nota de orquestación** (2026-09-04, LX-3): la sesión que ejecutaba LX-3
+  se cortó por límite de cuenta justo al terminar de escribir el punto de
+  entrada `@import` de `styles.css` (paso 3, SD-213), con el split ya hecho
+  en disco pero sin comitear. Al retomar se encontró una regresión real:
+  la declaración suelta `@layer bootstrap, app;` colocada ENTRE el `@import`
+  de Bootstrap y los 12 `@import` de los módulos invalidaba, según la
+  especificación CSS, todos los `@import` que la seguían — ningún módulo
+  llegaba a cargar en el navegador (confirmado con Playwright:
+  `document.styleSheets` sólo tenía 2 reglas en `styles.css`). Causaba
+  desborde horizontal real en `/login` y `/archivo` a 390px, detectado por
+  `test_visual.py` (4 fallos). Corregido quitando esa declaración —el orden
+  de capas ya lo fija el propio orden de los `@import ...layer(...)`—,
+  verificado con Playwright de nuevo y con la suite completa en 809/809.
+  Commit `9991649`. SD-212 (reordenar) y SD-211 (retirar los ~627
+  `!important` heredados) siguen pendientes para una próxima pasada, ahora
+  sin el bloqueo estructural que impedía intentarlas.
 - **Nota de orquestación** (2026-09-03): la reserva original de `L6-estilos`
   (`agente-l6-estilos`) lleva sin ningún commit desde antes de que arrancara esta
   tanda de agentes, mientras sus 15 hermanos (L1-L5, L7-L15) cerraron todos en
