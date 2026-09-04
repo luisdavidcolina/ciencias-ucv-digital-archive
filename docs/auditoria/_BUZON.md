@@ -2795,3 +2795,76 @@ detecta.
 `ee18da7`). Después del único cambio real (CLAUDE.md, SD-214): 782 passed también.
 
 **quién lo pide/resuelve**: agente-lx2-modularizacion (LX-2)
+
+## LX-4 — SD-212/SD-211/SD-206 sobre los 12 módulos: alcance real de esta pasada
+
+Retomé donde dejó LX-3 (SD-213 ya hecho: 12 módulos reales bajo `app/static/styles/`,
+importados desde `styles.css` con `@import url("styles/xxx.css") layer(app);`, mismo
+orden que tenía el archivo monolítico). El trabajo que pedía la ficha era grande
+(5.297 líneas repartidas en 12 archivos, 627 `!important`) y solo cubrí una parte
+real y verificada, no las tres tareas completas en los 12 módulos:
+
+**SD-212 (reordenar dentro de cada módulo)**: solo `componentes.css`. Añadí
+comentarios `/* === Sección === */` (tarjeta, breadcrumb, barra de búsqueda, campo,
+botón, pestañas de espacio de trabajo admin, cabecera de resultados, tarjetas de
+resultado, modal de documento, modal de expediente RRHH, textos de tarjeta,
+insignia) **sin mover ninguna regla de sitio** — decidí no reordenar de verdad
+porque mover una regla dentro de la misma capa puede cambiar qué gana en un empate
+de especificidad entre selectores que tocan la misma propiedad, y verificar eso con
+certeza exige diff visual por regla movida, no solo `pytest`/`test_visual.py` (que
+comprueban desborde/consola, no el color/tamaño exacto que gana la cascada). Quedan
+sin tocar (ni comentarios de sección siquiera): `componentes-admin.css`,
+`paneles-admin.css`, `paginas.css`, `dark-mode.css`, `personalizacion.css`,
+`shell.css`, `menus.css`, `responsive.css`, `impresion.css`, `base.css`,
+`tokens.css`.
+
+**SD-211 (retirar `!important` innecesarios)**: hallazgo importante para quien
+siga — `styles.css` importa Bootstrap en su propia `layer(bootstrap)` (SD-187) y
+todos los módulos propios en `layer(app)`, declarada después: por orden de capa,
+`app` le gana a Bootstrap **siempre**, sin necesitar `!important` ni más
+especificidad. Verifiqué esto quitando el `!important` de `.card`, `.card-header`,
+`.card-title`, `.card-body` y `.card-outline` en `componentes.css` (Bootstrap las
+usa en las diez páginas) — 14 `!important` menos (75→61 en ese archivo), suite
+completa (809) y `test_visual.py` (12) en verde antes y después. **Pero esto no
+generaliza a ciegas al resto**: dentro de la propia capa `app`, el orden de
+`@import` en `styles.css` decide quién gana entre módulos con la misma
+especificidad (tokens→base→shell→componentes→responsive→personalizacion→
+componentes-admin→impresion→menus→dark-mode→paneles-admin→paginas), y buena parte
+de los 627 `!important` restantes existen precisamente para que un override de
+tema o de modo oscuro gane pase lo que pase, incluso si su selector no es "el más
+fuerte" en ese momento del archivo. Retirar esos sin comprobar, módulo por módulo,
+si hay otra regla en un módulo posterior que dependa de perder ante ellos, se sale
+del tiempo de este carril. Quedan 613 `!important` en los 12 módulos
+(`grep -c "!important" app/static/styles/*.css`, tras mi único cambio):
+`componentes-admin.css` 83 (77 tras mi consolidación :is(), ver abajo), `dark-mode.css`
+140, `paneles-admin.css` 210, `personalizacion.css` 52, `paginas.css` 26,
+`shell.css` 23, `impresion.css` 11, `componentes.css` 61, `responsive.css` 3,
+`base.css` 3, `menus.css` 0, `tokens.css` 0.
+
+**SD-206 (`:is()`/`:where()`)**: solo el bloque de "acento de tema en componentes"
+en `componentes-admin.css` (líneas 6-124 originales, SD-089) — nueve reglas que
+repetían la lista completa de once temas (`body.theme-dorado X, body.theme-manila
+X, ...`) por cada propiedad. Las agrupé con `body:is(.theme-dorado, .theme-manila,
+...) X`, misma especificidad que la lista plana (un elemento + una clase cada una),
+así que no cambia ningún ganador de cascada — verificado con la suite completa y
+`test_visual.py` en verde. `theme-noche` queda fuera del `:is()` en los tres
+bloques donde ya tenía su propia regla aparte con otro valor
+(`.ds-doc-thumb-badge`, `.rrhh-person-photo-initials`, `.ds-login-card`), para no
+tocar ese caso. **Sin tocar**: los bloques de override de pestañas admin y
+breadcrumb por tema más abajo en el mismo archivo (líneas ~208-219 y ~434-444
+originales) no son candidatos de `:is()` porque cada tema fija un **valor
+distinto** (no la misma propiedad con el mismo valor), así que agruparlos no
+ahorra nada. Y sobre todo: `personalizacion.css` es donde de verdad viven los
+bloques grandes de redefinición de tokens por tema (`--tt-accent` etc. para los
+once `body.theme-X`) — no llegué a mirarlo, es candidato fuerte para SD-206 y
+queda para otra pasada.
+
+**Para quien retome esto**: el hallazgo de la `@layer bootstrap`/`layer app` (SD-211)
+es el más rentable de aplicar al resto — antes de tocar cualquier `!important`,
+comprobar primero si el selector compite con Bootstrap (en cuyo caso probablemente
+sobra) o con otro módulo de la propia capa `app` importado después (en cuyo caso
+probablemente hace falta, salvo que se verifique con cuidado el orden real). Ir
+módulo por módulo, con `pytest app/tests -q` + `test_visual.py` tras cada uno, tal
+como pedía la ficha original.
+
+**quién lo pide/resuelve**: agente-lx4-orden-important (LX-4)
