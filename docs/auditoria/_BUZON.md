@@ -2331,3 +2331,102 @@ No resueltos, fuera de `app/models.py`:
       `SHELL_SECCIONES` (`app-shell.js`) para que aparezca en el menú lateral. No
       lo toqué por ser colisión fuera de mi carril (`app-shell.js` está en la lista
       de colisiones de SD-040/SD-131).
+
+- [ ] `L6-estilos` (retomado) · **archivo**: `app/static/styles.css`, zona
+      "foco/KPI/pestañas/tabla/subida/vacíos/paginación" (~2099-2458 en el `HEAD`
+      actual) · **carril dueño**: L6-estilos
+      **quién lo pide**: agente-l6b-estilos-focused (L6-estilos)
+      **qué encontré al llegar**: la reserva original (`agente-l6-estilos`) sí
+      había trabajado — el commit quedó absorbido por `b93bdb4` ("L2-estilos"),
+      verificado con `git blame` sobre `*:focus-visible`, los comentarios SD-093,
+      SD-071/072, SD-130 (parcial), SD-081, SD-122, SD-204, SD-092, SD-113,
+      SD-215 ya estaban en `HEAD` con su nota explicativa, igual que el patrón
+      de carrera de git que describen otros carriles en este mismo archivo. No
+      repetí ese trabajo.
+      **Hecho, dentro de mi zona**:
+      - **SD-058** (degradados decorativos sin criterio): aplanados a color
+        plano la cabecera de `.ds-admin-table`, `.ds-upload-zone` (reposo y
+        hover) y las seis cabeceras de tarjeta admin (`.card-primary` …
+        `.card-secondary`).
+      - **SD-065** (sin números tabulares): `font-variant-numeric: tabular-nums`
+        en `.ds-admin-table td`/`thead th`.
+      - **SD-095** (tres estilos visuales anulan el `box-shadow` del foco con
+        `!important` y se llevan también el resplandor del sistema): el anillo
+        de foco (`*:focus-visible`) ya no depende del `box-shadow` — sólo del
+        `outline`, que ningún estilo visual toca; el resplandor queda en una
+        regla `:where()` aparte, decorativa, no la señal.
+      - **SD-137** (`.ds-empty` no distinguía sin-resultados/con-acción/error):
+        añadidas `.ds-empty--accion` (con `.ds-empty-btn`) y `.ds-empty--error`,
+        mismo patrón que ya usa `.ds-chart-empty` (fuera de mi zona, comentario
+        de quien lo hizo apunta a que `.ds-empty` quedaba pendiente).
+      - **SD-140** (spinner propio vs. `fa-spin` de FontAwesome a otra
+        velocidad): `.fa-spin { animation-duration: 0.7s }`, iguala el ritmo sin
+        tocar el marcado que sigue usando el icono de FontAwesome.
+      - **SD-154** (parcial, sólo fila de tabla): `.ds-admin-table tbody tr` gana
+        el mismo resaltado en `:focus-within` que ya tiene en `:hover`. El resto
+        del ticket (grupo de búsqueda, tarjeta de resultado, elemento de lista)
+        es de L2/L3.
+      - `python -m pytest app/tests -q`: 732 passed (antes de empezar ya estaba
+        en verde con este mismo número — hay archivos de test nuevos de otro
+        carril, `test_impresion.py`/`test_selectores_tema.py`/`test_tokens.py`,
+        sin tocar). `test_contraste.py`: 8/8. Vigilé de cerca
+        `test_tokens.py::test_no_crecen_los_hexes_sueltos`: mi primer intento de
+        SD-152/SD-137 subía el conteo de hexes de 549 a 551 con valores de
+        respaldo en `var(--token, #hex)` — los quité (los tokens siempre están
+        definidos en `:root`, el respaldo no hacía falta) y quedé neto por
+        debajo del máximo gracias a que aplanar los degradados de SD-058 quita
+        más hexes de los que añaden mis reglas nuevas.
+      - **Descubrí sobre la marcha que `SD-152` (`.card-outline`) ya estaba
+        resuelto** por L2 (`styles.css:685-690`, mismo commit `b93bdb4`) — mi
+        primer borrador lo duplicaba con otros colores; lo retiré antes de
+        comitear.
+      **No hecho, documentado para quien coordine entre carriles**:
+      - **SD-040/SD-131** (usar `.ds-nav-user-badge` en vez del `style` en línea
+        en rojo): ya estaba anotado en el propio `styles.css` (comentario junto
+        a `.ds-nav-user-badge`, línea ~2434) por el trabajo absorbido en
+        `b93bdb4` — sigue pendiente de `app-shell.js:140` **[CHOCA]**, fuera de
+        lo que un carril CSS-only puede tocar.
+      - **SD-045** (retirar las seis variantes de color de `.card-primary` …
+        `.card-danger` en favor de tarjetas neutras): sólo aplané los
+        degradados (SD-058); retirar el propio esquema de color es una decisión
+        de sistema que afecta a quince usos en tres páginas admin fuera de mi
+        archivo — no elegí por mi cuenta qué tarjeta pierde su color.
+      - **SD-044** (tres implementaciones de alerta semántica: aquí, modo
+        oscuro `[L8]` y el toast en `app-core.js` **[CHOCA]**), **SD-074**
+        (etiqueta `.ds-eyebrow` unificada, ya señalada como decisión
+        multi-carril por L1/L14), **SD-096**/**SD-151** (radio e info-box/KPI
+        unificados con `[L14]`/`admin_*.html` **[LH]**), **SD-109**/**SD-121**
+        (componente de botón y de tabla completos, esfuerzo `L`, ya repartidos
+        entre L2/L6/L7/L8/L9/L10 en la tabla de lotes) y **SD-124** (insignia
+        única, ya marcada por L14 como decisión de varios carriles a la vez):
+        todos exigen tocar zonas fuera de mi rango o decidir algo que no le
+        toca a un solo carril — sin cambios.
+      - **SD-147** (insignia de notificación con `style` en línea): es
+        `app-theme.js:378-379` **[CHOCA]**, no `styles.css`.
+      - **SD-143** (unificar zona de subida grande/compacta): mi mitad
+        (`.ds-upload-zone`) ya estaba tokenizada; la compacta vive en la zona de
+        L9, que además ya la tokenizó por su lado (ver su entrada más arriba en
+        este archivo) — unificar en un componente con dos tamaños exige tocar
+        ambas zonas a la vez.
+      - **SD-094** (contorno de foco recortado): la instancia de la barra
+        lateral es de L1 (ya resuelta según su entrada); no encontré una
+        segunda instancia de borde-a-borde con `overflow:hidden` dentro de mi
+        zona.
+      - **SD-162** (scrollbar de `.ds-admin-tabs` con dos criterios opuestos):
+        ya resuelto por el trabajo absorbido en `b93bdb4` (comentario en
+        `styles.css` junto a `.ds-admin-tabs`, líneas ~2123-2137); los cinco
+        contenedores sin barra que pide el resto del ticket
+        (`.ds-sidebar-nav`, `#ia-mensajes`, `.rrhh-person-modal .modal-body`,
+        `.ds-table-wrap`) están fuera de mi rango — `.ds-notif-list` ya lo
+        resolvió L9.
+      - **SD-166** (fila de tabla clicable sin ser enfocable): el `cursor:
+        pointer` vive en el `<style>` de `admin_archive.html` **[LH]**, y hacer
+        la fila realmente enfocable (`tabindex`, `Enter`) es JS de
+        `admin-monitor.js`; desde `styles.css` sólo puedo dejar preparado el
+        estado de foco cuando llegue el `tabindex`, y ya lo cubre el
+        `:focus-within` de SD-154 más el `*:focus-visible` global — no añadí
+        una regla adicional que nadie usaría todavía.
+      - **SD-164** (pseudo-elementos de icono para insignias/orden de
+        columna/migaja): esfuerzo `M`, repartido con L14, sin un caso claro
+        dentro de mi zona que no dependa de decidir primero el componente de
+        insignia (SD-124/SD-046).

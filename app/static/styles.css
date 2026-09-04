@@ -2102,10 +2102,17 @@ body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
    pero arrastraba un `border-radius: 4px` parásito que redondeaba
    cualquier elemento enfocado, no sólo su contorno. Se retira ese radio
    y se pasa al token de acento. */
+/* SD-095: Maximalismo, Brutalismo y Liquid Glass fijan `box-shadow` en `.btn`
+   con `!important`, y ese `!important` empataba en especificidad con el de
+   aquí y a veces ganaba por orden — el anillo de foco se reducía al contorno
+   de 2px, invisible sobre el propio glass. El foco depende sólo de `outline`,
+   que ningún estilo visual toca; el resplandor es un añadido, no la señal. */
 *:focus-visible {
   outline: 2px solid var(--color-link) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 15%, transparent) !important;
+}
+:where(*:focus-visible) {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 15%, transparent);
 }
 
 /* ==========================================================================
@@ -2178,7 +2185,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
   position: sticky;
   top: 0;
   z-index: var(--z-sticky, 50);
-  background: linear-gradient(180deg, #f4f7fb, #edf1f8) !important;
+  background: #eef1f7 !important;
   color: #3a4f66 !important;
   font-weight: 700;
   font-size: 0.73rem;
@@ -2193,8 +2200,12 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
   content-visibility: auto;
   contain-intrinsic-size: auto 42px;
 }
-.ds-admin-table tbody tr:hover { background-color: #f0f7ff !important; }
+.ds-admin-table tbody tr:hover,
+.ds-admin-table tbody tr:focus-within { background-color: #f0f7ff !important; }
 .ds-admin-table td { vertical-align: middle !important; padding: 8px 12px !important; }
+/* SD-065: sin números tabulares, los dígitos de fecha/cédula bailan columna
+   a columna en vez de alinearse como una columna real. */
+.ds-admin-table td, .ds-admin-table thead th { font-variant-numeric: tabular-nums; }
 .ds-admin-table .ds-tbl-actions { white-space: nowrap; }
 .ds-admin-table .ds-tbl-actions .btn { margin: 1px; }
 
@@ -2208,7 +2219,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
   border: 2px dashed var(--border-strong, #ced4da);
   border-radius: 12px;
   padding: 28px 16px;
-  background: linear-gradient(135deg, #f8f9fa, #fff);
+  background: #f9fafb;
   transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
   cursor: pointer;
   text-align: center;
@@ -2216,7 +2227,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 }
 .ds-upload-zone:hover, .ds-upload-zone.drag-over {
   border-color: var(--color-link, #0056b3);
-  background: linear-gradient(135deg, #eef4fb, #f5f9ff);
+  background: #eef4fb;
   box-shadow: 0 4px 16px rgba(0,86,179,0.1);
 }
 .ds-upload-zone .ds-upload-icon {
@@ -2300,6 +2311,30 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 .ds-empty i { font-size: 3rem; opacity: 0.25; display: block; margin-bottom: 1rem; }
 .ds-empty h5 { font-weight: 700; color: #495057; margin-bottom: 6px; }
 .ds-empty p { font-size: 0.88rem; margin: 0; }
+
+/* SD-137: mismas tres variantes que ya tiene `.ds-chart-empty` (fuera de
+   este carril, ver ese comentario) — sin resultados con los filtros
+   actuales, sin datos con una acción para crear el primero, y error de
+   carga. Antes era un único vacío para los tres casos. */
+.ds-empty--accion .ds-empty-btn {
+  margin-top: 4px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-link);
+  background: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.ds-empty--accion .ds-empty-btn:hover { background: var(--surface-2); }
+.ds-empty--error i, .ds-empty--error h5 { color: var(--color-danger); opacity: 1; }
+
+/* SD-140: FontAwesome gira a 2s con otro grosor; el spinner propio gira a
+   0.7s. Igualar la velocidad de fa-spin evita dos ritmos de espera en la
+   misma pantalla mientras el marcado migra a `.ds-spinner`. */
+.fa-spin { animation-duration: 0.7s; }
+
 @keyframes ds-spin { to { transform: rotate(360deg); } }
 .ds-spinner {
   width: 22px; height: 22px;
@@ -2394,13 +2429,20 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
 
 /* ==========================================================================
    ADMIN CARD HEADERS — limpiar inline colors, mejor visual
+   SD-058: seis degradados de dos paradas casi idénticas por seis colores de
+   tarjeta; ninguno significaba nada que un color plano no dijera igual, así
+   que se aplanan. SD-045 (retirar del todo estas seis variantes en favor de
+   `.ds-chart-card`/`.ds-filter-card` neutras) queda sin tocar: son quince
+   usos en tres páginas admin fuera de este carril, y decidir qué tarjeta usa
+   cuál color es una decisión de marcado, no de esta hoja — anotado en
+   `_BUZON.md`.
    ========================================================================== */
-.card.card-primary .card-header  { background: linear-gradient(90deg,#d0e4f7,#e8f3ff) !important; color:#0f3460 !important; border-bottom-color:#b8d5ef !important; }
-.card.card-success .card-header  { background: linear-gradient(90deg,#d4edda,#eaf5ee) !important; color:#1a5c30 !important; border-bottom-color:#b5d9c5 !important; }
-.card.card-info    .card-header  { background: linear-gradient(90deg,#d1ecf1,#e8f7fa) !important; color:#0c545d !important; border-bottom-color:#aadfe7 !important; }
-.card.card-warning .card-header  { background: linear-gradient(90deg,#fff3cd,#fffaed) !important; color:#7B5800 !important; border-bottom-color:#eedfa0 !important; }
-.card.card-danger  .card-header  { background: linear-gradient(90deg,#f8d7da,#fff0f2) !important; color:#7c2d3c !important; border-bottom-color:#f0b4bf !important; }
-.card.card-secondary .card-header { background: linear-gradient(90deg,#e9ecef,#f5f5f5) !important; color:#495057 !important; }
+.card.card-primary .card-header  { background:#e3eefa !important; color:#0f3460 !important; border-bottom-color:#b8d5ef !important; }
+.card.card-success .card-header  { background:#deefe3 !important; color:#1a5c30 !important; border-bottom-color:#b5d9c5 !important; }
+.card.card-info    .card-header  { background:#daf0f4 !important; color:#0c545d !important; border-bottom-color:#aadfe7 !important; }
+.card.card-warning .card-header  { background:#fff5d6 !important; color:#7B5800 !important; border-bottom-color:#eedfa0 !important; }
+.card.card-danger  .card-header  { background:#fbdfe2 !important; color:#7c2d3c !important; border-bottom-color:#f0b4bf !important; }
+.card.card-secondary .card-header { background:#eef0f1 !important; color:#495057 !important; }
 .card.card-primary .card-header .card-title  { color: #0f3460 !important; }
 .card.card-success .card-header .card-title  { color: #1a5c30 !important; }
 .card.card-info    .card-header .card-title  { color: #0c545d !important; }
