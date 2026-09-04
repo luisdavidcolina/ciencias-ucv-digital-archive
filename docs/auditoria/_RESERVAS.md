@@ -66,7 +66,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | en curso | |
 | SWEEP-main | agente-sweep-main | 2026-09-03 | en curso | |
-| SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | en curso | |
+| SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
 | SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | en curso | |
 | SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | en curso | |
 | SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | en curso | |
