@@ -2430,3 +2430,30 @@ No resueltos, fuera de `app/models.py`:
         columna/migaja): esfuerzo `M`, repartido con L14, sin un caso claro
         dentro de mi zona que no dependa de decidir primero el componente de
         insignia (SD-124/SD-046).
+
+- `agente-lt-tests-vercel` (carril LT, SD-021/022/047/224/225/226/227/236):
+  - **SD-224** (pruebas visuales): la ficha completa —capturas de referencia
+    de la galería de SD-223, a 390/768/1440px, en claro y oscuro, con dos o
+    tres temas, comparadas contra un baseline— depende de dos decisiones que
+    no son de este carril: que exista `app/static/sistema.html` (carril LG,
+    SD-223, sin resolver aún) y una política de cuándo se actualiza a mano un
+    PNG de referencia (¿se commitea binario? ¿se recalcula en CI?). Entregué
+    en su lugar `app/tests/test_visual.py`: levanta la app real con
+    Playwright y falla si una página pública desborda horizontalmente o tira
+    un error de consola, a los tres anchos, en claro y oscuro. Es la mismísima
+    inspección manual que ya pide "Antes de dar algo por terminado" en
+    `CLAUDE.md`, mecanizada. Cuando LG entregue la galería, las utilidades de
+    ese archivo (`servidor_vivo`, `navegador`) sirven para el pixel-diff
+    completo sin reescribir nada.
+  - **SD-047**: extendí `test_contraste.py` con una matriz tema × fondo real
+    (barra lateral de cada tema contra su propio color de texto, extraída en
+    vivo de `styles.css`, no copiada a mano). Cubre hoy `theme-noche`, el
+    único tema que redefine explícitamente tanto el fondo de la barra lateral
+    como el color de sus enlaces con un hex literal — el resto de temas
+    comparte fondo/texto con la barra por defecto y ya lo cubren los tests de
+    grises existentes. Cuando SD-031 (los once temas derivados de cuatro
+    variables) aterrice, esta matriz se ampliará sola en cuanto más temas
+    redefinan su propio fondo.
+  - **SD-235** (unificar el informe PDF de RRHH con la impresión del
+    navegador): `hr.py` no es de este carril — anotado aquí para quien tenga
+    ese archivo, sin cambios de mi parte.

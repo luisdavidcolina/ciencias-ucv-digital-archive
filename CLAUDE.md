@@ -65,6 +65,22 @@ ya llegaron a `main` una vez:
   ambos módulos ofrecen la misma navegación, los encabezados del monitor cuadran
   con las celdas que emite la plantilla, y ninguna página vuelve a traer la
   cáscara escrita a mano.
+- `test_tokens.py` — el bloque de tokens (L0) de `styles.css`: los hexes
+  sueltos fuera del bloque no crecen, todo token consumido con `var(--x)` sin
+  fallback está definido, todo token definido tiene consumidor (con
+  excepciones documentadas mientras dura la migración por lotes), y todo
+  token de color en modo claro tiene su redefinición bajo `body.dark-mode`.
+- `test_selectores_tema.py` — el selector de modo oscuro se escribe igual en
+  todas las hojas propias. Existe porque `ai-widget.css` usaba uno distinto
+  al de `styles.css` y el modo oscuro del asistente llevaba muerto (SD-041).
+- `test_impresion.py` — todo `position: fixed` tiene contrapartida en algún
+  `@media print`, para que no vuelva a salir la burbuja del asistente encima
+  de un documento impreso (SD-229).
+- `test_visual.py` — levanta la app real en un puerto local y navega con
+  Playwright: cada página pública a 390/768/1440px, en claro y oscuro, sin
+  desborde horizontal ni errores de consola. Necesita
+  `pip install playwright && python -m playwright install chromium`; sin eso
+  se saltan solos, no fallan.
 
 ## Estructura de Directorios
 
@@ -256,6 +272,65 @@ existan. Por eso el `<script>` va en el `<body>`, no al final.
   acceso de la página: **al añadir una página con `data-page` hay que darle su
   rama ahí**, o rebotará a quien sí tiene permiso.
 - Al añadir un enlace, se añade en `SHELL_SECCIONES` y en ningún HTML.
+
+### Sistema de diseño
+
+`styles.css` tiene un bloque de tokens al principio del archivo (comentario
+`SISTEMA DE TOKENS (L0)`), fuente de verdad para todo color, tamaño, radio,
+sombra, duración o z-index. **Ningún valor nuevo se escribe a pelo si ya
+existe un token que lo cubre** (SD-021); si hace falta uno que no está, se
+añade a ese bloque con su justificación, no suelto en la regla que lo usa.
+`app/tests/test_tokens.py` vigila que no crezcan los hexes sueltos y que todo
+token definido tenga consumidor y todo consumido tenga definición.
+
+Tres niveles, de abajo arriba — igual que documenta el propio bloque en
+`styles.css`, aquí como referencia rápida sin tener que abrirlo:
+
+| Nivel | Prefijo | Qué es | Ejemplos |
+|---|---|---|---|
+| 1. Primitivos | `--gray-*`, `--c-*` | La escala cruda, sin significado semántico | `--gray-50`…`--gray-900`, `--c-brand-700`, `--c-green-600` |
+| 2. Semánticos | `--surface-*`, `--text*`, `--border*`, `--color-*` | Lo que resuelve `light-dark()` a mano (SD-189): un bloque para claro, redefinido bajo `body.dark-mode` | `--surface-0`…`--surface-3`, `--text-muted`, `--border-strong` |
+| 3. Componente | `--ds-*`, `--viz-*`, `--tt-*` | Tokens ya existentes antes de L0, no se tocan ni se duplican | `--ds-accent`, `--ds-muted-aa`, `--viz-1`…`--viz-8`, `--tt-accent` (por tema) |
+
+Otras familias de tokens, no de color, sin par oscuro: `--space-*`
+(espaciado), `--font-size-*`/`--font-weight-*`/`--line-height-*`/
+`--letter-spacing-*` (tipografía), `--radius-*` (bordes), `--shadow-*`
+(elevación, 5 niveles), `--duration-*`/`--ease-*` (movimiento), `--z-*`
+(apilamiento).
+
+**Los cinco ejes de personalización** (SD-227) — un agente que no sabe que
+existen escribe una regla sin variante oscura, o un tema que nadie prueba:
+
+1. **Modo oscuro** — `body.dark-mode`, alternado por `app-theme.js`. Toda
+   hoja que lo declare tiene que usar exactamente ese selector: SD-041 (la
+   burbuja del asistente con modo oscuro muerto) fue `ai-widget.css` usando
+   otra forma. `app/tests/test_selectores_tema.py` lo vigila.
+2. **Once temas** (`body.theme-dorado`, `.theme-manila`, `.theme-noche`…) —
+   cada uno redefine `--tt-accent`/`--tt-accent-hover`/`--tt-accent-light`/
+   `--tt-tint-*` y, algunos, el fondo de la barra lateral. Viven en la zona
+   1235-1635 de `styles.css` (lote L5 de `sistema-diseno.md`).
+3. **Ocho acentos** — variantes de `--ds-accent` para quien no quiere un
+   tema completo, sólo el color de acción.
+4. **Siete estilos visuales** (*Vidrio*, *Liquid Glass*…) — capas opcionales
+   de efecto (`backdrop-filter`, sombras) sobre el mismo sistema de tokens.
+5. **Densidad** — `--density-scale`, compacta el espaciado sin tocar la
+   tipografía.
+
+**Cinco reglas de oro** al tocar cualquier cosa visual:
+
+1. Ningún color, tamaño o duración a pelo si el bloque de tokens ya tiene uno
+   (SD-021/SD-022).
+2. Todo token de color declarado en modo claro necesita su redefinición bajo
+   `body.dark-mode`, aunque sea el mismo valor repetido — así queda explícito
+   que se decidió, no que se olvidó (SD-226).
+3. Un componente nuevo se prueba en los tres modos (claro/oscuro + tema) y en
+   390px antes de darlo por terminado — ver "Antes de dar algo por
+   terminado" más abajo.
+4. El color pertenece al dato o al estado, no al marco: no se inventa un hue
+   nuevo por gráfico o por tarjeta si no representa una diferencia real.
+5. Un selector de estado global (tema, modo oscuro, densidad) se escribe
+   igual en todas las hojas propias (`styles.css`, `ai-widget.css`, las que
+   vengan). Cruzarlo a mano es como se perdió SD-041.
 
 ### Colores de datos (tokens `--viz-*`)
 La paleta de gráficos vive en `styles.css` como tokens `--viz-1` … `--viz-8`,

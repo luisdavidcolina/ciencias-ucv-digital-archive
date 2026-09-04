@@ -86,6 +86,65 @@ def test_los_grises_de_texto_cumplen(token, fondo):
     )
 
 
+# --- SD-047: matriz tema × fondo -------------------------------------------
+#
+# Nota de agente-l15-estilos en _BUZON.md: --ds-muted-aa/--ds-muted-aa-oscuro
+# no se pueden pasar a color-mix() sin romper los tests de arriba (piden un
+# hex literal), y ningún tema redefine --viz-surface/--viz-ink, así que un
+# cálculo genérico por tema no sería exacto. Lo que SÍ redefine cada tema con
+# un valor propio, literal, es el color del texto de la barra lateral sobre
+# su propio fondo — así se descubrió que el modo oscuro del asistente
+# (SD-041) llevaba dos selectores distintos. Esta es la matriz tema × fondo
+# de esos pares, extraídos en vivo de styles.css (no copiados a mano, para no
+# quedar desincronizados si un lote de estilos cambia el valor).
+
+def _color_de_regla(css: str, selector_regex: str, propiedad: str) -> str | None:
+    m = re.search(
+        re.escape(selector_regex) + r"\s*\{[^}]*" + propiedad + r"\s*:\s*(#[0-9a-fA-F]{6})",
+        css,
+    )
+    return m.group(1) if m else None
+
+
+def _pares_tema_fondo_texto():
+    """(tema, selector de texto, fondo, texto) para los temas que redefinen
+    tanto el fondo de la barra lateral como el color de sus enlaces."""
+    css = (STATIC / "styles.css").read_text(encoding="utf-8")
+    temas = re.findall(r"body\.(theme-[\w-]+)\s*\{\s*--tt-accent", css)
+    pares = []
+    for tema in temas:
+        fondo = _color_de_regla(css, f"body.{tema} .ds-sidebar ", "background")
+        texto = _color_de_regla(css, f"body.{tema} .ds-sidebar-link ", "color")
+        if fondo and texto:
+            pares.append((tema, fondo, texto))
+    return pares
+
+
+PARES_TEMA_FONDO = _pares_tema_fondo_texto()
+
+
+def test_se_detecto_al_menos_un_tema_con_fondo_propio():
+    """Ancla: si el patrón deja de casar (p. ej. porque L5 reescribe SD-031
+    a variables derivadas), esta prueba avisa antes que un parametrize vacío
+    que pasa en silencio sin comprobar nada."""
+    assert PARES_TEMA_FONDO, (
+        "ningún tema declara a la vez fondo de barra lateral y color de "
+        "enlace propios: revisa si SD-031 ya derivó los temas de otra forma "
+        "y actualiza el patrón de extracción"
+    )
+
+
+@pytest.mark.parametrize("tema,fondo,texto", PARES_TEMA_FONDO)
+def test_la_barra_lateral_de_cada_tema_cumple_contraste(tema, fondo, texto):
+    r = contraste(fondo, texto)
+    assert r >= MINIMO, (
+        f'tema "{tema}": el texto de la barra lateral ({texto}) da {r:.2f}:1 '
+        f"sobre su propio fondo ({fondo}); hace falta {MINIMO}. Es la misma "
+        "clase de fallo que dejó muerto el modo oscuro del asistente (SD-041): "
+        "un tema con su propio color que nadie cruzó contra su propio fondo."
+    )
+
+
 def test_no_vuelve_el_gris_de_bootstrap_en_estilos_en_linea():
     """#6c757d sobre #f8f9fa da 4,44:1, y en un style en línea ninguna hoja de
     estilos puede corregirlo."""
