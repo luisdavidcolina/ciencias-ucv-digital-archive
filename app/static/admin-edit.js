@@ -289,7 +289,14 @@ async function handleSaveEditDoc() {
     $("#editArchivoModal").modal("hide");
     showToast("Documento actualizado.", "success");
     try {
-      loadMonitorTable();
+      // OA-027: actualización optimista de la fila en vez de recargar toda la
+      // tabla — evita que un fallo de red posterior al guardado exitoso deje
+      // la fila con datos viejos sin avisar.
+      if (typeof updateMonitorRowOptimistic === "function") {
+        updateMonitorRowOptimistic(parseInt(id), payload);
+      } else {
+        loadMonitorTable();
+      }
     } catch {
       showToast("El documento se guardó, pero la tabla no se pudo refrescar. Recarga la pestaña.", "warning");
     }

@@ -3,12 +3,53 @@
 // Los pendientes que exigen cambios en admin_archive.html, admin_hr.html, docs.py,
 // hr.py o main.py quedan anotados en docs/auditoria/_BUZON.md y no se tocan aquí.
 
+// OA-106 / OR-131: persistencia de filtros y página en la URL, por sufijo de
+// módulo para que Archivo y RRHH no se pisen. `type`/`person` son <select> que
+// se repueblan en cada carga (OA-029), así que su valor de la URL se guarda
+// aparte y se re-aplica cuando las opciones ya existen, no al restaurar.
+function _monitorURLKeys(suf) {
+  return { q: `m_${suf}_q`, type: `m_${suf}_type`, person: `m_${suf}_person`, status: `m_${suf}_status`, page: `m_${suf}_page` };
+}
+
+function _restoreMonitorFiltersFromURL(suf) {
+  state.adminTable._urlRestored = state.adminTable._urlRestored || {};
+  if (state.adminTable._urlRestored[suf]) return;
+  state.adminTable._urlRestored[suf] = true;
+  const params = new URLSearchParams(window.location.search);
+  const keys = _monitorURLKeys(suf);
+  const qEl = document.getElementById(`admin_search-${suf}`);
+  if (qEl && params.has(keys.q)) qEl.value = params.get(keys.q);
+  const statusEl = document.getElementById(`admin_filter_status-${suf}`);
+  if (statusEl && params.has(keys.status)) statusEl.value = params.get(keys.status);
+  state.adminTable._pendingURLType = state.adminTable._pendingURLType || {};
+  state.adminTable._pendingURLPerson = state.adminTable._pendingURLPerson || {};
+  if (params.has(keys.type)) state.adminTable._pendingURLType[suf] = params.get(keys.type);
+  if (params.has(keys.person)) state.adminTable._pendingURLPerson[suf] = params.get(keys.person);
+  const pageVal = parseInt(params.get(keys.page), 10);
+  if (pageVal > 0) state.adminTable.page = pageVal;
+}
+
+function _updateMonitorURL(suf, q, type, person, statusFilt) {
+  const params = new URLSearchParams(window.location.search);
+  const keys = _monitorURLKeys(suf);
+  const setOrDelete = (key, val) => { if (val) params.set(key, val); else params.delete(key); };
+  setOrDelete(keys.q, q);
+  setOrDelete(keys.type, type);
+  setOrDelete(keys.person, person);
+  setOrDelete(keys.status, statusFilt);
+  setOrDelete(keys.page, (state.adminTable.page && state.adminTable.page > 1) ? String(state.adminTable.page) : "");
+  const qs = params.toString();
+  const newUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+  window.history.replaceState(null, "", newUrl);
+}
+
 async function loadMonitorTable() {
   const mod        = state.user.modulo;
   const suf        = adminSuffixFromTab();
+  _restoreMonitorFiltersFromURL(suf);
   const q          = document.getElementById(`admin_search-${suf}`)?.value          || "";
-  const type       = document.getElementById(`admin_filter_type-${suf}`)?.value     || "";
-  const person     = document.getElementById(`admin_filter_person-${suf}`)?.value   || "";
+  let   type       = document.getElementById(`admin_filter_type-${suf}`)?.value     || "";
+  let   person     = document.getElementById(`admin_filter_person-${suf}`)?.value   || "";
   const statusFilt = document.getElementById(`admin_filter_status-${suf}`)?.value   || "";
   const page    = state.adminTable.page    || 1;
   const perPage = state.adminTable.perPage || 25;
@@ -44,6 +85,17 @@ async function loadMonitorTable() {
         typeSelector.value = prevType;
         typeSelector.dataset.dsOptionsSig = optionsHtml.length + ":" + (types || []).join("|");
       }
+      // OA-106/OR-131: la URL traía un tipo restaurado, pero al momento del
+      // fetch anterior las opciones aún no existían — se aplica ahora y se
+      // recarga una sola vez con el filtro real.
+      if (state.adminTable._pendingURLType?.[suf] !== undefined) {
+        const wanted = state.adminTable._pendingURLType[suf];
+        delete state.adminTable._pendingURLType[suf];
+        if (wanted && wanted !== type) {
+          typeSelector.value = wanted;
+          if (typeSelector.value === wanted) { loadMonitorTable(); return; }
+        }
+      }
     }
 
     // Poblar filtro de persona (solo primera carga: en Archivo depende de la
@@ -59,7 +111,16 @@ async function loadMonitorTable() {
       personSelector.innerHTML = `<option value="">Filtrar por Persona...</option>` +
         people.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join("");
     }
+    if (personSelector && state.adminTable._pendingURLPerson?.[suf] !== undefined) {
+      const wantedPerson = state.adminTable._pendingURLPerson[suf];
+      delete state.adminTable._pendingURLPerson[suf];
+      if (wantedPerson && wantedPerson !== person) {
+        personSelector.value = wantedPerson;
+        if (personSelector.value === wantedPerson) { loadMonitorTable(); return; }
+      }
+    }
 
+    _updateMonitorURL(suf, q, type, person, statusFilt);
     _ensureMonitorToolbarExtras(suf);
     renderMonitorTable();
     _renderMonitorStatusBadges();
@@ -144,6 +205,17 @@ function _ensureMonitorToolbarExtras(suf) {
       if (e.key === "Enter") { e.preventDefault(); go(); }
     });
   }
+}
+
+// OA-027 (parte): tras guardar una edición, actualizar sólo la fila afectada
+// en vez de disparar una recarga completa que puede fallar en silencio si la
+// red falla justo después de un guardado exitoso.
+function updateMonitorRowOptimistic(id, patch) {
+  const results = state.adminTable.results || [];
+  const idx = results.findIndex(r => r.id == id);
+  if (idx === -1) { loadMonitorTable(); return; }
+  results[idx] = { ...results[idx], ...patch };
+  renderMonitorTable();
 }
 
 function _clearMonitorFilters(suf) {
@@ -272,8 +344,11 @@ function renderMonitorTable() {
       </tr>`;
     }).join("");
   } else {
+    // OR-135: clase por estado laboral (con variante de modo oscuro y temas en
+    // styles.css) en vez del `style` inline que armaba getStatusColor().
+    const STATUS_CLASS = { Activo: "ds-status-activo", Retirado: "ds-status-retirado", Jubilado: "ds-status-jubilado", Pensionado: "ds-status-pensionado" };
     container.innerHTML = records.map(f => {
-      const c = getStatusColor(f.estado);
+      const statusCls = STATUS_CLASS[f.estado] || "ds-status-otro";
       const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
       const nombreEmp = escHtml(f.empleado || "");
       // OR-237: avatar con iniciales como respaldo (no llega foto por ahora,
@@ -299,7 +374,7 @@ function renderMonitorTable() {
           <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${avatar}${hlEmpleado}${docCountBadge}</td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.cedula||'—')}</td>
           <td class="text-muted small ds-hide-sm" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="${escHtml([f.cargo, f.departamento].filter(Boolean).join(' · '))}">${cargoDeptoCell}</td>
-          <td><span class="badge" style="background-color:${c};color:white;padding:3px 6px;">${escHtml(f.estado||'—')}</span></td>
+          <td><span class="badge ${statusCls}" style="padding:3px 6px;">${escHtml(f.estado||'—')}</span></td>
           <td class="ds-hide-sm"><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.ubicacion||'—')}</td>
           <td>
