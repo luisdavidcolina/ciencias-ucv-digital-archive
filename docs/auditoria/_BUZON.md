@@ -1565,3 +1565,61 @@ sobre `HEAD` (713 pasan). No reparo el historial, segun la regla 10 —
 marco mi reserva como terminada con `ada29aa` en `_RESERVAS.md`.
 
 **quien lo pide**: agente-l5-estilos (L5-estilos)
+
+---
+
+## L15-estilos (agente-l15-estilos)
+
+Zona: `styles.css`, página compartida / contraste / enlace de salto
+(~4400-4780 en la numeración actual, se movió respecto al 3805-3973 de la
+ficha por lo que L0 y otros carriles añadieron antes).
+
+Resueltos en mi zona:
+- SD-108: `scroll-margin-top` en `#contenido-principal` y en `:target`
+  genérico — listo para cuando la barra superior se haga pegajosa (SD-135).
+- SD-161: `:target` con resalte temporal (`ds-target-flash`), apagado por
+  `body.ds-no-anim` y por `prefers-reduced-motion` — para las anclas de
+  `ayuda.html` (`LH`, no toqué ese archivo).
+- SD-185 (parte del enlace de salto): `.ds-skip-link` animaba `top`
+  (fuerza reflow); pasa a `transform: translateY()`, que solo compone. La
+  otra mitad de SD-185 (el cajón lateral animando `left`) es de otro
+  carril (L1/L5).
+- SD-234: bloque `@media print` para `.ds-compartido-wrap` — sin el
+  `min-height:100dvh` que deja una página en blanco al final, sin el botón
+  de descarga (`.ds-compartido-acciones`), sin sombra/borde de tarjeta.
+- SD-066 (parte de la página compartida): `max-width: 70ch` en
+  `.ds-compartido-caja`.
+
+Sin tocar, anotado aquí:
+- SD-015/SD-047: el test `test_contraste.py::test_los_grises_de_texto_cumplen`
+  exige que `--ds-muted-aa`/`--ds-muted-aa-oscuro` sean un hex literal
+  (`re.search(token + r":\s*(#[0-9a-fA-F]{6})")`), así que no se puede pasar
+  a `color-mix()` sin romper la prueba fijada en 713/0 — y `test_contraste.py`
+  no es mi archivo. Además ninguno de los temas (`theme-manila`,
+  `theme-noche`) redefine `--viz-surface`/`--viz-ink` (viven en `app-theme.js`
+  o en zonas de otros carriles, líneas ~1549-1863), así que aunque se pudiera
+  derivar con `color-mix()` el cálculo seguiría sin ser exacto por tema. Para
+  quien tenga `test_contraste.py`: extender la prueba a una matriz tema×modo
+  es el primer paso (lo pide SD-047 explícitamente) antes de tocar el token
+  en `styles.css`.
+- SD-024: en mi zona ya estaba resuelto (`.badge-success`/`.bg-success` en
+  `#208838`, contraste 4.5+ con blanco); los usos sin corregir del verde de
+  Bootstrap que cita la ficha (`styles.css:288`, `500`, `2811` en la
+  numeración vieja) caen en zonas de L1/L9, no la mía.
+- SD-074 (etiqueta `.ds-eyebrow` unificada): mi instancia (`.info-box-text`)
+  ya usa tokens (`var(--viz-ink-muted)`); unificarla con las otras ocho
+  (L1/L6/L7/L14) en una sola clase compartida es una decisión de varios
+  carriles a la vez y se sale de "no escribir fuera de mi zona" — lo dejo
+  para quien coordine ese SD entre carriles.
+
+`python -m pytest app/tests -q`: 713 pasan.
+
+**Nota de carrera de git**: igual que otros carriles de estilos, mi trabajo
+quedó arrastrado por el commit de otro agente sobre el mismo índice
+compartido — `git status --short` salió limpio y coincidía con `HEAD` al ir
+a comitear. Verificado con `git log -S "ds-target-flash" --oneline --
+app/static/styles.css`, que apunta a `7de4937` ("L10-estilos: SD-105,
+SD-215 en zona responsive de paneles admin"); ahí están mis reglas de
+`:target`, el `translateY(-100%)` del enlace de salto, el `@media print`
+de la página compartida y el `max-width: 70ch`. No reparo el historial,
+según la regla 10 — marco mi reserva como terminada con `7de4937`.
