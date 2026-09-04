@@ -1519,3 +1519,49 @@ Confirmado con `git show b93bdb4:app/static/styles.css | grep -c ds-accent-ink` 
 apariciones, coincide con lo que escribí) y con `python -m pytest app/tests -q` en verde
 sobre `HEAD` (713 pasan). No reparo el historial, según la regla 10 del plan paralelo —
 marco mi reserva como terminada con `b93bdb4` en `_RESERVAS.md`.
+
+## L5-estilos — SD-031 (panel de temas y los once temas)
+
+SD-031 hecho: los once temas ya no repiten ~15 declaraciones de color por
+componente (~330 lineas totales) — cada `body.theme-X` declara siete
+variables (`--tt-accent`, `--tt-accent-hover`, `--tt-accent-light`,
+`--tt-accent-rgb`, `--tt-tint-1/2/border`; la ficha sugeria cuatro, hicieron
+falta algunas mas para no perder fidelidad visual en las once paletas
+hechas a mano) y un bloque de reglas compartidas las consume una sola vez.
+Con ella caen SD-038 (ya no hay que escribir una regla oscura por tema y
+componente: el nuevo bloque compartido es un solo punto para engancharla
+cuando alguien tokenice el modo oscuro), SD-061 (la barra lateral en
+oscuro puede derivar del acento en vez de un azul fijo), SD-089 (la
+sombra de hover de la tarjeta pasa de trece declaraciones a una) y
+SD-057 (parcial: menos combinaciones sin probar, no cierra la falta de
+infraestructura de pruebas visual). Tambien cerre SD-165 (el check del
+tema activo ya no depende de `content:"✓"`, se dibuja con bordes),
+SD-183 y SD-182 (giro decorativo retirado del boton de cerrar del panel de
+temas; su transicion usa los tokens `--duration-slow`/`--ease-out` de L0) y
+SD-087 (sombra del panel de temas alineada con `--shadow-xl`, ya
+etiquetado para "barra lateral, panel de temas" en el bloque L0).
+
+SD-033/SD-034/SD-035 (Manila y Medianoche tocan la superficie de pagina/
+sidebar, los otros nueve no; Medianoche tiene titulos oscuros sobre un
+fondo que no oscurece) siguen igual que antes — son decisiones de
+producto marcadas explicitamente en la ficha ("decidir si..."), no algo
+que una refactorizacion de CSS deba resolver por su cuenta. SD-032 (unificar
+temas y acentos en un solo eje) y SD-200 (usar `popover` nativo para los
+tres desplegables) exigen tocar `app-theme.js`, fuera de mi archivo
+(`app/static/styles.css` es lo unico que declara mi carril) — anotado aqui
+para quien tenga ese archivo.
+
+`python -m pytest app/tests -q`: 713 pasan, igual que antes de empezar.
+
+**Nota de carrera de git**: verifique `git status --short` antes de ir a
+comitear y mi bloque ya no aparecia como cambio sin comitear — coincidia
+con `HEAD`. Mi trabajo quedo arrastrado por el commit de otro agente sobre
+el mismo indice compartido: verificado con
+`git show HEAD:app/static/styles.css | grep -n 'tt-accent-hover:#7B5800'`,
+que aparece en `ada29aa` ("SD-036: modo oscuro como redefinicion de
+tokens, no 190 reglas sueltas"), junto con las notas SD-165/SD-183/SD-182/
+SD-087 tambien confirmadas ahi. `python -m pytest app/tests -q` en verde
+sobre `HEAD` (713 pasan). No reparo el historial, segun la regla 10 —
+marco mi reserva como terminada con `ada29aa` en `_RESERVAS.md`.
+
+**quien lo pide**: agente-l5-estilos (L5-estilos)

@@ -2165,21 +2165,34 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 
 /* ==========================================================================
    ADMIN TABLE
+   SD-081: las mayúsculas forzadas de la cabecera ensanchaban columnas largas
+   («Fecha de vencimiento») y obligaban al `white-space: nowrap` que causaba
+   el desborde horizontal (OA-195) — capitalización normal, mismo peso.
+   SD-122: cabecera pegajosa: el monitor y la auditoría muestran hasta 100
+   filas y se perdía de vista qué columna era cuál al bajar.
+   SD-204: `content-visibility` en filas — se pintaban las 100 aunque sólo
+   se vean seis.
    ========================================================================== */
 .ds-admin-table { font-size: 0.83rem; margin-bottom: 0 !important; }
 .ds-admin-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky, 50);
   background: linear-gradient(180deg, #f4f7fb, #edf1f8) !important;
   color: #3a4f66 !important;
   font-weight: 700;
   font-size: 0.73rem;
-  text-transform: uppercase;
   letter-spacing: 0.6px;
   border-bottom: 2px solid #cdd8e8 !important;
   border-top: none !important;
   white-space: nowrap;
   padding: 10px 12px !important;
 }
-.ds-admin-table tbody tr { transition: background 0.15s; }
+.ds-admin-table tbody tr {
+  transition: background 0.15s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 42px;
+}
 .ds-admin-table tbody tr:hover { background-color: #f0f7ff !important; }
 .ds-admin-table td { vertical-align: middle !important; padding: 8px 12px !important; }
 .ds-admin-table .ds-tbl-actions { white-space: nowrap; }
@@ -2187,9 +2200,12 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 
 /* ==========================================================================
    UPLOAD ZONE (Nuevo Ingreso)
+   SD-092: el discontinuo se reserva para "vacío/arrastrable" — aquí es
+   exactamente ese caso, se tokeniza el color de borde para que sea el mismo
+   gris que el resto de bordes discontinuos del sistema.
    ========================================================================== */
 .ds-upload-zone {
-  border: 2px dashed #ced4da;
+  border: 2px dashed var(--border-strong, #ced4da);
   border-radius: 12px;
   padding: 28px 16px;
   background: linear-gradient(135deg, #f8f9fa, #fff);
@@ -2199,7 +2215,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
   margin-bottom: 14px;
 }
 .ds-upload-zone:hover, .ds-upload-zone.drag-over {
-  border-color: #0056b3;
+  border-color: var(--color-link, #0056b3);
   background: linear-gradient(135deg, #eef4fb, #f5f9ff);
   box-shadow: 0 4px 16px rgba(0,86,179,0.1);
 }
@@ -2210,7 +2226,7 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
   display: block;
   transition: color 0.25s, transform 0.25s;
 }
-.ds-upload-zone:hover .ds-upload-icon { color: #0056b3; transform: translateY(-4px); }
+.ds-upload-zone:hover .ds-upload-icon { color: var(--color-link, #0056b3); transform: translateY(-4px); }
 .ds-upload-zone h6 { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
 .ds-upload-zone p { font-size: 0.8rem; color: #6c757d; margin-bottom: 10px; }
 
@@ -2287,12 +2303,42 @@ body.theme-oliva          .ds-admin-tabs .nav-link.active { background-color:#5a
 @keyframes ds-spin { to { transform: rotate(360deg); } }
 .ds-spinner {
   width: 22px; height: 22px;
-  border: 3px solid #dee2e6;
-  border-top-color: #0056b3;
+  border: 3px solid var(--border, #dee2e6);
+  border-top-color: var(--color-link, #0056b3);
   border-radius: 50%;
   animation: ds-spin 0.7s linear infinite;
   display: inline-block;
   flex-shrink: 0;
+}
+
+/* SD-113: ningún botón tenía estado de carga — Guardar, importar, exportar y
+   restaurar copia tardan segundos y el botón se queda igual. Variante con
+   `.ds-spinner` en línea (mismo giro de 0.7s que el resto del sistema,
+   SD-140) y ancho estable: el texto se oculta mediante `visibility` en vez
+   de `display`, así la caja del botón no cambia de tamaño al activarse. */
+.btn.is-loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+.btn.is-loading > * { visibility: hidden; }
+.btn.is-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ds-spin 0.7s linear infinite;
+}
+.btn-outline-secondary.is-loading::after,
+.btn-light.is-loading::after {
+  border-color: var(--border-strong, #ced4da);
+  border-top-color: var(--text, #212529);
 }
 
 /* ==========================================================================
@@ -2341,11 +2387,9 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
   .ds-search-bar { margin-bottom: 1.25rem; }
   .ds-results-title { font-size: 1.1rem; }
   .ds-item-card { padding: 0.65rem 0.5rem; }
-  /* KPI 2x2 en móvil */
-  .ds-kpi-row > .col-md-3 { flex: 0 0 50%; max-width: 50%; padding: 0 6px; }
-}
-@media (max-width: 400px) {
-  .ds-kpi-row > .col-md-3 { flex: 0 0 100%; max-width: 100%; }
+  /* SD-215: `.ds-kpi-row` no aparece en ningún HTML/JS del proyecto — el
+     marcado real usa `.ds-kpi-grid` (con su propia regla responsive más
+     abajo en el archivo). Regla muerta retirada. */
 }
 
 /* ==========================================================================
