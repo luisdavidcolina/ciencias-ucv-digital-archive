@@ -32,6 +32,18 @@
 }
 #ia-panel.ia-abierto { display: flex; }
 
+/* SI-124: a 380px fijos el panel se sale a 390px de viewport y el teclado
+   virtual tapa el campo de escritura. Por debajo de 576px pasa a pantalla
+   completa, con dvh para que el teclado no lo corte. */
+@media (max-width: 576px) {
+  #ia-panel {
+    right: 0; bottom: 0; left: 0; top: 0;
+    width: 100%; max-width: 100%;
+    height: 100dvh; max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
 .ia-cab {
   background: var(--ds-accent); color: var(--text-inverse); padding: var(--space-3) var(--space-4);
   display: flex; align-items: center; justify-content: space-between; font-weight: var(--font-weight-semibold);

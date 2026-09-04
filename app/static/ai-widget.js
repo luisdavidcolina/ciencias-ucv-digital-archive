@@ -329,6 +329,11 @@
   function alternar() {
     estado.abierto = !estado.abierto;
     document.getElementById("ia-panel").classList.toggle("ia-abierto", estado.abierto);
+    var burbuja = document.getElementById("ia-burbuja");
+    if (burbuja) {
+      burbuja.setAttribute("aria-expanded", String(estado.abierto));
+      burbuja.setAttribute("aria-label", estado.abierto ? "Cerrar asistente" : "Abrir asistente");
+    }
     if (estado.abierto) {
       pintar();
       var i = document.getElementById("ia-input");
@@ -349,16 +354,20 @@
 
     var cont = document.createElement("div");
     cont.innerHTML =
-      '<button id="ia-burbuja" title="Asistente del Archivo" aria-label="Abrir asistente">' +
+      '<button id="ia-burbuja" title="Asistente del Archivo" aria-label="Abrir asistente" ' +
+             'aria-expanded="false" aria-controls="ia-panel">' +
         '<i class="fas fa-robot"></i></button>' +
       '<div id="ia-panel" role="dialog" aria-label="Asistente del Archivo">' +
         '<div class="ia-cab">' +
           '<span><i class="fas fa-robot"></i> Asistente del Archivo</span>' +
           "<div>" +
-            '<button id="ia-hist-btn" title="Conversaciones anteriores" style="display:none">' +
+            '<button id="ia-hist-btn" title="Conversaciones anteriores" ' +
+                    'aria-label="Conversaciones anteriores" style="display:none">' +
               '<i class="fas fa-clock-rotate-left"></i></button>' +
-            '<button id="ia-limpiar" title="Nueva conversación"><i class="fas fa-plus"></i></button>' +
-            '<button id="ia-cerrar" title="Cerrar"><i class="fas fa-times"></i></button>' +
+            '<button id="ia-limpiar" title="Nueva conversación" aria-label="Nueva conversación">' +
+              '<i class="fas fa-plus"></i></button>' +
+            '<button id="ia-cerrar" title="Cerrar" aria-label="Cerrar asistente">' +
+              '<i class="fas fa-times"></i></button>' +
           "</div></div>" +
         '<div id="ia-aviso"></div>' +
         '<div id="ia-historial">' +

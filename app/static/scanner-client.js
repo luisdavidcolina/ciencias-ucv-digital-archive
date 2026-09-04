@@ -209,9 +209,30 @@
 
   function _stopCamera() {
     clearInterval(_cameraInterval); _cameraInterval = null;
+    clearTimeout(_cameraIdleTimer); _cameraIdleTimer = null;
+    document.removeEventListener("visibilitychange", _onCameraVisibilityChange);
     if (_cameraStream) { _cameraStream.getTracks().forEach(t => t.stop()); _cameraStream = null; }
+    _cameraVid = null;
     document.getElementById("ds-camera-overlay")?.remove();
     _setBtnState("idle");
+  }
+
+  // SI-179: sin esto la detección corre a 4 fps indefinidamente aunque la
+  // pestaña esté oculta o nadie lea nada en varios minutos.
+  const CAMERA_IDLE_MS = 3 * 60 * 1000;
+
+  function _onCameraVisibilityChange() {
+    if (!_cameraStream) return;
+    if (document.hidden) {
+      clearInterval(_cameraInterval); _cameraInterval = null;
+    } else if (!_cameraInterval) {
+      _startCameraScanLoop();
+    }
+  }
+
+  function _resetCameraIdleTimer() {
+    clearTimeout(_cameraIdleTimer);
+    _cameraIdleTimer = setTimeout(() => { _active = false; _stopCamera(); }, CAMERA_IDLE_MS);
   }
 
   function _buildCameraOverlay(stream) {
@@ -280,15 +301,25 @@
     document.addEventListener("mouseup", () => { drag = false; });
 
     // Scan loop
-    let _lastCode = "", _lastTs = 0;
+    _cameraVid = vid;
+    _startCameraScanLoop();
+    _resetCameraIdleTimer();
+    document.addEventListener("visibilitychange", _onCameraVisibilityChange);
+  }
+
+  let _cameraVid = null, _cameraIdleTimer = null, _cameraLastCode = "", _cameraLastTs = 0;
+
+  function _startCameraScanLoop() {
+    clearInterval(_cameraInterval);
     _cameraInterval = setInterval(async () => {
-      if (!_detector || vid.readyState < 2) return;
+      if (!_detector || !_cameraVid || _cameraVid.readyState < 2) return;
       try {
-        const codes = await _detector.detect(vid);
+        const codes = await _detector.detect(_cameraVid);
         if (!codes.length) return;
         const code = codes[0].rawValue;
-        if (code === _lastCode && Date.now() - _lastTs < 2000) return;
-        _lastCode = code; _lastTs = Date.now();
+        if (code === _cameraLastCode && Date.now() - _cameraLastTs < 2000) return;
+        _cameraLastCode = code; _cameraLastTs = Date.now();
+        _resetCameraIdleTimer();
         handleScannerCode(code);
       } catch { /* ignore */ }
     }, 250);
@@ -373,7 +404,7 @@
       <div id="ds-scn-ws-sec" style="${_mode==="camera"?"display:none":""}margin-bottom:.55rem;">
         <label style="font-weight:600;display:block;margin-bottom:.2rem;">URL del Scanner Bridge</label>
         <div style="display:flex;gap:.35rem;">
-          <input id="ds-scn-url" type="text" value="${_wsUrl}"
+          <input id="ds-scn-url" type="text"
             placeholder="ws://192.168.1.X:3737"
             style="flex:1;padding:.3rem .45rem;border:1px solid #ced4da;border-radius:4px;font-size:.78rem;font-family:monospace;">
           <button onclick="_scnTest()" title="Probar conexión"
@@ -383,7 +414,7 @@
         </div>
         <div style="color:#888;font-size:.7rem;margin-top:.2rem;">Puede ser otra PC de la red local</div>
         <label style="font-weight:600;display:block;margin:.5rem 0 .2rem;">Token del bridge (SCANNER_TOKEN)</label>
-        <input id="ds-scn-token" type="text" value="${_token}"
+        <input id="ds-scn-token" type="text"
           placeholder="pégalo desde la consola del Scanner Bridge"
           style="width:100%;padding:.3rem .45rem;border:1px solid #ced4da;border-radius:4px;font-size:.78rem;font-family:monospace;">
         <button onclick="_scnTestScan()"
@@ -397,6 +428,12 @@
         Guardar y aplicar
       </button>`;
     document.body.appendChild(panel);
+    // SI-178: se asigna por propiedad, no en el marcado — _wsUrl/_token vienen de
+    // localStorage y una comilla en el valor rompería el atributo en línea.
+    const urlInput = document.getElementById("ds-scn-url");
+    if (urlInput) urlInput.value = _wsUrl;
+    const tokenInput = document.getElementById("ds-scn-token");
+    if (tokenInput) tokenInput.value = _token;
 
     document.getElementById("ds-scn-mode").onchange = e => {
       const s = document.getElementById("ds-scn-ws-sec");

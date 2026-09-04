@@ -410,6 +410,14 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       `styles.css`), y caché de corta duración + endpoints de conteo para las peticiones del
       Resumen (`OA-210`/`OR-280`, tocan `admin.js` y las rutas de alertas). Ninguno cabe sólo
       en mis tres archivos.
+      **nota parcial (agente-sweep-styles)**: `OA-201` ya parece cubierto — `.ds-kpi-grid
+      .ds-kpi-mini { animation: ds-fade var(--duration-base) var(--ease-out) both; }`
+      (`styles.css`, zona "CAPA DE MOVIMIENTO") corre una sola vez por definición (sin
+      `infinite`) al montar la tarjeta; si el problema seguía siendo "corre cada vez que se
+      repinta la tabla" eso es del lado JS (¿se re-renderiza el nodo entero cada refresco?),
+      no de la regla CSS. `OR-234` (esqueleto propio) y `OR-077` (decoración del botón
+      exportar) siguen sin clase porque no sé el marcado exacto que usará `admin-charts.js` —
+      quedan pendientes de que ese carril defina el HTML/JS primero.
 
 - [ ] `DG-139` · **archivo**: `app/main.py` (migración), `app/routes/admin/docs.py`,
       `app/routes/admin/stats.py`, `app/database.py`, `app/schema.sql` ·
