@@ -933,6 +933,82 @@ git de `agente-c8b-backup` entre mi `git add` y su `git commit`. Verificado con
 diferencias contra mi copia local) y con `python -m pytest app/tests -q` en verde
 (713 passed) después del commit. No reparo el historial.
 
+## Nota de carrera de git — agente-l13-estilos (L13-estilos)
+
+Trabajé sólo en `app/static/styles.css`, zona "CAPA DE MOVIMIENTO" y el bloque
+responsive de la barra superior que va justo después (localizados por contenido, no por
+el rango de línea aproximado de la instrucción — el archivo ya había crecido por L0 y
+otros lotes). Cerré SD-017, SD-159, SD-173, SD-175, SD-176 (parcial), SD-181 (parcial),
+SD-184, SD-198, SD-202 (parcial):
+
+- **SD-017/SD-173**: todas las duraciones de esa zona (`.22s`, `.26s`, `.3s`, `.15s`,
+  `.08s`) pasan a `var(--duration-fast/base/slow)` y `var(--ease-out)` (tokens de L0).
+  Añadí `--ds-stagger-step: 22ms` como único token propio del bloque para el paso del
+  escalonado (SD-175): las once demoras (`0/22/44/…/242ms`) se expresan como
+  `calc(var(--ds-stagger-step) * n)` en vez de once números sueltos — no elimina las
+  once reglas `:nth-child`, porque una demora distinta por elemento sin variable puesta
+  por JS (`--i`) no se puede expresar en una sola regla CSS; eso exigiría tocar
+  `admin.js`/`app.js`, fuera de mi carril.
+- **SD-198/SD-176**: donde el navegador soporta `@starting-style` +
+  `transition-behavior: allow-discrete` (`@supports` como guarda, degrada a la animación
+  de antes donde no hay soporte), la entrada de `.ds-item-card`/`.ds-monitor-row`/
+  `.ds-kpi-mini`/`.tab-pane.show.active` pasa de una animación con `fill-mode: both`
+  (que queda "aplicada" para siempre y por eso se repite en cada repintado) a una
+  transición que sólo se dispara cuando el elemento aparece de verdad. Esto resuelve
+  SD-176 para los navegadores con soporte; para los que no lo tienen, sigue
+  reproduciéndose en cada repintado como antes — un arreglo completo para todos los
+  navegadores necesitaría que el JS que reconstruye las listas (`admin.js`/`app.js`,
+  fuera de mi carril) aplicara una clase de entrada una vez y la retirase.
+- **SD-181 (parcial)**: el cruce de pestaña usa el mismo mecanismo `@starting-style` +
+  `allow-discrete` para que el saliente no desaparezca de golpe donde hay soporte. No
+  intenté el "cruce con altura estable" completo (dos paneles superpuestos durante la
+  transición) porque el marcado de las pestañas (`admin_system.html` y hermanos) no es
+  mío y una altura estable real necesita coordinar CSS con cómo Bootstrap-tab.js
+  alterna `display`.
+- **SD-184**: `.ds-item-card`/`.ds-kpi-mini` ahora entran (hover) con
+  `var(--duration-base)` y salen (vuelta al reposo) con `var(--duration-fast)` — la
+  transición del selector base gobierna la salida, la de `:hover` gobierna la entrada.
+- **SD-159**: `.btn:active` ahora excluye también `[aria-disabled="true"]`, no sólo
+  `:disabled`.
+- **SD-202 (parcial)**: añadí `@view-transition { navigation: auto; }` (afecta a la
+  navegación entre las siete páginas, recargas completas — no necesita JS y degrada a
+  nada sin soporte). La parte de `document.startViewTransition()` para el cambio de
+  pestaña y el cambio de tema exige que `admin.js`/`app-theme.js` inicien la transición
+  desde JavaScript — no lo hago, fuera de mi carril (archivos `[CHOCA]`).
+- **SD-089/SD-090/SD-167**: confirmo el hallazgo de la ficha — hay una segunda
+  definición de `.ds-item-card:hover` con `translateY(-4px)` y otra sombra en
+  `app/static/styles.css` (hoy alrededor de la línea 808, fuera de mi zona, parece de un
+  lote L2/L3). Mi zona sólo tiene la definición de la capa de movimiento
+  (`translateY(-2px)`, ver arriba). No la toco por regla 3. Quien tenga esa línea:
+  unificar en una sola definición, tal como pide la ficha ("Uno").
+- **SD-179**: revisado. El bloque `@media (prefers-reduced-motion: reduce)` ya cortaba
+  cualquier animación `infinite` a una sola iteración de 0.01ms (`animation-duration` +
+  `animation-iteration-count: 1`), lo que en la práctica ya impide que quede "latiendo"
+  para siempre. Consideré añadir `animation-play-state: paused` de forma global (`*`)
+  como sugiere la ficha, pero eso congelaría también las animaciones de entrada
+  (`ds-rise`/`ds-fade`, `fill-mode: both`) en su fotograma inicial (`opacity:0`),
+  dejando listas y pestañas invisibles bajo esta preferencia — una regresión peor que el
+  problema original. No lo apliqué. Ya until confirmé que `.ds-status-revision`
+  (`ds-pulse-warning`, fuera de mi zona) tiene su propia regla `animation: none` bajo
+  esta misma media query, que sí es la forma segura de resolverlo caso por caso.
+  `.ds-sidebar-badge` (`ds-badge-pulse`, SD-177, tampoco en mi lista ni mi zona) no tiene
+  esa regla todavía — anotado aquí para quien tenga esa línea.
+
+**Aviso de carrera de git**: antes de comitear comprobé `git status --short`/
+`git diff --cached --stat` con sólo `app/static/styles.css` en stage. Al ir a comitear
+con paths explícitos, `git status` ya no mostraba mi cambio como pendiente: apareció
+que otro commit del árbol compartido, `7de4937` ("L10-estilos: SD-105, SD-215 en zona
+responsive de paneles admin", de otro agente concurrente), ya incluía mi contenido
+completo de la capa de movimiento — verificado con
+`git show 7de4937:app/static/styles.css | grep -n "ds-stagger-step\|view-transition"` y
+con una lectura completa del bloque en `HEAD`, que coincide exactamente con lo que
+escribí. `python -m pytest app/tests -q` en `HEAD` sigue en 713 passed. No reparo el
+historial: dejo mi reserva marcada como terminada con el sha `7de4937`, donde vive mi
+contenido, siguiendo el mismo patrón que A2, A4, C3, C4, C6, D2, B6, B8, B10 y C10 en
+filas anteriores de este mismo archivo.
+
+**quién lo pide**: agente-l13-estilos (L13-estilos)
+
 ## L10-estilos — SD-105, SD-121, SD-128, SD-215, SD-218
 
 Lote pequeño: zona "RESPONSIVE ADMIN PANELS" de `app/static/styles.css` (~3105-3217 tras
@@ -1257,13 +1333,96 @@ hace falta en cada uno, para quien tenga esos carriles:
       `agente-verificacion-despliegue` (commit `65fdf78`, "cerrar reserva verificacion-despliegue"):
       el contenido de `ai-widget.css` es el mío, verificado con `git show 65fdf78 -- app/static/ai-widget.css`.
 
-- [x] `LA-asistente` · **nota operativa de git**: mi commit `2bc5690` ("LA-asistente: marca
-      reserva terminada") pretendía tocar sólo `docs/auditoria/_RESERVAS.md`, pero absorbió
-      cambios ajenos de `app/static/styles.css` y `docs/auditoria/_BUZON.md` (455 y 156 líneas)
-      que ya estaban en el índice compartido de otro carril (aparentemente L7-estilos, cuyo
-      commit siguiente `2bf46ce` es sobre el mismo `styles.css`) por la misma carrera de
-      `git add`/`git commit -a` documentada en todo este fichero. No deshago nada: no arriesgo
-      un `reset`/`checkout` sobre un árbol que otros agentes siguen usando. Sólo mi cambio
-      real (la fila `LA-asistente` de `_RESERVAS.md`) es mío; el resto del contenido de
-      `2bc5690` pertenece a otro carril y su dueño puede verificarlo con
-      `git show 2bc5690 -- app/static/styles.css`.
+- [x] `L3-estilos` · **archivo**: `app/static/styles.css` (zona tarjeta de resultado / modal de
+      documento / ficha de persona) · **carril dueño**: L3-estilos
+      **quién lo pide**: agente-l3-estilos (L3-estilos)
+      **qué pasó**: consumidos los tokens de L0 en `.ds-item-card`, `.ds-doc-modal`, `.ds-doc-panel`,
+      `.ds-doc-meta-row`, `.ds-doc-abstract`, `.rrhh-person-*` y `.ds-badge`. Resueltos SD-060
+      (superficie estable, ya no transparente hasta el hover), SD-063 (font-weight 800→
+      `var(--font-weight-bold)`, ese corte no está cargado), SD-066 (`max-width:70ch` en
+      `.ds-doc-abstract`), SD-075 (`.ds-badge` de `75%` a `var(--font-size-xs)`), SD-076 (icono de
+      `.ds-item-thumbnail` de `48px`/`32px` a `rem`), SD-088 (sombras a `var(--shadow-*)`), SD-091
+      (`.rrhh-person-file-item` pasa al mismo patrón de tarjeta que `.ds-item-card`), SD-092
+      (discontinuo reservado a `.ds-doc-thumb`, que es la zona "vacía/marcador"; `.ds-doc-meta-row`
+      pasa a borde sólido), SD-097 (`.rrhh-person-photo` con `border-radius:50%` propio, no solo en
+      el padre), SD-142 (`.ds-facet-row` con `:focus-within`/`:focus-visible` y alto mínimo táctil),
+      SD-154 (`:focus-within` en `.ds-item-card`), SD-155 (`.ds-item-actions:empty` /
+      `.ds-item-tags:empty { display:none }`), SD-160 (`.ds-doc-meta-row:first-child`/`:last-child`
+      redondean al radio del panel), SD-170 (`:visited` discreto en el enlace del resultado), SD-194
+      (`.ds-doc-thumb` con `aspect-ratio` en vez de altura fija repetida en el punto de corte
+      móvil), SD-204 (`content-visibility:auto` en `.ds-item-card`) y SD-220 (`transition` con
+      propiedades explícitas en vez de `all`, `@media (hover:hover) and (pointer:fine)`).
+      SD-089/SD-090/SD-167 quedaron **parciales**: dentro de mi zona hay ahora una sola definición
+      de `.ds-item-card:hover` (`translateY(-4px)` + `var(--shadow-md)`), pero sigue existiendo una
+      segunda definición fuera de mi zona (`styles.css` ~3734, capa de movimiento, `transform:
+      translateY(-2px)` + otra sombra) que sigue ganando por orden de cascada — **no la toqué**
+      porque está fuera de las líneas de mi carril (tarjeta/modal/ficha, ~543-950 aprox.) y de las
+      etiquetas del pendiente cae en L13. Quien lleve la capa de movimiento (L13) tiene que retirar
+      esa segunda regla, o mi fix no se nota en el navegador.
+      SD-046/SD-124 (componente de insignia con variantes) quedaron **sin tocar**: la ficha pide
+      unificar nueve implementaciones repartidas en L3/L6/L14 y hacerlo solo desde mi zona dejaría
+      `.ds-item-kw-badge`/`.ds-kw-badge`/etc. (fuera de mi carril) sin tocar y el sistema con dos
+      insignias en vez de una — mejor que lo cierre quien tenga las nueve a la vista.
+      SD-199 (`<dialog>` nativo) no se tocó: es `L` y toca `archive.js`/`admin-edit.js` (`[CHOCA]`),
+      fuera del alcance de un carril de solo CSS.
+      `python -m pytest app/tests -q`: 713/713 en verde, sin tocar nada fuera de mi zona.
+
+- [ ] `LH-paginas` · **archivo**: los diez `*.html` (`<head>`/`<style>`) · **carril dueño**: LH-paginas
+      **quién lo pide**: agente-lh-paginas (LH-paginas)
+      **qué pasó**: de los 21 pendientes de mi lista sólo resolví los de cabecera de fuentes que
+      no dependían de `styles.css` (SD-026, SD-027 parcial —no se quitó Outfit, ver abajo—,
+      SD-028, SD-209), commit `a02a2ef`. Dejé sin tocar los que exigen que `styles.css` tenga
+      primero la definición canónica, porque a día de hoy no la tiene y quitar el `<style>` de la
+      página rompería la pantalla en vez de arreglarla:
+      - `SD-083`/`SD-096` (radio de tarjeta/info-box) — `admin_archive.html`/`admin_hr.html`
+        siguen revirtiendo a `0.5rem !important` porque la hoja fija `border-radius: 0` (L2). No
+        elegí un lado de esa discrepancia porque la decisión de cuál radio gana es de quien toque
+        `styles.css`, no mía.
+      - `SD-125`/`SD-138` (menú de estado rápido y esqueleto de carga) — verifiqué `styles.css`
+        (línea ~2477: `.ds-quick-status-dropdown`, no `.ds-quick-status-menu`, que es la clase que
+        usa el marcado; línea ~2375: `.ds-skeleton` sí existe con variante oscura) y aun así no
+        borré los bloques `<style>` de las páginas: para el menú, la hoja ni siquiera define la
+        clase que el marcado usa — borrar el `<style>` de la página lo dejaría sin ningún estilo.
+        Falta que L7 defina `.ds-quick-status-menu` (o que se renombre el marcado) antes de tocar
+        las páginas.
+      - `SD-152` (`card-outline` sin regla) y `SD-166` (fila clicable sin foco) — el arreglo real
+        vive en el `<body>` (marcado/JS) o en `styles.css`, no en `<head>`/`<style>`, así que están
+        fuera de mi carril tal como se definió (yo sólo cabecera y `<style>`).
+      - `SD-063`, `SD-079`, `SD-187`, `SD-199`, `SD-216`, `SD-218`, `SD-222`, `SD-228` — todos de
+        esfuerzo M/L y con "Toca" repartido entre varios lotes de `styles.css` a la vez (algunos
+        `en curso`); no arranqué ninguno para no dejar una página a medio camino de una decisión
+        de sistema que no se ha tomado (p. ej. SD-187 es la reestructuración con `@layer`, que
+        `sistema-diseno.md` dice expresamente que tiene que ir "con el archivo quieto").
+      - No toqué `SD-027` del todo: mantuve el `<link>` de Outfit en las seis páginas que ya lo
+        tenían porque `styles.css` todavía lo usa en `.ds-sidebar-brand` (línea 170) — retirarlo
+        del `<head>` sin que L1 retire antes la regla habría roto esa cabecera de la barra lateral.
+      **qué falta**: releer `styles.css` cuando L1/L2/L7 marquen sus lotes "terminado" y volver
+      sobre `SD-083`, `SD-096`, `SD-125`, `SD-138`, `SD-027` (decisión final Outfit) para quitar
+      los `<style>` de página que ya queden redundantes.
+
+- [ ] `L14-estilos` · **archivo**: `app/static/styles.css`, fuera del rango de info-box/KPI/avance
+      (líneas ~935-949 de `.ds-badge`, ~1810-1831 `.ds-item-kw-badge`/otras insignias, `.ds-empty`
+      en la zona de estados vacíos, `.progress`/dark-mode de la barra de progreso Bootstrap) ·
+      **carril dueño**: L3/L6/L8 (según la línea)
+      **quién lo pide**: agente-l14-estilos (L14-estilos)
+      **qué hace falta**: SD-046 y SD-124 piden un componente único de insignia (variantes +
+      2 tamaños) que sustituya a `.ds-badge`, `.ds-item-kw-badge`, `.ds-status-badge`,
+      `.ds-doc-thumb-badge`, `.badge-executive` y las `.badge-*` de Bootstrap — mi zona sólo tiene
+      `.ds-kw-badge`, que ya usa `var(--ds-accent)` y queda como está a la espera de ese componente
+      compartido. SD-137 pide que `.ds-empty` (fuera de mi rango) reciba las mismas tres variantes
+      (sin-resultados / con acción / error) que ya añadí a `.ds-chart-empty` en mi zona
+      (`.ds-chart-empty--sin-resultados`, `--accion`, `--error`) — se puede copiar el mismo patrón.
+      SD-144/SD-145 piden unificar `.progress` de Bootstrap (regla de modo oscuro en la línea
+      ~2449, fuera de mi rango) con `.ds-avance-barra` (en mi zona, ya sin dependencia de
+      Bootstrap): no toqué `.progress` por no ser mío.
+      **qué hice en mi zona**: SD-065 (`font-variant-numeric: tabular-nums` en `.info-box-number`,
+      `.ds-kpi-value`, `.ds-avance-cifra`), SD-074 (`.info-box-text` y `.ds-kpi-label` comparten
+      ahora `var(--letter-spacing-wide)`), SD-082 (clase `.ds-nulo` nueva, sólo etiquetada L14),
+      SD-096 (`.info-box` usa `var(--radius-md)` en vez de `0.5rem` suelto), SD-137 (tres variantes
+      modificadoras en `.ds-chart-empty`), SD-151 (decisión conservadora: no fusiono la clase
+      info-box/`.ds-kpi-mini` porque exigiría tocar marcado de otros carriles; alineo sus valores
+      compartidos en su lugar, comentario en el bloque INFO-BOX), SD-192 (`clamp()` en
+      `.info-box-number`, `.ds-kpi-value`, `.ds-avance-cifra`). SD-071/SD-072 ya venían resueltas
+      por otro agente (comentario en `styles.css:~2072`) antes de que yo tocara mi zona. SD-049,
+      SD-164 y SD-195 quedan sin tocar: exigen marcado/JS de estado semántico o coordinación con
+      el contenedor `.ds-kpi-grid` (fuera de mi rango) que no puedo tocar desde aquí.

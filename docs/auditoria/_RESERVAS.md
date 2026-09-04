@@ -59,7 +59,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L10-estilos | agente-l10-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: commit tomó el árbol de trabajo compartido con otros lotes L1-L15 editando styles.css a la vez, mi cambio verificado correcto dentro de él) |
 | L11-estilos | agente-l11-estilos | 2026-09-03 | en curso | |
 | L12-estilos | agente-l12-estilos | 2026-09-03 | en curso | |
-| L13-estilos | agente-l13-estilos | 2026-09-03 | en curso | |
+| L13-estilos | agente-l13-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: mi cambio en la zona "CAPA DE MOVIMIENTO" quedó arrastrado por el commit de agente-l10-estilos por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 7de4937 -- app/static/styles.css`) |
 | L14-estilos | agente-l14-estilos | 2026-09-03 | en curso | |
 | L15-estilos | agente-l15-estilos | 2026-09-03 | en curso | |
 | LH-paginas | agente-lh-paginas | 2026-09-03 | terminado (parcial: SD-026, SD-027, SD-028, SD-209) | a02a2ef |
