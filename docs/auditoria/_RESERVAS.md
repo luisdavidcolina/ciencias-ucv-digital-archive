@@ -55,7 +55,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
 | E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | terminado (parcial: 24 de 107 fichas — seguridad/protocolo/decodificador HID/pruebas de `scanner-app/server.js`; el resto son subsistemas nuevos de esfuerzo L —Electron, TWAIN/WIA/ICA/SANE, OCR, lotes, preservación— sin decisión de producto tomada, documentados en `scanner-app/README.md`) | 0eaf779 |
 | H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | terminado | `2828d16` |
-| H1d-modelos | agente-h1d-modelos | 2026-09-03 | en curso | |
+| H1d-modelos | agente-h1d-modelos | 2026-09-03 | terminado | ab84ecc |
 | H1e-consultas | agente-h1e-consultas | 2026-09-03 | terminado | 9a3a2e3 |
 | H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | terminado (sin cambios de código: `pages.py`/`config.py` ya cumplían, todo lo pendiente es `[CHOCA]` y quedó anotado en `_BUZON.md`) | e5a7696 |
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | terminado (parcial: 6 de 37 fichas resueltas de config/despliegue real; el resto exige main.py/database.py/backup.py/.python-version/CI/paneles externos, ver nota en _BUZON.md) | 8a98120 |
