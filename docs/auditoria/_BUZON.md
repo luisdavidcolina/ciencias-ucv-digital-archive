@@ -1256,3 +1256,14 @@ hace falta en cada uno, para quien tenga esos carriles:
       **nota operativa**: mi commit quedó absorbido por una carrera de `git commit -a` de
       `agente-verificacion-despliegue` (commit `65fdf78`, "cerrar reserva verificacion-despliegue"):
       el contenido de `ai-widget.css` es el mío, verificado con `git show 65fdf78 -- app/static/ai-widget.css`.
+
+- [x] `LA-asistente` · **nota operativa de git**: mi commit `2bc5690` ("LA-asistente: marca
+      reserva terminada") pretendía tocar sólo `docs/auditoria/_RESERVAS.md`, pero absorbió
+      cambios ajenos de `app/static/styles.css` y `docs/auditoria/_BUZON.md` (455 y 156 líneas)
+      que ya estaban en el índice compartido de otro carril (aparentemente L7-estilos, cuyo
+      commit siguiente `2bf46ce` es sobre el mismo `styles.css`) por la misma carrera de
+      `git add`/`git commit -a` documentada en todo este fichero. No deshago nada: no arriesgo
+      un `reset`/`checkout` sobre un árbol que otros agentes siguen usando. Sólo mi cambio
+      real (la fila `LA-asistente` de `_RESERVAS.md`) es mío; el resto del contenido de
+      `2bc5690` pertenece a otro carril y su dueño puede verificarlo con
+      `git show 2bc5690 -- app/static/styles.css`.
