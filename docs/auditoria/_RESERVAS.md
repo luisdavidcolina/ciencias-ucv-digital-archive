@@ -67,7 +67,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | en curso | |
 | SWEEP-main | agente-sweep-main | 2026-09-03 | terminado | 5ac751c |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
-| SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | en curso | |
+| SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | terminado | 77c8d74 |
 | SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | terminado (parcial: 3 de ~10 peticiones resueltas en stats.py/backup.py; admin-monitor.js y admin/deps.py sin peticiones accionables, ver nota en _BUZON.md) | b278648 |
 | SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | terminado | (ver commit en _BUZON.md) |
 | SWEEP-admin-js | agente-sweep-admin-js | 2026-09-03 | terminado | 1651fa3 |
