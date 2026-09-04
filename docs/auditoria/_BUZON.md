@@ -2197,4 +2197,56 @@ anotado para quien tenga el resto:
 No hubo cambios en `app/routes/pages.py` ni `app/core/config.py`: ambos ya cumplen lo que les
 toca hoy, y todo lo pendiente que los cita necesita coordinación con otro carril primero.
 
+## H1e-consultas
+
+Resuelto en `lookups.py`/`utils.py` (commit `9a3a2e3`):
+
+- **BA-101** — `/api/choices` era anónimo y devolvía `rrhh.people` (padrón completo) a
+  cualquiera. Ahora lleva `Depends(require_session)` y el payload sólo incluye `archivo`/`rrhh`
+  si el usuario tiene ese módulo (`Global` se expande a ambos, igual que en `auth.py`).
+- **BA-145** — añadido `?scope=archivo|rrhh` para pedir un solo módulo explícitamente; sin
+  `scope`, ya queda acotado por los módulos del usuario.
+- **BA-198** — `test_choices.py` reescrito: 401 sin sesión, segmentación por módulo/rol,
+  `scope` y que la caché no repite las consultas de datos.
+- **BA-163 / IN-029** (parte de `lookups.py`) — se quitó `import pandas`,
+  `fetch_archive_dataframe` y `fetch_hr_dataframe` de esta ruta; sustituidos por
+  `SELECT DISTINCT`/`MIN`/`MAX` directos contra `datos_archivo`/`empleados`/`datos_rrhh`. No
+  toqué `archive.py` ni `hr.py`: sus rutas propias siguen usando pandas, la parte de esos
+  tickets que les toca a ellos sigue abierta.
+- **BA-165** — `invalidate_choices_cache()` ahora usa `TTLCache.invalidate()` (borra clave y
+  marca de tiempo juntas; antes dejaba `_cache_ts` vivo).
+- **BA-169** — `utils.paginate()` topa `offset` en 10000.
+
+Quedan fuera de mi zona, anotados aquí:
+
+- **IN-028** (caché de `choices` por proceso en serverless, no se comparte entre lambdas) —
+  sigue así: mi cambio a `TTLCache` no resuelve esto, sigue en memoria de proceso. La solución
+  real (clave de versión en la base o `Cache-Control`/`ETag`) es de esfuerzo M y toca
+  `main.py` **[CHOCA]** (columna/contador de versión) además de `lookups.py`; no la hice para
+  no ampliar el commit con un cambio de esquema sin coordinar con `H1a-migraciones`.
+- **BA-046** (colores de tipo por catálogo) — necesita columna `icono`/`color` nueva en
+  `tipo_documento`, es decir una migración en `main.py` **[CHOCA]** (`H1a-migraciones`). No la
+  agrego yo: en cuanto exista la columna, exponerla en `_build_archivo_choices()` es un cambio
+  de una línea.
+- **IN-055** (`utils.py` dice "sin deps de rutas" pero `generate_unique_slug` y
+  `populate_missing_slugs` sí consultan la base) — no separé el archivo en `utils.py` +
+  `slugs.py` porque mover funciones cambia `main.py` **[CHOCA]** (el `import` en el arranque)
+  y `admin/helpers.py` **[CHOCA]**; lo dejo anotado para quien coordine ese refactor.
+- **IN-058** (`split_terms` vive en `database.py`, no en `utils.py`) — moverlo rompe los
+  imports de `archive.py` **[CHOCA]**, `hr.py` **[CHOCA]** y `lookups.py` (el mío, ya lo uso
+  vía `from database import ... split_terms`); no lo muevo solo, necesita coordinarse con
+  quien tenga esos dos archivos en su carril.
+- **IN-027** (`normalize_cedula` existe y no se llama desde ningún sitio) — la función en
+  `utils.py` ya está lista; falta invocarla desde `admin/docs.py` **[CHOCA]** y
+  `admin/imports.py` **[CHOCA]** en el borde de entrada, que no son míos.
+- **IN-092/IN-093** (`generate_unique_slug`/`populate_missing_slugs`, bucle de consultas sin
+  tope y actualización fila a fila en el arranque) — esfuerzo S cada una pero tocan el patrón
+  de arranque que documenta `main.py` **[CHOCA]**; no las toqué para no interferir con
+  `H1a-migraciones` mientras siga "en curso".
+- **RQ-017** (pandas en ruta caliente) — resuelto sólo en la parte de `lookups.py` (ver BA-163
+  arriba). `archive.py`, `hr.py`, `admin/stats.py` y `database.py` (pool por instancia) siguen
+  con pandas/su pool propio: no son míos.
+
+**quién lo pide**: agente-h1e-consultas (H1e-consultas)
+
 — agente-h1f-rutas-pagina (H1f-rutas-pagina)
