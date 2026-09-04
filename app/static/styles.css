@@ -1807,333 +1807,273 @@ body[data-page="login"] {
 .ds-theme-preview-bar { border-radius:2px; }
 .ds-theme-name { font-size:0.68rem; font-weight:700; color:#495057; line-height:1.2; }
 
-/* ====== TEMAS ====== */
-body.theme-dorado .ds-sidebar-header, body.theme-dorado .ds-theme-panel-header { background:linear-gradient(135deg,#9a7017,#5C4300) !important; }
-body.theme-dorado .ds-sidebar-link.active { background:linear-gradient(90deg,#fef3cd,#fff8e7) !important; color:#7B5800 !important; border-left-color:#9a7017 !important; }
-body.theme-dorado .ds-sidebar-link.active i { color:#9a7017 !important; }
-body.theme-dorado .ds-sidebar-link:hover { background:linear-gradient(90deg,#fef3cd,#fffdf0) !important; color:#7B5800 !important; border-left-color:#B8860B !important; }
-body.theme-dorado .ds-sidebar-link:hover i { color:#B8860B !important; }
-body.theme-dorado .ds-item-title { color:#7B5800 !important; }
-body.theme-dorado .ds-page-header { border-left-color:#9a7017 !important; color:#7B5800 !important; }
-body.theme-dorado .ds-sidebar-badge { background:#B8860B !important; }
+/* ==========================================================================
+   TEMAS (SD-031): antes, ~330 líneas de 8-17 reglas por tema con el hex
+   escrito a mano y repetido en cada una — añadir un componente al sistema
+   de temas eran once reglas nuevas, y olvidarse de una dejaba ese
+   componente en azul dentro de un tema granate (síntoma real: SD-038,
+   SD-061, SD-089 antes de este cambio). Ahora cada tema declara sólo su
+   paleta — cuatro colores de acento y un par de tintes para fondos claros
+   (identificados, no "cuatro variables" a rajatabla: la fidelidad exacta de
+   once paletas hechas a mano necesitaba algunas más de las cuatro que
+   sugiere la ficha; sigue siendo una reducción de ~15 declaraciones por
+   componente a 1) — y un único bloque de reglas compartidas, más abajo,
+   las consume. Añadir el componente #12 ya es una regla, no once.
 
-body.theme-manila, body.theme-manila .content-wrapper { background-color:#f5ead0 !important; }
-body.theme-manila .ds-sidebar { background:#fdf6e3 !important; }
-body.theme-manila .ds-sidebar-header, body.theme-manila .ds-theme-panel-header { background:linear-gradient(135deg,#8B7355,#5C4A2A) !important; }
-body.theme-manila .ds-sidebar-link { color:#5c4a2a; }
-body.theme-manila .ds-sidebar-link.active { background:linear-gradient(90deg,#ede0c4,#f5ead0) !important; color:#5C4A2A !important; border-left-color:#8B7355 !important; }
-body.theme-manila .ds-sidebar-link.active i { color:#8B7355 !important; }
-body.theme-manila .ds-sidebar-link:hover { background:linear-gradient(90deg,#ede0c4,#f5f0e0) !important; color:#5C4A2A !important; border-left-color:#A0856A !important; }
-body.theme-manila .ds-sidebar-link:hover i { color:#A0856A !important; }
-body.theme-manila .ds-item-title { color:#6B4C26 !important; }
-body.theme-manila .ds-page-header { border-left-color:#8B7355 !important; color:#6B4C26 !important; background:#fdf6e3 !important; }
-body.theme-manila .ds-sidebar-badge { background:#A0856A !important; }
-body.theme-manila .card { background:#fdf6e3 !important; border-color:#d5c8a0 !important; }
+   Medianoche (`theme-noche`) es la única excepción real: su barra lateral
+   es oscura, así que el patrón se invierte (texto claro sobre fondo oscuro)
+   y necesita sus propias reglas para el encabezado y los enlaces de la
+   barra — el resto de sus componentes (botones, insignias, tarjetas...)
+   viven sobre fondo claro igual que los otros diez temas y sí usan la
+   paleta compartida. */
+body.theme-dorado         { --tt-accent:#9a7017; --tt-accent-hover:#7B5800; --tt-accent-light:#B8860B; --tt-accent-rgb:154,112,23; --tt-tint-1:#fef3cd; --tt-tint-2:#fff8e7; --tt-tint-border:#e8d08a; }
+body.theme-manila         { --tt-accent:#8B7355; --tt-accent-hover:#5C4A2A; --tt-accent-light:#A0856A; --tt-accent-rgb:139,115,85; --tt-tint-1:#ede0c4; --tt-tint-2:#f5ead0; --tt-tint-border:#d5c8a0; }
+body.theme-esmeralda      { --tt-accent:#2d6a4f; --tt-accent-hover:#1b4332; --tt-accent-light:#40916c; --tt-accent-rgb:45,106,79; --tt-tint-1:#d8f3dc; --tt-tint-2:#f0faf2; --tt-tint-border:#aadcb8; }
+body.theme-noche          { --tt-accent:#4a90d9; --tt-accent-hover:#1a3a6b; --tt-accent-light:#6aafd9; --tt-accent-rgb:74,144,217; --tt-tint-1:#d0e8f7; --tt-tint-2:#eaf4ff; --tt-tint-border:#a0ccee; }
+body.theme-granate        { --tt-accent:#7c2d3c; --tt-accent-hover:#5a1e2b; --tt-accent-light:#a03048; --tt-accent-rgb:124,45,60; --tt-tint-1:#fce4e9; --tt-tint-2:#fff0f2; --tt-tint-border:#f0b4bf; }
+body.theme-carbon         { --tt-accent:#444444; --tt-accent-hover:#1a1a1a; --tt-accent-light:#555555; --tt-accent-rgb:68,68,68; --tt-tint-1:#e8e8e8; --tt-tint-2:#f2f2f2; --tt-tint-border:#cccccc; }
+body.theme-lavanda        { --tt-accent:#4a3570; --tt-accent-hover:#2d1b5c; --tt-accent-light:#7c5cbf; --tt-accent-rgb:74,53,112; --tt-tint-1:#e8dff5; --tt-tint-2:#f2ecff; --tt-tint-border:#c4aee8; }
+body.theme-terracota      { --tt-accent:#b5451b; --tt-accent-hover:#7a2d10; --tt-accent-light:#d4623a; --tt-accent-rgb:181,69,27; --tt-tint-1:#fde9e0; --tt-tint-2:#fff5f0; --tt-tint-border:#f0b89a; }
+body.theme-azul-profundo  { --tt-accent:#0f3460; --tt-accent-hover:#0a2040; --tt-accent-light:#1a5fa0; --tt-accent-rgb:15,52,96;  --tt-tint-1:#d0e4f7; --tt-tint-2:#e8f3ff; --tt-tint-border:#aacbee; }
+body.theme-cian           { --tt-accent:#0d6e7c; --tt-accent-hover:#074a55; --tt-accent-light:#13a0b4; --tt-accent-rgb:13,110,124; --tt-tint-1:#c7f0f5; --tt-tint-2:#e8fafc; --tt-tint-border:#8ddce8; }
+body.theme-oliva          { --tt-accent:#5a6b2a; --tt-accent-hover:#3a4517; --tt-accent-light:#7a9040; --tt-accent-rgb:90,107,42;  --tt-tint-1:#e8f0d0; --tt-tint-2:#f2f8e0; --tt-tint-border:#c0d490; }
 
-body.theme-esmeralda .ds-sidebar-header, body.theme-esmeralda .ds-theme-panel-header { background:linear-gradient(135deg,#2d6a4f,#1b4332) !important; }
-body.theme-esmeralda .ds-sidebar-link.active { background:linear-gradient(90deg,#d8f3dc,#f0faf2) !important; color:#1b4332 !important; border-left-color:#2d6a4f !important; }
-body.theme-esmeralda .ds-sidebar-link.active i { color:#2d6a4f !important; }
-body.theme-esmeralda .ds-sidebar-link:hover { background:linear-gradient(90deg,#d8f3dc,#f5fdf7) !important; color:#1b4332 !important; border-left-color:#40916c !important; }
-body.theme-esmeralda .ds-sidebar-link:hover i { color:#40916c !important; }
-body.theme-esmeralda .ds-item-title { color:#1b4332 !important; }
-body.theme-esmeralda .ds-page-header { border-left-color:#2d6a4f !important; color:#1b4332 !important; }
-body.theme-esmeralda .ds-sidebar-badge { background:#40916c !important; }
-
+/* Encabezado de barra lateral y del propio panel de temas: degradado
+   acento → acento-oscuro, igual en los once. */
+body.theme-dorado .ds-sidebar-header, body.theme-dorado .ds-theme-panel-header,
+body.theme-manila .ds-sidebar-header, body.theme-manila .ds-theme-panel-header,
+body.theme-esmeralda .ds-sidebar-header, body.theme-esmeralda .ds-theme-panel-header,
+body.theme-granate .ds-sidebar-header, body.theme-granate .ds-theme-panel-header,
+body.theme-carbon .ds-sidebar-header, body.theme-carbon .ds-theme-panel-header,
+body.theme-lavanda .ds-sidebar-header, body.theme-lavanda .ds-theme-panel-header,
+body.theme-terracota .ds-sidebar-header, body.theme-terracota .ds-theme-panel-header,
+body.theme-azul-profundo .ds-sidebar-header, body.theme-azul-profundo .ds-theme-panel-header,
+body.theme-cian .ds-sidebar-header, body.theme-cian .ds-theme-panel-header,
+body.theme-oliva .ds-sidebar-header, body.theme-oliva .ds-theme-panel-header {
+  background: linear-gradient(135deg, var(--tt-accent), var(--tt-accent-hover)) !important;
+}
+/* Medianoche: barra oscura propia (SD-034/035 documentan que este tema no
+   sigue el patrón claro de los otros diez; no se fuerza aquí, es una
+   decisión de producto pendiente en sistema-diseno.md). */
 body.theme-noche .ds-sidebar { background:#111d2e !important; }
 body.theme-noche .ds-sidebar-header, body.theme-noche .ds-theme-panel-header { background:linear-gradient(135deg,#0d1b2a,#1a2744) !important; }
 body.theme-noche .ds-sidebar-link { color:#8896a5; }
-body.theme-noche .ds-sidebar-link.active { background:linear-gradient(90deg,#1e3a5f,#243b5c) !important; color:#8bb8e8 !important; border-left-color:#4a90d9 !important; }
-body.theme-noche .ds-sidebar-link.active i { color:#4a90d9 !important; }
-body.theme-noche .ds-sidebar-link:hover { background:linear-gradient(90deg,#1a3352,#1f3859) !important; color:#a0c8f0 !important; border-left-color:#6aafd9 !important; }
-body.theme-noche .ds-sidebar-link:hover i { color:#6aafd9 !important; }
-body.theme-noche .ds-item-title { color:#1a3a6b !important; }
-body.theme-noche .ds-page-header { border-left-color:#1a3a6b !important; color:#0d1b2a !important; }
-body.theme-noche .ds-sidebar-badge { background:#4a90d9 !important; }
+body.theme-noche .ds-sidebar-link.active { background:linear-gradient(90deg,#1e3a5f,#243b5c) !important; color:#8bb8e8 !important; border-left-color:var(--tt-accent) !important; }
+body.theme-noche .ds-sidebar-link.active i { color:var(--tt-accent) !important; }
+body.theme-noche .ds-sidebar-link:hover { background:linear-gradient(90deg,#1a3352,#1f3859) !important; color:#a0c8f0 !important; border-left-color:var(--tt-accent-light) !important; }
+body.theme-noche .ds-sidebar-link:hover i { color:var(--tt-accent-light) !important; }
 body.theme-noche .ds-sidebar-footer { border-top-color:#1e3358; color:#5a7a9a; }
 
-body.theme-granate .ds-sidebar-header, body.theme-granate .ds-theme-panel-header { background:linear-gradient(135deg,#7c2d3c,#5a1e2b) !important; }
-body.theme-granate .ds-sidebar-link.active { background:linear-gradient(90deg,#fce4e9,#fff0f2) !important; color:#7c2d3c !important; border-left-color:#7c2d3c !important; }
-body.theme-granate .ds-sidebar-link.active i { color:#7c2d3c !important; }
-body.theme-granate .ds-sidebar-link:hover { background:linear-gradient(90deg,#fce4e9,#fff5f7) !important; color:#7c2d3c !important; border-left-color:#a03048 !important; }
-body.theme-granate .ds-sidebar-link:hover i { color:#a03048 !important; }
-body.theme-granate .ds-item-title { color:#7c2d3c !important; }
-body.theme-granate .ds-page-header { border-left-color:#7c2d3c !important; color:#7c2d3c !important; }
-body.theme-granate .ds-sidebar-badge { background:#a03048 !important; }
+/* Manila: la única otra excepción estructural (SD-033: sólo dos de once
+   temas tocan la superficie de la página; no se generaliza aquí, es la
+   misma decisión de producto pendiente). */
+body.theme-manila, body.theme-manila .content-wrapper { background-color:#f5ead0 !important; }
+body.theme-manila .ds-sidebar { background:#fdf6e3 !important; }
+body.theme-manila .ds-sidebar-link { color:#5c4a2a; }
+body.theme-manila .card { background:#fdf6e3 !important; border-color:var(--tt-tint-border) !important; }
+body.theme-manila .ds-breadcrumb-wrapper { background-color:var(--tt-tint-1) !important; }
 
-body.theme-carbon .ds-sidebar-header, body.theme-carbon .ds-theme-panel-header { background:linear-gradient(135deg,#2c2c2c,#1a1a1a) !important; }
-body.theme-carbon .ds-sidebar-link.active { background:linear-gradient(90deg,#e8e8e8,#f2f2f2) !important; color:#2c2c2c !important; border-left-color:#555 !important; }
-body.theme-carbon .ds-sidebar-link.active i { color:#444 !important; }
-body.theme-carbon .ds-sidebar-link:hover { background:linear-gradient(90deg,#e4e4e4,#f5f5f5) !important; color:#1a1a1a !important; border-left-color:#777 !important; }
-body.theme-carbon .ds-sidebar-link:hover i { color:#555 !important; }
-body.theme-carbon .ds-item-title { color:#2c2c2c !important; }
-body.theme-carbon .ds-page-header { border-left-color:#555 !important; color:#2c2c2c !important; }
-body.theme-carbon .ds-sidebar-badge { background:#555 !important; }
+/* Enlace de la barra lateral (activo/hover): fondo de tinte claro, texto y
+   borde del acento oscuro/claro. Los diez temas de fondo claro comparten
+   esta única regla; Medianoche queda fuera, definida arriba. */
+body.theme-dorado .ds-sidebar-link.active, body.theme-manila .ds-sidebar-link.active,
+body.theme-esmeralda .ds-sidebar-link.active, body.theme-granate .ds-sidebar-link.active,
+body.theme-carbon .ds-sidebar-link.active, body.theme-lavanda .ds-sidebar-link.active,
+body.theme-terracota .ds-sidebar-link.active, body.theme-azul-profundo .ds-sidebar-link.active,
+body.theme-cian .ds-sidebar-link.active, body.theme-oliva .ds-sidebar-link.active {
+  background: linear-gradient(90deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  color: var(--tt-accent-hover) !important;
+  border-left-color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-sidebar-link.active i, body.theme-manila .ds-sidebar-link.active i,
+body.theme-esmeralda .ds-sidebar-link.active i, body.theme-granate .ds-sidebar-link.active i,
+body.theme-carbon .ds-sidebar-link.active i, body.theme-lavanda .ds-sidebar-link.active i,
+body.theme-terracota .ds-sidebar-link.active i, body.theme-azul-profundo .ds-sidebar-link.active i,
+body.theme-cian .ds-sidebar-link.active i, body.theme-oliva .ds-sidebar-link.active i {
+  color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-sidebar-link:hover, body.theme-manila .ds-sidebar-link:hover,
+body.theme-esmeralda .ds-sidebar-link:hover, body.theme-granate .ds-sidebar-link:hover,
+body.theme-carbon .ds-sidebar-link:hover, body.theme-lavanda .ds-sidebar-link:hover,
+body.theme-terracota .ds-sidebar-link:hover, body.theme-azul-profundo .ds-sidebar-link:hover,
+body.theme-cian .ds-sidebar-link:hover, body.theme-oliva .ds-sidebar-link:hover {
+  background: linear-gradient(90deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  color: var(--tt-accent-hover) !important;
+  border-left-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .ds-sidebar-link:hover i, body.theme-manila .ds-sidebar-link:hover i,
+body.theme-esmeralda .ds-sidebar-link:hover i, body.theme-granate .ds-sidebar-link:hover i,
+body.theme-carbon .ds-sidebar-link:hover i, body.theme-lavanda .ds-sidebar-link:hover i,
+body.theme-terracota .ds-sidebar-link:hover i, body.theme-azul-profundo .ds-sidebar-link:hover i,
+body.theme-cian .ds-sidebar-link:hover i, body.theme-oliva .ds-sidebar-link:hover i {
+  color: var(--tt-accent-light) !important;
+}
 
-body.theme-lavanda .ds-sidebar-header, body.theme-lavanda .ds-theme-panel-header { background:linear-gradient(135deg,#4a3570,#2d1b5c) !important; }
-body.theme-lavanda .ds-sidebar-link.active { background:linear-gradient(90deg,#e8dff5,#f2ecff) !important; color:#4a3570 !important; border-left-color:#4a3570 !important; }
-body.theme-lavanda .ds-sidebar-link.active i { color:#4a3570 !important; }
-body.theme-lavanda .ds-sidebar-link:hover { background:linear-gradient(90deg,#e8dff5,#f5f0ff) !important; color:#4a3570 !important; border-left-color:#7c5cbf !important; }
-body.theme-lavanda .ds-sidebar-link:hover i { color:#7c5cbf !important; }
-body.theme-lavanda .ds-item-title { color:#4a3570 !important; }
-body.theme-lavanda .ds-page-header { border-left-color:#4a3570 !important; color:#4a3570 !important; }
-body.theme-lavanda .ds-sidebar-badge { background:#7c5cbf !important; }
-
-body.theme-terracota .ds-sidebar-header, body.theme-terracota .ds-theme-panel-header { background:linear-gradient(135deg,#b5451b,#7a2d10) !important; }
-body.theme-terracota .ds-sidebar-link.active { background:linear-gradient(90deg,#fde9e0,#fff5f0) !important; color:#b5451b !important; border-left-color:#b5451b !important; }
-body.theme-terracota .ds-sidebar-link.active i { color:#b5451b !important; }
-body.theme-terracota .ds-sidebar-link:hover { background:linear-gradient(90deg,#fde9e0,#fff8f5) !important; color:#b5451b !important; border-left-color:#d4623a !important; }
-body.theme-terracota .ds-sidebar-link:hover i { color:#d4623a !important; }
-body.theme-terracota .ds-item-title { color:#b5451b !important; }
-body.theme-terracota .ds-page-header { border-left-color:#b5451b !important; color:#b5451b !important; }
-body.theme-terracota .ds-sidebar-badge { background:#d4623a !important; }
-
-body.theme-azul-profundo .ds-sidebar-header, body.theme-azul-profundo .ds-theme-panel-header { background:linear-gradient(135deg,#0f3460,#0a2040) !important; }
-body.theme-azul-profundo .ds-sidebar-link.active { background:linear-gradient(90deg,#d0e4f7,#e8f3ff) !important; color:#0f3460 !important; border-left-color:#0f3460 !important; }
-body.theme-azul-profundo .ds-sidebar-link.active i { color:#0f3460 !important; }
-body.theme-azul-profundo .ds-sidebar-link:hover { background:linear-gradient(90deg,#d0e4f7,#f0f7ff) !important; color:#0f3460 !important; border-left-color:#1a5fa0 !important; }
-body.theme-azul-profundo .ds-sidebar-link:hover i { color:#1a5fa0 !important; }
-body.theme-azul-profundo .ds-item-title { color:#0f3460 !important; }
-body.theme-azul-profundo .ds-page-header { border-left-color:#0f3460 !important; color:#0f3460 !important; }
-body.theme-azul-profundo .ds-sidebar-badge { background:#1a5fa0 !important; }
-
-body.theme-oliva .ds-sidebar-header, body.theme-oliva .ds-theme-panel-header { background:linear-gradient(135deg,#5a6b2a,#3a4517) !important; }
-body.theme-oliva .ds-sidebar-link.active { background:linear-gradient(90deg,#e8f0d0,#f2f8e0) !important; color:#5a6b2a !important; border-left-color:#5a6b2a !important; }
-body.theme-oliva .ds-sidebar-link.active i { color:#5a6b2a !important; }
-body.theme-oliva .ds-sidebar-link:hover { background:linear-gradient(90deg,#e8f0d0,#f5fae0) !important; color:#3a4517 !important; border-left-color:#7a9040 !important; }
-body.theme-oliva .ds-sidebar-link:hover i { color:#7a9040 !important; }
-body.theme-oliva .ds-item-title { color:#5a6b2a !important; }
-body.theme-oliva .ds-page-header { border-left-color:#5a6b2a !important; color:#5a6b2a !important; }
-body.theme-oliva .ds-sidebar-badge { background:#7a9040 !important; }
-
-body.theme-cian .ds-sidebar-header, body.theme-cian .ds-theme-panel-header { background:linear-gradient(135deg,#0d6e7c,#074a55) !important; }
-body.theme-cian .ds-sidebar-link.active { background:linear-gradient(90deg,#c7f0f5,#e8fafc) !important; color:#0d6e7c !important; border-left-color:#0d6e7c !important; }
-body.theme-cian .ds-sidebar-link.active i { color:#0d6e7c !important; }
-body.theme-cian .ds-sidebar-link:hover { background:linear-gradient(90deg,#c7f0f5,#f0fcfd) !important; color:#0d6e7c !important; border-left-color:#13a0b4 !important; }
-body.theme-cian .ds-sidebar-link:hover i { color:#13a0b4 !important; }
-body.theme-cian .ds-item-title { color:#0d6e7c !important; }
-body.theme-cian .ds-page-header { border-left-color:#0d6e7c !important; color:#0d6e7c !important; }
-body.theme-cian .ds-sidebar-badge { background:#13a0b4 !important; }
+/* Título de resultado, cabecera de página, insignia lateral: mismo par
+   acento/acento-oscuro en los once temas (Medianoche incluido: éstos viven
+   sobre el fondo claro del contenido, no sobre la barra oscura). */
+body.theme-dorado .ds-item-title, body.theme-manila .ds-item-title,
+body.theme-esmeralda .ds-item-title, body.theme-noche .ds-item-title,
+body.theme-granate .ds-item-title, body.theme-carbon .ds-item-title,
+body.theme-lavanda .ds-item-title, body.theme-terracota .ds-item-title,
+body.theme-azul-profundo .ds-item-title, body.theme-cian .ds-item-title,
+body.theme-oliva .ds-item-title,
+body.theme-dorado .ds-doc-modal-head i, body.theme-dorado .ds-doc-modal-head h4, body.theme-dorado .ds-doc-panel h5, body.theme-dorado .ds-category-title,
+body.theme-manila .ds-doc-modal-head i, body.theme-manila .ds-doc-modal-head h4, body.theme-manila .ds-doc-panel h5, body.theme-manila .ds-category-title,
+body.theme-esmeralda .ds-doc-modal-head i, body.theme-esmeralda .ds-doc-modal-head h4, body.theme-esmeralda .ds-doc-panel h5, body.theme-esmeralda .ds-category-title,
+body.theme-noche .ds-doc-modal-head i, body.theme-noche .ds-doc-modal-head h4, body.theme-noche .ds-doc-panel h5, body.theme-noche .ds-category-title,
+body.theme-granate .ds-doc-modal-head i, body.theme-granate .ds-doc-modal-head h4, body.theme-granate .ds-doc-panel h5, body.theme-granate .ds-category-title,
+body.theme-carbon .ds-doc-modal-head i, body.theme-carbon .ds-doc-modal-head h4, body.theme-carbon .ds-doc-panel h5, body.theme-carbon .ds-category-title,
+body.theme-lavanda .ds-doc-modal-head i, body.theme-lavanda .ds-doc-modal-head h4, body.theme-lavanda .ds-doc-panel h5, body.theme-lavanda .ds-category-title,
+body.theme-terracota .ds-doc-modal-head i, body.theme-terracota .ds-doc-modal-head h4, body.theme-terracota .ds-doc-panel h5, body.theme-terracota .ds-category-title,
+body.theme-azul-profundo .ds-doc-modal-head i, body.theme-azul-profundo .ds-doc-modal-head h4, body.theme-azul-profundo .ds-doc-panel h5, body.theme-azul-profundo .ds-category-title,
+body.theme-cian .ds-doc-modal-head i, body.theme-cian .ds-doc-modal-head h4, body.theme-cian .ds-doc-panel h5, body.theme-cian .ds-category-title,
+body.theme-oliva .ds-doc-modal-head i, body.theme-oliva .ds-doc-modal-head h4, body.theme-oliva .ds-doc-panel h5, body.theme-oliva .ds-category-title {
+  color: var(--tt-accent-hover) !important;
+}
+body.theme-dorado .ds-page-header, body.theme-manila .ds-page-header,
+body.theme-esmeralda .ds-page-header, body.theme-noche .ds-page-header,
+body.theme-granate .ds-page-header, body.theme-carbon .ds-page-header,
+body.theme-lavanda .ds-page-header, body.theme-terracota .ds-page-header,
+body.theme-azul-profundo .ds-page-header, body.theme-cian .ds-page-header,
+body.theme-oliva .ds-page-header {
+  border-left-color: var(--tt-accent) !important;
+  color: var(--tt-accent-hover) !important;
+}
+body.theme-manila .ds-page-header { background:#fdf6e3 !important; }
+body.theme-dorado .ds-sidebar-badge, body.theme-manila .ds-sidebar-badge,
+body.theme-esmeralda .ds-sidebar-badge, body.theme-noche .ds-sidebar-badge,
+body.theme-granate .ds-sidebar-badge, body.theme-carbon .ds-sidebar-badge,
+body.theme-lavanda .ds-sidebar-badge, body.theme-terracota .ds-sidebar-badge,
+body.theme-azul-profundo .ds-sidebar-badge, body.theme-cian .ds-sidebar-badge,
+body.theme-oliva .ds-sidebar-badge {
+  background: var(--tt-accent) !important;
+}
 
 /* ==========================================================================
-   TEMAS — Extensión completa: botones, cards, badges, modales, accents
+   Botones, tarjetas, insignias, modales — la parte que antes vivía en el
+   bloque "Extensión completa" (SD-089: la sombra de hover pasa a ser una
+   sola declaración con el color del tema, no trece repartidas).
    ========================================================================== */
-
-/* Mixin conceptual: cada tema define --t-primary y --t-accent por medio de reglas directas */
-
-/* ── AZUL PROFUNDO ── */
-body.theme-azul-profundo .ds-btn-primary { background-color:#0f3460 !important; border-color:#0f3460 !important; }
-body.theme-azul-profundo .ds-btn-primary:hover { background-color:#0a2645 !important; border-color:#081e38 !important; box-shadow:0 4px 12px rgba(15,52,96,0.4) !important; }
-body.theme-azul-profundo .ds-item-card:hover { border-left-color:#1a5fa0 !important; box-shadow:0 10px 20px rgba(15,52,96,0.12),0 6px 6px rgba(15,52,96,0.07) !important; }
-body.theme-azul-profundo .ds-search-input:focus { border-color:#5488bb !important; box-shadow:0 0 0 0.2rem rgba(15,52,96,0.25) !important; }
-body.theme-azul-profundo .ds-results-header { border-bottom-color:#1a5fa0 !important; }
-body.theme-azul-profundo .select-tag.active { background-color:#0f3460 !important; border-color:#0f3460 !important; }
-body.theme-azul-profundo .select-tag:hover { color:#0f3460 !important; border-color:#0f3460 !important; }
-body.theme-azul-profundo .ds-badge { background-color:#0f3460 !important; }
-body.theme-azul-profundo .ds-doc-thumb-badge { background:#0f3460 !important; }
-body.theme-azul-profundo .ds-doc-thumb i { color:#0f3460 !important; }
-body.theme-azul-profundo .ds-doc-modal-head { background:linear-gradient(135deg,#d0e4f7,#e8f3ff) !important; border-color:#aacbee !important; }
-body.theme-azul-profundo .ds-doc-modal-head i, body.theme-azul-profundo .ds-doc-modal-head h4 { color:#0f3460 !important; }
-body.theme-azul-profundo .ds-doc-panel h5, body.theme-azul-profundo .ds-category-title { color:#0f3460 !important; }
-body.theme-azul-profundo .rrhh-person-photo-initials { background:#0f3460 !important; }
-body.theme-azul-profundo .rrhh-person-modal .nav-pills .nav-link.active { background-color:#0f3460 !important; }
-body.theme-azul-profundo .ds-login-card { border-top-color:#0f3460 !important; }
-
-/* ── DORADO ── */
-body.theme-dorado .ds-btn-primary { background-color:#9a7017 !important; border-color:#9a7017 !important; }
-body.theme-dorado .ds-btn-primary:hover { background-color:#7d5b12 !important; border-color:#6a4d0f !important; box-shadow:0 4px 12px rgba(154,112,23,0.4) !important; }
-body.theme-dorado .ds-item-card:hover { border-left-color:#B8860B !important; box-shadow:0 10px 20px rgba(154,112,23,0.12),0 6px 6px rgba(154,112,23,0.07) !important; }
-body.theme-dorado .ds-search-input:focus { border-color:#d4a843 !important; box-shadow:0 0 0 0.2rem rgba(154,112,23,0.25) !important; }
-body.theme-dorado .ds-results-header { border-bottom-color:#B8860B !important; }
-body.theme-dorado .select-tag.active { background-color:#9a7017 !important; border-color:#9a7017 !important; }
-body.theme-dorado .select-tag:hover { color:#7B5800 !important; border-color:#B8860B !important; }
-body.theme-dorado .ds-badge { background-color:#9a7017 !important; }
-body.theme-dorado .ds-doc-thumb-badge { background:#9a7017 !important; }
-body.theme-dorado .ds-doc-thumb i { color:#9a7017 !important; }
-body.theme-dorado .ds-doc-modal-head { background:linear-gradient(135deg,#fef3cd,#fffaed) !important; border-color:#e8d08a !important; }
-body.theme-dorado .ds-doc-modal-head i, body.theme-dorado .ds-doc-modal-head h4 { color:#7B5800 !important; }
-body.theme-dorado .ds-doc-panel h5, body.theme-dorado .ds-category-title { color:#7B5800 !important; }
-body.theme-dorado .rrhh-person-photo-initials { background:#9a7017 !important; }
-body.theme-dorado .rrhh-person-modal .nav-pills .nav-link.active { background-color:#9a7017 !important; }
-body.theme-dorado .ds-login-card { border-top-color:#9a7017 !important; }
-
-/* ── MANILA ── */
-body.theme-manila .ds-btn-primary { background-color:#8B7355 !important; border-color:#8B7355 !important; }
-body.theme-manila .ds-btn-primary:hover { background-color:#725e44 !important; border-color:#5e4d37 !important; box-shadow:0 4px 12px rgba(139,115,85,0.4) !important; }
-body.theme-manila .ds-item-card:hover { border-left-color:#A0856A !important; box-shadow:0 10px 20px rgba(139,115,85,0.12),0 6px 6px rgba(139,115,85,0.07) !important; }
-body.theme-manila .ds-search-input:focus { border-color:#c4aa8a !important; box-shadow:0 0 0 0.2rem rgba(139,115,85,0.25) !important; }
-body.theme-manila .ds-results-header { border-bottom-color:#A0856A !important; }
-body.theme-manila .select-tag.active { background-color:#8B7355 !important; border-color:#8B7355 !important; }
-body.theme-manila .select-tag:hover { color:#5C4A2A !important; border-color:#A0856A !important; }
-body.theme-manila .ds-badge { background-color:#8B7355 !important; }
-body.theme-manila .ds-doc-thumb-badge { background:#8B7355 !important; }
-body.theme-manila .ds-doc-thumb i { color:#8B7355 !important; }
-body.theme-manila .ds-doc-modal-head { background:linear-gradient(135deg,#ede0c4,#f8f0e0) !important; border-color:#d5c8a0 !important; }
-body.theme-manila .ds-doc-modal-head i, body.theme-manila .ds-doc-modal-head h4 { color:#5C4A2A !important; }
-body.theme-manila .ds-doc-panel h5, body.theme-manila .ds-category-title { color:#5C4A2A !important; }
-body.theme-manila .rrhh-person-photo-initials { background:#8B7355 !important; }
-body.theme-manila .rrhh-person-modal .nav-pills .nav-link.active { background-color:#8B7355 !important; }
-body.theme-manila .ds-login-card { border-top-color:#8B7355 !important; }
-body.theme-manila .ds-breadcrumb-wrapper { background-color:#ede0c4 !important; }
-
-/* ── ESMERALDA ── */
-body.theme-esmeralda .ds-btn-primary { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
-body.theme-esmeralda .ds-btn-primary:hover { background-color:#1f5239 !important; border-color:#1b4332 !important; box-shadow:0 4px 12px rgba(45,106,79,0.4) !important; }
-body.theme-esmeralda .ds-item-card:hover { border-left-color:#40916c !important; box-shadow:0 10px 20px rgba(45,106,79,0.12),0 6px 6px rgba(45,106,79,0.07) !important; }
-body.theme-esmeralda .ds-search-input:focus { border-color:#74c69d !important; box-shadow:0 0 0 0.2rem rgba(45,106,79,0.25) !important; }
-body.theme-esmeralda .ds-results-header { border-bottom-color:#40916c !important; }
-body.theme-esmeralda .select-tag.active { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
-body.theme-esmeralda .select-tag:hover { color:#1b4332 !important; border-color:#40916c !important; }
-body.theme-esmeralda .ds-badge { background-color:#2d6a4f !important; }
-body.theme-esmeralda .ds-doc-thumb-badge { background:#2d6a4f !important; }
-body.theme-esmeralda .ds-doc-thumb i { color:#2d6a4f !important; }
-body.theme-esmeralda .ds-doc-modal-head { background:linear-gradient(135deg,#d8f3dc,#f0faf2) !important; border-color:#aadcb8 !important; }
-body.theme-esmeralda .ds-doc-modal-head i, body.theme-esmeralda .ds-doc-modal-head h4 { color:#1b4332 !important; }
-body.theme-esmeralda .ds-doc-panel h5, body.theme-esmeralda .ds-category-title { color:#1b4332 !important; }
-body.theme-esmeralda .rrhh-person-photo-initials { background:#2d6a4f !important; }
-body.theme-esmeralda .rrhh-person-modal .nav-pills .nav-link.active { background-color:#2d6a4f !important; }
-body.theme-esmeralda .ds-login-card { border-top-color:#2d6a4f !important; }
-
-/* ── CIAN ── */
-body.theme-cian .ds-btn-primary { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
-body.theme-cian .ds-btn-primary:hover { background-color:#09555f !important; border-color:#074a55 !important; box-shadow:0 4px 12px rgba(13,110,124,0.4) !important; }
-body.theme-cian .ds-item-card:hover { border-left-color:#13a0b4 !important; box-shadow:0 10px 20px rgba(13,110,124,0.12),0 6px 6px rgba(13,110,124,0.07) !important; }
-body.theme-cian .ds-search-input:focus { border-color:#5dcfdd !important; box-shadow:0 0 0 0.2rem rgba(13,110,124,0.25) !important; }
-body.theme-cian .ds-results-header { border-bottom-color:#13a0b4 !important; }
-body.theme-cian .select-tag.active { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
-body.theme-cian .select-tag:hover { color:#074a55 !important; border-color:#13a0b4 !important; }
-body.theme-cian .ds-badge { background-color:#0d6e7c !important; }
-body.theme-cian .ds-doc-thumb-badge { background:#0d6e7c !important; }
-body.theme-cian .ds-doc-thumb i { color:#0d6e7c !important; }
-body.theme-cian .ds-doc-modal-head { background:linear-gradient(135deg,#c7f0f5,#e8fafc) !important; border-color:#8ddce8 !important; }
-body.theme-cian .ds-doc-modal-head i, body.theme-cian .ds-doc-modal-head h4 { color:#074a55 !important; }
-body.theme-cian .ds-doc-panel h5, body.theme-cian .ds-category-title { color:#074a55 !important; }
-body.theme-cian .rrhh-person-photo-initials { background:#0d6e7c !important; }
-body.theme-cian .rrhh-person-modal .nav-pills .nav-link.active { background-color:#0d6e7c !important; }
-body.theme-cian .ds-login-card { border-top-color:#0d6e7c !important; }
-
-/* ── LAVANDA ── */
-body.theme-lavanda .ds-btn-primary { background-color:#4a3570 !important; border-color:#4a3570 !important; }
-body.theme-lavanda .ds-btn-primary:hover { background-color:#362659 !important; border-color:#2d1b5c !important; box-shadow:0 4px 12px rgba(74,53,112,0.4) !important; }
-body.theme-lavanda .ds-item-card:hover { border-left-color:#7c5cbf !important; box-shadow:0 10px 20px rgba(74,53,112,0.12),0 6px 6px rgba(74,53,112,0.07) !important; }
-body.theme-lavanda .ds-search-input:focus { border-color:#a98fd9 !important; box-shadow:0 0 0 0.2rem rgba(74,53,112,0.25) !important; }
-body.theme-lavanda .ds-results-header { border-bottom-color:#7c5cbf !important; }
-body.theme-lavanda .select-tag.active { background-color:#4a3570 !important; border-color:#4a3570 !important; }
-body.theme-lavanda .select-tag:hover { color:#4a3570 !important; border-color:#7c5cbf !important; }
-body.theme-lavanda .ds-badge { background-color:#4a3570 !important; }
-body.theme-lavanda .ds-doc-thumb-badge { background:#4a3570 !important; }
-body.theme-lavanda .ds-doc-thumb i { color:#4a3570 !important; }
-body.theme-lavanda .ds-doc-modal-head { background:linear-gradient(135deg,#e8dff5,#f2ecff) !important; border-color:#c4aee8 !important; }
-body.theme-lavanda .ds-doc-modal-head i, body.theme-lavanda .ds-doc-modal-head h4 { color:#2d1b5c !important; }
-body.theme-lavanda .ds-doc-panel h5, body.theme-lavanda .ds-category-title { color:#2d1b5c !important; }
-body.theme-lavanda .rrhh-person-photo-initials { background:#4a3570 !important; }
-body.theme-lavanda .rrhh-person-modal .nav-pills .nav-link.active { background-color:#4a3570 !important; }
-body.theme-lavanda .ds-login-card { border-top-color:#4a3570 !important; }
-
-/* ── GRANATE ── */
-body.theme-granate .ds-btn-primary { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
-body.theme-granate .ds-btn-primary:hover { background-color:#631f2d !important; border-color:#5a1e2b !important; box-shadow:0 4px 12px rgba(124,45,60,0.4) !important; }
-body.theme-granate .ds-item-card:hover { border-left-color:#a03048 !important; box-shadow:0 10px 20px rgba(124,45,60,0.12),0 6px 6px rgba(124,45,60,0.07) !important; }
-body.theme-granate .ds-search-input:focus { border-color:#d07082 !important; box-shadow:0 0 0 0.2rem rgba(124,45,60,0.25) !important; }
-body.theme-granate .ds-results-header { border-bottom-color:#a03048 !important; }
-body.theme-granate .select-tag.active { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
-body.theme-granate .select-tag:hover { color:#7c2d3c !important; border-color:#a03048 !important; }
-body.theme-granate .ds-badge { background-color:#7c2d3c !important; }
-body.theme-granate .ds-doc-thumb-badge { background:#7c2d3c !important; }
-body.theme-granate .ds-doc-thumb i { color:#7c2d3c !important; }
-body.theme-granate .ds-doc-modal-head { background:linear-gradient(135deg,#fce4e9,#fff0f2) !important; border-color:#f0b4bf !important; }
-body.theme-granate .ds-doc-modal-head i, body.theme-granate .ds-doc-modal-head h4 { color:#5a1e2b !important; }
-body.theme-granate .ds-doc-panel h5, body.theme-granate .ds-category-title { color:#5a1e2b !important; }
-body.theme-granate .rrhh-person-photo-initials { background:#7c2d3c !important; }
-body.theme-granate .rrhh-person-modal .nav-pills .nav-link.active { background-color:#7c2d3c !important; }
-body.theme-granate .ds-login-card { border-top-color:#7c2d3c !important; }
-
-/* ── TERRACOTA ── */
-body.theme-terracota .ds-btn-primary { background-color:#b5451b !important; border-color:#b5451b !important; }
-body.theme-terracota .ds-btn-primary:hover { background-color:#943814 !important; border-color:#7a2d10 !important; box-shadow:0 4px 12px rgba(181,69,27,0.4) !important; }
-body.theme-terracota .ds-item-card:hover { border-left-color:#d4623a !important; box-shadow:0 10px 20px rgba(181,69,27,0.12),0 6px 6px rgba(181,69,27,0.07) !important; }
-body.theme-terracota .ds-search-input:focus { border-color:#e09070 !important; box-shadow:0 0 0 0.2rem rgba(181,69,27,0.25) !important; }
-body.theme-terracota .ds-results-header { border-bottom-color:#d4623a !important; }
-body.theme-terracota .select-tag.active { background-color:#b5451b !important; border-color:#b5451b !important; }
-body.theme-terracota .select-tag:hover { color:#b5451b !important; border-color:#d4623a !important; }
-body.theme-terracota .ds-badge { background-color:#b5451b !important; }
-body.theme-terracota .ds-doc-thumb-badge { background:#b5451b !important; }
-body.theme-terracota .ds-doc-thumb i { color:#b5451b !important; }
-body.theme-terracota .ds-doc-modal-head { background:linear-gradient(135deg,#fde9e0,#fff5f0) !important; border-color:#f0b89a !important; }
-body.theme-terracota .ds-doc-modal-head i, body.theme-terracota .ds-doc-modal-head h4 { color:#7a2d10 !important; }
-body.theme-terracota .ds-doc-panel h5, body.theme-terracota .ds-category-title { color:#7a2d10 !important; }
-body.theme-terracota .rrhh-person-photo-initials { background:#b5451b !important; }
-body.theme-terracota .rrhh-person-modal .nav-pills .nav-link.active { background-color:#b5451b !important; }
-body.theme-terracota .ds-login-card { border-top-color:#b5451b !important; }
-
-/* ── NOCHE (dark sidebar, blue accent en contenido) ── */
-body.theme-noche .ds-btn-primary { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
-body.theme-noche .ds-btn-primary:hover { background-color:#2f76c0 !important; border-color:#2464aa !important; box-shadow:0 4px 12px rgba(74,144,217,0.4) !important; }
-body.theme-noche .ds-item-card:hover { border-left-color:#4a90d9 !important; box-shadow:0 10px 20px rgba(74,144,217,0.12),0 6px 6px rgba(74,144,217,0.07) !important; }
-body.theme-noche .ds-search-input:focus { border-color:#7ab4e8 !important; box-shadow:0 0 0 0.2rem rgba(74,144,217,0.25) !important; }
-body.theme-noche .ds-results-header { border-bottom-color:#4a90d9 !important; }
-body.theme-noche .select-tag.active { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
-body.theme-noche .select-tag:hover { color:#2f76c0 !important; border-color:#4a90d9 !important; }
-body.theme-noche .ds-badge { background-color:#4a90d9 !important; }
-body.theme-noche .ds-doc-thumb-badge { background:#1a3a6b !important; }
-body.theme-noche .ds-doc-thumb i { color:#4a90d9 !important; }
-body.theme-noche .ds-doc-modal-head { background:linear-gradient(135deg,#d0e8f7,#eaf4ff) !important; border-color:#a0ccee !important; }
-body.theme-noche .ds-doc-modal-head i, body.theme-noche .ds-doc-modal-head h4 { color:#1a3a6b !important; }
-body.theme-noche .ds-doc-panel h5, body.theme-noche .ds-category-title { color:#1a3a6b !important; }
-body.theme-noche .rrhh-person-photo-initials { background:#1a3a6b !important; }
-body.theme-noche .rrhh-person-modal .nav-pills .nav-link.active { background-color:#4a90d9 !important; }
+body.theme-dorado .ds-btn-primary, body.theme-manila .ds-btn-primary,
+body.theme-esmeralda .ds-btn-primary, body.theme-noche .ds-btn-primary,
+body.theme-granate .ds-btn-primary, body.theme-carbon .ds-btn-primary,
+body.theme-lavanda .ds-btn-primary, body.theme-terracota .ds-btn-primary,
+body.theme-azul-profundo .ds-btn-primary, body.theme-cian .ds-btn-primary,
+body.theme-oliva .ds-btn-primary,
+body.theme-dorado .btn.btn-primary:not(.ds-btn-primary), body.theme-manila .btn.btn-primary:not(.ds-btn-primary),
+body.theme-esmeralda .btn.btn-primary:not(.ds-btn-primary), body.theme-noche .btn.btn-primary:not(.ds-btn-primary),
+body.theme-granate .btn.btn-primary:not(.ds-btn-primary), body.theme-carbon .btn.btn-primary:not(.ds-btn-primary),
+body.theme-lavanda .btn.btn-primary:not(.ds-btn-primary), body.theme-terracota .btn.btn-primary:not(.ds-btn-primary),
+body.theme-azul-profundo .btn.btn-primary:not(.ds-btn-primary), body.theme-cian .btn.btn-primary:not(.ds-btn-primary),
+body.theme-oliva .btn.btn-primary:not(.ds-btn-primary),
+body.theme-dorado .select-tag.active, body.theme-manila .select-tag.active,
+body.theme-esmeralda .select-tag.active, body.theme-noche .select-tag.active,
+body.theme-granate .select-tag.active, body.theme-carbon .select-tag.active,
+body.theme-lavanda .select-tag.active, body.theme-terracota .select-tag.active,
+body.theme-azul-profundo .select-tag.active, body.theme-cian .select-tag.active,
+body.theme-oliva .select-tag.active,
+body.theme-dorado .ds-badge, body.theme-manila .ds-badge,
+body.theme-esmeralda .ds-badge, body.theme-noche .ds-badge,
+body.theme-granate .ds-badge, body.theme-carbon .ds-badge,
+body.theme-lavanda .ds-badge, body.theme-terracota .ds-badge,
+body.theme-azul-profundo .ds-badge, body.theme-cian .ds-badge,
+body.theme-oliva .ds-badge,
+body.theme-dorado .rrhh-person-modal .nav-pills .nav-link.active, body.theme-manila .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-esmeralda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-noche .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-granate .rrhh-person-modal .nav-pills .nav-link.active, body.theme-carbon .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-lavanda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-terracota .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-azul-profundo .rrhh-person-modal .nav-pills .nav-link.active, body.theme-cian .rrhh-person-modal .nav-pills .nav-link.active,
+body.theme-oliva .rrhh-person-modal .nav-pills .nav-link.active {
+  background-color: var(--tt-accent) !important;
+  border-color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-btn-primary:hover, body.theme-manila .ds-btn-primary:hover,
+body.theme-esmeralda .ds-btn-primary:hover, body.theme-noche .ds-btn-primary:hover,
+body.theme-granate .ds-btn-primary:hover, body.theme-carbon .ds-btn-primary:hover,
+body.theme-lavanda .ds-btn-primary:hover, body.theme-terracota .ds-btn-primary:hover,
+body.theme-azul-profundo .ds-btn-primary:hover, body.theme-cian .ds-btn-primary:hover,
+body.theme-oliva .ds-btn-primary:hover {
+  background-color: var(--tt-accent-hover) !important;
+  border-color: var(--tt-accent-hover) !important;
+  box-shadow: 0 4px 12px rgba(var(--tt-accent-rgb), .4) !important;
+}
+body.theme-dorado .ds-item-card:hover, body.theme-manila .ds-item-card:hover,
+body.theme-esmeralda .ds-item-card:hover, body.theme-noche .ds-item-card:hover,
+body.theme-granate .ds-item-card:hover, body.theme-carbon .ds-item-card:hover,
+body.theme-lavanda .ds-item-card:hover, body.theme-terracota .ds-item-card:hover,
+body.theme-azul-profundo .ds-item-card:hover, body.theme-cian .ds-item-card:hover,
+body.theme-oliva .ds-item-card:hover {
+  border-left-color: var(--tt-accent-light) !important;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,.12)), 0 0 0 1px rgba(var(--tt-accent-rgb), .07) !important;
+}
+body.theme-dorado .ds-search-input:focus, body.theme-manila .ds-search-input:focus,
+body.theme-esmeralda .ds-search-input:focus, body.theme-noche .ds-search-input:focus,
+body.theme-granate .ds-search-input:focus, body.theme-carbon .ds-search-input:focus,
+body.theme-lavanda .ds-search-input:focus, body.theme-terracota .ds-search-input:focus,
+body.theme-azul-profundo .ds-search-input:focus, body.theme-cian .ds-search-input:focus,
+body.theme-oliva .ds-search-input:focus {
+  border-color: var(--tt-accent-light) !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--tt-accent-rgb), .25) !important;
+}
+body.theme-dorado .ds-results-header, body.theme-manila .ds-results-header,
+body.theme-esmeralda .ds-results-header, body.theme-noche .ds-results-header,
+body.theme-granate .ds-results-header, body.theme-carbon .ds-results-header,
+body.theme-lavanda .ds-results-header, body.theme-terracota .ds-results-header,
+body.theme-azul-profundo .ds-results-header, body.theme-cian .ds-results-header,
+body.theme-oliva .ds-results-header {
+  border-bottom-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .select-tag:hover, body.theme-manila .select-tag:hover,
+body.theme-esmeralda .select-tag:hover, body.theme-noche .select-tag:hover,
+body.theme-granate .select-tag:hover, body.theme-carbon .select-tag:hover,
+body.theme-lavanda .select-tag:hover, body.theme-terracota .select-tag:hover,
+body.theme-azul-profundo .select-tag:hover, body.theme-cian .select-tag:hover,
+body.theme-oliva .select-tag:hover {
+  color: var(--tt-accent-hover) !important;
+  border-color: var(--tt-accent-light) !important;
+}
+body.theme-dorado .ds-doc-thumb-badge, body.theme-manila .ds-doc-thumb-badge,
+body.theme-esmeralda .ds-doc-thumb-badge, body.theme-granate .ds-doc-thumb-badge,
+body.theme-carbon .ds-doc-thumb-badge, body.theme-lavanda .ds-doc-thumb-badge,
+body.theme-terracota .ds-doc-thumb-badge, body.theme-azul-profundo .ds-doc-thumb-badge,
+body.theme-cian .ds-doc-thumb-badge, body.theme-oliva .ds-doc-thumb-badge {
+  background: var(--tt-accent) !important;
+}
+body.theme-noche .ds-doc-thumb-badge { background: var(--tt-accent-hover) !important; }
+body.theme-dorado .ds-doc-thumb i, body.theme-manila .ds-doc-thumb i,
+body.theme-esmeralda .ds-doc-thumb i, body.theme-noche .ds-doc-thumb i,
+body.theme-granate .ds-doc-thumb i, body.theme-carbon .ds-doc-thumb i,
+body.theme-lavanda .ds-doc-thumb i, body.theme-terracota .ds-doc-thumb i,
+body.theme-azul-profundo .ds-doc-thumb i, body.theme-cian .ds-doc-thumb i,
+body.theme-oliva .ds-doc-thumb i {
+  color: var(--tt-accent) !important;
+}
+body.theme-dorado .ds-doc-modal-head, body.theme-manila .ds-doc-modal-head,
+body.theme-esmeralda .ds-doc-modal-head, body.theme-noche .ds-doc-modal-head,
+body.theme-granate .ds-doc-modal-head, body.theme-carbon .ds-doc-modal-head,
+body.theme-lavanda .ds-doc-modal-head, body.theme-terracota .ds-doc-modal-head,
+body.theme-azul-profundo .ds-doc-modal-head, body.theme-cian .ds-doc-modal-head,
+body.theme-oliva .ds-doc-modal-head {
+  background: linear-gradient(135deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
+  border-color: var(--tt-tint-border) !important;
+}
+body.theme-dorado .rrhh-person-photo-initials, body.theme-manila .rrhh-person-photo-initials,
+body.theme-esmeralda .rrhh-person-photo-initials, body.theme-granate .rrhh-person-photo-initials,
+body.theme-carbon .rrhh-person-photo-initials, body.theme-lavanda .rrhh-person-photo-initials,
+body.theme-terracota .rrhh-person-photo-initials, body.theme-azul-profundo .rrhh-person-photo-initials,
+body.theme-cian .rrhh-person-photo-initials, body.theme-oliva .rrhh-person-photo-initials {
+  background: var(--tt-accent) !important;
+}
+body.theme-noche .rrhh-person-photo-initials { background: var(--tt-accent-hover) !important; }
+body.theme-dorado .ds-login-card, body.theme-manila .ds-login-card,
+body.theme-esmeralda .ds-login-card, body.theme-granate .ds-login-card,
+body.theme-carbon .ds-login-card, body.theme-lavanda .ds-login-card,
+body.theme-terracota .ds-login-card, body.theme-azul-profundo .ds-login-card,
+body.theme-cian .ds-login-card, body.theme-oliva .ds-login-card {
+  border-top-color: var(--tt-accent) !important;
+}
 body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
-body.theme-noche .ds-item-title { color:#1a3a6b !important; }
-
-/* ── CARBON (dark sidebar, charcoal accent) ── */
-body.theme-carbon .ds-btn-primary { background-color:#444 !important; border-color:#444 !important; }
-body.theme-carbon .ds-btn-primary:hover { background-color:#2a2a2a !important; border-color:#1a1a1a !important; box-shadow:0 4px 12px rgba(68,68,68,0.4) !important; }
-body.theme-carbon .ds-item-card:hover { border-left-color:#555 !important; box-shadow:0 10px 20px rgba(68,68,68,0.12),0 6px 6px rgba(68,68,68,0.07) !important; }
-body.theme-carbon .ds-search-input:focus { border-color:#999 !important; box-shadow:0 0 0 0.2rem rgba(68,68,68,0.2) !important; }
-body.theme-carbon .ds-results-header { border-bottom-color:#555 !important; }
-body.theme-carbon .select-tag.active { background-color:#444 !important; border-color:#444 !important; }
-body.theme-carbon .select-tag:hover { color:#2c2c2c !important; border-color:#777 !important; }
-body.theme-carbon .ds-badge { background-color:#444 !important; }
-body.theme-carbon .ds-doc-thumb-badge { background:#2c2c2c !important; }
-body.theme-carbon .ds-doc-thumb i { color:#555 !important; }
-body.theme-carbon .ds-doc-modal-head { background:linear-gradient(135deg,#e8e8e8,#f5f5f5) !important; border-color:#ccc !important; }
-body.theme-carbon .ds-doc-modal-head i, body.theme-carbon .ds-doc-modal-head h4 { color:#1a1a1a !important; }
-body.theme-carbon .ds-doc-panel h5, body.theme-carbon .ds-category-title { color:#1a1a1a !important; }
-body.theme-carbon .rrhh-person-photo-initials { background:#2c2c2c !important; }
-body.theme-carbon .rrhh-person-modal .nav-pills .nav-link.active { background-color:#444 !important; }
-body.theme-carbon .ds-login-card { border-top-color:#2c2c2c !important; }
-
-/* ── OLIVA ── */
-body.theme-oliva .ds-btn-primary { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
-body.theme-oliva .ds-btn-primary:hover { background-color:#47551f !important; border-color:#3a4517 !important; box-shadow:0 4px 12px rgba(90,107,42,0.4) !important; }
-body.theme-oliva .ds-item-card:hover { border-left-color:#7a9040 !important; box-shadow:0 10px 20px rgba(90,107,42,0.12),0 6px 6px rgba(90,107,42,0.07) !important; }
-body.theme-oliva .ds-search-input:focus { border-color:#a0b865 !important; box-shadow:0 0 0 0.2rem rgba(90,107,42,0.25) !important; }
-body.theme-oliva .ds-results-header { border-bottom-color:#7a9040 !important; }
-body.theme-oliva .select-tag.active { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
-body.theme-oliva .select-tag:hover { color:#3a4517 !important; border-color:#7a9040 !important; }
-body.theme-oliva .ds-badge { background-color:#5a6b2a !important; }
-body.theme-oliva .ds-doc-thumb-badge { background:#5a6b2a !important; }
-body.theme-oliva .ds-doc-thumb i { color:#5a6b2a !important; }
-body.theme-oliva .ds-doc-modal-head { background:linear-gradient(135deg,#e8f0d0,#f2f8e0) !important; border-color:#c0d490 !important; }
-body.theme-oliva .ds-doc-modal-head i, body.theme-oliva .ds-doc-modal-head h4 { color:#3a4517 !important; }
-body.theme-oliva .ds-doc-panel h5, body.theme-oliva .ds-category-title { color:#3a4517 !important; }
-body.theme-oliva .rrhh-person-photo-initials { background:#5a6b2a !important; }
-body.theme-oliva .rrhh-person-modal .nav-pills .nav-link.active { background-color:#5a6b2a !important; }
-body.theme-oliva .ds-login-card { border-top-color:#5a6b2a !important; }
-
-/* ==========================================================================
-   Bootstrap .btn-primary overrides por tema (item action buttons, etc.)
-   ========================================================================== */
-body.theme-azul-profundo .btn.btn-primary:not(.ds-btn-primary) { background-color:#0f3460 !important; border-color:#0f3460 !important; }
-body.theme-dorado         .btn.btn-primary:not(.ds-btn-primary) { background-color:#9a7017 !important; border-color:#9a7017 !important; }
-body.theme-manila         .btn.btn-primary:not(.ds-btn-primary) { background-color:#8B7355 !important; border-color:#8B7355 !important; }
-body.theme-esmeralda      .btn.btn-primary:not(.ds-btn-primary) { background-color:#2d6a4f !important; border-color:#2d6a4f !important; }
-body.theme-cian           .btn.btn-primary:not(.ds-btn-primary) { background-color:#0d6e7c !important; border-color:#0d6e7c !important; }
-body.theme-lavanda        .btn.btn-primary:not(.ds-btn-primary) { background-color:#4a3570 !important; border-color:#4a3570 !important; }
-body.theme-granate        .btn.btn-primary:not(.ds-btn-primary) { background-color:#7c2d3c !important; border-color:#7c2d3c !important; }
-body.theme-terracota      .btn.btn-primary:not(.ds-btn-primary) { background-color:#b5451b !important; border-color:#b5451b !important; }
-body.theme-noche          .btn.btn-primary:not(.ds-btn-primary) { background-color:#4a90d9 !important; border-color:#4a90d9 !important; }
-body.theme-carbon         .btn.btn-primary:not(.ds-btn-primary) { background-color:#444    !important; border-color:#444    !important; }
-body.theme-oliva          .btn.btn-primary:not(.ds-btn-primary) { background-color:#5a6b2a !important; border-color:#5a6b2a !important; }
 
 /* ==========================================================================
    UI/UX — ACCESIBILIDAD, RESPONSIVE & COMPONENTES MEJORADOS
