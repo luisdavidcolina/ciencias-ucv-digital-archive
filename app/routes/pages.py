@@ -79,6 +79,11 @@ async def serve_ayuda():
     return _page("ayuda.html")
 
 
+@router.get("/sistema", include_in_schema=False)
+async def serve_sistema():
+    return _page("sistema.html")
+
+
 @router.get("/compartido/{token}", include_in_schema=False)
 async def serve_compartido(token: str):
     """Pagina publica de un documento compartido. El token lo valida la API.

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería de Componentes — Sistema de Diseño</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/icons/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/static/assets/icons/site.webmanifest">
+  <style>
+    .ds-swatch {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .ds-swatch-color { height: 3.5rem; }
+    .ds-swatch-label {
+      padding: var(--space-2) var(--space-3);
+      background: var(--surface-1);
+      font-size: var(--font-size-xs);
+    }
+    .ds-swatch-label code { font-size: var(--font-size-xs); color: var(--text-muted); }
+    .ds-space-bar {
+      background: var(--color-primary);
+      border-radius: var(--radius-xs);
+    }
+    .ds-space-row { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2); }
+    .ds-space-row code { width: 6rem; flex: none; }
+    .ds-radius-demo, .ds-shadow-demo {
+      width: 5rem; height: 5rem;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--font-size-xs);
+      color: var(--text-muted);
+    }
+    .ds-gallery-section { margin-bottom: var(--space-8); scroll-margin-top: var(--space-6); }
+    .ds-gallery-section h2 {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-bold);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .ds-gallery-demo {
+      background: var(--surface-0);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+    }
+    .ds-gallery-demo > * + * { margin-left: var(--space-2); }
+    .ds-gallery-toc {
+      position: sticky;
+      top: var(--space-4);
+    }
+    .ds-gallery-toc .nav-link {
+      padding: var(--space-1) var(--space-2);
+      color: var(--text-muted);
+      font-size: var(--font-size-sm);
+    }
+    .ds-gallery-toc .nav-link:hover { color: var(--color-link); }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini" data-page="sistema"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
+
+  <div id="app-shell-navbar"></div>
+  <div id="app-shell-sidebar"></div>
+  <script src="/static/app-shell.js"></script>
+
+  <div class="content-wrapper">
+    <section class="app-tab-section p-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="ds-breadcrumb-wrapper">
+            <nav class="ds-breadcrumb" aria-label="Ruta de navegación">
+              <a href="/archivo"><i class="fas fa-home"></i> Panel de Control</a>
+              <span aria-hidden="true"> / </span>
+              <span aria-current="page"><i class="fas fa-palette"></i> Galería de Componentes</span>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 mb-4">
+          <h1 class="mb-1">Galería de Componentes</h1>
+          <p class="text-muted mb-0">
+            Los tokens y los componentes del sistema de diseño, en vivo, con las clases
+            reales de <code>styles.css</code>. El tema y el modo oscuro se cambian desde el
+            panel de personalización de la barra superior — esta página no tiene selector
+            propio, reutiliza el de la aplicación.
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3 col-lg-2 d-none d-md-block">
+          <nav class="ds-gallery-toc" aria-label="Contenido de la galería">
+            <ul class="nav flex-column">
+              <li class="nav-item"><a class="nav-link" href="#gs-colores">Colores</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-tipografia">Tipografía</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-espaciado">Espaciado</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-radios">Radios</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-sombras">Sombras</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-botones">Botones</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-insignias">Insignias</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-campos">Campos</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-tarjetas">Tarjetas</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-tabs">Tabs</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-tablas">Tablas</a></li>
+              <li class="nav-item"><a class="nav-link" href="#gs-modales">Modales</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="col-md-9 col-lg-10">
+
+          <div id="gs-colores" class="ds-gallery-section">
+            <h2>Colores</h2>
+            <p class="text-muted">Escala neutra, identidad y colores semánticos. Los valores se leen en runtime de <code>styles.css</code>.</p>
+            <div class="row" id="ds-gallery-colores"></div>
+          </div>
+
+          <div id="gs-tipografia" class="ds-gallery-section">
+            <h2>Tipografía</h2>
+            <div class="ds-gallery-demo">
+              <p style="font-size:var(--font-size-3xl); font-weight:var(--font-weight-black); margin:0;">Aa — 3xl / black <code class="text-muted small">--font-size-3xl</code></p>
+              <p style="font-size:var(--font-size-2xl); font-weight:var(--font-weight-bold); margin:0;">Aa — 2xl / bold <code class="text-muted small">--font-size-2xl</code></p>
+              <p style="font-size:var(--font-size-xl); font-weight:var(--font-weight-bold); margin:0;">Aa — xl / bold <code class="text-muted small">--font-size-xl</code></p>
+              <p style="font-size:var(--font-size-lg); font-weight:var(--font-weight-semibold); margin:0;">Aa — lg / semibold <code class="text-muted small">--font-size-lg</code></p>
+              <p style="font-size:var(--font-size-base); margin:0;">Aa — base / normal <code class="text-muted small">--font-size-base</code></p>
+              <p style="font-size:var(--font-size-sm); margin:0;">Aa — sm / normal <code class="text-muted small">--font-size-sm</code></p>
+              <p style="font-size:var(--font-size-xs); letter-spacing:var(--letter-spacing-wide); text-transform:uppercase; margin:0;">Aa — xs / wide <code class="text-muted small">--font-size-xs</code></p>
+            </div>
+          </div>
+
+          <div id="gs-espaciado" class="ds-gallery-section">
+            <h2>Espaciado</h2>
+            <div class="ds-gallery-demo" id="ds-gallery-espaciado"></div>
+          </div>
+
+          <div id="gs-radios" class="ds-gallery-section">
+            <h2>Radios</h2>
+            <div class="ds-gallery-demo d-flex flex-wrap" id="ds-gallery-radios"></div>
+          </div>
+
+          <div id="gs-sombras" class="ds-gallery-section">
+            <h2>Sombras</h2>
+            <div class="ds-gallery-demo d-flex flex-wrap" id="ds-gallery-sombras" style="background:var(--surface-2); gap: var(--space-5);"></div>
+          </div>
+
+          <div id="gs-botones" class="ds-gallery-section">
+            <h2>Botones</h2>
+            <div class="ds-gallery-demo mb-3">
+              <button type="button" class="ds-btn-primary">ds-btn-primary</button>
+              <button type="button" class="ds-btn-primary" disabled>disabled</button>
+              <button type="button" class="ds-btn-export"><i class="fas fa-file-export"></i> ds-btn-export</button>
+              <button type="button" class="btn btn-primary">btn-primary</button>
+              <button type="button" class="btn btn-secondary">btn-secondary</button>
+              <button type="button" class="btn btn-outline-secondary">btn-outline-secondary</button>
+              <button type="button" class="btn btn-light">btn-light</button>
+              <button type="button" class="btn btn-danger">btn-danger</button>
+              <button type="button" class="btn btn-link">btn-link</button>
+            </div>
+            <div class="ds-gallery-demo mb-3">
+              <button type="button" class="btn btn-primary btn-sm">btn-sm</button>
+              <button type="button" class="btn btn-primary btn-xs">btn-xs</button>
+              <button type="button" class="btn btn-primary is-loading">is-loading</button>
+            </div>
+            <div class="ds-gallery-demo">
+              <button type="button" class="ds-action-btn" aria-label="Ver"><i class="fas fa-eye"></i></button>
+              <button type="button" class="ds-action-btn" aria-label="Editar"><i class="fas fa-pencil-alt"></i></button>
+              <button type="button" class="ds-action-btn" aria-label="Eliminar"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+
+          <div id="gs-insignias" class="ds-gallery-section">
+            <h2>Insignias</h2>
+            <div class="ds-gallery-demo">
+              <span class="badge badge-primary">badge-primary</span>
+              <span class="badge badge-secondary">badge-secondary</span>
+              <span class="badge badge-success">badge-success</span>
+              <span class="badge badge-warning text-dark">badge-warning</span>
+              <span class="badge badge-danger">badge-danger</span>
+              <span class="badge badge-info">badge-info</span>
+              <span class="badge badge-light border text-muted">badge-light</span>
+              <span class="ds-badge">ds-badge</span>
+            </div>
+          </div>
+
+          <div id="gs-campos" class="ds-gallery-section">
+            <h2>Campos</h2>
+            <div class="ds-gallery-demo">
+              <form onsubmit="return false;">
+                <div class="form-row">
+                  <div class="form-group col-md-4">
+                    <label for="gs-campo-texto">Campo de texto</label>
+                    <input type="text" class="form-control" id="gs-campo-texto" placeholder="Título del documento">
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="gs-campo-select">Select</label>
+                    <select class="form-control" id="gs-campo-select">
+                      <option>Archivo</option>
+                      <option>RRHH</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="gs-campo-fecha">Fecha</label>
+                    <input type="date" class="form-control" id="gs-campo-fecha">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="gs-campo-invalido">Campo con error</label>
+                  <input type="text" class="form-control is-invalid" id="gs-campo-invalido" value="valor incompleto">
+                  <div class="invalid-feedback d-block">Este campo es obligatorio.</div>
+                </div>
+                <div class="form-group">
+                  <label for="gs-campo-disabled">Campo deshabilitado</label>
+                  <input type="text" class="form-control" id="gs-campo-disabled" value="No editable" disabled>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div id="gs-tarjetas" class="ds-gallery-section">
+            <h2>Tarjetas</h2>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="card card-outline ds-chart-card shadow-sm">
+                  <div class="card-header p-2 d-flex justify-content-between align-items-center">
+                    <span class="font-weight-bold small">card-outline</span>
+                    <span class="card-tools"><span class="badge badge-light border text-muted small">ejemplo</span></span>
+                  </div>
+                  <div class="card-body">
+                    <p class="text-muted small mb-0">Cuerpo de tarjeta con encabezado y herramienta.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title">Tarjeta simple</h5>
+                    <p class="card-text text-muted small">Sin <code>card-outline</code>, solo <code>card</code> + <code>shadow-sm</code>.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-file-alt"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">info-box</span>
+                    <span class="info-box-number">1.234</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="gs-tabs" class="ds-gallery-section">
+            <h2>Tabs</h2>
+            <div class="card">
+              <div class="card-header p-2 bg-light">
+                <ul class="nav nav-pills" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <a id="gs-tab-1" class="nav-link active" data-toggle="pill" href="#gs-pane-1" role="tab" aria-selected="true" aria-controls="gs-pane-1">Pestaña activa</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a id="gs-tab-2" class="nav-link" data-toggle="pill" href="#gs-pane-2" role="tab" aria-selected="false" aria-controls="gs-pane-2">Otra pestaña</a>
+                  </li>
+                  <li class="ds-tab-sep" role="presentation"></li>
+                  <li class="nav-item" role="presentation">
+                    <a id="gs-tab-3" class="nav-link" data-toggle="pill" href="#gs-pane-3" role="tab" aria-selected="false" aria-controls="gs-pane-3">Tras separador</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="card-body tab-content">
+                <div class="tab-pane fade show active" id="gs-pane-1" role="tabpanel" aria-labelledby="gs-tab-1">Contenido de la pestaña activa.</div>
+                <div class="tab-pane fade" id="gs-pane-2" role="tabpanel" aria-labelledby="gs-tab-2">Contenido de la segunda pestaña.</div>
+                <div class="tab-pane fade" id="gs-pane-3" role="tabpanel" aria-labelledby="gs-tab-3">Contenido tras el separador <code>.ds-tab-sep</code>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="gs-tablas" class="ds-gallery-section">
+            <h2>Tablas</h2>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Documento</th>
+                    <th>Tipo</th>
+                    <th class="ds-hide-sm">Fecha</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Acta de consejo 2024-01</td>
+                    <td><span class="badge badge-light border text-muted">Acta</span></td>
+                    <td class="ds-hide-sm">04/01/2024</td>
+                    <td><span class="badge badge-success">Vigente</span></td>
+                  </tr>
+                  <tr>
+                    <td>Contrato de servicio</td>
+                    <td><span class="badge badge-light border text-muted">Contrato</span></td>
+                    <td class="ds-hide-sm">11/06/2023</td>
+                    <td><span class="badge badge-danger">Vencido</span></td>
+                  </tr>
+                  <tr>
+                    <td>Informe de gestión</td>
+                    <td><span class="badge badge-light border text-muted">Informe</span></td>
+                    <td class="ds-hide-sm">30/03/2025</td>
+                    <td><span class="badge badge-warning text-dark">Por vencer</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="gs-modales" class="ds-gallery-section">
+            <h2>Modales</h2>
+            <div class="ds-gallery-demo">
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#gs-modal-demo">Abrir modal</button>
+            </div>
+            <div class="modal fade" id="gs-modal-demo" tabindex="-1" role="dialog" aria-labelledby="gs-modal-demo-title" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="gs-modal-demo-title">Modal de ejemplo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Marcado real de <code>.modal.fade</code>, disparado por Bootstrap.</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Guardar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/static/app-core.js"></script>
+  <script src="/static/app-choices.js"></script>
+  <script src="/static/app-theme.js"></script>
+  <script src="/static/app.js"></script>
+  <script>
+    const GS_COLOR_GROUPS = [
+      { titulo: "Escala neutra", tokens: ["--gray-50","--gray-100","--gray-200","--gray-300","--gray-400","--gray-500","--gray-600","--gray-700","--gray-800","--gray-900"] },
+      { titulo: "Identidad y enlace", tokens: ["--c-brand-700","--c-brand-800","--c-link-600","--c-link-700"] },
+      { titulo: "Semánticos", tokens: ["--c-green-600","--c-amber-500","--c-red-600","--c-cyan-600"] },
+      { titulo: "Superficies y texto", tokens: ["--surface-0","--surface-1","--surface-2","--surface-3","--text","--text-muted","--border"] },
+    ];
+    const GS_SPACE_TOKENS = ["--space-1","--space-2","--space-3","--space-4","--space-5","--space-6","--space-7","--space-8"];
+    const GS_RADIUS_TOKENS = ["--radius-xs","--radius-sm","--radius-md","--radius-lg","--radius-pill"];
+    const GS_SHADOW_TOKENS = ["--shadow-sm","--shadow-md","--shadow-lg","--shadow-xl","--shadow-2xl"];
+
+    function gsToken(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function gsRenderColores() {
+      const wrap = document.getElementById("ds-gallery-colores");
+      if (!wrap) return;
+      wrap.innerHTML = GS_COLOR_GROUPS.map(grupo => `
+        <div class="col-md-6 col-lg-3 mb-3">
+          <h6 class="text-muted">${escHtml(grupo.titulo)}</h6>
+          <div class="row no-gutters">
+            ${grupo.tokens.map(t => `
+              <div class="col-6 p-1">
+                <div class="ds-swatch">
+                  <div class="ds-swatch-color" style="background:var(${t});"></div>
+                  <div class="ds-swatch-label">
+                    <code>${t}</code><br><code>${escHtml(gsToken(t) || "—")}</code>
+                  </div>
+                </div>
+              </div>`).join("")}
+          </div>
+        </div>`).join("");
+    }
+
+    function gsRenderEspaciado() {
+      const wrap = document.getElementById("ds-gallery-espaciado");
+      if (!wrap) return;
+      wrap.innerHTML = GS_SPACE_TOKENS.map(t => `
+        <div class="ds-space-row">
+          <code>${t}</code>
+          <div class="ds-space-bar" style="width:var(${t}); height:1rem;"></div>
+          <span class="text-muted small">${escHtml(gsToken(t) || "—")}</span>
+        </div>`).join("");
+    }
+
+    function gsRenderRadios() {
+      const wrap = document.getElementById("ds-gallery-radios");
+      if (!wrap) return;
+      wrap.innerHTML = GS_RADIUS_TOKENS.map(t => `
+        <div class="text-center mr-4 mb-3">
+          <div class="ds-radius-demo" style="border-radius:var(${t});">${t}</div>
+          <code class="small text-muted">${escHtml(gsToken(t) || "—")}</code>
+        </div>`).join("");
+    }
+
+    function gsRenderSombras() {
+      const wrap = document.getElementById("ds-gallery-sombras");
+      if (!wrap) return;
+      wrap.innerHTML = GS_SHADOW_TOKENS.map(t => `
+        <div class="text-center mb-3">
+          <div class="ds-shadow-demo" style="box-shadow:var(${t}); border-radius:var(--radius-md);">${t}</div>
+        </div>`).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      gsRenderColores();
+      gsRenderEspaciado();
+      gsRenderRadios();
+      gsRenderSombras();
+      document.addEventListener("ds:theme-change", () => {
+        gsRenderColores();
+        gsRenderEspaciado();
+        gsRenderRadios();
+        gsRenderSombras();
+      });
+    });
+  </script>
+</body>
+</html>
