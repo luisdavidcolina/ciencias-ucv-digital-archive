@@ -1623,3 +1623,58 @@ SD-215 en zona responsive de paneles admin"); ahí están mis reglas de
 `:target`, el `translateY(-100%)` del enlace de salto, el `@media print`
 de la página compartida y el `max-width: 70ch`. No reparo el historial,
 según la regla 10 — marco mi reserva como terminada con `7de4937`.
+
+## L9-estilos (agente-l9-estilos)
+
+Cubrí, dentro de mi zona (PANEL DE PERSONALIZACIÓN / ADMIN PANEL compacto /
+IMPORT BAR / drop zone / densidad / animaciones): **SD-179** (prioridad —
+`body.ds-no-anim` pausaba/apagaba las animaciones infinitas en vez de
+acelerarlas a frecuencia de parpadeo; `.ds-status-revision` y `.ds-skeleton`
+quedan explícitamente detenidas con `animation-play-state:paused`/`none`),
+**SD-178** (`ds-pulse-warning` pasa de `infinite` a 3 ciclos), **SD-024**
+(`.ds-dropzone-compact.has-file i` usa `var(--color-success)` en vez de
+`#28a745`), **SD-092/143** (drop zone compacta tokenizada, con estados nuevos
+`.has-error`/`.is-uploading`), **SD-103/104/105** (densidad como
+`--density-scale` multiplicando los tokens `--space-*` de L0, tercer paso
+`ds-density-cozy` listo para cuando `app-theme.js` lo active, e interlineado
+propio del paso compacto), **SD-109/112/148/174** (`.ds-dark-btn`,
+`.ds-font-btn`, `.ds-reset-btn` y `.ds-ff-btn` comparten ahora radio, azul de
+activo y transición explícita; los cuatro tienen `:disabled`/
+`[aria-disabled="true"]`) y **SD-162** (scrollbar propio en `.ds-notif-list`,
+uno de los cinco contenedores que no tenían ninguno). **SD-215**: borré
+`.ds-tbl-btn` (cero apariciones en HTML/JS del repositorio).
+
+Quedan sin cerrar, fuera de mi zona:
+- **SD-104 (mitad JS)**: el tercer paso de densidad (`ds-density-cozy`) sólo
+  existe en CSS. Falta el botón/estado en `app-theme.js` (carril H2-app-js)
+  que le añada o quite la clase al `body`.
+- **SD-130**: `.ds-admin-tabs` sigue definida dos veces — la mía (en mi zona,
+  oculta la barra de scroll con degradado de aviso vía `::after`, ya
+  existente en otra zona) y la de la zona "1636-2005" (línea ~2160 en el
+  HEAD actual: `scrollbar-width` visible, radio y azul de activo distintos).
+  Gana la mía en cascada por orden de aparición, pero no la toco por ser de
+  otra zona; si el carril dueño de esa otra definición la retira, no haría
+  falta nada más de mi lado.
+- **SD-109 (componente de botón completo)**: sólo unifiqué las cuatro
+  variantes que vivían dentro de mi zona (SD-148). El resto de los trece
+  botones sin base común que lista la ficha vive en L2/L6/L8, fuera de mi
+  archivo.
+
+**quién lo pide**: agente-l9-estilos (L9-estilos)
+
+## Carrera de git — agente-l9-estilos
+
+Comprobé `git diff --cached --stat` antes de comitear: no tenía nada en
+stage ajeno. Comité con `git commit app/static/styles.css -m ...` (todo el
+archivo, porque es compartido por 15 lotes L1-L15 a la vez, igual que hicieron
+L10/L11/L12/L13/L15 antes que yo) y el resultado, `7194678`, sólo trae "1
+insertion, 1 deletion" — mi contenido real ya había sido absorbido por el
+commit anterior en la cola, `6ca0fc7` ("L3-estilos..."), de otro agente
+trabajando sobre el mismo árbol en paralelo. Verificado con
+`grep -n "SD-179 (prioridad" app/static/styles.css` y el resto de mis
+marcadores tras `6ca0fc7`: todos presentes en HEAD, y
+`python -m pytest app/tests -q` en 713/0. No reparo el historial — marco mi
+reserva como terminada con `6ca0fc7`, según el mismo patrón documentado por
+L7/L10/L11/L12/L13 arriba.
+
+**quién lo pide**: agente-l9-estilos (L9-estilos)
