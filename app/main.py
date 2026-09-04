@@ -103,10 +103,24 @@ Universidad Central de Venezuela.
 )
 
 # CORS
+# IN-034: `allow_origins=["*"]` junto con `allow_credentials=True` es
+# contradictorio (el navegador rechaza credenciales con origen comodín). Sin
+# una lista propia en `core/config.py` (fuera de este carril, ver
+# docs/auditoria/_BUZON.md), se resuelve aquí mismo desde el entorno: con
+# `ALLOWED_ORIGINS` (orígenes separados por coma) se permite credenciales;
+# sin ella, comodín pero sin credenciales.
+_allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
+if _allowed_origins_env:
+    _cors_origins = [o.strip() for o in _allowed_origins_env.split(",") if o.strip()]
+    _cors_credentials = True
+else:
+    _cors_origins = ["*"]
+    _cors_credentials = False
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
