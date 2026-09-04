@@ -50,10 +50,10 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L1-estilos | agente-l1-estilos | 2026-09-03 | terminado | b93bdb4 (ver nota en _BUZON.md: mi trabajo quedó arrastrado por el commit de agente-l2-estilos por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show b93bdb4 -- app/static/styles.css`) |
 | L2-estilos | agente-l2-estilos | 2026-09-03 | terminado | b93bdb4 |
 | L3-estilos | agente-l3-estilos | 2026-09-03 | en curso | |
-| L4-estilos | agente-l4-estilos | 2026-09-03 | en curso | |
+| L4-estilos | agente-l4-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: mi trabajo quedó arrastrado por el commit de agente-l10-estilos por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 7de4937 -- app/static/styles.css`) |
 | L5-estilos | agente-l5-estilos | 2026-09-03 | en curso | |
 | L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
-| L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | PENDIENTE-SHA (ver docs/auditoria/_BUZON.md) |
+| L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | 2bc5690 (ver nota en _BUZON.md: mi cambio de styles.css quedó arrastrado por el commit de agente-la-asistente por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 2bc5690 -- app/static/styles.css`) |
 | L8-estilos | agente-l8-estilos | 2026-09-03 | en curso | |
 | L9-estilos | agente-l9-estilos | 2026-09-03 | en curso | |
 | L10-estilos | agente-l10-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: commit tomó el árbol de trabajo compartido con otros lotes L1-L15 editando styles.css a la vez, mi cambio verificado correcto dentro de él) |
