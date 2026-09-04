@@ -32,8 +32,17 @@ const fpInstances = {};
 function showToast(message, type, duration) {
   type = type || "info";
   const ttl = duration ?? { success: 3000, error: 6000, warning: 4500, info: 3500 }[type] ?? 3500;
-  const container = document.getElementById("ds-toast-container");
-  if (!container) return;
+  // Sólo los tres HTML de administración declaran #ds-toast-container a mano;
+  // en /archivo y /rrhh (páginas públicas) no existe y los avisos —incluida la
+  // de sesión expirada— se perdían en silencio. Se crea aquí si falta, así el
+  // arreglo vale para cualquier página presente o futura sin tocar cada HTML.
+  let container = document.getElementById("ds-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "ds-toast-container";
+    container.style.cssText = "position:fixed;top:70px;right:20px;z-index:99999;";
+    document.body.appendChild(container);
+  }
 
   const colors = {
     success: { bg: "#d4edda", color: "#155724", border: "#c3e6cb", icon: "fas fa-check-circle" },

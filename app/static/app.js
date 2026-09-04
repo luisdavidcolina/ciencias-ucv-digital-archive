@@ -186,6 +186,16 @@ function switchTab(tabId) {
   // cabecera. Entrando por "monitor" esos KPIs se quedaban en cero.
   else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("stats"); }
   else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("stats"); }
+  // admin_system.html es una página standalone de una sola sección, sin los
+  // cuatro ids de arriba: su única ".app-tab-section" no tenía rama que la
+  // volviera a mostrar tras el ocultamiento general tres líneas más arriba, así
+  // que /admin/sistema se quedaba en blanco (barra superior y nada más). No
+  // tiene id propio en el HTML — es la única sección de esa página, así que se
+  // localiza por clase.
+  else if (tabId === "admin-sistema") {
+    const tabAdminSistema = document.querySelector(".app-tab-section");
+    if (tabAdminSistema) tabAdminSistema.style.display = "block";
+  }
 }
 
 function openSidebar() {
