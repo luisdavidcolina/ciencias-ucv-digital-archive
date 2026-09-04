@@ -64,7 +64,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L15-estilos | agente-l15-estilos | 2026-09-03 | en curso | |
 | LH-paginas | agente-lh-paginas | 2026-09-03 | en curso | |
 | LA-asistente | agente-la-asistente | 2026-09-03 | en curso | |
-| LW-www | agente-lw-www | 2026-09-03 | en curso | |
+| LW-www | — | 2026-09-03 | terminado | ya resuelto en 9244e45 (F1-paginas-estaticas borró www/styles.css) |
 
 ## Cómo se escribe una fila
 
