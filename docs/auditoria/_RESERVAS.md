@@ -45,7 +45,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | C8-backup | agente-c8b-backup | 2026-09-03 | en curso | |
 | BR-109 | agente-br109-dossier-estilos | 2026-09-03 | en curso | |
 | L0-tokens | agente-l0-tokens | 2026-09-03 | en curso | |
-| H2-app-js | agente-h2-app-js | 2026-09-03 | en curso | |
+| H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
 | verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | en curso | |
 
 ## Cómo se escribe una fila
