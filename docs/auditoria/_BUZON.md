@@ -2457,3 +2457,47 @@ No resueltos, fuera de `app/models.py`:
   - **SD-235** (unificar el informe PDF de RRHH con la impresión del
     navegador): `hr.py` no es de este carril — anotado aquí para quien tenga
     ese archivo, sin cambios de mi parte.
+
+- `agente-lx-reestructuracion` (carril LX, SD-187/206/211/212/213/214):
+  - Antes de tocar nada verifiqué actividad concurrente sobre `styles.css`:
+    `git log` no mostraba commits recientes fuera de los ya cerrados, y de
+    las filas "en curso" de `_RESERVAS.md` sólo dos eran reales — la mía y
+    `L6-estilos` de `agente-l6-estilos`, que resultó ser una fila vieja sin
+    cerrar de un trabajo retomado y ya terminado por `agente-l6b-estilos-focused`
+    (95fc341, el commit más reciente sobre el archivo). Las otras tres
+    coincidencias de "en curso" están dentro de la sección de ejemplo "Cómo
+    se escribe una fila", no son datos reales. Con eso confirmado, procedí.
+  - **SD-187 — hecho** (`ee18da7`): Bootstrap pasa de `<link>` en cada HTML a
+    `@import url(...) layer(bootstrap)` al principio de `styles.css`, y el
+    resto del archivo queda envuelto en `@layer app`. Con el orden de capas
+    fijado por la cascada, las reglas de `app` le ganan a Bootstrap por
+    orden de capa, no por especificidad ni por que `styles.css` se enlace
+    después en el `<head>` — que es justo la base que SD-211 necesita para
+    poder retirar `!important` sin que la especificidad de Bootstrap vuelva a
+    ganar. Verificado con `pytest app/tests -q` (755/755, igual que antes del
+    cambio) y `test_visual.py` con Playwright (12/12: las 7 páginas públicas
+    a 390/768/1440px, claro y oscuro, sin desborde horizontal ni error de
+    consola) — es decir, la maquetación de Bootstrap (grid, botones, tarjetas)
+    sigue rindiendo igual con la hoja importada en capa que con el `<link>`
+    suelto que tenía antes.
+  - **SD-211, SD-212, SD-213, SD-206, SD-214 — no hechos, dejados para otra
+    pasada.** Motivo: con `@layer` puesto, retirar los 620 `!important` que
+    quedan en el archivo (SD-211) exige revisar cada uno para confirmar que
+    el nuevo orden de capas realmente cubre el caso que ese `!important`
+    resolvía a mano — algunos pisan Bootstrap (ya cubierto por la capa),
+    pero otros pisan reglas *dentro* de la propia capa `app` que hoy sólo se
+    ordenan por accidente de dónde cayó cada lote (L1-L15) en el archivo, no
+    por ninguna jerarquía real; retirar el `!important` ahí sin antes hacer
+    SD-212 (reordenar en capas internas: reseteo, base, componentes, temas,
+    utilidades) puede invertir silenciosamente qué regla gana. Es exactamente
+    el riesgo que el propio plan describe ("va con el archivo quieto", "cada
+    paso lo permite el anterior") y para hacerlo bien hacen falta muchos
+    commits pequeños con verificación visual entre cada bloque de reglas —
+    más presupuesto del que tenía esta pasada. SD-213 (partir en módulos)
+    depende de que SD-212 esté hecho primero, así que tampoco tenía sentido
+    adelantarlo; y SD-206/SD-214 son limpiezas menores que conviene hacer
+    junto con la reordenación, no antes, para no tocar las mismas líneas dos
+    veces. Dejo el archivo con la capa puesta y **sin nadie más
+    editándolo activamente** (ver arriba) para que la siguiente pasada de LX
+    pueda continuar por SD-211 con el terreno ya preparado, sin tener que
+    rehacer este paso.
