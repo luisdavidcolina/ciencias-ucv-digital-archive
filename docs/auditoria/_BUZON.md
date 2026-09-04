@@ -338,14 +338,16 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       `showProgress`/`updateProgress` de `admin-ui.js` (tiene su UI dedicada de subida), pero
       cumple el objetivo de la ficha: progreso real en vez de una barra indeterminada.
 
-- [ ] `OA-182` · **archivo**: `app/static/admin-edit.js` (y análogos en `admin-edit-hr.js`,
-      `admin.js`) · **carril dueño**: B8-admin-edit-archivo / B9-admin-edit-rrhh / B4-admin-tabs
-      **quién lo pide**: agente-b6-admin-ui (B6-admin-ui)
-      **qué hace falta**: el manejador global de Escape en `admin-ui.js` ya confirma antes de
-      cerrar si el modal en pantalla lleva `data-dirty="true"`. Falta que cada formulario marque
-      esa propiedad (`modal.dataset.dirty = "true"`) en el primer `input`/`change` y la limpie
-      (`"false"`) al guardar con éxito, para que "Cancelar", clic fuera y Escape avisen de verdad
-      de los cambios sin guardar.
+- [x] `OA-182` (parte de `admin-edit.js`) · resuelto por agente-sweep2-admin-monitor-js
+      (SWEEP2-admin-monitor-js): verificado que `editArchivoModal` ya lleva el manejador
+      completo — `_wireEditDocModalFocusAndDirty()` marca `_editDocDirty` en el primer
+      `input`/`change` del formulario (línea ~39), confirma con `confirmModal` antes de cerrar
+      por `hide.bs.modal` si hay cambios sin guardar, y limpia la marca al guardar con éxito en
+      `handleSaveEditDoc()`. Esto ya estaba resuelto antes de esta pasada (no de este carril,
+      probablemente B8-admin-edit-archivo en su tanda), sólo se confirma y se marca la ficha.
+      Queda pendiente el mismo patrón en `admin-edit-hr.js`/`admin.js`, fuera de mi zona
+      (SWEEP2-admin-monitor-js sólo declara `admin-monitor.js`, `admin-stats.js`,
+      `admin-edit.js`).
 
 - [ ] `OR-207` · **archivo**: `app/routes/admin/deps.py`, `app/routes/admin/users.py`,
       `app/main.py` · **carril dueño**: ninguno abierto todavía (fichas `[CHOCA]`)
@@ -526,12 +528,14 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       en vez de escribir `this.style.borderColor=…` a mano. Falta: quitar esos atributos
       en línea del HTML y definir las clases en `styles.css` (hoy no existen, así que
       visualmente la zona de arrastre no cambia de color hasta que se añadan).
-- [ ] `OA-027` (parte del monitor) · **archivo**: `app/static/admin-monitor.js`
-      **carril dueño**: B5-admin-monitor
-      **qué hace falta**: estado de error visible y reintento en la tabla cuando
-      `loadMonitorTable()` falla (hoy sólo `console.error`), y actualización optimista de
-      la fila recién editada en vez de depender de una recarga completa que puede fallar
-      en silencio.
+- [x] `OA-027` (parte del monitor) · resuelto por agente-sweep2-admin-monitor-js
+      (SWEEP2-admin-monitor-js): el estado de error con reintento ya estaba (`renderMonitorTable`
+      pinta `state.adminTable.lastError` con botón «Reintentar» — de una pasada anterior, ver
+      OR-133 en este mismo buzón). Lo que faltaba: `updateMonitorRowOptimistic(id, patch)` en
+      `admin-monitor.js`, que actualiza sólo la fila editada en `state.adminTable.results` y
+      repinta sin pedir la página entera; `handleSaveEditDoc()` en `admin-edit.js` la llama tras
+      el `PUT` exitoso en vez de `loadMonitorTable()` (con respaldo a la recarga completa si la
+      función no existe).
 
 **quién lo pide**: agente-b8-admin-edit-archivo (B8-admin-edit-archivo)
 
@@ -661,6 +665,11 @@ mío:
       **falta**: `admin-monitor.js`/`hr.js` deben aplicar la clase en vez del `style` inline que
       arma `getStatusColor()`, y `test_contraste.py` sumar el caso — ninguno de los dos es
       `styles.css`.
+      **hecho, lado `admin-monitor.js` (agente-sweep2-admin-monitor-js, SWEEP2-admin-monitor-js)**:
+      el badge de estado laboral del monitor de RRHH ya usa `class="badge ${statusCls}"`
+      (mapa `Activo→ds-status-activo`, etc., por defecto `ds-status-otro`) en vez de
+      `style="background-color:${getStatusColor(f.estado)}"`. Queda `hr.js` (buscador público),
+      fuera de mi carril, y `test_contraste.py` sin el caso nuevo, que tampoco es de mi archivo.
 
 - [x] `OR-237` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (RRHH)
       ahora selecciona `COALESCE(e.foto_url, '') AS foto_url`, así que el monitor ya puede
@@ -730,13 +739,20 @@ mío:
       primero el id sufijado y caer al id sin sufijo si no existe, así que el cambio de HTML es
       seguro de aplicar en cualquier momento sin coordinar de nuevo conmigo.
 
-- [ ] `OA-106` / `OR-131` (persistencia de filtros en la URL) · **archivo**:
-      `app/static/admin-monitor.js` · **carril dueño**: B5-admin-monitor
-      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
-      **qué hace falta**: en mi carril evité que `loadAdminTab("monitor")` reinicie
-      `state.adminTable.page` cuando se re-entra a una pestaña que ya estaba activa, pero la
-      persistencia real de filtros/página en la URL y su restauración vive en
-      `admin-monitor.js`, fuera de mi carril.
+- [x] `OA-106` / `OR-131` (persistencia de filtros en la URL) · resuelto por
+      agente-sweep2-admin-monitor-js (SWEEP2-admin-monitor-js): `admin-monitor.js` ahora lee y
+      escribe la búsqueda, los filtros (tipo/persona/estado) y la página en la query string, con
+      claves por sufijo de módulo (`m_archivo_q`, `m_rrhh_page`, …) para que Archivo y RRHH no se
+      pisen — `_updateMonitorURL()` usa `history.replaceState` al final de cada
+      `loadMonitorTable()` exitosa. `_restoreMonitorFiltersFromURL()` repuebla el buscador y el
+      `<select>` de estado directamente al primer render de la pestaña; tipo/persona son
+      `<select>` que se repueblan con opciones que no existen todavía en esa primera carga
+      (OA-029), así que el valor de la URL se guarda como pendiente y se aplica en cuanto las
+      opciones están listas, con una única recarga adicional si hacía falta cambiar el filtro
+      real. Restauración de "persona" en Archivo tiene un límite conocido: sus opciones salen de
+      los autores de la página ya cargada, así que un valor de la URL que no esté entre los
+      autores de esa primera página no podrá seleccionarse hasta que aparezca en alguna carga
+      posterior — mismo límite que ya tenía el propio `<select>` sin esta ficha.
 
 - [x] `OR-223` (patrón de flechas entre pestañas) · **archivo**: `app/static/admin-ui.js` ·
       verificado por agente-sweep-admin-js (SWEEP-admin-js): ya resuelto antes de esta pasada —
@@ -2031,6 +2047,33 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       SI-123, SI-125) exige cambios de comportamiento mayores (aria-live incremental,
       colas, Markdown, copiar/exportar, decisión de producto sobre dónde vive la burbuja) —
       quedan sin tocar.
+      **Más resuelto (agente-sweep2-misc, SWEEP2-misc)**: SI-113 (el input no se
+      deshabilitaba mientras cargaba) — `marcarCargando()` deshabilita `#ia-input` y el
+      botón de enviar, con `aria-busy`, entre el envío y la respuesta; SI-115 (nombre de
+      archivo escapado dos veces) — `sistema()` ya no pre-escapa, `formatear()` escapa una
+      sola vez al pintar; SI-116 (subir un archivo disparaba un turno pago solo) — ahora se
+      deja un mensaje de sistema con un botón «Preguntar por este archivo»
+      (`.ia-sug[data-sugerencia]`) en vez de llamar a `enviar()` automáticamente; SI-117 (la
+      redirección de `ir_a` ocurría sola, sin poder cancelarse) — el `setTimeout` que
+      navegaba solo se quitó; ahora se pinta un botón «Ir a la página» (`.ia-ir`) y decide la
+      persona; SI-119 (no se podía copiar ni exportar) — botón de copiar por mensaje
+      (`.ia-copiar`, `navigator.clipboard`) y botón «Descargar conversación» en la cabecera
+      del panel (`#ia-descargar`, genera un `.txt`); SI-122 (un fallo de red ocultaba la
+      burbuja sin explicación) — `comprobarDisponibilidad()` reintenta una vez a los 2s antes
+      de rendirse, y si sigue fallando la burbuja queda visible con un aviso «No se pudo
+      conectar con el asistente» en vez de desaparecer; SI-125 (traza con el nombre interno
+      de la función) — `NOMBRES_HERRAMIENTA` traduce cada herramienta a una frase legible
+      («buscó en el Archivo», «abrió la ficha de un documento»…), tomada de los 15 nombres
+      registrados en `app/core/ai_tools.py` (no es mi archivo, sólo lo leí para la lista).
+      Quedan sin tocar: SI-111 (M, `aria-live`/`role="log"` incremental en vez de
+      reconstruir `#ia-mensajes` entero — cambio de arquitectura del render, arriesgado sin
+      poder verlo en pantalla real), SI-118 (no localizado con ese número exacto en la tabla
+      de tickets al momento de esta pasada), SI-120 (M, subconjunto de Markdown — depende de
+      decidir qué etiquetas permitir y toca también `ai-widget.css`), SI-121 (necesita
+      `app/routes/ai.py`, fuera de mi archivo) y SI-123 (decisión de producto: si la burbuja
+      va en `ayuda.html`/`compartido.html`/`login.html`, no una corrección de código).
+      `python -m pytest app/tests -q` en verde antes y después; `node --check
+      app/static/ai-widget.js` en verde.
 - [ ] `SI-157`–`SI-159`, `SI-162`–`SI-165`, `SI-167`–`SI-170` · **archivo**: `ayuda.html`,
       `investigacion.html`, `compartido.html` · **carril dueño**: exclusivo de esas tres
       páginas.
