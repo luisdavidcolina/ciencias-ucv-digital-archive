@@ -2975,3 +2975,33 @@ sin tocar HTML/JS/backend de otro carril. No hice cambios de código.
 empezar).
 
 **quién lo pide/resuelve**: agente-sweep2-styles (SWEEP2-styles)
+
+## SWEEP3-html-js-resto
+
+Tercera ronda del barrido sobre `admin_hr.html`, `admin_archive.html`, `admin_qa.html`,
+`admin-monitor.js`, `admin-stats.js`, `login.html`, `ayuda.html`, `scanner-client.js`,
+`hr.html`, `app-shell.js`, `ai-widget.js`. Las dos rondas anteriores (SWEEP/SWEEP2) ya habían
+cerrado casi todo lo accionable en estos once archivos; esta pasada confirmó 6 fichas más como
+ya resueltas por commits posteriores a cuando se escribió la nota original (marcadas `[x]` con
+detalle: `OA-015`, `OA-055`, `OA-053`, `OR-009`, y el bloque de login `SI-032`–`SI-034`/`SI-038`/
+`SI-049`–`SI-052`/`SI-054`), sin necesidad de tocar código.
+
+No quedó ninguna ficha nueva verdaderamente accionable sólo con estos once archivos. Lo que
+seguía sin marcar y se revisó exige backend o `styles.css`/`app.js`/`admin.js` ajenos:
+`OA-063`/`OA-103`/`OR-117` (bandeja de pendientes y selección por lote — HTML + endpoint de
+`docs.py`), `OR-121` (columna propia en `admin_hr.html`, factible pero exige tocar el `<th>` del
+`thead` justo cuando `test_admin_panels.py` ya está verde — se deja para no arriesgar la suite
+en una pasada de barrido; ver ficha original), `OR-241` (tarjetas en móvil, HTML+CSS), `OR-257`/
+`OR-277` (backend inexistente), `OR-070` (pantalla de jubilaciones próximas en `admin_hr.html`,
+sigue sin marcado — distinta de la tabla de retención vencida que sí existe), `DG-154`
+(`admin_qa.html` nuevo, sin decisión de producto de digitalización), `SD-217`/`SD-201`
+(`admin-stats.js`/`admin-monitor.js`, ya revisadas por SWEEP-admin-js y siguen bloqueadas por
+backend/CSS), `SI-110`–`SI-125`/`SI-157`–`SI-170`/`SI-175`–`SI-179`/`RQ-053` (ya exhaustivamente
+resueltas en parte y documentadas por SWEEP-misc-paginas/SWEEP2-misc/SWEEP2-shell-app, sin
+sobras nuevas). No se tocó `login.js`, `admin.js`, `styles.css` ni backend: ninguno de esos es
+zona de este carril.
+
+`python -m pytest app/tests -q`: 809 passed antes y después (sólo cambios de documentación en
+`_BUZON.md`, ningún archivo de código tocado).
+
+**quién resuelve**: agente-sweep3-html-js-resto (SWEEP3-html-js-resto)
