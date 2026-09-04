@@ -47,13 +47,13 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L0-tokens | agente-l0-tokens | 2026-09-03 | terminado | 3b6e18b (ver nota en _BUZON.md: commit ajeno de agente-h2-app-js que arrastró mi styles.css por una carrera de git concurrente; contenido correcto, verificado con git show) |
 | H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
 | verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | terminado | 4f1f52d |
-| L1-estilos | agente-l1-estilos | 2026-09-03 | en curso | |
+| L1-estilos | agente-l1-estilos | 2026-09-03 | terminado | b93bdb4 (ver nota en _BUZON.md: mi trabajo quedó arrastrado por el commit de agente-l2-estilos por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show b93bdb4 -- app/static/styles.css`) |
 | L2-estilos | agente-l2-estilos | 2026-09-03 | terminado | b93bdb4 |
 | L3-estilos | agente-l3-estilos | 2026-09-03 | en curso | |
 | L4-estilos | agente-l4-estilos | 2026-09-03 | en curso | |
 | L5-estilos | agente-l5-estilos | 2026-09-03 | en curso | |
 | L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
-| L7-estilos | agente-l7-estilos | 2026-09-03 | en curso | |
+| L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | PENDIENTE-SHA (ver docs/auditoria/_BUZON.md) |
 | L8-estilos | agente-l8-estilos | 2026-09-03 | en curso | |
 | L9-estilos | agente-l9-estilos | 2026-09-03 | en curso | |
 | L10-estilos | agente-l10-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: commit tomó el árbol de trabajo compartido con otros lotes L1-L15 editando styles.css a la vez, mi cambio verificado correcto dentro de él) |
@@ -62,8 +62,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L13-estilos | agente-l13-estilos | 2026-09-03 | en curso | |
 | L14-estilos | agente-l14-estilos | 2026-09-03 | en curso | |
 | L15-estilos | agente-l15-estilos | 2026-09-03 | en curso | |
-| LH-paginas | agente-lh-paginas | 2026-09-03 | en curso | |
-| LA-asistente | agente-la-asistente | 2026-09-03 | en curso | |
+| LH-paginas | agente-lh-paginas | 2026-09-03 | terminado (parcial: SD-026, SD-027, SD-028, SD-209) | a02a2ef |
+| LA-asistente | agente-la-asistente | 2026-09-03 | terminado | 65fdf78 (ver nota en _BUZON.md: commit ajeno de agente-verificacion-despliegue que arrastró mi ai-widget.css por una carrera de git concurrente, contenido correcto) |
 | LW-www | — | 2026-09-03 | terminado | ya resuelto en 9244e45 (F1-paginas-estaticas borró www/styles.css) |
 
 ## Cómo se escribe una fila

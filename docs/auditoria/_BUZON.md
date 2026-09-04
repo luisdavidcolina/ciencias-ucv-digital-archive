@@ -1033,3 +1033,159 @@ Si el carril dueño de `ai-widget.css` lo nota, verifiquen con `git show 65fdf78
 app/static/ai-widget.css` que el contenido es el suyo esperado.
 
 **quien lo pide**: agente-verificacion-despliegue (verificacion-despliegue)
+
+## L12-estilos — SD-013, SD-014, SD-188, SD-193, SD-194, SD-195
+
+Lote: tokens `--viz-*`, rejilla KPI, caja de gráfico, separador de pestañas
+(`app/static/styles.css`, bloque «CAPA DE VISUALIZACIÓN DE DATOS» y alrededores).
+
+Hecho, dentro de mi zona:
+- **SD-013**: `--viz-surface/--viz-ink/--viz-ink-muted/--viz-grid` ahora son alias de
+  `var(--surface-1)/var(--text)/var(--text-muted)/var(--border)` (los tokens de L0), en
+  `:root` y en `body.dark-mode`. Verifiqué antes de tocarlo que los valores hex coinciden
+  exactamente en los dos modos (`--surface-1`=`#ffffff`, `--text`=`#212529`=`--gray-900`,
+  y en oscuro `#23272f`/`#e0e4ee`/`#7880a0`/`#2e3342` calzan con los cuatro viz-* de
+  siempre), así que no hay cambio visual. `viz-tokens.js` no se tocó — sigue leyendo los
+  mismos custom properties `--viz-*`.
+- **SD-014**: añadido `body.theme-manila { --viz-surface: #fdf6e3; --viz-grid: #e0d3ad; }`.
+  Verifiqué en el propio `styles.css` que `theme-manila` es el **único** de los once temas
+  que redefine el fondo de `.content-wrapper` (línea ~1603, `#f5ead0`); los otros nueve
+  sólo tocan barra lateral/acento (consistente con SD-033) y dejan la página en blanco, así
+  que ahí `--viz-surface` blanco ya es coherente y no le añadí una redefinición inventada.
+  La ficha SD-014 también nombra `theme-noche` como caso roto, pero no encontré ninguna
+  regla que cambie el fondo de página en ese tema — sólo la barra lateral — así que no le
+  agregué override sin un mal real que corregir. Si el dueño del proyecto confirma que
+  `theme-noche` sí debe llevar su propio `--viz-surface`/`--viz-grid` (por ejemplo si
+  cambia el fondo de página en un cambio futuro), que se añada entonces.
+- **SD-193**: `.ds-kpi-grid` ahora es `container-type: inline-size` (`container-name:
+  ds-kpi-grid`), y el tamaño de cifra de `.ds-kpi-mini h3` que antes decidía por ancho de
+  **pantalla** ahora usa `@container ds-kpi-grid (max-width: 400px)`, es decir por ancho de
+  su propia celda en la rejilla `auto-fit`. El número de columnas que caben (`grid-
+  template-columns`) se dejó como `@media`: eso sí depende del viewport real, no tendría
+  sentido como container query (sería el propio contenedor consultándose a sí mismo).
+- **SD-194**: `.ds-chart-box`/`.ds-chart-box-wide` pasan de tres alturas fijas sin relación
+  entre sí a `aspect-ratio` (con `min-height` como piso) en las tres combinaciones
+  ancho/breakpoint. Las proporciones se calcularon para reproducir aproximadamente la
+  altura anterior sobre el ancho típico de columna en cada punto de corte — no lo verifiqué
+  renderizando (no tenía a mano el arnés de capturas para esta pantalla concreta); si al
+  revisar con capturas el alto de algún gráfico se ve raro en algún punto de corte, es la
+  proporción la que hay que ajustar, no volver a alturas fijas.
+
+No hecho, documentado para que el dueño decida o para quien tenga el archivo/rango que le
+corresponde:
+- **SD-188** (`:has()` para `.ds-admin-card-header.ds-has-overflow`, que hoy activa una
+  clase por JS): no lo apliqué. El estado `.ds-has-overflow` refleja que el contenido tiene
+  scroll horizontal real (`scrollWidth > clientWidth`), que es una medida de layout — no
+  hay selector `:has()` que exprese "este elemento desborda su propio contenedor" (a
+  diferencia de `.ds-card:has(.ds-empty)` o `tr:has(:focus-visible)`, que sí son relaciones
+  de DOM/estado que la ficha cita como resueltas por `:has()`). No toqué la clase ni el JS
+  que la activa.
+- **SD-195** (`subgrid` en `.ds-kpi-grid` para quitar el parche `min-height: 2.4em` de las
+  etiquetas de KPI): la rejilla en sí (`.ds-kpi-grid`, mi zona) no tiene filas que alinear
+  por sí sola — el `min-height: 2.4em` que causa el problema vive en `.ds-kpi-label`, junto
+  con `.ds-kpi-body`/`.ds-kpi-value` (bloque «info-box» más adelante en el archivo, fuera
+  del rango que me tocó — «rejilla KPI, caja de gráfico, separador»). Aplicar `subgrid` de
+  verdad requiere que `.ds-kpi-mini` también sea `display: grid` con filas que hereden de
+  `.ds-kpi-grid`, y esas reglas de `.ds-kpi-mini`/`.ds-kpi-label` no son mías. Si quien
+  tenga ese bloque en su carril quiere resolver SD-195 completa, mi `.ds-kpi-grid` ya
+  puede llevar `grid-template-rows: subgrid` sin problema — falta la otra mitad.
+
+**quien lo pide**: agente-l12-estilos (L12-estilos)
+
+---
+
+## L7-estilos — SD-039, 050, 079, 088, 102, 120, 125, 126, 129, 138, 139, 141, 146, 155,
+## 159, 160, 174, 180, 201, 215, 217, 229, 230, 231, 232, 233, 235
+
+Zona: flatpickr, chips de fecha, esqueleto de carga, marca de navbar, dosier RRHH, toast,
+impresión — desde `.ds-nav-user-badge` hasta `#ds-toast-container` (justo antes del bloque
+"MODO OSCURO"), dentro de mi rango declarado.
+
+Hecho el sub-lote completo de impresión (SD-229 a SD-233), de una sentada: `@media print`
+reescrito de lista negra a lista blanca (oculta toda navegación y todo `position: fixed`,
+en vez de una lista de cinco selectores que ya no existen y dejaba visible la burbuja del
+asistente, los desplegables y los paneles), `print-color-adjust: exact` + modo claro forzado
+para que insignias y estado no se impriman en blanco, `break-inside`/`thead` como grupo de
+cabecera/`orphans`/`widows` para tablas y tarjetas largas, `a[href]::after` con el destino
+del enlace acotado a prosa, y un `@page { size: A4; margin: 18mm 15mm }` con
+`.ds-print-header`/`.ds-print-footer` preparados (ocultos) por si algún HTML llega a añadir
+el marcado de identificación institucional — hoy ninguno lo tiene.
+
+También: toast como componente (`.ds-toast` + variantes semánticas, tope de pila de 5),
+esqueleto con tres variantes de forma (fila/tarjeta/KPI) sobre la única definición que ya
+había en mi zona, `mark` con par claro/oscuro tokenizado, flatpickr y chips de fecha
+reescritos sobre los tokens de L0, un componente `.ds-menu`/`.ds-menu-item` que además
+reactiva `.ds-quick-status-dropdown` (muerta, SD-215) unificándola con
+`.ds-quick-status-menu` (la clase que el marcado real usa, SD-125/SD-126), `:disabled`
+general, y `:first-child`/`:last-child` con radio en la lista del dosier (SD-160).
+
+No toqué `app/routes/hr.py` (SD-235) ni ningún otro archivo fuera de `styles.css`. Lo que
+hace falta en cada uno, para quien tenga esos carriles:
+
+- [ ] `SD-235` · **archivo**: `app/routes/hr.py` (generador del informe PDF de RRHH) ·
+      **carril dueño**: A4-rrhh-backend
+      **qué hace falta**: el informe se genera en servidor por un camino que no pasa por
+      `styles.css`, así que nunca va a coincidir con lo que produce imprimir desde el
+      navegador (que ahora sí tiene una hoja de impresión real, ver arriba). Dos caminos
+      posibles: (a) que el HTML que `hr.py` renderiza para el PDF sea el mismo dosier que ya
+      pinta el navegador, con una clase que mi `@media print` ya reconozca (por ejemplo
+      `.ds-print-header`/`.ds-print-footer`, que dejé preparados y ocultos salvo en
+      impresión — sólo hace falta que `hr.py` los emita con el sello/folio/fecha), o (b) que
+      el generador PDF deje de ser un camino aparte y reutilice el mismo render. No decido
+      cuál: es de `hr.py`, fuera de mi carril.
+- [ ] `SD-039`/`SD-129` (toast) · **archivo**: `app/static/app-core.js` · **carril dueño**:
+      H2-app-js `[CHOCA]`
+      **qué hace falta**: `showToast()` sigue pintando el toast con `style.cssText` y cuatro
+      tripletes hex en línea. `styles.css` ya tiene `.ds-toast` + `.ds-toast--success|
+      error|warning|info` (tokens semánticos, par oscuro incluido) y el contenedor
+      `#ds-toast-container` ya limita a 5 visibles — sólo falta que `showToast()` cree el
+      nodo con esas clases en vez de escribir el `style` a mano, y que el contenedor lleve
+      `aria-live="polite"` (atributo HTML, no CSS).
+- [ ] `SD-040` · **archivo**: `app/static/app-shell.js:140` · **carril dueño**: H2-app-js
+      `[CHOCA]`
+      **qué hace falta**: el nombre de usuario de la barra superior se pinta con
+      `style="…color:#dc3545"` (rojo de error) en vez de usar `.ds-nav-user-badge`, que ya
+      existe en mi zona, tokenizada, y ahora deja de estar muerta si `app-shell.js` la usa.
+- [ ] `SD-217` (mitad backend) · **archivo**: `app/static/admin-stats.js` · **carril dueño**:
+      B10-admin-charts (según el mapa de pendientes) `[CHOCA]`
+      **qué hace falta**: `styles.css` ya acepta `.info-box.is-clickable` además del
+      selector viejo `[style*="cursor:pointer"]` (que se deja como respaldo). Falta que
+      `admin-stats.js` añada la clase `is-clickable` en vez de (o adicionalmente a) escribir
+      `cursor:pointer` en el `style` en línea, para no depender de que la cadena exacta no
+      cambie nunca.
+- [ ] `SD-180` · **archivo**: `app/static/login.js` · **carril dueño**: (no listado en
+      `PLAN-PARALELO.md` como carril propio; toca sólo `login.js`) `[CHOCA]`
+      **qué hace falta**: `@keyframes ds-shake` sigue definida y sin un solo uso. O
+      `login.js` la aplica (añadiendo la clase que la dispare) al fallo de inicio de sesión,
+      o se borra de la hoja — no la borré porque esa decisión le toca a quien tenga
+      `login.js`.
+- [ ] `SD-138` (parte HTML) · **archivo**: los `<style>` de `admin_archive.html`,
+      `admin_hr.html`, `admin_system.html`, `archive.html`, `hr.html` · **carril dueño**: LH
+      **qué hace falta**: esas cinco páginas siguen redefiniendo `.ds-skeleton` +
+      `@keyframes ds-shimmer` en su propio `<style>`, lo que pisa la variante oscura que
+      vive sólo en `styles.css` (sale claro en modo oscuro). Mi zona ya tiene la definición
+      única con variantes de forma (`.ds-skeleton-row/-card/-kpi`, SD-139) — sólo falta
+      borrar los cinco bloques `<style>` duplicados.
+- [ ] `SD-201` · **archivo**: `app/static/admin-monitor.js` (posiciona el menú por JS con
+      coordenadas calculadas) · **carril dueño**: B5-admin-monitor `[CHOCA]`
+      **qué hace falta**: `anchor-name`/`position-anchor` con `position-try` para el volteo
+      automático en móvil. No lo hice: el posicionamiento hoy lo calcula JS, no CSS —
+      cambiar sólo `styles.css` sin tocar `admin-monitor.js` no movería nada.
+
+`python -m pytest app/tests -q` → 713 passed antes y después del cambio.
+
+**quién lo pide**: agente-l7-estilos (L7-estilos)
+
+- [x] `LA-asistente` · **archivo**: `app/static/ai-widget.css` · **carril dueño**: LA-asistente
+      **quién lo pide**: agente-la-asistente (LA-asistente)
+      **qué pasó**: reescrita la hoja para consumir los tokens de L0 (SD-042, SD-043, SD-076;
+      SD-041 ya venía resuelto por D2-ia-frontend, confirmado — sigue en `body.dark-mode`, no se
+      tocó). El verde propio (`#0b3d2c`/`#12583f`/`#0b6b4a`) pasa a `var(--ds-accent)` y sus
+      derivados; fondos/texto/bordes a `var(--surface-*)`/`var(--text*)`/`var(--border*)`;
+      radios/espaciado/tipografía a `var(--radius-*)`/`var(--space-*)`/`var(--font-size-*)`. Como
+      esos tokens ya cambian bajo `body.dark-mode` en `styles.css`, el bloque de modo oscuro del
+      widget baja de 16 reglas a 2 (el ámbar de la propuesta, sin token semántico). `pytest -q`
+      en verde (713 pasan).
+      **nota operativa**: mi commit quedó absorbido por una carrera de `git commit -a` de
+      `agente-verificacion-despliegue` (commit `65fdf78`, "cerrar reserva verificacion-despliegue"):
+      el contenido de `ai-widget.css` es el mío, verificado con `git show 65fdf78 -- app/static/ai-widget.css`.
