@@ -1,88 +1,99 @@
 /* Asistente IA — estilos de la burbuja flotante.
-   Todo va prefijado con #ia-* para no colisionar con AdminLTE ni Bootstrap. */
+   Todo va prefijado con #ia-* para no colisionar con AdminLTE ni Bootstrap.
+
+   SD-042/043/076: esta hoja consume los tokens de L0 (styles.css) en vez de
+   valores propios. El verde institucional (#0b3d2c/#12583f/#0b6b4a) pasa a
+   var(--ds-accent) y sus derivados, así que la burbuja ya cambia con el
+   acento elegido y no sólo con el tema. Fondos/texto/bordes pasan a
+   var(--surface-*)/var(--text*)/var(--border*): como esos tokens ya se
+   redefinen bajo body.dark-mode en styles.css, la mayoría de las reglas de
+   modo oscuro de más abajo dejan de hacer falta — sólo quedan los casos sin
+   token semántico (el ámbar de la propuesta, el resaltado de historial).
+   Tamaños en rem/var(--font-size-*) para que "Muy Grande" (--ds-font-scale)
+   sí afecte al asistente (SD-076). */
 
 #ia-burbuja {
   position: fixed; right: 22px; bottom: 22px; z-index: 3000;
   width: 56px; height: 56px; border: none; border-radius: 50%;
-  background: #0b3d2c; color: #fff; font-size: 22px; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, .28);
-  transition: transform .15s ease, background .15s ease;
+  background: var(--ds-accent); color: var(--text-inverse); font-size: var(--font-size-xl); cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--duration-base) ease, background var(--duration-base) ease;
 }
-#ia-burbuja:hover { transform: scale(1.07); background: #12583f; }
+#ia-burbuja:hover { transform: scale(1.07); background: var(--ds-accent-hover); }
 
 #ia-panel {
   position: fixed; right: 22px; bottom: 90px; z-index: 3000;
   width: 380px; max-width: calc(100vw - 32px);
   height: 540px; max-height: calc(100vh - 130px);
-  background: #fff; border-radius: 12px; overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+  background: var(--surface-1); border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-xl);
   display: none; flex-direction: column;
-  font-family: inherit; font-size: 14px;
+  font-family: inherit; font-size: var(--font-size-sm);
 }
 #ia-panel.ia-abierto { display: flex; }
 
 .ia-cab {
-  background: #0b3d2c; color: #fff; padding: 12px 14px;
-  display: flex; align-items: center; justify-content: space-between; font-weight: 600;
+  background: var(--ds-accent); color: var(--text-inverse); padding: var(--space-3) var(--space-4);
+  display: flex; align-items: center; justify-content: space-between; font-weight: var(--font-weight-semibold);
 }
 .ia-cab button {
-  background: none; border: none; color: #fff; opacity: .8;
-  cursor: pointer; font-size: 14px; padding: 4px 6px;
+  background: none; border: none; color: var(--text-inverse); opacity: .8;
+  cursor: pointer; font-size: var(--font-size-sm); padding: var(--space-1) 6px;
 }
 .ia-cab button:hover { opacity: 1; }
 
 #ia-aviso {
-  display: none; background: #fff3cd; color: #856404;
-  padding: 6px 12px; font-size: 12px; border-bottom: 1px solid #ffeeba;
+  display: none; background: var(--color-warning-bg); color: #856404;
+  padding: 6px var(--space-3); font-size: var(--font-size-xs); border-bottom: 1px solid var(--color-warning);
 }
 
-#ia-mensajes { flex: 1; overflow-y: auto; padding: 14px; background: #f6f7f9; }
+#ia-mensajes { flex: 1; overflow-y: auto; padding: var(--space-4); background: var(--surface-2); }
 
 /* Historial: se despliega sobre los mensajes en vez de al lado. El panel mide 380px y una
    barra lateral dejaría el chat en 240 — ilegible. */
 #ia-historial {
   display: none; position: absolute; top: 46px; bottom: 0; left: 0; right: 0;
-  background: #fff; z-index: 5; overflow-y: auto;
+  background: var(--surface-1); z-index: 5; overflow-y: auto;
 }
 #ia-historial.ia-hist-abierto { display: block; }
 .ia-hist-cab {
-  padding: 10px 14px; font-size: 12px; font-weight: 600; color: #6c757d;
-  text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid #e3e6ea;
+  padding: var(--space-2) var(--space-4); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); border-bottom: 1px solid var(--border);
 }
 .ia-hist-item {
-  position: relative; padding: 10px 40px 10px 14px;
-  border-bottom: 1px solid #f0f2f4; cursor: pointer;
+  position: relative; padding: var(--space-2) 40px var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle); cursor: pointer;
 }
-.ia-hist-item:hover { background: #f0f7f4; }
-.ia-hist-activa { background: #e6f2ed; border-left: 3px solid #0b3d2c; }
+.ia-hist-item:hover { background: var(--ds-accent-light); }
+.ia-hist-activa { background: var(--ds-accent-light); border-left: 3px solid var(--ds-accent); }
 .ia-hist-titulo {
-  font-size: 13px; color: #222; white-space: nowrap;
+  font-size: var(--font-size-sm); color: var(--text); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
-.ia-hist-meta { font-size: 11px; color: #8a9099; margin-top: 2px; }
+.ia-hist-meta { font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 2px; }
 .ia-hist-borrar {
-  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; color: #c0c5cc; cursor: pointer; padding: 6px;
+  position: absolute; right: var(--space-2); top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--gray-500); cursor: pointer; padding: 6px;
 }
-.ia-hist-borrar:hover { color: #dc3545; }
-.ia-hist-vacio { padding: 24px 14px; text-align: center; color: #8a9099; font-size: 13px; }
+.ia-hist-borrar:hover { color: var(--color-danger); }
+.ia-hist-vacio { padding: var(--space-6) var(--space-4); text-align: center; color: var(--text-muted); font-size: var(--font-size-sm); }
 
 .ia-msg {
-  max-width: 88%; padding: 9px 12px; border-radius: 12px;
-  margin-bottom: 8px; line-height: 1.45; word-wrap: break-word;
+  max-width: 88%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg);
+  margin-bottom: var(--space-2); line-height: var(--line-height-base); word-wrap: break-word;
 }
-.ia-msg-user { background: #0b3d2c; color: #fff; margin-left: auto; border-bottom-right-radius: 3px; }
-.ia-msg-bot  { background: #fff; color: #222; border: 1px solid #e3e6ea; border-bottom-left-radius: 3px; }
-.ia-msg-bot a { color: #0b6b4a; text-decoration: underline; word-break: break-all; }
+.ia-msg-user { background: var(--ds-accent); color: var(--text-inverse); margin-left: auto; border-bottom-right-radius: var(--radius-xs); }
+.ia-msg-bot  { background: var(--surface-1); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: var(--radius-xs); }
+.ia-msg-bot a { color: var(--ds-accent-hover); text-decoration: underline; word-break: break-all; }
 
 /* La traza de herramientas: lo que separa una respuesta verificable de una inventada. */
 .ia-traza {
-  font-size: 11px; color: #7a8290; margin: -4px 0 10px 4px; font-style: italic;
+  font-size: var(--font-size-xs); color: var(--text-muted); margin: -4px 0 var(--space-3) 4px; font-style: italic;
 }
 
 .ia-escribiendo { display: flex; gap: 4px; width: 52px; }
 .ia-escribiendo span {
-  width: 7px; height: 7px; border-radius: 50%; background: #b3b9c2;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--gray-500);
   animation: ia-latido 1.2s infinite;
 }
 .ia-escribiendo span:nth-child(2) { animation-delay: .2s; }
@@ -90,80 +101,68 @@
 @keyframes ia-latido { 0%, 60%, 100% { opacity: .3 } 30% { opacity: 1 } }
 
 /* Propuestas: el único punto donde el asistente cambia algo, y siempre con una persona
-   apretando el botón. Se marca en ámbar para que no se confunda con una respuesta. */
+   apretando el botón. Se marca en ámbar (--color-warning) para que no se confunda con
+   una respuesta. #8a6d00 no tiene equivalente semántico: es un ámbar oscurecido a mano
+   para dar contraste AA sobre --color-warning-bg, igual que --text-muted lo es de --gray-600. */
 .ia-propuesta {
-  background: #fff8e6; border: 1px solid #f0d68a; border-left: 4px solid #e0a800;
-  border-radius: 8px; padding: 10px 12px; margin: 4px 0 12px;
+  background: var(--color-warning-bg); border: 1px solid var(--color-warning); border-left: 4px solid var(--color-warning);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); margin: 4px 0 var(--space-3);
 }
 .ia-prop-ocupada { opacity: .5; pointer-events: none; }
-.ia-prop-cab { font-weight: 600; font-size: 12px; color: #8a6d00; margin-bottom: 4px; }
-.ia-prop-txt { font-size: 13px; color: #333; line-height: 1.4; }
-.ia-prop-btns { display: flex; gap: 8px; margin-top: 10px; }
+.ia-prop-cab { font-weight: var(--font-weight-semibold); font-size: var(--font-size-xs); color: #8a6d00; margin-bottom: var(--space-1); }
+.ia-prop-txt { font-size: var(--font-size-sm); color: var(--text); line-height: 1.4; }
+.ia-prop-btns { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
 .ia-prop-btns button {
-  flex: 1; border: none; border-radius: 6px; padding: 7px;
-  font-size: 13px; font-weight: 600; cursor: pointer;
+  flex: 1; border: none; border-radius: var(--radius-sm); padding: var(--space-2);
+  font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); cursor: pointer;
 }
-.ia-aprobar { background: #28a745; color: #fff; }
-.ia-aprobar:hover { background: #218838; }
-.ia-rechazar { background: #e9ecef; color: #495057; }
-.ia-rechazar:hover { background: #dde1e5; }
+.ia-aprobar { background: var(--color-success); color: var(--text-inverse); }
+.ia-aprobar:hover { filter: brightness(0.9); }
+.ia-rechazar { background: var(--gray-200); color: var(--gray-700); }
+.ia-rechazar:hover { background: var(--gray-300); }
 
 /* Avisos del propio widget (subidas, resultados de aprobación): ni del usuario ni del
    modelo, así que no llevan burbuja. */
 .ia-sistema {
-  text-align: center; font-size: 12px; color: #6c757d;
-  margin: 6px 0 10px; font-style: italic;
+  text-align: center; font-size: var(--font-size-xs); color: var(--text-muted);
+  margin: var(--space-2) 0 var(--space-3); font-style: italic;
 }
 
 #ia-clip {
   width: 34px; height: 38px; border: none; background: none;
-  color: #6c757d; cursor: pointer; font-size: 16px;
+  color: var(--text-muted); cursor: pointer; font-size: var(--font-size-base);
 }
-#ia-clip:hover { color: #0b3d2c; }
+#ia-clip:hover { color: var(--ds-accent); }
 
-.ia-perfil { font-size: 12px; color: #0b6b4a; }
+.ia-perfil { font-size: var(--font-size-xs); color: var(--ds-accent-hover); }
 
-.ia-vacio { text-align: center; color: #6c757d; padding: 24px 8px; }
-.ia-vacio i { font-size: 34px; color: #0b3d2c; margin-bottom: 10px; display: block; }
-.ia-vacio p { margin: 0 0 6px; }
-.ia-sug-titulo { margin-top: 16px !important; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+.ia-vacio { text-align: center; color: var(--text-muted); padding: var(--space-6) var(--space-2); }
+.ia-vacio i { font-size: var(--font-size-3xl); color: var(--ds-accent); margin-bottom: var(--space-3); display: block; }
+.ia-vacio p { margin: 0 0 var(--space-2); }
+.ia-sug-titulo { margin-top: var(--space-4) !important; font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
 .ia-sug {
-  display: block; width: 100%; margin: 6px 0; padding: 8px 10px;
-  background: #fff; border: 1px solid #d8dce2; border-radius: 8px;
-  font-size: 13px; color: #333; text-align: left; cursor: pointer;
+  display: block; width: 100%; margin: var(--space-2) 0; padding: var(--space-2) var(--space-3);
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md);
+  font-size: var(--font-size-sm); color: var(--text); text-align: left; cursor: pointer;
 }
-.ia-sug:hover { border-color: #0b3d2c; background: #f0f7f4; }
+.ia-sug:hover { border-color: var(--ds-accent); background: var(--ds-accent-light); }
 
-#ia-form { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e3e6ea; background: #fff; }
+#ia-form { display: flex; gap: var(--space-2); padding: var(--space-3); border-top: 1px solid var(--border); background: var(--surface-1); }
 #ia-input {
-  flex: 1; border: 1px solid #d8dce2; border-radius: 20px;
-  padding: 8px 14px; font-size: 14px; outline: none;
+  flex: 1; border: 1px solid var(--border); border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-4); font-size: var(--font-size-sm); outline: none;
 }
-#ia-input:focus { border-color: #0b3d2c; }
+#ia-input:focus { border-color: var(--ds-accent); }
 #ia-form button[type="submit"] {
   width: 38px; height: 38px; border: none; border-radius: 50%;
-  background: #0b3d2c; color: #fff; cursor: pointer;
+  background: var(--ds-accent); color: var(--text-inverse); cursor: pointer;
 }
 
 /* Tema oscuro: app-theme.js alterna body.dark-mode, no data-theme en <html> (SD-041:
-   con el selector viejo estas 16 reglas nunca disparaban y el asistente salía blanco
-   puro sobre la app en oscuro). Este es el mismo selector que usa styles.css. */
-body.dark-mode #ia-panel { background: #1e2227; }
-body.dark-mode #ia-mensajes { background: #15181c; }
-body.dark-mode .ia-msg-bot { background: #262b31; color: #e6e8ea; border-color: #343a41; }
-body.dark-mode #ia-form { background: #1e2227; border-color: #343a41; }
-body.dark-mode #ia-input { background: #262b31; border-color: #343a41; color: #e6e8ea; }
-body.dark-mode .ia-sug { background: #262b31; border-color: #343a41; color: #e6e8ea; }
+   con el selector viejo estas reglas nunca disparaban y el asistente salía blanco puro
+   sobre la app en oscuro). Este es el mismo selector que usa styles.css. La mayoría de
+   colores ya viene de var(--surface-*)/var(--text*)/var(--border*)/var(--ds-accent*),
+   que styles.css redefine bajo este mismo selector — sólo quedan aquí los pares sin
+   token semántico: el ámbar de la propuesta y el texto de la cabecera de propuesta. */
 body.dark-mode .ia-propuesta { background: #332d16; border-color: #6b5720; }
-body.dark-mode .ia-prop-txt { color: #e6e8ea; }
-body.dark-mode .ia-rechazar { background: #3a4049; color: #e6e8ea; }
-body.dark-mode #ia-historial { background: #1e2227; }
-body.dark-mode .ia-hist-cab { border-color: #343a41; }
-body.dark-mode .ia-hist-item { border-color: #2a2f35; }
-body.dark-mode .ia-hist-item:hover { background: #262b31; }
-body.dark-mode .ia-hist-activa { background: #1c3a2e; }
-body.dark-mode .ia-hist-titulo { color: #e6e8ea; }
-
-@media (max-width: 480px) {
-  #ia-panel { right: 8px; left: 8px; width: auto; bottom: 80px; }
-}
+body.dark-mode .ia-prop-cab { color: #d8b23a; }

@@ -46,7 +46,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | BR-109 | agente-br109-dossier-estilos | 2026-09-03 | terminado | 6284460 |
 | L0-tokens | agente-l0-tokens | 2026-09-03 | terminado | 3b6e18b (ver nota en _BUZON.md: commit ajeno de agente-h2-app-js que arrastró mi styles.css por una carrera de git concurrente; contenido correcto, verificado con git show) |
 | H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
-| verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | en curso | |
+| verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | terminado | 4f1f52d |
 | L1-estilos | agente-l1-estilos | 2026-09-03 | en curso | |
 | L2-estilos | agente-l2-estilos | 2026-09-03 | en curso | |
 | L3-estilos | agente-l3-estilos | 2026-09-03 | en curso | |
