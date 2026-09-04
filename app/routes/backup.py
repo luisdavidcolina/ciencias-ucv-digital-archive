@@ -5,7 +5,7 @@ Solo accesible para el administrador máximo (Global).
 from fastapi import APIRouter, Depends, File, HTTPException, Header, Query, UploadFile
 from fastapi.responses import StreamingResponse
 import storage
-from database import db_query, logger
+from database import db_query, db_transaction, logger
 import json
 import io
 import os
@@ -15,6 +15,35 @@ from datetime import datetime, date
 from typing import Optional
 
 _SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
+
+# IN-021: cada tabla exportable identifica su fila con una columna distinta
+# (o ninguna, para las de vínculo con clave compuesta). Tras un restore que
+# inserta filas con su `id` explícito, la secuencia `GENERATED ALWAYS AS
+# IDENTITY` queda por detrás del máximo insertado — el siguiente INSERT sin
+# id explícito choca contra una fila que ya existe. Se reajusta al final de
+# cada tabla restaurada, dentro de la misma transacción.
+_PK_COLUMN = {
+    "categoria": "id",
+    "cargos": "id",
+    "departamentos": "id",
+    "estados_laborales": "id",
+    "tipo_documento": "id",
+    "descriptores_libres": "id_descriptor",
+    "empleados": "id",
+    "historial_cargos": "id",
+    "datos_rrhh": "id_rrhh",
+    "rrhh_descriptores": None,       # clave compuesta, sin secuencia
+    "datos_archivo": "id_archivo",
+    "archivo_descriptores": None,    # clave compuesta, sin secuencia
+    "usuarios_sistema": "id",
+}
+
+# SI-235-adyacente / higiene de subida: un restore no es una subida de
+# ficheros pesados, es JSON de la propia base. Un archivo de cientos de MB
+# aquí es un error de quien lo sube (o un intento de agotar memoria), no un
+# backup legítimo — con las tablas actuales el export completo pesa
+# decenas de MB como mucho.
+_MAX_RESTORE_BYTES = 100 * 1024 * 1024  # 100 MB
 
 from routes.admin.deps import require_session, require_role
 
@@ -63,6 +92,37 @@ def _serialize_value(v):
     return v
 
 
+def _extraer_claves_r2(backup: dict) -> list:
+    """DG-149: recolecta las claves de R2 referenciadas por `file_url` en las
+    tablas de documentos exportadas.
+
+    No copia los ficheros (podrían ser gigas) — sólo deja constancia de qué
+    claves existían en R2 al momento del backup, para poder comparar después
+    y detectar si el fondo digitalizado (o parte de él) desapareció aunque la
+    base siga intacta apuntando a URLs que ya no responden.
+
+    `file_url` se guarda con la forma `/api/files/<clave>` (ver
+    `routes/files.py`); se ignoran valores vacíos o con otra forma (URLs
+    externas antiguas, si las hubiera).
+
+    Esto NO verifica que las claves existan de verdad en R2 — eso requeriría
+    listar el bucket con `storage.py`, fuera del alcance de este carril
+    (declarado explícitamente `[CHOCA]` para quien lo tome). Sirve para
+    detectar la ausencia comparando manifiestos de dos backups distintos, o
+    cruzando a mano contra el bucket el día que haga falta.
+    """
+    claves = set()
+    prefijo = "/api/files/"
+    for tabla in ("datos_archivo", "datos_rrhh"):
+        for fila in backup.get(tabla, []) or []:
+            url = (fila.get("file_url") or "").strip()
+            if url.startswith(prefijo):
+                clave = url[len(prefijo):].strip()
+                if clave:
+                    claves.add(clave)
+    return sorted(claves)
+
+
 def _construir_backup(selected: list) -> tuple[dict, int]:
     """Serializa las tablas indicadas. Devuelve (payload, filas totales)."""
     backup = {
@@ -86,6 +146,10 @@ def _construir_backup(selected: list) -> tuple[dict, int]:
         except Exception as e:
             backup[table] = []
             backup[f"_error_{table}"] = str(e)
+
+    claves_r2 = _extraer_claves_r2(backup)
+    backup["_metadata"]["r2_keys_referenced"] = claves_r2
+    backup["_metadata"]["r2_keys_count"] = len(claves_r2)
     return backup, total_rows
 
 
@@ -160,13 +224,35 @@ async def restore_backup(
         raise HTTPException(400, "mode debe ser 'merge' o 'overwrite'")
 
     content = await file.read()
+
+    # Límite de tamaño: esto es JSON de la propia base, no una subida de
+    # ficheros pesados. Un archivo de cientos de MB aquí es un error de quien
+    # lo sube (entorno equivocado) o un intento de agotar memoria del
+    # proceso al decodificarlo — se rechaza antes de tocar `json.loads`.
+    if len(content) > _MAX_RESTORE_BYTES:
+        raise HTTPException(
+            413,
+            f"El archivo pesa {len(content) / (1024*1024):.1f} MB, "
+            f"más del límite de {_MAX_RESTORE_BYTES // (1024*1024)} MB para un backup.",
+        )
+
     try:
         backup = json.loads(content.decode("utf-8"))
     except Exception:
         raise HTTPException(400, "Archivo JSON inválido o corrupto.")
 
-    if "_metadata" not in backup:
+    if not isinstance(backup, dict) or "_metadata" not in backup:
         raise HTTPException(400, "El archivo no es un backup válido del sistema.")
+
+    # Validar la forma antes de procesar: cada clave de tabla presente debe
+    # ser una lista de objetos. Un backup con `datos_archivo` como string o
+    # número (archivo corrupto, o de otro sistema con el mismo nombre de
+    # campo) no debe llegar a construir SQL con lo que traiga dentro.
+    for table in EXPORTABLE_TABLES:
+        if table not in backup:
+            continue
+        if not isinstance(backup[table], list) or not all(isinstance(r, dict) for r in backup[table]):
+            raise HTTPException(400, f"La tabla '{table}' del backup no tiene el formato esperado (lista de filas).")
 
     results = {}
     errors = []
@@ -177,27 +263,46 @@ async def restore_backup(
             results[table] = {"inserted": 0, "skipped": "sin datos"}
             continue
         try:
-            if mode == "overwrite" and table not in ("usuarios_sistema",):
-                # No borramos usuarios para evitar quedar sin acceso
-                db_query(f"DELETE FROM public.{table}", fetch="none", commit=True)
-
+            # IN-022/O2: DELETE (en overwrite) e INSERTs de la tabla van en
+            # una sola transacción. Antes, el DELETE hacía su propio commit y
+            # sólo entonces empezaban los INSERT fila a fila — si uno fallaba
+            # a mitad de camino la tabla quedaba parcialmente vacía, sin
+            # forma de volver atrás. Ahora, si cualquier fila falla, toda la
+            # tabla (borrado incluido) se deshace: o queda como estaba, o
+            # queda restaurada — nunca a medias.
             inserted = 0
-            for row in rows:
-                cols = [c for c in row.keys() if _SAFE_IDENTIFIER.match(c)]
-                if not cols:
-                    continue
-                vals = [row[c] for c in cols]
-                placeholders = ", ".join(["%s"] * len(cols))
-                col_names = ", ".join(cols)
-                conflict = "ON CONFLICT DO NOTHING" if mode == "merge" else ""
-                sql = f"INSERT INTO public.{table} ({col_names}) VALUES ({placeholders}) {conflict}"
-                try:
-                    db_query(sql, vals, fetch="none", commit=True)
+            with db_transaction() as execute:
+                if mode == "overwrite" and table not in ("usuarios_sistema",):
+                    # No borramos usuarios para evitar quedar sin acceso
+                    execute(f"DELETE FROM public.{table}")
+
+                for row in rows:
+                    cols = [c for c in row.keys() if _SAFE_IDENTIFIER.match(c)]
+                    if not cols:
+                        continue
+                    vals = [row[c] for c in cols]
+                    placeholders = ", ".join(["%s"] * len(cols))
+                    col_names = ", ".join(cols)
+                    conflict = "ON CONFLICT DO NOTHING" if mode == "merge" else ""
+                    sql = f"INSERT INTO public.{table} ({col_names}) VALUES ({placeholders}) {conflict}"
+                    execute(sql, vals)
                     inserted += 1
-                except Exception as row_err:
-                    errors.append(f"{table}: {row_err}")
+
+                # IN-021: reajustar la secuencia al máximo `id` insertado —
+                # si no, el siguiente INSERT sin id explícito (alta normal
+                # desde la UI) choca contra una fila que el restore ya puso.
+                pk = _PK_COLUMN.get(table)
+                if pk and inserted:
+                    execute(
+                        f"SELECT setval(pg_get_serial_sequence('public.{table}', '{pk}'), "
+                        f"COALESCE((SELECT MAX({pk}) FROM public.{table}), 1), true)"
+                    )
             results[table] = {"inserted": inserted, "total": len(rows)}
         except Exception as e:
+            # La transacción de esta tabla ya hizo rollback dentro de
+            # db_transaction(); la tabla queda tal como estaba antes de
+            # intentar restaurarla. Se sigue con el resto — una tabla mal
+            # formada no debe impedir restaurar las demás.
             results[table] = {"error": str(e)}
             errors.append(f"{table}: {e}")
 
