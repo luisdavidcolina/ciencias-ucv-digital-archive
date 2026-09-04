@@ -372,6 +372,16 @@ a.ds-link:hover,
     margin-right: auto;
 }
 
+/* SD-134: `.ds-sidebar` pasa a `position:sticky` (fija) en ≥1200px más
+   abajo en este mismo archivo; como es un `<aside>` independiente del
+   flujo de `.content-wrapper` (no un hijo del mismo contenedor flex), sin
+   este margen el contenido quedaría tapado detrás de la barra fija. */
+@media (min-width: 1200px) {
+    .content-wrapper {
+        margin-left: 280px !important;
+    }
+}
+
 /* --- SIDEBAR COLAPSABLE CON ANIMACIONES --- */
 /* SD-221: el velo llevaba blur(2px) además de oscurecer — un desenfoque
    apenas perceptible que igual fuerza una capa de composición a pantalla
@@ -1425,7 +1435,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
         min-width: 60px;
     }
     .ds-item-thumbnail i {
-        font-size: 32px;
+        font-size: 2rem; /* SD-076 */
     }
 
     .ds-item-actions {
@@ -1450,7 +1460,7 @@ body.dark-mode .ds-facet-active { background: var(--surface-2); }
     }
 
     .ds-doc-thumb {
-        height: 120px;
+        max-height: 120px; /* SD-194: sigue el aspect-ratio de la regla base */
     }
 
     .rrhh-person-photo-card {
@@ -2126,14 +2136,17 @@ body.theme-oliva          .btn.btn-primary:not(.ds-btn-primary) { background-col
 }
 .ds-skip-nav:focus { top: 0; color: #fff !important; }
 
-/* Better focus rings */
+/* Better focus rings
+   SD-093: había dos definiciones de foco incompatibles (ésta y la de más
+   abajo en el archivo, fuera de esta zona); ganaba ésta por `!important`,
+   pero arrastraba un `border-radius: 4px` parásito que redondeaba
+   cualquier elemento enfocado, no sólo su contorno. Se retira ese radio
+   y se pasa al token de acento. */
 *:focus-visible {
-  outline: 2px solid #0056b3 !important;
+  outline: 2px solid var(--color-link) !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 4px rgba(0,86,179,0.15) !important;
-  border-radius: 4px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 15%, transparent) !important;
 }
-.ds-sidebar-link:focus-visible { border-radius: 0 !important; }
 
 /* ==========================================================================
    KPI CARDS (Panel de administración)
@@ -3425,13 +3438,8 @@ body.dark-mode .ds-theme-name          { color:#b8c0d0 !important; }
 }
 .ds-monitor-filters .form-control-sm { min-width: 120px; flex: 1; }
 
-/* Botones de acción en tabla: más pequeños y coherentes */
-.ds-tbl-btn {
-  padding: 2px 7px !important;
-  font-size: 0.75rem !important;
-  border-radius: 4px !important;
-  line-height: 1.5 !important;
-}
+/* SD-215: .ds-tbl-btn no aparece en ningún HTML/JS del repositorio — regla
+   muerta, se borra en vez de arrastrarla. */
 
 /* Formulario de nuevo ingreso — más denso */
 .ds-submit-form .form-group { margin-bottom: 0.6rem !important; }
@@ -3500,27 +3508,43 @@ body.dark-mode .ds-admin-card-header { background: #1e222b; border-color: #2e334
 .ds-import-hint { line-height: 1; }
 .ds-import-result { font-size: 0.78rem; flex: 1 0 100%; }
 
-/* Drop zone compacta en el formulario */
+/* Drop zone compacta en el formulario — SD-143: la versión grande
+   (`.ds-dropzone`, fuera de este carril) tiene estado de error y de
+   progreso; esta no tenía ninguno de los dos. SD-092: discontinuo
+   reservado a "vacío/arrastrable", tokenizado en vez de a pelo. */
 .ds-dropzone-compact {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  border: 1.5px dashed #ced4da;
-  border-radius: 8px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
   padding: 10px 14px;
-  background: #f8f9fa;
+  background: var(--gray-50);
   font-size: 0.82rem;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color var(--duration-base), background var(--duration-base);
   cursor: default;
 }
 .ds-dropzone-compact.drag-over {
-  border-color: #0056b3;
+  border-color: var(--color-link);
   background: #e8f0fe;
 }
+.ds-dropzone-compact.has-error {
+  border-style: solid;
+  border-color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+.ds-dropzone-compact.is-uploading {
+  border-style: solid;
+  border-color: var(--color-link);
+  background: #e8f0fe;
+  cursor: progress;
+}
 .ds-dropzone-compact i { color: #adb5bd; font-size: 1.1rem; }
-.ds-dropzone-compact.has-file i { color: #28a745; }
+.ds-dropzone-compact.has-file i { color: var(--color-success); }
+.ds-dropzone-compact.has-error i { color: var(--color-danger); }
 .ds-drop-label { flex: 1; color: #6c757d; }
+.ds-dropzone-compact.has-error .ds-drop-label { color: var(--color-danger); }
 
 /* Dark mode */
 body.dark-mode .ds-import-bar { background: #1e222b; border-color: #2e3342; }
@@ -3529,6 +3553,8 @@ body.dark-mode .ds-import-file-label { background: #2a2e3a; border-color: #3c425
 body.dark-mode .ds-import-file-label:hover { border-color: #6fa3d8; color: #6fa3d8; }
 body.dark-mode .ds-dropzone-compact { background: #1e222b; border-color: #3c4257; }
 body.dark-mode .ds-dropzone-compact.drag-over { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
+body.dark-mode .ds-dropzone-compact.has-error { background: rgba(208,59,59,0.15); border-color: #e57373; }
+body.dark-mode .ds-dropzone-compact.is-uploading { background: rgba(43,78,114,0.2); border-color: #6fa3d8; }
 
 /* ==========================================================================
    PERSONALIZACIÓN — DENSITY, FONT FAMILY, ANIMATIONS
@@ -3766,9 +3792,13 @@ body[data-style="glassmorphism"] .custom-select {
 }
 body[data-style="glassmorphism"] .badge-primary,
 body[data-style="glassmorphism"] .nav-pills .nav-link.active {
-  background: rgba(var(--ds-accent-rgb),0.5) !important;
+  /* SD-190/SD-011: derivación mecánica del acento con color-mix() en vez
+     del triplete `--ds-accent-rgb` (el token sigue declarado porque otra
+     zona del archivo, fuera de L11, aún lo consume — ver nota junto a su
+     definición). */
+  background: color-mix(in srgb, var(--ds-accent) 50%, transparent) !important;
   backdrop-filter: blur(6px) !important;
-  border: 1px solid rgba(var(--ds-accent-rgb),0.4) !important;
+  border: 1px solid color-mix(in srgb, var(--ds-accent) 40%, transparent) !important;
 }
 
 /* ============================================================
@@ -3868,7 +3898,8 @@ body.dark-mode[data-style="minimalism"] .ds-sidebar {
 }
 body[data-style="minimalism"] .ds-item-card:hover {
   box-shadow: none !important;
-  border-color: rgba(var(--ds-accent-rgb),0.4) !important;
+  /* SD-190/SD-011: color-mix() en vez del triplete --ds-accent-rgb. */
+  border-color: color-mix(in srgb, var(--ds-accent) 40%, transparent) !important;
 }
 
 /* ============================================================
@@ -3913,29 +3944,39 @@ body[data-style="maximalism"] .badge {
 
 /* ============================================================
    5. BRUTALISMO
+
+   SD-055: era el único de los seis estilos que no consumía --ds-accent
+   (usaba #111/#e8e8e8 a pelo en catorce reglas), mientras Maximalismo sí lo
+   hace para el mismo tipo de borde/sombra "offset". La ficha deja elegir
+   entre "todos lo consumen" o "ninguno"; opto por que todos lo consuman,
+   igual que Maximalismo, para que cambiar de acento tenga efecto visible en
+   los seis estilos y no en cinco. El contraste alto/duro del brutalismo se
+   conserva porque los siete acentos son suficientemente oscuros/saturados
+   (ninguno es un pastel claro); en oscuro se aclara con color-mix() (SD-190)
+   en vez de un segundo hex fijo, igual que --ds-accent-ink más arriba.
    ============================================================ */
 body[data-style="brutalism"] .card,
 body[data-style="brutalism"] .ds-item-card {
   border-radius: 0 !important;
-  border: 3px solid #111 !important;
-  box-shadow: 6px 6px 0 #111 !important;
+  border: 3px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent, #2b4e72) !important;
 }
 body.dark-mode[data-style="brutalism"] .card,
 body.dark-mode[data-style="brutalism"] .ds-item-card {
-  border: 3px solid #e8e8e8 !important;
-  box-shadow: 6px 6px 0 #e8e8e8 !important;
+  border: 3px solid var(--ds-accent-ink) !important;
+  box-shadow: 6px 6px 0 var(--ds-accent-ink) !important;
 }
 body[data-style="brutalism"] .card-header {
   border-radius: 0 !important;
-  border-bottom: 3px solid #111 !important;
+  border-bottom: 3px solid var(--ds-accent, #2b4e72) !important;
 }
 body.dark-mode[data-style="brutalism"] .card-header {
-  border-bottom: 3px solid #e8e8e8 !important;
+  border-bottom: 3px solid var(--ds-accent-ink) !important;
 }
 body[data-style="brutalism"] .btn {
   border-radius: 0 !important;
-  border: 2px solid #111 !important;
-  box-shadow: 4px 4px 0 #111 !important;
+  border: 2px solid var(--ds-accent, #2b4e72) !important;
+  box-shadow: 4px 4px 0 var(--ds-accent, #2b4e72) !important;
   font-weight: 700 !important;
   transition: transform .1s, box-shadow .1s !important;
   text-transform: uppercase !important;
@@ -3943,27 +3984,27 @@ body[data-style="brutalism"] .btn {
 }
 body[data-style="brutalism"] .btn:hover {
   transform: translate(-2px,-2px) !important;
-  box-shadow: 6px 6px 0 #111 !important;
+  box-shadow: 6px 6px 0 var(--ds-accent, #2b4e72) !important;
 }
 body[data-style="brutalism"] .btn:active {
   transform: translate(2px,2px) !important;
-  box-shadow: 2px 2px 0 #111 !important;
+  box-shadow: 2px 2px 0 var(--ds-accent, #2b4e72) !important;
 }
 body.dark-mode[data-style="brutalism"] .btn {
-  border: 2px solid #e8e8e8 !important;
-  box-shadow: 4px 4px 0 #e8e8e8 !important;
+  border: 2px solid var(--ds-accent-ink) !important;
+  box-shadow: 4px 4px 0 var(--ds-accent-ink) !important;
 }
 body.dark-mode[data-style="brutalism"] .btn:hover {
-  box-shadow: 6px 6px 0 #e8e8e8 !important;
+  box-shadow: 6px 6px 0 var(--ds-accent-ink) !important;
 }
 body[data-style="brutalism"] .form-control,
 body[data-style="brutalism"] .custom-select {
   border-radius: 0 !important;
-  border: 2px solid #111 !important;
+  border: 2px solid var(--ds-accent, #2b4e72) !important;
 }
 body.dark-mode[data-style="brutalism"] .form-control,
 body.dark-mode[data-style="brutalism"] .custom-select {
-  border: 2px solid #e8e8e8 !important;
+  border: 2px solid var(--ds-accent-ink) !important;
 }
 body[data-style="brutalism"] .badge {
   border-radius: 0 !important;
@@ -3973,10 +4014,10 @@ body[data-style="brutalism"] .badge {
 }
 body[data-style="brutalism"] .ds-item-card:hover {
   transform: translate(-2px,-2px) !important;
-  box-shadow: 8px 8px 0 #111 !important;
+  box-shadow: 8px 8px 0 var(--ds-accent, #2b4e72) !important;
 }
 body.dark-mode[data-style="brutalism"] .ds-item-card:hover {
-  box-shadow: 8px 8px 0 #e8e8e8 !important;
+  box-shadow: 8px 8px 0 var(--ds-accent-ink) !important;
 }
 
 /* ============================================================
@@ -3995,8 +4036,11 @@ body[data-style="liquid-glass"] .ds-item-card {
     rgba(255,255,255,0.17) 0%,
     rgba(255,255,255,0.06) 50%,
     rgba(255,255,255,0.11) 100%) !important;
-  backdrop-filter: blur(28px) saturate(180%) brightness(1.08) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.08) !important;
+  /* SD-221: igual que en Glassmorphism, 28px por tarjeta es la variante más
+     cara de las seis; 14px conserva el aspecto "liquid glass" con la mitad
+     del coste de composición. */
+  backdrop-filter: blur(14px) saturate(180%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) brightness(1.08) !important;
   border: 1px solid rgba(255,255,255,0.22) !important;
   border-radius: 22px !important;
   box-shadow:
@@ -4034,11 +4078,32 @@ body[data-style="liquid-glass"] .btn {
   border: 1px solid rgba(255,255,255,0.22) !important;
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.22), 0 4px 12px rgba(0,0,0,0.15) !important;
   backdrop-filter: blur(8px) !important;
-  transition: all .2s !important;
+  /* SD-174: lista explícita en vez de `transition: all` — sólo `background`
+     y `box-shadow` cambian entre reposo y :hover en este botón. */
+  transition: background .2s, box-shadow .2s !important;
 }
 body[data-style="liquid-glass"] .btn:hover {
   background: rgba(255,255,255,0.22) !important;
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.32), 0 6px 18px rgba(0,0,0,0.22) !important;
+}
+/* SD-095: Maximalismo, Brutalismo y Liquid Glass fijan `box-shadow` en
+   `.btn` con `!important` en todos los estados, incluido el foco — eso
+   deja el anillo de foco (que en el resto del sistema combina `outline` +
+   `box-shadow`, styles.css ~1657) reducido a un contorno de 2px que sobre
+   un fondo de vidrio translúcido casi no se distingue. En vez de tocar el
+   mecanismo global de foco (fuera de mi zona), refuerzo el contorno sólo
+   en estos tres estilos con un `outline` más grueso y separado, que ningún
+   `box-shadow` de la regla puede pisar. */
+body[data-style="maximalism"] .btn:focus-visible,
+body[data-style="brutalism"] .btn:focus-visible,
+body[data-style="liquid-glass"] .btn:focus-visible {
+  outline: 3px solid var(--ds-accent, #2b4e72) !important;
+  outline-offset: 2px !important;
+}
+body.dark-mode[data-style="maximalism"] .btn:focus-visible,
+body.dark-mode[data-style="brutalism"] .btn:focus-visible,
+body.dark-mode[data-style="liquid-glass"] .btn:focus-visible {
+  outline-color: var(--ds-accent-ink) !important;
 }
 body[data-style="liquid-glass"] .ds-sidebar {
   background: rgba(255,255,255,0.06) !important;
@@ -4638,13 +4703,35 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 }
 .ds-chart-empty i { opacity: .6; }
 
+/* SD-137: el estado vacío no es siempre el mismo vacío. Tres variantes sobre
+   el mismo componente en vez de otro distinto: sin resultados con los
+   filtros actuales, sin datos con acción para crear el primero, y error de
+   carga. `.ds-empty` (fuera de este rango) queda pendiente de la misma
+   revisión — anotado en _BUZON.md para quien tenga esa clase en su carril. */
+.ds-chart-empty--sin-resultados { color: var(--viz-ink-muted); }
+.ds-chart-empty--error { color: var(--viz-critical); }
+.ds-chart-empty--error i { opacity: .8; }
+.ds-chart-empty--accion { flex-direction: column; gap: 10px; }
+.ds-chart-empty--accion .ds-chart-empty-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ds-link, var(--color-link, #0056b3));
+  background: none;
+  border: 1px solid var(--viz-grid);
+  border-radius: var(--radius-sm, 4px);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.ds-chart-empty--accion .ds-chart-empty-btn:hover { background: var(--viz-grid); }
+
 /* Avance de digitalización: una proporción sobre un total se lee como barra,
    no como dona — a 0% una dona es un círculo entero que no dice nada. */
 .ds-avance-cifra {
-  font-size: 2.4rem;
+  font-size: clamp(1.8rem, 1.4rem + 1.8vw, 2.4rem); /* SD-192: tipografía fluida */
   font-weight: 700;
   line-height: 1;
   color: var(--viz-ink);
+  font-variant-numeric: tabular-nums; /* SD-065 */
 }
 .ds-avance-cifra span { font-size: 1.1rem; font-weight: 600; color: var(--viz-ink-muted); }
 .ds-avance-pie { font-size: 0.82rem; color: var(--viz-ink-muted); margin: 4px 0 12px; }
