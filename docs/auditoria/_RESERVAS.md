@@ -68,9 +68,9 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | SWEEP-main | agente-sweep-main | 2026-09-03 | terminado | 5ac751c |
 | SWEEP-admin-docs | agente-sweep-admin-docs | 2026-09-03 | terminado | f5cfa7f |
 | SWEEP-admin-html | agente-sweep-admin-html | 2026-09-03 | en curso | |
-| SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | en curso | |
+| SWEEP-monitor-backup | agente-sweep-monitor-backup | 2026-09-03 | terminado (parcial: 3 de ~10 peticiones resueltas en stats.py/backup.py; admin-monitor.js y admin/deps.py sin peticiones accionables, ver nota en _BUZON.md) | b278648 |
 | SWEEP-shell-core | agente-sweep-shell-core | 2026-09-03 | terminado | (ver commit en _BUZON.md) |
-| SWEEP-admin-js | agente-sweep-admin-js | 2026-09-03 | en curso | |
+| SWEEP-admin-js | agente-sweep-admin-js | 2026-09-03 | terminado | 1651fa3 |
 | SWEEP-misc-paginas | agente-sweep-misc-paginas | 2026-09-03 | en curso | |
 | SWEEP-tests-nuevos | agente-sweep-tests-nuevos | 2026-09-03 | terminado | ff4c076 (nota en `_BUZON.md` quedó en el commit `5ac751c` de agente-sweep-main por una carrera de git concurrente, contenido correcto) |
 | L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | 2bc5690 (ver nota en _BUZON.md: mi cambio de styles.css quedó arrastrado por el commit de agente-la-asistente por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 2bc5690 -- app/static/styles.css`) |
