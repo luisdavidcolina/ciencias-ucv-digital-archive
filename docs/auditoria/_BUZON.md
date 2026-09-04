@@ -1176,6 +1176,73 @@ hace falta en cada uno, para quien tenga esos carriles:
 
 **quién lo pide**: agente-l7-estilos (L7-estilos)
 
+- [x] `L1-estilos` · **archivo**: `app/static/styles.css` (base, barra superior, barra
+      lateral, cabecera de página — zona SD-024/026/027/028/029/051/058/063/074/085/086/
+      087/094/100/107/132/133/134/135/170/172/174/177/182/183/185/221) · **carril dueño**:
+      agente-l1-estilos (L1-estilos)
+      **nota sobre el commit**: mi trabajo NO tiene commit propio — quedó arrastrado por
+      `b93bdb4` ("L2-estilos: componentes de tarjeta, migaja, buscador y botones con
+      tokens L0"), de agente-l2-estilos, por la misma carrera de git concurrente que
+      describen las notas de arriba: en un árbol de trabajo compartido por hasta veinte
+      agentes, cuando otro agente hace `git add app/static/styles.css` (nombre explícito,
+      regla 10), añade el ESTADO ACTUAL del archivo en disco, que ya incluía mis ediciones
+      sin confirmar. Verificado con `git show b93bdb4 -- app/static/styles.css` línea por
+      línea contra lo que escribí — el contenido es mío, intacto. No reparo el historial.
+      `python -m pytest app/tests/test_contraste.py -q`: 8/8 pasa.
+      **Hecho**: SD-132 (limpieza de restos AdminLTE) primero, como pedía la ficha; verde
+      único (SD-024) en `.ds-sidebar-badge`; `@import` de Google Fonts retirado y familia
+      Outfit retirada de `.ds-sidebar-brand` (SD-026/027); pesos vía `--font-weight-black`
+      en vez de `800`/`900` sueltos (SD-028/063); rojo de `.ds-sidebar-sistema` tokenizado
+      a `--color-danger` (SD-051); degradados aplanados salvo la cabecera de marca, que se
+      declara excepción a propósito (SD-058); acento de borde izquierdo retirado de
+      `.ds-page-header` y simplificado el borde/radio (SD-085/086); margen lateral de
+      `.ds-page-header` retirado, ahora vive dentro de `.container-fluid` (SD-100); ancho
+      máximo en `.content-wrapper` (SD-107); barra superior con `position: sticky`
+      (SD-135); `outline-offset:-3px` en `.ds-sidebar-link:focus-visible` para que el
+      contorno no se recorte contra el `overflow:hidden` del contenedor (SD-094, parcial —
+      la otra mitad, la regla que sólo corrige el radio, vive en `styles.css:1895` fuera
+      de mi rango, lote L6); `:visited` discreto en enlaces de resultado (SD-170); el
+      subrayado de `:hover` deja de ser global y se limita a `.ds-link`/prosa, sin las
+      catorce excepciones `!important` que necesitaba (SD-172); `transition: all` con
+      lista explícita en `.ds-sidebar-link`/`.ds-sidebar-link i` (SD-174); el pulso del
+      badge de la barra lateral se para tras tres ciclos (SD-177); cajón lateral y velo
+      comparten ahora `--duration-slow`/`--ease-out` (SD-182); giro decorativo de 90° en
+      `.ds-sidebar-close:hover` retirado, contra la doctrina de `CLAUDE.md` de que el
+      movimiento explica de dónde viene el contenido, no decora (SD-183); cajón lateral
+      animado con `transform: translateX()` en vez de `left` (SD-185); `backdrop-filter`
+      del velo del cajón retirado — apenas se notaba y forzaba una capa de composición a
+      pantalla completa en cada apertura (SD-221, sólo el velo; los otros cinco sitios que
+      cita la ficha son de otros lotes).
+      **SD-134** (barra lateral fija en ≥1200px en vez de cajón modal siempre) también
+      está implementada: `.ds-sidebar` pasa a `position:sticky` desde ese ancho y
+      `.content-wrapper` gana `margin-left:280px` a la misma media query, porque el
+      `<aside id="app-sidebar">` que inyecta `app-shell.js` es independiente del flujo del
+      contenido (no es hijo del mismo contenedor flex) — sin ese margen el contenido
+      quedaría tapado detrás de la barra fija. **No pude verificar esto renderizando**
+      (regla 7 del plan): no encontré el arnés de capturas en un estado que pudiera correr
+      desde este carril CSS-only sin tocar JS/HTML fuera de mi zona. Pido a quien revise
+      `L1-estilos` que confirme con una captura en ≥1200px que el contenido no queda
+      tapado y que por debajo de 1200px el cajón/velo se siguen comportando igual que
+      antes.
+      **Pendientes de mi lista que dejo sin terminar, documentados aquí en vez de
+      tocarlos a medias**:
+      - `SD-029` (respaldo tipográfico con métricas ajustadas, `size-adjust`/
+        `ascent-override`) — necesita generar los valores de métrica de Nunito contra la
+        pila de respaldo (herramienta tipo Fontaine/Capsize), fuera de lo que puedo hacer
+        sólo editando CSS a mano sin introducir un valor inventado. Queda para quien tenga
+        esa herramienta.
+      - `SD-074` (`.ds-eyebrow`, una calibración para las nueve etiquetas en versalitas) —
+        mi zona sólo tiene una de las nueve (`.ds-sidebar-section-label`); las otras ocho
+        viven en L6/L7/L14/L15. No creé la clase compartida por mi cuenta porque unificar
+        con las otras ocho es justo el trabajo que hay que coordinar entre lotes, no
+        decidir desde uno solo — dejo la etiqueta de mi zona con su calibración actual
+        para que quien lo resuelva no tenga que deshacer nada mío.
+      - `SD-133` (marcar también la sección que contiene el enlace activo) — añadí el CSS
+        (`.ds-sidebar-section-label.ds-section-active`) pero la clase la tiene que alternar
+        `app.js` al marcar el enlace activo, y `app.js` es de `H2-app-js` (ya "terminado"
+        en `_RESERVAS.md`, así que anoto aquí para quien la revise después: falta cablear
+        `ds-section-active` en el JS de navegación).
+
 - [x] `LA-asistente` · **archivo**: `app/static/ai-widget.css` · **carril dueño**: LA-asistente
       **quién lo pide**: agente-la-asistente (LA-asistente)
       **qué pasó**: reescrita la hoja para consumir los tokens de L0 (SD-042, SD-043, SD-076;
