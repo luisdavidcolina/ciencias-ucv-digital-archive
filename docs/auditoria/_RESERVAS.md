@@ -64,6 +64,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | terminado (sin cambios de código: `pages.py`/`config.py` ya cumplían, todo lo pendiente es `[CHOCA]` y quedó anotado en `_BUZON.md`) | e5a7696 |
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | terminado (parcial: 6 de 37 fichas resueltas de config/despliegue real; el resto exige main.py/database.py/backup.py/.python-version/CI/paneles externos, ver nota en _BUZON.md) | 8a98120 |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
+| A3-buscador-rrhh (hr.js) | agente-a3a-buscador-rrhh-js | 2026-09-04 | en curso | |
+| A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | en curso | |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
 | LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
 | LX-3 | agente-lx3-modularizacion | 2026-09-04 | terminado (SD-213 completo: 12 modulos reales bajo app/static/styles/, mas un bug real de @layer que invalidaba los @import corregido por el orquestador tras el corte de sesion — ver commit; SD-212/SD-211/SD-206 quedan para otra pasada) | 9991649 |
@@ -101,14 +103,16 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 
 ## Cómo se escribe una fila
 
+**Nota de orquestación (2026-09-04)**: este bloque de ejemplo tenía la fila
+`A3-buscador-rrhh | bruno | ...` como texto de muestra, con un sha de relleno
+(`a1b2c3d`). Varios agentes la confundieron con una reserva real y respetaron
+el carril "ocupado" durante más de 30 horas sin que nadie lo estuviera
+trabajando de verdad. Limpiado: el ejemplo ya no usa un nombre de carril real
+para no repetir la confusión.
+
 ```
-| A3-buscador-rrhh | bruno | 2026-09-02 14:20 | en curso | |
-| A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | en curso | |
-| B1-admin-archivo-html | agente-b1-admin-archivo-html | 2026-09-03 | terminado | 4be45d3 |
-| B2-admin-rrhh-html | agente-b2-admin-rrhh-html | 2026-09-03 | terminado | 7cb1a0a |
-| B3-admin-sistema-html | agente-b3-admin-sistema-html | 2026-09-03 | terminado (parcial: 29/114, ver nota en _BUZON.md) | d5477fe |
-| E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | en curso | |
-| A3-buscador-rrhh | bruno | 2026-09-02 14:20 | terminado | a1b2c3d |
+| <carril> | <tu-nombre-de-agente> | <fecha> | en curso | |
+| <carril> | <tu-nombre-de-agente> | <fecha> | terminado | <sha-del-commit> |
 ```
 
 ## Carriles que no se cogen sin permiso
