@@ -1952,10 +1952,19 @@ colisiones" de `sistema-ia-paginas.md`, viven en archivos de otros carriles. No 
       páginas.
 - [ ] `SI-175`, `SI-176`, `SI-178`, `SI-179` · **archivo**: `app/static/scanner-client.js`,
       `scanner-app/` · **carril dueño**: exclusivo de ese bloque.
-- [ ] `SI-181`, `SI-183`–`SI-185`, `SI-200`–`SI-202` · **archivo**: `app/static/app-shell.js`,
-      `app-theme.js`, `styles.css` · **carril dueño**: cáscara compartida `[CHOCA]` — SI-181
-      (telón del menú lateral) y SI-183-185 (nombre accesible del menú, botón sin estado) son
-      del mismo fichero que uso yo sólo de lectura.
+- [x] `SI-181`, `SI-183`, `SI-185` (parte de `app-shell.js`/`app.js`), `SI-200` · resuelto
+      por agente-sweep-shell-core (SWEEP-shell-core): `shellSidebarHTML()` ahora genera
+      `<div id="sidebar-overlay" class="ds-sidebar-overlay">` junto al menú (SI-181, la
+      regla CSS ya existía); `<nav>` del menú y de la barra superior llevan
+      `aria-label="Menú principal"`/`"Barra superior"` (SI-183); el botón `#sidebar-toggle-btn`
+      ya lleva `aria-label`/`aria-expanded`/`aria-controls`, `openSidebar()`/`closeSidebar()`
+      (`app.js`) los mantienen sincronizados y mueven el foco al abrir/cerrar (SI-185, sin la
+      lista/encabezados de SI-184 que exige además `styles.css`, fuera de mi carril); «Volver
+      al Inicio» se quitó de la barra superior en vez de decir a dónde va — el menú ya cubre
+      Sistema/IA (SI-200).
+      **queda pendiente**, fuera de mi zona: `SI-184` (lista/encabezados semánticos, pide
+      además `styles.css`), `SI-201`/`SI-202` (`app-theme.js`/`styles.css`, preferencia de
+      sistema y `forced-colors`) — no toqué ninguno de los dos archivos.
 - [ ] `SI-205` · **archivo**: `app/static/admin_ai.html` · igual que el bloque de arriba.
 - [ ] `SI-211` · **archivo**: multi-archivo (`app-core.js`, `app.js`, todas las páginas) ·
       cambio arquitectónico (migrar a módulos ES), no tiene sentido resolverlo tocando un solo

@@ -115,12 +115,16 @@ app.add_middleware(
 async def add_no_cache_header(request, call_next):
     response = await call_next(request)
     path = request.url.path
-    # Assets estáticos (imágenes, fuentes, íconos) pueden cachearse; JS/CSS/HTML no.
+    # IN-113/IN-114: `vercel.json` ya declara `max-age=3600` para `/static/*.js`
+    # `.css`/`.html`, así que esta cabecera dejó de fijarla aquí — dos políticas
+    # de caché para la misma ruta compiten, y la de `vercel.json` es la que se
+    # quería mantener (no se tocó). Los demás assets estáticos (imágenes,
+    # fuentes, íconos) siguen cacheándose agresivamente desde este middleware.
     if path.startswith("/static/") and not path.endswith((".js", ".css", ".html")):
         response.headers["Cache-Control"] = "public, max-age=86400, immutable"
     elif path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    else:
+    elif not path.startswith("/static/"):
         response.headers["Cache-Control"] = "no-cache, must-revalidate, max-age=0"
     return response
 
@@ -614,6 +618,21 @@ def run_migrations():
         ("idx login_attempts usuario_ip",
          "CREATE UNIQUE INDEX IF NOT EXISTS idx_login_attempts_usuario_ip "
          "ON public.login_attempts(usuario, ip)"),
+
+        # ── IN-057/BA-002: el índice GIN original no incluía personas_relacionadas,
+        # que sí forma parte del to_tsvector de la consulta en archive.py. Un índice
+        # que no casa con la expresión de la consulta no se usa (Postgres no lo
+        # considera aplicable) y toda esa búsqueda cae a un seq scan. No se puede
+        # ALTER un índice existente ni DROP el viejo (regla de migraciones): se crea
+        # uno nuevo con la expresión completa, alineada con archive.py líneas 96-103
+        # y 182-186.
+        ("GIN index FTS datos_archivo v2 (incluye personas_relacionadas)",
+         """CREATE INDEX IF NOT EXISTS idx_datos_archivo_fts_v2
+            ON public.datos_archivo
+            USING GIN(to_tsvector('spanish',
+              coalesce(titulo,'') || ' ' || coalesce(autor,'') || ' ' ||
+              coalesce(abstract,'') || ' ' || coalesce(tesauro_primario,'') || ' ' ||
+              coalesce(tesauro_secundario,'') || ' ' || coalesce(personas_relacionadas,'')))"""),
     ]
     # En serverless esta funcion corre en CADA arranque en frio. Son ~80 viajes
     # de ida y vuelta a Neon antes de poder responder la primera peticion, y el
