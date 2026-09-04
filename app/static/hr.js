@@ -293,7 +293,7 @@ function renderRrhhDossierModal() {
   document.getElementById("rrhh-person-modal-content").innerHTML = `
     <div class="ds-person-profile-header mb-4 p-3 bg-white rounded shadow-sm border">
       <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
-        <div class="ds-person-avatar-wrap mb-3 mb-md-0 mr-md-4" style="width:150px;min-width:150px;">
+        <div class="ds-person-avatar-wrap ds-dossier-avatar-wrap mb-3 mb-md-0 mr-md-4">
           ${photoHtml}
         </div>
         <div class="ds-person-info flex-grow-1 w-100">
@@ -328,7 +328,7 @@ function renderRrhhDossierModal() {
             ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong>    ${formatISOToSpanish(profile.fecha_pension)    || "No registrada"}</div>` : ""}
           </div>
           <div class="border-top pt-3 mt-2">
-            <h6 class="font-weight-bold text-secondary text-uppercase mb-2" style="font-size:0.78rem;">
+            <h6 class="font-weight-bold text-secondary text-uppercase mb-2 ds-dossier-subheading">
               <i class="fas fa-folder mr-2"></i>Documentos de Identidad
             </h6>
             <div class="d-flex flex-wrap">
@@ -337,7 +337,7 @@ function renderRrhhDossierModal() {
           </div>
           <div class="border-top pt-3 mt-2">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="font-weight-bold text-secondary text-uppercase mb-0" style="font-size:0.78rem;">
+              <h6 class="font-weight-bold text-secondary text-uppercase mb-0 ds-dossier-subheading">
                 <i class="fas fa-briefcase mr-2"></i>Historial de Cargos
               </h6>
               <button class="btn btn-xs btn-outline-secondary"
@@ -345,7 +345,7 @@ function renderRrhhDossierModal() {
                 <i class="fas fa-history mr-1"></i>Ver historial
               </button>
             </div>
-            <div id="historial-cargos-inline" class="bg-light rounded p-2" style="display:none;font-size:0.82rem;"></div>
+            <div id="historial-cargos-inline" class="bg-light rounded p-2 ds-dossier-historial-inline d-none"></div>
           </div>
         </div>
       </div>
@@ -464,14 +464,13 @@ function filterInnerDossier() {
     const tabId = "dossier-partes-tabs";
     const tabsHtml = sortedGroups.map(([cat], i) => {
       const parte = RRHH_PARTES.find(p => p.nombre === cat);
-      const icon  = parte ? `<i class="${parte.icon} mr-1" style="color:${parte.color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
       const color = parte?.color || "#6c757d";
+      const icon  = parte ? `<i class="${parte.icon} mr-1 ds-dossier-parte-icon" style="--ds-parte-color:${color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
       const count = grouped[cat].length;
       return `<li class="nav-item">
-        <a class="nav-link${i === 0 ? " active" : ""}" data-toggle="tab" href="#dossier-tab-${i}"
-           style="font-size:0.82rem;padding:6px 12px;">
+        <a class="nav-link${i === 0 ? " active" : ""} ds-dossier-parte-tab" data-toggle="tab" href="#dossier-tab-${i}">
           ${icon}${cat.replace(/ — .+/, "")}
-          <span class="badge ml-1" style="background:${color};color:#fff;font-size:0.68rem;">${count}</span>
+          <span class="badge ml-1 ds-dossier-parte-badge" style="--ds-parte-color:${color}">${count}</span>
         </a>
       </li>`;
     }).join("");
@@ -567,19 +566,19 @@ async function _toggleHistorialCargos(empleadoId) {
   const container = document.getElementById("historial-cargos-inline");
   if (!container) return;
 
-  if (container.style.display !== "none") {
-    container.style.display = "none";
+  if (!container.classList.contains("d-none")) {
+    container.classList.add("d-none");
     return;
   }
 
   if (!empleadoId) {
     container.innerHTML = '<span class="text-muted">ID de empleado no disponible.</span>';
-    container.style.display = "block";
+    container.classList.remove("d-none");
     return;
   }
 
   container.innerHTML = '<span class="spinner-border spinner-border-sm mr-2 text-secondary"></span>Cargando historial...';
-  container.style.display = "block";
+  container.classList.remove("d-none");
 
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empleadoId}/historial_cargos`);
@@ -592,7 +591,7 @@ async function _toggleHistorialCargos(empleadoId) {
     }
 
     container.innerHTML = `
-      <table class="table table-sm mb-0" style="font-size:0.8rem;">
+      <table class="table table-sm mb-0 ds-dossier-historial-table">
         <thead class="bg-white">
           <tr>
             <th>Cargo</th>
