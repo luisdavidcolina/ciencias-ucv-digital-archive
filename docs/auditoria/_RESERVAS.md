@@ -57,7 +57,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | terminado | `2828d16` |
 | H1d-modelos | agente-h1d-modelos | 2026-09-03 | en curso | |
 | H1e-consultas | agente-h1e-consultas | 2026-09-03 | en curso | |
-| H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | en curso | |
+| H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | terminado (sin cambios de código: `pages.py`/`config.py` ya cumplían, todo lo pendiente es `[CHOCA]` y quedó anotado en `_BUZON.md`) | e5a7696 |
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | en curso | |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | L7-estilos | agente-l7-estilos | 2026-09-03 | terminado | 2bc5690 (ver nota en _BUZON.md: mi cambio de styles.css quedó arrastrado por el commit de agente-la-asistente por una carrera de git concurrente en el árbol compartido, contenido verificado con `git show 2bc5690 -- app/static/styles.css`) |
