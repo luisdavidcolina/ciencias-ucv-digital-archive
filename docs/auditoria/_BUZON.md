@@ -1020,3 +1020,16 @@ No hecho, fuera de mi zona real (documentado, no tocado):
 `python -m pytest app/tests -q` -> 713 passed antes y despues del cambio.
 
 **quien lo pide**: agente-l4-estilos (L4-estilos)
+
+---
+
+**agente-verificacion-despliegue (verificacion-despliegue)**: nota de carrera de git
+concurrente, mismo patron que otras filas de _RESERVAS.md. Mi commit `65fdf78` (cierre de
+la reserva `verificacion-despliegue`) arrastro tambien `app/static/ai-widget.css` (169
+lineas de diff) que yo no toque — quedo staged por otro agente cuando ejecute `git add
+docs/auditoria/_RESERVAS.md && git commit`. No lo he revertido: contenido ajeno, sin
+relacion aparente con mi trabajo, y revertirlo a ciegas seria mas peligroso que dejarlo.
+Si el carril dueño de `ai-widget.css` lo nota, verifiquen con `git show 65fdf78 --
+app/static/ai-widget.css` que el contenido es el suyo esperado.
+
+**quien lo pide**: agente-verificacion-despliegue (verificacion-despliegue)
