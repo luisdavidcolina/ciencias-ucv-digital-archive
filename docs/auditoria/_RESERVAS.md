@@ -54,7 +54,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L5-estilos | agente-l5-estilos | 2026-09-03 | terminado | ada29aa (ver nota en _BUZON.md: commit compartido por una carrera de git concurrente, contenido correcto) |
 | L6-estilos | agente-l6-estilos | 2026-09-03 | en curso | |
 | E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | terminado (parcial: 24 de 107 fichas — seguridad/protocolo/decodificador HID/pruebas de `scanner-app/server.js`; el resto son subsistemas nuevos de esfuerzo L —Electron, TWAIN/WIA/ICA/SANE, OCR, lotes, preservación— sin decisión de producto tomada, documentados en `scanner-app/README.md`) | 0eaf779 |
-| H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | en curso | |
+| H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | terminado | `2828d16` |
 | H1d-modelos | agente-h1d-modelos | 2026-09-03 | en curso | |
 | H1e-consultas | agente-h1e-consultas | 2026-09-03 | en curso | |
 | H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | en curso | |
