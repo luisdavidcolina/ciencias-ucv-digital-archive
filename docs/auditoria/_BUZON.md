@@ -1435,3 +1435,87 @@ hace falta en cada uno, para quien tenga esos carriles:
       por otro agente (comentario en `styles.css:~2072`) antes de que yo tocara mi zona. SD-049,
       SD-164 y SD-195 quedan sin tocar: exigen marcado/JS de estado semántico o coordinación con
       el contenedor `.ds-kpi-grid` (fuera de mi rango) que no puedo tocar desde aquí.
+
+## L11-estilos
+
+**quién lo pide**: agente-l11-estilos (L11-estilos)
+
+**Interpretación de SD-032** (la ficha decía que este lote "depende de la decisión de
+SD-032"): SD-032 pide fusionar los dos ejes de color paralelos —once temas (L5,
+`styles.css:1308-1634` en el original) y siete acentos (mi zona)— en uno solo, "el tema
+ES el acento". Implementarlo de verdad exige tocar la lista de temas y `app-theme.js`,
+ninguno de los dos en mi carril (`L11` sólo tiene `styles.css:2964-3368` original). No lo
+hago — sería escribir fuera de mi zona, contra la regla 1 del plan paralelo. Mi
+interpretación: dejar el eje de acentos internamente consistente (SD-010, SD-011, SD-048,
+SD-190) para que, decida quien decida sobre SD-032 (L5 o una vuelta posterior), la fusión
+no herede los mismos problemas de contraste que ya tenía el eje de acentos por separado.
+Documentado también en un comentario dentro de `styles.css`, junto a la definición de los
+tokens de acento.
+
+**Lo que sí cerré en mi zona** (`app/static/styles.css`, bloque "SISTEMA DE ACENTO Y TEMAS
+DE ESTILO" + los seis estilos visuales + panel de personalización):
+- `SD-010`/`SD-190`: nuevo token `--ds-accent-ink` (variante de `--ds-accent` segura como
+  color de TEXTO, no de fondo) con `color-mix(in oklab, var(--ds-accent) 62%, white)` en
+  `body.dark-mode`, en vez de escribir una segunda tabla de siete hex a mano.
+- `SD-048`: nuevo token `--ds-accent-on` (color de texto sobre fondo de acento), blanco por
+  defecto y `#212529` para `accent-amber` (el único de los siete que no pasa AA con blanco,
+  comprobado con la fórmula de luminancia relativa de WCAG).
+- `SD-011`: sustituidos los tres usos de `rgba(var(--ds-accent-rgb),X)` **dentro de mi
+  zona** (glassmorphism, minimalism) por `color-mix(in srgb, var(--ds-accent) X%,
+  transparent)`. El token `--ds-accent-rgb` en sí **no se retira**: sigue en uso fuera de
+  mi zona (`styles.css` ~línea 4756/4872 en el árbol actual, fuera de L11) — anotado abajo
+  para quien tenga esa zona.
+- `SD-012`: `--ds-panel-item-bg` (consumido con respaldo pero nunca definido) ahora es
+  `var(--surface-3, #f0f4f8)`.
+- `SD-055`: *Brutalismo* ahora consume `var(--ds-accent)`/`--ds-accent-ink` igual que
+  *Maximalismo*, en vez de `#111`/`#e8e8e8` fijos — elegí "todos los estilos consumen el
+  acento" (la otra opción de la ficha era "ninguno").
+- `SD-054`: decisión documentada en comentario junto a Glassmorphism — *Vidrio* y *Liquid
+  Glass* quedan marcados como decorativos/fuera de la garantía AA (la otra opción de la
+  ficha, redefinir los tokens de tinta por estilo, es un cambio grande fuera de proporción
+  para este lote). Falta que el panel lo diga en el texto visible — vive en `app-theme.js`,
+  anotado abajo.
+- `SD-095`: *Maximalismo*, *Brutalismo* y *Liquid Glass* fijan `box-shadow` en `.btn` con
+  `!important`, lo que borraba el anillo de foco. Añadido `outline` reforzado en
+  `:focus-visible` sólo para esos tres estilos, sin tocar el mecanismo global de foco
+  (fuera de mi zona).
+- `SD-149`/`SD-150`: añadido soporte CSS para `[aria-checked="true"]` (mismo estilo que
+  `.active`, sin quitarla) y `:focus-visible` en `.ds-style-card`/`.ds-accent-swatch`, para
+  que cuando `app-theme.js` cambie a `role="radio"`/`aria-checked` no haga falta tocar esta
+  hoja otra vez. El cambio de marcado (`<div onclick>` → `<button role="radio">`) en sí es
+  de `app-theme.js`, fuera de mi carril.
+- `SD-174`: la única `transition: all` que cayó en mi zona (`.btn` de *Liquid Glass*) ahora
+  lista `background, box-shadow` explícitamente.
+- `SD-221`: reducido el desenfoque por tarjeta de Glassmorphism (18px→10px) y Liquid Glass
+  (28px→14px) — conserva el efecto visual con la mitad del coste de composición por
+  tarjeta. No toqué los otros cuatro sitios que cita la ficha (cajón, login), fuera de mi
+  zona.
+
+**Sin tocar, para quien tenga la zona**:
+- `SD-011` (retirar `--ds-accent-rgb` del todo) necesita que quien tenga la zona de
+  `styles.css` ~4756/4872 (visualización de datos / animación, fuera de mi rango) cambie
+  también sus dos usos de `rgba(var(--ds-accent-rgb),X)` a `color-mix()`.
+- `SD-010` (consumidores reales del nuevo `--ds-accent-ink`): `.ds-kw-badge` y
+  `.ds-compartido-modulo` siguen usando `color: var(--ds-accent)` a secas — fuera de mi
+  zona (L14/L15). Cambiarlos a `var(--ds-accent-ink)` cierra el hallazgo del todo.
+- `SD-054` (texto del panel): decir en el panel de personalización que *Vidrio*/*Liquid
+  Glass* son decorativos — `app-theme.js`.
+- `SD-056` (los seis estilos sólo tocan cinco componentes: `.card`, `.ds-item-card`,
+  `.card-header`, `.btn`, `.form-control`, `.badge`) — esfuerzo `L` en la ficha, ampliar la
+  cobertura a barra lateral/modal/tabla/pestañas/paginación/insignias propias/chips/panel de
+  temas/KPI/info-box/toast en los seis estilos a la vez es más de lo que cabe en este lote
+  sin arriesgar dejarlo a medias; no lo empecé.
+- `SD-057` (2.016 estados sin probar) es sobre todo de infraestructura de pruebas
+  (`app/tests/`, fuera de cualquier lote de `styles.css`) más la decisión de SD-032 de
+  arriba — nada que cerrar sólo con CSS.
+
+**Nota de carrera de git**: verifiqué `git status --short`/`git diff --cached --stat` antes
+de comitear (sólo `app/static/styles.css` en stage, sin nada ajeno). Para cuando terminé de
+escribir esta nota, el árbol de trabajo ya coincidía con `HEAD`: mi bloque completo había
+quedado arrastrado por el commit de otro agente sobre el mismo índice compartido —
+verificado con `git log --oneline -S"ds-accent-ink" -- app/static/styles.css`, que apunta a
+`b93bdb4` ("L2-estilos: componentes de tarjeta, migaja, buscador y botones con tokens L0").
+Confirmado con `git show b93bdb4:app/static/styles.css | grep -c ds-accent-ink` (14
+apariciones, coincide con lo que escribí) y con `python -m pytest app/tests -q` en verde
+sobre `HEAD` (713 pasan). No reparo el historial, según la regla 10 del plan paralelo —
+marco mi reserva como terminada con `b93bdb4` en `_RESERVAS.md`.
