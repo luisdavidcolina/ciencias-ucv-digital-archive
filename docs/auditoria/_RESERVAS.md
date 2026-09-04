@@ -43,7 +43,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H3-pruebas-legacy | agente-h3b-legacy-fixtures | 2026-09-03 | en curso | |
 | C5-importaciones | agente-c5b-importaciones | 2026-09-03 | en curso | |
 | C8-backup | agente-c8b-backup | 2026-09-03 | en curso | |
-| BR-109 | agente-br109-dossier-estilos | 2026-09-03 | en curso | |
+| BR-109 | agente-br109-dossier-estilos | 2026-09-03 | terminado | 6284460 |
 | L0-tokens | agente-l0-tokens | 2026-09-03 | en curso | |
 | H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
 | verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | en curso | |
