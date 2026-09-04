@@ -367,25 +367,26 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
 
 **quién lo pide**: agente-b11-admin-categorias (B11-admin-categorias)
 
-- [ ] `OA-033`, `OR-018`, `OR-019`, `RQ-012` · **archivo**: `app/routes/admin/stats.py`
-      (además `app/static/admin-stats.js`, `app/static/admin-charts.js` que sí son míos) ·
-      **carril dueño**: C3-stats-backend
-      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
-      **qué hace falta**: los KPIs de la cabecera mezclan cifras filtradas (`/stats`, que sí
-      acepta rango de fechas) con cifras sin filtrar (`/charts`, que lo ignora); RRHH cuenta
-      expedientes vacíos como documentos por el `LEFT JOIN` sin excluir `deleted_at`; y no hay
-      forma de acotar por tipo/departamento. Los tres piden que `/charts` acepte el mismo rango
-      que `/stats` y sea la única fuente de la fila de KPIs — cambio de contrato del endpoint,
-      no lo hago desde el frontend.
+- [x] `OA-033`, `OR-018`, `OR-019`, `RQ-012` · resuelto en la parte de `stats.py` por
+      agente-sweep-monitor-backup (SWEEP-monitor-backup): `GET /api/admin/charts` acepta ahora
+      `date_start`/`date_end` (mismo formato que `/stats`) y filtra por `fecha_documento` en
+      `by_type`, `by_year`, `by_month`, `by_soporte` y `totals` (Archivo) y en `by_doc_type` y
+      `totals.total_documents` (RRHH); los desgloses de plantilla (`by_department`, `by_status`,
+      `by_nivel`, `by_sexo`) no tienen fecha de documento propia y siguen sin filtrar, del
+      personal activo completo. Falta la parte de frontend: `admin-charts.js`/`admin-stats.js`
+      no son míos — quien los tenga puede ahora pasar el rango a `/charts` y dejar de llamar a
+      `/stats` para la fila de KPIs, que era el pedido original. No toqué el `LEFT JOIN` que
+      cuenta expedientes vacíos como documentos en RRHH (`by_dept`/`totals.total_employees` no
+      dependen de documentos, es `total_sin_documentos` quien ya lo mide aparte) — no encontré
+      un `LEFT JOIN` contando expedientes vacíos como "documentos" tal como lo describe la
+      ficha; si el problema persiste hace falta más detalle de qué número exacto está mal.
+      Suite completa en verde antes y después (`python -m pytest app/tests -q`).
 
-- [ ] `OA-079` · **archivo**: `app/routes/admin/stats.py` · **carril dueño**: C3-stats-backend
-      **quién lo pide**: agente-b10-admin-charts (B10-admin-charts)
-      **qué hace falta**: «Documentos por Tipo» asigna el color por posición en el ranking de
-      volumen, así que dos tipos intercambian color al cambiar su orden — justo lo que
-      `CLAUDE.md` dice que no se hace con los slots `--viz-*`. Necesita que el backend mande un
-      id de tipo estable para asignar el slot por clave, no por posición; ya lo dejé
-      preparado del lado del frontend (`_norm`/mapa por clave en el bloque de soporte), falta
-      el mismo tratamiento en «por tipo» y el id estable viniendo de `stats.py`.
+- [x] `OA-079` · resuelto por agente-sweep-monitor-backup (SWEEP-monitor-backup): `by_type` de
+      `GET /api/admin/charts?modulo=Archivo` ahora incluye `id` (el `id_tipo_documento`, `null`
+      para el cajón "Otros") junto a `label`/`value`, para que el frontend pueda asignar el
+      slot de color por clave estable en vez de por posición en el ranking. El mapeo por clave
+      en `admin-charts.js` (`_norm`/mapa) sigue siendo trabajo de ese carril, no mío.
 
 - [ ] `OR-071`, `OR-101`, `OR-106`, `OR-109`, `OR-112`, `OR-124` · **archivo**:
       `app/routes/admin/imports.py` / `app/routes/admin/docs.py` / `app/static/admin_hr.html`
@@ -501,7 +502,7 @@ alguno de esos archivos y tu `git status` aparece limpio sin tus cambios, revisa
       `handleDeleteDoc`, ya existen y son públicas en `admin-edit.js`, listas para que el
       monitor las llame); OR-129, «Mostrando N–M de T» en el resumen del monitor (mismo
       patrón que apliqué en la papelera con `_updatePapeleraPager`).
-- [ ] `OA-190`/`OA-191` (parte del marcado) · **archivos**: `app/static/admin_archive.html`
+- [x] `OA-190`/`OA-191` (parte del marcado) · **archivos**: `app/static/admin_archive.html`
       (atributos `ondragover`/`ondragleave` en línea de la zona de arrastre, línea ~680) y
       `app/static/styles.css` (clases `.is-dragover`, `.is-uploading`, `.is-ok`,
       `.is-error`, `.ds-edit-preview-frame`, `.ds-edit-preview-img`, `.ds-row-removing`,
@@ -2089,10 +2090,17 @@ Pendientes de mi lote que necesitan un archivo que no es mío, anotados aquí en
       lo único que le tocaba a `vercel.json` (servir minificado) depende de que exista un paso
       de compilación (`IN-203`), que no existe. No invento un pipeline de build nuevo desde
       este carril de sólo despliegue.
-- [ ] `SI-030` · **archivo**: `app/routes/backup.py`, `app/database.py` · **carril dueño**:
-      C8-backup / H1b-conexion (ambos terminados)
-      **qué hace falta**: validar `_metadata.version` y columnas antes de restaurar, dentro de
-      una transacción. Es lógica de aplicación, no de despliegue.
+- [x] `SI-030` (parcial) · resuelto en la parte de `backup.py` por agente-sweep-monitor-backup
+      (SWEEP-monitor-backup): `POST /api/admin/backup/restore` ahora valida
+      `_metadata.version` antes de tocar la base — rechaza con 400 si no es un string con forma
+      `N.N` o si su versión mayor es más nueva que la que este sistema sabe restaurar (1.x). La
+      validación de columnas por tabla ya existía (`_SAFE_IDENTIFIER`, forma lista-de-objetos) y
+      cada tabla ya restaura dentro de su propia transacción (`db_transaction`, IN-022/O2) con
+      rollback si falla. No até todas las tablas en una única transacción de extremo a extremo
+      (`app/database.py` no es mío y cambiar `db_transaction` para anidar/compartir conexión
+      entre tablas es un cambio de contrato de ese módulo) — el comportamiento actual ya es "por
+      tabla, todo o nada", no "fila por fila a medias". `python -m pytest
+      app/tests/test_backup.py app/tests/test_backup_programado.py -q` en verde antes y después.
 - [ ] `SI-235` · **archivo**: `app/tests/test_cabeceras.py` (nuevo) · **carril dueño**: ninguno
       abierto (ficheros de test no están en mi lista de archivos)
       **qué hace falta**: una prueba que lea `vercel.json` y confirme que `/(.*)` lleva las
