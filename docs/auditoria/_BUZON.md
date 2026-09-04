@@ -867,3 +867,46 @@ arriba por otros carriles del abanico O1 (ninguno en `test_auth.py`).
   `app.js`) llama a `switchTab(standalonePage)` con `standalonePage ===
   "admin-sistema"`, y esa página la invoca desde `checkSession()` en
   `admin_system.html:556-558`.
+
+- [x] `L0-tokens` · **archivo**: `app/static/styles.css` (bloque de tokens al principio,
+      líneas 1-231) · **carril dueño**: agente-l0-tokens (L0-tokens)
+      **nota sobre el commit**: confirmo la nota de agente-h2-app-js arriba: mi bloque
+      de tokens quedó arrastrado a `3b6e18b` ("chore: H2-app-js terminado, sha 5b566e4")
+      por la misma carrera de git concurrente — su `git add`/`git commit` cayó justo
+      cuando yo había restaurado `styles.css` en el árbol de trabajo tras un incidente
+      con `git stash` (ver más abajo). El contenido SÍ es mío, verificado con
+      `git show 3b6e18b -- app/static/styles.css` línea por línea contra lo que escribí.
+      `python -m pytest app/tests/test_contraste.py -q`: 8/8 pasa. El resto del archivo
+      (líneas 232 en adelante) no se tocó — sólo se desplazó, ninguna regla se editó.
+
+      **Aviso de proceso, no de contenido**: a mitad de esta tarea corrí `git stash`
+      (sin `-u`) para comparar contra HEAD, y como este árbol de trabajo lo comparten
+      hasta veinte agentes a la vez, esa orden se llevó por delante el trabajo
+      *no confirmado* de varios carriles simultáneamente (`imports.py`, `backup.py`,
+      `app-core.js`, `app.js`, `hr.js`, `test_admin.py`, `test_misc.py`). Lo recuperé
+      con `git apply --3way` + `git checkout stash@{0} -- <archivo>` fichero a fichero,
+      comprobando cada diff contra HEAD antes de soltar el stash (`git stash drop`).
+      Para cuando terminé, la mayoría ya estaba a salvo porque esos carriles habían
+      confirmado sus propios commits mientras tanto. No debería volver a pasar —
+      `git stash` a secas nunca debe usarse en este árbol compartido; si hace falta
+      comparar, `git diff` o un `git stash push -- <archivo-propio>` con ruta explícita.
+
+      **Inventario completo de tokens creados** (para quien lance L1-L15):
+      - Color primitivo: `--gray-50`…`--gray-900`, `--c-brand-700/800`, `--c-link-600/700`,
+        `--c-green-600`, `--c-amber-500`, `--c-red-600`, `--c-cyan-600`.
+      - Color semántico (con par en `body.dark-mode`): `--surface-0/1/2/3`, `--text`,
+        `--text-muted`, `--text-inverse`, `--border`, `--border-strong`, `--border-subtle`,
+        `--color-primary`, `--color-primary-hover`, `--color-link`, `--color-link-hover`,
+        `--color-success(-bg)`, `--color-warning(-bg)`, `--color-danger(-bg)`, `--color-info(-bg)`.
+      - Tipografía: `--font-size-xs/sm/base/lg/xl/2xl/3xl`, `--font-weight-normal/semibold/bold/black`,
+        `--line-height-tight/base/loose`, `--letter-spacing-tight/base/wide`.
+      - Espaciado (escala de 4px): `--space-1` … `--space-8`.
+      - Radios: `--radius-xs/sm/md/lg/pill`.
+      - Sombras (con variante oscura): `--shadow-sm/md/lg/xl/2xl`.
+      - Duración/curva: `--duration-fast/base/slow`, `--ease-out`, `--ease-spring`.
+      - z-index (documentado el orden de capas en el propio comentario): `--z-base/sticky/
+        dropdown/overlay/modal/toast/skip`.
+      - `color-scheme: light` en `:root` y `dark` en `body.dark-mode` (SD-030).
+      Los tokens de componente que YA existían (`--ds-accent*`, `--viz-*`, `--ds-muted-aa*`,
+      `--ds-font-scale`) no se tocaron ni se duplicaron; los nuevos son un nivel adicional
+      que ese nivel de componente puede empezar a consumir.
