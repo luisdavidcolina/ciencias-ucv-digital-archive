@@ -23,7 +23,8 @@
 
   var estado = {
     abierto: false, cargando: false, convId: null, mensajes: [],
-    perfil: "publico", puedeEscribir: false, propuestas: [], usuario: null
+    perfil: "publico", puedeEscribir: false, propuestas: [], usuario: null,
+    disponible: true
   };
 
   // --- persistencia del hilo (solo la pestaña actual) -----------------------
@@ -54,6 +55,29 @@
       .replace(/"/g, "&quot;");
   }
 
+  // SI-125: el nombre interno de la función no le dice nada a quien lee la traza.
+  var NOMBRES_HERRAMIENTA = {
+    buscar_archivo: "buscó en el Archivo",
+    ver_documento: "abrió la ficha de un documento",
+    listar_tipos_documento: "listó los tipos de documento",
+    listar_palabras_clave: "listó palabras clave",
+    estadisticas: "consultó las cifras generales",
+    ir_a: "preparó un enlace de navegación",
+    buscar_empleado: "buscó personal",
+    expediente_empleado: "abrió un expediente de RRHH",
+    buscar_documento_rrhh: "buscó documentos de RRHH",
+    documentos_por_vencer: "revisó vencimientos",
+    mis_adjuntos: "revisó los archivos adjuntos",
+    proponer_actualizacion: "preparó una propuesta de cambio",
+    proponer_documento: "preparó una propuesta de documento nuevo",
+    proponer_adjuntar_archivo: "preparó una propuesta de adjunto",
+    proponer_palabras_clave: "preparó una propuesta de palabras clave"
+  };
+
+  function nombreHerramienta(id) {
+    return NOMBRES_HERRAMIENTA[id] || id;
+  }
+
   // El modelo responde en texto plano, pero suelta URLs de documentos digitalizados. Se
   // convierten en enlaces DESPUÉS de escapar, nunca antes: al revés, un título con HTML
   // dentro se ejecutaría en la página.
@@ -82,6 +106,14 @@
     if (!caja) return;
 
     if (!estado.mensajes.length) {
+      if (estado.disponible === false) {
+        caja.innerHTML =
+          '<div class="ia-vacio"><i class="fas fa-robot"></i>' +
+          "<p><strong>Asistente del Archivo</strong></p>" +
+          '<p class="ia-perfil">No se pudo conectar con el asistente. Vuelve a intentarlo ' +
+          "más tarde.</p></div>";
+        return;
+      }
       var sugerencias = estado.puedeEscribir
         ? ['¿Qué documentos hay sobre el Consejo de Facultad?',
            'Corrige la fecha del documento 42 a 2019-03-15',
@@ -102,18 +134,32 @@
     }
 
     var html = "";
-    estado.mensajes.forEach(function (m) {
+    estado.mensajes.forEach(function (m, idx) {
       if (m.rol === "sistema") {
         html += '<div class="ia-sistema">' + formatear(m.contenido) + "</div>";
+        // SI-116: subir un archivo ya no dispara un turno pago solo; se ofrece como
+        // sugerencia pulsable, igual que las sugerencias iniciales.
+        if (m.sugerencia) {
+          html += '<button class="ia-sug" data-sugerencia="' + esc(m.sugerencia) +
+                  '">Preguntar por este archivo</button>';
+        }
+        // SI-117: el asistente ya no navega solo; ofrece el destino y decide la persona.
+        if (m.navegar_a) {
+          html += '<button class="ia-ir" data-href="' + esc(m.navegar_a) +
+                  '"><i class="fas fa-arrow-right"></i> Ir a la página</button>';
+        }
         return;
       }
       html += '<div class="ia-msg ia-msg-' + (m.rol === "user" ? "user" : "bot") + '">' +
-              formatear(m.contenido) + "</div>";
+              formatear(m.contenido) +
+              '<button class="ia-copiar" data-idx="' + idx +
+              '" aria-label="Copiar mensaje" title="Copiar"><i class="fas fa-copy"></i></button>' +
+              "</div>";
       if (m.herramientas && m.herramientas.length) {
         // Se muestra qué consultó. Sin esto, una respuesta correcta y una inventada se ven
         // exactamente igual, y el usuario no tiene cómo distinguirlas.
         html += '<div class="ia-traza"><i class="fas fa-database"></i> consultó: ' +
-                esc(m.herramientas.map(function (h) { return h.herramienta; }).join(", ")) +
+                esc(m.herramientas.map(function (h) { return nombreHerramienta(h.herramienta); }).join(", ")) +
                 "</div>";
       }
     });
@@ -144,13 +190,29 @@
     return "Consulta pública del Archivo Institucional.";
   }
 
-  function sistema(texto) {
-    estado.mensajes.push({ rol: "sistema", contenido: texto });
+  function sistema(texto, extra) {
+    var msg = { rol: "sistema", contenido: texto };
+    if (extra) {
+      for (var k in extra) { if (Object.prototype.hasOwnProperty.call(extra, k)) msg[k] = extra[k]; }
+    }
+    estado.mensajes.push(msg);
     pintar();
     guardar();
   }
 
   // --- envío ---------------------------------------------------------------
+
+  // SI-113: mientras carga, el campo y el botón se deshabilitan en vez de tragarse el
+  // siguiente intento en silencio.
+  function marcarCargando(cargando) {
+    var i = document.getElementById("ia-input");
+    var f = document.getElementById("ia-form");
+    if (i) { i.disabled = cargando; i.setAttribute("aria-busy", String(cargando)); }
+    if (f) {
+      var btn = f.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = cargando;
+    }
+  }
 
   function enviar(texto) {
     texto = (texto || "").trim();
@@ -158,6 +220,7 @@
 
     estado.mensajes.push({ rol: "user", contenido: texto });
     estado.cargando = true;
+    marcarCargando(true);
     pintar();
     guardar();
 
@@ -177,6 +240,7 @@
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
         estado.cargando = false;
+        marcarCargando(false);
         if (!res.ok) {
           estado.mensajes.push({
             rol: "assistant",
@@ -189,8 +253,12 @@
           estado.mensajes.push({
             rol: "assistant", contenido: res.d.respuesta, herramientas: res.d.herramientas
           });
+          // SI-117: ya no navega solo. Se ofrece el destino en un botón y decide la persona.
           if (res.d.navegar_a) {
-            setTimeout(function () { window.location.href = res.d.navegar_a; }, 1200);
+            estado.mensajes.push({
+              rol: "sistema", contenido: "El asistente sugiere ir a otra página.",
+              navegar_a: res.d.navegar_a
+            });
           }
         }
         pintar();
@@ -198,6 +266,7 @@
       })
       .catch(function () {
         estado.cargando = false;
+        marcarCargando(false);
         estado.mensajes.push({ rol: "assistant", contenido: "⚠️ Error de red. Intenta de nuevo." });
         pintar();
       });
@@ -306,7 +375,9 @@
     var fd = new FormData();
     fd.append("file", archivo);
     fd.append("conversacion_id", estado.convId);
-    sistema("Subiendo «" + esc(archivo.name) + "»…");
+    // SI-115: el nombre se guarda crudo. `formatear()` ya escapa al pintar; escaparlo aquí
+    // también lo dejaba doblemente escapado ("Acta 1 &amp; 2.pdf").
+    sistema("Subiendo «" + archivo.name + "»…");
 
     fetch("/api/ia/adjuntar", { method: "POST", credentials: "same-origin", body: fd })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
@@ -315,11 +386,12 @@
           sistema("⚠️ " + (res.d.detail || "No se pudo subir el archivo."));
           return;
         }
-        sistema("📎 «" + esc(res.d.nombre_archivo) + "» subido.");
-        // Se le avisa al modelo con un turno de usuario: es la forma de que lo sepa sin
-        // inventar un canal aparte, y deja el hecho escrito en la conversación.
-        enviar("Acabo de subir el archivo «" + res.d.nombre_archivo +
-               "». Revísalo con mis_adjuntos y dime a qué documento lo engancho.");
+        // SI-116: ya no se dispara un turno pago solo. Se deja el adjunto en el hilo con
+        // una sugerencia pulsable; la persona decide si pregunta por él.
+        sistema("📎 «" + res.d.nombre_archivo + "» subido.", {
+          sugerencia: "Acabo de subir el archivo «" + res.d.nombre_archivo +
+                      "». Revísalo con mis_adjuntos y dime a qué documento lo engancho."
+        });
       })
       .catch(function () { sistema("⚠️ Error de red al subir el archivo."); });
   }
@@ -349,6 +421,24 @@
     pintar();
   }
 
+  // SI-119: no había forma de sacar la conversación del panel salvo copiarla a mano.
+  function descargarConversacion() {
+    var texto = estado.mensajes
+      .filter(function (m) { return m.rol === "user" || m.rol === "assistant"; })
+      .map(function (m) { return (m.rol === "user" ? "Tú: " : "Asistente: ") + m.contenido; })
+      .join("\n\n");
+    if (!texto) return;
+    var blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "conversacion-asistente.txt";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
   function montar() {
     if (document.getElementById("ia-burbuja")) return;
 
@@ -366,6 +456,9 @@
               '<i class="fas fa-clock-rotate-left"></i></button>' +
             '<button id="ia-limpiar" title="Nueva conversación" aria-label="Nueva conversación">' +
               '<i class="fas fa-plus"></i></button>' +
+            '<button id="ia-descargar" title="Descargar conversación" ' +
+                    'aria-label="Descargar conversación">' +
+              '<i class="fas fa-download"></i></button>' +
             '<button id="ia-cerrar" title="Cerrar" aria-label="Cerrar asistente">' +
               '<i class="fas fa-times"></i></button>' +
           "</div></div>" +
@@ -414,15 +507,34 @@
 
     document.getElementById("ia-mensajes").addEventListener("click", function (e) {
       var sug = e.target.closest(".ia-sug");
-      if (sug) { enviar(sug.textContent); return; }
+      if (sug) { enviar(sug.dataset.sugerencia || sug.textContent); return; }
+      var ir = e.target.closest(".ia-ir");
+      if (ir) { window.location.href = ir.dataset.href; return; }
+      var cop = e.target.closest(".ia-copiar");
+      if (cop) {
+        var m = estado.mensajes[Number(cop.dataset.idx)];
+        if (m && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(m.contenido).catch(function () {});
+        }
+        return;
+      }
       var ap = e.target.closest(".ia-aprobar");
       if (ap) { resolver(Number(ap.dataset.id), "aprobar"); return; }
       var re = e.target.closest(".ia-rechazar");
       if (re) { resolver(Number(re.dataset.id), "rechazar"); }
     });
 
-    // Si falta la clave o está deshabilitado, no se muestra la burbuja: mejor que no exista
-    // a que exista y falle en cada clic.
+    document.getElementById("ia-descargar").addEventListener("click", descargarConversacion);
+
+    comprobarDisponibilidad(false);
+
+    restaurar();
+    pintar();
+  }
+
+  // SI-122: un corte de red de dos segundos ya no deja al usuario sin asistente el resto
+  // de la sesión. Se reintenta una vez antes de darlo por caído.
+  function comprobarDisponibilidad(esReintento) {
     fetch("/api/ia/disponible", { credentials: "same-origin" })
       .then(function (r) { return r.json(); })
       .then(function (d) {
@@ -451,11 +563,13 @@
         pintar();
       })
       .catch(function () {
-        document.getElementById("ia-burbuja").style.display = "none";
+        if (!esReintento) {
+          setTimeout(function () { comprobarDisponibilidad(true); }, 2000);
+          return;
+        }
+        estado.disponible = false;
+        pintar();
       });
-
-    restaurar();
-    pintar();
   }
 
   if (document.readyState === "loading") {
