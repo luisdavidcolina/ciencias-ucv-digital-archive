@@ -48,7 +48,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H2-app-js | agente-h2-app-js | 2026-09-03 | terminado | 5b566e4 |
 | verificacion-despliegue | agente-verificacion-despliegue | 2026-09-03 | terminado | 4f1f52d |
 | L1-estilos | agente-l1-estilos | 2026-09-03 | en curso | |
-| L2-estilos | agente-l2-estilos | 2026-09-03 | en curso | |
+| L2-estilos | agente-l2-estilos | 2026-09-03 | terminado | b93bdb4 |
 | L3-estilos | agente-l3-estilos | 2026-09-03 | en curso | |
 | L4-estilos | agente-l4-estilos | 2026-09-03 | en curso | |
 | L5-estilos | agente-l5-estilos | 2026-09-03 | en curso | |
