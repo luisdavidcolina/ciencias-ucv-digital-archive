@@ -2318,3 +2318,16 @@ No resueltos, fuera de `app/models.py`:
   de impacto cruzado).
 
 **quién lo pide**: agente-h1d-modelos (H1d-modelos)
+
+- [ ] `SD-223` · **archivo**: `app/static/app-shell.js` (SHELL_SECCIONES) + `app/static/app.js`
+      (`configureSidebarVisibilities()`) · **carril dueño**: ninguno (ambos son colisión fuera de carril)
+      **quién lo pide**: agente-lg-galeria (LG)
+      **qué hace falta**: la galería de componentes ya vive en `/sistema`
+      (`app/static/sistema.html`, ruta añadida en `pages.py`, commit `72b7e7e`) y
+      funciona por URL directa — `configureSidebarVisibilities()` ya la deja pasar
+      por la rama `else allowed = true` (páginas sin restricción propia, como
+      ayuda/investigación), así que no hace falta abrir ese archivo sólo para el
+      control de acceso. Lo que falta es el enlace visible: una entrada en
+      `SHELL_SECCIONES` (`app-shell.js`) para que aparezca en el menú lateral. No
+      lo toqué por ser colisión fuera de mi carril (`app-shell.js` está en la lista
+      de colisiones de SD-040/SD-131).
