@@ -1,124 +1,88 @@
 /* === Componentes de administracion: KPI, tabs, tabla, upload, estados === */
+/* === Acento de tema en componentes (SD-089, SD-206) ===
    Botones, tarjetas, insignias, modales — la parte que antes vivía en el
    bloque "Extensión completa" (SD-089: la sombra de hover pasa a ser una
    sola declaración con el color del tema, no trece repartidas).
-   ========================================================================== */
-body.theme-dorado .ds-btn-primary, body.theme-manila .ds-btn-primary,
-body.theme-esmeralda .ds-btn-primary, body.theme-noche .ds-btn-primary,
-body.theme-granate .ds-btn-primary, body.theme-carbon .ds-btn-primary,
-body.theme-lavanda .ds-btn-primary, body.theme-terracota .ds-btn-primary,
-body.theme-azul-profundo .ds-btn-primary, body.theme-cian .ds-btn-primary,
-body.theme-oliva .ds-btn-primary,
-body.theme-dorado .btn.btn-primary:not(.ds-btn-primary), body.theme-manila .btn.btn-primary:not(.ds-btn-primary),
-body.theme-esmeralda .btn.btn-primary:not(.ds-btn-primary), body.theme-noche .btn.btn-primary:not(.ds-btn-primary),
-body.theme-granate .btn.btn-primary:not(.ds-btn-primary), body.theme-carbon .btn.btn-primary:not(.ds-btn-primary),
-body.theme-lavanda .btn.btn-primary:not(.ds-btn-primary), body.theme-terracota .btn.btn-primary:not(.ds-btn-primary),
-body.theme-azul-profundo .btn.btn-primary:not(.ds-btn-primary), body.theme-cian .btn.btn-primary:not(.ds-btn-primary),
-body.theme-oliva .btn.btn-primary:not(.ds-btn-primary),
-body.theme-dorado .select-tag.active, body.theme-manila .select-tag.active,
-body.theme-esmeralda .select-tag.active, body.theme-noche .select-tag.active,
-body.theme-granate .select-tag.active, body.theme-carbon .select-tag.active,
-body.theme-lavanda .select-tag.active, body.theme-terracota .select-tag.active,
-body.theme-azul-profundo .select-tag.active, body.theme-cian .select-tag.active,
-body.theme-oliva .select-tag.active,
-body.theme-dorado .ds-badge, body.theme-manila .ds-badge,
-body.theme-esmeralda .ds-badge, body.theme-noche .ds-badge,
-body.theme-granate .ds-badge, body.theme-carbon .ds-badge,
-body.theme-lavanda .ds-badge, body.theme-terracota .ds-badge,
-body.theme-azul-profundo .ds-badge, body.theme-cian .ds-badge,
-body.theme-oliva .ds-badge,
-body.theme-dorado .rrhh-person-modal .nav-pills .nav-link.active, body.theme-manila .rrhh-person-modal .nav-pills .nav-link.active,
-body.theme-esmeralda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-noche .rrhh-person-modal .nav-pills .nav-link.active,
-body.theme-granate .rrhh-person-modal .nav-pills .nav-link.active, body.theme-carbon .rrhh-person-modal .nav-pills .nav-link.active,
-body.theme-lavanda .rrhh-person-modal .nav-pills .nav-link.active, body.theme-terracota .rrhh-person-modal .nav-pills .nav-link.active,
-body.theme-azul-profundo .rrhh-person-modal .nav-pills .nav-link.active, body.theme-cian .rrhh-person-modal .nav-pills .nav-link.active,
-body.theme-oliva .rrhh-person-modal .nav-pills .nav-link.active {
+   SD-206: los once selectores por tema se agrupan con `:is()`, misma
+   especificidad que la lista repetida (elemento + una clase), sin cambiar
+   qué gana en ningún empate. */
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-btn-primary,
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .btn.btn-primary:not(.ds-btn-primary),
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .select-tag.active,
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-badge,
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .rrhh-person-modal .nav-pills .nav-link.active {
   background-color: var(--tt-accent) !important;
   border-color: var(--tt-accent) !important;
 }
-body.theme-dorado .ds-btn-primary:hover, body.theme-manila .ds-btn-primary:hover,
-body.theme-esmeralda .ds-btn-primary:hover, body.theme-noche .ds-btn-primary:hover,
-body.theme-granate .ds-btn-primary:hover, body.theme-carbon .ds-btn-primary:hover,
-body.theme-lavanda .ds-btn-primary:hover, body.theme-terracota .ds-btn-primary:hover,
-body.theme-azul-profundo .ds-btn-primary:hover, body.theme-cian .ds-btn-primary:hover,
-body.theme-oliva .ds-btn-primary:hover {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-btn-primary:hover {
   background-color: var(--tt-accent-hover) !important;
   border-color: var(--tt-accent-hover) !important;
   box-shadow: 0 4px 12px rgba(var(--tt-accent-rgb), .4) !important;
 }
-body.theme-dorado .ds-item-card:hover, body.theme-manila .ds-item-card:hover,
-body.theme-esmeralda .ds-item-card:hover, body.theme-noche .ds-item-card:hover,
-body.theme-granate .ds-item-card:hover, body.theme-carbon .ds-item-card:hover,
-body.theme-lavanda .ds-item-card:hover, body.theme-terracota .ds-item-card:hover,
-body.theme-azul-profundo .ds-item-card:hover, body.theme-cian .ds-item-card:hover,
-body.theme-oliva .ds-item-card:hover {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-item-card:hover {
   border-left-color: var(--tt-accent-light) !important;
   box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,.12)), 0 0 0 1px rgba(var(--tt-accent-rgb), .07) !important;
 }
-body.theme-dorado .ds-search-input:focus, body.theme-manila .ds-search-input:focus,
-body.theme-esmeralda .ds-search-input:focus, body.theme-noche .ds-search-input:focus,
-body.theme-granate .ds-search-input:focus, body.theme-carbon .ds-search-input:focus,
-body.theme-lavanda .ds-search-input:focus, body.theme-terracota .ds-search-input:focus,
-body.theme-azul-profundo .ds-search-input:focus, body.theme-cian .ds-search-input:focus,
-body.theme-oliva .ds-search-input:focus {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-search-input:focus {
   border-color: var(--tt-accent-light) !important;
   box-shadow: 0 0 0 0.2rem rgba(var(--tt-accent-rgb), .25) !important;
 }
-body.theme-dorado .ds-results-header, body.theme-manila .ds-results-header,
-body.theme-esmeralda .ds-results-header, body.theme-noche .ds-results-header,
-body.theme-granate .ds-results-header, body.theme-carbon .ds-results-header,
-body.theme-lavanda .ds-results-header, body.theme-terracota .ds-results-header,
-body.theme-azul-profundo .ds-results-header, body.theme-cian .ds-results-header,
-body.theme-oliva .ds-results-header {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-results-header {
   border-bottom-color: var(--tt-accent-light) !important;
 }
-body.theme-dorado .select-tag:hover, body.theme-manila .select-tag:hover,
-body.theme-esmeralda .select-tag:hover, body.theme-noche .select-tag:hover,
-body.theme-granate .select-tag:hover, body.theme-carbon .select-tag:hover,
-body.theme-lavanda .select-tag:hover, body.theme-terracota .select-tag:hover,
-body.theme-azul-profundo .select-tag:hover, body.theme-cian .select-tag:hover,
-body.theme-oliva .select-tag:hover {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .select-tag:hover {
   color: var(--tt-accent-hover) !important;
   border-color: var(--tt-accent-light) !important;
 }
-body.theme-dorado .ds-doc-thumb-badge, body.theme-manila .ds-doc-thumb-badge,
-body.theme-esmeralda .ds-doc-thumb-badge, body.theme-granate .ds-doc-thumb-badge,
-body.theme-carbon .ds-doc-thumb-badge, body.theme-lavanda .ds-doc-thumb-badge,
-body.theme-terracota .ds-doc-thumb-badge, body.theme-azul-profundo .ds-doc-thumb-badge,
-body.theme-cian .ds-doc-thumb-badge, body.theme-oliva .ds-doc-thumb-badge {
+/* .ds-doc-thumb-badge, .rrhh-person-photo-initials, .ds-login-card excluyen
+   theme-noche: tiene un acento propio (línea siguiente en cada bloque) que
+   no coincide con --tt-accent, así que ese tema queda fuera del :is(). */
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-granate,
+        .theme-carbon, .theme-lavanda, .theme-terracota, .theme-azul-profundo,
+        .theme-cian, .theme-oliva) .ds-doc-thumb-badge {
   background: var(--tt-accent) !important;
 }
 body.theme-noche .ds-doc-thumb-badge { background: var(--tt-accent-hover) !important; }
-body.theme-dorado .ds-doc-thumb i, body.theme-manila .ds-doc-thumb i,
-body.theme-esmeralda .ds-doc-thumb i, body.theme-noche .ds-doc-thumb i,
-body.theme-granate .ds-doc-thumb i, body.theme-carbon .ds-doc-thumb i,
-body.theme-lavanda .ds-doc-thumb i, body.theme-terracota .ds-doc-thumb i,
-body.theme-azul-profundo .ds-doc-thumb i, body.theme-cian .ds-doc-thumb i,
-body.theme-oliva .ds-doc-thumb i {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-doc-thumb i {
   color: var(--tt-accent) !important;
 }
-body.theme-dorado .ds-doc-modal-head, body.theme-manila .ds-doc-modal-head,
-body.theme-esmeralda .ds-doc-modal-head, body.theme-noche .ds-doc-modal-head,
-body.theme-granate .ds-doc-modal-head, body.theme-carbon .ds-doc-modal-head,
-body.theme-lavanda .ds-doc-modal-head, body.theme-terracota .ds-doc-modal-head,
-body.theme-azul-profundo .ds-doc-modal-head, body.theme-cian .ds-doc-modal-head,
-body.theme-oliva .ds-doc-modal-head {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-noche,
+        .theme-granate, .theme-carbon, .theme-lavanda, .theme-terracota,
+        .theme-azul-profundo, .theme-cian, .theme-oliva) .ds-doc-modal-head {
   background: linear-gradient(135deg, var(--tt-tint-1), var(--tt-tint-2)) !important;
   border-color: var(--tt-tint-border) !important;
 }
-body.theme-dorado .rrhh-person-photo-initials, body.theme-manila .rrhh-person-photo-initials,
-body.theme-esmeralda .rrhh-person-photo-initials, body.theme-granate .rrhh-person-photo-initials,
-body.theme-carbon .rrhh-person-photo-initials, body.theme-lavanda .rrhh-person-photo-initials,
-body.theme-terracota .rrhh-person-photo-initials, body.theme-azul-profundo .rrhh-person-photo-initials,
-body.theme-cian .rrhh-person-photo-initials, body.theme-oliva .rrhh-person-photo-initials {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-granate,
+        .theme-carbon, .theme-lavanda, .theme-terracota, .theme-azul-profundo,
+        .theme-cian, .theme-oliva) .rrhh-person-photo-initials {
   background: var(--tt-accent) !important;
 }
 body.theme-noche .rrhh-person-photo-initials { background: var(--tt-accent-hover) !important; }
-body.theme-dorado .ds-login-card, body.theme-manila .ds-login-card,
-body.theme-esmeralda .ds-login-card, body.theme-granate .ds-login-card,
-body.theme-carbon .ds-login-card, body.theme-lavanda .ds-login-card,
-body.theme-terracota .ds-login-card, body.theme-azul-profundo .ds-login-card,
-body.theme-cian .ds-login-card, body.theme-oliva .ds-login-card {
+body:is(.theme-dorado, .theme-manila, .theme-esmeralda, .theme-granate,
+        .theme-carbon, .theme-lavanda, .theme-terracota, .theme-azul-profundo,
+        .theme-cian, .theme-oliva) .ds-login-card {
   border-top-color: var(--tt-accent) !important;
 }
 body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
