@@ -965,3 +965,58 @@ No hecho, fuera de mi zona real (documentado, no tocado):
 `python -m pytest app/tests -q` → 713 passed antes y después del cambio.
 
 **quién lo pide**: agente-l10-estilos (L10-estilos)
+
+**NOTA (carrera de git, no un pendiente)**: antes de comitear comprobé `git status --short`
+y `git diff --cached --stat` — sólo `app/static/styles.css` y este mismo `_BUZON.md` en
+stage, nada ajeno. Usé `git commit <paths explícitos>` (regla 10, recomendado en la nota de
+`agente-c3-stats` más arriba) precisamente para evitar arrastrar el índice compartido. Aun
+así el commit resultante (`7de4937`) muestra 1693 líneas cambiadas en `styles.css` — muchas
+más que mi edición (unas 15 líneas netas) — porque `git commit <paths>` toma el contenido
+**del árbol de trabajo en ese instante**, y `styles.css` es un único archivo en disco que
+varios agentes `L1`-`L15` estaban editando a la vez sin worktrees aislados: cualquier commit
+sobre ese path, con o sin `git add` de por medio, incluye el trabajo en curso de todos en
+ese momento. Verifiqué que mi cambio está intacto y correcto dentro del commit (`git show
+7de4937 -- app/static/styles.css | grep SD-105`), no reparo el historial.
+
+## L4-estilos — SD-052, SD-053, SD-070, SD-105, SD-141, SD-174, SD-218, SD-219, SD-221
+
+Lote pequeño: zona responsive de tarjeta, login y etiquetas de seleccion en
+`app/static/styles.css` (contenido: desde `.ds-doc-panel h5` hasta el final de
+`.select-tag.active`).
+
+Hecho, dentro de mi zona:
+- **SD-052**: `.ds-login-backdrop` ya no usa el degradado azul marino fijo
+  (`rgba(10,25,47,.8)`/`.88`, ajeno a los once temas). Ahora `background-color:
+  color-mix(in srgb, var(--c-brand-800) 88%, black)`: un solo alfa, derivado
+  del acento de marca.
+- **SD-053**: quitado `backdrop-filter: blur(15px)` de `.ds-login-card` — el
+  fondo ya es un color solido, asi que no difuminaba nada y solo forzaba una
+  capa de composicion a pantalla completa.
+- **SD-070**: verificado, ya no aplica en mi zona — `.ds-item-abstract` (base
+  y el bloque `@media (max-width:768px)`) ya declara `line-clamp` estandar
+  junto al `-webkit-line-clamp`.
+- **SD-141**: tokenizado `.select-tag` (radio, color, espaciado) con los
+  primitivos de L0. No fusionado con `.ds-date-chip` (zona L7, fuera de mi
+  rango) — dejo comentario en el CSS señalando la coordinacion pendiente.
+- **SD-174**: `.select-tag` tenia `transition: all 0.2s ease-in-out`; ahora
+  lista explicita de propiedades (`background-color, color, border-color,
+  box-shadow`) con `var(--duration-base)`.
+- **SD-221**: la unica ocurrencia de `backdrop-filter` en mi zona era la de
+  SD-053, ya resuelta.
+
+No hecho, fuera de mi zona real (documentado, no tocado):
+- **SD-105**: los tres puntos de declaracion citados en la ficha
+  (`styles.css:355, 2828, 2960` en la numeracion del documento) no caen en mi
+  rango (950-1235 aprox.); no encontre un cuarto punto de `.ds-item-card`
+  padding en mi zona que coincida con la ficha. No tocado.
+- **SD-218**: `.ds-person-profile-header .d-flex`, `.ds-person-info .row
+  .col-sm-6` y `.ds-person-info .d-flex.justify-content-between` si estan en
+  mi zona (bloque `@media (max-width:768px)`), pero el arreglo real es clases
+  semanticas en el marcado (`admin_hr.html`, carril LH, fuera de mi alcance).
+  No invento una clase CSS nueva sin que exista quien la use en el HTML.
+- **SD-219**: los bloques `_archivo`/`_rrhh` duplicados citados en la ficha
+  estan fuera de mi zona (~655-767).
+
+`python -m pytest app/tests -q` -> 713 passed antes y despues del cambio.
+
+**quien lo pide**: agente-l4-estilos (L4-estilos)

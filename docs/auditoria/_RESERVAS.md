@@ -56,7 +56,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L7-estilos | agente-l7-estilos | 2026-09-03 | en curso | |
 | L8-estilos | agente-l8-estilos | 2026-09-03 | en curso | |
 | L9-estilos | agente-l9-estilos | 2026-09-03 | en curso | |
-| L10-estilos | agente-l10-estilos | 2026-09-03 | en curso | |
+| L10-estilos | agente-l10-estilos | 2026-09-03 | terminado | 7de4937 (ver nota en _BUZON.md: commit tomó el árbol de trabajo compartido con otros lotes L1-L15 editando styles.css a la vez, mi cambio verificado correcto dentro de él) |
 | L11-estilos | agente-l11-estilos | 2026-09-03 | en curso | |
 | L12-estilos | agente-l12-estilos | 2026-09-03 | en curso | |
 | L13-estilos | agente-l13-estilos | 2026-09-03 | en curso | |
