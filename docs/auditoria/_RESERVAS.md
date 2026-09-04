@@ -71,7 +71,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 ```
 | A3-buscador-rrhh | bruno | 2026-09-02 14:20 | en curso | |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | en curso | |
-| B1-admin-archivo-html | agente-b1-admin-archivo-html | 2026-09-03 | en curso | |
+| B1-admin-archivo-html | agente-b1-admin-archivo-html | 2026-09-03 | terminado | 4be45d3 |
 | B2-admin-rrhh-html | agente-b2-admin-rrhh-html | 2026-09-03 | terminado | 7cb1a0a |
 | B3-admin-sistema-html | agente-b3-admin-sistema-html | 2026-09-03 | en curso | |
 | E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | en curso | |

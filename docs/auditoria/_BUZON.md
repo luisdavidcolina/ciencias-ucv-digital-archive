@@ -1735,3 +1735,79 @@ No toqué (anotadas para su carril dueño):
   `admin_hr.html` en absoluto, así que no hay nada que resolver desde este carril.
 
 **quién lo pide**: agente-b2-admin-rrhh-html (B2-admin-rrhh-html)
+
+## Pendientes de B1-admin-archivo-html que tocan archivos ajenos o backend
+
+Resueltas en `app/static/admin_archive.html` (commit `4be45d3`): `OA-013`, `OA-050`
+(SRI en las 5 dependencias de CDN que no son fuentes dinámicas de Google Fonts —
+`crossorigin`/`integrity` calculados con `openssl dgst -sha384` sobre el contenido
+real servido), `OA-058`/`OR-233` (pestaña «Exportar» renombrada a «Datos», con la
+barra de importación CSV movida ahí desde «Ingresar» — mismos ids, sólo cambia de
+sitio en el DOM, ningún listener depende de la posición), `OA-064` (se quitó
+`#rrhh-person-modal` y el `<script src="/static/admin-edit-hr.js">`: no hay ninguna
+página que cargue `hr.js` desde `admin_archive.html`, así que el modal estaba
+muerto; de paso corrige un bug de solapamiento — `admin-edit-hr.js:97` definía su
+propia `exportAdminCSV()` que, por cargarse después de `admin-monitor.js:395`,
+pisaba la versión correcta para el módulo Archivo), `OA-066`, `OA-073`, `OA-087`,
+`OA-095` (el `<input type="file">` de la zona de arrastre pasó de
+`style="display:none"` a la clase `.sr-only` de Bootstrap —ya cargado por CDN, no
+hizo falta tocar `styles.css`— con un `<label for=...>` asociado), `OA-108`,
+`OA-139`, `OA-179`, `OA-180`, `OA-186` (parcial, ver abajo) y `OA-211`.
+
+- [ ] `DG-138` (digitalización a la carta desde una petición de consulta) ·
+      **archivos**: `app/main.py` `[CHOCA]` (migración de estado «pendiente de
+      digitalizar» + cola), `app/static/admin_archive.html` · **carril dueño**:
+      H1a-migraciones / B1-admin-archivo-html
+      **qué hace falta**: es una función nueva completa (estado en el documento,
+      cola visible para el archivista, aviso al solicitante), no una corrección de
+      marcado. No hay endpoint ni columna que consumir todavía; queda para cuando
+      exista el soporte de backend.
+- [ ] `OA-052` (el pane de «Tipos» carga y pinta la tabla de retención aunque esté
+      oculto) · **archivo**: `app/static/admin.js` `[CHOCA]` · **carril dueño**:
+      B4-admin-tabs (terminado, commit `6c55738`)
+      **qué hace falta**: revisando el HTML, `retencion-tipos-body-archivo` sólo
+      existe dentro del pane de Retención — no hay ningún `tbody` compartido que
+      arreglar en `admin_archive.html`. El problema real es que
+      `loadAdminTab("categories")` también llama a `loadRetentionConfig()`
+      (`admin.js:18` y `:21`, la misma causa que documenta `OA-051`, que no es mío):
+      quien retoque `admin.js` debe hacer que sólo la pestaña «Retención» dispare esa
+      carga.
+- [ ] `OA-065` (ocho KPIs sin jerarquía) y `OA-069` (color de KPI en `style` en
+      línea) · **archivo**: `app/static/styles.css` `[CHOCA]` · **carril dueño**:
+      cualquier carril de estilos (`LX`, todos terminados)
+      **qué hace falta**: para OA-065, clases de tamaño/peso distintas para 2-3 KPIs
+      principales (`kpi-total-docs`, `chart-total-digitalizados`,
+      `chart-total-pendientes`) frente al resto — no las añadí en el HTML porque sin
+      la regla CSS correspondiente no cambia nada visualmente y quería evitar dejar
+      clases fantasma. Para OA-069, faltan las clases semánticas
+      `.ds-kpi--neutral`/`.ds-kpi--alerta`/`.ds-kpi--aviso` que sustituyan al
+      `border-left: 4px solid var(--viz-N)` en línea de las 8 tarjetas
+      (`admin_archive.html:55,64,74,84,94,103,112,121` tras mi commit) — en cuanto
+      existan esas clases en `styles.css`, el cambio en el HTML es mecánico.
+- [ ] `OA-081` (filtro analítico de una tarjeta entera para 2 fechas) · **archivos**:
+      `app/static/admin-charts.js` `[CHOCA]` · **carril dueño**: B10-admin-charts
+      (terminado, commit `3b6001e`)
+      **qué hace falta**: las clases `.ds-date-chips`/`.ds-date-chip` ya existen en
+      `styles.css` y el patrón está en `archive.html:66-69`, así que el HTML se
+      puede reemplazar sin tocar `styles.css` — pero esos chips los interpreta
+      `app.js:262` (`data-module`/`data-preset` de la búsqueda pública), no
+      `admin-charts.js`. Sin la lógica de "aplicar preset" en `admin-charts.js`
+      quedarían botones muertos, así que no los añadí todavía.
+- [ ] `OA-186` (queda pendiente el resto) · **archivo**: `app/static/styles.css`
+      `[CHOCA]` · **carril dueño**: cualquier carril de estilos
+      **qué hace falta**: sólo pude borrar el bloque `<style>` que ya estaba
+      duplicado en `styles.css` (comentario en `styles.css:2615-2618` lo confirma
+      explícitamente para este archivo) y las reglas de `border-radius` de `.card`/
+      `.info-box`, también duplicadas (`styles.css:658-663`, `:4705-4714`). Quedan
+      dos reglas en el primer `<style>` del `<head>` (`.table-hover tbody tr:hover`,
+      `.nav-pills .nav-link.active` en modo claro) que **no** tienen equivalente en
+      `styles.css` — sólo existe la variante `body.dark-mode` (`styles.css:3050`,
+      `:3097`). Borrarlas sin más perdería el resaltado de fila al pasar el ratón y
+      el color de la pestaña activa en modo claro.
+- [ ] `OA-197` (ocho KPIs a 390px ocupan cuatro filas de scroll antes de las
+      pestañas) · **archivo**: `app/static/styles.css` `[CHOCA]` (`:3396-3405`) ·
+      **carril dueño**: cualquier carril de estilos
+      **qué hace falta**: colapsar a 2-3 cifras clave + «Ver todas las cifras» en
+      móvil es un cambio de `styles.css` (media query), no de marcado.
+
+**quién lo pide**: agente-b1-admin-archivo-html (B1-admin-archivo-html)
