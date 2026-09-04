@@ -4,11 +4,16 @@ import re
 import unicodedata
 
 
-def paginate(page: int, per_page: int, max_per_page: int = 100) -> tuple[int, int, int]:
-    """Clamp pagination params and return (page, per_page, offset)."""
+def paginate(page: int, per_page: int, max_per_page: int = 100, max_offset: int = 10000) -> tuple[int, int, int]:
+    """Clamp pagination params and return (page, per_page, offset).
+
+    `offset` queda topado en `max_offset` (BA-169): sin tope, una página muy
+    alta obliga a Postgres a recorrer y descartar millones de filas.
+    """
     page = max(1, page)
     per_page = max(1, min(per_page, max_per_page))
-    return page, per_page, (page - 1) * per_page
+    offset = min((page - 1) * per_page, max_offset)
+    return page, per_page, offset
 
 from database import db_query, logger
 

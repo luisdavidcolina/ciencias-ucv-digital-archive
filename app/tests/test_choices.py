@@ -1,41 +1,56 @@
-"""Tests para /api/choices (estructura del payload y caché)."""
-import pytest
+"""Tests para /api/choices (BA-101: exige sesión y segmenta por módulo;
+BA-145: `?scope=` filtra el payload; caché en memoria con TTL)."""
 from unittest.mock import patch
-import pandas as pd
-
-from tests.conftest import _archivo_row, _rrhh_view_row
 
 
-def _empty_rrhh_df():
-    return pd.DataFrame(columns=[
-        "cedula", "empleado", "personas_relacionadas", "departamento", "estado",
-        "doc_type", "categoria", "fecha_ingreso", "ubicacion", "foto_url",
-        "fecha_jubilacion", "fecha_pension", "rif", "cargo", "id_archivo",
-        "descriptores_libres",
-    ])
-
-
-def _archivo_df():
-    return pd.DataFrame([{
-        "id": 1, "titulo": "Doc", "autor": "A", "fecha": "2024-01-01",
-        "doc_type": "Informe", "categoria": "Parte I", "ubicacion": "Estante 1",
-        "tesauro_primario": "Informe", "tesauro_secundario": "Parte I",
-        "descriptores_libres": "gestión; académico", "resumen": "", "file_url": "",
-    }])
+def _fila_modulo(modulo):
+    return [{"modulo": modulo}]
 
 
 class TestChoices:
-    def test_estructura_correcta(self, client):
-        with (
-            patch("routes.lookups.fetch_archive_dataframe", return_value=_archivo_df()),
-            patch("routes.hr.fetch_hr_dataframe",       return_value=_empty_rrhh_df()),
-            patch("routes.lookups.db_query",                return_value=[]),
-        ):
-            # Limpiar caché antes del test
-            import routes.lookups as ch
-            ch._cache = {}
+    def test_sin_sesion_recibe_401(self, anon_client):
+        res = anon_client.get("/api/choices")
+        assert res.status_code == 401
 
-            res = client.get("/api/choices")
+    def test_usuario_de_archivo_no_recibe_datos_de_rrhh(self, client_as):
+        c = client_as("archivo_normal")
+        with patch("routes.lookups.db_query") as mock_db:
+            mock_db.side_effect = lambda sql, *a, **k: (
+                _fila_modulo("Archivo") if "usuarios_sistema" in sql else []
+            )
+            import routes.lookups as ch
+            ch.invalidate_choices_cache()
+            res = c.get("/api/choices")
+
+        assert res.status_code == 200
+        body = res.json()
+        assert "archivo" in body
+        assert "rrhh" not in body
+
+    def test_usuario_de_rrhh_no_recibe_datos_de_archivo(self, client_as):
+        c = client_as("rrhh_normal")
+        with patch("routes.lookups.db_query") as mock_db:
+            mock_db.side_effect = lambda sql, *a, **k: (
+                _fila_modulo("RRHH") if "usuarios_sistema" in sql else []
+            )
+            import routes.lookups as ch
+            ch.invalidate_choices_cache()
+            res = c.get("/api/choices")
+
+        assert res.status_code == 200
+        body = res.json()
+        assert "rrhh" in body
+        assert "archivo" not in body
+
+    def test_usuario_global_recibe_ambos_modulos(self, client_as):
+        c = client_as("global_admin")
+        with patch("routes.lookups.db_query") as mock_db:
+            mock_db.side_effect = lambda sql, *a, **k: (
+                _fila_modulo("Global") if "usuarios_sistema" in sql else []
+            )
+            import routes.lookups as ch
+            ch.invalidate_choices_cache()
+            res = c.get("/api/choices")
 
         assert res.status_code == 200
         body = res.json()
@@ -49,16 +64,39 @@ class TestChoices:
         assert "estados"   in body["rrhh"]
         assert "people"    in body["rrhh"]
 
-    def test_cache_activo(self, client):
-        """Segunda llamada devuelve el caché sin tocar la BD."""
-        import routes.lookups as ch
-        ch._cache = {"archivo": {"doc_types": ["Cached"]}, "rrhh": {}}
-        ch._cache_ts = 1e18  # Timestamp muy futuro → nunca expira
+    def test_scope_archivo_omite_rrhh_aunque_el_usuario_tenga_ambos_modulos(self, client_as):
+        c = client_as("global_admin")
+        with patch("routes.lookups.db_query") as mock_db:
+            mock_db.side_effect = lambda sql, *a, **k: (
+                _fila_modulo("Global") if "usuarios_sistema" in sql else []
+            )
+            import routes.lookups as ch
+            ch.invalidate_choices_cache()
+            res = c.get("/api/choices?scope=archivo")
 
-        res = client.get("/api/choices")
         assert res.status_code == 200
-        assert res.json()["archivo"]["doc_types"] == ["Cached"]
+        body = res.json()
+        assert "archivo" in body
+        assert "rrhh" not in body
 
-        # Limpiar después del test
-        ch._cache = {}
-        ch._cache_ts = 0.0
+    def test_cache_activo_no_repite_las_consultas_de_datos(self, client_as):
+        """Segunda llamada dentro del TTL no vuelve a construir el payload."""
+        c = client_as("global_admin")
+        with patch("routes.lookups.db_query") as mock_db:
+            mock_db.side_effect = lambda sql, *a, **k: (
+                _fila_modulo("Global") if "usuarios_sistema" in sql else []
+            )
+            import routes.lookups as ch
+            ch.invalidate_choices_cache()
+
+            res1 = c.get("/api/choices")
+            calls_after_first = mock_db.call_count
+            res2 = c.get("/api/choices")
+
+        assert res1.status_code == 200
+        assert res2.status_code == 200
+        # La segunda llamada sólo consulta el módulo del usuario, no reconstruye
+        # el payload completo desde la base.
+        assert mock_db.call_count < calls_after_first * 2
+
+        ch.invalidate_choices_cache()
