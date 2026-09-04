@@ -49,16 +49,10 @@ apunte aquí vale más que un conflicto de fusión en `main.py`.
       mi carril declarado es solo `files.py`, `share.py`, `compartido.html`.
 
 
-- [ ] `OR-009` · **archivo**: `app/routes/trash.py`, `app/static/admin_hr.html`,
-      `app/static/admin-edit.js` · **carril dueño**: `C7-papelera` (ya está en su lista de
-      pendientes en `PLAN-PARALELO.md`, no en la de `B9-admin-edit-rrhh`)
-      **quién lo pide**: agente-b9-admin-edit-rrhh (B9-admin-edit-rrhh)
-      **qué hace falta**: la instrucción que me dieron citaba OR-009 como ficha "muy concreta"
-      de mi carril, pero ninguno de los archivos que toca es `admin-edit-hr.js` — la papelera de
-      RRHH se pinta desde `admin-edit.js` (carril `B8-admin-edit-archivo`) leyendo
-      `app/routes/trash.py` (carril `C7-papelera`), y el marcado es `admin_hr.html` (carril
-      `B2-admin-rrhh-html`). No la toco por regla 3 del plan paralelo. Ya está anotada en el
-      abanico de `C7-papelera` (en curso).
+- [x] `OR-009` · confirmado por agente-sweep2-admin-html (SWEEP2-admin-html): ya resuelto por
+      C7-papelera (`42b90c5`) del lado de `trash.py`; no queda nada por hacer en
+      `admin_hr.html` (ver también la confirmación de agente-sweep-admin-html en este mismo
+      archivo, línea ~2697).
 
 - **NOTA (no es un pendiente, es una carrera de git)**: mi corrección de OR-005/OR-006 en
       `app/static/admin-edit-hr.js` y esta misma anotación de OR-009 quedaron en el commit
@@ -593,11 +587,15 @@ mío:
       **qué hace falta**: selección múltiple con barra de acciones flotante. No cabe sin
       casillas en el `<thead>`/`<tbody>` que declara el HTML, ni sin un endpoint de lote.
 
-- [ ] `OA-104/OR-128` · **archivo**: `app/routes/admin/docs.py` (parámetros `sort`/`dir` en
-      `/list_all` sobre lista blanca de columnas), `app/static/admin_archive.html`/`admin_hr.html`
-      (`aria-sort` en los `<th>`)
-      **qué hace falta**: orden real server-side; un orden sólo de la página visible en JS sería
-      engañoso (25 de 412 filas) y no es lo que pide la ficha.
+- [x] `OA-104/OR-128` (mitad de `docs.py`) · resuelto por agente-sweep2-backup-docs-deps-ai
+      (SWEEP2-backup-docs-deps-ai): `GET /api/admin/list_all` acepta ahora `sort`/`dir`
+      (`asc`/`desc`) sobre una lista blanca de columnas por módulo (`_SORT_COLUMNS` en
+      `docs.py`: título/autor/fecha/tipo/estado/soporte en Archivo; empleado/cédula/
+      departamento/estado/cargo/fecha de ingreso/nº de documentos en RRHH). Un `sort`
+      fuera de la lista cae al orden por defecto de siempre (nunca 400), para que un
+      frontend con un valor obsoleto no se rompa. Falta el lado de marcado —
+      `aria-sort`/cabeceras clicables en `app/static/admin_archive.html`/`admin_hr.html` —
+      fuera de mi zona (B1-admin-archivo-html/B2-admin-rrhh-html).
 
 - [ ] `OA-105` · no es de este carril (no aparece en la lista de B5) — mencionado sólo para que
       quien lo tenga sepa que un selector de columnas persistido interactúa con OA-104 y con
@@ -612,10 +610,10 @@ mío:
 - [x] `OA-150` · resuelto por agente-sweep-admin-docs (SWEEP-admin-docs): `list_all` (Archivo)
       ahora selecciona `COALESCE(da.disposicion, '') AS disposicion`.
 
-- [ ] `OA-181` · **archivo**: `app/static/admin_archive.html`
-      **qué hace falta**: son los tres botones del *pie del modal de detalle* (Visualizar/
-      Editar/Descargar), marcado fijo en el HTML del modal, no algo que arme
-      `admin-monitor.js`.
+- [x] `OA-181` · verificado por agente-sweep2-admin-html (SWEEP2-admin-html): el pie del modal
+      de detalle en `admin_archive.html` (`#btn-modal-view`/`#btn-modal-edit`/
+      `#btn-modal-download`, líneas 573-575) ya tiene los tres botones fijos en el marcado del
+      modal. No requirió cambio.
 
 - [ ] `OR-001` (backend) — ver primera entrada de este bloque.
 
@@ -789,14 +787,15 @@ también lo encuentre. También cerré SI-028/IN-038 (`/api/auth/verify` ya no a
 token por query param), SI-035 (ya no se hace `.strip()` sobre la contraseña) y SI-048
 (mensaje de login siempre genérico).
 
-- [ ] **archivo**: `app/schema.sql`, `app/database.py` · **carril dueño**: H1a-migraciones /
-      H1b-conexion **qué hace falta**: el bloqueo de SI-031 que implementé en `auth.py` vive
-      en un diccionario en memoria del proceso (`_FAILED_ATTEMPTS`). Funciona dentro de una
-      misma instancia cálida, pero en Vercel (funciones serverless, múltiples instancias) no
-      es un contador compartido de verdad — un atacante repartido entre instancias frías lo
-      esquiva. Para cerrarlo del todo hace falta una tabla (`login_attempts` o similar) y
-      persistir el contador en Postgres, fuera de mi carril (`auth.py` no puede tocar
-      `schema.sql`). Dejé el comentario del código apuntando a esto.
+- [x] `SI-031` (parte de `schema.sql`) · resuelto por agente-h1a-migraciones (H1a-migraciones,
+      commit `2828d16`), confirmado por agente-sweep2-main-schema (SWEEP2-main-schema): la
+      tabla `public.login_attempts` (usuario, ip, intentos, primer_intento_at,
+      ultimo_intento_at, bloqueado_hasta) con índice único `(usuario, ip)` ya existe en
+      `run_migrations()` (`app/main.py`). `database.py` no necesitaba cambio — es
+      `db_query` normal. Falta sólo el lado de `auth.py` (carril C9-auth): cambiar
+      `_FAILED_ATTEMPTS` (diccionario en memoria) por `db_query` con
+      `ON CONFLICT (usuario, ip) DO UPDATE`, fuera de mi carril (`auth.py` no es
+      `main.py`/`schema.sql`).
 
 **Carrera de git**: mi primer intento de commit (`9244e45`, con mi mismo mensaje "C9-auth:
 bloqueo de login...") no contenía mis cambios — otro agente (`agente-f1-paginas`, ver su
@@ -1258,13 +1257,13 @@ hace falta en cada uno, para quien tenga esos carriles:
       0.4s ease"` en cada fallo de login (fuerza reflow antes para que retriggeree si el
       error se repite). Verificado leyendo el archivo, sin cambio de código necesario; sólo
       se marca la ficha.
-- [ ] `SD-138` (parte HTML) · **archivo**: los `<style>` de `admin_archive.html`,
-      `admin_hr.html`, `admin_system.html` · **carril dueño**: LH
-      **qué hace falta**: quedan tres páginas (fuera de mi carril) que aún pueden redefinir
-      `.ds-skeleton` + `@keyframes ds-shimmer` en su propio `<style>`, pisando la variante
-      oscura que vive sólo en `styles.css`. `archive.html` ya no tenía el bloque duplicado
-      (verificado por agente-sweep-misc-paginas, SWEEP-misc-paginas) y `hr.html` lo tenía
-      — borrado por el mismo agente, dejando sólo `#session-warning-banner` en su
+- [x] `SD-138` (parte HTML, `admin_archive.html`/`admin_hr.html`) · resuelto por
+      agente-sweep2-admin-html (SWEEP2-admin-html): `admin_archive.html` ya no tenía el bloque
+      duplicado (verificado, sin coincidencias de `.ds-skeleton`/`ds-shimmer` en su `<style>`);
+      `admin_hr.html` sí lo tenía (líneas 924-925) — borrado, `styles.css` ya define
+      `.ds-skeleton` con variante oscura (línea ~2375). `admin_system.html` queda fuera de mi
+      zona (carril `B3-admin-sistema-html`), sigue pendiente ahí si aplica.
+      **nota histórica (parte HTML, `admin_archive.html`)** — dejaba sólo `#session-warning-banner` en su
       `<style>`; `styles.css` ya define `.ds-skeleton`/`ds-shimmer` con su variante bajo
       `body.dark-mode` (línea ~2672 y 3272), así que no hay pérdida visual. Quedan
       `admin_archive.html`, `admin_hr.html`, `admin_system.html` para el carril LH.
@@ -2264,18 +2263,14 @@ anotado para quien tenga el resto:
       expone `settings.environment` tal cual llega del entorno (no lo toqué, ese campo está
       bien); el arreglo es invertir la condición en `auth.py` (`!= "development"`) o derivarlo
       del esquema de la petición — ninguno de los dos es archivo mío.
-- [ ] `IN-034` · **archivo**: `app/main.py:70-76` (CORS), `app/core/config.py` ·
-      **carril dueño**: H1a-migraciones (main.py) + H1f-rutas-pagina (config.py)
-      **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
-      **qué hace falta**: `allow_origins=["*"]` junto con `allow_credentials=True` sigue
-      contradictorio. Confirmado por agente-sweep-main (SWEEP-main): mi carril de esta pasada
-      es exclusivamente `main.py`/`schema.sql`, así que no puedo añadir la variable
-      `ALLOWED_ORIGINS` en `config.py` yo mismo. Propuesta de formato para quien tenga
-      `config.py`: `ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "")` con orígenes
-      separados por coma; `main.py` la parsea y, si viene vacía, cae a `allow_origins=["*"]`
-      con `allow_credentials=False` (nunca `True` con `*`, para no dejar el arranque sin CORS
-      del todo mientras no haya lista configurada). En cuanto `config.py` exponga el campo, el
-      cambio en `main.py` es de una línea.
+- [x] `IN-034` · resuelto por agente-sweep2-main-schema (SWEEP2-main-schema): sin esperar a
+      `core/config.py`, `main.py` lee `ALLOWED_ORIGINS` directo de `os.environ` (mismo formato
+      propuesto por SWEEP-main: orígenes separados por coma). Si viene definida,
+      `allow_credentials=True` con esa lista; si no, `allow_origins=["*"]` con
+      `allow_credentials=False` — ya no coexisten comodín y credenciales. Cuando
+      `core/config.py` exponga el campo como `Settings`, esto puede simplificarse a leerlo de
+      `settings` en vez de `os.environ` directamente, pero el comportamiento correcto no
+      dependía de eso. `python -m pytest app/tests -q`: 809 passed antes y después.
 - [ ] `IN-107`/`IN-108` · **archivo**: `app/database.py:31-42` · **carril dueño**: H1b-conexion
       **quién lo pide**: agente-h1f-rutas-pagina (H1f-rutas-pagina)
       **qué hace falta**: nota informativa, no bloqueo: `core/config.py:25-26` ya declara
@@ -2868,3 +2863,30 @@ módulo por módulo, con `pytest app/tests -q` + `test_visual.py` tras cada uno,
 como pedía la ficha original.
 
 **quién lo pide/resuelve**: agente-lx4-orden-important (LX-4)
+
+## SWEEP2-styles (2026-09-04) — sin cambios de código
+
+Repasé las entradas sin marcar cuyo **archivo** objetivo incluye
+`app/static/styles.css` (hoy: los 12 módulos reales bajo `app/static/styles/`,
+importados desde `styles.css`, ver nota de LX-3 más arriba):
+
+- **línea ~403** (`OA-201`/`OR-234`/`OR-077`/`OA-210`/`OR-280`): `OA-201` ya
+  quedó verificado como resuelto por `agente-sweep-styles` en una nota previa
+  de este mismo buzón. `OR-234`/`OR-077` siguen bloqueados porque no existe
+  el marcado de `admin-charts.js` que definiría las clases a estilar.
+  `OA-210`/`OR-280` son de `admin.js`/rutas de alertas, no de CSS.
+- **línea ~662** (`OR-241`, tarjetas apiladas en móvil para el monitor RRHH):
+  exige marcado nuevo en `app/static/admin_hr.html` además de reglas de
+  layout — no es CSS-only, ya anotado así por `agente-b5-admin-monitor`.
+- **línea ~1451** (`L14-estilos`, insignia única SD-046/SD-124): ya resuelto
+  en su mayoría por `agente-l14-estilos` (commit `2bc5690`); lo que queda
+  (componente único de insignia) es una decisión de sistema repartida entre
+  varios carriles, no una tarea de un solo módulo CSS.
+
+Ninguna de las tres cabe en un cambio aislado de `app/static/styles/*.css`
+sin tocar HTML/JS/backend de otro carril. No hice cambios de código.
+`python -m pytest app/tests -q`: 809 passed (igual que al empezar).
+`python -m pytest app/tests/test_visual.py -q`: 12 passed (igual que al
+empezar).
+
+**quién lo pide/resuelve**: agente-sweep2-styles (SWEEP2-styles)
