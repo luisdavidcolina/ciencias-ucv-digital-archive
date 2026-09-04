@@ -1,9 +1,11 @@
 import re
+from datetime import date
 from typing import Annotated, List, Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 _SAFE_URL_RE = re.compile(r'^(/|https?://)', re.IGNORECASE)
 _DATE_RE     = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+_CEDULA_RE   = re.compile(r'^[VEJPGvejpg]?-?\d{6,9}$')
 
 # Aliases de longitud comunes
 Str255  = Annotated[str, Field(max_length=255)]
@@ -20,6 +22,28 @@ def _validate_date(v: str | None, field_name: str = "fecha") -> str | None:
     if v and not _DATE_RE.match(v):
         raise ValueError(f"{field_name} debe tener formato YYYY-MM-DD")
     return v or None
+
+def _normalize_cedula(v):
+    """OR-016/OR-084: 'V-12345678', 'v12345678', '12.345.678' y '12345678'
+    son la misma persona. Normaliza a '<letra>-<dígitos>' (letra por defecto V)
+    y rechaza lo que no tenga forma de cédula, para que dejen de convivir
+    como registros distintos bajo el UNIQUE de `cedula`."""
+    if not v:
+        return v or None
+    raw = v.strip().upper().replace(".", "").replace(" ", "")
+    if not _CEDULA_RE.match(raw):
+        raise ValueError("cedula debe tener el formato V-12345678 (letra opcional, 6 a 9 dígitos)")
+    digits = raw.lstrip("VEJPG-")
+    letra = raw[0] if raw[0] in "VEJPG" else "V"
+    return f"{letra}-{digits}"
+
+def _parse_iso_date(v):
+    if not v:
+        return None
+    try:
+        return date.fromisoformat(v)
+    except ValueError:
+        return None
 
 
 # =============================================================================
@@ -140,6 +164,44 @@ class DocumentSubmitRequest(BaseModel):
     def fecha_format(cls, v):
         return _validate_date(v)
 
+    @field_validator("cedula")
+    @classmethod
+    def cedula_format(cls, v):
+        return _normalize_cedula(v)
+
+    @model_validator(mode="after")
+    def rrhh_campos_obligatorios(self):
+        """OR-087: la pantalla marca con asterisco Nombres, Apellidos, Cédula,
+        Departamento y Estado (además de Tipo/Fecha/Ubicación, ya obligatorios
+        a nivel de campo) pero el backend sólo exigía Nombres, Cédula y
+        Ubicación. Sin esto entraban expedientes que la propia pantalla
+        prometía completos."""
+        if self.modulo == "RRHH":
+            faltantes = [campo for campo, valor in (
+                ("nombres", self.nombres), ("apellidos", self.apellidos),
+                ("cedula", self.cedula), ("departamento", self.departamento),
+                ("estado", self.estado),
+            ) if not (valor or "").strip()]
+            if faltantes:
+                raise ValueError(f"faltan campos obligatorios: {', '.join(faltantes)}")
+        return self
+
+    @model_validator(mode="after")
+    def fecha_nacimiento_coherente(self):
+        """OR-085: nada impedía una fecha de nacimiento posterior a la de
+        ingreso o jubilación — un dedo torpe teclea 1999 en vez de 1969 y la
+        persona aparece con 26 años en el KPI de jubilaciones próximas."""
+        nacimiento = _parse_iso_date(self.fecha_nacimiento)
+        if not nacimiento:
+            return self
+        for campo, valor in (("fecha (documento)", self.fecha),
+                              ("fecha_jubilacion", self.fecha_jubilacion),
+                              ("fecha_pension", self.fecha_pension)):
+            otra = _parse_iso_date(valor)
+            if otra and nacimiento >= otra:
+                raise ValueError(f"fecha_nacimiento debe ser anterior a {campo}")
+        return self
+
 
 class StatsRequest(BaseModel):
     modulo:     str
@@ -207,6 +269,7 @@ class DocumentUpdateRequest(BaseModel):
     idioma:               Annotated[Optional[str], Field(max_length=10)]   = None
     fecha_vencimiento:    Optional[str] = None
     usuario:              Annotated[str, Field(max_length=100)]
+    updated_at:           Annotated[Optional[str], Field(max_length=100)] = None
 
     @field_validator("file_url", mode="before")
     @classmethod
@@ -266,6 +329,21 @@ class EmpleadoUpdateRequest(BaseModel):
     @classmethod
     def fecha_format(cls, v):
         return _validate_date(v)
+
+    @model_validator(mode="after")
+    def fecha_nacimiento_coherente(self):
+        """OR-085: aplicado también a la edición del expediente, no sólo al
+        alta — un dedo torpe puede corregir una fecha y volver a introducir
+        el mismo error de orden."""
+        nacimiento = _parse_iso_date(self.fecha_nacimiento)
+        if not nacimiento:
+            return self
+        for campo, valor in (("fecha_jubilacion", self.fecha_jubilacion),
+                              ("fecha_pension", self.fecha_pension)):
+            otra = _parse_iso_date(valor)
+            if otra and nacimiento >= otra:
+                raise ValueError(f"fecha_nacimiento debe ser anterior a {campo}")
+        return self
 
 
 class PasswordChangeRequest(BaseModel):

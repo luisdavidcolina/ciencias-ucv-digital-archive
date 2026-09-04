@@ -2250,3 +2250,65 @@ Quedan fuera de mi zona, anotados aquí:
 **quién lo pide**: agente-h1e-consultas (H1e-consultas)
 
 — agente-h1f-rutas-pagina (H1f-rutas-pagina)
+
+## agente-h1d-modelos — resuelto en `models.py`, y lo que no
+
+Resueltos en `app/models.py` (validación en el borde, sin tocar ningún otro archivo):
+
+- **OR-016 / OR-084** — `DocumentSubmitRequest.cedula` ahora exige forma de cédula
+  (`^[VEJPG]?-?\d{6,9}$`, tolera puntos/espacios/minúsculas) y normaliza a
+  `<letra>-<dígitos>` (letra por defecto `V`). Antes `123456`, `v-12345678` y
+  `12.345.678` entraban todas como valores distintos bajo el mismo `UNIQUE(cedula)`.
+- **OR-085** — `fecha_nacimiento` ya no puede ser posterior (ni igual) a `fecha`
+  (documento), `fecha_jubilacion` o `fecha_pension`, tanto en `DocumentSubmitRequest`
+  como en `EmpleadoUpdateRequest`. Antes un `1999` en vez de `1969` colaba a alguien de
+  26 años en el KPI de jubilaciones próximas.
+- **OR-087** — `DocumentSubmitRequest` exige ahora `nombres`, `apellidos`, `cedula`,
+  `departamento` y `estado` cuando `modulo == "RRHH"` (además de `doc_type`, `fecha` y
+  `ubicacion`, ya obligatorios a nivel de campo). Antes la pantalla marcaba esos campos
+  con asterisco pero el validador real sólo exigía tres.
+- **OA-025 / IN-012** (parcial) — añadí `updated_at: Optional[str]` a
+  `DocumentUpdateRequest` para que `admin/docs.py` **[CHOCA]** pueda comparar contra el
+  valor en base antes del `UPDATE` (control de concurrencia optimista). El campo existe
+  y valida longitud; la comparación en sí y el 409 al cliente son de `C1-docs-backend`,
+  y que `admin-edit.js`/`admin-edit-hr.js` **[CHOCA]** empiecen a enviarlo es de
+  `B8-admin-edit-archivo`/`B9-admin-edit-rrhh`.
+
+No resueltos, fuera de `app/models.py`:
+
+- **OR-016** (mitad que falta) — mi normalización sólo alcanza a las cédulas que
+  entran por `DocumentSubmitRequest`. `utils.normalize_cedula()` (digits-only, sin
+  prefijo de letra) existe desde `IN-027` y **no la invoca nadie** (`admin/docs.py`
+  **[CHOCA]**, `admin/imports.py` **[CHOCA]**): el CSV de importación no pasa por
+  ningún modelo Pydantic (lee `row.get("cedula")` crudo), así que las cinco variantes
+  de la ficha siguen colando por ahí. Ojo: mi formato normalizado (`V-12345678`) y el
+  de `utils.normalize_cedula` (`12345678`) **no son el mismo** — quien resuelva
+  `IN-027` tiene que decidir cuál es la forma canónica única y, si es la de
+  `utils.py`, avisarme para alinear el validador de `models.py`.
+- **OA-020** (`status` no se guarda en el `INSERT` de Archivo) — el campo ya existe en
+  `DocumentSubmitRequest` con default `"aprobado"`; falta que `admin/docs.py`
+  **[CHOCA]** lo incluya en el `INSERT` y que `admin-submit.js` **[CHOCA]** muestre el
+  selector. Nada que tocar en el modelo.
+- **OR-041** (`desc`/Descripción de `tipo_documento` no se guarda) — no hay ningún
+  modelo Pydantic para la creación de `tipo_documento` en `models.py` (la ruta usa el
+  body crudo o `CategoryCreateRequest`, que es de `categoria`); si `C2-catalogo`
+  decide tipar esa entrada, aquí se le da soporte, pero hoy no hay nada mío que
+  cambiar.
+- **BR-004** (dossier fusiona dos "José Pérez" homónimos), **BR-030**/**BR-033**
+  (facetas y coincidencia de subcadena en tipos de RRHH), **BR-152** (modalidad de
+  dedicación embebida en el texto del cargo) — lógica de consulta en `hr.py`, no de
+  validación de entrada; no hay cambio de modelo que las resuelva por sí solo.
+- **OR-267** (añadir un campo al expediente exige tocar `schema.sql` + `models.py` +
+  el modal + el reporte) — es una decisión de arquitectura (¿esquema fijo vs.
+  extensible?), no una corrección puntual; la dejo sin tocar.
+- **RQ-009** (`RrhhSearchRequest.people_terms` sigue vivo aunque el control se retiró
+  de `hr.html`) — no lo quito: `app/routes/hr.py` **[CHOCA]** todavía lo lee como
+  `people_clauses`. Quitarlo del modelo sin coordinar con `A4-rrhh-backend` rompería
+  esa ruta.
+- **OA-039** (política de contraseñas: longitud sólo en cambio, sin caducidad) — vive
+  en `core/security.py` y `routes/admin/users.py`, ninguno mío.
+- **BA-019** (enlace compartido devuelve 401 en vez de servir el archivo) — es
+  `share.py`/`files.py`, no aparece `app/models.py` en la ficha real (sólo en el mapa
+  de impacto cruzado).
+
+**quién lo pide**: agente-h1d-modelos (H1d-modelos)
