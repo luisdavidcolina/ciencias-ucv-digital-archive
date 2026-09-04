@@ -67,55 +67,67 @@ def _normalizar_totales(fila) -> dict:
 
 
 @router.get("/charts", dependencies=[Depends(require_role("Archivo", "RRHH"))])
-def get_charts_data(modulo: str = "Archivo"):
+def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str = ""):
     from .helpers import _require_modulo
     _require_modulo(modulo)
+
+    # OA-033/OR-018/OR-019/RQ-012: la fila de KPIs mezclaba cifras filtradas
+    # (/stats, que sí acepta rango de fechas) con cifras sin filtrar (/charts,
+    # que lo ignoraba). Mismo rango aquí, para que /charts sea la única fuente
+    # de la fila de KPIs — el filtro sólo aplica a lo que tiene fecha de
+    # documento; los desgloses por plantilla (departamento, sexo, nivel
+    # educativo) siguen siendo del personal activo completo, no del rango.
+    rango_activo = bool(date_start and date_end)
+    rango_sql = " AND fecha_documento BETWEEN %s AND %s" if rango_activo else ""
+    rango_params = [date_start, date_end] if rango_activo else []
+
     if modulo == "Archivo":
         # Todas las consultas excluyen los borrados logicos: hasta ahora el panel
         # contaba documentos que ya estaban en la papelera.
-        by_type = db_query("""
+        by_type = db_query(f"""
             WITH conteo AS (
-                SELECT COALESCE(td.nombre_corto, da.tesauro_primario, 'Sin tipo') AS label,
+                SELECT da.id_tipo_documento AS id,
+                       COALESCE(td.nombre_corto, da.tesauro_primario, 'Sin tipo') AS label,
                        COUNT(*) AS value
                 FROM public.datos_archivo da
                 LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
-                WHERE da.deleted_at IS NULL
-                GROUP BY label
+                WHERE da.deleted_at IS NULL{rango_sql}
+                GROUP BY da.id_tipo_documento, label
             ), ordenado AS (
-                SELECT label, value, ROW_NUMBER() OVER (ORDER BY value DESC, label) AS pos
+                SELECT id, label, value, ROW_NUMBER() OVER (ORDER BY value DESC, label) AS pos
                 FROM conteo
             )
-            SELECT label, value, pos FROM ordenado WHERE pos <= 7
+            SELECT id, label, value, pos FROM ordenado WHERE pos <= 7
             UNION ALL
-            SELECT 'Otros', SUM(value), 8 FROM ordenado WHERE pos > 7
+            SELECT NULL, 'Otros', SUM(value), 8 FROM ordenado WHERE pos > 7
             HAVING SUM(value) > 0
             ORDER BY pos
-        """, fetch="all") or []
-        by_year = db_query("""
+        """, rango_params, fetch="all") or []
+        by_year = db_query(f"""
             SELECT EXTRACT(YEAR FROM fecha_documento)::TEXT AS label, COUNT(*) AS value
             FROM public.datos_archivo
-            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL
+            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL{rango_sql}
             GROUP BY label ORDER BY label DESC LIMIT 10
-        """, fetch="all") or []
-        by_month = db_query("""
+        """, rango_params, fetch="all") or []
+        by_month_sql = " AND fecha_documento >= NOW() - INTERVAL '24 months'" if not rango_activo else ""
+        by_month = db_query(f"""
             SELECT TO_CHAR(fecha_documento, 'Mon YYYY') AS label,
                    DATE_TRUNC('month', fecha_documento) AS sort_key, COUNT(*) AS value
             FROM public.datos_archivo
-            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL
-              AND fecha_documento >= NOW() - INTERVAL '24 months'
+            WHERE fecha_documento IS NOT NULL AND deleted_at IS NULL{rango_sql}{by_month_sql}
             GROUP BY label, sort_key ORDER BY sort_key
-        """, fetch="all") or []
+        """, rango_params, fetch="all") or []
 
         # El proyecto se llama "Archivo Institucional Digital": cuanto del fondo
         # esta efectivamente digitalizado es la medida que da sentido al resto,
         # y hasta ahora no aparecia por ninguna parte.
-        by_soporte = db_query("""
+        by_soporte = db_query(f"""
             SELECT COALESCE(NULLIF(TRIM(soporte),''), 'Físico') AS label, COUNT(*) AS value
-            FROM public.datos_archivo WHERE deleted_at IS NULL
+            FROM public.datos_archivo WHERE deleted_at IS NULL{rango_sql}
             GROUP BY label ORDER BY value DESC
-        """, fetch="all") or []
+        """, rango_params, fetch="all") or []
 
-        totals = db_query("""
+        totals = db_query(f"""
             SELECT COUNT(*) AS total_docs,
                    COUNT(DISTINCT da.id_tipo_documento)
                      FILTER (WHERE da.id_tipo_documento IS NOT NULL)      AS total_types,
@@ -135,12 +147,12 @@ def get_charts_data(modulo: str = "Archivo"):
                    )                                                      AS total_vencidos
             FROM public.datos_archivo da
             LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
-            WHERE da.deleted_at IS NULL
-        """, fetch="one")
+            WHERE da.deleted_at IS NULL{rango_sql.replace('fecha_documento', 'da.fecha_documento')}
+        """, rango_params, fetch="one")
         return {
             "modulo": "Archivo",
             "charts": {
-                "by_type":    [{"label": r["label"], "value": int(r["value"])} for r in by_type],
+                "by_type":    [{"id": r["id"], "label": r["label"], "value": int(r["value"])} for r in by_type],
                 "by_year":    [{"label": r["label"], "value": int(r["value"])} for r in by_year],
                 "by_month":   [{"label": r["label"], "value": int(r["value"])} for r in by_month],
                 "by_soporte": [{"label": r["label"], "value": int(r["value"])} for r in by_soporte],
@@ -163,13 +175,14 @@ def get_charts_data(modulo: str = "Archivo"):
             WHERE e.deleted_at IS NULL
             GROUP BY el.estados ORDER BY value DESC
         """, fetch="all") or []
-        by_doc_type = db_query("""
+        rango_dr_sql = " AND dr.fecha_documento BETWEEN %s AND %s" if rango_activo else ""
+        by_doc_type = db_query(f"""
             SELECT td.nombre_corto AS label, COUNT(*) AS value
             FROM public.datos_rrhh dr
             JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
-            WHERE dr.deleted_at IS NULL
+            WHERE dr.deleted_at IS NULL{rango_dr_sql}
             GROUP BY td.nombre_corto ORDER BY value DESC LIMIT 10
-        """, fetch="all") or []
+        """, rango_params, fetch="all") or []
 
         # Cobertura, no volumen. Contar documentos por Parte no dice si los
         # expedientes estan completos: mil titulos en la Parte I y ninguna
@@ -212,10 +225,12 @@ def get_charts_data(modulo: str = "Archivo"):
             GROUP BY sexo ORDER BY value DESC
         """, fetch="all") or []
 
-        totals = db_query("""
+        rango_dr_totales_sql = " AND fecha_documento BETWEEN %s AND %s" if rango_activo else ""
+        totals = db_query(f"""
             SELECT (SELECT COUNT(*) FROM public.empleados WHERE deleted_at IS NULL)
                        AS total_employees,
-                   (SELECT COUNT(*) FROM public.datos_rrhh WHERE deleted_at IS NULL)
+                   (SELECT COUNT(*) FROM public.datos_rrhh
+                    WHERE deleted_at IS NULL{rango_dr_totales_sql})
                        AS total_documents,
                    (SELECT COUNT(*) FROM public.empleados e
                     JOIN public.estados_laborales el ON e.estado_id = el.id
@@ -244,7 +259,7 @@ def get_charts_data(modulo: str = "Archivo"):
                       AND COALESCE(e.fecha_jubilacion, e.fecha_pension)
                           BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '365 days')
                        AS total_jubilaciones_proximas
-        """, fetch="one")
+        """, rango_params, fetch="one")
         return {
             "modulo": "RRHH",
             "charts": {

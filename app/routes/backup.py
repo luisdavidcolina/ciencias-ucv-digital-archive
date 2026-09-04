@@ -244,6 +244,24 @@ async def restore_backup(
     if not isinstance(backup, dict) or "_metadata" not in backup:
         raise HTTPException(400, "El archivo no es un backup válido del sistema.")
 
+    # SI-030: la versión declara la forma que el resto de este endpoint da por
+    # sentada (qué tablas trae, qué columnas). Un backup de una versión mayor
+    # futura podría traer columnas que hoy no existen — mejor rechazarlo antes
+    # de tocar la base que dejar que cada INSERT falle tabla por tabla.
+    metadata = backup.get("_metadata")
+    if not isinstance(metadata, dict):
+        raise HTTPException(400, "El archivo no es un backup válido del sistema.")
+    version = metadata.get("version")
+    if not isinstance(version, str) or not re.match(r'^\d+\.\d+$', version):
+        raise HTTPException(400, "El backup no declara una versión reconocible.")
+    version_mayor = int(version.split(".")[0])
+    if version_mayor > 1:
+        raise HTTPException(
+            400,
+            f"El backup es de la versión {version}, más nueva que la que este sistema sabe "
+            "restaurar (1.x). Actualiza el sistema antes de restaurarlo.",
+        )
+
     # Validar la forma antes de procesar: cada clave de tabla presente debe
     # ser una lista de objetos. Un backup con `datos_archivo` como string o
     # número (archivo corrupto, o de otro sistema con el mismo nombre de

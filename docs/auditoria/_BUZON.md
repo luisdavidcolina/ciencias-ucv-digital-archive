@@ -2549,3 +2549,90 @@ que documentan las notas de arriba, sin los 29-30 fallos de C4-retencion que
 ya estaban resueltos). Después, con las 21 pruebas nuevas (9 + 12) añadidas:
 en verde también — ver commit. — agente-sweep-tests-nuevos
 (SWEEP-tests-nuevos)
+
+## SWEEP-admin-html — barrido de peticiones dirigidas a admin_hr.html/admin_archive.html/admin_ai.html/admin_qa.html
+
+Resueltas dentro de mi zona (marcado + JS inline, sin tocar backend/JS externo/styles.css):
+
+- [x] `OA-055` · `app/static/admin_archive.html` — el `<h3 class="card-title">` de la tabla del
+      monitor ahora dice «Documentos del archivo» literal en el HTML (antes «Directorio Activo
+      Local», reescrito por `admin.js:111-114` en cada carga). De paso corregí el mismo texto
+      fósil en `admin_hr.html` («Directorio Activo RRHH» → «Expedientes de personal»), que tenía
+      el mismo problema y no estaba en ninguna ficha con ese id exacto. La reescritura de
+      `admin.js:111-114` queda ahora redundante (mismo texto que ya escribe) pero no la toco, no
+      es mi archivo.
+- [x] `OA-053` (parte HTML) · `app/static/admin_archive.html` — sufijados
+      `vencimientos-table-body` → `vencimientos-table-body-archivo` y `vencimientos-summary` →
+      `vencimientos-summary-archivo`. `admin.js:245-246` ya buscaba primero el id sufijado con
+      fallback al viejo, así que el cambio era seguro sin coordinar de nuevo.
+- [x] `OR-188` · `app/static/admin_hr.html` — añadida la tarjeta «Expedientes con Retención
+      Vencida» en la pestaña Retención de RRHH, calcada de la de Archivo, con ids ya sufijados
+      (`vencimientos-table-body-rrhh`/`vencimientos-summary-rrhh`) y el botón
+      `onclick="loadVencimientosTable()"` que ya sabía resolver por sufijo. RRHH no tenía esta
+      tabla en absoluto; ahora la tiene y `admin-charts.js`/`admin.js` la alimentan sin cambios
+      adicionales.
+- [ ] `OR-070` (jubilaciones próximas, pantalla propia) — no resuelto: es una pantalla nueva
+      distinta de la tabla de vencimientos de retención (esa ya quedó en OR-188). El banner de
+      jubilaciones que sí existe hoy vive fuera de mi archivo (ver nota de B4-admin-tabs arriba);
+      construir la tabla completa exige decidir su fuente de datos, fuera del alcance de un
+      barrido de HTML.
+- [x] `SI-097`/`SI-098` (control de acceso y cáscara compartida en `admin_ai.html`) — añadidos
+      `#app-shell-navbar`/`#app-shell-sidebar`/`app-shell.js` en el orden que documenta
+      `CLAUDE.md`, `role="main"` en el contenedor para que `_marcarContenidoPrincipal()` marque
+      el salto de navegación, y `app.js` al final. Verificado en `app.js:149-151` que la rama de
+      control de acceso para `standalonePage === "admin-ia"` **ya existía** (añadida junto con
+      SI-181 en otro carril) — solo faltaba que esta página cargara `app.js`; no toqué ese
+      archivo. `switchTab("admin-ia")` no tiene rama propia y no la necesita: el contenido de
+      esta página no está envuelto en `.app-tab-section`, así que no hay nada que
+      mostrar/ocultar.
+- [x] `SI-099` · ya estaba resuelto de facto: `elegirModelo()` (commit anterior de
+      D2-ia-frontend, SI-005) ya comprueba `r.ok` y relee `/api/ia/modelos`. Sin cambios
+      adicionales.
+- [x] `SI-100` · los dos `confirm()` nativos (borrar conversación, modelo sin herramientas)
+      ahora usan `confirmModal()` de `admin-ui.js` (cargado al final de la página), con
+      degradación a `confirm()` nativo si por lo que sea `admin-ui.js` no cargó.
+- [x] `SI-101` · `borrarConv()` ya no hace `location.reload()`: quita la fila del DOM
+      (`data-conv-id`) y avisa con `showToast` si el borrado falla o tiene éxito.
+- [x] `SI-102` · añadido `.catch()` a las cinco cadenas de carga que no lo tenían (estado,
+      config, gasto, conversaciones, propuestas), cada una con su propio mensaje de error en
+      el contenedor correspondiente o por toast.
+- [x] `SI-103` · esqueletos de carga con `.ds-skeleton` (ya existente en `styles.css`) en
+      gasto, conversaciones y propuestas mientras llega la respuesta.
+- [x] `SI-104` · el filtro de modelos ahora tiene 200 ms de retardo (`setTimeout`/
+      `clearTimeout`) antes de reconstruir la tabla.
+- [x] `SI-105` · cabeceras ordenables (`ordenarModelosPor`), por defecto por
+      «$ / 1000 msgs», y dos filtros de casilla («Sólo con herramientas», «Sólo con caché»).
+- [x] `SI-106` · cuando el filtro deja más de 250 modelos, se muestra «Mostrando 250 de N.
+      Afina el filtro para ver el resto.» en vez de cortar en silencio.
+- [x] `SI-109` · añadido `#ds-toast-container` a `admin_ai.html` (no existía; cualquier
+      `showToast` futuro salía al vacío).
+- [x] `SI-205` · las tres tablas de `admin_ai.html` (gasto, propuestas, modelos) ahora están
+      en `.table-responsive`; la de propuestas oculta «Resolvió»/«Fecha» en móvil con
+      `ds-hide-xs` (clase ya existente en `styles.css`).
+
+No resueltas, siguen anotadas para su carril dueño:
+- [ ] `OR-009` · ya resuelto por C7-papelera (`42b90c5`, ver `_RESERVAS.md`) — confirmado, no
+      queda nada pendiente en `admin_hr.html` por esta ficha.
+- [ ] `DG-154` (pantalla propia de digitalización, `admin_qa.html` nuevo) — sigue sin carril
+      dueño ni decisión de producto de E1/E2. No creo el archivo: documentar una pantalla de
+      escaneo que no existe (`scanner-app/ui/`) dejaría contenido falso, mismo motivo que ya
+      documentó `agente-f1-paginas` para `ayuda.html`.
+- [ ] `SI-097`/`SI-098` (mitad backend, cierre de endpoints SI-011) — la parte de marcado ya
+      quedó resuelta arriba; falta que `app/routes/ai.py` (carril D1-ia-backend, terminado)
+      confirme que los endpoints rechazan sin sesión Global, no solo la UI.
+- [ ] `SI-107` (aprobar/rechazar propuestas desde el panel) · **archivo**: `app/routes/ai.py` +
+      `admin_ai.html` · esfuerzo M, necesita endpoint nuevo — no lo invento sin el contrato del
+      backend.
+- [ ] `SI-108` (mostrar antes/después de la propuesta) · **archivo**: `app/routes/ai.py`,
+      `app/core/ai_proposals.py` + `admin_ai.html`/`ai-widget.js` · el campo `datos` no llega
+      en el listado (`GET /api/ia/propuestas` sólo manda `resumen`); nada que pintar sin el
+      cambio de contrato del endpoint.
+- [ ] `SI-110`–`SI-125` (ai-widget.js), `SI-157`–`SI-170` (ayuda/investigacion/compartido),
+      `SI-175`–`SI-179` (scanner), `SI-181`/`SI-183`–`SI-185`/`SI-200`–`SI-202` (cáscara
+      compartida) — no son de mis cuatro archivos, no los toco.
+
+`python -m pytest app/tests -q` antes de esta tanda: en verde. Después: ver commit (corrido con
+`test_admin_panels.py`/`test_paginas.py`/`test_static_assets.py` en verde primero, suite
+completa en curso al cerrar esta nota).
+
+**quién lo pide/resuelve**: agente-sweep-admin-html (SWEEP-admin-html)
