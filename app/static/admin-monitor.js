@@ -8,7 +8,11 @@
 // se repueblan en cada carga (OA-029), así que su valor de la URL se guarda
 // aparte y se re-aplica cuando las opciones ya existen, no al restaurar.
 function _monitorURLKeys(suf) {
-  return { q: `m_${suf}_q`, type: `m_${suf}_type`, person: `m_${suf}_person`, status: `m_${suf}_status`, page: `m_${suf}_page` };
+  return {
+    q: `m_${suf}_q`, type: `m_${suf}_type`, person: `m_${suf}_person`,
+    department: `m_${suf}_dept`, status: `m_${suf}_status`, page: `m_${suf}_page`,
+    sort: `m_${suf}_sort`, dir: `m_${suf}_dir`,
+  };
 }
 
 function _restoreMonitorFiltersFromURL(suf) {
@@ -23,20 +27,27 @@ function _restoreMonitorFiltersFromURL(suf) {
   if (statusEl && params.has(keys.status)) statusEl.value = params.get(keys.status);
   state.adminTable._pendingURLType = state.adminTable._pendingURLType || {};
   state.adminTable._pendingURLPerson = state.adminTable._pendingURLPerson || {};
+  state.adminTable._pendingURLDept = state.adminTable._pendingURLDept || {};
   if (params.has(keys.type)) state.adminTable._pendingURLType[suf] = params.get(keys.type);
   if (params.has(keys.person)) state.adminTable._pendingURLPerson[suf] = params.get(keys.person);
+  if (params.has(keys.department)) state.adminTable._pendingURLDept[suf] = params.get(keys.department);
+  if (params.has(keys.sort)) state.adminTable.sort = params.get(keys.sort);
+  if (params.has(keys.dir)) state.adminTable.dir = params.get(keys.dir);
   const pageVal = parseInt(params.get(keys.page), 10);
   if (pageVal > 0) state.adminTable.page = pageVal;
 }
 
-function _updateMonitorURL(suf, q, type, person, statusFilt) {
+function _updateMonitorURL(suf, q, type, person, statusFilt, department) {
   const params = new URLSearchParams(window.location.search);
   const keys = _monitorURLKeys(suf);
   const setOrDelete = (key, val) => { if (val) params.set(key, val); else params.delete(key); };
   setOrDelete(keys.q, q);
   setOrDelete(keys.type, type);
   setOrDelete(keys.person, person);
+  setOrDelete(keys.department, department);
   setOrDelete(keys.status, statusFilt);
+  setOrDelete(keys.sort, state.adminTable.sort);
+  setOrDelete(keys.dir, state.adminTable.sort ? state.adminTable.dir : "");
   setOrDelete(keys.page, (state.adminTable.page && state.adminTable.page > 1) ? String(state.adminTable.page) : "");
   const qs = params.toString();
   const newUrl = window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
@@ -47,26 +58,42 @@ async function loadMonitorTable() {
   const mod        = state.user.modulo;
   const suf        = adminSuffixFromTab();
   _restoreMonitorFiltersFromURL(suf);
+  const isArch     = isArchivoModule();
   const q          = document.getElementById(`admin_search-${suf}`)?.value          || "";
   let   type       = document.getElementById(`admin_filter_type-${suf}`)?.value     || "";
-  let   person     = document.getElementById(`admin_filter_person-${suf}`)?.value   || "";
+  // OR-125: en RRHH el desplegable "Persona..." (un <select> de 400 opciones
+  // sin buscador que duplicaba al cuadro de búsqueda) fue reemplazado por
+  // "Departamento...". En Archivo sigue siendo el filtro por autor.
+  let   person     = isArch ? (document.getElementById(`admin_filter_person-${suf}`)?.value || "") : "";
+  let   department = isArch ? "" : (document.getElementById(`admin_filter_department-${suf}`)?.value || "");
   const statusFilt = document.getElementById(`admin_filter_status-${suf}`)?.value   || "";
   const page    = state.adminTable.page    || 1;
   const perPage = state.adminTable.perPage || 25;
 
   // OA-119 / OR-134: para distinguir "aún no hay datos" de "ningún resultado
   // coincide" hace falta saber si hay algún filtro activo en esta consulta.
-  state.adminTable.filtersActive = !!(q || type || person || statusFilt);
+  state.adminTable.filtersActive = !!(q || type || person || department || statusFilt);
   state.adminTable.lastError = null;
 
   if (typeof showTableSkeleton === "function") {
-    showTableSkeleton(`admin_control_table-${suf}`, isArchivoModule() ? 6 : 7, 6);
+    showTableSkeleton(`admin_control_table-${suf}`, isArch ? 6 : 8, 6);
   }
   const tableEl = document.getElementById(`admin_control_table-${suf}`)?.closest("table");
   if (tableEl) tableEl.setAttribute("aria-busy", "true");
 
   try {
-    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&status_filter=${encodeURIComponent(statusFilt)}&page=${page}&per_page=${perPage}`;
+    // OR-126: en RRHH el estado laboral va por `estado_laboral_filter`, no por
+    // `status_filter` — ese nombre en Archivo significa estado del documento,
+    // un concepto distinto con su propia validación en el backend.
+    const statusParam = isArch
+      ? `&status_filter=${encodeURIComponent(statusFilt)}`
+      : `&estado_laboral_filter=${encodeURIComponent(statusFilt)}`;
+    // OR-128: el orden se propaga al servidor (lista blanca de columnas por
+    // módulo en docs.py); sin `sort` cae al orden por defecto de siempre.
+    const sortParam = state.adminTable.sort
+      ? `&sort=${encodeURIComponent(state.adminTable.sort)}&dir=${encodeURIComponent(state.adminTable.dir || "asc")}`
+      : "";
+    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&department_filter=${encodeURIComponent(department)}${statusParam}${sortParam}&page=${page}&per_page=${perPage}`;
     const data = await apiFetchJSON(url);
 
     state.adminTable.results = data.records;
@@ -98,20 +125,15 @@ async function loadMonitorTable() {
       }
     }
 
-    // Poblar filtro de persona (solo primera carga: en Archivo depende de la
+    // Poblar filtro de persona en Archivo (solo primera carga: depende de la
     // página que llegó, así que no tiene sentido recalcularlo en cada tecleo).
     const personSelector = document.getElementById(`admin_filter_person-${suf}`);
-    if (personSelector && personSelector.options.length <= 1) {
-      let people = [];
-      if (isArchivoModule()) {
-        people = [...new Set((data.records || []).map(r => r.autor).filter(Boolean))].sort();
-      } else {
-        people = state.choices?.rrhh?.people || [];
-      }
+    if (isArch && personSelector && personSelector.options.length <= 1) {
+      const people = [...new Set((data.records || []).map(r => r.autor).filter(Boolean))].sort();
       personSelector.innerHTML = `<option value="">Filtrar por Persona...</option>` +
         people.map(p => `<option value="${escHtml(p)}">${escHtml(p)}</option>`).join("");
     }
-    if (personSelector && state.adminTable._pendingURLPerson?.[suf] !== undefined) {
+    if (isArch && personSelector && state.adminTable._pendingURLPerson?.[suf] !== undefined) {
       const wantedPerson = state.adminTable._pendingURLPerson[suf];
       delete state.adminTable._pendingURLPerson[suf];
       if (wantedPerson && wantedPerson !== person) {
@@ -120,8 +142,33 @@ async function loadMonitorTable() {
       }
     }
 
-    _updateMonitorURL(suf, q, type, person, statusFilt);
+    // OR-125: filtro de departamento en RRHH, con las opciones reales del
+    // catálogo (`state.choices.rrhh.departamentos`) en vez de repetir la
+    // lista completa de personas.
+    const deptSelector = document.getElementById(`admin_filter_department-${suf}`);
+    if (!isArch && deptSelector && state.choices?.rrhh) {
+      const depts = state.choices.rrhh.departamentos || [];
+      const prevDept = deptSelector.value;
+      const optionsHtml = `<option value="">Filtrar por Departamento...</option>` +
+        depts.map(d => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
+      if (deptSelector.dataset.dsOptionsSig !== optionsHtml.length + ":" + depts.join("|")) {
+        deptSelector.innerHTML = optionsHtml;
+        deptSelector.value = prevDept;
+        deptSelector.dataset.dsOptionsSig = optionsHtml.length + ":" + depts.join("|");
+      }
+      if (state.adminTable._pendingURLDept?.[suf] !== undefined) {
+        const wantedDept = state.adminTable._pendingURLDept[suf];
+        delete state.adminTable._pendingURLDept[suf];
+        if (wantedDept && wantedDept !== department) {
+          deptSelector.value = wantedDept;
+          if (deptSelector.value === wantedDept) { loadMonitorTable(); return; }
+        }
+      }
+    }
+
+    _updateMonitorURL(suf, q, type, person, statusFilt, department);
     _ensureMonitorToolbarExtras(suf);
+    _ensureMonitorSortableHeaders(suf);
     renderMonitorTable();
     _renderMonitorStatusBadges();
   } catch (e) {
@@ -140,22 +187,34 @@ async function _renderMonitorStatusBadges() {
   const mod    = state.user.modulo;
   const badgesEl = document.getElementById(`monitor-status-badges-${suf}`);
   if (!badgesEl) return;
-  if (!isArchivoModule()) { badgesEl.innerHTML = ""; return; }
+  // OR-122: `/status_counts?modulo=RRHH` ya cuenta filas de `datos_rrhh`
+  // (documentos del expediente, no empleados) — el flujo borrador/revisión/
+  // aprobado/rechazado existe igual en ambos módulos, sólo hacía falta dejar
+  // de cortarlo aquí para RRHH.
   try {
+    const isArch = isArchivoModule();
     const counts = await apiFetchJSON(`${API_BASE}/api/admin/status_counts?modulo=${mod}`);
     const defs = [
       { key: "revision",  label: "Pendientes revisión", cls: "badge-warning text-dark", icon: "fa-clock" },
       { key: "draft",     label: "Borrador",            cls: "badge-secondary",         icon: "fa-pencil-alt" },
       { key: "rechazado", label: "Rechazados",          cls: "badge-danger",            icon: "fa-times-circle" },
     ];
+    // El filtro de estado del monitor de RRHH (`admin_filter_status-rrhh`) es
+    // estado LABORAL (OR-126), no estado de documento: no hay forma de filtrar
+    // la tabla agregada por empleado según el estado de un documento suyo, así
+    // que en RRHH el badge es sólo informativo (sin filtro al clic).
     badgesEl.innerHTML = defs
       .filter(d => (counts[d.key] || 0) > 0)
-      .map(d => `
+      .map(d => isArch ? `
         <button class="badge ${d.cls} ds-status-badge" style="cursor:pointer;font-size:0.78rem;padding:5px 9px;border:none;"
           title="Filtrar por: ${d.label}"
           onclick="document.getElementById('admin_filter_status-${suf}').value='${d.key}';state.adminTable.page=1;loadMonitorTable();">
           <i class="fas ${d.icon} mr-1"></i>${d.label}: <strong>${counts[d.key]}</strong>
-        </button>`)
+        </button>` : `
+        <span class="badge ${d.cls} ds-status-badge" style="font-size:0.78rem;padding:5px 9px;border:none;"
+          title="${d.label} en expedientes de RRHH">
+          <i class="fas ${d.icon} mr-1"></i>${d.label}: <strong>${counts[d.key]}</strong>
+        </span>`)
       .join("");
   } catch {}
 }
@@ -176,8 +235,41 @@ function _ensureMonitorToolbarExtras(suf) {
     statusSel.insertAdjacentElement("afterend", btn);
   }
 
+  // OR-130: "primera"/"última" antes de anterior, salto directo después de
+  // siguiente — 17 páginas de 25 en 25 no se recorren de una en una.
+  const prevBtn = document.getElementById(`admin_prev-${suf}`);
+  if (prevBtn && !document.getElementById(`admin_first-${suf}`)) {
+    const firstBtn = document.createElement("button");
+    firstBtn.type = "button";
+    firstBtn.id = `admin_first-${suf}`;
+    firstBtn.className = "btn btn-outline-secondary btn-sm mr-1";
+    firstBtn.setAttribute("aria-label", "Primera página");
+    firstBtn.title = "Primera página";
+    firstBtn.innerHTML = `<i class="fas fa-angle-double-left"></i>`;
+    firstBtn.addEventListener("click", () => { state.adminTable.page = 1; loadMonitorTable(); });
+    prevBtn.insertAdjacentElement("beforebegin", firstBtn);
+  }
+
   const nextBtn = document.getElementById(`admin_next-${suf}`);
-  if (nextBtn && !document.getElementById(`admin_goto_page-${suf}`)) {
+  if (nextBtn && !document.getElementById(`admin_last-${suf}`)) {
+    const lastBtn = document.createElement("button");
+    lastBtn.type = "button";
+    lastBtn.id = `admin_last-${suf}`;
+    lastBtn.className = "btn btn-outline-secondary btn-sm ml-1";
+    lastBtn.setAttribute("aria-label", "Última página");
+    lastBtn.title = "Última página";
+    lastBtn.innerHTML = `<i class="fas fa-angle-double-right"></i>`;
+    lastBtn.addEventListener("click", () => {
+      const total = state.adminTable.total || 0;
+      const perPage = state.adminTable.perPage || 25;
+      state.adminTable.page = Math.max(1, Math.ceil(total / perPage));
+      loadMonitorTable();
+    });
+    nextBtn.insertAdjacentElement("afterend", lastBtn);
+  }
+
+  const lastBtnEl = document.getElementById(`admin_last-${suf}`);
+  if (lastBtnEl && !document.getElementById(`admin_goto_page-${suf}`)) {
     const wrap = document.createElement("span");
     wrap.className = "ml-2 d-inline-flex align-items-center";
     wrap.innerHTML = `
@@ -186,7 +278,7 @@ function _ensureMonitorToolbarExtras(suf) {
              style="width:64px;display:inline-block;" aria-label="Ir a la página">
       <button type="button" class="btn btn-xs btn-outline-secondary ml-1" id="admin_goto_page_btn-${suf}"
               aria-label="Ir a la página indicada">Ir</button>`;
-    nextBtn.insertAdjacentElement("afterend", wrap);
+    lastBtnEl.insertAdjacentElement("afterend", wrap);
     const go = () => {
       const input = document.getElementById(`admin_goto_page-${suf}`);
       const n = parseInt(input?.value, 10);
@@ -207,6 +299,54 @@ function _ensureMonitorToolbarExtras(suf) {
   }
 }
 
+// OR-128: encabezados ordenables. Delegado por clic/teclado sobre cualquier
+// `<th data-sort="...">` de la tabla del monitor (hoy sólo RRHH los declara en
+// `admin_hr.html`; Archivo no toca este carril). Un único listener por tabla,
+// alterna asc/desc, actualiza `aria-sort` e íconos, y recarga desde la
+// primera página porque el orden cambia qué es "primero".
+function _ensureMonitorSortableHeaders(suf) {
+  const table = document.getElementById(`admin_control_table-${suf}`)?.closest("table");
+  if (!table || table.dataset.dsSortWired) return;
+  table.dataset.dsSortWired = "1";
+
+  const applySort = (key) => {
+    if (state.adminTable.sort === key) {
+      state.adminTable.dir = state.adminTable.dir === "desc" ? "asc" : "desc";
+    } else {
+      state.adminTable.sort = key;
+      state.adminTable.dir = "asc";
+    }
+    state.adminTable.page = 1;
+    loadMonitorTable();
+  };
+
+  table.querySelectorAll("thead th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => applySort(th.dataset.sort));
+    th.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); applySort(th.dataset.sort); }
+    });
+  });
+}
+
+// Refleja el orden activo en `aria-sort` y el ícono de cada encabezado
+// ordenable — se llama en cada render porque el estado puede haber llegado
+// restaurado desde la URL (OR-131) después de que los encabezados ya existían.
+function _updateMonitorSortIndicators(suf) {
+  const table = document.getElementById(`admin_control_table-${suf}`)?.closest("table");
+  if (!table) return;
+  table.querySelectorAll("thead th[data-sort]").forEach(th => {
+    const icon = th.querySelector(".ds-sort-icon");
+    if (th.dataset.sort === state.adminTable.sort) {
+      const asc = state.adminTable.dir !== "desc";
+      th.setAttribute("aria-sort", asc ? "ascending" : "descending");
+      if (icon) icon.className = `fas ${asc ? "fa-sort-up" : "fa-sort-down"} ds-sort-icon`;
+    } else {
+      th.setAttribute("aria-sort", "none");
+      if (icon) icon.className = "fas fa-sort ds-sort-icon";
+    }
+  });
+}
+
 // OA-027 (parte): tras guardar una edición, actualizar sólo la fila afectada
 // en vez de disparar una recarga completa que puede fallar en silencio si la
 // red falla justo después de un guardado exitoso.
@@ -219,7 +359,8 @@ function updateMonitorRowOptimistic(id, patch) {
 }
 
 function _clearMonitorFilters(suf) {
-  const ids = [`admin_search-${suf}`, `admin_filter_type-${suf}`, `admin_filter_person-${suf}`, `admin_filter_status-${suf}`];
+  const ids = [`admin_search-${suf}`, `admin_filter_type-${suf}`, `admin_filter_person-${suf}`,
+               `admin_filter_department-${suf}`, `admin_filter_status-${suf}`];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
   state.adminTable.page = 1;
   loadMonitorTable();
@@ -252,12 +393,17 @@ function renderMonitorTable() {
 
   const pageInfo = document.getElementById(`admin_page_info-${suf}`);
   if (pageInfo) pageInfo.innerText = `Pág ${page} de ${totalPages}`;
-  const prevBtnAdm = document.getElementById(`admin_prev-${suf}`);
-  const nextBtnAdm = document.getElementById(`admin_next-${suf}`);
-  if (prevBtnAdm) { prevBtnAdm.disabled = page <= 1; prevBtnAdm.setAttribute("aria-label", "Página anterior"); }
-  if (nextBtnAdm) { nextBtnAdm.disabled = page >= totalPages; nextBtnAdm.setAttribute("aria-label", "Página siguiente"); }
+  const prevBtnAdm  = document.getElementById(`admin_prev-${suf}`);
+  const nextBtnAdm  = document.getElementById(`admin_next-${suf}`);
+  const firstBtnAdm = document.getElementById(`admin_first-${suf}`);
+  const lastBtnAdm  = document.getElementById(`admin_last-${suf}`);
+  if (prevBtnAdm)  { prevBtnAdm.disabled  = page <= 1;          prevBtnAdm.setAttribute("aria-label", "Página anterior"); }
+  if (nextBtnAdm)  { nextBtnAdm.disabled  = page >= totalPages; nextBtnAdm.setAttribute("aria-label", "Página siguiente"); }
+  if (firstBtnAdm) firstBtnAdm.disabled = page <= 1;
+  if (lastBtnAdm)  lastBtnAdm.disabled  = page >= totalPages;
+  _updateMonitorSortIndicators(suf);
 
-  const colspan = isArch ? 6 : 7;
+  const colspan = isArch ? 6 : 8;
 
   // OR-133: un error de carga no puede quedarse como el esqueleto animado para
   // siempre — se distingue de "cero resultados" y trae un botón de reintentar.
@@ -364,20 +510,21 @@ function renderMonitorTable() {
       const avatar = `<span class="ds-person-avatar-sm mr-2" style="width:28px;height:28px;vertical-align:middle;">
         <span class="ds-person-initials-sm" style="font-size:0.7rem;">${escHtml(initials)}</span>
       </span>`;
-      // OR-121 (parcial): el número de documentos ya lo sirve el backend
-      // (f.doc_count) pero no cabe una columna nueva sin tocar admin_hr.html
-      // (fuera de este carril, ver _BUZON.md) — se muestra como indicador
-      // junto al nombre mientras tanto.
-      const docCountBadge = (f.doc_count !== undefined && f.doc_count !== null)
-        ? `<span class="badge badge-light border ml-1" title="${f.doc_count} documento(s) en el expediente">${f.doc_count} <i class="fas fa-file-alt"></i></span>`
-        : "";
+      // OR-121: columna propia con el conteo de documentos del expediente
+      // (el backend ya lo calcula en `doc_count`) — resaltado cuando está en
+      // cero, que es justo lo que la pestaña necesita completar.
+      const docCount = f.doc_count ?? 0;
+      const docCountCell = docCount === 0
+        ? `<span class="badge badge-warning text-dark" title="Expediente sin documentos"><i class="fas fa-exclamation-triangle mr-1"></i>0</span>`
+        : `<span class="badge badge-light border" title="${docCount} documento(s) en el expediente">${docCount}</span>`;
       // OR-120: cargo y departamento en dos líneas, no "uno u otro".
       const cargoDeptoCell = (f.cargo || f.departamento)
         ? `${f.cargo ? `<div class="font-weight-bold" style="line-height:1.2;">${escHtml(f.cargo)}</div>` : ""}${f.departamento ? `<div class="text-muted" style="line-height:1.2;font-size:0.85em;">${escHtml(f.departamento)}</div>` : ""}`
         : "—";
       return `
         <tr class="ds-monitor-row">
-          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${avatar}${empleadoDisplay}${docCountBadge}</td>
+          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${avatar}${empleadoDisplay}</td>
+          <td class="text-center">${docCountCell}</td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.cedula||'—')}</td>
           <td class="text-muted small ds-hide-sm" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="${escHtml([f.cargo, f.departamento].filter(Boolean).join(' · '))}">${cargoDeptoCell}</td>
           <td>${f.estado
@@ -460,16 +607,24 @@ async function openAdminDocById(id) {
 // Se recorren todas las páginas del resultado filtrado antes de armar el CSV.
 async function _fetchAllFilteredRecords(suf) {
   const mod        = state.user.modulo;
+  const isArch     = isArchivoModule();
   const q          = document.getElementById(`admin_search-${suf}`)?.value          || "";
   const type       = document.getElementById(`admin_filter_type-${suf}`)?.value     || "";
-  const person     = document.getElementById(`admin_filter_person-${suf}`)?.value   || "";
+  const person     = isArch ? (document.getElementById(`admin_filter_person-${suf}`)?.value || "") : "";
+  const department = isArch ? "" : (document.getElementById(`admin_filter_department-${suf}`)?.value || "");
   const statusFilt = document.getElementById(`admin_filter_status-${suf}`)?.value   || "";
+  // OR-126/OR-125: el CSV exportado debe respetar exactamente los mismos
+  // filtros activos que la tabla, con los mismos nombres de parámetro que
+  // usa loadMonitorTable().
+  const statusParam = isArch
+    ? `&status_filter=${encodeURIComponent(statusFilt)}`
+    : `&estado_laboral_filter=${encodeURIComponent(statusFilt)}`;
   const perPage = 200;
   let page = 1;
   let all = [];
   let total = Infinity;
   while (all.length < total && page <= 200) { // corte de seguridad: 40.000 registros
-    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&status_filter=${encodeURIComponent(statusFilt)}&page=${page}&per_page=${perPage}`;
+    const url = `${API_BASE}/api/admin/list_all?modulo=${mod}&search=${encodeURIComponent(q)}&type_filter=${encodeURIComponent(type)}&person_filter=${encodeURIComponent(person)}&department_filter=${encodeURIComponent(department)}${statusParam}&page=${page}&per_page=${perPage}`;
     const data = await apiFetchJSON(url);
     all = all.concat(data.records || []);
     total = data.total || 0;

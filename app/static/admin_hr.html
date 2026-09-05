@@ -362,8 +362,12 @@
                     <select id="admin_filter_type-rrhh" class="form-control form-control-sm">
                       <option value="">Tipo...</option>
                     </select>
-                    <select id="admin_filter_person-rrhh" class="form-control form-control-sm">
-                      <option value="">Persona...</option>
+                    <!-- OR-125: reemplaza al desplegable "Persona..." (400 opciones sin
+                         buscador, duplicaba al cuadro de búsqueda) por el filtro que de
+                         verdad falta en RRHH: departamento. Opciones reales del catálogo,
+                         pobladas por admin-monitor.js. -->
+                    <select id="admin_filter_department-rrhh" class="form-control form-control-sm">
+                      <option value="">Filtrar por Departamento...</option>
                     </select>
                     <select id="admin_filter_status-rrhh" class="form-control form-control-sm" style="max-width:130px;" title="Estado laboral">
                       <option value="">Todos</option>
@@ -377,12 +381,17 @@
                   </div>
                   <div class="table-responsive">
                     <table class="table table-bordered table-striped" style="font-size:0.85rem;">
+                      <!-- OR-128: encabezados ordenables (data-sort consumido por
+                           admin-monitor.js, lista blanca real en docs.py). Cédula,
+                           Tipos, Ubicación y Acciones se quedan fuera: no son columnas
+                           que la base pueda ordenar de forma barata o con sentido. -->
                       <thead>
                         <tr class="bg-light text-dark">
-                          <th>Empleado</th>
+                          <th scope="col" class="ds-sortable" data-sort="empleado" role="button" tabindex="0" aria-sort="none">Empleado <i class="fas fa-sort ds-sort-icon" aria-hidden="true"></i></th>
+                          <th scope="col" class="ds-sortable text-center" data-sort="doc_count" role="button" tabindex="0" aria-sort="none" title="N° de documentos del expediente">N° Docs <i class="fas fa-sort ds-sort-icon" aria-hidden="true"></i></th>
                           <th class="ds-hide-sm">Cédula</th>
-                          <th class="ds-hide-sm">Cargo / Depto.</th>
-                          <th>Estado</th>
+                          <th scope="col" class="ds-hide-sm ds-sortable" data-sort="cargo" role="button" tabindex="0" aria-sort="none">Cargo / Depto. <i class="fas fa-sort ds-sort-icon" aria-hidden="true"></i></th>
+                          <th scope="col" class="ds-sortable" data-sort="estado" role="button" tabindex="0" aria-sort="none">Estado <i class="fas fa-sort ds-sort-icon" aria-hidden="true"></i></th>
                           <th class="ds-hide-sm">Tipos</th>
                           <th class="ds-hide-sm">Ubicación</th>
                           <th>Acciones</th>
@@ -392,7 +401,7 @@
                     </table>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap" style="gap:6px;">
-                    <span id="admin_table_summary-rrhh" class="text-muted" style="font-size:0.85rem;">Mostrando 0 registros</span>
+                    <span id="admin_table_summary-rrhh" class="text-muted" style="font-size:0.85rem;">Mostrando 0 de 0 expedientes</span>
                     <div class="d-flex align-items-center" style="gap:8px;">
                       <select id="admin_per_page-rrhh" class="form-control form-control-sm" style="width:auto;" title="Filas por página">
                         <option value="10">10/pág</option>

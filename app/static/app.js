@@ -379,10 +379,17 @@ function setupEventListeners() {
     });
     document.getElementById(`btn-apply-stats-${suf}`)?.addEventListener("click", loadDynamicStats);
     document.getElementById(`admin-submit-form-${suf}`)?.addEventListener("submit", handleNewSubmission);
-    document.getElementById(`admin_search-${suf}`)?.addEventListener("input",   () => { state.adminTable.page = 1; loadMonitorTable(); });
+    // OR-127: un tecleo, una petición de sobra — `debounce()` (admin-ui.js) evita
+    // disparar `loadMonitorTable()` (con su `to_tsvector`/`unaccent`/`COUNT(DISTINCT)`
+    // contra Neon) en cada tecla; Enter sigue siendo inmediato.
+    const _debouncedMonitorSearch = typeof debounce === "function"
+      ? debounce(() => loadMonitorTable(), 300)
+      : () => loadMonitorTable();
+    document.getElementById(`admin_search-${suf}`)?.addEventListener("input",   () => { state.adminTable.page = 1; _debouncedMonitorSearch(); });
     document.getElementById(`admin_search-${suf}`)?.addEventListener("keydown", e => { if (e.key === "Enter") { state.adminTable.page = 1; loadMonitorTable(); } });
     document.getElementById(`admin_filter_type-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_person-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
+    document.getElementById(`admin_filter_department-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`admin_filter_status-${suf}`)?.addEventListener("change", () => { state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`btn_refresh_table-${suf}`)?.addEventListener("click",  loadMonitorTable);
     document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click", exportAdminCSV);

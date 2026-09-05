@@ -116,6 +116,80 @@ class TestListAll:
         assert body["records"] == []
 
 
+class TestListAllRRHHFiltros:
+    """OR-126: `estado_laboral_filter` es igualdad exacta contra el catálogo
+    `estados_laborales`, no `ILIKE '%...%'` (que también traía "Reactivado" o
+    "Inactivo" al filtrar "Activo"). OR-125: `department_filter` es el
+    reemplazo del desplegable "Persona..." en RRHH."""
+
+    def test_estado_laboral_filter_valido_aplica_igualdad_exacta(self, client_as):
+        c = client_as("rrhh1")
+        count_row = _mock_row(total=0)
+        queries = []
+
+        def mock_query(sql, params=None, fetch="all", commit=False):
+            queries.append((sql, params))
+            if "SELECT 1 FROM public.estados_laborales" in sql:
+                return {"1": 1}  # catálogo: "Activo" existe
+            if "COUNT(DISTINCT e.id)" in sql:
+                return count_row
+            return []
+
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(modulo="RRHH", rol="Normal")),
+            patch("routes.admin.docs.db_query", side_effect=mock_query),
+        ):
+            res = c.get("/api/admin/list_all?modulo=RRHH&estado_laboral_filter=Activo")
+
+        assert res.status_code == 200
+        filter_queries = [q for q, p in queries if "el.estados = %s" in q]
+        assert filter_queries, "el filtro de estado laboral no aplicó igualdad exacta"
+        # Nunca un ILIKE con comodines para este filtro (regresión de OR-126).
+        assert not any("el.estados" in q and "ILIKE" in q for q, p in queries)
+
+    def test_estado_laboral_filter_invalido_se_ignora(self, client_as):
+        c = client_as("rrhh2")
+        count_row = _mock_row(total=0)
+        queries = []
+
+        def mock_query(sql, params=None, fetch="all", commit=False):
+            queries.append((sql, params))
+            if "SELECT 1 FROM public.estados_laborales" in sql:
+                return None  # no existe en el catálogo
+            if "COUNT(DISTINCT e.id)" in sql:
+                return count_row
+            return []
+
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(modulo="RRHH", rol="Normal")),
+            patch("routes.admin.docs.db_query", side_effect=mock_query),
+        ):
+            res = c.get("/api/admin/list_all?modulo=RRHH&estado_laboral_filter=Inventado")
+
+        assert res.status_code == 200
+        assert not any("el.estados = %s" in q for q, p in queries)
+
+    def test_department_filter_aplica_igualdad_sobre_departamentos(self, client_as):
+        c = client_as("rrhh3")
+        count_row = _mock_row(total=0)
+        queries = []
+
+        def mock_query(sql, params=None, fetch="all", commit=False):
+            queries.append((sql, params))
+            if "COUNT(DISTINCT e.id)" in sql:
+                return count_row
+            return []
+
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(modulo="RRHH", rol="Normal")),
+            patch("routes.admin.docs.db_query", side_effect=mock_query),
+        ):
+            res = c.get("/api/admin/list_all?modulo=RRHH&department_filter=Biolog%C3%ADa")
+
+        assert res.status_code == 200
+        assert any("d.nombre = %s" in q and params and "Biología" in params for q, params in queries)
+
+
 class TestAuthGuard:
     def test_admin_sin_sesion_retorna_401(self, anon_client):
         """Sin cookie ds_session, los endpoints admin deben retornar 401.

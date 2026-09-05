@@ -67,6 +67,14 @@ def list_all_files(
     type_filter: Optional[str] = "",
     person_filter: Optional[str] = "",
     status_filter: Optional[str] = "",
+    # OR-126: `status_filter` en Archivo significa estado del documento
+    # (draft/revision/aprobado/rechazado); en RRHH significa estado laboral
+    # (catálogo `estados_laborales`), un concepto distinto que merece su
+    # propio parámetro en vez de compartir semántica por nombre.
+    estado_laboral_filter: Optional[str] = "",
+    # OR-125: reemplaza al desplegable «Persona…» en RRHH, que duplicaba al
+    # buscador con un <select> de 400 opciones sin filtro propio de búsqueda.
+    department_filter: Optional[str] = "",
     sort: Optional[str] = None,
     dir: Optional[str] = "asc",
     page: int = 1,
@@ -176,9 +184,23 @@ def list_all_files(
         if person_filter:
             conditions.append("unaccent(e.nombres || ' ' || e.apellidos) ILIKE unaccent(%s)")
             params.append(f"%{person_filter}%")
-        if status_filter:
-            conditions.append("COALESCE(el.estados, '') ILIKE %s")
-            params.append(f"%{status_filter}%")
+        # OR-126: igualdad exacta contra el catálogo `estados_laborales`, no
+        # `ILIKE '%...%'` — con ese comodín, filtrar "Activo" también traía
+        # "Reactivado" o "Inactivo" en cuanto ese estado existiera. Un valor
+        # que no está en el catálogo (URL manipulada, catálogo cambiado) se
+        # ignora en vez de devolver un 400: coincide con cómo se trata ya
+        # `status_filter` en Archivo (fuera de la lista blanca -> se ignora).
+        if estado_laboral_filter:
+            _valid_estado = db_query(
+                "SELECT 1 FROM public.estados_laborales WHERE estados = %s",
+                [estado_laboral_filter], fetch="one",
+            )
+            if _valid_estado:
+                conditions.append("el.estados = %s")
+                params.append(estado_laboral_filter)
+        if department_filter:
+            conditions.append("d.nombre = %s")
+            params.append(department_filter)
 
         join = """
             FROM public.empleados e
