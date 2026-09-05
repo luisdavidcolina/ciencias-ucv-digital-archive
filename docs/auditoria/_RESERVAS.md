@@ -156,5 +156,5 @@ para no repetir la confusión.
 | VI-compartido-ayuda | agente-vi-compartido-ayuda | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 273000b |
 | VI-shell-integration | agente-vi-shell-integration | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 10ea006 |
 | VI-styles-final | agente-vi-styles-final | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | e76437a |
-| BA-app-choices | agente-ba-app-choices | 2026-09-05 | terminado (BA-010, BA-009, BA-027, BA-094, BA-177; BA-003/004/145/172 y la mitad de BA-009 en app.js documentados en _BUZON.md, fuera de zona) | |
+| BA-app-choices | agente-ba-app-choices | 2026-09-05 | terminado (BA-010, BA-009, BA-027, BA-094, BA-177; BA-003/004/145/172 y la mitad de BA-009 en app.js documentados en _BUZON.md, fuera de zona) | 0cfffa5 |
 | VI-viz-tokens | agente-vi-viz-tokens | 2026-09-05 | en curso | |
