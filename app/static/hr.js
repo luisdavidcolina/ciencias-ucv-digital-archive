@@ -21,40 +21,65 @@ const _debouncedRrhhSearch = (() => {
   return () => { clearTimeout(timer); timer = setTimeout(triggerRrhhSearch, 420); };
 })();
 
+// Descarta respuestas de búsquedas que ya no son la última lanzada (BR-018)
+let _rrhhSearchSeq = 0;
+
 async function triggerRrhhSearch() {
+  if (!state.rrhh) state.rrhh = {};
+  const rrhh = state.rrhh;
   showRrhhSkeleton();
+  const mySeq = ++_rrhhSearchSeq;
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/buscar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        search_term:  state.rrhh.search,
-        doc_types:    state.rrhh.selectedTypes,
-        estados:      state.rrhh.selectedEstados,
-        people_terms: state.rrhh.selectedPeople,
-        date_start:   state.rrhh.dateStart,
-        date_end:     state.rrhh.dateEnd,
-        sort_mode:    state.rrhh.sortMode,
-        page:         state.rrhh.page,
-        per_page:     state.rrhh.perPage
+        search_term:  rrhh.search,
+        doc_types:    rrhh.selectedTypes,
+        estados:      rrhh.selectedEstados,
+        people_terms: rrhh.selectedPeople,
+        date_start:   rrhh.dateStart,
+        date_end:     rrhh.dateEnd,
+        sort_mode:    rrhh.sortMode,
+        page:         rrhh.page,
+        per_page:     rrhh.perPage
       })
     });
-    if (!res.ok) throw new Error();
+    if (mySeq !== _rrhhSearchSeq) return; // llegó una búsqueda más reciente antes
+    if (!res.ok) { renderRrhhSearchError(res.status); return; }
     const data = await res.json();
-    // Retrocompatibilidad: si la respuesta es un array (formato viejo), tratar como antes
-    if (Array.isArray(data)) {
-      state.rrhh.results = data;
-      state.rrhh.total   = data.length;
-    } else {
-      state.rrhh.results = data.records || [];
-      state.rrhh.total   = data.total   || state.rrhh.results.length;
-    }
+    if (mySeq !== _rrhhSearchSeq) return;
+    state.rrhh.results = data.records || [];
+    state.rrhh.total   = data.total   || state.rrhh.results.length;
     renderRrhhList();
     renderRrhhPagination();
     _renderRrhhFacets(data.facets || null);
   } catch (e) {
+    if (mySeq !== _rrhhSearchSeq) return;
     console.error("Error buscando RRHH:", e);
+    renderRrhhSearchError(0);
   }
+}
+
+// Estado de error explícito en la lista, con reintento (BR-019)
+function renderRrhhSearchError(status) {
+  const container = document.getElementById("list_rrhh");
+  if (!container) return;
+  const esSesion = status === 401 || status === 403;
+  const mensaje = esSesion
+    ? "Su sesión expiró o no tiene permiso para consultar RRHH. Vuelva a iniciar sesión."
+    : "No se pudo completar la búsqueda. Intente de nuevo.";
+  container.setAttribute("role", "alert");
+  container.innerHTML = `<div class="alert alert-danger text-center p-4">
+    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+    <p class="mb-2">${escHtml(mensaje)}</p>
+    ${esSesion
+      ? `<a href="/login.html" class="btn btn-sm btn-primary">Iniciar sesión</a>`
+      : `<button type="button" class="btn btn-sm btn-outline-danger" data-rrhh-retry>Reintentar</button>`}
+  </div>`;
+  const retryBtn = container.querySelector("[data-rrhh-retry]");
+  if (retryBtn) retryBtn.addEventListener("click", () => { container.removeAttribute("role"); triggerRrhhSearch(); });
+  showToast(mensaje, "error");
 }
 
 function renderRrhhPagination() {
@@ -73,31 +98,42 @@ function renderRrhhPagination() {
   for (let i = startPage; i <= endPage; i++) pageNums.push(i);
 
   container.innerHTML = `
-    <nav class="mt-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:6px;">
+    <nav class="mt-3 d-flex align-items-center justify-content-between flex-wrap" style="gap:6px;" aria-label="Paginación de expedientes">
       <small class="text-muted">Pág. ${page} de ${pages} &mdash; ${total} resultados</small>
       <ul class="pagination pagination-sm mb-0">
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(1)" title="Primera" aria-label="Primera página"><i class="fas fa-angle-double-left"></i></button>
+          <button class="page-link" data-rrhh-page="1" aria-label="Primera página"><i class="fas fa-angle-double-left" aria-hidden="true"></i></button>
         </li>
         <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${page - 1})" aria-label="Página anterior"><i class="fas fa-chevron-left"></i></button>
+          <button class="page-link" data-rrhh-page="${page - 1}" aria-label="Página anterior"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
         </li>
         ${pageNums.map(p => `<li class="page-item ${p === page ? 'active' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${p})">${p}</button>
+          <button class="page-link" data-rrhh-page="${p}" aria-label="Página ${p}" ${p === page ? 'aria-current="page"' : ''}>${p}</button>
         </li>`).join("")}
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${page + 1})" aria-label="Página siguiente"><i class="fas fa-chevron-right"></i></button>
+          <button class="page-link" data-rrhh-page="${page + 1}" aria-label="Página siguiente"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
         </li>
         <li class="page-item ${page >= pages ? 'disabled' : ''}">
-          <button class="page-link" onclick="changeRrhhPage(${pages})" title="Última" aria-label="Última página"><i class="fas fa-angle-double-right"></i></button>
+          <button class="page-link" data-rrhh-page="${pages}" aria-label="Última página"><i class="fas fa-angle-double-right" aria-hidden="true"></i></button>
         </li>
       </ul>
     </nav>`;
+  container.querySelectorAll("[data-rrhh-page]").forEach(btn => {
+    btn.addEventListener("click", () => changeRrhhPage(Number(btn.dataset.rrhhPage)));
+  });
 }
 
 function changeRrhhPage(p) {
   state.rrhh.page = p;
   triggerRrhhSearch();
+  // Devuelve el scroll y el foco al principio de la lista (BR-027)
+  const header = document.querySelector(".ds-results-header");
+  if (header) { header.setAttribute("tabindex", "-1"); header.scrollIntoView({ behavior: "smooth", block: "start" }); header.focus({ preventScroll: true }); }
+}
+
+// El usuario puede editar RRHH sólo si es Admin de ese módulo (BR-024)
+function _esAdminRrhh() {
+  return !!(state.user && state.user.roles && state.user.roles["RRHH"] === "Admin");
 }
 
 function renderRrhhList() {
@@ -108,14 +144,18 @@ function renderRrhhList() {
   document.getElementById("count-rrhh-results").innerText = hasFilter ? `${total} Resultados` : `${total} Registros`;
 
   if (results.length === 0) {
+    container.removeAttribute("role");
     const emptyMsg = hasFilter
       ? `No se encontraron expedientes con los filtros aplicados.
          <br><small class="text-muted">Intente ampliar la búsqueda o limpiar los filtros.</small>`
       : `No hay expedientes registrados en el sistema.`;
     container.innerHTML = `<div class="alert alert-secondary text-center p-4">
-      <i class="fas fa-users fa-2x mb-2 text-muted"></i>
+      <i class="fas fa-users fa-2x mb-2 text-muted" aria-hidden="true"></i>
       <p class="mb-0">${emptyMsg}</p>
+      ${hasFilter ? `<button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-rrhh-clear-empty">Limpiar filtros</button>` : ""}
     </div>`;
+    const clearBtn = container.querySelector("[data-rrhh-clear-empty]");
+    if (clearBtn) clearBtn.addEventListener("click", () => document.getElementById("btn_clear_rrhh")?.click());
     document.getElementById("info-rrhh-pagination").innerText = "Pág 1 de 1";
     const prevBtn = document.getElementById("btn-rrhh-prev");
     const nextBtn = document.getElementById("btn-rrhh-next");
@@ -124,6 +164,7 @@ function renderRrhhList() {
     return;
   }
 
+  container.setAttribute("role", "list");
   const totalPages = Math.ceil(total / state.rrhh.perPage) || 1;
   document.getElementById("info-rrhh-pagination").innerText = `Pág ${state.rrhh.page} de ${totalPages}`;
   const prevBtnR = document.getElementById("btn-rrhh-prev");
@@ -133,69 +174,99 @@ function renderRrhhList() {
 
   const searchTerms = (state.rrhh.search || "").trim().split(/\s+/).filter(t => t.length > 1);
   const hl = txt => typeof highlightTerms === "function" ? highlightTerms(txt, searchTerms) : (txt || "");
+  const puedeEditar = _esAdminRrhh();
 
   container.innerHTML = results.map(p => {
     const initials   = getPersonInitials(p.persona_raw);
     const colorState = getStatusColor(p.estatuses);
-    const escapedRaw = JSON.stringify(p.persona_raw || "");
+    const nombreEsc  = escHtml(p.persona || "el empleado");
+    const tipos = (p.tipos || "").split(";").filter(Boolean);
+    const tiposVisibles = tipos.slice(0, 3);
+    const tiposRestantes = tipos.length - tiposVisibles.length;
     return `
-      <div class="ds-item-card ds-person-card" role="listitem" onclick="openRrhhPersonDossier(${escapedRaw})" style="cursor:pointer;border-left:3px solid ${colorState};">
-        <div class="ds-item-thumbnail" style="align-items:center;padding-top:0;">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid ${colorState};flex-shrink:0;">
-            ${p.foto_url
-              ? `<img src="${_secureFileUrl(p.foto_url)}" alt="Fotografía de ${escHtml(p.persona || "el empleado")}" style="width:100%;height:100%;object-fit:cover;display:block;">`
-              : `<span style="width:100%;height:100%;background:#2b4e72;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">${initials}</span>`}
+      <div class="ds-item-card ds-person-card" role="listitem" style="border-left:3px solid ${colorState};">
+        <button type="button" class="ds-person-card-open" data-rrhh-open="${escHtml(p.persona_raw || "")}"
+          aria-label="Ver expediente de ${nombreEsc}"
+          style="all:unset;cursor:pointer;display:flex;align-items:center;flex:1 1 auto;min-width:0;">
+          <div class="ds-item-thumbnail" style="align-items:center;padding-top:0;">
+            <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#eef4fb;border:2px solid ${colorState};flex-shrink:0;">
+              ${p.foto_url
+                ? `<img src="${_secureFileUrl(p.foto_url)}" alt="Fotografía de ${nombreEsc}" loading="lazy" decoding="async" data-rrhh-initials="${escHtml(initials)}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+                : `<span style="width:100%;height:100%;background:#2b4e72;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;">${initials}</span>`}
+            </div>
           </div>
-        </div>
-        <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;">
-          <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h4>
-          <div style="font-size:0.82rem;color:#495057;line-height:1.5;">
-            <span class="mr-3"><i class="fas fa-id-card mr-1 text-muted"></i> C.I: <strong>${hl(p.cedulas)}</strong></span>
-            <span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted"></i> <strong>${hl(p.departamentos)}</strong></span>
-            <span><i class="fas fa-user-tie mr-1 text-muted"></i> <strong>${hl(p.cargos)}</strong></span>
+          <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;min-width:0;text-align:left;">
+            <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h4>
+            <div style="font-size:0.82rem;color:#495057;line-height:1.5;">
+              <span class="mr-3"><i class="fas fa-id-card mr-1 text-muted" aria-hidden="true"></i> C.I: <strong>${hl(p.cedulas)}</strong></span>
+              <span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.departamentos)}</strong></span>
+              <span><i class="fas fa-user-tie mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.cargos)}</strong></span>
+            </div>
+            <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
+              <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.78rem;font-weight:700;">${escHtml(p.estatuses)}</span>
+              <span class="badge badge-light border" style="padding:2px 7px;border-radius:10px;font-size:0.7rem;"><i class="fas fa-file-alt mr-1" aria-hidden="true"></i>${Number(p.doc_count) || 0} docs</span>
+              ${tiposVisibles.map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${escHtml(t.trim())}</span>`).join("")}
+              ${tiposRestantes > 0 ? `<span class="badge badge-secondary" title="${escHtml(tipos.slice(3).join(", "))}" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">+${tiposRestantes}</span>` : ""}
+            </div>
           </div>
-          <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
-            <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.73rem;">${escHtml(p.estatuses)}</span>
-            <span class="badge badge-light border" style="padding:3px 8px;border-radius:10px;font-size:0.73rem;"><i class="fas fa-file-alt mr-1"></i>${Number(p.doc_count) || 0} docs</span>
-            ${(p.tipos||"").split(";").filter(Boolean).slice(0,3).map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${escHtml(t.trim())}</span>`).join("")}
-          </div>
-        </div>
+        </button>
         <div class="ds-item-actions" style="margin-left:12px;display:flex;flex-direction:column;justify-content:center;gap:6px;">
-          <button class="btn btn-primary ds-action-btn" title="Ver expediente"
-            onclick="event.stopPropagation();openRrhhPersonDossier(${escapedRaw})"
+          <button class="btn btn-primary ds-action-btn" aria-label="Ver expediente de ${nombreEsc}" title="Ver expediente"
+            data-rrhh-open="${escHtml(p.persona_raw || "")}"
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
-            <i class="fas fa-eye"></i>
+            <i class="fas fa-eye" aria-hidden="true"></i>
           </button>
-          ${state.user ? `<a href="/static/admin_hr.html?empId=${p.empleado_id}" class="btn btn-outline-warning ds-action-btn" title="Editar expediente (Admin)"
-            onclick="event.stopPropagation()"
+          ${puedeEditar ? `<a href="/static/admin_hr.html?empId=${encodeURIComponent(p.empleado_id)}" class="btn btn-outline-warning ds-action-btn" aria-label="Editar expediente de ${nombreEsc}" title="Editar expediente (Admin)"
             style="width:36px;height:36px;border-radius:50%!important;display:inline-flex;align-items:center;justify-content:center;">
-            <i class="fas fa-pen" style="font-size:0.8rem;"></i>
+            <i class="fas fa-pen" style="font-size:0.8rem;" aria-hidden="true"></i>
           </a>` : ""}
         </div>
       </div>
     `;
   }).join("");
+  container.querySelectorAll("[data-rrhh-open]").forEach(el => {
+    el.addEventListener("click", (e) => { e.stopPropagation(); openRrhhPersonDossier(el.dataset.rrhhOpen, el); });
+  });
+  // Fallback a iniciales si la foto no carga (BR-037)
+  container.querySelectorAll("img[data-rrhh-initials]").forEach(img => {
+    img.addEventListener("error", () => {
+      const span = document.createElement("span");
+      span.style.cssText = "width:100%;height:100%;background:#2b4e72;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;";
+      span.textContent = img.dataset.rrhhInitials || "";
+      img.replaceWith(span);
+    }, { once: true });
+  });
 }
 
 // ==========================================================================
 // DOSSIER DE PERSONA
 // ==========================================================================
-async function openRrhhPersonDossier(personaRaw) {
+// Elemento que abrió el dossier, para devolverle el foco al cerrar (BR-080)
+let _rrhhDossierTrigger = null;
+
+async function openRrhhPersonDossier(personaRaw, triggerEl) {
+  _rrhhDossierTrigger = triggerEl || document.activeElement;
+  const modalContent = document.getElementById("rrhh-person-modal-content");
+  if (modalContent) {
+    modalContent.innerHTML = `<div class="text-center p-5"><span class="spinner-border text-primary mb-2" role="status"></span><p class="text-muted mb-0">Cargando expediente…</p></div>`;
+  }
+  $("#rrhh-person-modal").modal("show");
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/person/profile`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ persona: personaRaw })
     });
-    if (!res.ok) throw new Error();
+    if (!res.ok) throw new Error(String(res.status));
     state.activePersonProfile = await res.json();
     state.innerDossierSearch  = "";
     state.innerDossierClass   = "";
     state.innerDossierSort    = "Alfabético (A-Z)";
     renderRrhhDossierModal();
-    $("#rrhh-person-modal").modal("show");
   } catch (e) {
     console.error("Error al abrir perfil de RRHH:", e);
+    $("#rrhh-person-modal").modal("hide");
+    showToast("No se pudo abrir el expediente. Intente de nuevo.", "error");
   }
 }
 
@@ -234,27 +305,31 @@ function renderQuickDocLinks(profile) {
     const doc = findPersonKeyDoc(profile, qd.keywords);
     if (doc) {
       return `
-        <button class="btn btn-sm btn-outline-primary mr-2 mb-2"
-          onclick="openDocMetadataModal(${doc.__idx})" title="Ver ${escHtml(qd.label)} en el expediente">
-          <i class="fas ${qd.icon} mr-1"></i>${escHtml(qd.label)}
+        <button type="button" class="btn btn-sm btn-outline-primary mr-2 mb-2"
+          data-open-doc-idx="${escHtml(String(doc.__idx))}" title="Ver ${escHtml(qd.label)} en el expediente">
+          <i class="fas ${qd.icon} mr-1" aria-hidden="true"></i>${escHtml(qd.label)}
         </button>`;
     }
     return `
-      <button class="btn btn-sm btn-outline-secondary mr-2 mb-2" disabled
+      <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2" aria-disabled="true"
         title="${qd.label} no registrado en el expediente">
-        <i class="fas ${qd.icon} mr-1"></i>${qd.label} <small>(no registrado)</small>
+        <i class="fas ${qd.icon} mr-1" aria-hidden="true"></i>${qd.label} <small>(no registrado)</small>
       </button>`;
   }).join("");
 }
 
+// Calcula la edad a partir de los componentes de la fecha, sin pasar por la
+// zona horaria del navegador (BR-035): "1980-05-14" no debe leerse como
+// medianoche UTC, que en Venezuela cae un día antes.
 function _calcEdad(fechaNac) {
   if (!fechaNac) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fechaNac));
+  if (!m) return null;
+  const [, y, mo, d] = m.map(Number);
   const hoy = new Date();
-  const nac = new Date(fechaNac);
-  if (isNaN(nac)) return null;
-  let edad = hoy.getFullYear() - nac.getFullYear();
-  const m = hoy.getMonth() - nac.getMonth();
-  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  let edad = hoy.getFullYear() - y;
+  const mesesDiff = (hoy.getMonth() + 1) - mo;
+  if (mesesDiff < 0 || (mesesDiff === 0 && hoy.getDate() < d)) edad--;
   return edad > 0 ? edad : null;
 }
 
@@ -271,8 +346,9 @@ function renderRrhhDossierModal() {
   const isPensionado = (profile.statuses || "").includes("Pensionado");
   const cedulaDoc = findPersonKeyDoc(profile, ["cedula"]);
   const ciHtml = profile.cedulas
-    ? `${escHtml(profile.cedulas)}${cedulaDoc ? ` <a href="#" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" onclick="openDocMetadataModal(${JSON.stringify(cedulaDoc.__idx)});return false;"><i class="fas fa-id-card"></i> Ver</a>` : ""}`
+    ? `${escHtml(profile.cedulas)}${cedulaDoc ? ` <button type="button" class="btn btn-xs btn-outline-primary ml-2 py-0 px-2" data-open-doc-idx="${escHtml(String(cedulaDoc.__idx))}"><i class="fas fa-id-card" aria-hidden="true"></i> Ver</button>` : ""}`
     : "N/A";
+  const empleadoId = profile.rows && profile.rows[0]?.empleado_id;
 
   // Derivar categorías visibles desde los documentos (usa slug→parte canónica como fallback)
   const docCatSet = new Set();
@@ -298,51 +374,52 @@ function renderRrhhDossierModal() {
         </div>
         <div class="ds-person-info flex-grow-1 w-100">
           <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-            <h3 class="ds-person-name m-0 text-primary font-weight-bold">${escHtml(profile.persona)}</h3>
+            <h3 id="rrhh-person-modal-title" class="ds-person-name m-0 text-primary font-weight-bold">${escHtml(profile.persona)}</h3>
             <div class="d-flex align-items-center">
               <span class="badge badge-info text-uppercase px-3 py-2">${escHtml(profile.statuses || "Sin estado")}</span>
-              ${profile.rows && profile.rows[0]?.empleado_id
-                ? `<a href="${API_BASE}/api/rrhh/report/${profile.rows[0].empleado_id}" target="_blank" class="btn btn-outline-secondary btn-sm ml-2" title="Generar reporte imprimible">
-                    <i class="fas fa-print mr-1"></i>Imprimir Expediente
+              ${state.user && empleadoId
+                ? `<a href="${API_BASE}/api/rrhh/report/${empleadoId}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm ml-2" title="Generar reporte imprimible">
+                    <i class="fas fa-print mr-1" aria-hidden="true"></i>Imprimir Expediente
                   </a>`
                 : ''}
-              ${state.user && profile.rows && profile.rows[0]?.empleado_id
-                ? `<a href="/static/admin_hr.html?empId=${profile.rows[0].empleado_id}" class="btn btn-outline-warning btn-sm ml-2" title="Editar expediente en panel de administración">
-                    <i class="fas fa-pen mr-1"></i>Editar
+              ${_esAdminRrhh() && empleadoId
+                ? `<a href="/static/admin_hr.html?empId=${encodeURIComponent(empleadoId)}" class="btn btn-outline-warning btn-sm ml-2" title="Editar expediente en panel de administración">
+                    <i class="fas fa-pen mr-1" aria-hidden="true"></i>Editar
                   </a>`
                 : ''}
             </div>
           </div>
-          <h5 class="ds-person-cargo text-secondary mb-3 font-weight-bold">
-            <i class="fas fa-user-tie mr-2"></i>${escHtml(profile.cargos || "Cargo no especificado")}
-          </h5>
+          <p class="ds-person-cargo text-secondary mb-3 font-weight-bold">
+            <i class="fas fa-user-tie mr-2" aria-hidden="true"></i>${escHtml(profile.cargos || "Cargo no especificado")}
+          </p>
           <div class="row">
             <div class="col-6 mb-2"><strong>C.I.:</strong> ${ciHtml}</div>
-            <div class="col-6 mb-2"><strong>RIF:</strong> ${escHtml(profile.rifs || "N/A")}</div>
-            <div class="col-6 mb-2"><strong>Adscripción:</strong> ${escHtml(profile.departamentos || "N/A")}</div>
+            ${profile.rifs ? `<div class="col-6 mb-2"><strong>RIF:</strong> ${escHtml(profile.rifs)}</div>` : ""}
+            ${profile.departamentos ? `<div class="col-6 mb-2"><strong>Adscripción:</strong> ${escHtml(profile.departamentos)}</div>` : ""}
             <div class="col-6 mb-2"><strong>Ingreso:</strong> ${escHtml(formatISOToSpanish(profile.fecha_ingreso) || "No registrada")}</div>
             ${profile.fecha_nacimiento ? `<div class="col-6 mb-2"><strong>Nacimiento:</strong> ${escHtml(formatISOToSpanish(profile.fecha_nacimiento))}${_calcEdad(profile.fecha_nacimiento) ? ` <span class="text-muted small">(${_calcEdad(profile.fecha_nacimiento)} años)</span>` : ""}</div>` : ""}
             ${profile.nivel_educativo  ? `<div class="col-6 mb-2"><strong>Nivel Educ.:</strong> <span class="badge badge-light border">${escHtml(profile.nivel_educativo)}</span></div>` : ""}
             ${profile.sexo             ? `<div class="col-6 mb-2"><strong>Sexo:</strong> ${escHtml({ M: "Masculino", F: "Femenino", O: "Otro" }[profile.sexo] || profile.sexo)}</div>` : ""}
-            ${isRetirado   ? `<div class="col-6 mb-2"><strong>Jubilación:</strong> ${formatISOToSpanish(profile.fecha_jubilacion) || "No registrada"}</div>` : ""}
-            ${isPensionado ? `<div class="col-6 mb-2"><strong>Pensión:</strong>    ${formatISOToSpanish(profile.fecha_pension)    || "No registrada"}</div>` : ""}
+            ${profile.fecha_jubilacion ? `<div class="col-6 mb-2"><strong>Jubilación${isRetirado ? " (efectiva)" : " (prevista)"}:</strong> ${escHtml(formatISOToSpanish(profile.fecha_jubilacion))}</div>` : ""}
+            ${isPensionado && profile.fecha_pension ? `<div class="col-6 mb-2"><strong>Pensión:</strong> ${escHtml(formatISOToSpanish(profile.fecha_pension))}</div>` : ""}
           </div>
           <div class="border-top pt-3 mt-2">
-            <h6 class="font-weight-bold text-secondary text-uppercase mb-2 ds-dossier-subheading">
-              <i class="fas fa-folder mr-2"></i>Documentos de Identidad
-            </h6>
+            <h4 class="font-weight-bold text-secondary text-uppercase mb-2 ds-dossier-subheading">
+              <i class="fas fa-folder mr-2" aria-hidden="true"></i>Documentos de Identidad
+            </h4>
             <div class="d-flex flex-wrap">
               ${renderQuickDocLinks(profile)}
             </div>
           </div>
           <div class="border-top pt-3 mt-2">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h6 class="font-weight-bold text-secondary text-uppercase mb-0 ds-dossier-subheading">
-                <i class="fas fa-briefcase mr-2"></i>Historial de Cargos
-              </h6>
-              <button class="btn btn-xs btn-outline-secondary"
-                onclick="_toggleHistorialCargos(${profile.rows && profile.rows[0]?.empleado_id || 0})">
-                <i class="fas fa-history mr-1"></i>Ver historial
+              <h4 class="font-weight-bold text-secondary text-uppercase mb-0 ds-dossier-subheading">
+                <i class="fas fa-briefcase mr-2" aria-hidden="true"></i>Historial de Cargos
+              </h4>
+              <button type="button" class="btn btn-xs btn-outline-secondary" ${empleadoId ? "" : 'aria-disabled="true"'}
+                data-toggle-historial="${escHtml(String(empleadoId || ""))}"
+                title="${empleadoId ? "" : "Sin identificador de empleado disponible"}">
+                <i class="fas fa-history mr-1" aria-hidden="true"></i>Ver historial
               </button>
             </div>
             <div id="historial-cargos-inline" class="bg-light rounded p-2 ds-dossier-historial-inline d-none"></div>
@@ -351,9 +428,9 @@ function renderRrhhDossierModal() {
       </div>
     </div>
     <div class="ds-modal-filters-wrap bg-light p-3 rounded border mb-4">
-      <h6 class="font-weight-bold text-secondary text-uppercase mb-3">
-        <i class="fas fa-sliders-h mr-2"></i>Explorar Documentos
-      </h6>
+      <h4 class="font-weight-bold text-secondary text-uppercase mb-3">
+        <i class="fas fa-sliders-h mr-2" aria-hidden="true"></i>Explorar Documentos
+      </h4>
       <div class="row">
         <div class="col-md-5 mb-2">
           <input type="text" id="inner-dossier-search" class="form-control form-control-sm"
@@ -423,30 +500,46 @@ function filterInnerDossier() {
   }
 
   const sortKey = state.innerDossierSort;
-  if      (sortKey === "Alfabético (A-Z)")      files.sort((a, b) => _docLabel(a).localeCompare(_docLabel(b)));
-  else if (sortKey === "Alfabético (Z-A)")      files.sort((a, b) => _docLabel(b).localeCompare(_docLabel(a)));
+  if      (sortKey === "Alfabético (A-Z)")      files.sort((a, b) => _docLabel(a).localeCompare(_docLabel(b), "es", { sensitivity: "base", numeric: true }));
+  else if (sortKey === "Alfabético (Z-A)")      files.sort((a, b) => _docLabel(b).localeCompare(_docLabel(a), "es", { sensitivity: "base", numeric: true }));
   else if (sortKey === "Más recientes primero") files.sort((a, b) => (b.fecha_documento || b.fecha_ingreso || "").localeCompare(a.fecha_documento || a.fecha_ingreso || ""));
   else if (sortKey === "Más antiguos primero")  files.sort((a, b) => (a.fecha_documento || a.fecha_ingreso || "").localeCompare(b.fecha_documento || b.fecha_ingreso || ""));
 
   const countBadge = document.getElementById("inner-dossier-folio-count");
-  if (countBadge) countBadge.textContent = `${files.length} folios visibles`;
+  // "Folio" es un término técnico de archivo (un documento puede tener varios);
+  // lo correcto aquí es contar documentos, no inventar un conteo de folios (BR-164)
+  if (countBadge) countBadge.textContent = `${files.length} documentos visibles`;
 
   const container = document.getElementById("inner-dossier-items-container");
   if (files.length === 0) {
-    container.innerHTML = `<div class="alert alert-secondary text-center p-3">No se encontraron archivos con estos filtros en el expediente.</div>`;
+    container.innerHTML = `<div class="alert alert-secondary text-center p-3">
+      No se encontraron archivos con estos filtros en el expediente.
+      <br><button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-clear-inner-dossier-filters>Limpiar filtros del expediente</button>
+    </div>`;
+    const clearBtn = container.querySelector("[data-clear-inner-dossier-filters]");
+    if (clearBtn) clearBtn.addEventListener("click", () => {
+      state.innerDossierSearch = ""; state.innerDossierClass = "";
+      const s = document.getElementById("inner-dossier-search"); if (s) s.value = "";
+      const c = document.getElementById("inner-dossier-class");  if (c) c.value = "";
+      filterInnerDossier();
+    });
     return;
   }
 
-  // Agrupar por parte (categoria_slug → parte canónica) o por categoria/doc_type
+  // Agrupar por parte (categoria_slug → parte canónica) o por categoria/doc_type.
+  // Los documentos sin clasificar se separan aparte: son una tarea de archivo
+  // pendiente, no una Parte más del expediente (BR-166).
   const grouped = {};
+  const sinClasificar = [];
   for (const f of files) {
     let key;
     if (f.categoria_slug) {
       const parte = RRHH_PARTES.find(p => p.slug === f.categoria_slug);
-      key = parte ? parte.nombre : (f.categoria || f.doc_type || "Sin clasificar");
+      key = parte ? parte.nombre : (f.categoria || f.doc_type || null);
     } else {
-      key = f.categoria || f.doc_type || "Sin clasificar";
+      key = f.categoria || f.doc_type || null;
     }
+    if (!key) { sinClasificar.push(f); continue; }
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(f);
   }
@@ -456,39 +549,62 @@ function filterInnerDossier() {
   const sortedGroups = Object.entries(grouped).sort(([a], [b]) => {
     const oa = parteOrder[a] ?? 99;
     const ob = parteOrder[b] ?? 99;
-    return oa !== ob ? oa - ob : a.localeCompare(b);
+    return oa !== ob ? oa - ob : a.localeCompare(b, "es", { sensitivity: "base" });
   });
+  if (sinClasificar.length) sortedGroups.push(["__sin_clasificar__", sinClasificar]);
+
+  const slugOf = cat => cat === "__sin_clasificar__"
+    ? "sin-clasificar"
+    : (RRHH_PARTES.find(p => p.nombre === cat)?.slug
+        || cat.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "grupo");
 
   // Renderizar como tabs si hay múltiples grupos, secciones si solo hay uno
   if (sortedGroups.length > 1) {
     const tabId = "dossier-partes-tabs";
     const tabsHtml = sortedGroups.map(([cat], i) => {
+      const esSinClasificar = cat === "__sin_clasificar__";
       const parte = RRHH_PARTES.find(p => p.nombre === cat);
       const color = parte?.color || "#6c757d";
-      const icon  = parte ? `<i class="${parte.icon} mr-1 ds-dossier-parte-icon" style="--ds-parte-color:${color}"></i>` : `<i class="fas fa-folder mr-1"></i>`;
-      const count = grouped[cat].length;
-      return `<li class="nav-item">
-        <a class="nav-link${i === 0 ? " active" : ""} ds-dossier-parte-tab" data-toggle="tab" href="#dossier-tab-${i}">
-          ${icon}${cat.replace(/ — .+/, "")}
+      const icon  = esSinClasificar
+        ? `<i class="fas fa-exclamation-circle mr-1 ds-dossier-parte-icon" aria-hidden="true" style="--ds-parte-color:${color}"></i>`
+        : (parte ? `<i class="${parte.icon} mr-1 ds-dossier-parte-icon" aria-hidden="true" style="--ds-parte-color:${color}"></i>` : `<i class="fas fa-folder mr-1" aria-hidden="true"></i>`);
+      const count = grouped[cat]?.length ?? sinClasificar.length;
+      const slug = slugOf(cat);
+      const label = esSinClasificar ? "Sin clasificar" : cat.replace(/ — .+/, "");
+      return `<li class="nav-item" role="presentation">
+        <a class="nav-link${i === 0 ? " active" : ""} ds-dossier-parte-tab" role="tab" id="dossier-tab-btn-${slug}"
+          data-toggle="tab" href="#dossier-tab-${slug}" aria-controls="dossier-tab-${slug}" aria-selected="${i === 0 ? "true" : "false"}"
+          title="${escHtml(esSinClasificar ? "Documentos sin clasificar — revisar" : cat)}">
+          ${icon}${escHtml(label)}
           <span class="badge ml-1 ds-dossier-parte-badge" style="--ds-parte-color:${color}">${count}</span>
         </a>
       </li>`;
     }).join("");
 
-    const panelsHtml = sortedGroups.map(([cat, catFiles], i) =>
-      `<div class="tab-pane fade${i === 0 ? " show active" : ""}" id="dossier-tab-${i}">
-        ${_renderDossierFileList(catFiles, dossierTerms)}
-      </div>`
-    ).join("");
+    const panelsHtml = sortedGroups.map(([cat, catFiles], i) => {
+      const slug = slugOf(cat);
+      const aviso = cat === "__sin_clasificar__"
+        ? `<div class="alert alert-warning py-2 px-3 mb-3"><i class="fas fa-exclamation-triangle mr-2" aria-hidden="true"></i>${catFiles.length} documento(s) sin clasificar — pendientes de asignar a una Parte del expediente.</div>`
+        : "";
+      return `<div class="tab-pane fade${i === 0 ? " show active" : ""}" id="dossier-tab-${slug}" role="tabpanel" aria-labelledby="dossier-tab-btn-${slug}">
+        ${aviso}${_renderDossierFileList(catFiles, dossierTerms)}
+      </div>`;
+    }).join("");
 
     container.innerHTML = `
       <ul class="nav nav-tabs mb-3" id="${tabId}" role="tablist">${tabsHtml}</ul>
       <div class="tab-content">${panelsHtml}</div>`;
+    container.querySelectorAll('[data-toggle="tab"]').forEach(tabEl => {
+      tabEl.addEventListener("shown.bs.tab", () => {
+        container.querySelectorAll('[data-toggle="tab"]').forEach(t => t.setAttribute("aria-selected", t.classList.contains("active") ? "true" : "false"));
+      });
+    });
   } else {
     // Un solo grupo: sin tabs
-    const [cat, catFiles] = sortedGroups[0];
+    const [, catFiles] = sortedGroups[0];
     container.innerHTML = _renderDossierFileList(catFiles, dossierTerms);
   }
+  _wireDossierOpenButtons(container);
 }
 
 function _renderDossierFileList(catFiles, dossierTerms) {
