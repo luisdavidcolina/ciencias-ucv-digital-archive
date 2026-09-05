@@ -78,6 +78,22 @@ const _MODALES_UI = `
     </div>
   </div>
 </div>
+<div class="modal fade" id="ds-detail-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="ds-dm-title-id">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
+      <div class="modal-header border-0 pb-0">
+        <h6 class="modal-title font-weight-bold ds-dm-title" id="ds-dm-title-id">Detalle</h6>
+        <button type="button" class="close ds-dm-close" aria-label="Cerrar"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body pt-2 pb-3">
+        <p class="ds-dm-body mb-0" style="white-space:pre-wrap;word-break:break-word;"></p>
+      </div>
+      <div class="modal-footer border-0 pt-1">
+        <button type="button" class="btn btn-secondary btn-sm ds-dm-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal fade" id="ds-shortcuts-modal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="ds-sc-title-id">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius:12px;">
@@ -300,6 +316,24 @@ document.addEventListener("keydown", e => {
   if (pm && pm.classList.contains("show") && e.key === "Enter" && !e.target.closest(".ds-pm-toggle")) {
     e.preventDefault();
     pm.querySelector(".ds-pm-ok")?.click();
+  }
+});
+
+// ─── Modal de detalle (OA-154: una celda truncada sólo se podía leer pasando
+// el ratón por encima del `title`; en táctil o con teclado no hay forma de
+// verla completa) ──────────────────────────────────────────────────────────
+function detailModal(title, text) {
+  _asegurarModalesUI();
+  const el = document.getElementById("ds-detail-modal");
+  if (!el) return;
+  el.querySelector(".ds-dm-title").textContent = title || "Detalle";
+  el.querySelector(".ds-dm-body").textContent  = text  || "(sin detalle)";
+  $(el).modal("show");
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest(".ds-dm-close")) {
+    $(document.getElementById("ds-detail-modal")).modal("hide");
   }
 });
 
@@ -767,32 +801,34 @@ function _panelAcceso(suf, modulo) {
       <div id="admin_users_table-${suf}" class="table-responsive mb-4"></div>
       <hr>
       <h6 class="font-weight-bold mb-3" id="ds-nuevo-usuario-title-${suf}"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h6>
-      <div class="row mb-3" role="group" aria-labelledby="ds-nuevo-usuario-title-${suf}">
-        <div class="col-md-3 mb-2">
-          <label class="sr-only" for="new_user_name-${suf}">Usuario</label>
-          <input type="text" id="new_user_name-${suf}" class="form-control form-control-sm" placeholder="Usuario">
+      <form id="new-user-form-${suf}" aria-labelledby="ds-nuevo-usuario-title-${suf}" onsubmit="event.preventDefault(); handleAddUser();">
+        <div class="row mb-3">
+          <div class="col-md-3 mb-2">
+            <label class="sr-only" for="new_user_name-${suf}">Usuario</label>
+            <input type="text" id="new_user_name-${suf}" class="form-control form-control-sm" placeholder="Usuario" autocomplete="username" required>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="sr-only" for="new_user_pass-${suf}">Contraseña</label>
+            <input type="password" id="new_user_pass-${suf}" class="form-control form-control-sm" placeholder="Contraseña" autocomplete="new-password" required>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="sr-only" for="new_user_modulo-${suf}">Módulo</label>
+            <select id="new_user_modulo-${suf}" class="form-control form-control-sm">
+              <option value="${modulo}">${modulo}</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="sr-only" for="new_user_rol-${suf}">Rol</label>
+            <select id="new_user_rol-${suf}" class="form-control form-control-sm">
+              <option value="Normal">Normal</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-3 mb-2">
-          <label class="sr-only" for="new_user_pass-${suf}">Contraseña</label>
-          <input type="password" id="new_user_pass-${suf}" class="form-control form-control-sm" placeholder="Contraseña">
-        </div>
-        <div class="col-md-3 mb-2">
-          <label class="sr-only" for="new_user_modulo-${suf}">Módulo</label>
-          <select id="new_user_modulo-${suf}" class="form-control form-control-sm">
-            <option value="${modulo}">${modulo}</option>
-          </select>
-        </div>
-        <div class="col-md-3 mb-2">
-          <label class="sr-only" for="new_user_rol-${suf}">Rol</label>
-          <select id="new_user_rol-${suf}" class="form-control form-control-sm">
-            <option value="Normal">Normal</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div>
-      </div>
-      <button id="btn_add_user-${suf}" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
-        <i class="fas fa-user-plus"></i> Crear Usuario
-      </button>
+        <button type="submit" id="btn_add_user-${suf}" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
+          <i class="fas fa-user-plus"></i> Crear Usuario
+        </button>
+      </form>
     </div>
   </div>
 </div>`;

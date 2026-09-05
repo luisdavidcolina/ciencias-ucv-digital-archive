@@ -249,6 +249,11 @@ async function loadAuditTab() {
   const body   = document.getElementById(`audit_table_body-${suf}`);
   const search = document.getElementById(`audit_search-${suf}`)?.value || "";
   if (!body) return;
+  // OA-158: sin estado de carga la tabla se quedaba con los datos anteriores
+  // hasta que llegaba la respuesta, y al teclear en el buscador parpadeaba
+  // de "resultado viejo" a "resultado nuevo" sin ningún aviso intermedio.
+  body.closest("table")?.setAttribute("aria-busy", "true");
+  if (typeof showTableSkeleton === "function") showTableSkeleton(`audit_table_body-${suf}`, 6, 5);
   try {
     const url = `${API_BASE}/api/admin/audit_log?page=${auditState.page}&per_page=${auditState.perPage}&search=${encodeURIComponent(search)}`;
     const data = await apiFetchJSON(url);
@@ -266,21 +271,46 @@ async function loadAuditTab() {
 
     const colorResult = r => r === "Success" || r === "success" ? "text-success" : r === "Failure" ? "text-danger" : "text-muted";
 
+    // OA-154: la celda se sigue recortando visualmente, pero ahora es un botón
+    // real -alcanzable con teclado y con nombre accesible- que abre el detalle
+    // completo en un modal, en vez de depender de que alguien pase el ratón
+    // por encima del `title`.
     body.innerHTML = data.records.length === 0
       ? `<tr><td colspan="6" class="text-center text-muted p-3">Sin eventos registrados.</td></tr>`
-      : data.records.map(r => `
+      : data.records.map(r => {
+          const detalle = r.detalle || "";
+          // Sin inline onclick: el detalle es texto libre de auditoría y puede
+          // traer comillas que romperían un atributo HTML construido a mano.
+          const detalleCell = detalle
+            ? `<button type="button" class="btn btn-link btn-sm p-0 text-muted text-left ds-audit-detalle-btn"
+                       style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;"
+                       data-evento="${escHtml(r.evento || "evento")}" data-detalle="${escHtml(detalle)}"
+                       title="Ver detalle completo">${escHtml(detalle)}</button>`
+            : "";
+          return `
           <tr>
             <td class="text-muted">${escHtml(r.timestamp || "")}</td>
             <td class="font-weight-bold">${escHtml(r.usuario || "")}</td>
             <td>${escHtml(r.evento || "")}</td>
             <td><span class="badge badge-secondary">${escHtml(r.modulo || "")}</span></td>
-            <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(r.detalle||'')}">${escHtml(r.detalle || "")}</td>
+            <td class="text-muted">${detalleCell}</td>
             <td class="${colorResult(r.resultado)}">${escHtml(r.resultado || "OK")}</td>
-          </tr>`).join("");
+          </tr>`;
+        }).join("");
   } catch (e) {
     if (body) body.innerHTML = `<tr><td colspan="6" class="text-danger text-center p-3">Error cargando auditoría.</td></tr>`;
+  } finally {
+    body.closest("table")?.removeAttribute("aria-busy");
   }
 }
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".ds-audit-detalle-btn");
+  if (!btn) return;
+  if (typeof detailModal === "function") {
+    detailModal(`Detalle — ${btn.dataset.evento || "evento"}`, btn.dataset.detalle || "");
+  }
+});
 
 function changeAuditPage(delta) {
   const totalPages = Math.ceil(auditState.total / auditState.perPage) || 1;
