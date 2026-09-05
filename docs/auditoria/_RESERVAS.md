@@ -68,9 +68,9 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | terminado | db8679e |
 | PASS2-admin-edit | agente-pass2-admin-edit | 2026-09-04 | terminado (OA-046, OR-037, OR-147, OR-219; resto verificado ya resuelto o requiere `[CHOCA]`, ver _BUZON.md) | |
 | PASS2-docs-hr-backend | agente-pass2-docs-hr-backend | 2026-09-04 | en curso | |
-| PASS2-archive-depth | agente-pass2-archive-depth | 2026-09-04 | en curso | |
+| PASS2-archive-depth | agente-pass2-archive-depth | 2026-09-04 | terminado (BA-005, BA-015, BA-016, BA-026, BA-027, BA-161, BA-167; ver nota en _BUZON.md) | 13bc2ce |
 | PASS2-engineering | agente-pass2-engineering | 2026-09-04 | en curso | |
-| PASS2-ai | agente-pass2-ai | 2026-09-04 | en curso | |
+| PASS2-ai | agente-pass2-ai | 2026-09-04 | terminado (SI-019, SI-020, SI-061, SI-066; resto confirmado ya resuelto o documentado como pendiente en _BUZON.md) | 20548d9 (mi commit quedó absorbido por una carrera de git concurrente con PASS2-archive-depth; contenido verificado con `git show 20548d9:app/core/ai_tools.py`) |
 | PASS2-hr-frontend-depth | agente-pass2-hr-frontend-depth | 2026-09-04 | en curso | |
 | PASS2-models-schema | agente-pass2-models-schema | 2026-09-04 | terminado (sin cambios de código: RQ-009/RQ-010/RQ-014/RQ-016/RQ-028/RQ-041/RQ-044/RQ-049 revisados contra `models.py`/`schema.sql` — todo lo accionable ya estaba resuelto por H1d-modelos, el resto exige `main.py`/`hr.py`/`admin/*.py` fuera de zona; hallazgo real de RQ-049 documentado en `_BUZON.md`) | bbb2442 |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
