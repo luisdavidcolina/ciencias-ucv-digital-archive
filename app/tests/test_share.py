@@ -15,7 +15,20 @@ import pytest
 APP = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(APP))
 
-from core.security import generate_share_token, verify_share_token  # noqa: E402
+from core.security import (  # noqa: E402
+    generate_share_token,
+    share_token_jti,
+    verify_share_token,
+)
+
+
+@pytest.fixture(autouse=True)
+def _no_revocados():
+    """`verify_share_token` consulta `enlaces_revocados` (IN-146) antes de
+    aceptar un token. Estos tests no tienen base de datos: se simula "nada
+    revocado" salvo que un test concreto quiera lo contrario."""
+    with patch("database.db_query", return_value=None) as m:
+        yield m
 
 
 # --- el token ---------------------------------------------------------------
@@ -23,6 +36,34 @@ from core.security import generate_share_token, verify_share_token  # noqa: E402
 def test_ida_y_vuelta():
     t = generate_share_token("Archivo", 42, horas=1)
     assert verify_share_token(t) == ("Archivo", 42)
+
+
+def test_jti_es_unico_por_token():
+    a = generate_share_token("Archivo", 1, horas=1)
+    b = generate_share_token("Archivo", 1, horas=1)
+    assert share_token_jti(a) != share_token_jti(b)
+
+
+def test_token_revocado_deja_de_servir(_no_revocados):
+    """Un jti presente en `enlaces_revocados` invalida el enlace aunque la
+    firma y la caducidad sigan siendo correctas — el mecanismo de IN-146."""
+    t = generate_share_token("Archivo", 42, horas=1)
+    assert verify_share_token(t) == ("Archivo", 42)  # antes de revocar, sirve
+    _no_revocados.return_value = {"1": 1}            # simula fila encontrada
+    assert verify_share_token(t) is None
+
+
+def test_revocar_un_token_no_afecta_a_otro(_no_revocados):
+    a = generate_share_token("Archivo", 1, horas=1)
+    b = generate_share_token("Archivo", 2, horas=1)
+    jti_a = share_token_jti(a)
+
+    def fake_query(sql, params=None, fetch="all"):
+        return {"jti": jti_a} if params and params[0] == jti_a else None
+
+    _no_revocados.side_effect = fake_query
+    assert verify_share_token(a) is None
+    assert verify_share_token(b) == ("Archivo", 2)
 
 
 def test_rechaza_token_manipulado():
@@ -66,7 +107,7 @@ def test_caducidad_futura_razonable():
     import base64
     relleno = "=" * (-len(t) % 4)
     crudo = base64.urlsafe_b64decode((t + relleno).encode()).decode()
-    expira = int(crudo.rsplit(":", 2)[1])
+    expira = int(crudo.rsplit(":", 4)[2])
     restante = expira - time.time()
     assert 71 * 3600 < restante <= 72 * 3600
 

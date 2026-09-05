@@ -647,6 +647,19 @@ def run_migrations():
               coalesce(titulo,'') || ' ' || coalesce(autor,'') || ' ' ||
               coalesce(abstract,'') || ' ' || coalesce(tesauro_primario,'') || ' ' ||
               coalesce(tesauro_secundario,'') || ' ' || coalesce(personas_relacionadas,'')))"""),
+
+        # ── IN-146: revocación de enlaces compartidos sin rotar SECRET_KEY ────
+        # El enlace de `share.py` sigue siendo un token autocontenido (no se
+        # vuelve a un diseño con tabla de sesiones de enlace): sólo se guarda
+        # el identificador único (`jti`, aleatorio — ver `generate_share_token`)
+        # de los enlaces que un administrador decidió apagar antes de su
+        # caducidad natural. `verify_share_token` consulta esta tabla.
+        ("tabla enlaces_revocados",
+         """CREATE TABLE IF NOT EXISTS public.enlaces_revocados (
+             jti        TEXT PRIMARY KEY,
+             motivo     TEXT,
+             creado_en  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+         )"""),
     ]
     # En serverless esta funcion corre en CADA arranque en frio. Son ~80 viajes
     # de ida y vuelta a Neon antes de poder responder la primera peticion, y el

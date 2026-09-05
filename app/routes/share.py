@@ -29,9 +29,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 
 import storage
-from core.security import generate_share_token, verify_share_token
+from core.security import generate_share_token, share_token_jti, verify_share_token
 from database import db_query, log_event
-from routes.admin.deps import require_session
+from routes.admin.deps import require_admin_role, require_session
 
 router = APIRouter(tags=["share"])
 
@@ -84,9 +84,46 @@ def crear_enlace(
         raise HTTPException(404, "El documento no existe o está en la papelera")
 
     token = generate_share_token(modulo, doc_id, horas)
+    jti = share_token_jti(token)
     log_event(usuario or "sistema", "Crear Enlace Externo", modulo,
-              f"doc_id={doc_id}, caduca en {horas}h")
-    return {"token": token, "url": f"/compartido/{token}", "horas": horas}
+              f"doc_id={doc_id}, caduca en {horas}h, jti={jti}")
+    return {"token": token, "url": f"/compartido/{token}", "horas": horas, "jti": jti}
+
+
+@router.get("/api/admin/compartir/revocados",
+            dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
+def listar_revocados():
+    """Enlaces revocados hasta ahora (IN-146). El diseño es stateless: no hay
+    tabla de enlaces EMITIDOS —sólo de revocados—, así que esto no es un
+    listado de "todo enlace activo que exista en el mundo" (eso exigiría
+    volver a un diseño con estado), sino de lo que un administrador ya decidió
+    apagar. El `jti` de un enlace recién creado se ve en `crear_enlace` (queda
+    también en auditoría, "Crear Enlace Externo")."""
+    filas = db_query(
+        "SELECT jti, motivo, creado_en FROM public.enlaces_revocados "
+        "ORDER BY creado_en DESC",
+        fetch="all",
+    )
+    return {"revocados": filas}
+
+
+@router.post("/api/admin/compartir/revocar",
+             dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
+def revocar_enlace(
+    jti: str = Query(..., min_length=1, max_length=64),
+    motivo: str = Query(default=""),
+    usuario: str = Query(default=""),
+):
+    """Apaga un enlace por su identificador único (IN-146), sin tocar los
+    demás y sin rotar SECRET_KEY —que cerraría también todas las sesiones—.
+    Idempotente: revocar dos veces el mismo jti no es un error."""
+    db_query(
+        "INSERT INTO public.enlaces_revocados (jti, motivo) VALUES (%s, %s) "
+        "ON CONFLICT (jti) DO NOTHING",
+        [jti, motivo or None], fetch="none", commit=True,
+    )
+    log_event(usuario or "sistema", "Revocar Enlace Externo", "Sistema", f"jti={jti}")
+    return {"revocado": True, "jti": jti}
 
 
 @router.get("/api/compartido/{token}")
