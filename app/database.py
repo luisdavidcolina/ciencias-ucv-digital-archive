@@ -8,9 +8,9 @@ from psycopg2 import pool as pg_pool
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from fastapi import HTTPException
-import bcrypt
 
 from core.config import settings
+from core.security import hash_password as _hash_password, verify_password as _verify_password
 
 load_dotenv()
 # IN-033: fuente única para la cadena de conexión. Antes se leía tres veces
@@ -335,11 +335,9 @@ def log_event(
 from utils import split_terms  # noqa: E402,F401
 
 
-def hash_password(password: str) -> str:
-    """Retorna el hash bcrypt de una contraseña."""
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifica si una contraseña en texto plano coincide con su hash."""
-    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+# IN-056: había una segunda implementación aquí que no atrapaba la excepción
+# de bcrypt.checkpw en verify_password -- un hash corrupto en la base tumbaba
+# el login con un 500 en vez de rechazar la credencial. Una sola
+# implementación, la defensiva, en core/security.py.
+hash_password = _hash_password
+verify_password = _verify_password
