@@ -404,6 +404,9 @@ label:has(+ :required)::after {
 .ds-item-metadata {
     flex-grow: 1;
     padding-left: 1rem;
+    min-width: 0; /* VI-007: sin esto un hijo con texto largo (soporte/tipología
+                     de longitud variable) no se encoge dentro del flex y
+                     desborda la tarjeta — causa estructural de VI-005/VI-006 */
 }
 
 .ds-item-actions {

@@ -83,16 +83,23 @@ body[data-page="login"] {
 
 .ds-pass-toggle {
     position: absolute;
-    right: 12px;
+    right: 4px;
     top: 50%;
     transform: translateY(-50%);
     border: none;
     background: transparent;
     color: #5c6f82;
     font-size: 1.1rem;
-    padding: 0.35rem;
     line-height: 1;
     z-index: 15;
+    /* VI-018: medía 31×28px, por debajo del mínimo táctil de 44px en las dos
+       dimensiones — el icono no crece, sólo su área activa. */
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .ds-pass-toggle:hover,

@@ -138,7 +138,7 @@ para no repetir la confusión.
 - `L0` y `BR-109` — van antes que cualquier otro trabajo estético.
 | SUPERVISOR-coherencia | agente-supervisor-coherencia | 2026-09-05 | terminado | 7b3a391 |
 | VI-app-theme-escape | agente-vi-app-theme | 2026-09-05 | terminado | 15f40cf |
-| VI-styles-desbordes | agente-vi-styles-desbordes | 2026-09-05 | en curso | |
+| VI-styles-desbordes | agente-vi-styles-desbordes | 2026-09-05 | terminado (VI-007 corregido — causa estructural de VI-005/VI-006 —, VI-018 y VI-009; VI-013/VI-014/VI-020 confirmados ya resueltos por trabajo previo; VI-004/VI-008 no eran de mi zona o ya estaban resueltos, ver nota en _BUZON.md) | |
 | VI-archive-hr-js | agente-vi-archive-hr-js | 2026-09-05 | terminado (VI-005/VI-006 recortados por JS puro en archive.js/hr.js; VI-015 ya estaba resuelto en código actual; VI-012 no accionable solo con mis dos archivos, ver nota en _BUZON.md) | a61f70a |
 | VI-admin-ai-html | agente-vi-admin-ai-html | 2026-09-05 | terminado (VI-010: sólo faltaba envolver `gasto-tabla` y `conv-tabla`, las otras dos ya tenían `.table-responsive`; VI-011 ya estaba resuelto, sin cambios de código, ver nota en `_BUZON.md`) | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63:app/static/admin_ai.html` y `git show 3780b63:docs/auditoria/_BUZON.md`) |
 | VI-ai-widget-zindex | agente-vi-ai-widget-zindex | 2026-09-05 | terminado | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63 -- app/static/ai-widget.css app/static/ai-widget.js`) |

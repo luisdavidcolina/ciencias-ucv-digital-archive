@@ -3939,3 +3939,52 @@ Verificado: `node --check app/static/archive.js`, `node --check app/static/hr.js
 errores. `python -m pytest app/tests -q`: 859 passed (igual que al empezar).
 `python -m pytest app/tests/test_visual.py -q`: 54 passed (igual que al empezar). Commit
 `a61f70a`, sin carrera de git (verificado con `git show a61f70a --stat`).
+
+- [x] `VI-styles-desbordes` · **archivo**: los 12 módulos de `app/static/styles/` · **carril
+      dueño**: VI-styles-desbordes
+      **quién lo pide**: agente-vi-styles-desbordes (VI-styles-desbordes)
+      **qué pasó**: repasadas las ocho fichas de `recorrido-visual.md` de mi encargo contra el
+      CSS modular actual (ya no el monolito que auditó Playwright):
+      - **VI-007** (causa estructural de VI-005/VI-006) — real: `.ds-item-metadata` tenía
+        `flex-grow:1` sin `min-width:0`, así que un hijo con texto largo (soporte/tipología de
+        longitud variable) no podía encogerse dentro del flex y desbordaba la tarjeta. Añadido
+        `min-width:0` (`componentes.css`) y, por debajo de 768px, `flex-wrap` en `.ds-item-card`
+        con `.ds-item-actions` bajando a su propia fila en vez de competir por ancho con los
+        metadatos (`responsive.css` — de paso fusioné dos definiciones duplicadas de
+        `.ds-item-actions` en ese mismo bloque que se pisaban entre sí).
+      - **VI-018** (botón mostrar-contraseña 31×28px) — real: `.ds-pass-toggle` sólo tenía
+        `padding:0.35rem`. Ahora `min-width:44px; min-height:44px` con flex-centrado, el icono
+        sigue del mismo tamaño (`personalizacion.css`).
+      - **VI-009** (14 tablas se salen de `.table-responsive` sin afordancia) — parcial, sólo la
+        parte CSS: añadido un degradado de sombra en los bordes de `.table-responsive` con la
+        técnica de doble gradiente (`background-attachment: local`/`scroll`) que se autoculta en
+        los extremos sin JS, usando `var(--surface-1)` (el fondo real de `.card-body`, ya con su
+        par oscuro). No mide el desborde por elemento — eso sigue pidiendo JS en
+        `admin-monitor.js`/`admin-users.js`, fuera de mi carril **[CHOCA]**, así que queda
+        siempre visible en los bordes en vez de aparecer sólo cuando hace falta.
+      - **VI-013** (cabecera amarilla con texto blanco, 1,9:1) — **ya resuelto**: el modal de
+        `admin_hr.html:794` usa `text-dark`, no `text-white` como describía la ficha. Con
+        `#ffc107` de fondo y `#212529` de texto calculé ~9,5:1, muy por encima del mínimo. No es
+        cambio mío — probablemente un carril de HTML anterior a esta pasada. Queda sin tocar el
+        problema semántico de fondo (amarillo = editar/aviso en el resto del producto, SD-023),
+        que no es de accesibilidad y no estaba en mi encargo.
+      - **VI-014** (columna de miniatura no colapsa a 390px) — **ya resuelto**: el punto de corte
+        de `.ds-doc-modal-grid` vive ahora en `responsive.css` bajo `@media (max-width:768px)`,
+        que sí cubre 390px (la ficha describía un corte más estrecho en el monolito viejo, ya
+        no existe).
+      - **VI-020** (cabeceras "Filtros"/"Vista" y acordeones ilegibles en oscuro) — **ya
+        resuelto**: `dark-mode.css:46` ya trae `body.dark-mode .card-header { background:
+        var(--surface-2) !important; color: var(--text) !important; }`, con `!important` que
+        gana sobre el `.card.card-secondary .card-header { background:#eef0f1; color:#495057; }`
+        sin `!important` de `componentes-admin.css`. Cubre tanto "Filtros"/"Vista" como los
+        `card-header p-2` de los acordeones (mismo selector).
+      - **VI-008** (barra de 9 pestañas se corta sin señal) — **ya resuelto**: `paginas.css:103`
+        ya trae el degradado `.ds-admin-card-header::after` con la clase `.ds-has-overflow`, y
+        `admin-ui.js:699` ya la alterna según el scroll real. Mecanismo completo, no toqué nada.
+      - **VI-004** (burbuja del asistente tapa contenido, z-index) — no es de mi zona: vive en
+        `ai-widget.css`/`ai-widget.js`, fuera de los 12 módulos de `app/static/styles/`. El
+        carril `VI-ai-widget-zindex` ya está `terminado` en `_RESERVAS.md`, así que no lo
+        dupliqué.
+      `python -m pytest app/tests -q`: 859 passed (igual que al empezar).
+      `python -m pytest app/tests/test_visual.py -q`: 54 passed (igual que al empezar), corridas
+      antes y después de cada módulo tocado.

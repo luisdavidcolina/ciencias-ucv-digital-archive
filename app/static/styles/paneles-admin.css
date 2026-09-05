@@ -567,6 +567,26 @@ body.dark-mode .ds-ff-btn.active { background: rgba(43,78,114,0.3); border-color
 /* Tables in monitor/papelera/audit get a scrollable wrapper */
 .ds-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
+/* VI-009: 14 tablas se salían de `.table-responsive` sin ninguna señal de que
+   hubiera más columnas — el recorte era limpio y silencioso. El degradado de
+   máscara se desplaza con el contenido (`background-attachment: local`) y el
+   de sombra queda fijo al envoltorio (`scroll`): el resultado se autoculta en
+   los extremos sin necesitar JS que mida el desborde. `var(--surface-1)` es
+   el fondo real de `.card-body`, donde viven todas estas tablas, así que
+   sigue el tema claro/oscuro sin redefinición aparte. */
+.table-responsive {
+  background-image:
+    linear-gradient(to right, var(--surface-1) 30%, rgba(0, 0, 0, 0)),
+    linear-gradient(to left, var(--surface-1) 30%, rgba(0, 0, 0, 0)),
+    linear-gradient(to right, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0)),
+    linear-gradient(to left, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0));
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-color: var(--surface-1);
+  background-size: 24px 100%, 24px 100%, 10px 100%, 10px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
 /* Edit/view modals become full-screen on phones */
 @media (max-width: 575px) {
   .modal-xl, .modal-lg { max-width: 100% !important; margin: 0; }
