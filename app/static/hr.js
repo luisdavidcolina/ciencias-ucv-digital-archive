@@ -91,7 +91,18 @@ function renderRrhhSearchError(status) {
   showToast(mensaje, "error");
 }
 
+// VI-058: `#rrhh-pagination` (numerada, aquí abajo) y `#rrhh_pagination_controls`
+// (Anterior/Siguiente, en hr.html) son dos controles para la misma lista,
+// apilados uno debajo del otro. archive.js sólo tiene el numerado; se oculta
+// el redundante por JS —tocar el HTML queda fuera de este carril— en vez de
+// quitarlo, así los listeners que ya le puso `app.js` no rompen nada.
+function _hideRedundantRrhhPaginationBar() {
+  const bar = document.getElementById("rrhh_pagination_controls");
+  if (bar) bar.style.display = "none";
+}
+
 function renderRrhhPagination() {
+  _hideRedundantRrhhPaginationBar();
   const container = document.getElementById("rrhh-pagination");
   if (!container) return;
   const total   = state.rrhh.total || state.rrhh.results.length;
@@ -146,6 +157,7 @@ function _esAdminRrhh() {
 }
 
 function renderRrhhList() {
+  _hideRedundantRrhhPaginationBar();
   const container = document.getElementById("list_rrhh");
   const results   = state.rrhh.results;
   const total     = state.rrhh.total || results.length;

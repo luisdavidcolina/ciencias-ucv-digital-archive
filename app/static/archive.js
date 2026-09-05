@@ -90,8 +90,19 @@ function _renderArchivoError(message) {
     </div>`;
   const countEl = document.getElementById("count-archivo-results");
   if (countEl) countEl.innerText = "Error al cargar";
+  // VI-069: antes se vaciaba por completo (`innerHTML = ""`), y la columna de
+  // facetas perdía su marco de tarjeta —la sección cambiaba de forma sin
+  // explicación—. Ahora conserva el mismo contenedor con su propio aviso.
   const facetsEl = document.getElementById("archivo-facets-panel");
-  if (facetsEl) facetsEl.innerHTML = "";
+  if (facetsEl) {
+    facetsEl.innerHTML = `
+      <div class="card card-secondary mt-2">
+        <div class="card-body p-2 text-center text-muted">
+          <i class="fas fa-exclamation-circle mb-1" aria-hidden="true"></i>
+          <p class="mb-0" style="font-size:0.8rem;">No se pudieron cargar los filtros.</p>
+        </div>
+      </div>`;
+  }
 }
 
 async function triggerArchivoSearch() {
@@ -358,10 +369,12 @@ function openDocModalWithRecord(doc) {
     ? doc.tesauro_badges
     : [doc.doc_type, ..._normalizeTesauroTerms(doc.tesauro_secundario)].filter(Boolean);
 
+  // VI-060: el título ya va en la cabecera del modal (`modal-doc-title`,
+  // arriba); repetirlo como primera fila de la tabla de Metadata sólo suma
+  // ocho líneas sin dato nuevo.
   if (isPlano) {
     document.getElementById("modal-doc-meta-container").innerHTML = `
       <div class="ds-doc-meta-row"><span class="k">Proyecto</span><span class="v">${escHtml(doc.proyecto || doc.titulo)}</span></div>
-      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${escHtml(doc.titulo)}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Año</span><span class="v">${escHtml(anio || "N/A")}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${escHtml(doc.doc_type)}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Dibujante / Autor</span><span class="v">${escHtml(doc.autor || "N/A")}</span></div>
@@ -373,7 +386,6 @@ function openDocModalWithRecord(doc) {
       ? `${escHtml(formatISOToSpanish(doc.fecha))} <small class="text-muted">(Sesión)</small>`
       : escHtml(formatISOToSpanish(doc.fecha));
     document.getElementById("modal-doc-meta-container").innerHTML = `
-      <div class="ds-doc-meta-row"><span class="k">Título</span><span class="v">${escHtml(doc.titulo)}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Autor / Ente</span><span class="v">${escHtml(doc.autor)}</span></div>
       <div class="ds-doc-meta-row"><span class="k">${escHtml(dateLabel)}</span><span class="v">${dateValue}</span></div>
       <div class="ds-doc-meta-row"><span class="k">Tipología</span><span class="v">${escHtml(doc.doc_type)}</span></div>
@@ -406,6 +418,10 @@ function openDocModalWithRecord(doc) {
     viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
   }
   const editBtn = document.getElementById("btn-modal-edit");
+  // VI-061: el botón traía sólo el lápiz (aria-label sí, texto visible no) y
+  // quedaba indistinguible de un adorno junto a «Cerrar»/«Ver Imagen», que sí
+  // llevan texto. Mismo patrón que `viewBtn` arriba: icono + etiqueta.
+  editBtn.innerHTML = '<i class="fas fa-pen mr-1" aria-hidden="true"></i>Editar';
   if (state.user && state.user.roles && state.user.roles.Archivo === "Admin" && doc.id) {
     editBtn.classList.remove("d-none");
     editBtn.onclick = () => { window.location.href = `/admin/archivo?docId=${doc.id}`; };
