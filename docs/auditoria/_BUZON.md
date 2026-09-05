@@ -3540,3 +3540,84 @@ show --stat` que sólo incluye mis cinco archivos (`app/core/config.py`,
 `app/utils.py`).
 
 **quién lo pide**: agente-pass2-engineering (PASS2-engineering)
+
+## PASS2-hr-frontend-depth (hr.js + hr.html) — segundo pase sobre lo que A3a/A3b dejaron pendiente
+
+Carril del segundo pase sobre `docs/auditoria/buscador-rrhh.md`, tomando la lista de
+pendientes que dejaron `agente-a3a-buscador-rrhh-js` (commit `ab3be26`) y
+`agente-a3b-buscador-rrhh-html` (nota en este mismo buzón, sección "A3-buscador-rrhh
+(hr.html)"). A diferencia de esos dos carriles, este sí puede tocar ambos archivos a la
+vez, así que se priorizaron los tickets que cruzaban entre `hr.js` y `hr.html` más los
+que ninguno de los dos había tocado todavía.
+
+Resueltos:
+- **Bug funcional no documentado como BR-, encontrado al revisar BR-023**: el botón
+  "Ver historial" del dossier (`data-toggle-historial`) no tenía ningún manejador
+  atado en ningún archivo — `_toggleHistorialCargos` existía pero nada la llamaba.
+  El botón no hacía nada al hacer clic. Se ató el listener en
+  `renderRrhhDossierModal` (`hr.js`).
+- `BR-022` — `_toggleHistorialCargos` no comprobaba `res.ok`: un 401/500 con cuerpo
+  JSON se leía como "sin movimientos registrados". Ahora distingue sesión (401/403)
+  de error de servidor.
+- `BR-143` — la tabla de historial de cargos ahora envuelta en `.table-responsive`
+  (se tocó en el mismo cambio que BR-022).
+- `BR-034` (residual) — el `docTypes.sort()` de `renderRrhhDossierModal` seguía con
+  `localeCompare(b)` sin locale española; A3a ya había corregido las otras tres
+  ordenaciones del dossier pero esta se quedó fuera.
+- `BR-038` — el "resumen" del documento ya no se fabrica a partir de departamento/
+  estado; ahora es `doc.notas || "Sin descripción registrada."`, igual que el
+  placeholder que ya traía `hr.html` por defecto.
+- `BR-039` — el botón "Ver" ya no se reetiqueta a "Ubicación"/"Digitalizado" cuando
+  no hay archivo (una acción fallida disfrazada de disponible); ahora se deshabilita
+  con el motivo en `title`. La ubicación física ya vive en el panel de metadatos.
+- `BR-040` — `closeDocViewer()` ahora se llama también en `hidden.bs.modal` de
+  `#doc-modal`, así que cerrar con la X o Escape también limpia el iframe (antes
+  sólo lo hacía el botón "Cerrar" del pie).
+- `BR-080` — el foco ahora se devuelve al elemento que abrió el dossier en
+  `hidden.bs.modal` de `#rrhh-person-modal` (la variable `_rrhhDossierTrigger` ya
+  existía, guardada por A3a, pero no se consumía en ningún sitio).
+- `BR-041` — guarda explícita en el branch de más de un grupo sin match, en vez de
+  depender de que `sortedGroups` nunca esté vacío.
+- `BR-082` — "Abrir archivo" en el dossier era `<a href="#" onclick="...;return
+  false;">`; ahora `<button type="button">`.
+- `BR-099` (resto) — tres iconos decorativos sin `aria-hidden` que quedaban en
+  `hr.js` (alerta de error de búsqueda, icono de la foto de perfil sin foto, icono
+  de "Distribución" en facetas).
+- `BR-100` — el `<iframe>` del visor ahora recibe `title="Visor del documento: <tipo
+  de documento>"` al abrir cada PDF, en vez del título genérico fijo.
+- `BR-078` — `aria-labelledby="rrhh-person-modal-title"` en `#rrhh-person-modal` (el
+  `<h3 id="rrhh-person-modal-title">` con el nombre ya lo pintaba `hr.js`, sólo
+  faltaba la referencia en `hr.html`); igual `aria-labelledby="modal-doc-title"` en
+  `#doc-modal`.
+- `BR-092`/`BR-093` (parcial, la parte de jerarquía real) — se añadió
+  `<h1 class="sr-only">Búsqueda de Recursos Humanos</h1>` (no existía ningún `h1` en
+  la página), "Filtros" y "Vista" pasaron de `h3` a `h2` (mismo nivel que
+  "Resultados de Búsqueda"), los tres títulos del acordeón de filtros de `h4` a `h3`,
+  y el título de cada tarjeta de resultado de `h4` a `h3` en `renderRrhhList`. El
+  dossier (`h3` nombre → `h4` secciones) ya estaba consecutivo, obra de A3a/A3b.
+
+No se tocó `styles.css`, `admin_hr.html`, `app.js` ni backend — ninguno es zona de
+este carril. Quedan sin tocar (efectivamente en la lista de A3a/A3b, no releídos
+línea por línea de nuevo aquí para no duplicar): `BR-011`, `BR-017` (ya resuelto de
+hecho por A3a: los ids del tab ya usan `slugOf(cat)`, no índice posicional — se
+verificó al leer el código, no hace falta ficha nueva), `BR-081` (modal sobre modal,
+esfuerzo M, exige rediseñar el detalle de documento como panel dentro del propio
+expediente en vez de un segundo modal — no es un parche de una tarde),
+`BR-083`/`BR-085`/`BR-088`/`BR-089`/`BR-106`/`BR-112`-`BR-114`/`BR-123`/`BR-124`/
+`BR-126`-`BR-128`/`BR-131`/`BR-134`/`BR-135`-`BR-139`/`BR-140`/`BR-144`/`BR-146`/
+`BR-151`/`BR-157`/`BR-165`/`BR-169`/`BR-171`/`BR-173`/`BR-175`/`BR-177`/`BR-178`,
+`RQ-043` — no revisados en detalle esta vuelta por límite de tiempo; varios de ellos
+(`BR-106`, `BR-112`-`BR-114`, `BR-135`-`BR-139`, `BR-144`) siguen exigiendo tokens
+nuevos en `styles.css` (`[CHOCA]`, fuera de zona), y otros (`BR-151`/`BR-157`/
+`BR-172`/`BR-177`) son funcionalidad nueva de esfuerzo M/L con decisión de producto
+pendiente, como ya habían anotado A3a/A3b.
+
+`python -m pytest app/tests -q`: 851 antes de mi turno (según instrucción recibida) →
+859 pasan después (859 total, 0 fallos; una corrida intermedia mostró
+`test_static_analysis.py::test_sin_imports_muertos` fallando sola, pero era un
+cambio a medio terminar de `agente-pass2-engineering` en el árbol compartido —
+confirmado en su propia nota de este buzón, ya resuelto por él; no relacionado con
+`hr.js`/`hr.html`). `python -m pytest app/tests/test_visual.py -q`: 54 pasan.
+`node --check app/static/hr.js`: sin errores.
+
+**quién resuelve**: agente-pass2-hr-frontend-depth (PASS2-hr-frontend-depth)

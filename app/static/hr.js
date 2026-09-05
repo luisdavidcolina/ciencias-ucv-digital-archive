@@ -71,7 +71,7 @@ function renderRrhhSearchError(status) {
     : "No se pudo completar la búsqueda. Intente de nuevo.";
   container.setAttribute("role", "alert");
   container.innerHTML = `<div class="alert alert-danger text-center p-4">
-    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+    <i class="fas fa-exclamation-triangle fa-2x mb-2" aria-hidden="true"></i>
     <p class="mb-2">${escHtml(mensaje)}</p>
     ${esSesion
       ? `<a href="/login.html" class="btn btn-sm btn-primary">Iniciar sesión</a>`
@@ -196,7 +196,7 @@ function renderRrhhList() {
             </div>
           </div>
           <div class="ds-item-metadata" style="flex-grow:1;padding-left:15px;min-width:0;text-align:left;">
-            <h4 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h4>
+            <h3 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h3>
             <div style="font-size:0.82rem;color:#495057;line-height:1.5;">
               <span class="mr-3"><i class="fas fa-id-card mr-1 text-muted" aria-hidden="true"></i> C.I: <strong>${hl(p.cedulas)}</strong></span>
               <span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.departamentos)}</strong></span>
@@ -340,7 +340,7 @@ function renderRrhhDossierModal() {
   const initials  = getPersonInitials(profile.persona_raw);
   const photoHtml = profile.foto_url
     ? `<div class="rrhh-person-photo-card"><img src="${_secureFileUrl(profile.foto_url)}" class="rrhh-person-photo" alt="${escHtml(profile.persona)}"></div>`
-    : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${escHtml(initials)}</span><i class="fas fa-user rrhh-person-photo-icon"></i></div>`;
+    : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${escHtml(initials)}</span><i class="fas fa-user rrhh-person-photo-icon" aria-hidden="true"></i></div>`;
 
   const isRetirado  = (profile.statuses || "").includes("Retirado");
   const isPensionado = (profile.statuses || "").includes("Pensionado");
@@ -364,7 +364,7 @@ function renderRrhhDossierModal() {
   }
   const docTypes = [...docCatSet].sort((a, b) => {
     const po = Object.fromEntries(RRHH_PARTES.map((p, i) => [p.nombre, i]));
-    return (po[a] ?? 99) - (po[b] ?? 99) || a.localeCompare(b);
+    return (po[a] ?? 99) - (po[b] ?? 99) || a.localeCompare(b, "es", { sensitivity: "base", numeric: true });
   });
   document.getElementById("rrhh-person-modal-content").innerHTML = `
     <div class="ds-person-profile-header mb-4 p-3 bg-white rounded shadow-sm border">
@@ -460,6 +460,10 @@ function renderRrhhDossierModal() {
     </div>
     <div class="rrhh-person-files px-1" id="inner-dossier-items-container"></div>
   `;
+  // El contenido se genera de nuevo cada vez que se abre el dossier; el botón
+  // no tenía manejador atado en ningún sitio y "Ver historial" no hacía nada.
+  const histBtn = document.querySelector("#rrhh-person-modal-content [data-toggle-historial]");
+  if (histBtn) histBtn.addEventListener("click", () => _toggleHistorialCargos(empleadoId || null));
   filterInnerDossier();
 }
 
@@ -599,10 +603,15 @@ function filterInnerDossier() {
         container.querySelectorAll('[data-toggle="tab"]').forEach(t => t.setAttribute("aria-selected", t.classList.contains("active") ? "true" : "false"));
       });
     });
-  } else {
+  } else if (sortedGroups.length === 1) {
     // Un solo grupo: sin tabs
     const [, catFiles] = sortedGroups[0];
     container.innerHTML = _renderDossierFileList(catFiles, dossierTerms);
+  } else {
+    // files.length > 0 pero ningún documento produjo una clave de grupo
+    // (guarda explícita para no depender de que _docLabel nunca devuelva
+    // clave vacía -- BR-041)
+    container.innerHTML = _renderDossierFileList(files, dossierTerms);
   }
   _wireDossierOpenButtons(container);
 }
@@ -619,8 +628,8 @@ function _renderDossierFileList(catFiles, dossierTerms) {
           ${f.titulo_doc && f.titulo_doc !== label ? `<span class="text-muted small ml-2">${hlD(f.titulo_doc)}</span>` : ""}
           <span class="rrhh-person-file-sub">Fecha: ${formatISOToSpanish(f.fecha_documento || f.fecha_ingreso)}</span>
         </div>
-        <a href="#" class="btn btn-sm btn-outline-info"
-          onclick="openDocMetadataModal(${JSON.stringify(f.__idx)});return false;">Abrir archivo</a>
+        <button type="button" class="btn btn-sm btn-outline-info"
+          onclick="openDocMetadataModal(${JSON.stringify(f.__idx)})">Abrir archivo</button>
       </div>
       <div class="rrhh-person-file-meta">
         <span>Dependencia: <strong>${escHtml(f.departamento || "N/A")}</strong></span>
@@ -654,21 +663,38 @@ function openDocMetadataModal(idxReal) {
     <div class="ds-doc-meta-row"><span class="k">Fecha del Documento</span><span class="v">${escHtml(formatISOToSpanish(doc.fecha_documento || doc.fecha_ingreso))}</span></div>
     ${doc.notas ? `<div class="ds-doc-meta-row"><span class="k">Notas</span><span class="v">${escHtml(doc.notas)}</span></div>` : ""}
   `;
-  document.getElementById("modal-doc-abstract").innerText =
-    doc.notas || `Expediente Laboral Digitalizado del empleado ${doc.empleado}. Clasificado en el departamento de ${doc.departamento} con el estado de personal ${doc.estado || doc.estatus || "N/A"}.`;
+  // "Sin descripción registrada" en vez de fabricar una a partir de otros
+  // campos del documento -- inventar metadatos descriptivos es un error de
+  // fondo en un sistema de archivo, no un detalle de estilo (BR-038).
+  document.getElementById("modal-doc-abstract").innerText = doc.notas || "Sin descripción registrada.";
 
   closeDocViewer();
   const fileUrl = _secureFileUrl(doc.file_url || "");
   const viewBtn = document.getElementById("btn-modal-view");
+  // Un botón "Ver" que no muestra el documento es una acción fallida
+  // disfrazada de disponible; sin archivo se deshabilita con el motivo en el
+  // título en vez de reetiquetarse como otra acción (BR-039). La ubicación
+  // física ya se lista en el panel de metadatos.
   if (fileUrl) {
-    viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1"></i>Ver PDF';
-    viewBtn.onclick = () => toggleDocViewer(fileUrl);
-  } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
-    viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
-    viewBtn.onclick = () => showToast("Documento digitalizado sin URL asignada. Contacte al administrador.", "warning");
+    viewBtn.disabled = false;
+    viewBtn.removeAttribute("title");
+    viewBtn.innerHTML = '<i class="fas fa-file-pdf mr-1" aria-hidden="true"></i>Ver PDF';
+    viewBtn.onclick = () => {
+      toggleDocViewer(fileUrl);
+      // El <iframe> del visor llevaba siempre el mismo título genérico
+      // ("Visor del documento"); con el nombre real un lector de pantalla
+      // distingue qué documento se está mostrando (BR-100).
+      const iframe = document.getElementById("modal-doc-iframe");
+      if (iframe) iframe.title = `Visor del documento: ${_lbl}`;
+    };
   } else {
-    viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
-    viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
+    const motivo = (doc.ubicacion || "").toLowerCase().includes("digitalizado")
+      ? "Documento marcado como digitalizado, pero sin archivo asignado (incidencia de datos)."
+      : "No hay archivo digital asociado a este documento.";
+    viewBtn.disabled = true;
+    viewBtn.title = motivo;
+    viewBtn.innerHTML = '<i class="fas fa-eye-slash mr-1" aria-hidden="true"></i>Ver';
+    viewBtn.onclick = null;
   }
 
   $("#doc-modal").modal("show");
@@ -698,35 +724,47 @@ async function _toggleHistorialCargos(empleadoId) {
 
   try {
     const res = await fetch(`${API_BASE}/api/rrhh/empleado/${empleadoId}/historial_cargos`);
+    // Sin esta comprobación, un 401/500 con cuerpo JSON se leía como
+    // "sin movimientos registrados" -- un error de servidor disfrazado de
+    // dato de negocio (BR-022).
+    if (!res.ok) {
+      const msg = res.status === 401 || res.status === 403
+        ? "Su sesión expiró o no tiene permiso para ver el historial."
+        : "No se pudo cargar el historial de cargos.";
+      container.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle mr-1" aria-hidden="true"></i>${escHtml(msg)}</span>`;
+      return;
+    }
     const data = await res.json();
     const historial = data.historial || [];
 
     if (!historial.length) {
-      container.innerHTML = '<span class="text-muted"><i class="fas fa-info-circle mr-1"></i>No hay movimientos de cargo registrados.</span>';
+      container.innerHTML = '<span class="text-muted"><i class="fas fa-info-circle mr-1" aria-hidden="true"></i>No hay movimientos de cargo registrados.</span>';
       return;
     }
 
     container.innerHTML = `
-      <table class="table table-sm mb-0 ds-dossier-historial-table">
-        <thead class="bg-white">
-          <tr>
-            <th>Cargo</th>
-            <th>Desde</th>
-            <th>Hasta</th>
-            <th>Motivo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${historial.map((h, i) => `
-            <tr ${i === 0 ? 'class="font-weight-bold"' : ''}>
-              <td>${escHtml(h.cargo || "—")}</td>
-              <td>${formatISOToSpanish(h.fecha_inicio) || escHtml(h.fecha_inicio) || "—"}</td>
-              <td>${h.fecha_fin ? (formatISOToSpanish(h.fecha_fin) || escHtml(h.fecha_fin)) : '<span class="badge badge-success">Actual</span>'}</td>
-              <td class="text-muted">${escHtml(h.motivo || "—")}</td>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 ds-dossier-historial-table">
+          <thead class="bg-white">
+            <tr>
+              <th>Cargo</th>
+              <th>Desde</th>
+              <th>Hasta</th>
+              <th>Motivo</th>
             </tr>
-          `).join("")}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${historial.map((h, i) => `
+              <tr ${i === 0 ? 'class="font-weight-bold"' : ''}>
+                <td>${escHtml(h.cargo || "—")}</td>
+                <td>${formatISOToSpanish(h.fecha_inicio) || escHtml(h.fecha_inicio) || "—"}</td>
+                <td>${h.fecha_fin ? (formatISOToSpanish(h.fecha_fin) || escHtml(h.fecha_fin)) : '<span class="badge badge-success">Actual</span>'}</td>
+                <td class="text-muted">${escHtml(h.motivo || "—")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
     `;
   } catch {
     container.innerHTML = '<span class="text-danger">Error al cargar el historial de cargos.</span>';
@@ -767,7 +805,7 @@ function _renderRrhhFacets(facets) {
   el.innerHTML = `
     <div class="card card-secondary mt-2" style="font-size:0.82rem;">
       <div class="card-header py-1 px-2" style="background:#f4f9ff;">
-        <span class="font-weight-bold text-primary" style="font-size:0.8rem;"><i class="fas fa-chart-bar mr-1"></i>Distribución</span>
+        <span class="font-weight-bold text-primary" style="font-size:0.8rem;"><i class="fas fa-chart-bar mr-1" aria-hidden="true"></i>Distribución</span>
       </div>
       <div class="card-body p-2">
         ${byDept.length   ? `<p class="text-muted mb-1" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">Por Departamento</p>${deptRows}` : ""}
@@ -792,4 +830,24 @@ function _facetRrhhEstadoClick(name) {
   else state.rrhh.selectedEstados.push(name);
   state.rrhh.page = 1;
   triggerRrhhSearch();
+}
+
+// ==========================================================================
+// EVENTOS DE MODAL — limpieza y foco por cualquier vía de cierre
+// ==========================================================================
+if (typeof $ === "function") {
+  $(document).ready(() => {
+    // El visor de PDF sólo se cerraba desde el botón "Cerrar" del pie; la X
+    // y Escape dejaban el iframe con la URL anterior cargada en el DOM
+    // (BR-040).
+    $("#doc-modal").on("hidden.bs.modal", () => { if (typeof closeDocViewer === "function") closeDocViewer(); });
+    // Bootstrap devuelve el foco al <body> al cerrar el modal porque la
+    // tarjeta que lo abrió puede haber sido reemplazada por innerHTML; se
+    // devuelve explícitamente al elemento que lo abrió cuando sigue en el
+    // DOM (BR-080).
+    $("#rrhh-person-modal").on("hidden.bs.modal", () => {
+      if (_rrhhDossierTrigger && document.contains(_rrhhDossierTrigger)) _rrhhDossierTrigger.focus();
+      _rrhhDossierTrigger = null;
+    });
+  });
 }
