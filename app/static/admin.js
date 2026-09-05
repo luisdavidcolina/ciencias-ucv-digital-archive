@@ -330,6 +330,12 @@ async function loadRetentionConfig() {
       // si llega null/ausente no hay "operando" que restar, así que se cae a
       // un valor por defecto explícito en vez de pintar "NaN" en un <input>.
       const plazoNum = Number.isFinite(Number(t.plazo_retencion_anios)) ? Number(t.plazo_retencion_anios) : 1;
+      // VI-063: catorce botones de guardar (uno por fila) obligaban a repetir
+      // el mismo gesto catorce veces para el mismo cambio conceptual. La
+      // tercera columna ya no lleva acción propia — el guardado ahora es un
+      // único "Guardar cambios" al pie (ver _renderRetentionSaveBar) que
+      // recorre las filas modificadas. No se toca el ancho de columnas: eso
+      // es `styles.css`/HTML, fuera de esta zona (VI-063 [CHOCA]).
       return `
       <tr>
         <td>${nombreDisplay}</td>
@@ -337,25 +343,58 @@ async function loadRetentionConfig() {
           <div class="input-group input-group-sm">
             <input type="number" class="form-control form-control-sm"
                    id="ret-plazo-${t.id}" value="${plazoNum}" min="1" max="100"
-                   data-original="${plazoNum}"
+                   data-original="${plazoNum}" data-tipo-id="${t.id}" data-tipo-nombre="${nombreLegible ? escHtml(nombreLegible) : ''}"
                    style="max-width:80px;" oninput="_validateRetentionPlazoInput(this)">
             <div class="input-group-append">
               <span class="input-group-text text-muted">años</span>
             </div>
           </div>
         </td>
-        <td>
-          <button class="btn btn-sm btn-outline-success" onclick="_saveRetentionPlazo(${t.id})"
-                  title="Guardar plazo para ${nombreLegible ? escHtml(nombreLegible) : "tipo documental sin nombre"}">
-            <i class="fas fa-save"></i>
-          </button>
-        </td>
+        <td class="text-muted small" id="ret-status-${t.id}"></td>
       </tr>`;
     }).join("");
+    _renderRetentionSaveBar(tbody);
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-2"></td></tr>`;
     tbody.querySelector("td").textContent = e.message;
   }
+}
+
+// VI-063: un único punto de guardado para toda la tabla, en vez de un botón
+// por fila. Se inserta como fila de pie del propio `tbody` (no toca el
+// `<thead>` de `admin_archive.html`/`admin_hr.html`, fuera de esta zona), y
+// sólo envía al servidor las filas cuyo valor difiere de `data-original`.
+function _renderRetentionSaveBar(tbody) {
+  const table = tbody.closest("table");
+  if (!table) return;
+  let bar = table.parentElement.querySelector(".ds-retencion-savebar");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.className = "ds-retencion-savebar text-right mt-2";
+    table.parentElement.insertBefore(bar, table.nextSibling);
+  }
+  bar.innerHTML = `
+    <button type="button" class="btn btn-sm btn-success" onclick="_saveAllRetentionPlazos(this)">
+      <i class="fas fa-save mr-1"></i>Guardar cambios
+    </button>`;
+}
+
+async function _saveAllRetentionPlazos(btnEl) {
+  const table = btnEl.closest(".ds-retencion-savebar")?.previousElementSibling;
+  const tbody = table?.tagName === "TABLE" ? table.querySelector("tbody") : null;
+  if (!tbody) return;
+  const inputs = [...tbody.querySelectorAll("input[data-tipo-id]")]
+    .filter(inp => String(parseInt(inp.value)) !== inp.dataset.original && !inp.classList.contains("is-invalid"));
+  if (inputs.length === 0) {
+    showToast("No hay cambios de plazo sin guardar.", "info");
+    return;
+  }
+  // _saveRetentionPlazo ya muestra un toast por cada plazo — un fallo o éxito
+  // individual no se pierde, sólo deja de exigir catorce clics para llegar
+  // a ellos.
+  btnEl.disabled = true;
+  for (const inp of inputs) await _saveRetentionPlazo(parseInt(inp.dataset.tipoId));
+  btnEl.disabled = false;
 }
 
 // OR-189: antes el único límite era min/max en el marcado, y la comprobación

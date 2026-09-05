@@ -101,7 +101,6 @@ function renderUsersTable(suf) {
       <thead>
         <tr class="bg-light">
           <th role="button" onclick="_toggleUsersSort('${suf}','usuario')">Usuario ${_sortArrow(st, 'usuario')}</th>
-          <th>Contraseña</th>
           <th>Módulo</th>
           <th>Rol</th>
           <th>Estado</th>
@@ -111,7 +110,7 @@ function renderUsersTable(suf) {
       </thead>
       <tbody>
         ${rows.length === 0
-          ? `<tr><td colspan="7" class="text-center text-muted p-3">Sin usuarios que coincidan con el filtro.</td></tr>`
+          ? `<tr><td colspan="6" class="text-center text-muted p-3">Sin usuarios que coincidan con el filtro.</td></tr>`
           : rows.map(u => _renderUserRow(u)).join("")}
       </tbody>
     </table>
@@ -143,7 +142,6 @@ function _renderUserRow(u) {
   return `
     <tr>
       <td class="font-weight-bold text-dark"><i class="fas fa-user-circle mr-1 text-secondary"></i> ${uEsc}</td>
-      <td class="text-muted">${escHtml(u.password)}</td>
       <td>${escHtml(u.modulo)}</td>
       <td><span class="badge ${u.rol === "Admin" ? "badge-danger" : "badge-primary"}">${escHtml(u.rol)}</span></td>
       <td>
