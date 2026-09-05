@@ -3307,3 +3307,106 @@ por separado: mis 20 pruebas de IA en verde, la misma falla ajena repetida.
 `python -c "import ast; ast.parse(...)"` sobre los tres archivos que toqué, ok.
 
 **quién lo pide**: agente-pass2-ai (PASS2-ai)
+
+## PASS2-archive-depth
+
+Segundo pase sobre `app/routes/archive.py`/`app/static/archive.js`/
+`app/static/archive.html` (zona exclusiva), continuando donde A1-buscador-archivo
+(sólo `archive.js`/`archive.html`) y A2-archivo-backend (sólo dejó una nota de
+producto, sin cambios de código) lo dejaron. `archive.py` seguía prácticamente
+como en la auditoría original.
+
+Resueltos en `app/routes/archive.py` (y su contraparte mínima en `archive.js`):
+
+- `BA-005`: el `order` se forzaba a `relevance DESC` en cuanto el término tenía
+  letras, ignorando el `sort_mode` elegido en el `<select>` (que A1 ya había
+  completado con la opción "Relevancia"). Ahora sólo se sustituye por
+  relevancia cuando `sort_mode` sigue en su valor por defecto
+  ("Alfabético (A-Z)") o cuando el usuario pide "Relevancia" explícitamente;
+  cualquier otro criterio elegido se respeta aunque haya texto de búsqueda.
+- `BA-015`: los conteos de facetas omitían el filtro de Palabras Clave
+  (`tesauro_terms`), así que con una palabra clave activa describían un
+  conjunto distinto al que veía el usuario. Al unificar la construcción de
+  condiciones (ver BA-161) quedó incluido automáticamente.
+- `BA-016`: la faceta "Sin tipo" se etiquetaba y se filtraba con el mismo
+  texto visible ("Sin tipo"), que nunca casaba contra ninguna fila real
+  (`tesauro_primario = ANY(['Sin tipo'])`). Ahora el backend usa un valor
+  centinela `__sin_tipo__` que se traduce a `COALESCE(tesauro_primario,'')=''`
+  al filtrar, y `archive.js` sólo traduce el centinela a la etiqueta "Sin
+  tipo" al pintarlo — el valor que viaja de ida y vuelta en `data-facet-type`
+  sigue siendo el centinela.
+- `BA-026`: `GET /api/archivo/documentos/buscar` (autocompletado) no filtraba
+  `deleted_at`/`status`, así que sugería términos que sólo existían en la
+  papelera o en material sin aprobar; elegirlos devolvía siempre cero
+  resultados. Añadido el mismo par de condiciones que ya usa la búsqueda
+  principal.
+- `BA-027`: el mismo endpoint no tenía longitud mínima; cada pulsación de una
+  letra escaneaba dos tablas completas. Ahora corta en menos de 2 caracteres
+  antes de tocar la base de datos. (La parte de `app-choices.js` — debounce en
+  el cliente — sigue fuera de mi carril, `[CHOCA]`.)
+- `BA-161`: la lógica de filtros estaba escrita dos veces con variaciones
+  sutiles entre la búsqueda principal y las facetas — la causa raíz de
+  BA-015. Extraída a `_build_common_conditions(req, fts_fields=...)`, con
+  `fts_fields="full"`/`"short"` para conservar exactamente el comportamiento
+  que cada consulta ya tenía (no unifiqué las dos expresiones FTS
+  distintas, eso es BA-002, `[CHOCA]` con `main.py`).
+- `BA-167`: `ts_rank_cd(to_tsvector(...), plainto_tsquery(...))` se calculaba
+  por cada fila devuelta aunque no hubiera término de búsqueda (el `ORDER BY`
+  no lo usaba en ese caso). Ahora la columna `relevance` es `0::real` sin
+  término, sin evaluar `to_tsvector` de balde.
+
+Quedan fuera de mi alcance en este pase, todos ya documentados por A1/A2 o
+marcados `[CHOCA]` en `buscador-archivo.md`:
+
+- `BA-002`/`BA-004`/`BA-051`/`BA-101`/`BA-123`/`BA-135`/`BA-140`/`BA-141`/
+  `BA-166`/`BA-168`/`BA-174`/`BA-194` — tocan `main.py`, `lookups.py` o
+  decisión de producto (público vs privado), fuera de mi zona declarada.
+- `BA-121`/`BA-122`/`BA-124`/`BA-126`/`BA-128`/`BA-130`/`BA-133`/`BA-134`/
+  `BA-140` (funcionalidad ausente, esfuerzo L: permalinks, búsqueda avanzada,
+  OCR, búsquedas guardadas, exportación EAD/Dublin Core, OAI-PMH, cuadro de
+  clasificación) — decisión de producto y/o esfuerzo L, no caben en un pase de
+  profundidad sobre lo ya auditado.
+- `BA-142` (filtro/orden por folio) — exige columnas nuevas en
+  `ArchivoSearchRequest` (`models.py`), carril `PASS2-models-schema`, `[CHOCA]`.
+- `BA-160`/`BA-162` (CTE única para resultados+facetas; paginar antes de unir
+  con descriptores) — esfuerzo M, cambio de forma de la consulta con más
+  riesgo del que quería asumir sin poder probar contra Neon real en este pase;
+  documentado para quien retome rendimiento de `archive.py`.
+- `BA-169` (tope de `offset`) — `utils.py::paginate`, `[CHOCA]`.
+- `BA-180`/`BA-181` (auditoría de búsquedas, capturar errores SQL) — esfuerzo
+  S pero cambian el contrato de errores/logging del endpoint más disputado del
+  proyecto (BA-168 ya avisa que agota el pool); preferí no tocarlo sin una
+  ronda de revisión aparte.
+- `BA-185` (eliminar parámetros muertos de `fetch_archive_dataframe`) —
+  depende de resolver primero BA-163 (`lookups.py`, `[CHOCA]`), que es quien
+  llama a esa función.
+- `BA-190`–`BA-200` (pruebas nuevas) — `app/tests/` no es mi zona declarada;
+  nótese que con el cambio de `BA-161`/`BA-016` el mock de `test_archivo.py`
+  (`_search_mock`, que devuelve `[]` para toda llamada salvo la primera)
+  sigue funcionando porque no cambié el número ni el orden de las llamadas a
+  `db_query` (búsqueda → facet_type → facet_year).
+
+**Verificación**: `python -m pytest app/tests/test_archivo.py
+app/tests/test_sql_columns.py app/tests/test_static_assets.py -q` → 344
+passed. La corrida completa de la suite (`app/tests -q`) tenía, al momento de
+mi turno, 1 fallo preexistente en `test_static_analysis.py` (import `os` sin
+usar en `app/database.py`) por trabajo concurrente de otro carril sobre ese
+archivo — no relacionado con `archive.py`/`archive.js`, confirmado por la
+nota de PASS2-ai arriba que documenta el mismo síntoma. `node --check
+app/static/archive.js` y `python -m pyflakes app/routes/archive.py` sin
+incidencias.
+
+**Nota operativa**: mi primer intento de `git commit` (con `git add
+app/routes/archive.py app/static/archive.js`, ambos explícitos por nombre)
+quedó absorbido por una carrera de `git commit` concurrente en el árbol de
+trabajo compartido: el commit resultante (`20548d9`) contenía únicamente
+`app/core/ai.py`, `app/core/ai_tools.py`, `app/routes/ai.py` y
+`docs/auditoria/_BUZON.md` de otro carril, sin ninguno de mis dos archivos.
+Verifiqué que mis cambios seguían intactos en el árbol de trabajo
+(`git diff HEAD -- app/routes/archive.py app/static/archive.js` los mostraba
+completos y sin commitear) y repetí `git add`+`git commit` con los mismos dos
+archivos explícitos; el segundo intento, `13bc2ce`, sí contiene exactamente
+mis dos archivos (`git show --stat HEAD`). No toqué el commit `20548d9`
+ajeno: es trabajo real de otro carril, sólo el orden de commits se cruzó.
+
+**quién lo pide**: agente-pass2-archive-depth (PASS2-archive-depth)
