@@ -3697,3 +3697,53 @@ accionable en solitario:
 
 `node --check app/static/login.js app/static/scanner-client.js`: sin errores.
 `python -m pytest app/tests -q`: ver resultado en la fila de `_RESERVAS.md`.
+
+## Reverificación de las 11 entradas sin marcar de `app/static/styles.css` (2026-09-04)
+
+**quién lo hace**: agente-pass3-styles-buzon (PASS3-styles-buzon). Zona: los 12 módulos
+reales bajo `app/static/styles/` (hoy `styles.css` es sólo el punto de entrada `@import`).
+
+Repasé cada `- [ ]` de este buzón cuyo **archivo** es `app/static/styles.css` (líneas ~406,
+~676, ~1477, ~1936-1998, ~2091-2130, ~2247, ~2507 en este documento) contra el estado actual
+de los archivos de los que dependían — varios de ellos (`admin_hr.html`, `hr.js`,
+`archive.js`, `ai-widget.js`, `admin.js`, `app-shell.js`, `admin-monitor.js`,
+`admin-charts.js`) recibieron pases PASS2/PASS3 hoy mismo. Resultado: **ninguna pasó a
+accionable** — siguen bloqueadas exactamente por lo que ya documentaba cada nota, ahora
+reconfirmado línea por línea:
+
+- `OA-201`/`OR-234`/`OR-077`/`OA-210`/`OR-280` (esqueleto de carga, animación, exportar
+  PNG/CSV de gráficos): revisé `app/static/admin-charts.js` completo — sigue sin ningún
+  marcado nuevo (`ds-skeleton`, botón exportar, contenedor de KPI) que una regla CSS pudiera
+  consumir. `OA-201` (animación de una sola vez) sigue resuelto del lado CSS
+  (`.ds-kpi-grid .ds-kpi-mini` con `animation: ds-fade ... both`, sin `infinite`).
+- `OR-241` (tarjetas apiladas en móvil en `admin_hr.html`): el HTML sigue usando
+  `<table class="table table-sm table-hover mb-0">` dentro de `.table-responsive` en las
+  cuatro tablas de Partes — sin `data-label`/marcado de tarjeta que una media query pueda
+  aprovechar. Sigue siendo un cambio de HTML+CSS a la vez, HTML fuera de mi carril.
+- `L14-estilos` (insignia única `.ds-badge`/`.ds-item-kw-badge`/`.ds-status-badge`/etc.,
+  unificar `.ds-empty`): sigue siendo una decisión de componente compartida entre L3/L6/L8,
+  no un bloqueo de archivo ajeno — nadie ha consolidado el componente todavía.
+- `OA-197` (colapsar 8 KPIs a 390px + «Ver todas las cifras»): necesita el botón/JS de
+  expandir, que no existe en `admin.js` ni en `admin_archive.html` — confirmado, sin
+  marcado nuevo.
+- `SI-184`/`SI-201`/`SI-202` (lista/encabezados semánticos del menú, preferencia de sistema,
+  `forced-colors`): revisé `app-shell.js`/`app-theme.js` — sin cambios relacionados hoy.
+  Nota aparte: `SI-181`/`SD-040`/`SD-131` (badge de usuario con `style` en línea rojo) **sí
+  ya está resuelto de los dos lados** (`app-shell.js:158` usa `class="ds-nav-user-badge"`
+  sin `style` en línea; la clase y su variante `body.dark-mode` ya existen en
+  `componentes-admin.css`/`dark-mode.css`) — no era un pendiente sin marcar, sino que la
+  nota previa ya lo daba por cerrado del lado CSS.
+- `L6-estilos` (SD-166 fila de tabla enfocable, SD-147 insignia de notificación,
+  SD-040/131 ya cubierto arriba): revisé `admin-monitor.js` — sigue sin `tabindex` ni
+  manejador de teclado en las filas, así que la regla `:focus-within` que pide SD-166 no
+  tendría nada que activar todavía.
+- `SD-228` (CSS crítico en línea / `preload`, paso de compilación): sigue siendo decisión
+  de infraestructura (`IN-203`), no de los módulos de `styles/`.
+
+**Conclusión**: 0 de 11 pasaron a accionable en esta pasada. Todas quedan igual que estaban,
+con la razón reverificada contra el código de hoy en vez de sólo la nota antigua. No toqué
+ningún archivo bajo `app/static/styles/` porque no había nada seguro que escribir sin
+inventar clases que ningún HTML/JS consume todavía (regla de oro: no CSS fantasma).
+
+`python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios). `python -m
+pytest app/tests/test_visual.py -q`: ver resultado abajo/en `_RESERVAS.md`.
