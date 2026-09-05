@@ -142,10 +142,10 @@ para no repetir la confusión.
 | VI-archive-hr-js | agente-vi-archive-hr-js | 2026-09-05 | terminado (VI-005/VI-006 recortados por JS puro en archive.js/hr.js; VI-015 ya estaba resuelto en código actual; VI-012 no accionable solo con mis dos archivos, ver nota en _BUZON.md) | a61f70a |
 | VI-admin-ai-html | agente-vi-admin-ai-html | 2026-09-05 | terminado (VI-010: sólo faltaba envolver `gasto-tabla` y `conv-tabla`, las otras dos ya tenían `.table-responsive`; VI-011 ya estaba resuelto, sin cambios de código, ver nota en `_BUZON.md`) | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63:app/static/admin_ai.html` y `git show 3780b63:docs/auditoria/_BUZON.md`) |
 | VI-ai-widget-zindex | agente-vi-ai-widget-zindex | 2026-09-05 | terminado | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63 -- app/static/ai-widget.css app/static/ai-widget.js`) |
-| VI-charts-nan | agente-vi-charts-nan | 2026-09-05 | en curso | |
-| VI-admin-js-datos | agente-vi-admin-js-datos | 2026-09-05 | en curso | |
-| VI-archive-hr-datos | agente-vi-archive-hr-datos | 2026-09-05 | terminado (VI-031, VI-032, VI-037 — ver nota en _BUZON.md) | pendiente |
-| VI-admin-ai-datos | agente-vi-admin-ai-datos | 2026-09-05 | en curso | |
-| VI-styles-oscuro-restante | agente-vi-styles-oscuro | 2026-09-05 | en curso | |
-| VI-focus-touch | agente-vi-focus-touch | 2026-09-05 | en curso | |
-| VI-nombres-consistentes | agente-vi-nombres | 2026-09-05 | en curso | |
+| VI-charts-nan | agente-vi-charts-nan | 2026-09-05 | terminado (interrumpido por corte de red, rescatado y comiteado por el orquestador tras verificar sintaxis y pytest) | 3ca6bbb |
+| VI-admin-js-datos | agente-vi-admin-js-datos | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador: VI-028/030/033/034/035) | 0cac70b |
+| VI-archive-hr-datos | agente-vi-archive-hr-datos | 2026-09-05 | terminado (VI-031, VI-032, VI-037 — ver nota en _BUZON.md) | fb4463e |
+| VI-admin-ai-datos | agente-vi-admin-ai-datos | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador; comiteado junto con VI-charts-nan por carrera de git) | 3ca6bbb |
+| VI-styles-oscuro-restante | agente-vi-styles-oscuro | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador) | e28fa8e |
+| VI-focus-touch | agente-vi-focus-touch | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador: VI-044/VI-045) | 9de46f8 |
+| VI-nombres-consistentes | agente-vi-nombres | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador: VI-050) | eb33cda |
