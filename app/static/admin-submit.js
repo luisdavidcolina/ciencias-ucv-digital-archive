@@ -867,6 +867,14 @@ async function handleNewSubmission(e) {
     const msg = err?.message || "";
     if (/^Error 4\d\d/.test(msg) || /obligator|requerid|inválid|invalid/i.test(msg)) {
       showToast(msg, "error");
+      // OR-035: cuando el backend nombra el campo culpable ("cédula",
+      // "RIF"...) se marca ese campo en rojo, no sólo el toast que
+      // desaparece a los pocos segundos.
+      const fieldByKeyword = isArchivo
+        ? [[/t[ií]tulo/i, "reg-title"], [/autor/i, "reg-author"], [/fecha/i, "reg-fecha"], [/ubicaci[oó]n/i, "reg-location"]]
+        : [[/c[eé]dula/i, "reg-cedula"], [/\brif\b/i, "reg-rif"], [/nombre/i, "reg-nombres"], [/apellido/i, "reg-apellidos"], [/departamento/i, "reg-depto"], [/fecha/i, "reg-fecha"]];
+      const hit = fieldByKeyword.find(([re]) => re.test(msg));
+      if (hit) _setSubmitFieldError(suf, hit[1], msg);
     } else if (/^Error 413/.test(msg)) {
       showToast("El archivo es demasiado grande para el servidor.", "error");
     } else if (/^Error 5\d\d/.test(msg)) {

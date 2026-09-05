@@ -3783,3 +3783,51 @@ ningún archivo de mi zona.
 
 `python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios).
 `python -m pytest app/tests/test_visual.py -q`: 54 passed (antes y después, sin cambios).
+
+## Reverificación de las entradas sin marcar de `admin_hr.html`/`admin_archive.html` (2026-09-05)
+
+**quién lo hace**: agente-pass3b-admin-html-depth (PASS3-admin-html-depth-2). Zona: sólo
+`app/static/admin_hr.html` y `app/static/admin_archive.html`.
+
+El encargo era repasar cada `- [ ]` de este buzón con esos dos archivos, porque `docs.py`,
+`trash.py`, `retention.py`, `admin.js` y `admin-edit-hr.js` recibieron pases PASS2/PASS3 en
+las últimas horas. Repasé el código actual de esos cinco archivos contra cada bloqueo
+documentado:
+
+- `OA-063` (bandeja de pendientes, selección múltiple) y `OA-103`/`OR-117` (casillas +
+  endpoint de lote) · **sigue bloqueado**: `grep` de `bulk`/`lote`/`masiv` en
+  `app/routes/admin/docs.py` no encuentra ningún endpoint de lote transaccional. Sin él, las
+  casillas en el HTML no tendrían nada que invocar.
+- `OA-133` (vaciar papelera / purgar en lote) · **sigue bloqueado**: `app/routes/trash.py`
+  sigue sin endpoint de purga masiva (sólo `purgar/{doc_id}` y `empleados/{emp_id}/purgar`,
+  uno por uno). Añadir checkboxes en `admin_archive.html` sin ese endpoint dejaría un botón
+  «Vaciar papelera» sin destino.
+- `OR-121` (columna propia para `doc_count` en el monitor de RRHH) · **sigue bloqueado**:
+  `admin-monitor.js` sigue pintando `f.doc_count` como insignia dentro de la celda del
+  nombre (línea ~365), no como `<td>` propio. Añadir sólo el `<th>` en
+  `admin_hr.html` sin el `<td>` correspondiente en `admin-monitor.js` rompe
+  `test_admin_panels.py::test_monitor_columnas_y_celdas_cuadran` (cabeceras vs celdas).
+- `OR-241` (tarjetas apiladas en móvil, tablas de Partes en RRHH) · **sigue bloqueado**:
+  confirmado con `agente-pass3b-styles-buzon` en la sección anterior de este mismo documento —
+  sigue siendo HTML+CSS a la vez y el lado CSS tampoco se escribió esta pasada. No fabrico el
+  marcado de tarjeta en solitario porque quedaría sin ninguna regla `@media` que lo consuma
+  (mismo motivo que documentaron los carriles anteriores para no hacerlo a medias).
+- `OR-070` (pantalla propia de jubilaciones próximas en RRHH) · **sigue bloqueado**: releí
+  `app/static/admin.js` (`_loadAlertasBanner`, líneas 160-183) — el comentario `OR-070` de esa
+  función sigue diciendo que la pantalla está "pendiente de `admin_hr.html`", pero
+  `loadAdminTab` (el switch de pestañas) no tiene ninguna rama nueva para ella. Añadir sólo el
+  `<li>`/`<div>` en `admin_hr.html` sin su rama en `loadAdminTab` deja un panel en blanco que
+  `test_admin_panels.py` no detecta (compara pestaña↔panel, no contenido) — mismo motivo que
+  documentó `agente-pass3-admin-html-depth` ayer. `admin.js` está siendo tocado ahora mismo por
+  `PASS3-admin-js-resto` (en curso en `_RESERVAS.md`), así que no coincide con este turno.
+- `DG-154` (pantalla de digitalización nueva) y `OR-277` (vistas guardadas por enlace) ·
+  siguen siendo funciones nuevas completas, sin carril dueño ni endpoint — no accionables desde
+  HTML solo.
+
+**Conclusión**: 0 de las entradas sin marcar de estos dos archivos pasaron a accionable. Los
+cinco archivos que recibieron pases PASS2/PASS3 (`docs.py`, `trash.py`, `retention.py`,
+`admin.js`, `admin-edit-hr.js`) no añadieron ninguno de los endpoints/ramas que estos
+bloqueos necesitan del lado backend/JS. No toqué `admin_hr.html` ni `admin_archive.html`
+porque no había nada seguro que escribir sin dejar un control sin destino o un panel vacío.
+
+`python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios, sin tocar código).
