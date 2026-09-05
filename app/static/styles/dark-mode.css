@@ -29,6 +29,19 @@ body.dark-mode .content-wrapper      { background-color: var(--surface-0) !impor
 /* Navbar */
 body.dark-mode .main-header.navbar   { background-color: var(--surface-2) !important; border-color: var(--border) !important; }
 body.dark-mode .navbar-nav .nav-link  { color: var(--ds-dark-text-2) !important; }
+/* VI-022: `.main-header.navbar` ya se oscurece por el token `--surface-1`
+   (shell.css), pero `.main-header .nav-link` (`--gray-700`, fijo) y
+   `.main-header .navbar-brand`/`.ds-navbar-logo`/`.ds-navbar-logo i`
+   (`--color-primary`, azul oscuro #2b4e72 con `!important` en origen) no
+   tenían par oscuro — texto oscuro quedaba casi ilegible sobre la barra ya
+   oscurecida, la franja más visible de toda pantalla con el interruptor
+   activado. */
+body.dark-mode .main-header .nav-link { color: var(--ds-dark-text-2) !important; }
+body.dark-mode .main-header .nav-link:hover { color: var(--ds-dark-accent-active) !important; }
+body.dark-mode .main-header .navbar-brand,
+body.dark-mode .main-header .navbar-brand:hover,
+body.dark-mode .main-header .ds-navbar-logo { color: var(--ds-dark-accent-active) !important; }
+body.dark-mode .ds-navbar-logo i { color: var(--ds-dark-accent-active) !important; }
 
 /* Sidebar */
 body.dark-mode .ds-sidebar            { background: var(--surface-2) !important; box-shadow: var(--shadow-xl) !important; }
@@ -46,6 +59,25 @@ body.dark-mode .card                  { background: var(--surface-1) !important;
 body.dark-mode .card-header           { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--text) !important; }
 body.dark-mode .card-footer           { background: var(--surface-2) !important; border-color: var(--border) !important; }
 body.dark-mode .card-body             { background: var(--surface-1) !important; }
+/* VI-021: la regla de arriba fuerza el fondo/texto de `.card-header` mismo,
+   pero `.card.card-primary/-success/-info/-warning/-danger .card-header
+   .card-title` (componentes-admin.css) trae su propia tinta oscura fija
+   (ej. #7c2d3c) para leerse sobre los pasteles claros de esa misma regla —
+   sin importar, así que sobrevive al cambio de tema y queda tinta oscura
+   sobre superficie oscura, casi invisible. El título del panel es lo primero
+   que se lee de cada tarjeta. */
+body.dark-mode .card-header .card-title { color: var(--text) !important; }
+body.dark-mode .card-header .text-muted { color: var(--ds-dark-text-2) !important; }
+
+/* VI-024: `.ds-item-authors` (#212529), `.ds-item-publisher`/`.ds-item-date`
+   (#6c757d) y `.ds-item-abstract` (#495057) en componentes.css son tinta
+   fija pensada para fondo claro, sin par oscuro — sobre `--surface-1` quedan
+   casi al ras del fondo. El autor es justo el dato de identidad de la fila,
+   así que es el primero que se pierde. */
+body.dark-mode .ds-item-authors       { color: var(--text) !important; }
+body.dark-mode .ds-item-publisher,
+body.dark-mode .ds-item-date          { color: var(--ds-dark-text-2) !important; }
+body.dark-mode .ds-item-abstract      { color: var(--ds-dark-text-2) !important; }
 
 /* Headings */
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,

@@ -461,6 +461,14 @@ body.theme-oliva          .ds-breadcrumb-wrapper { border-left-color: #5a6b2a !i
 .card.card-warning .card-header .card-title  { color: #7B5800; }
 .card.card-danger  .card-header .card-title  { color: #7c2d3c; }
 
+/* VI-025: el texto secundario (`.text-muted` de Bootstrap, #6c757d) dentro de
+   estas cabeceras claras no llega a 4.5:1 sobre ninguno de los seis pasteles
+   de arriba — por eso "Los documentos aquí pueden restaurarse..." en la
+   cabecera de Papelera se lee gris sobre gris. Un tono más oscuro sí cumple
+   AA sobre los seis fondos a la vez, sin tener que emparejar cada variante
+   con su propia tinta de título. */
+.card-header .text-muted { color: #495057 !important; }
+
 /* ==========================================================================
    PAGINATION CONTROLS — visual mejorado
    ========================================================================== */
