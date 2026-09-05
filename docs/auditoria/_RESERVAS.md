@@ -159,4 +159,4 @@ para no repetir la confusión.
 | BA-app-choices | agente-ba-app-choices | 2026-09-05 | terminado (BA-010, BA-009, BA-027, BA-094, BA-177; BA-003/004/145/172 y la mitad de BA-009 en app.js documentados en _BUZON.md, fuera de zona) | 0cfffa5 |
 | VI-viz-tokens | agente-vi-viz-tokens | 2026-09-05 | terminado (sin cambios de código: `vizSeries()` ya devuelve exactamente 8 colores en orden fijo, sin ciclar y sin inventar un noveno tono — cumple la regla de CLAUDE.md. El agrupamiento en "Otros" para VI-038/VI-039 ya lo resolvió hoy `agente-vi-charts-nan` del lado del cliente en `admin-charts.js` (`_capYColorear`, commit `3ca6bbb`), consumiendo el array de `vizSeries()` tal cual; no duplicado aquí. `node --check` OK, pytest 859/859 y test_visual.py 54/54, sin cambios respecto al inicio) | (sin commit) |
 | IN-share-revocation | agente-in-share-revocation | 2026-09-05 | en curso | |
-| IN-rotacion-docs | agente-in-rotacion-docs | 2026-09-05 | en curso | |
+| IN-rotacion-docs | agente-in-rotacion-docs | 2026-09-05 | terminado | 6dd4fba |
