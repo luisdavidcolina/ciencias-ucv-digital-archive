@@ -17,7 +17,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/icons/apple-touch-icon.png">
   <link rel="manifest" href="/static/assets/icons/site.webmanifest">
 </head>
-<body class="hold-transition sidebar-mini" data-page="rrhh"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);}catch(e){}</script>
+<body class="hold-transition sidebar-mini" data-page="rrhh"><script>try{var _t=localStorage.getItem('ds_theme');if(_t&&_t!=='default')document.body.classList.add(_t);var _dm=localStorage.getItem('ds_dark_mode')||'auto';if(_dm==='dark'||(_dm==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.body.classList.add('dark-mode');if(localStorage.getItem('ds_density')==='compact')document.body.classList.add('ds-density-compact');}catch(e){}</script>
 
   <!-- Barra superior: definida en app-shell.js. -->
   <div id="app-shell-navbar"></div>
@@ -35,7 +35,7 @@
       <div class="row">
         <div class="col-12">
           <div class="ds-breadcrumb-wrapper">
-            <div class="ds-breadcrumb">Comunidades / RRHH / Privado</div>
+            <div class="ds-breadcrumb">Archivo Digital / Recursos Humanos</div>
           </div>
         </div>
       </div>
@@ -48,7 +48,7 @@
               <div class="accordion" id="rrhh_filters_acc">
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-rh-type">
-                    <button class="btn btn-link btn-block text-left text-lightblue font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-type">Tipología</button>
+                    <h4 class="m-0"><button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-type" aria-expanded="true" aria-controls="collapse-rh-type">Tipología</button></h4>
                   </div>
                   <div id="collapse-rh-type" class="collapse show" data-parent="#rrhh_filters_acc">
                     <div class="card-body p-2">
@@ -58,14 +58,14 @@
                 </div>
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-rh-date">
-                    <button class="btn btn-link btn-block text-left text-teal font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-date">Fecha</button>
+                    <h4 class="m-0"><button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-date" aria-expanded="false" aria-controls="collapse-rh-date">Fecha de ingreso</button></h4>
                   </div>
                   <div id="collapse-rh-date" class="collapse" data-parent="#rrhh_filters_acc">
                     <div class="card-body p-2">
                       <div class="ds-date-chips mb-2">
                         <button class="ds-date-chip active" data-module="rrhh" data-preset="all">Todo</button>
-                        <button class="ds-date-chip" data-module="rrhh" data-preset="year"><i class="fas fa-hashtag"></i> Año</button>
-                        <button class="ds-date-chip" data-module="rrhh" data-preset="custom"><i class="fas fa-sliders-h"></i> Rango</button>
+                        <button class="ds-date-chip" data-module="rrhh" data-preset="year"><i class="fas fa-hashtag" aria-hidden="true"></i> Año</button>
+                        <button class="ds-date-chip" data-module="rrhh" data-preset="custom"><i class="fas fa-sliders-h" aria-hidden="true"></i> Rango</button>
                       </div>
                       <div id="year-panel-rrhh" style="display:none;" class="mb-1">
                         <select id="year-select-rrhh" class="form-control form-control-sm">
@@ -75,11 +75,11 @@
                       <div id="range-panel-rrhh" style="display:none;" class="mb-1">
                         <div class="input-group input-group-sm">
                           <div class="input-group-prepend">
-                            <span class="input-group-text" style="background:#f4f9ff;"><i class="fas fa-calendar-alt text-primary"></i></span>
+                            <span class="input-group-text" style="background:#f4f9ff;"><i class="fas fa-calendar-alt text-primary" aria-hidden="true"></i></span>
                           </div>
-                          <input type="text" id="fp-rrhh-range" class="form-control form-control-sm" placeholder="Desde → Hasta" readonly style="cursor:pointer;background:#fff;">
+                          <input type="text" id="fp-rrhh-range" class="form-control form-control-sm" placeholder="Desde → Hasta" readonly style="cursor:pointer;background:#fff;" aria-label="Rango de fechas de ingreso">
                           <div class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" id="fp-rrhh-clear" title="Volver a Todo"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" id="fp-rrhh-clear" title="Volver a Todo" aria-label="Volver a Todo"><i class="fas fa-times" aria-hidden="true"></i></button>
                           </div>
                         </div>
                       </div>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="card mb-1">
                   <div class="card-header p-2" id="heading-rh-estado">
-                    <button class="btn btn-link btn-block text-left text-indigo font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-estado">Estado</button>
+                    <h4 class="m-0"><button class="btn btn-link btn-block text-left text-primary font-weight-bold" type="button" data-toggle="collapse" data-target="#collapse-rh-estado" aria-expanded="false" aria-controls="collapse-rh-estado">Estado</button></h4>
                   </div>
                   <div id="collapse-rh-estado" class="collapse" data-parent="#rrhh_filters_acc">
                     <div class="card-body p-2">
@@ -133,11 +133,12 @@
         <div class="col-md-9">
           <div class="ds-search-bar">
             <div class="input-group">
+              <label for="search_rrhh" class="sr-only">Buscar expediente por cédula, nombres o apellidos</label>
               <input type="text" id="search_rrhh" class="form-control ds-search-input" placeholder="Buscar expediente por Cédula, Nombres, Apellidos...">
               <div class="input-group-append">
-                <button id="btn_s_rrhh" class="btn ds-btn-primary ds-search-action-btn" title="Buscar"><i class="fas fa-search"></i></button>
-                <button id="btn_clear_rrhh" class="btn btn-outline-secondary ds-search-action-btn" title="Limpiar filtros"><i class="fas fa-eraser"></i></button>
-                <button id="download_rrhh_xls" class="btn ds-btn-export ds-search-action-btn" title="Exportar XLS"><i class="fas fa-file-excel"></i></button>
+                <button id="btn_s_rrhh" class="btn ds-btn-primary ds-search-action-btn" title="Buscar" aria-label="Buscar"><i class="fas fa-search" aria-hidden="true"></i></button>
+                <button id="btn_clear_rrhh" class="btn btn-outline-secondary ds-search-action-btn" title="Limpiar filtros" aria-label="Limpiar filtros"><i class="fas fa-eraser" aria-hidden="true"></i></button>
+                <button id="download_rrhh_xls" class="btn ds-btn-export ds-search-action-btn" title="Exportar XLS" aria-label="Exportar resultados a Excel"><i class="fas fa-file-excel" aria-hidden="true"></i></button>
               </div>
             </div>
           </div>
@@ -158,7 +159,7 @@
   </div>
 
   <!-- Modal Expediente RRHH -->
-  <div id="rrhh-person-modal" class="modal fade rrhh-person-modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div id="rrhh-person-modal" class="modal fade rrhh-person-modal" tabindex="-1" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content" style="border-radius:14px; border:1px solid #d6dbe1; box-shadow:0 18px 40px rgba(16,24,40,0.2);">
         <div class="modal-body p-4" style="max-height:80vh; overflow-y:auto;">
@@ -172,7 +173,7 @@
   </div>
 
   <!-- Modal Documento (compartido con archive.js via openDocMetadataModal) -->
-  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content" style="border-radius:14px; border:1px solid #d6dbe1; box-shadow:0 18px 40px rgba(16,24,40,0.2);">
         <div class="modal-body p-4">
@@ -204,7 +205,7 @@
               <button onclick="closeDocViewer()" class="btn btn-sm btn-outline-secondary"><i class="fas fa-times mr-1"></i>Cerrar Visor</button>
             </div>
             <div style="border:1px solid #dee2e6;border-radius:8px;overflow:hidden;background:#f8f9fa;">
-              <iframe id="modal-doc-iframe" src="" style="width:100%;height:520px;border:none;display:block;" allowfullscreen></iframe>
+              <iframe id="modal-doc-iframe" src="" title="Visor del documento" style="width:100%;height:520px;border:none;display:block;" allowfullscreen></iframe>
             </div>
           </div>
         </div>
