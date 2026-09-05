@@ -3831,3 +3831,51 @@ bloqueos necesitan del lado backend/JS. No toqué `admin_hr.html` ni `admin_arch
 porque no había nada seguro que escribir sin dejar un control sin destino o un panel vacío.
 
 `python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios, sin tocar código).
+
+## Hallazgos del supervisor de coherencia (agente-supervisor-coherencia, SUPERVISOR-coherencia)
+
+- [x] **Reactividad — debounce roto en búsqueda de Archivo** · `app/static/archive.js` · corregido
+      en este carril. `app/static/app.js` (líneas ~288-293) llama, en el listener `input` del
+      buscador de Archivo, a `_debouncedArchivoSearch()` si existe como función, replicando el
+      patrón ya usado para RRHH (`_debouncedRrhhSearch`, definido en `hr.js:19-22`). Pero
+      `archive.js` nunca definía `_debouncedArchivoSearch`: el `typeof === "function"` fallaba
+      en silencio y caía en `triggerArchivoSearch()` directo en cada tecla — sin debounce, una
+      petición HTTP por carácter tecleado, mientras RRHH sí espera 420 ms. Es exactamente la
+      clase de divergencia entre archivos gemelos que pedía revisar (mismo comentario "debounce
+      420ms en input" en `app.js` para ambos buscadores, pero solo uno lo cumplía). Arreglado
+      añadiendo en `archive.js` el mismo cierre `_debouncedArchivoSearch` que ya existe en
+      `hr.js`, sin tocar `app.js` (no hacía falta) ni el contrato de `triggerArchivoSearch()`.
+      Verificado: `node --check app/static/archive.js`, `python -m pytest
+      app/tests/test_static_assets.py app/tests/test_static_analysis.py -q` (336 passed) y
+      `python -m pytest app/tests -q` (859 passed, sin cambios respecto a la línea base).
+
+- **Falso positivo descartado, documentado para quien audite ids/JS-HTML en el futuro**:
+  `app/static/admin-edit.js:444` hace `getElementById("papelera-body-empleados")`, que no existe
+  en `admin_archive.html` — pero sí en `admin_hr.html:562`. No es un bug: `admin-edit.js` se
+  carga en ambas páginas admin y la función `_loadPapeleraEmpleados()` tiene guarda `if (!body)
+  return;`, así que en `admin_archive.html` simplemente no hace nada. Comprobado con `comm` entre
+  los `getElementById(...)` de `admin-edit.js`/`admin-edit-hr.js` contra los `id="..."` de
+  `admin_archive.html`/`admin_hr.html`: sin más discrepancias en esos cuatro archivos.
+
+- **Pendiente para otra tanda, no tocado por bajo ser un cambio más amplio**: `archive.js` usa
+  `AbortController` para cancelar peticiones de búsqueda en vuelo (además del número de secuencia
+  `_archivoSearchSeq`) y pone `aria-busy="true"` en `#list_archivo` mientras carga; `hr.js` sólo
+  usa el número de secuencia (`_rrhhSearchSeq`) para descartar respuestas obsoletas, sin abortar
+  la petición HTTP en curso ni marcar `aria-busy` en `#list_rrhh`. Funcionalmente RRHH no muestra
+  datos obsoletos (el `mySeq !== _rrhhSearchSeq` lo evita), así que no es un bug visible, pero es
+  una mejora que sí recibió `archive.js` y no `hr.js` (menos tráfico de red cancelado, mejor
+  semántica ARIA para lectores de pantalla durante la carga). Cambio pequeño y de bajo riesgo en
+  sí mismo, pero toca un archivo grande (`hr.js`, 850+ líneas) con lógica de dossier compleja
+  alrededor — lo dejo para quien tenga ese archivo en su carril declarado, con instrucción
+  concreta: añadir `_rrhhAbortController` (mismo patrón que `_archivoAbortController` en
+  `archive.js` líneas 6, 70-72, 94) y `listEl.setAttribute("aria-busy","true")` /
+  `removeAttribute` alrededor de `triggerRrhhSearch()`, igual que `archive.js` líneas 76-77 y 125.
+
+- **Revisión de convenciones entre `docs.py`/`hr.py`, `admin_archive.html`/`admin_hr.html`**: no
+  se encontraron discrepancias de bajo riesgo y corregibles sueltas — los nombres de función,
+  patrón de `log_event` y manejo de errores ya son equivalentes entre los pares revisados (la
+  tabla de pestañas agrupadas, `test_admin_panels.py`, y las guardas de tokens/selectores de tema
+  ya vigilan la mayoría de las divergencias estructurales de plantilla). No amplié
+  `test_visual.py` en este carril por presupuesto de sesión — dejo la idea del test de búsqueda
+  con estado de carga simulado (sección "verificación end-to-end real" del encargo) para una
+  vuelta futura si hace falta cobertura adicional ahí.

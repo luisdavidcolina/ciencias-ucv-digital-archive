@@ -6,6 +6,14 @@ let _archivoSearchSeq = 0;
 let _archivoAbortController = null;
 let _archivoModalTrigger = null;
 
+// app.js llama a esta función (mismo patrón que _debouncedRrhhSearch en
+// hr.js) para el input de búsqueda; sin ella el guard `typeof === "function"`
+// caía en triggerArchivoSearch() directo y cada tecla disparaba una petición.
+const _debouncedArchivoSearch = (() => {
+  let timer;
+  return () => { clearTimeout(timer); timer = setTimeout(triggerArchivoSearch, 420); };
+})();
+
 function _pluralArchivo(n, singular, pluralWord) {
   return `${n} ${n === 1 ? singular : pluralWord}`;
 }
