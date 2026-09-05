@@ -66,7 +66,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | A3-buscador-rrhh (hr.js) | agente-a3a-buscador-rrhh-js | 2026-09-04 | terminado (interrumpido por corte de sesion, retomado por el orquestador: comiteado tal cual quedo, ver ab3be26) | ab3be26 |
 | A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | terminado | db8679e |
-| PASS2-admin-edit | agente-pass2-admin-edit | 2026-09-04 | en curso | |
+| PASS2-admin-edit | agente-pass2-admin-edit | 2026-09-04 | terminado (OA-046, OR-037, OR-147, OR-219; resto verificado ya resuelto o requiere `[CHOCA]`, ver _BUZON.md) | |
 | PASS2-docs-hr-backend | agente-pass2-docs-hr-backend | 2026-09-04 | en curso | |
 | PASS2-archive-depth | agente-pass2-archive-depth | 2026-09-04 | en curso | |
 | PASS2-engineering | agente-pass2-engineering | 2026-09-04 | en curso | |

@@ -1,12 +1,41 @@
 
 // --- EDITAR / ELIMINAR EMPLEADO (RRHH) ---
-async function openEditEmpleadoModal(empId) {
-  let rec = state.adminTable.results.find(r => r.empleado_id == empId) || { empleado_id: empId };
 
-  // Fetch datos frescos del servidor
+// OR-219: se recuerda qué elemento abrió el modal para devolverle el foco al cerrar,
+// igual que `admin-edit.js` ya hace para `editArchivoModal`.
+let _editEmpOpener = null;
+
+(function _wireEditEmpModalFocus() {
+  const wire = () => {
+    const modalEl = document.getElementById("editEmpleadoModal");
+    if (!modalEl) return;
+    modalEl.addEventListener("hidden.bs.modal", () => {
+      if (_editEmpOpener && document.body.contains(_editEmpOpener)) {
+        _editEmpOpener.focus();
+      }
+      _editEmpOpener = null;
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wire);
+  } else {
+    wire();
+  }
+})();
+
+async function openEditEmpleadoModal(empId) {
+  _editEmpOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  // OR-147: la fila de la tabla no trae fecha_nacimiento/sexo/foto_url (no se listan
+  // en el monitor). Si el fetch fresco falla y se abre igual con esos huecos, guardar
+  // sin tocarlos los pone en null y borra datos que sí existían en el servidor.
+  let rec;
   try {
-    rec = { ...rec, ...await apiFetchJSON(`${API_BASE}/api/admin/empleado/${empId}`) };
-  } catch {}
+    rec = await apiFetchJSON(`${API_BASE}/api/admin/empleado/${empId}`);
+  } catch {
+    showToast("No se pudo cargar el expediente del empleado. Reintente.", "error");
+    return;
+  }
 
   document.getElementById("edit-emp-id").value          = rec.empleado_id || rec.id || "";
   document.getElementById("edit-emp-nombres").value     = rec.nombres || "";
@@ -229,7 +258,9 @@ async function _adminDeleteCargo(empId, histId) {
   const ok = await confirmModal("Eliminar entrada", "¿Eliminar esta entrada del historial de cargos?", "Sí, eliminar", "btn-danger");
   if (!ok) return;
   try {
-    await apiFetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}`, { method: "DELETE" });
+    // OR-037: sin `requester` el backend registra el borrado a nombre de "sistema" y
+    // la auditoría no puede decir quién tocó el historial laboral de la persona.
+    await apiFetch(`${API_BASE}/api/rrhh/empleado/${empId}/historial_cargos/${histId}?requester=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });
     showToast("Entrada eliminada.", "success");
     await _adminLoadHistorial();
   } catch (e) { showToast(e.message || "Error al eliminar.", "error"); }

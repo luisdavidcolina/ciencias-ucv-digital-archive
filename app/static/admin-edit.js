@@ -429,7 +429,7 @@ async function _loadPapeleraDocumentos(modulo, suf) {
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${JSON.stringify(modulo)},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)},${JSON.stringify(r.titulo || "")},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
@@ -496,9 +496,27 @@ async function _restaurarDoc(id, modulo, btnEl) {
   } catch { showToast("Error al restaurar.", "error"); }
 }
 
-async function _purgarDoc(id, modulo, btnEl) {
-  const ok = await confirmModal("Eliminar permanentemente", "Esta acción es irreversible. ¿Continuar?", "Sí, eliminar", "btn-danger");
+// OA-046: purgar es irreversible y estaba a un solo clic de distancia del botón de
+// restaurar, con el mismo texto genérico que cualquier otra confirmación. Se exige
+// escribir el título, igual que OR-176 ya exige la cédula al purgar un empleado.
+async function _purgarDoc(id, modulo, titulo, btnEl) {
+  const ok = await confirmModal(
+    "Eliminar documento permanentemente",
+    "Esta acción es irreversible: se eliminarán el archivo digital, todas sus versiones y sus palabras clave asociadas. ¿Continuar?",
+    "Sí, eliminar", "btn-danger"
+  );
   if (!ok) return;
+  if (titulo) {
+    const typed = await promptModal(
+      "Confirmar eliminación",
+      `Para confirmar, escriba el título del documento (${titulo}):`
+    );
+    if (typed === null) return;
+    if (typed.trim() !== String(titulo).trim()) {
+      showToast("El título no coincide. No se eliminó nada.", "warning");
+      return;
+    }
+  }
   const suf = modulo === "Archivo" ? "archivo" : "rrhh";
   try {
     await apiFetch(`${API_BASE}/api/admin/papelera/${id}/purgar?modulo=${encodeURIComponent(modulo)}&usuario=${encodeURIComponent(state.user?.username || "")}`, { method: "DELETE" });

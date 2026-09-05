@@ -3160,3 +3160,62 @@ una base nueva esperando el estado *actual* y no el original.
   histórico `H1a-migraciones`; yo aviso aquí pero no reabro ese carril.
 
 **quién lo pide**: agente-pass2-models-schema (PASS2-models-schema)
+
+## Segundo pase de `admin-edit.js` / `admin-edit-hr.js` (PASS2-admin-edit)
+
+Revisé ticket por ticket todas las menciones a estos dos archivos en
+`backoffice-archivo.md` (OA-) y `backoffice-rrhh.md` (OR-). La mayoría de lo que
+tocaba sólo estos dos JS ya estaba resuelto por tandas anteriores (B8/B9-admin-edit-*,
+SWEEP*): OA-019, OA-025 (parcial, ver abajo), OA-026, OA-027, OA-137 (parcial),
+OA-138 (parcial), OA-140, OA-173, OA-182, OA-190, OA-191, OA-194, OR-005, OR-006 ya
+estaban aplicados en el código actual — sólo verificados, sin tocar nada.
+
+Resuelto en esta pasada (sólo JS, sin backend):
+- **OA-046** (`admin-edit.js`) · purgar un documento de la papelera pedía un solo clic
+  de confirmación genérica pese a ser irreversible, a seis píxeles del botón de
+  restaurar. Ahora `_purgarDoc` exige escribir el título del documento para confirmar
+  (mismo patrón que `_purgarEmpleado` ya usaba para OR-176) y el diálogo dice qué se
+  destruye (archivo digital, versiones, palabras clave).
+- **OR-037** (`admin-edit-hr.js`) · `_adminDeleteCargo` no mandaba `requester`, así
+  que `hr_alerts.py` registraba siempre el borrado del historial de cargos a nombre
+  de "sistema" — sin poder saber quién tocó la carrera de un profesor. El endpoint ya
+  acepta `requester` por query, así que ahora se envía `state.user.username`.
+- **OR-147** (`admin-edit-hr.js`) · si el fetch fresco de `openEditEmpleadoModal`
+  fallaba, el modal se abría igual con los datos de la fila de la tabla (que no trae
+  `fecha_nacimiento`/`sexo`/`foto_url`); guardar sin tocarlos escribía `null` y
+  borraba datos reales. Ahora si el fetch falla se muestra un toast de error y el
+  modal no se abre.
+- **OR-219** (`admin-edit-hr.js`) · `editEmpleadoModal` no devolvía el foco a quien lo
+  abrió al cerrarlo (WCAG 2.4.3), a diferencia de `editArchivoModal` que ya lo hacía
+  desde OA-173. Añadido el mismo patrón (`_editEmpOpener` + `hidden.bs.modal`).
+
+Pendiente, requiere coordinar con otro carril (no tocado, para no arriesgar un
+archivo `[CHOCA]` de otro agente en curso):
+- **OA-133/OR-011** (vaciar papelera / purgar en lote) · exige checkboxes y un botón
+  "Vaciar papelera" en `admin_archive.html`/`admin_hr.html` (fuera de mi zona) y
+  lo ideal es un endpoint de purga por lote en `trash.py` (evita N peticiones); hoy
+  sólo hay purga fila a fila. Esfuerzo M, necesita HTML + backend a la vez.
+- **OA-134** (buscar/filtrar la papelera) · control de búsqueda vive en
+  `admin_archive.html`, backend en `trash.py`; `admin-edit.js` sólo pintaría los
+  resultados si el filtro llegara ya resuelto.
+- **OA-025/OR-148/OR-284** (control de concurrencia optimista con `updated_at`) ·
+  el `PUT` de documento/empleado no envía ni comprueba `updated_at`. El dato ya
+  viaja en el `GET` de cada uno; falta que `docs.py` (`[CHOCA]`) compruebe el
+  `WHERE updated_at = %s` y devuelva 409. Sin ese lado del servidor, mandar el campo
+  desde el cliente no sirve de nada — lo dejo documentado, no a medias.
+- **OR-044** (el actor de las acciones de RRHH lo declara el cliente en todo el
+  módulo) · OR-037 ya se resolvió del lado del cliente (enviar `requester`), pero la
+  raíz sigue siendo que `hr_alerts.py`/`docs.py`/`trash.py` confían en ese valor en
+  vez de tomarlo de la sesión (`require_session`). Es OA-036 aplicado a RRHH;
+  requiere tocar esas tres rutas, todas `[CHOCA]`.
+- **OR-030** (estado "Fallecido" no seleccionable) · el `<select>` de
+  `openEditEmpleadoModal` (`admin-edit-hr.js:18-22`) sólo pinta
+  `state.choices.rrhh.estados_catalog`, que sale de estados ya existentes en la
+  base. Un catálogo cerrado con "Fallecido" incluido vive en `lookups.py`/`main.py`
+  (`[CHOCA]`) y en `app-core.js` (`getStatusColor`, también `[CHOCA]`); no hay nada
+  que ajustar sólo en `admin-edit-hr.js` sin ese catálogo.
+
+**Verificación**: `node --check` en los dos archivos, y `python -m pytest app/tests -q`
+→ 851 passed (mismo número que antes de esta pasada), sin regresiones.
+
+**quién lo pide**: agente-pass2-admin-edit (PASS2-admin-edit)
