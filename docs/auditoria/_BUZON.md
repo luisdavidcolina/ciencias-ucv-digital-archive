@@ -3747,3 +3747,39 @@ inventar clases que ningún HTML/JS consume todavía (regla de oro: no CSS fanta
 
 `python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios). `python -m
 pytest app/tests/test_visual.py -q`: ver resultado abajo/en `_RESERVAS.md`.
+
+## Segunda reverificación de las mismas entradas de `app/static/styles.css` (2026-09-05)
+
+**quién lo hace**: agente-pass3b-styles-buzon (PASS3-styles-buzon-2). Misma zona que la
+pasada anterior: los 12 módulos reales bajo `app/static/styles/` (`styles.css` sigue siendo
+sólo el `@import`).
+
+Repetí la reverificación de la pasada anterior (arriba, 2026-09-04) contra el estado de hoy
+de los archivos de los que dependen estas entradas, por si algún carril PASS2/PASS3 de las
+últimas horas los hubiera movido:
+
+- `OA-201`/`OR-234`/`OR-077`/`OA-210`/`OR-280` — releí `app/static/admin-charts.js` completo:
+  sigue sin marcado nuevo (`grep` de `ds-skeleton`/`exportar`/`export-btn` sin resultados,
+  aparte de la card `.ds-kpi-mini` ya existente). Sigue bloqueado.
+- `OR-241` (tarjetas apiladas en móvil, monitor RRHH) — `app/static/admin_hr.html` sigue
+  usando `<table class="table table-sm table-hover mb-0">` en las cuatro tablas de Partes,
+  sin `data-label` ni marcado de tarjeta. Sigue siendo cambio de HTML+CSS a la vez, HTML
+  fuera de mi carril (dueño: A4-rrhh-backend/B2-admin-rrhh-html, no tocado en ese sentido).
+- `L14-estilos` (insignia única) — sin consumidor nuevo (`grep` de `ds-badge`/
+  `ds-item-kw-badge`/`ds-status-badge` en JS/HTML: 0 resultados). Sigue sin decisión de
+  componente tomada.
+- `OA-190`/`OA-191` — confirmado que ya estaban `[x]` (línea ~516 de este documento,
+  resuelto y notado en la fila `SWEEP2-admin-html`/similar): las clases
+  `.is-dragover`/`.is-uploading`/`.is-ok`/`.is-error`/`.ds-edit-preview-frame`/
+  `.ds-row-removing` ya existen en `app/static/styles/paneles-admin.css` (líneas 391-463) y
+  `admin-edit.js` ya las consume. No es un pendiente sin marcar activo.
+- Resto de entradas (`SI-184`/`SI-201`/`SI-202`, `SD-228`) — mismas dependencias externas
+  (`app-shell.js`/`app-theme.js` sin cambios relacionados, `IN-203` de infraestructura sin
+  resolver) que documentó la pasada anterior.
+
+**Conclusión**: igual que la pasada de ayer, 0 entradas nuevas pasaron a accionable. No hay
+nada seguro que escribir en `app/static/styles/*.css` sin inventar clases fantasma. No toqué
+ningún archivo de mi zona.
+
+`python -m pytest app/tests -q`: 859 passed (antes y después, sin cambios).
+`python -m pytest app/tests/test_visual.py -q`: 54 passed (antes y después, sin cambios).

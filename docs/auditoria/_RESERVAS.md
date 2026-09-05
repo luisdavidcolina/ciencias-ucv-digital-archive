@@ -111,7 +111,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | PASS3-rrhh-backend-untouched | agente-pass3-rrhh-backend | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado y comiteado por el orquestador tras verificar sintaxis y pytest: OR-021/022/023, BR-063/064/065/067/068/069, OR-013/014/037/038/044, OA-006/007, OA-042) | 54237d8 |
 | PASS3-catalog-retention-imports | agente-pass3-catalog-retention-imports | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado por el orquestador; imports.py/helpers.py sin cambios en lo rescatado) | 79472a6 |
 | PASS3-admin-js-untouched | agente-pass3-admin-js-untouched | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado por el orquestador: admin-ui.js y admin-users.js; admin.js/admin-submit.js/admin-stats.js/admin-categories.js sin cambios en lo rescatado — relanzar si hace falta profundizar) | 05e812b |
-| PASS3-styles-buzon-2 | agente-pass3b-styles-buzon | 2026-09-05 | en curso | |
+| PASS3-styles-buzon-2 | agente-pass3b-styles-buzon | 2026-09-05 | terminado (sin cambios de código: reverificadas las mismas 11 entradas sin marcar de `app/static/styles.css`, 0 pasaron a accionable — ver nota en `_BUZON.md`) | |
 | PASS3-admin-html-depth-2 | agente-pass3b-admin-html-depth | 2026-09-05 | en curso | |
 | PASS3-admin-js-resto | agente-pass3-admin-js-resto | 2026-09-05 | en curso | |
 | PASS3-login-scanner-js | agente-pass3-login-scanner-js | 2026-09-04 | terminado (SI-175 corregido — id de selector muerto; SI-177/DG-162 parcial — accesibilidad de teclado; login.js sin cambios, ya resuelto por C9-auth; resto documentado en _BUZON.md) | b68a951 |
