@@ -149,10 +149,10 @@ para no repetir la confusión.
 | VI-styles-oscuro-restante | agente-vi-styles-oscuro | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador) | e28fa8e |
 | VI-focus-touch | agente-vi-focus-touch | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador: VI-044/VI-045) | 9de46f8 |
 | VI-nombres-consistentes | agente-vi-nombres | 2026-09-05 | terminado (interrumpido por corte de red, rescatado por el orquestador: VI-050) | eb33cda |
-| VI-archive-hr-cleanup2 | agente-vi-archive-hr-cleanup2 | 2026-09-05 | en curso | |
-| VI-admin-forms | agente-vi-admin-forms | 2026-09-05 | en curso | |
-| VI-admin-js-misc2 | agente-vi-admin-js-misc2 | 2026-09-05 | en curso | |
-| VI-login | agente-vi-login | 2026-09-05 | en curso | |
-| VI-compartido-ayuda | agente-vi-compartido-ayuda | 2026-09-05 | en curso | |
-| VI-shell-integration | agente-vi-shell-integration | 2026-09-05 | en curso | |
-| VI-styles-final | agente-vi-styles-final | 2026-09-05 | en curso | |
+| VI-archive-hr-cleanup2 | agente-vi-archive-hr-cleanup2 | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 2f48119 |
+| VI-admin-forms | agente-vi-admin-forms | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 521c740 |
+| VI-admin-js-misc2 | agente-vi-admin-js-misc2 | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 52491ef |
+| VI-login | agente-vi-login | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 1c76f19 |
+| VI-compartido-ayuda | agente-vi-compartido-ayuda | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 273000b |
+| VI-shell-integration | agente-vi-shell-integration | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | 10ea006 |
+| VI-styles-final | agente-vi-styles-final | 2026-09-05 | terminado (interrumpido por corte de internet, rescatado y comiteado por el orquestador tras verificar sintaxis, pytest y test_visual.py) | e76437a |
