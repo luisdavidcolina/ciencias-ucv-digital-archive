@@ -160,7 +160,11 @@
             <h2 class="ds-results-title">Resultados de Búsqueda</h2>
             <span id="count-archivo-results" class="ds-pagination-info" role="status" aria-live="polite">0 Registros</span>
           </div>
-          <div id="list_archivo" role="list"></div>
+          <!-- BA-072: `role="list"` se aplica/retira desde archive.js según el
+               contenido real — el esqueleto de carga y el estado vacío no son
+               `listitem`, y prometer esa estructura mientras están presentes
+               incumple lo que ya documenta CLAUDE.md sobre esta violación. -->
+          <div id="list_archivo"></div>
           <div id="archivo-pagination"></div>
         </div>
       </div>

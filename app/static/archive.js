@@ -50,6 +50,9 @@ function _archivoMotionBehavior() {
 function showArchivoSkeleton() {
   const container = document.getElementById("list_archivo");
   if (container) {
+    // BA-072: el esqueleto no son `listitem`; sin quitar el rol, un lector de
+    // pantalla oiría "lista" para un contenido que no lo es.
+    container.removeAttribute("role");
     const count = Math.min(state.archivo.perPage || 10, 12);
     container.innerHTML = Array.from({ length: count }, () => `
       <div class="ds-item-card ds-skeleton-card" aria-hidden="true">
@@ -82,6 +85,7 @@ function _renderArchivoFacetsSkeleton() {
 function _renderArchivoError(message) {
   const container = document.getElementById("list_archivo");
   if (!container) return;
+  container.removeAttribute("role"); // BA-072: el aviso de error no es una lista
   container.innerHTML = `
     <div class="alert alert-danger text-center p-4">
       <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
@@ -268,6 +272,9 @@ function renderArchivoList() {
   }
 
   if (results.length === 0) {
+    // BA-072: el aviso de "sin resultados" es una alerta, no un elemento de
+    // lista; el rol se retira mientras esté presente.
+    container.removeAttribute("role");
     const emptyMsg = hasFilter
       ? "No se encontraron documentos con los filtros aplicados."
       : "El archivo no contiene documentos publicados que cumplan estos criterios.";
@@ -279,6 +286,10 @@ function renderArchivoList() {
       </div>`;
     return;
   }
+
+  // BA-072: sólo aquí el contenido son de verdad tarjetas equivalentes a
+  // elementos de lista, así que sólo aquí se declara `role="list"`.
+  container.setAttribute("role", "list");
 
   const searchTerms = (state.archivo.search || "").trim().split(/\s+/).filter(t => t.length > 1);
 
@@ -403,6 +414,11 @@ function openDocModalWithRecord(doc) {
   closeDocViewer();
   const fileUrl = _secureFileUrl(doc.file_url || "");
   const viewBtn = document.getElementById("btn-modal-view");
+  // BA-067: "Ver" sólo existe como botón cuando hay una acción de archivo real
+  // que ejecutar (abrir el visor). La ubicación física ya se muestra como fila
+  // de metadata ("Ubicación Física") en la tabla de arriba: repetirla aquí
+  // como un botón que sólo lanza un `toast` es un quinto significado bajo el
+  // mismo control, no una acción. Sin fichero, el botón se oculta.
   if (fileUrl) {
     const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);
     const isPdf = /\.pdf$/i.test(fileUrl);
@@ -410,12 +426,10 @@ function openDocModalWithRecord(doc) {
     const viewText = isImg ? "Ver Imagen" : isPdf ? "Ver PDF" : "Abrir Archivo";
     viewBtn.innerHTML = `<i class="${viewIcon} mr-1"></i>${viewText}`;
     viewBtn.onclick = () => toggleDocViewer(fileUrl);
-  } else if ((doc.ubicacion || "").toLowerCase().includes("digitalizado")) {
-    viewBtn.innerHTML = '<i class="fas fa-search mr-1"></i>Digitalizado';
-    viewBtn.onclick = () => showToast("Documento digitalizado sin URL asignada. Contacte al administrador.", "warning");
+    viewBtn.classList.remove("d-none");
   } else {
-    viewBtn.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i>Ubicación';
-    viewBtn.onclick = () => showToast(`Ubicación física: ${doc.ubicacion || "No registrada"}`, "info");
+    viewBtn.onclick = null;
+    viewBtn.classList.add("d-none");
   }
   const editBtn = document.getElementById("btn-modal-edit");
   // VI-061: el botón traía sólo el lápiz (aria-label sí, texto visible no) y

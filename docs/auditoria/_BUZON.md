@@ -4336,3 +4336,84 @@ módulo Archivo, con un viewport distinto en cada corrida — parece flaky, no l
 porque no es `hr.js`). `node --check app/static/hr.js`: sin errores.
 
 **quién resuelve**: agente-br-hr-js-3 (BR-hr-js-tercer-pase), commit `d1676ee`
+
+## BA-archive-js-tercer-pase
+
+Tercer pase dirigido sobre `app/static/archive.js`/`archive.html` (zona exclusiva),
+tickets BA-065 a BA-100 de `buscador-archivo.md`, tras A1-buscador-archivo,
+PASS2-archive-depth, VI-archive-hr-cleanup2 y VI-archive-hr-datos.
+
+**Corregidos de verdad:**
+
+- `BA-067`: el botón "Ver" del modal tenía cinco comportamientos distintos
+  (Ver PDF / Ver Imagen / Abrir Archivo / un aviso de "Digitalizado" / un
+  `toast` con la ubicación física). La ubicación física ya se muestra como
+  fila de metadata ("Ubicación Física") en la propia tabla del modal, así que
+  repetirla como botón que sólo lanza un `toast` no era una acción, era un
+  quinto significado bajo el mismo control. Ahora el botón sólo aparece
+  cuando hay `file_url` real (acción de archivo genuina); sin fichero se
+  oculta con `d-none` y `onclick=null`.
+- `BA-072`: `role="list"` estaba fijo en el `<div id="list_archivo">` del
+  HTML, pero el esqueleto de carga, el estado vacío (`alert`) y el estado de
+  error se siguen inyectando dentro — hijos que no son `listitem`, la
+  violación exacta que `CLAUDE.md` documenta como ya cometida una vez. Se
+  quitó el `role="list"` estático del HTML; ahora `archive.js` lo añade con
+  `setAttribute` sólo en `renderArchivoList` cuando de verdad hay tarjetas, y
+  lo retira con `removeAttribute` en `showArchivoSkeleton`, `_renderArchivoError`
+  y en la rama de "sin resultados" de `renderArchivoList`.
+
+**Verificados contra el código actual y ya resueltos por pasadas anteriores,
+sin tocar de nuevo:** BA-065 (recorte del resumen: ya no queda
+`-webkit-line-clamp` en línea, un solo origen en `styles.css`), BA-066
+(el título ya es lo primero y con más peso en la tarjeta; la insignia de
+tipología quedó como metadato secundario debajo), BA-068 (la miniatura del
+modal arranca vacía, sin "N/A"), BA-070 (facetas ya son `<button>` con
+`data-facet-type`/`data-facet-year` y `aria-pressed`, con delegación de
+eventos), BA-071 (el título de la tarjeta ya es un `<button>` enfocable;
+el `onclick` del contenedor quedó como atajo de ratón), BA-073 (el modal ya
+no lleva `data-backdrop="static" data-keyboard="false"`), BA-074 (
+`aria-labelledby="modal-doc-title" aria-modal="true"` ya presentes), BA-075
+(`title="Vista previa del documento"` ya en el `<iframe>`), BA-076 (el foco
+ya se guarda en `_archivoModalTrigger` y se restaura en `hidden.bs.modal`),
+BA-077 (`aria-busy` y "Buscando…" ya en `triggerArchivoSearch`), BA-078 (el
+campo de búsqueda ya precede a los filtros en el DOM, con `order-md-*` para
+el orden visual), BA-079 (el botón `×` del rango ya lleva
+`aria-label="Volver a Todo"`), BA-080 (los botones de la tarjeta ya usan
+`aria-label` con el título del documento), BA-081/BA-082 (paginación ya con
+`aria-label="Página N"`, `aria-current="page"` y `disabled`/`aria-disabled`
+en el `<button>`, no en el `<li>`), BA-086 (`<label class="sr-only">` +
+placeholder descriptivo ya en el campo de búsqueda), BA-089 (ya no existe
+`#info-archivo-pagination`; una sola región `aria-live` combina resultado y
+paginación), BA-092 (`_archivoMotionBehavior()` ya respeta
+`prefers-reduced-motion` y `ds-no-anim` en el scroll del visor y de
+paginación), BA-093 (el acordeón ya lleva `aria-expanded`/`aria-controls`),
+BA-094 (los chips de fecha ya son `role="radiogroup"` con `role="radio"`
+`aria-checked`, resuelto por BA-app-choices).
+
+**Bug sin ficha propia buscado y no encontrado**: siguiendo el patrón que hoy
+encontró `agente-br-hr-js-3` en `hr.js` (función llamada pero nunca
+definida), se verificaron una por una todas las funciones globales que
+`archive.js`/`archive.html` invocan sin definir localmente
+(`_secureFileUrl`, `escHtml`, `highlightTerms`, `formatISOToSpanish`,
+`showToast`, `plural`, `applyDatePreset`, `tsInstances`, `state`,
+`API_BASE`) contra `app-core.js`/`app.js`/`app-choices.js`: todas existen.
+No se encontró ningún caso equivalente en esta zona.
+
+**Pendientes por depender de `styles.css` u otro archivo `[CHOCA]`, sin
+tocar** (nada de esto es accionable sólo con JS/HTML): BA-083 (foco visible
+tokenizado), BA-084 (`:active`/`@media(hover:hover)`), BA-085 (contraste del
+`::placeholder`), BA-087 (`::selection` tokenizado), BA-088 (`:empty{display:none}`
+para `#archivo-pagination`/`#archivo-facets-panel`), BA-090 (`transition: all`
+→ lista explícita de propiedades), BA-091 (retardo escalonado limitado a doce
+`nth-child`, necesita variable CSS calculada), BA-095 (el `<input>` de rango
+sigue `readonly`; la alternativa real —permitir escritura o dos `<input
+type="date">` nativos— vive en la inicialización de flatpickr de
+`app-choices.js`, fuera de zona), BA-100 (en 390px la columna de filtros
+antes de los resultados necesita un patrón de cajón/`<details>` colapsado en
+`styles.css`, más contador de filtros activos).
+
+`python -m pytest app/tests -q`: 867 pasan antes de mi turno y también
+después de los dos cambios. `node --check app/static/archive.js`: sin
+errores.
+
+**quién resuelve**: agente-ba-archive-js-3 (BA-archive-js-tercer-pase)
