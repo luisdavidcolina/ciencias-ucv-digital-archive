@@ -446,10 +446,14 @@ function _renderArchivoFacets(facets) {
 
   const typeRows = byType.map(f => {
     const active = selectedTypes.includes(f.name);
+    // BA-016: el backend etiqueta la faceta sin tipo con el centinela
+    // "__sin_tipo__" (no con el texto "Sin tipo") para poder traducirla de
+    // vuelta a `tesauro_primario = ''`; aquí sólo se decide qué se muestra.
+    const label = f.name === "__sin_tipo__" ? "Sin tipo" : f.name;
     return `<button type="button" class="ds-facet-row w-100 d-flex justify-content-between align-items-center py-1 px-1${active ? " ds-facet-active" : ""}"
                  data-facet-type="${escHtml(f.name)}" aria-pressed="${active}"
                  style="font-size:0.78rem;border:none;background:transparent;text-align:left;">
-      <span class="text-truncate" style="max-width:140px;" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
+      <span class="text-truncate" style="max-width:140px;" title="${escHtml(label)}">${escHtml(label)}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
     </button>`;
   }).join("");

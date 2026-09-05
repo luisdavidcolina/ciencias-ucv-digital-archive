@@ -8,6 +8,91 @@ from utils import paginate
 
 router = APIRouter(prefix="/api/archivo", tags=["archivo"])
 
+# BA-016: valor centinela para la faceta "Sin tipo" — el catálogo de tipos es
+# texto libre y una cadena vacía no se puede pasar como opción seleccionable
+# en el `<select>` sin ambigüedad, así que se traduce a `tesauro_primario = ''`.
+SIN_TIPO_SENTINEL = "__sin_tipo__"
+
+
+def _build_common_conditions(req: "ArchivoSearchRequest", *, fts_fields: str = "full") -> tuple:
+    """Condiciones compartidas por la búsqueda principal y las facetas.
+
+    BA-161: esta lógica estaba escrita dos veces con variaciones sutiles (la
+    de facetas omitía `personas_relacionadas`/`tesauro_secundario` del FTS),
+    lo que ya había causado BA-015. `fts_fields="full"` usa las mismas columnas
+    que el índice GIN; `fts_fields="short"` es la variante reducida que ya
+    usaban las facetas y se conserva para no cambiar su comportamiento de
+    golpe fuera del alcance de este pase.
+    """
+    conditions: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
+    params: list = []
+
+    if req.search_term:
+        term = f"%{req.search_term}%"
+        has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+        if has_letters:
+            if fts_fields == "full":
+                tsv = (
+                    "coalesce(da.titulo,'') || ' ' ||"
+                    "coalesce(da.autor,'') || ' ' ||"
+                    "coalesce(da.abstract,'') || ' ' ||"
+                    "coalesce(da.tesauro_primario,'') || ' ' ||"
+                    "coalesce(da.tesauro_secundario,'') || ' ' ||"
+                    "coalesce(da.personas_relacionadas,'')"
+                )
+                conditions.append(
+                    f"(to_tsvector('spanish', {tsv}) @@ plainto_tsquery('spanish', %s)"
+                    " OR unaccent(da.titulo) ILIKE unaccent(%s)"
+                    " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+                    " OR unaccent(COALESCE(da.personas_relacionadas,'')) ILIKE unaccent(%s))"
+                )
+                params.extend([req.search_term, term, term, term])
+            else:
+                tsv = (
+                    "coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||"
+                    "coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'')"
+                )
+                conditions.append(
+                    f"(to_tsvector('spanish', {tsv}) @@ plainto_tsquery('spanish', %s)"
+                    " OR unaccent(da.titulo) ILIKE unaccent(%s)"
+                    " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
+                )
+                params.extend([req.search_term, term, term])
+        else:
+            conditions.append(
+                "(unaccent(da.titulo) ILIKE unaccent(%s)"
+                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
+                " OR unaccent(COALESCE(da.ubicacion,'')) ILIKE unaccent(%s))"
+            )
+            params.extend([term, term, term])
+
+    if req.tesauro_terms:
+        conditions.append(
+            """da.id_archivo IN (
+                SELECT ad2.id_archivo FROM public.archivo_descriptores ad2
+                JOIN public.descriptores_libres dl2 ON ad2.id_descriptor = dl2.id_descriptor
+                WHERE dl2.nombre = ANY(%s)
+                UNION
+                SELECT da3.id_archivo FROM public.datos_archivo da3
+                WHERE da3.tesauro_primario = ANY(%s) OR da3.tesauro_secundario = ANY(%s)
+            )"""
+        )
+        params.extend([req.tesauro_terms, req.tesauro_terms, req.tesauro_terms])
+
+    if req.date_start:
+        conditions.append("da.fecha_documento >= %s::date")
+        params.append(req.date_start)
+
+    if req.date_end:
+        conditions.append("da.fecha_documento <= %s::date")
+        params.append(req.date_end)
+
+    if getattr(req, "soporte", None) and req.soporte in ("Físico", "Digital", "Digitalizado"):
+        conditions.append("COALESCE(da.soporte,'Físico') = %s")
+        params.append(req.soporte)
+
+    return conditions, params
+
 
 # =============================================================================
 # DATAFRAME FETCHER
@@ -84,83 +169,64 @@ def search_archive(req: ArchivoSearchRequest):
     """
     page, per_page, offset = paginate(req.page, req.per_page, max_per_page=50)
 
-    conditions: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
-    params: list = []
-
-    if req.search_term:
-        term = f"%{req.search_term}%"
-        _has_letters = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
-        if _has_letters:
-            conditions.append(
-                "("
-                "  to_tsvector('spanish',"
-                "    coalesce(da.titulo,'') || ' ' ||"
-                "    coalesce(da.autor,'') || ' ' ||"
-                "    coalesce(da.abstract,'') || ' ' ||"
-                "    coalesce(da.tesauro_primario,'') || ' ' ||"
-                "    coalesce(da.tesauro_secundario,'') || ' ' ||"
-                "    coalesce(da.personas_relacionadas,'')"
-                "  ) @@ plainto_tsquery('spanish', %s)"
-                "  OR unaccent(da.titulo) ILIKE unaccent(%s)"
-                "  OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
-                "  OR unaccent(COALESCE(da.personas_relacionadas,'')) ILIKE unaccent(%s)"
-                ")"
-            )
-            params.extend([req.search_term, term, term, term])
-        else:
-            conditions.append(
-                "(unaccent(da.titulo) ILIKE unaccent(%s)"
-                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
-                " OR unaccent(COALESCE(da.ubicacion,'')) ILIKE unaccent(%s))"
-            )
-            params.extend([term, term, term])
+    conditions, params = _build_common_conditions(req, fts_fields="full")
 
     if req.doc_types:
-        conditions.append("da.tesauro_primario = ANY(%s)")
-        params.append(req.doc_types)
-
-    if req.tesauro_terms:
-        conditions.append(
-            """da.id_archivo IN (
-                SELECT ad2.id_archivo FROM public.archivo_descriptores ad2
-                JOIN public.descriptores_libres dl2 ON ad2.id_descriptor = dl2.id_descriptor
-                WHERE dl2.nombre = ANY(%s)
-                UNION
-                SELECT da3.id_archivo FROM public.datos_archivo da3
-                WHERE da3.tesauro_primario = ANY(%s) OR da3.tesauro_secundario = ANY(%s)
-            )"""
-        )
-        params.extend([req.tesauro_terms, req.tesauro_terms, req.tesauro_terms])
-
-    if req.date_start:
-        conditions.append("da.fecha_documento >= %s::date")
-        params.append(req.date_start)
-
-    if req.date_end:
-        conditions.append("da.fecha_documento <= %s::date")
-        params.append(req.date_end)
-
-    if getattr(req, "soporte", None) and req.soporte in ("Físico", "Digital", "Digitalizado"):
-        conditions.append("COALESCE(da.soporte,'Físico') = %s")
-        params.append(req.soporte)
+        # BA-016: "Sin tipo" viaja como valor centinela, no como la etiqueta
+        # visible, porque `tesauro_primario = ANY(['Sin tipo'])` no casaba con
+        # ninguna fila real y la faceta no filtraba nada.
+        real_types = [t for t in req.doc_types if t != SIN_TIPO_SENTINEL]
+        wants_sin_tipo = len(real_types) != len(req.doc_types)
+        type_conds = []
+        if real_types:
+            type_conds.append("da.tesauro_primario = ANY(%s)")
+            params.append(real_types)
+        if wants_sin_tipo:
+            type_conds.append("COALESCE(da.tesauro_primario,'') = ''")
+        if type_conds:
+            conditions.append("(" + " OR ".join(type_conds) + ")")
 
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
+    # BA-005: el orden elegido por el usuario se ignoraba en cuanto el
+    # término tenía letras. Ahora sólo se sustituye por relevancia cuando el
+    # usuario no ha elegido explícitamente otro criterio (el valor por
+    # defecto del `<select>` es "Alfabético (A-Z)"), o cuando pide
+    # "Relevancia" a propósito.
     sort_map = {
+        "Alfabético (A-Z)":      "da.titulo ASC",
+        "Alfabético (Z-A)":      "da.titulo DESC",
         "Más recientes primero": "da.fecha_documento DESC NULLS LAST",
         "Más antiguos primero":  "da.fecha_documento ASC NULLS LAST",
-        "Alfabético (Z-A)":      "da.titulo DESC",
+        "Relevancia":            "relevance DESC, da.titulo ASC",
     }
     base_order = sort_map.get(req.sort_mode, "da.titulo ASC")
 
-    _search_has_letters = req.search_term and bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+    _search_has_letters = bool(req.search_term) and bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+    _default_sort = req.sort_mode in (None, "", "Alfabético (A-Z)")
 
-    if _search_has_letters:
+    if req.sort_mode == "Relevancia" or (_search_has_letters and _default_sort):
         order = "relevance DESC, da.titulo ASC"
     else:
         order = base_order
 
-    _fts_param = req.search_term if _search_has_letters else ""
+    # BA-167: to_tsvector()/plainto_tsquery() se evaluaban por cada fila
+    # devuelta aunque no hubiese término de búsqueda, porque `order` no los
+    # usaba pero la columna se seguía calculando. Sin término, `relevance` es
+    # una constante y no cuesta nada.
+    if _search_has_letters:
+        relevance_sql = """ts_rank_cd(
+              to_tsvector('spanish',
+                coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||
+                coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'') || ' ' ||
+                coalesce(da.tesauro_secundario,'') || ' ' || coalesce(da.personas_relacionadas,'')
+              ),
+              plainto_tsquery('spanish', %s)
+            )"""
+        relevance_params = [req.search_term]
+    else:
+        relevance_sql = "0::real"
+        relevance_params = []
 
     sql = f"""
         SELECT
@@ -178,14 +244,7 @@ def search_archive(req: ArchivoSearchRequest):
             COALESCE(da.soporte, 'Físico')          AS soporte,
             da.numero_paginas,
             COALESCE(STRING_AGG(DISTINCT dl.nombre, '; ') FILTER (WHERE dl.nombre IS NOT NULL), '') AS descriptores_libres,
-            ts_rank_cd(
-              to_tsvector('spanish',
-                coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||
-                coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'') || ' ' ||
-                coalesce(da.tesauro_secundario,'') || ' ' || coalesce(da.personas_relacionadas,'')
-              ),
-              plainto_tsquery('spanish', %s)
-            ) AS relevance,
+            {relevance_sql} AS relevance,
             COUNT(*) OVER() AS total_count
         FROM public.datos_archivo da
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
@@ -197,7 +256,7 @@ def search_archive(req: ArchivoSearchRequest):
         ORDER BY {order}
         LIMIT %s OFFSET %s
     """
-    params = [_fts_param] + params
+    params = relevance_params + params
     params.extend([per_page, offset])
 
     rows = db_query(sql, params, fetch="all") or []
@@ -217,40 +276,16 @@ def search_archive(req: ArchivoSearchRequest):
         records.append(rec)
 
     # ── Facetas: conteos por tipo y año (sin filtro de tipo para mostrar todos) ──
-    # Reconstruye el WHERE sin el filtro de tipo para que los conteos sean correctos
-    # incluso cuando el usuario ya tiene un tipo seleccionado.
-    facet_conds: list = ["da.deleted_at IS NULL", "COALESCE(da.status, 'aprobado') = 'aprobado'"]
-    facet_params: list = []
-    if req.search_term:
-        _has_l = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
-        if _has_l:
-            facet_conds.append(
-                "(to_tsvector('spanish',"
-                "  coalesce(da.titulo,'') || ' ' || coalesce(da.autor,'') || ' ' ||"
-                "  coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'')"
-                " ) @@ plainto_tsquery('spanish', %s)"
-                " OR unaccent(da.titulo) ILIKE unaccent(%s)"
-                " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
-            )
-            facet_params.extend([req.search_term, f"%{req.search_term}%", f"%{req.search_term}%"])
-        else:
-            t = f"%{req.search_term}%"
-            facet_conds.append("(unaccent(da.titulo) ILIKE unaccent(%s) OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))")
-            facet_params.extend([t, t])
-    if req.date_start:
-        facet_conds.append("da.fecha_documento >= %s::date")
-        facet_params.append(req.date_start)
-    if req.date_end:
-        facet_conds.append("da.fecha_documento <= %s::date")
-        facet_params.append(req.date_end)
-    if getattr(req, "soporte", None) and req.soporte in ("Físico", "Digital", "Digitalizado"):
-        facet_conds.append("COALESCE(da.soporte,'Físico') = %s")
-        facet_params.append(req.soporte)
-
+    # BA-161: comparte `_build_common_conditions` con la búsqueda principal en
+    # vez de repetir la lógica de filtros con variaciones — la duplicación
+    # anterior ya había divergido (BA-015: el filtro de Palabras Clave no se
+    # aplicaba aquí, así que con una palabra clave activa los conteos
+    # describían un conjunto distinto al que se veía en pantalla).
+    facet_conds, facet_params = _build_common_conditions(req, fts_fields="short")
     facet_where = "WHERE " + " AND ".join(facet_conds)
 
     facet_type_rows = db_query(
-        f"""SELECT COALESCE(NULLIF(da.tesauro_primario,''),'Sin tipo') AS name, COUNT(*) AS cnt
+        f"""SELECT COALESCE(NULLIF(da.tesauro_primario,''),'{SIN_TIPO_SENTINEL}') AS name, COUNT(*) AS cnt
             FROM public.datos_archivo da {facet_where}
             GROUP BY da.tesauro_primario ORDER BY cnt DESC LIMIT 20""",
         facet_params or None, fetch="all"
@@ -278,12 +313,20 @@ def search_archive(req: ArchivoSearchRequest):
 
 @router.get("/documentos/buscar")
 def lookup_document_type(q: str = Query(..., description="Palabra clave a buscar")):
+    # BA-027: un solo carácter fuerza un escaneo completo de dos tablas en
+    # cada pulsación; con menos de 2 caracteres no vale la pena consultar.
+    if len(q.strip()) < 2:
+        return []
     rows = db_query(
         """
         SELECT DISTINCT val AS nombre_corto
         FROM (
             SELECT UNNEST(ARRAY[tesauro_primario, tesauro_secundario]) AS val
             FROM public.datos_archivo
+            -- BA-026: sin estos dos filtros se sugerían términos que sólo
+            -- existen en la papelera o en material sin aprobar; al elegirlos
+            -- la búsqueda devolvía siempre cero resultados.
+            WHERE deleted_at IS NULL AND COALESCE(status, 'aprobado') = 'aprobado'
             UNION
             SELECT nombre AS val
             FROM public.descriptores_libres
