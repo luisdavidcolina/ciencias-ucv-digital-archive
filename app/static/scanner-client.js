@@ -211,6 +211,7 @@
     clearInterval(_cameraInterval); _cameraInterval = null;
     clearTimeout(_cameraIdleTimer); _cameraIdleTimer = null;
     document.removeEventListener("visibilitychange", _onCameraVisibilityChange);
+    document.removeEventListener("keydown", _onCameraKeydown);
     if (_cameraStream) { _cameraStream.getTracks().forEach(t => t.stop()); _cameraStream = null; }
     _cameraVid = null;
     document.getElementById("ds-camera-overlay")?.remove();
@@ -220,6 +221,11 @@
   // SI-179: sin esto la detección corre a 4 fps indefinidamente aunque la
   // pestaña esté oculta o nadie lea nada en varios minutos.
   const CAMERA_IDLE_MS = 3 * 60 * 1000;
+
+  // SI-177: Escape cierra la superposición de cámara.
+  function _onCameraKeydown(e) {
+    if (e.key === "Escape") { _active = false; _stopCamera(); }
+  }
 
   function _onCameraVisibilityChange() {
     if (!_cameraStream) return;
@@ -239,6 +245,12 @@
     document.getElementById("ds-camera-overlay")?.remove();
     const ov = document.createElement("div");
     ov.id = "ds-camera-overlay";
+    // SI-177 (parcial): nombre y rol accesibles, y foco atrapable con teclado.
+    // El resto (rediseño visual con el sistema de diseño) queda para el carril
+    // que toque styles.css.
+    ov.setAttribute("role", "dialog");
+    ov.setAttribute("aria-label", "Lector de códigos por cámara");
+    ov.tabIndex = -1;
     Object.assign(ov.style, {
       position: "fixed", bottom: "70px", right: "16px", zIndex: "9990",
       background: "#000", borderRadius: "12px", overflow: "hidden",
@@ -252,6 +264,8 @@
 
     const closeBtn = document.createElement("button");
     closeBtn.innerHTML = "&times;";
+    closeBtn.type = "button";
+    closeBtn.setAttribute("aria-label", "Cerrar lector de cámara");
     Object.assign(closeBtn.style, {
       position: "absolute", top: "6px", right: "6px",
       background: "rgba(0,0,0,0.6)", color: "#fff", border: "none",
@@ -299,6 +313,11 @@
       ov.style.right = ov.style.bottom = "auto";
     });
     document.addEventListener("mouseup", () => { drag = false; });
+
+    // SI-177: cierre por teclado — Escape cierra la superposición desde
+    // cualquier punto donde esté el foco mientras esté abierta.
+    document.addEventListener("keydown", _onCameraKeydown);
+    ov.focus();
 
     // Scan loop
     _cameraVid = vid;
@@ -366,7 +385,10 @@
     }
 
     // 3. Barra de búsqueda del monitor
-    const bar = document.querySelector("#admin_search_input-archivo,#admin_search_input-rrhh");
+    // SI-175: los ids reales son admin_search-<sufijo> (ver admin_archive.html /
+    // admin_hr.html y admin-monitor.js); "admin_search_input-*" nunca existió y
+    // este camino no funcionaba nunca.
+    const bar = document.querySelector("#admin_search-archivo,#admin_search-rrhh");
     if (bar) {
       bar.value = code;
       bar.dispatchEvent(new Event("input", { bubbles: true }));
@@ -381,6 +403,13 @@
     const hasCamera = _hasDetector();
     const panel = document.createElement("div");
     panel.id = "ds-scn-cfg-panel";
+    // DG-162 (parcial): rol y nombre accesibles, cierre por Escape y foco
+    // inicial dentro del panel. El resto (patrón de diálogo completo con
+    // trampa de foco por Tab, y el rediseño visual) queda pendiente — ver
+    // nota SI-177/DG-161/DG-162 en digitalizacion-escaner.md.
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Configuración del escáner");
+    panel.tabIndex = -1;
     Object.assign(panel.style, {
       position: "fixed", top: "54px", right: "8px", zIndex: "9995",
       width: "300px", background: "#fff", border: "1px solid #d1dae6",
@@ -446,7 +475,16 @@
           panel.remove(); document.removeEventListener("click", _h);
         }
       });
+      document.addEventListener("keydown", function _k(e) {
+        if (!document.body.contains(panel)) { document.removeEventListener("keydown", _k); return; }
+        if (e.key === "Escape") {
+          panel.remove();
+          document.removeEventListener("keydown", _k);
+          document.getElementById("ds-scn-cfg-btn")?.focus();
+        }
+      });
     }, 100);
+    (urlInput || panel).focus();
   };
 
   window._scnSave = function () {

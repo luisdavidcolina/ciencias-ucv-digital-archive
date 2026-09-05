@@ -715,17 +715,29 @@ mío:
       reescritura es ya redundante — no es mi archivo, no la toco, pero queda anotado para quien
       limpie `admin.js`.
 
-- [ ] `OR-070` / `OR-188` · **archivo**: `app/static/admin_hr.html` · **carril dueño**:
-      B2-admin-rrhh-html / B3-admin-sistema-html
-      **quién lo pide**: agente-b4-admin-tabs (B4-admin-tabs)
-      **qué hace falta**: RRHH no tiene ninguna pantalla que liste jubilaciones próximas
-      (OR-070) ni una tabla de vencimientos desde la que invocar la disposición documental
-      (OR-188). Ya dejé `abrirDisposicion()`/`_formularioDisposicion()` en `admin.js`
-      genéricos y reutilizables (reciben `docId`/`titulo`, no dependen del módulo), así que en
-      cuanto exista el marcado de esa tabla en `admin_hr.html`, un botón «Disponer» igual al de
-      Archivo ya funciona sin tocar `admin.js` de nuevo. Hasta entonces el banner de
-      jubilaciones en RRHH sólo amplía a 5 nombres en vez de 3, sin prometer un enlace que hoy
-      no lleva a ninguna parte.
+- [ ] `OR-070` (revisado por agente-pass3-admin-html-depth, PASS3-admin-html-depth) ·
+      **archivo**: `app/static/admin_hr.html` (falta también `admin.js`, fuera de mi zona)
+      **qué hace falta**: RRHH sigue sin ninguna pantalla dedicada que liste jubilaciones
+      próximas — sólo el banner (`_loadAlertasBanner` en `admin.js`) y el KPI
+      `chart-total-jubproximas-rrhh`. Añadir esa pantalla exige las tres piezas que pide
+      "Admin Panels" en `CLAUDE.md` (`<li>` de pestaña, `<div>` de panel y su rama en
+      `loadAdminTab`) a la vez — sólo puedo aportar las dos de `admin_hr.html`, la tercera
+      es `admin.js` (`[CHOCA]` con otros carriles de hoy: PASS3-admin-js-untouched). No la
+      fabrico a medias porque dejaría un panel en blanco sin nadie que lo detecte
+      (`test_admin_panels.py` compara pestaña↔panel, no si el panel tiene contenido real).
+
+  `OR-188` (la tabla de vencimientos con botón «Disponer» en RRHH) **ya estaba resuelta del
+  lado HTML** desde `SWEEP3-html-js-resto` (comentario "OR-070/OR-188" en
+  `admin_hr.html:484-505`: card «Expedientes con Retención Vencida», thead de 8 columnas,
+  `<tbody id="vencimientos-table-body-rrhh">`, pie `vencimientos-summary-rrhh`) — no hacía
+  falta ningún cambio mío. Verifiqué el backend que consume (`GET
+  /api/admin/retencion/vencimientos`, `POST /api/admin/retencion/disponer/{id}` en
+  `app/routes/admin/retention.py`) y **sigue restringido a `datos_archivo`** (líneas 20-24 del
+  propio archivo lo documentan: "las consultas sólo tocan datos_archivo... restringidas a
+  Archivo"), así que hoy esa tabla en RRHH se queda cargando vencimientos vacíos/ajenos en vez
+  de expedientes reales — un pendiente de `retention.py`, no de `admin_hr.html`. Marco sólo el
+  lado HTML como cerrado; el ítem de backend queda documentado aquí para quien tenga ese
+  archivo en su carril.
 
 - [x] `OA-053` (parte HTML) · confirmado resuelto (agente-sweep3-html-js-resto,
       SWEEP3-html-js-resto): `admin_archive.html` ya usa `vencimientos-table-body-archivo`/
@@ -3621,3 +3633,67 @@ confirmado en su propia nota de este buzón, ya resuelto por él; no relacionado
 `node --check app/static/hr.js`: sin errores.
 
 **quién resuelve**: agente-pass2-hr-frontend-depth (PASS2-hr-frontend-depth)
+
+## PASS3-login-scanner-js — pase dedicado a `login.js` y `app/static/scanner-client.js`
+
+**quién lo pide**: agente-pass3-login-scanner-js (PASS3-login-scanner-js)
+
+**`login.js`**: revisado ticket por ticket contra el código actual (SI-032 a SI-035,
+SI-038, SI-049 a SI-054). Todo ya estaba resuelto por `agente-c9-auth` (commit `de9f6cf`)
+y confirmado sin cambios por `agente-sweep3-html-js-resto`: `<form>` real con
+`autocomplete`, bloqueo de 30 s persistido en `localStorage` (sobrevive a recargar),
+`role="alert"`/`aria-live` en el error, `aria-pressed`/`aria-label` dinámico en el
+botón de mostrar contraseña. No hice cambios en este archivo — no había nada
+accionable que no estuviera ya cerrado.
+
+**`app/static/scanner-client.js`**: la mayoría de `DG-001` a `DG-023`, `SI-171`
+a `SI-179` ya los resolvió `agente-e2-escaner-cliente` (commit `56e7be0`): token
+de emparejamiento, backoff con techo, latido/silencio (`STALE_MS`), distinción de
+causa por código de cierre, detección de contenido mixto antes de conectar,
+asignación por propiedad del valor guardado, y pausa de la cámara por
+`visibilitychange` + tiempo de inactividad. Encontré y arreglé lo que quedaba
+accionable en solitario:
+
+- **Bug real, no solo cosmético (`SI-175`)**: el tercer camino de enrutado del
+  código leído (barra de búsqueda del monitor) usaba
+  `#admin_search_input-archivo,#admin_search_input-rrhh`, un id que nunca
+  existió — verificado con grep contra `admin_archive.html`, `admin_hr.html` y
+  `admin-monitor.js`, que usan `#admin_search-archivo` / `#admin_search-rrhh`.
+  Ese camino no funcionaba nunca. Corregido al id real.
+- **`SI-177` (parcial)**: la superposición de la cámara ahora lleva
+  `role="dialog"`, `aria-label`, foco inicial al abrirse, y se cierra con
+  Escape (antes solo con el ratón). El botón de cerrar tiene `aria-label` y
+  `type="button"`. Falta el rediseño visual con el sistema de diseño
+  (`styles.css`, **[CHOCA]** con el carril de estilos) y una trampa de foco
+  por Tab completa — dejo constancia para quien tome ese carril.
+- **`DG-162` (parcial)**: el panel de configuración ahora lleva `role="dialog"`,
+  `aria-label`, foco inicial en el campo de URL, y Escape lo cierra devolviendo
+  el foco al botón que lo abrió (antes solo se cerraba con clic fuera). Sigue
+  sin trampa de foco por Tab y sin pasar por el sistema de diseño
+  (`DG-161`, **[CHOCA]** con `styles.css`).
+
+**Pendiente, fuera de zona o de esfuerzo mayor, sin tocar**:
+- `DG-002`/`DG-005`/`DG-053`/`DG-060` (negociación de versión vía `hello`) y
+  `DG-001` completo (token ya existe, pero el emparejamiento por código/QR que
+  pedía la ficha no) — exigen protocolo nuevo en `scanner-app/server.js`,
+  **[CHOCA]**.
+- `DG-008` (cola con acuse), `DG-009` (un solo cliente con el foco),
+  `DG-014` (`data-origen="scan"`, **[CHOCA]** con `app/routes/admin/docs.py`),
+  `DG-017`/`DG-018` (puerto libre + descubrimiento) — todas tocan
+  `scanner-app/server.js` o backend fuera de este carril.
+- `DG-012` (normalización de cédula/RIF) y `DG-015` (renombrar "Escáner" a
+  "Lector de códigos") — decisión de producto que además toca
+  `admin_archive.html`/`admin_hr.html`/`scanner-app/package.json`,
+  **[CHOCA]**.
+- `DG-085` a `DG-100`, `DG-167` (modo "Capturar documento") — esfuerzo L,
+  archivos nuevos (`capture.js`/`capture.html`), decisión de producto sin
+  tomar.
+- `DG-157` (catálogo de estados de fallo) y `DG-161` (panel fuera del sistema
+  de diseño) — tocan `styles.css`, **[CHOCA]**.
+- `SI-239` (prueba estática que cruce ids del escáner con los HTML) — pediría
+  un `app/tests/test_estatico_ids.py` nuevo; no lo añadí por quedar fuera del
+  encargo de esta pasada (solo `login.js`/`scanner-client.js`), pero el bug que
+  detectaría (`SI-175`) ya está corregido a mano.
+
+`node --check app/static/login.js app/static/scanner-client.js`: sin errores.
+`python -m pytest app/tests -q`: ver resultado en la fila de `_RESERVAS.md`.
