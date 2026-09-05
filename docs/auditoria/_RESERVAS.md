@@ -66,6 +66,13 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
 | A3-buscador-rrhh (hr.js) | agente-a3a-buscador-rrhh-js | 2026-09-04 | terminado (interrumpido por corte de sesion, retomado por el orquestador: comiteado tal cual quedo, ver ab3be26) | ab3be26 |
 | A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | terminado | db8679e |
+| PASS2-admin-edit | agente-pass2-admin-edit | 2026-09-04 | en curso | |
+| PASS2-docs-hr-backend | agente-pass2-docs-hr-backend | 2026-09-04 | en curso | |
+| PASS2-archive-depth | agente-pass2-archive-depth | 2026-09-04 | en curso | |
+| PASS2-engineering | agente-pass2-engineering | 2026-09-04 | en curso | |
+| PASS2-ai | agente-pass2-ai | 2026-09-04 | en curso | |
+| PASS2-hr-frontend-depth | agente-pass2-hr-frontend-depth | 2026-09-04 | en curso | |
+| PASS2-models-schema | agente-pass2-models-schema | 2026-09-04 | en curso | |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
 | LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
 | LX-3 | agente-lx3-modularizacion | 2026-09-04 | terminado (SD-213 completo: 12 modulos reales bajo app/static/styles/, mas un bug real de @layer que invalidaba los @import corregido por el orquestador tras el corte de sesion — ver commit; SD-212/SD-211/SD-206 quedan para otra pasada) | 9991649 |
