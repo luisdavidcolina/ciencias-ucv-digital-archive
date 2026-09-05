@@ -4022,3 +4022,88 @@ pero **no relacionados**: son páginas de administración, no `/archivo` ni `/rr
 pasan solos al repetirlos aislados — típico de la carrera de escritura del árbol compartido
 con ~20 agentes activos, documentado ya en otras notas de este buzón. 859 antes = 857+2 ahora,
 mismo total.
+
+## VI-login (agente-vi-login) — VI-074 y VI-075/SI-049
+
+Carril exclusivo `app/static/login.html` + `app/static/login.js`. `VI-017`/`VI-018` ya estaban
+resueltos hoy antes de empezar (logo desbordado a 390px y botón de mostrar-contraseña
+pequeño), no los toqué.
+
+- **VI-074** (marcador `••••••••` indistinguible de una contraseña ya escrita; campos fuera de
+  un `<form>`, sin `autocomplete`) — la parte del `<form>` ya estaba resuelta por `agente-c9-auth`
+  (commit `de9f6cf`) y reconfirmada por `SWEEP3-html-js-resto`/`PASS3-login-scanner-js`:
+  `#login_form` es un `<form>` real, con `autocomplete="username"`/`"current-password"` en los
+  dos campos. Lo único que quedaba era el marcador: el `placeholder` del campo de contraseña
+  seguía siendo literal `••••••••`, que en captura parece una contraseña ya escrita. Cambiado a
+  `placeholder="Contraseña"` (marcador textual, como pedía el ticket).
+- **VI-075** / **SI-049** (el login no tiene modo oscuro: la tarjeta sigue clara con la
+  preferencia en «Oscuro») — la causa real no era CSS: `login.html` nunca cargaba
+  `app-theme.js` (sólo `styles.css` + `login.js`), así que `initTheme()` no se ejecutaba en
+  esta página y `body.dark-mode` nunca se aplicaba, sin importar la preferencia guardada en
+  `localStorage`. Añadido `<script src="/static/app-theme.js"></script>` antes de `login.js`.
+  `app-theme.js` ya tiene un auto-arranque en `DOMContentLoaded` pensado exactamente para esto
+  (comentado en el propio archivo: "una pagina que incluyera este archivo sin app.js ... se
+  quedaba sin tema y sin modo oscuro, en silencio"), así que no hizo falta llamar a `initTheme()`
+  a mano desde `login.js`. Con `body.dark-mode` puesto, la tarjeta (`class="card ds-login-card"`)
+  hereda el fondo oscuro de la regla `body.dark-mode .card` en `dark-mode.css` — tiene más
+  especificidad (`body.dark-mode .card` = 3 selectores) que `.ds-login-card { background: rgba(255,255,255,.85) !important }`
+  de `personalizacion.css` (1 selector), así que gana sin tocar ese archivo. Las etiquetas y el
+  párrafo de ayuda, que llevan color en línea (`#495057`, `#6c757d`) sin `!important`, quedan
+  cubiertos por las reglas genéricas `body.dark-mode label` y `body.dark-mode p` (ambas con
+  `!important`, ya existentes en `dark-mode.css`) — un `!important` de hoja de estilos sí gana
+  sobre un `style=` en línea sin `!important`.
+  **No verificado visualmente** (sin navegador en esta sesión): la lógica de cascada/especificidad
+  se revisó a mano contra el CSS actual, pero no hay captura `login-1440-oscuro.png` nueva que lo
+  confirme. Si al reverificar visualmente algo se ve mal (por ejemplo el borde del input, que
+  sigue en `#ced4da` fijo vía `.ds-login-card input` en `personalizacion.css`, o el `border-top`
+  de la tarjeta con `var(--c-brand-700)` fijo), esos ajustes finos son de `styles/personalizacion.css`
+  y le tocan al carril de estilos, no a mí (zona exclusiva HTML/JS de este carril).
+
+`node --check app/static/login.js`: sin errores (sin cambios de código en este archivo; el
+arreglo fue en `login.html`). `python -m pytest app/tests -q`: ver resultado en la fila de
+`_RESERVAS.md`.
+
+## VI-admin-forms (2026-09-05)
+
+`agente-vi-admin-forms`. Zona: sólo `app/static/admin_archive.html` y `app/static/admin_hr.html`.
+
+- **VI-067** (la zona de arrastrar/soltar de "Ingresar" parte la frase por la mitad) —
+  confirmado real en ambos módulos: `.ds-dropzone-compact` es `display:flex` sin
+  `justify-content`, y `.ds-drop-label` lleva `flex:1` fijado en `styles.css` (fuera de mi
+  zona), así que a 1440px el label ocupa casi todo el ancho y empuja el botón «Explorar» y el
+  texto de formatos a los extremos, con la «o» colgando sola en medio. Arreglado sólo con
+  HTML: añadidas las utilidades de Bootstrap `justify-content-center text-center` al
+  contenedor, `style="flex:0 0 auto;"` en el `<span class="ds-drop-label">` para anular el
+  `flex:1` de la hoja de estilos sin tocarla, y un `<span class="w-100" style="height:0;">`
+  entre el botón y el texto de formatos para forzar el salto de línea dentro del mismo flex
+  con `flex-wrap:wrap` ya declarado. Resultado: icono + frase + botón centrados en una línea,
+  formatos debajo, como pedía la ficha — sin tocar `styles.css` (evita el choque `[CHOCA]`
+  anotado en la ficha original). Mismo cambio en `admin_archive.html` (`#dropzone-archivo`) y
+  `admin_hr.html` (`#dropzone-rrhh`); ningún `id` ni atributo usado por `admin-submit.js`
+  cambió.
+- **VI-068** (fecha de emisión prerellenada con la fecha de hoy) — verificado ya resuelto por
+  trabajo previo, sin tocar código: el campo `reg-fecha-${suf}` no existe en el HTML estático
+  (todo el formulario "Ingresar" se genera por `renderDynamicSubmitFields()` en
+  `admin-submit.js`, fuera de mi zona), y esa función ya deja `fechaInput.value = ""` de forma
+  explícita al cablear el campo (comentario `OA-098` en el propio archivo), con aviso de
+  "fecha futura" en el evento `change` en vez de prerelleno. No hay nada que corregir en mi
+  zona.
+- **VI-066** (formulario de alta sin rejilla, esfuerzo M) — **no accionable sólo con mi
+  zona**: los doce campos del formulario "Ingresar" (título, autor, ubicación física, etc.) no
+  están en el HTML — se generan enteros como texto de plantilla dentro de
+  `renderDynamicSubmitFields()` en `admin-submit.js` (`container.innerHTML = ...`). Reordenar
+  anchos y agrupar en bloques exige tocar esa función, no `admin_archive.html`/`admin_hr.html`.
+  Documento la decisión en vez de forzar un cambio a medias: queda para un carril con
+  `admin-submit.js` en su zona.
+- **VI-064** (pestaña «Exportar», esfuerzo M) — parcialmente vigente, no tocado: en
+  `admin_archive.html` la pestaña ya no está vacía (tiene tarjeta de "Importar CSV" +
+  "Exportar", visible desde antes de mi turno). En `admin_hr.html` sigue siendo real: la
+  pestaña «Exportar» (`#pane-admin-rrhh-export`) es sólo una frase y un botón — el import CSV
+  de RRHH vive en la pestaña "Ingresar" (`#pane-admin-rrhh-new`), no en "Exportar", así que no
+  hay nada que trasladar sin decisión de producto (¿mover el import de RRHH a Exportar para
+  igualar Archivo, o darle contenido propio — histórico de exportaciones, selección de tablas?
+  ambas opciones son cambio de HTML+`admin.js` a la vez). Documento en vez de forzar un
+  rediseño a medias, tal como indicaba la instrucción de esta ficha.
+
+`python -m pytest app/tests -q`: 859 passed antes de mi turno y 859 passed después (sin
+`test_admin_panels.py` afectado — no añadí ni quité pestañas ni paneles).
