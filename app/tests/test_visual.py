@@ -152,3 +152,4 @@ def test_pagina_publica_sin_desborde_ni_errores(servidor_vivo, navegador, ruta, 
         f"de consola: {errores_reales}"
     )
 
+
