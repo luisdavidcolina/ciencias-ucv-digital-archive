@@ -72,7 +72,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | PASS2-engineering | agente-pass2-engineering | 2026-09-04 | en curso | |
 | PASS2-ai | agente-pass2-ai | 2026-09-04 | en curso | |
 | PASS2-hr-frontend-depth | agente-pass2-hr-frontend-depth | 2026-09-04 | en curso | |
-| PASS2-models-schema | agente-pass2-models-schema | 2026-09-04 | en curso | |
+| PASS2-models-schema | agente-pass2-models-schema | 2026-09-04 | terminado (sin cambios de código: RQ-009/RQ-010/RQ-014/RQ-016/RQ-028/RQ-041/RQ-044/RQ-049 revisados contra `models.py`/`schema.sql` — todo lo accionable ya estaba resuelto por H1d-modelos, el resto exige `main.py`/`hr.py`/`admin/*.py` fuera de zona; hallazgo real de RQ-049 documentado en `_BUZON.md`) | bbb2442 |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
 | LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
 | LX-3 | agente-lx3-modularizacion | 2026-09-04 | terminado (SD-213 completo: 12 modulos reales bajo app/static/styles/, mas un bug real de @layer que invalidaba los @import corregido por el orquestador tras el corte de sesion — ver commit; SD-212/SD-211/SD-206 quedan para otra pasada) | 9991649 |
