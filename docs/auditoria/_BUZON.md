@@ -3005,3 +3005,84 @@ zona de este carril.
 `_BUZON.md`, ningún archivo de código tocado).
 
 **quién resuelve**: agente-sweep3-html-js-resto (SWEEP3-html-js-resto)
+
+## A3-buscador-rrhh (hr.html) — resueltas de marcado, y lo que cruza a hr.js/styles.css/backend
+
+Carril reservado el 2026-09-04 tras confirmar que la fila "A3-buscador-rrhh | bruno" en
+`_RESERVAS.md` era texto de ejemplo mal copiado, nunca una reserva real (ver nota de
+orquestación al pie de ese archivo) — 84 tickets BR-/RQ- llevaban >30h sin nadie trabajándolos
+de verdad.
+
+Resueltas en `app/static/hr.html` (marcado puro, sin tocar `hr.js`/backend/`styles.css`):
+- `BR-032` — la etiqueta del acordeón decía «Fecha» y filtra por fecha de ingreso; ahora dice
+  «Fecha de ingreso».
+- `BR-075` — ya estaba resuelto: `preconnect` a `fonts.googleapis.com` y `fonts.gstatic.com`
+  ya están ambos en `hr.html:7-8`, confirmado sin cambio de código.
+- `BR-076` — el script en línea que evita el parpadeo de tema sólo aplicaba `theme-*`; ahora
+  también aplica `dark-mode` (leyendo `ds_dark_mode`, con la misma lógica `auto`/`dark` que
+  `_applyDarkModeDOM` en `app-theme.js:92-95`, incluido `matchMedia`) y `ds-density-compact`
+  (leyendo `ds_density`), para que no parpadee de claro a oscuro ni de cómoda a compacta.
+- `BR-079` — los dos modales (`#rrhh-person-modal`, `#doc-modal`) llevaban
+  `data-backdrop="static" data-keyboard="false"`: `Escape` no cerraba ni el fondo. Quitado en
+  ambos; se añadió `aria-modal="true"` de paso (parte de `BR-078`).
+- `BR-087` — `aria-label` en los tres botones de la barra de búsqueda (buscar/limpiar/exportar),
+  que sólo tenían `title`.
+- `BR-090`/`BR-091` — los tres botones de acordeón de filtros (Tipología/Fecha/Estado) ahora
+  llevan `aria-expanded`/`aria-controls` y están envueltos en `<h4>`, para que la navegación por
+  encabezados los alcance y el estado abierto/cerrado se anuncie.
+- `BR-098` — `aria-label="Rango de fechas de ingreso"` en `#fp-rrhh-range`; `aria-hidden="true"`
+  en el icono de calendario que lo precede.
+- `BR-099` — parcial: `aria-hidden="true"` en los iconos puramente decorativos que están en mi
+  archivo (chips de fecha, icono del rango, botón de limpiar rango). Los de `hr.js` (tarjeta de
+  persona, dossier) siguen pendientes — no es mi archivo.
+- `BR-100` — `title="Visor del documento"` en el `<iframe>` del visor. La parte de "actualizado
+  con el nombre real al cargar" es JS, queda para `hr.js`.
+- `BR-104` — `<label class="sr-only">` real para `#search_rrhh`, que sólo tenía `placeholder`.
+- `BR-117` — los tres títulos de acordeón usaban `text-lightblue`/`text-teal`/`text-indigo`
+  (clases de AdminLTE, que CLAUDE.md advierte que no está cargado); unificados a `text-primary`,
+  que ya se usa en el resto de la pantalla — sin inventar clase CSS nueva.
+- `BR-133` — la miga de pan decía «Comunidades / RRHH / Privado», herencia de otra aplicación
+  («Comunidades» no es un concepto de este sistema, y la búsqueda es pública — `BR-001`, no
+  «Privado»). Cambiada a «Archivo Digital / Recursos Humanos», texto simple sin prometer
+  navegación que no existe.
+- `BR-078` — parcial: `aria-modal="true"` en ambos modales. La cabecera con `<h2>` del nombre y
+  `aria-labelledby` que apunte a ella exige que `hr.js` (que pinta el contenido del modal,
+  `hr.js:283`) emita ese `id` — no lo añadí sin coordinar la estructura con quien sí toca
+  `hr.js`, para no duplicar el nombre de la persona.
+
+No resueltas, cruzan a `hr.js`/`styles.css`/backend fuera de mi zona (`app/static/hr.html`
+únicamente):
+- `BR-011`, `BR-017`–`BR-025`, `BR-027`, `BR-034`, `BR-035`, `BR-037`–`BR-041`, `BR-043`,
+  `BR-055`, `BR-057`, `BR-073`, `BR-077`, `BR-080`–`BR-086`, `BR-088`, `BR-089`, `BR-092`
+  (necesita coordinar niveles de encabezado con las tarjetas `<h4>` que genera `hr.js`),
+  `BR-093`, `BR-101`, `BR-123`, `BR-124`, `BR-126`–`BR-128`, `BR-131`, `BR-134`, `BR-146`,
+  `BR-157`, `BR-164`–`BR-166`, `BR-169`, `BR-171`, `BR-173`, `BR-175`, `BR-178`, `RQ-043` —
+  todas viven o se resuelven de verdad en `app/static/hr.js` (plantillas generadas por JS con
+  `style=` en línea, manejadores, formato de datos). **Carril dueño**: agente-a3a-buscador-rrhh-js.
+- `BR-054` — el `oninput` está en `hr.html:343` pero el *debounce* real (~200ms) es lógica de
+  `hr.js`; no lo toqué para no dejar un `oninput` roto a medio camino.
+- `BR-074` — `integrity`/`crossorigin` en los CDN de `hr.html` es de esfuerzo **M** porque
+  CLAUDE.md marca `[CHOCA]` "afecta a las siete páginas": cambiarlo sólo en `hr.html` deja el
+  resto de páginas inconsistente y arriesga romper la carga si el hash no coincide con la
+  versión exacta servida por cada CDN hoy; mejor una pasada única sobre las siete páginas a la
+  vez, no la dejo a medias.
+- `BR-092`/`BR-093` (jerarquía de encabezados completa) — mi parte de `hr.html` (h3 "Filtros",
+  h2 "Resultados de Búsqueda") ya son consecutivos entre sí, pero un `h1` de página y el ajuste
+  de los niveles de `hr.js` (tarjetas `h4`, dossier `h3`/`h5`/`h6`) es un solo cambio a
+  coordinar con quien toca `hr.js`, no dos parches sueltos.
+- `BR-106`, `BR-112`, `BR-113`, `BR-114`, `BR-135`, `BR-136`–`BR-139`, `BR-144`, `BR-146` —
+  exigen tokens o reglas nuevas en `styles.css` (`[CHOCA]`): el esqueleto de carga, el fondo
+  `#f4f9ff` del panel de facetas y del rango, el radio/sombra de los modales, las fichas de
+  filtro activo y el ancho máximo a 1440px no tienen hoy clase propia que reutilizar sin crear
+  una — no invento clase CSS sin que exista quien la consuma también en `hr.js`/`styles.css`.
+- `BR-140` — la X fija en la esquina del modal depende de la cabecera de `BR-078`, que exige
+  coordinar con `hr.js`. Sin esa cabecera, añadir sólo la X duplicaría el cierre sin resolver el
+  problema real (pie fuera de la ventana visible con teclado abierto).
+- `BR-143` — la tabla de historial de cargos que necesita `.table-responsive` la genera
+  `hr.js:594-615`, no está en `hr.html`.
+- `BR-151`, `BR-157`, `BR-172`, `BR-177` — funcionalidad nueva de esfuerzo **M**/**L** (filtros
+  nuevos, comparación de expedientes, búsquedas guardadas): decisión de producto y cambios de
+  `hr.js`/`hr.py`/`models.py`, no marcado.
+- `BR-165`, `BR-166` — texto y agrupación de las 4 Partes las genera `hr.js:372-457`.
+
+**quién resuelve**: agente-a3b-buscador-rrhh-html (A3-buscador-rrhh, hr.html)
