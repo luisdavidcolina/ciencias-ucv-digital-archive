@@ -266,14 +266,15 @@
                       <p class="text-muted mb-3" style="font-size:0.8rem;"><i class="fas fa-asterisk text-danger" style="font-size:0.6rem;"></i> campos obligatorios</p>
                       <div id="dynamic-submit-fields-archivo"></div>
                       <!-- Zona de carga compacta -->
-                      <div class="ds-dropzone-compact mt-3" id="dropzone-archivo">
+                      <div class="ds-dropzone-compact mt-3 justify-content-center text-center" id="dropzone-archivo">
                         <i class="fas fa-file-upload text-secondary"></i>
-                        <span class="ds-drop-label text-muted">Arrastra el archivo digital aquí o</span>
+                        <span class="ds-drop-label text-muted" style="flex:0 0 auto;">Arrastra el archivo digital aquí o</span>
                         <label for="file_upload-archivo" class="sr-only">Seleccionar archivo digital</label>
                         <input type="file" id="file_upload-archivo" class="sr-only">
                         <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('file_upload-archivo').click()">
                           Explorar
                         </button>
+                        <span class="w-100" style="height:0;"></span>
                         <span class="text-muted" style="font-size:0.75rem;">PDF, DOC, ZIP, PNG — máx 200 MB</span>
                       </div>
                       <div class="d-flex justify-content-end align-items-center mt-3">
