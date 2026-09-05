@@ -76,9 +76,14 @@ class TestPurgarDocumento:
     def test_admin_del_modulo_si_puede_purgar(self, client_as):
         c = client_as("archivo_admin")
         fila = _fila(modulo="Archivo", rol="Admin", is_active=True)
-        existing = _fila(id_archivo=1)
+        # OA-006: purge_document ahora hace dos lecturas antes de la
+        # transacción (el documento, luego sus versiones) para poder borrar
+        # también los objetos de R2 -- side_effect refleja esa secuencia real,
+        # en vez de un return_value único (que al iterarse como lista de
+        # versiones daba sus claves de dict, no filas).
+        existing = _fila(id_archivo=1, file_url=None)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.trash.db_query", return_value=existing), \
+             patch("routes.trash.db_query", side_effect=[existing, []]), \
              patch("routes.trash.db_transaction") as mock_tx, \
              patch("routes.trash.log_event"):
             mock_tx.return_value.__enter__.return_value = MagicMock()
@@ -88,9 +93,9 @@ class TestPurgarDocumento:
     def test_admin_global_si_puede_purgar(self, client_as):
         c = client_as("admin_global")
         fila = _fila(modulo="Global", rol="Admin", is_active=True)
-        existing = _fila(id_rrhh=2)
+        existing = _fila(id_rrhh=2, file_url=None)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.trash.db_query", return_value=existing), \
+             patch("routes.trash.db_query", side_effect=[existing, []]), \
              patch("routes.trash.db_transaction") as mock_tx, \
              patch("routes.trash.log_event"):
             mock_tx.return_value.__enter__.return_value = MagicMock()
@@ -117,9 +122,15 @@ class TestPurgarEmpleado:
     def test_admin_de_rrhh_si_puede_purgar_empleado(self, client_as):
         c = client_as("rrhh_admin")
         fila = _fila(modulo="RRHH", rol="Admin", is_active=True)
+        # OA-007: purge_employee lee al empleado, luego sus documentos (para
+        # poder borrar también versiones y objetos de R2) antes de la
+        # transacción -- side_effect refleja esa secuencia real de dos
+        # lecturas, no una sola.
         existing = _fila(id=1)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.trash.db_query", return_value=existing), \
+             patch("routes.trash.db_query", side_effect=[existing, []]), \
+             patch("routes.trash.db_transaction") as mock_tx, \
              patch("routes.trash.log_event"):
+            mock_tx.return_value.__enter__.return_value = MagicMock()
             res = c.delete("/api/admin/papelera/empleados/1/purgar?usuario=rrhh_admin")
         assert res.status_code == 200

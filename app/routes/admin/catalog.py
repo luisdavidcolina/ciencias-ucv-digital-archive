@@ -57,6 +57,20 @@ def update_keyword(kid: int, req: KeywordRequest):
     nombre = (req.nombre or "").strip()
     if not nombre:
         raise HTTPException(400, "Nombre vacío")
+    # OA-130: sin este chequeo, renombrar a un nombre ya existente fusionaba
+    # dos descriptores sin avisar (o reventaba con un 500 genérico si hay
+    # UNIQUE(nombre)). Aquí se detecta antes de escribir y se responde 409.
+    colision = db_query(
+        "SELECT id_descriptor FROM public.descriptores_libres "
+        "WHERE LOWER(nombre) = LOWER(%s) AND id_descriptor != %s",
+        (nombre, kid), fetch="one",
+    )
+    if colision:
+        raise HTTPException(
+            409,
+            f"Ya existe una palabra clave '{nombre}'. Para unirlas, borre una "
+            "de las dos usando force=true y reasigne los documentos.",
+        )
     db_query(
         "UPDATE public.descriptores_libres SET nombre = %s WHERE id_descriptor = %s",
         (nombre, kid), fetch="none", commit=True,
@@ -111,7 +125,10 @@ def add_category(req: CategoryCreateRequest):
 
     existing = db_query("SELECT id FROM public.tipo_documento WHERE LOWER(nombre) = LOWER(%s)", (nombre,), fetch="one")
     if existing:
-        return {"success": True, "detail": "Ya existe"}
+        # OA-125: devolvía 200 con "Ya existe" y el cliente sólo mira el
+        # estado HTTP, así que mostraba "guardado con éxito" sobre algo que
+        # no se creó. Un 409 deja que el cliente distinga el caso.
+        raise HTTPException(409, f"El tipo documental '{nombre}' ya existe")
 
     slug = generate_unique_slug(nombre, "tipo_documento")
     db_query(

@@ -48,8 +48,18 @@ def list_retention_types(scope: str = Query(default="")):
     params = []
     where = ""
     if scope:
-        where = "WHERE LOWER(c.slug) LIKE %s"
-        params.append(f"%{scope.lower()}%")
+        # OA-001: los slugs de RRHH son parte-i..parte-iv, ninguno contiene
+        # "rrhh" — un LIKE '%rrhh%' dejaba la pestaña de Retención de RRHH
+        # siempre vacía. Filtra por pertenencia explícita en vez de adivinar
+        # por substring del slug.
+        s = scope.strip().lower()
+        if s == "archivo":
+            where = "WHERE c.slug = 'archivo'"
+        elif s == "rrhh":
+            where = "WHERE c.slug LIKE 'parte-%%'"
+        else:
+            where = "WHERE LOWER(c.slug) LIKE %s"
+            params.append(f"%{s}%")
 
     rows = db_query(f"""
         SELECT
