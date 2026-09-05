@@ -14,8 +14,20 @@ const _debouncedArchivoSearch = (() => {
   return () => { clearTimeout(timer); timer = setTimeout(triggerArchivoSearch, 420); };
 })();
 
-function _pluralArchivo(n, singular, pluralWord) {
-  return `${n} ${n === 1 ? singular : pluralWord}`;
+// VI-031: normaliza un campo de clasificación que puede llegar como array,
+// como cadena simple, o como un array de Python vuelto texto
+// (`"['Presupuesto', 'Consejo de Facultad']"`) — el caso real observado en
+// producción. Sin esto se pinta el literal completo, corchetes y comillas
+// incluidos, dentro de una sola insignia.
+function _normalizeTesauroTerms(val) {
+  if (Array.isArray(val)) return val.filter(Boolean);
+  if (val == null) return [];
+  const s = String(val).trim();
+  if (/^\[.*\]$/.test(s)) {
+    const items = s.slice(1, -1).match(/'([^']*)'|"([^"]*)"/g);
+    if (items) return items.map(m => m.slice(1, -1)).filter(Boolean);
+  }
+  return s ? [s] : [];
 }
 
 // VI-005/VI-006: soporte y tipología son texto libre sin longitud máxima en
@@ -241,7 +253,7 @@ function renderArchivoList() {
 
   const countEl = document.getElementById("count-archivo-results");
   if (countEl) {
-    countEl.innerText = `${_pluralArchivo(total, hasFilter ? "Resultado" : "Registro", hasFilter ? "Resultados" : "Registros")} — Pág. ${state.archivo.page} de ${totalPages}`;
+    countEl.innerText = `${plural(total, hasFilter ? "Resultado" : "Registro", hasFilter ? "Resultados" : "Registros")} — Pág. ${state.archivo.page} de ${totalPages}`;
   }
 
   if (results.length === 0) {
@@ -286,14 +298,14 @@ function renderArchivoList() {
         <button type="button" class="ds-item-title btn btn-link p-0 text-left" onclick="event.stopPropagation();openArchivoModal(${doc.__idx})">${hl(doc.titulo)}</button>
         <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:6px;">
           <span class="badge ds-badge" style="margin-top:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(doc.tesauro_primario || doc.doc_type)}"><i class="fas fa-bookmark mr-1" aria-hidden="true"></i>${escHtml(_truncBadge(doc.tesauro_primario || doc.doc_type))}</span>
-          <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1" aria-hidden="true"></i>${escHtml(formatISOToSpanish(doc.fecha))}</span>
+          ${doc.fecha ? `<span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1" aria-hidden="true"></i>${escHtml(formatISOToSpanish(doc.fecha))}</span>` : ""}
         </div>
-        <div class="ds-item-authors"><i class="fas fa-user-edit mr-1" aria-hidden="true"></i>${hl(doc.autor)}</div>
-        <div class="ds-item-publisher">
-          <i class="fas fa-map-marker-alt mr-1" aria-hidden="true"></i>${escHtml(doc.ubicacion)}
+        ${doc.autor ? `<div class="ds-item-authors"><i class="fas fa-user-edit mr-1" aria-hidden="true"></i>${hl(doc.autor)}</div>` : ""}
+        ${(doc.ubicacion || doc.numero_folio || doc.numero_paginas) ? `<div class="ds-item-publisher">
+          ${doc.ubicacion ? `<i class="fas fa-map-marker-alt mr-1" aria-hidden="true"></i>${escHtml(doc.ubicacion)}` : ""}
           ${doc.numero_folio ? `<span class="ml-2"><i class="fas fa-hashtag mr-1" aria-hidden="true"></i>${escHtml(doc.numero_folio)}</span>` : ""}
           ${doc.numero_paginas ? `<span class="ml-2"><i class="fas fa-file-alt mr-1" aria-hidden="true"></i>${escHtml(String(doc.numero_paginas))} p.</span>` : ""}
-        </div>
+        </div>` : ""}
         ${doc.resumen ? `<p class="ds-item-abstract m-0">${hl(doc.resumen)}</p>` : ""}
         <div class="ds-item-badges d-flex flex-wrap mt-2" style="gap:4px;">
           ${badges.slice(0, 4).map(b => `<span class="badge ds-kw-badge">${escHtml(b)}</span>`).join("")}
@@ -336,7 +348,15 @@ function openDocModalWithRecord(doc) {
   const isActa   = /^acta|^resoluc/i.test(doc.doc_type);
   const isPlano  = /plano/i.test(doc.doc_type);
   const anio     = (doc.fecha || "").substring(0, 4);
-  const badges   = doc.tesauro_badges || [doc.doc_type, doc.tesauro_secundario].filter(Boolean);
+  // VI-031: cuando no llega `tesauro_badges`, el respaldo usaba
+  // `doc.tesauro_secundario` a pelo. A veces ese campo llega como una lista
+  // ya serializada a texto por Python (`str(list)`, comillas simples y
+  // corchetes) en vez de una cadena limpia, y se pintaba literal:
+  // `['Presupuesto', 'Consejo de Facultad']`. Se normaliza a array de
+  // términos sueltos antes de unirlos.
+  const badges   = (doc.tesauro_badges && doc.tesauro_badges.length)
+    ? doc.tesauro_badges
+    : [doc.doc_type, ..._normalizeTesauroTerms(doc.tesauro_secundario)].filter(Boolean);
 
   if (isPlano) {
     document.getElementById("modal-doc-meta-container").innerHTML = `

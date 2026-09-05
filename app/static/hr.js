@@ -150,7 +150,8 @@ function renderRrhhList() {
   const results   = state.rrhh.results;
   const total     = state.rrhh.total || results.length;
   const hasFilter = !!(state.rrhh.search || (state.rrhh.selectedTypes && state.rrhh.selectedTypes.length) || (state.rrhh.selectedEstados && state.rrhh.selectedEstados.length));
-  document.getElementById("count-rrhh-results").innerText = hasFilter ? `${total} Resultados` : `${total} Registros`;
+  document.getElementById("count-rrhh-results").innerText =
+    plural(total, hasFilter ? "Resultado" : "Registro", hasFilter ? "Resultados" : "Registros");
 
   if (results.length === 0) {
     container.removeAttribute("role");
@@ -208,8 +209,8 @@ function renderRrhhList() {
             <h3 class="ds-item-title" style="font-size:1.05rem;font-weight:700;color:#2b4e72;margin:0 0 3px 0;">${hl(p.persona)}</h3>
             <div style="font-size:0.82rem;color:#495057;line-height:1.5;">
               <span class="mr-3"><i class="fas fa-id-card mr-1 text-muted" aria-hidden="true"></i> C.I: <strong>${hl(p.cedulas)}</strong></span>
-              <span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.departamentos)}</strong></span>
-              <span><i class="fas fa-user-tie mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.cargos)}</strong></span>
+              ${p.departamentos ? `<span class="mr-3"><i class="fas fa-sitemap mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.departamentos)}</strong></span>` : ""}
+              ${p.cargos ? `<span><i class="fas fa-user-tie mr-1 text-muted" aria-hidden="true"></i> <strong>${hl(p.cargos)}</strong></span>` : ""}
             </div>
             <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
               <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.78rem;font-weight:700;">${escHtml(p.estatuses)}</span>

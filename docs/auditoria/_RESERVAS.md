@@ -144,7 +144,7 @@ para no repetir la confusión.
 | VI-ai-widget-zindex | agente-vi-ai-widget-zindex | 2026-09-05 | terminado | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63 -- app/static/ai-widget.css app/static/ai-widget.js`) |
 | VI-charts-nan | agente-vi-charts-nan | 2026-09-05 | en curso | |
 | VI-admin-js-datos | agente-vi-admin-js-datos | 2026-09-05 | en curso | |
-| VI-archive-hr-datos | agente-vi-archive-hr-datos | 2026-09-05 | en curso | |
+| VI-archive-hr-datos | agente-vi-archive-hr-datos | 2026-09-05 | terminado (VI-031, VI-032, VI-037 — ver nota en _BUZON.md) | pendiente |
 | VI-admin-ai-datos | agente-vi-admin-ai-datos | 2026-09-05 | en curso | |
 | VI-styles-oscuro-restante | agente-vi-styles-oscuro | 2026-09-05 | en curso | |
 | VI-focus-touch | agente-vi-focus-touch | 2026-09-05 | en curso | |

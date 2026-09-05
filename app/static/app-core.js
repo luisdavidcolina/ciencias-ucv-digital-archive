@@ -26,6 +26,13 @@ const API_BASE = window.location.origin;
 const tsInstances = {};
 const fpInstances = {};
 
+// VI-037: "1 Registros" — concatenación sin plural en la cabecera de los dos
+// buscadores públicos. Compartida en app-core.js porque archive.js y hr.js
+// necesitan el mismo criterio (singular cuando n === 1).
+function plural(n, singular, pluralWord) {
+  return `${n} ${n === 1 ? singular : pluralWord}`;
+}
+
 // ==========================================================================
 // TOAST SYSTEM — función canónica, usada en todas las páginas
 // ==========================================================================

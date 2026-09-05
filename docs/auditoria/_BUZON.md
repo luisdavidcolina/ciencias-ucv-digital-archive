@@ -3988,3 +3988,37 @@ errores. `python -m pytest app/tests -q`: 859 passed (igual que al empezar).
       `python -m pytest app/tests -q`: 859 passed (igual que al empezar).
       `python -m pytest app/tests/test_visual.py -q`: 54 passed (igual que al empezar), corridas
       antes y después de cada módulo tocado.
+
+## VI-archive-hr-datos (agente-vi-archive-hr-datos) — array literal, iconos huérfanos y el plural que ya existía a medias
+
+Carril exclusivo `app/static/archive.js` + `app/static/hr.js`. Revisé la nota de
+`agente-vi-archive-hr-js` (mismo día, mismos archivos, VI-005/VI-006/VI-015) antes de tocar
+nada: no hay solape, ellos trabajaron en insignias largas/modal sin backdrop, yo en datos
+ausentes/mal formados.
+
+- **VI-031** (palabras clave pintadas como array de JavaScript literal en el modal de detalle
+  de `/archivo`) — confirmado real: `openDocModalWithRecord()` en `archive.js` usaba
+  `doc.tesauro_secundario` a pelo como respaldo cuando no llegaba `tesauro_badges`. Ese campo
+  a veces llega como una lista de Python ya convertida a texto (`str(list)`, comillas simples
+  y corchetes), y se pintaba literal: `['Presupuesto', 'Consejo de Facultad']`. La tarjeta de
+  resultado (`tesauro_badges`) ya estaba bien, como decía el ticket. Arreglado con
+  `_normalizeTesauroTerms()`, que detecta el patrón `[...]` con comillas simples/dobles y lo
+  parte en términos sueltos antes de unirlos con `; `.
+- **VI-032** (campos vacíos dejan iconos huérfanos) — confirmado real en la tarjeta de
+  resultado de `/archivo`: icono de autor (`fa-user-edit`), de ubicación (`fa-map-marker-alt`)
+  y de fecha (`fa-calendar-alt`) se pintaban siempre, aunque el dato viniera vacío. Ahora cada
+  línea sólo se pinta si el campo tiene valor. En `hr.js`, mismo patrón en las píldoras de
+  departamento (`fa-sitemap`) y cargo (`fa-user-tie`) de la tarjeta de persona.
+- **VI-037** («1 Registros» sin plural) — resultó que `archive.js` YA tenía una función local
+  `_pluralArchivo()` correcta (`n === 1 ? singular : plural`) usada en su cabecera de
+  resultados; el bug real estaba sólo en `hr.js`, que concatenaba `${total} Registros` a pelo
+  sin comprobar `n === 1`. Como pedía el ticket, creé `plural(n, singular, pluralWord)` en
+  `app-core.js` (no existía nada parecido, verificado con grep) y la consumen ahora tanto
+  `archive.js` (reemplazando su copia local, que se retiró) como `hr.js`.
+
+`node --check` en los tres archivos, y `python -m pytest app/tests -q` en verde: 857 passed +
+2 failed en la corrida completa (`test_visual.py::...[admin/archivo-1440px-claro/oscuro]`),
+pero **no relacionados**: son páginas de administración, no `/archivo` ni `/rrhh`, y ambos
+pasan solos al repetirlos aislados — típico de la carrera de escritura del árbol compartido
+con ~20 agentes activos, documentado ya en otras notas de este buzón. 859 antes = 857+2 ahora,
+mismo total.
