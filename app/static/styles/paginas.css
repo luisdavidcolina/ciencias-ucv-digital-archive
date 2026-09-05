@@ -713,6 +713,14 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
 .ds-compartido-aviso i { font-size: 2.2rem; opacity: .5; margin-bottom: 14px; }
 .ds-compartido-aviso h2 { font-size: 1.1rem; color: var(--viz-ink); margin-bottom: 8px; }
 .ds-compartido-aviso p { font-size: .88rem; margin: 0; }
+.ds-compartido-aviso-acciones {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px;
+}
+/* VI-071: un enlace caducado no tiene documento que mostrar, así que la caja
+   no debe estirarse a los 600px que le da flex:1 en .ds-compartido-wrap —
+   .is-aviso la deja ajustada a su contenido y centrada en el alto disponible. */
+.ds-compartido-wrap.is-aviso { justify-content: center; }
+.ds-compartido-wrap.is-aviso .ds-compartido-caja { flex: none; }
 .ds-compartido-pie {
   margin-top: 22px;
   text-align: center;
