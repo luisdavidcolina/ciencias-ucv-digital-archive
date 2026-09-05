@@ -3086,3 +3086,77 @@ No resueltas, cruzan a `hr.js`/`styles.css`/backend fuera de mi zona (`app/stati
 - `BR-165`, `BR-166` — texto y agrupación de las 4 Partes las genera `hr.js:372-457`.
 
 **quién resuelve**: agente-a3b-buscador-rrhh-html (A3-buscador-rrhh, hr.html)
+
+## agente-pass2-models-schema — segunda pasada sobre RQ- en `models.py`/`schema.sql`
+
+Mi carril es exclusivamente `app/models.py` y `app/schema.sql`. Revisé los RQ- de
+`requisitos-vs-implementado.md` que citan alguno de los dos, más las notas ya dejadas por
+`agente-h1d-modelos` (H1d-modelos) y `agente-h1a-migraciones`/`agente-sweep2-main-schema`
+(schema/migraciones). Conclusión: **no hay cambio seguro que hacer sólo con estos dos
+archivos que no esté ya hecho o ya bloqueado y documentado.** No toqué código.
+`python -m pytest app/tests -q` en verde antes de empezar (ver commit de reserva); no cambié
+nada, así que sigue igual.
+
+Repaso ticket por ticket de lo que cita `models.py`/`schema.sql`:
+
+- **RQ-009** (`RrhhSearchRequest.people_terms` código muerto) — sigue bloqueado exactamente
+  como lo dejó H1d: `app/routes/hr.py:169-172` todavía lee `req.people_terms` para construir
+  `people_clauses`. Quitar el campo del modelo rompería esa ruta. Necesita coordinarse con
+  quien toque `hr.py` (dueño histórico: `A4-rrhh-backend`, ya terminado — hace falta un nuevo
+  carril o ampliar uno existente que sí pueda tocar `hr.py`).
+- **RQ-010** (RRHH sin `sort_map`) — el campo `sort_mode` ya existe en `RrhhSearchRequest`
+  (con el mismo default que `ArchivoSearchRequest`); no hace falta nada nuevo en el modelo. El
+  `sort_map` en sí va en `app/routes/hr.py`, fuera de mi zona.
+- **RQ-014** (actor de auditoría puesto por el cliente) — sigue como lo describió H1d: quitar
+  `usuario`/`requester`/`creator` de los modelos sin que `admin/docs.py`, `admin/users.py`,
+  `admin/retention.py`, `admin/imports.py`, `trash.py`, `files.py` y `hr_alerts.py` dejen de
+  leerlos del payload rompe las nueve rutas de golpe. Esfuerzo L real, de varios carriles a la
+  vez.
+- **RQ-016** (asimetría de `dependencies=_auth` en `hr.py`) — no es de `models.py`/`schema.sql`;
+  la ficha real vive en `app/routes/hr.py`, ya señalado.
+- **RQ-028** (completitud/unicidad de metadatos por tipología) — revisé qué se podía hacer sin
+  tocar otro archivo: no hay forma honesta. Un perfil de campos obligatorios *por tipología*
+  necesita leer `tipo_documento` (tabla dinámica en BD) y `models.py` no tiene ni debe tener
+  dependencia de BD — validar con datos que no están en el propio payload rompería el patrón
+  "validar en el borde" que ya sigue el resto del archivo. La detección de duplicados
+  (título+fecha+tipo) tampoco es validación de forma: exige una consulta, que es lógica de
+  `admin/docs.py`/`admin/imports.py`. Dejo el ticket intacto para quien sí pueda tocar esos
+  routers.
+- **RQ-041** (columna `proyecto` en planos) — pide `app/main.py` (migración real) + `models.py`
+  + `archive.py` + `admin/docs.py` + JS. Añadir sólo el campo a `DocumentSubmitRequest` sin la
+  columna ni la ruta que lo persista es peor que no tocarlo: el cliente vería que el campo se
+  acepta y desaparece en silencio. `app/main.py` no es mío (dueño histórico: H1a-migraciones,
+  terminado — hace falta abrir un carril nuevo o reabrir ese).
+- **RQ-044** (`tipo_personal` docente/administrativo/obrero) — mismo caso: columna nueva vía
+  `main.py`, no vía `schema.sql` (que es el script de creación inicial, congelado — ver abajo).
+  No añadí el campo a `models.py` porque quedaría sin ningún consumidor real.
+- **RQ-049** (`estados_laborales` sólo siembra "Activo") — **hallazgo real, pero no arreglable
+  sólo con mi zona**: `app/schema.sql:174-175` ya siembra los cuatro estados
+  ("Pendiente de Registro", "Activo", "Jubilado", "Retirado", "Pensionado") desde siempre. El
+  problema que describe el ticket está en la migración idempotente de `app/main.py:217-218`
+  (`INSERT ... VALUES('Activo') ON CONFLICT DO NOTHING`), que es la que corre de verdad contra
+  una base ya existente y sólo mete un valor. `schema.sql` no es la causa; `app/main.py` sí, y
+  no es mi archivo.
+
+Sobre `schema.sql` en general: confirmé que sigue siendo el script de creación **inicial**,
+congelado — ninguna de las ~40 columnas/tablas añadidas después por `run_migrations()` en
+`app/main.py` (LOTTT, ISAD(G), papelera/soft-delete, versiones, disposición, IA, intentos de
+login, `schema_version`...) está reflejada ahí, y así lleva desde antes de mi turno (grep de
+`login_attempts`, `ia_conversaciones`, `deleted_at`, `disposicion`, etc. en `schema.sql`: cero
+resultados; todas viven sólo en `app/main.py`). Es consistente con `CLAUDE.md`
+("`app/schema.sql` — Esquema SQL de referencia, **NO modificar**") y con que ningún carril
+anterior lo haya tocado para añadir columnas — sólo lo hicieron para el propio SI-031, y ese
+resultó ser, verificado con grep, un cambio real en `app/main.py`, no en `schema.sql`. No
+reescribí `schema.sql` para sincronizarlo con las migraciones: sería un cambio grande, de sólo
+valor documental (los tests derivan el esquema efectivo de `schema.sql` + migraciones, no de
+`schema.sql` solo), y con riesgo de discrepancia si alguien vuelve a ejecutar el script contra
+una base nueva esperando el estado *actual* y no el original.
+
+**Quién puede desbloquear cada cosa**:
+- `RQ-009`, `RQ-016` → un carril que sí pueda tocar `app/routes/hr.py`.
+- `RQ-014` → un carril grande sobre `app/routes/admin/*.py` + `trash.py` + `files.py` +
+  `hr_alerts.py`, coordinado con `models.py`.
+- `RQ-028`, `RQ-041`, `RQ-044`, `RQ-049` → necesitan `app/main.py` (migraciones reales), dueño
+  histórico `H1a-migraciones`; yo aviso aquí pero no reabro ese carril.
+
+**quién lo pide**: agente-pass2-models-schema (PASS2-models-schema)
