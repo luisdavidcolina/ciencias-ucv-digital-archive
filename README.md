@@ -560,6 +560,16 @@ Cada acción crítica (login, ingreso de registros) se registra en `audit_log.cs
 
 ---
 
+## Operación y mantenimiento
+
+- **Rotación de secretos**: procedimiento para `SECRET_KEY`, `CRON_SECRET`,
+  credenciales de R2, `OPENROUTER_API_KEY` y `DATABASE_URL` — dónde se cambia
+  cada uno, qué efecto colateral tiene (sesiones cerradas, enlaces
+  compartidos invalidados, backup o asistente de IA temporalmente caídos) y
+  el orden que minimiza la interrupción. Ver [`docs/operacion.md`](docs/operacion.md).
+
+---
+
 ## Política de Seguridad y Privacidad
 
 1. **Confidencialidad**: Acceso restringido por roles y módulos sin cruce de visibilidad.
