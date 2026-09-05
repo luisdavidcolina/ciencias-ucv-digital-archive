@@ -1,7 +1,8 @@
 // =============================================================================
 // ADMIN — Tipos de Documento y Palabras Clave
 // Depende de: admin.js (state, API_BASE, adminSuffixFromTab, isArchivoModule,
-//             showToast, loadDynamicChoices, loadAdminTab), app.js (escHtml)
+//             showToast, loadDynamicChoices, loadAdminTab, formatAnios —
+//             VI-028), app.js (escHtml)
 //
 // Nomenclatura (CLAUDE.md): nunca "Tesauro". Aquí, además, un solo nombre para
 // el mismo concepto en toda la interfaz que este archivo controla: "tipo
@@ -120,14 +121,22 @@ function _renderCatListArchivo(suf, tipos) {
     ? Number(b.uso_archivo || 0) - Number(a.uso_archivo || 0)
     : (a.nombre_corto || a.nombre || "").localeCompare(b.nombre_corto || b.nombre || "", "es"));
 
-  return sorted.map(t => `
+  return sorted.map(t => {
+    // VI-033: un tipo documental sin nombre se pintaba como una fila alta y
+    // vacía, sin nada que diga qué se está editando. Respaldo explícito.
+    const nombreLegible = t.nombre_corto || t.nombre;
+    const nombreDisplay = nombreLegible
+      ? escHtml(nombreLegible)
+      : `<span class="text-muted font-italic" title="Tipo documental sin nombre registrado">(sin nombre — #${t.id})</span>`;
+    return `
     <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm" style="border-left:4px solid #ffc107!important;">
       <div>
-        <h6 class="font-weight-bold text-dark mb-0">${escHtml(t.nombre_corto || t.nombre)}</h6>
-        <small class="text-muted">Retención: ${Number(t.plazo_retencion_anios)} años</small>
+        <h6 class="font-weight-bold text-dark mb-0">${nombreDisplay}</h6>
+        <small class="text-muted">Retención: ${formatAnios(t.plazo_retencion_anios)}</small>
       </div>
       ${_catUsoBadge(Number(t.uso_archivo || 0))}
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 
 function _renderCatListRRHH(tipos) {
@@ -146,14 +155,22 @@ function _renderCatListRRHH(tipos) {
       (a.nombre_corto || a.nombre || "").localeCompare(b.nombre_corto || b.nombre || "", "es"));
     const color = PARTE_COLORS[parte];
     const body = items.length
-      ? items.map(t => `
+      ? items.map(t => {
+          // VI-033: mismo respaldo que en Archivo — sin nombre no puede
+          // quedar una fila vacía sin decir qué se está editando.
+          const nombreLegible = t.nombre_corto || t.nombre;
+          const nombreDisplay = nombreLegible
+            ? escHtml(nombreLegible)
+            : `<span class="text-muted font-italic" title="Tipo documental sin nombre registrado">(sin nombre — #${t.id})</span>`;
+          return `
           <div class="list-group-item d-flex justify-content-between align-items-center mb-1 rounded bg-white shadow-sm py-1" style="border-left:4px solid ${color}!important;">
             <div>
-              <span style="font-size:0.82rem;font-weight:600;">${escHtml(t.nombre_corto || t.nombre)}</span>
-              <br><small class="text-muted" style="font-size:0.72rem;">Retención: ${Number(t.plazo_retencion_anios)} años</small>
+              <span style="font-size:0.82rem;font-weight:600;">${nombreDisplay}</span>
+              <br><small class="text-muted" style="font-size:0.72rem;">Retención: ${formatAnios(t.plazo_retencion_anios)}</small>
             </div>
             ${_catUsoBadge(Number(t.uso_rrhh || 0))}
-          </div>`).join("")
+          </div>`;
+        }).join("")
       : `<div class="text-muted small px-2 pb-2">Sin tipos documentales en esta Parte.</div>`;
     return `
       <div class="mb-3">

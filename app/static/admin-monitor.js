@@ -350,6 +350,12 @@ function renderMonitorTable() {
     container.innerHTML = records.map(f => {
       const statusCls = STATUS_CLASS[f.estado] || "ds-status-otro";
       const hlEmpleado = typeof highlightTerms === "function" ? highlightTerms(f.empleado || "", searchTerms) : (f.empleado || "");
+      // VI-033: cinco de catorce filas no mostraban ningún nombre de
+      // empleado — el nombre vacío se pintaba tal cual, indistinguible de un
+      // error de carga. Respaldo explícito con el id.
+      const empleadoDisplay = f.empleado
+        ? hlEmpleado
+        : `<span class="text-muted font-italic" title="Expediente sin nombre registrado">(sin nombre${f.empleado_id ? ` — #${f.empleado_id}` : ""})</span>`;
       const nombreEmp = escHtml(f.empleado || "");
       // OR-237: avatar con iniciales como respaldo (no llega foto por ahora,
       // ver nota en _BUZON.md) — evita confundir homónimos, mismo problema que
@@ -371,10 +377,16 @@ function renderMonitorTable() {
         : "—";
       return `
         <tr class="ds-monitor-row">
-          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${avatar}${hlEmpleado}${docCountBadge}</td>
+          <td class="font-weight-bold text-dark" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(f.empleado||'')}">${avatar}${empleadoDisplay}${docCountBadge}</td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.cedula||'—')}</td>
           <td class="text-muted small ds-hide-sm" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="${escHtml([f.cargo, f.departamento].filter(Boolean).join(' · '))}">${cargoDeptoCell}</td>
-          <td><span class="badge ${statusCls}" style="padding:3px 6px;">${escHtml(f.estado||'—')}</span></td>
+          <td>${f.estado
+            ? `<span class="badge ${statusCls}" style="padding:3px 6px;">${escHtml(f.estado)}</span>`
+            // VI-034: una píldora gris con un guion se leía como un estado
+            // más, no como un dato ausente. Mismo patrón que ya usa Archivo
+            // para "estado no reconocido" (badge-light border, sin color de
+            // estado), con el texto explícito en vez de un guion vacío.
+            : `<span class="badge badge-light border" style="padding:3px 6px;" title="Sin estado laboral registrado">Sin estado</span>`}</td>
           <td class="ds-hide-sm"><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.ubicacion||'—')}</td>
           <td>

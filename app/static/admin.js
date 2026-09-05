@@ -18,6 +18,22 @@ const ADMIN_TAB_LABELS = {
 // en la que ya se estaba.
 const _adminLastTab = {};
 
+// VI-028: "días"/"años" de retención y vencimiento llegan ya calculados del
+// backend (resta de fechas hecha en SQL, no aquí). Cuando falta la fecha o el
+// plazo que los origina, el campo llega null o ausente y un `Number(...)` a
+// pelo pintaba "NaN" en Resumen, Retención y Tipos — un archivo institucional
+// que muestra "NaN" en su pantalla de control pierde credibilidad ante quien
+// lo audite. Punto único de formato, compartido con admin-categories.js y
+// admin-monitor.js: comprueba el operando antes de usarlo.
+function formatDias(value, unidad = "días") {
+  const n = Number(value);
+  return Number.isFinite(n) ? `${n} ${unidad}` : "sin plazo definido";
+}
+function formatAnios(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? `${n} año${n !== 1 ? "s" : ""}` : "—";
+}
+
 // Región viva compartida para anunciar el cambio de pestaña a lectores de
 // pantalla (OR-225). Se crea una sola vez y se reutiliza.
 function _adminAnnounce(text) {
@@ -143,7 +159,7 @@ async function _loadAlertasBanner() {
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.vencimientos || []).slice(0, 3).map(v =>
-        `<li class="small"><strong>${escHtml(v.titulo || "(sin título)")}</strong> — ${escHtml(v.tipo_documento || "?")} — venció ${Number(v.dias_vencido)} días</li>`
+        `<li class="small"><strong>${escHtml(v.titulo || "(sin título)")}</strong> — ${escHtml(v.tipo_documento || "?")} — venció ${formatDias(v.dias_vencido)}</li>`
       ).join("");
       // OA-080: mientras haya vencidos, el aviso no lleva botón de cerrar —
       // era la única alerta del panel y la más fácil de silenciar por
@@ -162,7 +178,7 @@ async function _loadAlertasBanner() {
       const total = data.total || 0;
       if (total === 0) { el.style.display = "none"; return; }
       const muestra = (data.alertas || []).slice(0, 3).map(a =>
-        `<li class="small"><strong>${escHtml(a.nombre_completo)}</strong> — ${escHtml(a.tipo_alerta)} (${Number(a.dias_restantes)} días)</li>`
+        `<li class="small"><strong>${escHtml(a.nombre_completo)}</strong> — ${escHtml(a.tipo_alerta)} (${formatDias(a.dias_restantes)})</li>`
       ).join("");
       // OR-070: en RRHH todavía no hay una pantalla que liste las
       // jubilaciones próximas (pendiente de admin_hr.html, fuera de este
@@ -170,7 +186,7 @@ async function _loadAlertasBanner() {
       // 5 en vez de 3 para reducir cuántos quedan fuera, sin prometer un
       // enlace que hoy no lleva a ninguna parte.
       const muestraAmpliada = (data.alertas || []).slice(0, 5).map(a =>
-        `<li class="small"><strong>${escHtml(a.nombre_completo)}</strong> — ${escHtml(a.tipo_alerta)} (${Number(a.dias_restantes)} días)</li>`
+        `<li class="small"><strong>${escHtml(a.nombre_completo)}</strong> — ${escHtml(a.tipo_alerta)} (${formatDias(a.dias_restantes)})</li>`
       ).join("") || muestra;
       el.innerHTML = `
         <div class="alert alert-warning mb-0" role="alert">
@@ -258,17 +274,19 @@ async function loadVencimientosTable() {
       // OA-146: el color de fondo era la única señal de urgencia. Para
       // daltonismo rojo-verde las tres bandas se leen igual. Se añade
       // icono + etiqueta de texto, no sólo la clase de color.
+      const diasVencido = Number(v.dias_vencido);
       let urgency = "", urgLabel = "", urgIcon = "";
-      if (v.dias_vencido > 365)      { urgency = "table-danger";  urgLabel = "Crítico"; urgIcon = "fa-triangle-exclamation"; }
-      else if (v.dias_vencido > 90)  { urgency = "table-warning"; urgLabel = "Urgente";  urgIcon = "fa-clock"; }
-      else                            { urgLabel = "Vencido";      urgIcon = "fa-circle-exclamation"; }
+      if (!Number.isFinite(diasVencido)) { urgency = ""; urgLabel = "Sin datos"; urgIcon = "fa-circle-question"; }
+      else if (diasVencido > 365)        { urgency = "table-danger";  urgLabel = "Crítico"; urgIcon = "fa-triangle-exclamation"; }
+      else if (diasVencido > 90)         { urgency = "table-warning"; urgLabel = "Urgente";  urgIcon = "fa-clock"; }
+      else                                { urgLabel = "Vencido";      urgIcon = "fa-circle-exclamation"; }
       return `<tr class="${urgency}">
         <td class="text-muted">${i + 1}</td>
         <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(v.titulo)}">${escHtml(v.titulo || "—")}</td>
         <td><span class="badge badge-secondary">${escHtml(v.tipo_documento || "—")}</span></td>
         <td>${escHtml(v.fecha_documento || "—")}</td>
-        <td>${Number(v.plazo_anios)} año${Number(v.plazo_anios) !== 1 ? "s" : ""}</td>
-        <td><i class="fas ${urgIcon} mr-1" aria-hidden="true"></i><span class="sr-only">${urgLabel}: </span><strong>${Number(v.dias_vencido)}</strong> días</td>
+        <td>${formatAnios(v.plazo_anios)}</td>
+        <td><i class="fas ${urgIcon} mr-1" aria-hidden="true"></i><span class="sr-only">${urgLabel}: </span><strong>${formatDias(v.dias_vencido)}</strong></td>
         <td class="text-muted small ds-hide-sm">${escHtml(v.ubicacion || "—")}</td>
         <td class="text-nowrap">
           <button class="btn btn-xs btn-outline-primary" onclick="abrirDisposicion(${v.id_archivo}, ${JSON.stringify(v.titulo || "")})"
@@ -300,14 +318,26 @@ async function loadRetentionConfig() {
       tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Sin tipos configurados.</td></tr>`;
       return;
     }
-    tbody.innerHTML = tipos.map(t => `
+    tbody.innerHTML = tipos.map(t => {
+      // VI-033: un tipo documental sin nombre se pintaba como una fila alta y
+      // vacía, sin nada que diga qué se está editando. Respaldo explícito con
+      // el id, y aviso en la propia fila.
+      const nombreLegible = t.nombre_corto || t.nombre;
+      const nombreDisplay = nombreLegible
+        ? escHtml(nombreLegible)
+        : `<span class="text-muted font-italic" title="Tipo documental sin nombre registrado">(sin nombre — #${t.id})</span>`;
+      // VI-028: el plazo de este tipo es justo el dato que se está editando;
+      // si llega null/ausente no hay "operando" que restar, así que se cae a
+      // un valor por defecto explícito en vez de pintar "NaN" en un <input>.
+      const plazoNum = Number.isFinite(Number(t.plazo_retencion_anios)) ? Number(t.plazo_retencion_anios) : 1;
+      return `
       <tr>
-        <td>${escHtml(t.nombre_corto || t.nombre)}</td>
+        <td>${nombreDisplay}</td>
         <td>
           <div class="input-group input-group-sm">
             <input type="number" class="form-control form-control-sm"
-                   id="ret-plazo-${t.id}" value="${Number(t.plazo_retencion_anios)}" min="1" max="100"
-                   data-original="${Number(t.plazo_retencion_anios)}"
+                   id="ret-plazo-${t.id}" value="${plazoNum}" min="1" max="100"
+                   data-original="${plazoNum}"
                    style="max-width:80px;" oninput="_validateRetentionPlazoInput(this)">
             <div class="input-group-append">
               <span class="input-group-text text-muted">años</span>
@@ -316,11 +346,12 @@ async function loadRetentionConfig() {
         </td>
         <td>
           <button class="btn btn-sm btn-outline-success" onclick="_saveRetentionPlazo(${t.id})"
-                  title="Guardar plazo para ${escHtml(t.nombre_corto || t.nombre)}">
+                  title="Guardar plazo para ${nombreLegible ? escHtml(nombreLegible) : "tipo documental sin nombre"}">
             <i class="fas fa-save"></i>
           </button>
         </td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
   } catch (e) {
     tbody.innerHTML = `<tr><td colspan="3" class="text-danger text-center py-2"></td></tr>`;
     tbody.querySelector("td").textContent = e.message;
