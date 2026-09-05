@@ -45,19 +45,15 @@
 <div class="container-fluid py-4" role="main" style="max-width:1200px">
 
   <div class="ds-breadcrumb-wrapper mb-3">
-    <div class="ds-breadcrumb"><i class="fas fa-robot"></i> Panel de Control / Asistente IA</div>
+    <nav class="ds-breadcrumb" aria-label="Ruta de navegación">
+      <a href="/archivo"><i class="fas fa-home"></i> Panel de Control</a>
+      <span aria-hidden="true"> / </span>
+      <span aria-current="page"><i class="fas fa-robot"></i> Asistente IA</span>
+    </nav>
   </div>
 
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap:8px;">
+  <div class="mb-3">
     <h4 class="mb-0"><i class="fas fa-robot mr-1"></i> Asistente IA</h4>
-    <div class="d-flex align-items-center" style="gap:6px;">
-      <button class="btn btn-sm btn-outline-secondary" onclick="openThemePanel()" title="Personalización" aria-label="Personalización">
-        <i class="fas fa-palette"></i> <span class="ds-btn-label">Personalización</span>
-      </button>
-      <a href="/admin/sistema" class="btn btn-sm btn-outline-secondary" aria-label="Admin Global">
-        <i class="fas fa-arrow-left"></i> <span class="ds-btn-label">Admin Global</span>
-      </a>
-    </div>
   </div>
 
   <div id="estado-alerta"></div>
