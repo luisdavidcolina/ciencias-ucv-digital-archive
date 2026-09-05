@@ -113,7 +113,10 @@ class TestDbTransaction:
             with database.db_transaction() as execute:
                 execute("DELETE FROM a WHERE id=%s", [1])
                 execute("DELETE FROM b WHERE id=%s", [1])
-        assert len(conn.executed) == 2
+        # IN-169: cada transacción también fija statement_timeout de sesión;
+        # se filtra aquí para no acoplar la prueba a ese detalle interno.
+        sentencias = [s for s, _ in conn.executed if s != "SET statement_timeout = 20000"]
+        assert len(sentencias) == 2
         assert conn.committed == 1
         assert conn.rolled_back == 0
         # la conexión siempre vuelve al pool, sin descartarla
@@ -130,7 +133,8 @@ class TestDbTransaction:
                 with database.db_transaction() as execute:
                     execute("DELETE FROM a WHERE id=%s", [1])
                     execute("DELETE FROM b WHERE id=%s", [1])  # lanza RuntimeError
-        assert len(conn.executed) == 2
+        sentencias = [s for s, _ in conn.executed if s != "SET statement_timeout = 20000"]
+        assert len(sentencias) == 2
         assert conn.committed == 0
         assert conn.rolled_back == 1
         assert pool.putconn_calls == [False]

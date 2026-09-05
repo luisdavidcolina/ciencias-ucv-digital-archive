@@ -54,11 +54,6 @@ def _get_pool() -> pg_pool.ThreadedConnectionPool:
             # (60s) sólo intentando conectar. 3s es suficiente para Neon
             # despierto y falla rápido cuando no lo está.
             connect_timeout=3,
-            # IN-169: sin statement_timeout, una sola consulta puede consumir
-            # el lambda entero. 20s dejan margen sobre el presupuesto de 60s
-            # para responder con un error claro en vez de que la plataforma
-            # corte la función sin dejar ni respuesta ni registro.
-            options="-c statement_timeout=20000",
         )
     return _pool
 
@@ -95,6 +90,16 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                 _get_pool().putconn(conn, close=True)
                 conn = _get_pool().getconn()
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                # IN-169: sin statement_timeout, una sola consulta puede consumir
+                # el lambda entero. 20s dejan margen sobre el presupuesto de 60s
+                # para responder con un error claro en vez de que la plataforma
+                # corte la función sin dejar ni respuesta ni registro. Va como
+                # SET de sesión, no como parámetro de arranque de la conexión:
+                # el pooler de Neon (pgbouncer) rechaza cualquier parámetro de
+                # arranque que no reconozca ("unsupported startup parameter"),
+                # tumbando la conexión entera -- esto rompió produccion el
+                # 2026-09-04 hasta que se corrigió aquí.
+                cur.execute("SET statement_timeout = 20000")
                 cur.execute(sql, params or ())
                 result = None
                 if fetch == "all":
@@ -225,6 +230,8 @@ def db_transaction():
         if conn.closed:
             _get_pool().putconn(conn, close=True)
             conn = _get_pool().getconn()
+        with conn.cursor() as _cur:
+            _cur.execute("SET statement_timeout = 20000")
 
         def execute(sql: str, params=None, fetch: str = "none"):
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
