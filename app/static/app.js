@@ -254,6 +254,36 @@ function closeSidebar() {
   }
 }
 
+// VI-045: el menú lateral abierto es un cajón modal sobre el contenido (el
+// resto de la página queda tapado por "sidebar-overlay"), así que el foco
+// tiene que quedarse atrapado dentro mientras esté abierto — si no, Tab lo
+// saca al contenido que sigue debajo, invisible bajo el overlay, y Shift+Tab
+// desde el primer enlace se lo lleva a la barra superior. Escape lo cierra,
+// como cualquier cajón/diálogo.
+function sidebarKeydownTrap(e) {
+  const barra = document.getElementById("app-sidebar");
+  if (!barra || !barra.classList.contains("open")) return;
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeSidebar();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  const focusables = Array.from(
+    barra.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')
+  ).filter(el => el.offsetParent !== null);
+  if (focusables.length === 0) return;
+  const primero = focusables[0];
+  const ultimo = focusables[focusables.length - 1];
+  if (e.shiftKey && document.activeElement === primero) {
+    e.preventDefault();
+    ultimo.focus();
+  } else if (!e.shiftKey && document.activeElement === ultimo) {
+    e.preventDefault();
+    primero.focus();
+  }
+}
+
 // ==========================================================================
 // EVENTOS
 // ==========================================================================
@@ -280,6 +310,7 @@ function setupEventListeners() {
   safeOn("sidebar-toggle-btn","click", openSidebar);
   safeOn("sidebar-close-btn", "click", closeSidebar);
   safeOn("sidebar-overlay",   "click", closeSidebar);
+  document.addEventListener("keydown", sidebarKeydownTrap);
 
   // Tabs (SPA únicamente; en standalone las <a href> navegan normalmente)
   // Los enlaces del menú son <a href> y navegan solos. Aquí vivían handlers de

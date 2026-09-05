@@ -173,8 +173,29 @@ function shellNavbarHTML(pagina) {
 // con teclado atraviesa trece controles de menú antes de llegar al contenido —
 // en cada página, cada vez. Está oculto hasta que recibe el foco.
 function shellSkipLinkHTML() {
-  return '<a class="ds-skip-link" href="#contenido-principal">' +
+  return '<a id="skip-nav-link" class="ds-skip-link" href="#contenido-principal">' +
          'Saltar al contenido principal</a>';
+}
+
+// VI-044: el recorrido de teclado real medía el enlace ya visible pero medio
+// cortado por la barra superior (`.main-header`, `position: sticky`, z-index
+// propio) — el `top: 0` de `.ds-skip-link` lo deja pegado al borde y una
+// parte queda debajo de la barra. Se fuerza aquí, en línea, para no tocar
+// `styles.css`/`styles/` (carriles paralelos trabajando ahí hoy): al recibir
+// el foco baja a 8px y sube por encima de cualquier z-index de la cáscara.
+function _reforzarSkipLinkAlEnfocar() {
+  const enlace = document.getElementById("skip-nav-link");
+  if (!enlace) return;
+  enlace.addEventListener("focus", () => {
+    enlace.style.top = "8px";
+    enlace.style.zIndex = "10000";
+    enlace.style.transform = "translateY(0)";
+  });
+  enlace.addEventListener("blur", () => {
+    enlace.style.top = "";
+    enlace.style.zIndex = "";
+    enlace.style.transform = "";
+  });
 }
 
 // El destino del salto se marca aquí y no en cada HTML: así ninguna página
@@ -193,6 +214,7 @@ function _marcarContenidoPrincipal() {
   const hueco = document.getElementById("app-shell-navbar");
   if (!hueco) return;
   hueco.outerHTML = shellSkipLinkHTML() + shellNavbarHTML(document.body.dataset.page || "");
+  _reforzarSkipLinkAlEnfocar();
 })();
 
 if (document.readyState === "loading") {
