@@ -108,11 +108,11 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | LA-asistente | agente-la-asistente | 2026-09-03 | terminado | 65fdf78 (ver nota en _BUZON.md: commit ajeno de agente-verificacion-despliegue que arrastró mi ai-widget.css por una carrera de git concurrente, contenido correcto) |
 | LW-www | — | 2026-09-03 | terminado | ya resuelto en 9244e45 (F1-paginas-estaticas borró www/styles.css) |
 
-| PASS3-rrhh-backend-untouched | agente-pass3-rrhh-backend | 2026-09-04 | en curso | |
-| PASS3-catalog-retention-imports | agente-pass3-catalog-retention-imports | 2026-09-04 | en curso | |
-| PASS3-admin-js-untouched | agente-pass3-admin-js-untouched | 2026-09-04 | en curso | |
-| PASS3-styles-buzon | agente-pass3-styles-buzon | 2026-09-04 | en curso | |
-| PASS3-admin-html-depth | agente-pass3-admin-html-depth | 2026-09-04 | en curso | |
+| PASS3-rrhh-backend-untouched | agente-pass3-rrhh-backend | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado y comiteado por el orquestador tras verificar sintaxis y pytest: OR-021/022/023, BR-063/064/065/067/068/069, OR-013/014/037/038/044, OA-006/007, OA-042) | 54237d8 |
+| PASS3-catalog-retention-imports | agente-pass3-catalog-retention-imports | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado por el orquestador; imports.py/helpers.py sin cambios en lo rescatado) | 79472a6 |
+| PASS3-admin-js-untouched | agente-pass3-admin-js-untouched | 2026-09-04 | terminado (interrumpido por limite de sesion, rescatado por el orquestador: admin-ui.js y admin-users.js; admin.js/admin-submit.js/admin-stats.js/admin-categories.js sin cambios en lo rescatado — relanzar si hace falta profundizar) | 05e812b |
+| PASS3-styles-buzon | agente-pass3-styles-buzon | 2026-09-04 | en curso (cayo por limite de sesion/red antes de escribir nada; sin rescate posible, relanzar) | |
+| PASS3-admin-html-depth | agente-pass3-admin-html-depth | 2026-09-04 | en curso (cayo por limite de sesion antes de comitear; sin cambios de codigo, solo nota de buzon ya en HEAD) | |
 | PASS3-login-scanner-js | agente-pass3-login-scanner-js | 2026-09-04 | terminado (SI-175 corregido — id de selector muerto; SI-177/DG-162 parcial — accesibilidad de teclado; login.js sin cambios, ya resuelto por C9-auth; resto documentado en _BUZON.md) | b68a951 |
 
 ## Cómo se escribe una fila
