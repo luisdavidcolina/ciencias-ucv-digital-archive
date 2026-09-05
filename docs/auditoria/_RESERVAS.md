@@ -64,8 +64,8 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | H1f-rutas-pagina | agente-h1f-rutas-pagina | 2026-09-03 | terminado (sin cambios de código: `pages.py`/`config.py` ya cumplían, todo lo pendiente es `[CHOCA]` y quedó anotado en `_BUZON.md`) | e5a7696 |
 | H4-despliegue | agente-h4-despliegue | 2026-09-03 | terminado (parcial: 6 de 37 fichas resueltas de config/despliegue real; el resto exige main.py/database.py/backup.py/.python-version/CI/paneles externos, ver nota en _BUZON.md) | 8a98120 |
 | A1-buscador-archivo | agente-a1-buscador-archivo | 2026-09-03 | terminado | 795cd42 |
-| A3-buscador-rrhh (hr.js) | agente-a3a-buscador-rrhh-js | 2026-09-04 | en curso | |
-| A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | en curso | |
+| A3-buscador-rrhh (hr.js) | agente-a3a-buscador-rrhh-js | 2026-09-04 | terminado (interrumpido por corte de sesion, retomado por el orquestador: comiteado tal cual quedo, ver ab3be26) | ab3be26 |
+| A3-buscador-rrhh (hr.html) | agente-a3b-buscador-rrhh-html | 2026-09-04 | terminado | db8679e |
 | SWEEP-styles | agente-sweep-styles | 2026-09-03 | terminado | d07452e |
 | LX-2 | agente-lx2-modularizacion | 2026-09-03 | terminado (parcial: solo SD-214 hecho; SD-211/212/213/206 sin tocar, bloqueo real y numeros actualizados en _BUZON.md) | baebd7c |
 | LX-3 | agente-lx3-modularizacion | 2026-09-04 | terminado (SD-213 completo: 12 modulos reales bajo app/static/styles/, mas un bug real de @layer que invalidaba los @import corregido por el orquestador tras el corte de sesion — ver commit; SD-212/SD-211/SD-206 quedan para otra pasada) | 9991649 |
