@@ -51,10 +51,10 @@
   <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap:8px;">
     <h4 class="mb-0"><i class="fas fa-robot mr-1"></i> Asistente IA</h4>
     <div class="d-flex align-items-center" style="gap:6px;">
-      <button class="btn btn-sm btn-outline-secondary" onclick="openThemePanel()" title="Personalización">
+      <button class="btn btn-sm btn-outline-secondary" onclick="openThemePanel()" title="Personalización" aria-label="Personalización">
         <i class="fas fa-palette"></i> <span class="ds-btn-label">Personalización</span>
       </button>
-      <a href="/admin/sistema" class="btn btn-sm btn-outline-secondary">
+      <a href="/admin/sistema" class="btn btn-sm btn-outline-secondary" aria-label="Admin Global">
         <i class="fas fa-arrow-left"></i> <span class="ds-btn-label">Admin Global</span>
       </a>
     </div>
@@ -230,6 +230,13 @@ function esc(t) {
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+// Formateador único para cifras y contadores: nunca concatena el valor crudo,
+// que puede llegar `null`/`undefined` desde el backend y salir como el string
+// literal "null" en pantalla (VI-029).
+function fmtNum(n) {
+  return (n ?? 0).toLocaleString();
+}
+
 // --- estado ---------------------------------------------------------------
 api("/api/ia/disponible").then(r => r.json()).then(d => {
   const el = document.getElementById("estado-alerta");
@@ -296,13 +303,13 @@ api("/api/ia/gastos?dias=30").then(r => {
     '<div class="progress my-2" style="height:8px"><div class="progress-bar ' +
       (pct > 80 ? "bg-danger" : "bg-success") + '" style="width:' + pct + '%"></div></div>' +
     '<div class="d-flex justify-content-between text-muted small">' +
-      '<span>Histórico</span><span>' + (d.historico.mensajes || 0) + ' respuestas · ' +
-      (d.historico.tokens || 0).toLocaleString() + ' tokens · $' +
+      '<span>Histórico</span><span>' + fmtNum(d.historico.mensajes) + ' respuestas · ' +
+      fmtNum(d.historico.tokens) + ' tokens · $' +
       Number(d.historico.costo || 0).toFixed(4) + '</span></div>';
 
   document.getElementById("gasto-tabla").innerHTML = (d.por_dia || []).map(f =>
-    '<tr><td>' + esc(f.dia) + '</td><td class="text-right">' + f.mensajes +
-    '</td><td class="text-right">' + (f.tokens || 0).toLocaleString() +
+    '<tr><td>' + esc(f.dia) + '</td><td class="text-right">' + fmtNum(f.mensajes) +
+    '</td><td class="text-right">' + fmtNum(f.tokens) +
     '</td><td class="text-right">$' + Number(f.costo || 0).toFixed(4) + '</td></tr>'
   ).join("") || '<tr><td colspan="4" class="text-muted">Sin actividad todavía.</td></tr>';
 }).catch(() => {
@@ -318,7 +325,7 @@ function pintarConversaciones(lista) {
   document.getElementById("conv-tabla").innerHTML = (lista || []).map(c =>
     '<tr data-conv-id="' + c.id + '"><td><div class="text-truncate" style="max-width:230px">' + esc(c.titulo || "(sin título)") +
     '</div><small class="text-muted">' + esc(c.ultima || "") + ' · ' + esc(c.perfil) + ' · ' +
-    esc(c.usuario || "público") + ' · ' + c.mensajes + ' msgs · $' +
+    esc(c.usuario || "público") + ' · ' + fmtNum(c.mensajes) + ' msgs · $' +
     Number(c.costo || 0).toFixed(4) + '</small></td>' +
     '<td class="text-right align-middle"><button class="btn btn-sm btn-link text-danger" ' +
     'onclick="borrarConv(' + c.id + ')"><i class="fas fa-trash"></i></button></td></tr>'

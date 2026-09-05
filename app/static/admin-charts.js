@@ -33,6 +33,36 @@ function _countScale(axis = "y") {
   return axis === "y" ? { y: g, x: o } : { x: g, y: o };
 }
 
+// VI-038/VI-039: tope de ocho ranuras de color + "Otros". El orden de
+// vizSeries() es el mecanismo de seguridad para daltonismo (CLAUDE.md); no se
+// cicla, así que a partir de la novena categoría se agrupan en un único
+// "Otros" gris en vez de repetir tono o dejarlas sin color (huecos undefined
+// de Chart.js cuando backgroundColor es más corto que data).
+function _capYColorear(rows, C) {
+  const grisOtros = _viz("ink-muted", "#6c757d");
+  if (rows.length <= C.length) return rows.map((r, i) => ({ ...r, color: C[i] }));
+  const ordenadas = [...rows].sort((a, b) => (b.value || 0) - (a.value || 0));
+  const top   = ordenadas.slice(0, C.length).map((r, i) => ({ ...r, color: C[i] }));
+  const resto = ordenadas.slice(C.length);
+  const otrosValor = resto.reduce((a, r) => a + (r.value || 0), 0);
+  if (otrosValor > 0) top.push({ label: `Otros (${resto.length})`, value: otrosValor, color: grisOtros });
+  return top;
+}
+
+// VI-042: un eje con rejilla de 0 a 100% y ni una barra parece un gráfico
+// roto, no uno vacío. Cero filas y "todas las filas en cero" son el mismo
+// estado a ojos de quien mira la pantalla.
+function _sinValor(rows) {
+  return !rows.length || rows.every(r => !r.value);
+}
+
+// VI-040: recorta la etiqueta larga del eje X, pero el dato completo sigue
+// disponible en el tooltip — no se pierde información, sólo espacio.
+function _etiquetaCorta(s, n = 10) {
+  const str = String(s ?? "");
+  return str.length > n ? str.slice(0, n - 1) + "…" : str;
+}
+
 // Mientras se espera a /api/admin/charts el panel era un muro de tarjetas en
 // blanco durante varios segundos, indistinguible de "esto no funciona".
 function _marcarCargando() {
@@ -67,6 +97,7 @@ async function loadChartsData() {
     } else {
       _renderRrhhCharts(data, suf);
     }
+    _observarCajasDeGrafico();
   } catch(e) {
     _quitarCargando();
     document.querySelectorAll(".ds-chart-box canvas").forEach(c =>
@@ -85,6 +116,7 @@ function _repaintCharts() {
   const { data, suf, modulo } = _lastChartsData;
   if (modulo === "Archivo") _renderArchivoCharts(data, suf);
   else                      _renderRrhhCharts(data, suf);
+  _observarCajasDeGrafico();
 }
 
 // Marca la tarjeta como alerta solo si hay algo que atender. El color va
@@ -128,7 +160,8 @@ function _renderArchivoCharts(data, suf) {
 
   setEl(`chart-total-keywords-${suf}`, t.total_keywords);
   setEl(`chart-total-autores-${suf}`, t.total_autores);
-  setEl(`chart-total-digitalizados-${suf}`, t.total_digitalizados);
+  // chart-total-digitalizados-${suf} se rellena más abajo, con la misma
+  // fuente que el resto de cifras de digitalización (VI-036).
   setEl(`chart-total-pendientes-${suf}`, t.total_pendientes);
   setEl(`chart-total-vencidos-${suf}`, t.total_vencidos);
   // OA-067: la fecha exacta en el hueco de una cifra desalinea la rejilla y no
@@ -142,9 +175,27 @@ function _renderArchivoCharts(data, suf) {
     }
   }
 
-  // El avance de digitalización solo se lee como proporción del fondo.
-  const pct = t.total_docs ? Math.round((t.total_digitalizados / t.total_docs) * 100) : 0;
-  setSub(`kpi-sub-digitalizados-${suf}`, `${pct}% del fondo`);
+  // VI-036: "0 % del fondo", "0 de 1807" y una lista que suma 1807 eran tres
+  // cifras de fuentes distintas (los totales de la API por un lado, la suma de
+  // `by_soporte` por otro) que podían no cuadrar entre sí. Ahora hay una sola
+  // fuente para el denominador: la propia lista de soportes, que es también lo
+  // que se pinta debajo. Si esa lista no llega, se cae a los totales de la API
+  // como único plan B, nunca se mezclan las dos.
+  const filasSoporte = data.charts.by_soporte || [];
+  // OA-075/VI-036: emparejar por texto exacto deja fuera cualquier variante de
+  // acento, mayúscula o espacio que llegue del backend. Se normaliza antes de
+  // comparar y sigue siendo por clave, no por posición (daltonismo).
+  const _norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+  const _esDigital = r => ["digital", "digitalizado"].includes(_norm(r.label));
+  const totalSoporte   = filasSoporte.reduce((a, r) => a + (r.value || 0), 0);
+  const digitalSoporte = filasSoporte.filter(_esDigital).reduce((a, r) => a + (r.value || 0), 0);
+  const hayFuenteSoporte = filasSoporte.length > 0;
+  const totalFondo   = hayFuenteSoporte ? totalSoporte   : (t.total_docs || 0);
+  const totalDigital = hayFuenteSoporte ? digitalSoporte : (t.total_digitalizados || 0);
+  const pct = totalFondo ? Math.round((totalDigital / totalFondo) * 100) : null;
+
+  setEl(`chart-total-digitalizados-${suf}`, totalDigital);
+  setSub(`kpi-sub-digitalizados-${suf}`, pct === null ? "sin datos de soporte" : `${pct}% del fondo`);
   setSub(`kpi-sub-pendientes-${suf}`,
          t.total_pendientes ? "borrador o revisión" : "todo aprobado");
   setSub(`kpi-sub-vencidos-${suf}`,
@@ -158,38 +209,38 @@ function _renderArchivoCharts(data, suf) {
   // no decía nada. La barra dice lo mismo a 0% que a 60%.
   const caja = document.getElementById(`soporte-${suf}`);
   if (caja) {
-    const filas = data.charts.by_soporte || [];
-    const total = filas.reduce((a, r) => a + r.value, 0);
-    // OA-075/VI-036: emparejar por texto exacto deja fuera cualquier variante de
-    // acento, mayúscula o espacio que llegue del backend, y entonces "0 %" convive
-    // con un total de cientos de documentos en la misma tarjeta. Se normaliza antes
-    // de comparar y sigue siendo por clave, no por posición (daltonismo).
-    const _norm = s => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
-    const color = { "digitalizado": C[0], "digital": C[2], "fisico": _viz("ink-muted", "#6c757d") };
-    const digital = filas
-      .filter(r => ["digital", "digitalizado"].includes(_norm(r.label)))
-      .reduce((a, r) => a + r.value, 0);
-    const pctDig = total ? Math.round((digital / total) * 100) : 0;
-    const colorDe = r => color[_norm(r.label)] || C[3];
+    // VI-039: "Digital"/"Físico" siempre visibles con su propio color; el resto
+    // de variantes (ruido de captura de datos: acentos, mayúsculas, erratas que
+    // el normalizado no reconoce) se ordena por peso y se agrupa a partir de la
+    // octava ranura en "Otros" (_capYColorear) en vez de repetir un solo tono
+    // sobre trece segmentos.
+    const colorFijo = { "digital": C[0], "digitalizado": C[0], "fisico": _viz("ink-muted", "#6c757d") };
+    const prioridad = r => (_norm(r.label) in colorFijo ? 0 : 1);
+    const ordenFilas = [...filasSoporte].sort((a, b) => prioridad(a) - prioridad(b) || (b.value || 0) - (a.value || 0));
+    const filasCap = _capYColorear(ordenFilas, C).map(r => ({ ...r, color: colorFijo[_norm(r.label)] || r.color }));
 
-    caja.innerHTML = total === 0
+    caja.innerHTML = totalFondo === 0
       ? `<div class="ds-chart-empty"><i class="fas fa-circle-info"></i><span>Aún no hay documentos registrados.</span></div>`
       : `
-      <div class="ds-avance-cifra">${pctDig}<span>%</span></div>
-      <div class="ds-avance-pie">${digital} de ${total} documentos con soporte digital</div>
-      <div class="ds-avance-barra" role="img" aria-label="${escHtml(`${pctDig}% del fondo con soporte digital: ${filas.map(r => `${r.value} ${r.label}`).join(', ')}`)}">
-        ${filas.map(r => `<div class="ds-avance-tramo" style="width:${(r.value / total) * 100}%;background:${colorDe(r)}" title="${escHtml(r.label)}: ${r.value}"></div>`).join("")}
+      <div class="ds-avance-cifra">${pct}<span>%</span></div>
+      <div class="ds-avance-pie">${totalDigital} de ${totalFondo} documentos con soporte digital</div>
+      <div class="ds-avance-barra" role="img" aria-label="${escHtml(`${pct}% del fondo con soporte digital: ${filasCap.map(r => `${r.value} ${r.label}`).join(', ')}`)}">
+        ${filasCap.map(r => `<div class="ds-avance-tramo" style="width:${(r.value / totalFondo) * 100}%;background:${r.color}" title="${escHtml(r.label)}: ${r.value}"></div>`).join("")}
       </div>
       <ul class="ds-avance-leyenda">
-        ${filas.map(r => `<li><span class="ds-avance-punto" style="background:${colorDe(r)}"></span>${escHtml(r.label)} <b>${r.value}</b></li>`).join("")}
+        ${filasCap.map(r => `<li><span class="ds-avance-punto" style="background:${r.color}"></span>${escHtml(r.label)} <b>${r.value}</b></li>`).join("")}
       </ul>`;
   }
 
   const byType = data.charts.by_type || [];
-  if (!byType.length) _sinDatos(`chart-by-type-${suf}`, "Aún no hay documentos clasificados por tipo.");
+  if (_sinValor(byType)) _sinDatos(`chart-by-type-${suf}`, "Aún no hay documentos clasificados por tipo.");
   else {
     _conDatos(`chart-by-type-${suf}`);
     _destroyChart(`by-type-${suf}`);
+    // VI-038: trece categorías con dos azules, dos naranjas... el tope de
+    // ocho ranuras + "Otros" que ya aplica la consulta en otros paneles no se
+    // reflejaba aquí. _capYColorear ordena por peso y agrupa la cola.
+    const byTypeCap = _capYColorear(byType, C);
     const elByType = document.getElementById(`chart-by-type-${suf}`);
     // OA-076/OR-078: un <canvas> es opaco para un lector de pantalla. El resumen
     // en aria-label lleva el mismo dato que el gráfico, sin esperar a la tabla
@@ -197,29 +248,42 @@ function _renderArchivoCharts(data, suf) {
     if (elByType) {
       elByType.setAttribute("role", "img");
       elByType.setAttribute("aria-label",
-        `Documentos por tipo: ${byType.map(r => `${r.label} ${r.value}`).join(", ")}`);
+        `Documentos por tipo: ${byTypeCap.map(r => `${r.label} ${r.value}`).join(", ")}`);
     }
     const ctx = elByType?.getContext("2d");
     if (ctx) _chartInstances[`by-type-${suf}`] = new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: byType.map(r => r.label),
+        labels: byTypeCap.map(r => r.label),
         datasets: [{
-          data: byType.map(r => r.value),
-          backgroundColor: C,
+          data: byTypeCap.map(r => r.value),
+          backgroundColor: byTypeCap.map(r => r.color),
           borderColor: _viz("surface", "#ffffff"),
           borderWidth: 2            // anillo de superficie: separa los sectores
         }]
       },
       options: _catOptions({
         cutout: "58%",
-        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
+        // VI-043: la leyenda lateral con muchas entradas se reflufa en
+        // columnas angostas y se corta a media palabra. Abajo siempre cabe,
+        // y con envoltura de Chart.js en vez de un recorte duro.
+        plugins: { legend: {
+          position: "bottom",
+          labels: {
+            font: { size: 11 }, boxWidth: 10, padding: 8,
+            generateLabels(chart) {
+              const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+              items.forEach(it => { if (it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
+              return items;
+            }
+          }
+        } }
       })
     });
   }
 
   const byYear = data.charts.by_year || [];
-  if (!byYear.length) _sinDatos(`chart-by-year-${suf}`, "Ningún documento tiene fecha registrada.");
+  if (_sinValor(byYear)) _sinDatos(`chart-by-year-${suf}`, "Ningún documento tiene fecha registrada.");
   else {
     _conDatos(`chart-by-year-${suf}`);
     _destroyChart(`by-year-${suf}`);
@@ -271,7 +335,26 @@ function _renderArchivoCharts(data, suf) {
       },
       options: _catOptions({
         interaction: { mode: "index", intersect: false },   // crosshair: toda la columna
-        scales: _countScale("y")
+        // VI-040: etiquetas largas rotadas a 45° se pisaban entre sí y se
+        // salían del área del gráfico. Se recortan con elipsis y el dato
+        // completo se conserva en el tooltip.
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: _viz("grid", "#e6e6e2") } },
+          x: {
+            grid: { display: false },
+            ticks: {
+              maxRotation: 45, minRotation: byMonth.length > 6 ? 45 : 0,
+              autoSkip: true,
+              callback: function (val) { return _etiquetaCorta(this.getLabelForValue(val)); }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            title: items => items.length ? byMonth[items[0].dataIndex].label : ""
+          } }
+        }
       })
     });
   }
@@ -317,16 +400,20 @@ function _renderRrhhCharts(data, suf) {
   // documento en cada una. Contar documentos no responde esa pregunta — mil
   // títulos en la Parte I y ninguna evaluación en la II se vería "bien".
   const cobertura = data.charts.cobertura || [];
+  const totalCobertura = cobertura[0]?.total || 0;
   // OR-073: si la consulta no devuelve filas (sin categorías "Parte" configuradas,
   // el mismo hueco que provoca OA-001 en Retención) el bloque se saltaba entero y
   // dejaba el canvas sin "Cargando…" y sin contenido: una tarjeta en blanco.
-  if (!cobertura.length) {
+  // VI-042: sin plantilla (total 0) las ocho barras dan 0%: rejilla y eje de
+  // 0 a 100% sin un solo trazo, que parece un gráfico roto. Es el mismo
+  // "sin datos" que cero filas, no un caso aparte.
+  if (!cobertura.length || totalCobertura === 0) {
     _sinDatos(`chart-cobertura-${suf}`, "No hay Partes de expediente configuradas.");
   } else {
     _conDatos(`chart-cobertura-${suf}`);
     _destroyChart(`cobertura-${suf}`);
     const elCobertura = document.getElementById(`chart-cobertura-${suf}`);
-    const total = cobertura[0]?.total || 0;
+    const total = totalCobertura;
     if (elCobertura) {
       elCobertura.setAttribute("role", "img");
       elCobertura.setAttribute("aria-label",
@@ -368,32 +455,50 @@ function _renderRrhhCharts(data, suf) {
   // categoría real (toda la plantilla Activa, o con el mismo nivel educativo).
   // El estado vacío se reserva para cero filas; una sola se pinta con el slot 1.
   const doughnut = (key, id, rows, vacio) => {
-    if (!rows.length) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
+    // VI-042: cero filas y "todas las filas en cero" son el mismo estado
+    // vacío a ojos de quien mira la pantalla.
+    if (_sinValor(rows)) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
     _conDatos(id);
     _destroyChart(key);
+    // VI-038: mismo tope de ocho ranuras + "Otros" que el donut de Archivo.
+    const rowsCap = _capYColorear(rows, C);
     const elD = document.getElementById(id);
     if (elD) {
       elD.setAttribute("role", "img");
-      elD.setAttribute("aria-label", rows.map(r => `${r.label} ${r.value}`).join(", "));
+      elD.setAttribute("aria-label", rowsCap.map(r => `${r.label} ${r.value}`).join(", "));
     }
     const ctx = elD?.getContext("2d");
     if (!ctx) return;
     _chartInstances[key] = new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: rows.map(r => r.label),
-        datasets: [{ data: rows.map(r => r.value), backgroundColor: C,
+        labels: rowsCap.map(r => r.label),
+        datasets: [{ data: rowsCap.map(r => r.value), backgroundColor: rowsCap.map(r => r.color),
           borderColor: ring, borderWidth: 2 }]
       },
       options: _catOptions({
         cutout: "58%",
-        plugins: { legend: { position: vizLegendSide(), labels: { font: { size: 11 } } } }
+        // VI-043: leyenda lateral con dos columnas desiguales que se cortan a
+        // media palabra (visto en los donuts de RRHH). Abajo con envoltura.
+        plugins: { legend: {
+          position: "bottom",
+          labels: {
+            font: { size: 11 }, boxWidth: 10, padding: 8,
+            generateLabels(chart) {
+              const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+              items.forEach(it => { if (it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
+              return items;
+            }
+          }
+        } }
       })
     });
   };
 
   const barH = (key, id, rows, color, vacio) => {
-    if (!rows.length) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
+    // VI-042: mismo criterio que el donut — cero filas o todas en cero es
+    // "sin datos", no un gráfico con ejes y sin barras.
+    if (_sinValor(rows)) { _sinDatos(id, vacio || "Sin datos suficientes."); return; }
     _conDatos(id);
     _destroyChart(key);
     const elB = document.getElementById(id);
@@ -424,7 +529,7 @@ function _renderRrhhCharts(data, suf) {
      "Sin nivel educativo registrado en las fichas de personal.");
 
   const byDocType = data.charts.by_doc_type || [];
-  if (!byDocType.length) {
+  if (_sinValor(byDocType)) {
     _sinDatos(`chart-by-doctype-${suf}`, "Aún no hay documentos clasificados por tipo.");
   } else {
     _conDatos(`chart-by-doctype-${suf}`);
@@ -456,6 +561,26 @@ window.addEventListener("resize", () => {
   const side = vizLegendSide();
   if (side !== _vizResizeSide) { _vizResizeSide = side; _repaintCharts(); }
 });
+
+// VI-041: con densidad compacta el contenedor cambia de tamaño sin que la
+// ventana dispare "resize" — el <canvas> se queda con el radio calculado
+// para el tamaño anterior y el donut sale recortado. Un ResizeObserver sobre
+// la propia caja del gráfico es lo único que ve ese cambio.
+const _chartResizeObserver = (typeof ResizeObserver !== "undefined")
+  ? new ResizeObserver(entries => {
+      entries.forEach(entry => {
+        const canvas = entry.target.querySelector("canvas");
+        if (!canvas) return;
+        const key = Object.keys(_chartInstances).find(k => _chartInstances[k].canvas === canvas);
+        if (key) _chartInstances[key].resize();
+      });
+    })
+  : null;
+
+function _observarCajasDeGrafico() {
+  if (!_chartResizeObserver) return;
+  document.querySelectorAll(".ds-chart-box").forEach(box => _chartResizeObserver.observe(box));
+}
 
 // =============================================================================
 // IMPORT CSV MASIVO
