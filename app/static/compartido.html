@@ -45,12 +45,31 @@ const TOKEN = decodeURIComponent(location.pathname.split('/compartido/')[1] || '
 const caja  = document.getElementById('contenido');
 
 function aviso(icono, titulo, detalle) {
+  // VI-071: sin salida ni contacto, un enlace caducado dejaba 600px de tarjeta
+  // vacía (la caja hereda flex:1 de .ds-compartido-wrap para el caso normal,
+  // con documento). Aquí se encoge al contenido y se ofrecen dos salidas
+  // reales: el catálogo público (no exige sesión) y el correo de soporte que
+  // ya usa /static/ayuda.html.
+  caja.parentElement.classList.add('is-aviso');
   caja.innerHTML =
     '<div class="ds-compartido-aviso">' +
       '<i class="fas ' + icono + '"></i>' +
       '<h2>' + esc(titulo) + '</h2>' +
       '<p>' + esc(detalle) + '</p>' +
+      '<div class="ds-compartido-aviso-acciones">' +
+        '<a class="btn btn-primary" href="/archivo"><i class="fas fa-magnifying-glass mr-1"></i>Ir al catálogo público</a>' +
+        '<a class="btn btn-outline-secondary" href="mailto:informatica@ciens.ucv.ve"><i class="fas fa-envelope mr-1"></i>Escribir al Archivo</a>' +
+      '</div>' +
     '</div>';
+}
+
+function formatearCaducidad(iso) {
+  if (!iso) return '';
+  const f = new Date(iso);
+  if (isNaN(f.getTime())) return '';
+  return f.toLocaleString('es-VE', {
+    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
 }
 
 function fila(etiqueta, valor) {
@@ -105,7 +124,11 @@ function fila(etiqueta, valor) {
     '</dl>' +
     '<div class="ds-compartido-acciones">' + descarga + '</div>' +
     '<p class="ds-compartido-nota"><i class="fas fa-shield-halved mr-1"></i>' +
-    'Consulta autorizada mediante enlace temporal. Su acceso queda registrado en la auditoría del archivo.</p>';
+    'Consulta autorizada mediante enlace temporal. Su acceso queda registrado en la auditoría del archivo.' +
+    (datos.caduca
+      ? '<br><i class="fas fa-clock mr-1"></i>Este enlace caduca el ' + esc(formatearCaducidad(datos.caduca)) + '.'
+      : '') +
+    '</p>';
 })();
 </script>
 </body>

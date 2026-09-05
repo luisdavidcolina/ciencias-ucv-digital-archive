@@ -22,6 +22,9 @@ Decisiones:
   enviado a la papelera (IN-147): la comprobación se repite en cada consulta,
   no sólo al crear el enlace.
 """
+import base64
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse
 
@@ -37,6 +40,19 @@ _TABLAS = {
     "Archivo": ("datos_archivo", "id_archivo"),
     "RRHH": ("datos_rrhh", "id_rrhh"),
 }
+
+
+def _token_expira_iso(token: str) -> str | None:
+    """Extrae la caducidad (VI-072) de un token que `verify_share_token` ya
+    validó: firma y formato correctos, así que basta con leer el payload de
+    nuevo sin repetir la verificación HMAC."""
+    try:
+        relleno = "=" * (-len(token) % 4)
+        raw = base64.urlsafe_b64decode((token + relleno).encode()).decode()
+        _, _, expira, _ = raw.rsplit(":", 3)
+        return datetime.fromtimestamp(int(expira), tz=timezone.utc).isoformat()
+    except Exception:
+        return None
 
 
 def _leer_documento(modulo: str, doc_id: int) -> dict | None:
@@ -90,7 +106,7 @@ def leer_compartido(token: str):
     # El file_url interno no se expone: se sirve por la ruta del propio enlace,
     # para que el token siga siendo la única llave.
     fila["tiene_archivo"] = bool(fila.pop("file_url", None))
-    return {"modulo": modulo, "documento": fila}
+    return {"modulo": modulo, "documento": fila, "caduca": _token_expira_iso(token)}
 
 
 @router.get("/api/compartido/{token}/archivo")

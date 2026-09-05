@@ -191,15 +191,103 @@
     <div class="col-lg-7">
       <h5 class="font-weight-bold mb-3"><i class="fas fa-question-circle mr-2 text-primary"></i>Preguntas Frecuentes</h5>
 
-      <div class="help-coming-soon" id="faq-empty">
+      <div class="help-coming-soon" id="faq-empty" hidden>
         <i class="fas fa-comment-dots"></i>
-        <h4>Preguntas frecuentes próximamente</h4>
-        <p>Estamos recopilando las consultas más comunes para publicarlas aquí.<br>
-          Por ahora, consulte directamente al equipo de soporte.</p>
+        <h4>No se encontraron resultados</h4>
+        <p>Pruebe con otra palabra o consulte directamente al equipo de soporte.</p>
       </div>
 
-      <!-- Los FAQ se agregarán aquí como .help-faq-item -->
-      <div id="faq-list" class="mt-2"></div>
+      <!-- VI-073: contenido real, verificado contra el comportamiento actual del
+           sistema (rutas, roles, terminología) — no texto de relleno. Cada
+           .help-faq-item es un par pregunta/respuesta filtrable por el buscador. -->
+      <div id="faq-list" class="mt-2">
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            ¿Cómo busco un documento o expediente?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            En «Archivo» o «RRHH» escriba en el buscador: el sistema busca por texto
+            completo (título, autor, contenido) y también reconoce cédulas y nombres
+            parciales en RRHH. Puede combinarlo con los filtros de la barra lateral
+            (tipo documental, fecha, palabras clave) para acotar resultados. La
+            búsqueda no requiere iniciar sesión.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            ¿Qué son las «Partes» en RRHH?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            Es la forma en que se organizan los documentos de cada docente, siguiendo
+            la LOTTT: <strong>Parte I</strong> (Ingreso), <strong>Parte II</strong>
+            (Escalafón), <strong>Parte III</strong> (Permisos) y <strong>Parte IV</strong>
+            (Documentos Personales). Cada documento de un expediente pertenece a una
+            de las cuatro.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            ¿Por qué se llama «Tipo documental» y no «Categoría» o «Tesauro»?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            Es el nombre que usa el propio sistema para el catálogo de tipos de
+            documento (constancia, memorando, oficio…). «Palabras Clave» es un campo
+            distinto, libre, que describe el contenido del documento — no lo
+            clasifica.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            ¿Cómo comparto un documento con alguien fuera de la Facultad?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            Desde el panel de administración de ese documento genere un «Enlace
+            externo»: crea una dirección de solo lectura de <em>ese</em> documento,
+            sin necesidad de crear una cuenta ni enviar el archivo por correo. El
+            enlace tiene una vigencia limitada (la fecha exacta se muestra al abrirlo)
+            y deja de funcionar si el documento pasa a la papelera. Cada creación y
+            cada consulta quedan registradas en la auditoría.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            Un enlace compartido me dice que «caducó o no es válido» — ¿qué hago?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            Los enlaces de consulta externa vencen (hasta un mes desde que se
+            generan) y no pueden renovarse: pida a quien se lo envió que genere uno
+            nuevo desde el documento, o consulte el catálogo público si tiene acceso.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            ¿Quién puede entrar al panel de Administración?
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            Solo el personal con sesión y rol asignado sobre ese módulo (Archivo,
+            RRHH, o ambos). Quien tiene ambos módulos es administrador Global y
+            además ve retención, auditoría, respaldo y gestión de usuarios.
+          </div>
+        </div>
+        <div class="help-faq-item">
+          <button class="help-faq-toggle" type="button">
+            Cambié el tema o el modo oscuro y no se ve igual en todas las pantallas
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div class="help-faq-body">
+            El tema, el acento de color y la densidad se guardan en este navegador y
+            aplican a las páginas internas del sistema. Si una pantalla se ve distinta,
+            repórtelo al equipo de soporte con el nombre de la página: es información
+            útil para localizar el fallo.
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="col-lg-5 mt-4 mt-lg-0">
@@ -262,12 +350,20 @@ document.querySelectorAll(".help-faq-toggle").forEach(btn => {
   });
 });
 
-// Search placeholder — filtrar artículos y FAQ cuando existan
+// VI-073: el buscador ya filtra sobre las preguntas frecuentes reales de
+// arriba, no sobre una lista vacía. Con texto y cero coincidencias se muestra
+// el estado "sin resultados" en vez de dejar la columna en blanco.
 document.getElementById("help-search")?.addEventListener("input", function() {
   const q = this.value.trim().toLowerCase();
-  document.querySelectorAll(".help-faq-item").forEach(item => {
-    item.style.display = !q || item.textContent.toLowerCase().includes(q) ? "" : "none";
+  const items = document.querySelectorAll(".help-faq-item");
+  let visibles = 0;
+  items.forEach(item => {
+    const coincide = !q || item.textContent.toLowerCase().includes(q);
+    item.hidden = !coincide;
+    if (coincide) visibles++;
   });
+  const vacio = document.getElementById("faq-empty");
+  if (vacio) vacio.hidden = !q || visibles > 0;
 });
 </script>
 <script src="/static/app-core.js"></script>
