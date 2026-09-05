@@ -4262,3 +4262,77 @@ filtro exacto de estado laboral (válido/inválido) y el filtro de
 departamento. `python -m pytest app/tests -q`: 864 antes de empezar → 867 al
 cerrar (864 base + 3 nuevos), verificado tras cada ticket, no sólo al final.
 `node --check` sobre `admin-monitor.js` y `app.js` sin errores.
+
+## BR-hr-js-tercer-pase (agente-br-hr-js-3) — tercer pase sobre hr.js, BR-018 a BR-060
+
+Carril exclusivo `app/static/hr.js`. Verifiqué BR-018 a BR-060 contra el código actual
+tras dos pasadas previas (A3a y PASS2-hr-frontend-depth).
+
+**Ya resueltos, sin tocar de nuevo** (confirmado leyendo el código, no repetido):
+BR-018 (`_rrhhSearchSeq` descarta respuestas obsoletas), BR-019
+(`renderRrhhSearchError` con reintento/login), BR-020/BR-021 (modal se abre con
+spinner inmediato, `catch` con toast), BR-022 (`_toggleHistorialCargos` distingue
+401/403 de 500), BR-023 (el botón de historial se deshabilita con motivo en `title`
+en vez de pintarse activo con `id=0`), BR-024/BR-025 (`_esAdminRrhh()`/`state.user`
+condicionan Editar e Imprimir), BR-027 (foco+scroll en `changeRrhhPage`), BR-034
+(las cuatro ordenaciones del dossier ya usan `localeCompare(..., "es", ...)`),
+BR-035 (`_calcEdad` ya parsea componentes a mano), BR-038 (resumen ya no se
+fabrica), BR-039 (botón "Ver" ya se deshabilita en vez de reetiquetarse), BR-040
+(`closeDocViewer` en `hidden.bs.modal`), BR-041 (guarda explícita en
+`filterInnerDossier`), BR-043 (el fallback de array ya no existe en
+`triggerRrhhSearch`).
+
+**Arreglados de verdad esta vuelta:**
+- **Bug real sin ficha propia, encontrado al revisar BR-055**: `filterInnerDossier`
+  llamaba a `_wireDossierOpenButtons(container)` en su última línea, y esa función
+  **no existía en ningún archivo del proyecto** — ni en `hr.js` ni en ningún otro
+  `.js` del repo (comprobado con `grep -rn` sobre `app/static/*.js`). Cada apertura
+  de un expediente, cada tecla en el filtro interno y cada cambio de categoría/orden
+  lanzaba `ReferenceError: _wireDossierOpenButtons is not defined` en consola justo
+  después de pintar la lista de documentos. No rompía la pantalla (el `innerHTML` ya
+  se había asignado antes de la llamada), pero los accesos directos del encabezado
+  (Cédula/RIF/CV/Planilla de Datos y el botón junto a la C.I., que usan
+  `data-open-doc-idx` desde antes) nunca quedaban conectados a un clic — otro botón
+  que no hacía nada, en la línea de lo que ya describía BR-020 para el dossier
+  entero. Se definió la función (delegación simple con marca `dossierOpenWired` para
+  no duplicar el listener en re-renders) y se llama también sobre todo
+  `#rrhh-person-modal-content` al pintar el dossier, no sólo sobre el contenedor de
+  la lista filtrada.
+- **BR-055 (parcial, sólo lo que vive en `hr.js`)**: de paso, el botón "Abrir
+  archivo" de `_renderDossierFileList` pasó de `onclick="openDocMetadataModal(${JSON.stringify(f.__idx)})"`
+  en línea a `data-open-doc-idx` + el mismo manejador delegado de arriba. Quedan sin
+  tocar los `onclick`/`oninput`/`onchange` que están en `hr.html` (los del acordeón
+  de filtros del expediente: buscador, selector de categoría y de orden) y los de
+  las facetas (`_facetRrhhDeptClick`/`_facetRrhhEstadoClick`, que siguen en línea
+  porque convertir sólo esos dos sin tocar el resto no cierra el ticket, que pide un
+  único manejador delegado por contenedor — esfuerzo M, más coherente en una pasada
+  dedicada a `hr.js`+`hr.html` juntos).
+- **BR-037 (residual)**: la foto de la cabecera del dossier no tenía `onerror` —
+  sólo la tenía la miniatura de la tarjeta de lista. Si la clave de R2 ya no existe
+  o el usuario no tiene permiso sobre el objeto, ahora cae a las mismas iniciales
+  que ya usa el fallback sin foto, en vez del icono de imagen rota del navegador.
+- **BR-054**: `filterInnerDossier` (el filtro interno del expediente, sin relación
+  con la búsqueda principal que sí tenía 420ms) ahora hace *debounce* de 200ms.
+  Implementado enteramente en `hr.js` sin tocar `hr.html`: la función exportada con
+  ese nombre pasó a ser el wrapper con `setTimeout`, y la lógica real se movió a
+  `_filterInnerDossierNow`. El `oninput`/`onchange` de `hr.html` sigue llamando
+  `filterInnerDossier()` tal cual, sin cambios de marcado.
+
+**Verificados y siguen reales, pero exigen archivo fuera de esta zona (no tocados,
+consistente con lo ya anotado por A3a/PASS2-hr-frontend-depth):** BR-026 (doble
+paginación, ya mitigado ocultando el bloque redundante — cerrarlo del todo exige
+tocar `hr.html`/`app.js`), BR-028/BR-029 (URL del estado y enlace permanente,
+`app.js`/`pages.py` `[CHOCA]`), BR-030/BR-031/BR-033 (facetas y filtro de tipo,
+`hr.py`/`models.py`), BR-032 (etiqueta "Fecha", `hr.html`/`hr.py`), BR-036
+(`getPersonInitials`, vive en `app-core.js`), BR-042 (`perPage` a `NaN`, vive en
+`app.js`), BR-044 a BR-053 (backend/rendimiento, `hr.py`/`main.py`/`schema.sql`),
+BR-056 (CSP, `main.py`), BR-057/BR-058 (tests nuevos, `app/tests/`), BR-059/BR-060
+(ya resueltos por `PASS2-docs-hr-backend` en `hr.py`, no repetido aquí).
+
+`python -m pytest app/tests -q`: 866 pasan / 1 falla antes de mi turno y también
+después — el mismo fallo preexistente y no relacionado
+(`test_visual.py::test_pagina_publica_sin_desborde_ni_errores[archivo-...]`, del
+módulo Archivo, con un viewport distinto en cada corrida — parece flaky, no lo toqué
+porque no es `hr.js`). `node --check app/static/hr.js`: sin errores.
+
+**quién resuelve**: agente-br-hr-js-3 (BR-hr-js-tercer-pase), commit `d1676ee`
