@@ -445,6 +445,11 @@ documento sin sesión.
 
 ## Terminología (UI)
 - **NUNCA usar "Tesauro"** → siempre "Palabras Clave"
+- **NUNCA usar "Categoría", "Tipología" ni "Taxonomía"** para el catálogo de tipos de
+  documento (pestaña, tarjeta, campo, botón, lista) → siempre **"Tipo documental"**
+  (singular) / **"Tipos documentales"** (plural). Ya es el nombre que usa el propio
+  backend (`tipo_documento`, columna CSV) — unificarlo evita los cinco nombres distintos
+  para el mismo objeto que tenía `/admin/archivo` → Tipos (VI-050/VI-049).
 - Las 4 Partes de RRHH: Parte I (Ingreso), II (Escalafón), III (Permisos), IV (Documentos Personales)
 - "Clasificación" = `tesauro_secundario` en Archivo
 
