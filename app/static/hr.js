@@ -360,8 +360,11 @@ function renderRrhhDossierModal() {
   if (!profile) return;
 
   const initials  = getPersonInitials(profile.persona_raw);
+  // Igual que en la tarjeta de lista (BR-037): si la clave de R2 ya no existe
+  // o el usuario no tiene permiso, sustituye por las iniciales en vez de
+  // dejar el icono de imagen rota del navegador.
   const photoHtml = profile.foto_url
-    ? `<div class="rrhh-person-photo-card"><img src="${_secureFileUrl(profile.foto_url)}" class="rrhh-person-photo" alt="${escHtml(profile.persona)}"></div>`
+    ? `<div class="rrhh-person-photo-card"><img src="${_secureFileUrl(profile.foto_url)}" class="rrhh-person-photo" alt="${escHtml(profile.persona)}" loading="lazy" decoding="async" data-rrhh-dossier-initials="${escHtml(initials)}"></div>`
     : `<div class="rrhh-person-photo-card rrhh-person-photo-fallback"><span class="rrhh-person-photo-initials">${escHtml(initials)}</span><i class="fas fa-user rrhh-person-photo-icon" aria-hidden="true"></i></div>`;
 
   const isRetirado  = (profile.statuses || "").includes("Retirado");
@@ -486,7 +489,37 @@ function renderRrhhDossierModal() {
   // no tenía manejador atado en ningún sitio y "Ver historial" no hacía nada.
   const histBtn = document.querySelector("#rrhh-person-modal-content [data-toggle-historial]");
   if (histBtn) histBtn.addEventListener("click", () => _toggleHistorialCargos(empleadoId || null));
+  // Fallback a iniciales si la foto del dossier no carga, igual que en la
+  // tarjeta de lista (BR-037).
+  const dossierPhotoImg = document.querySelector('#rrhh-person-modal-content [data-rrhh-dossier-initials]');
+  if (dossierPhotoImg) {
+    dossierPhotoImg.addEventListener("error", () => {
+      const card = dossierPhotoImg.closest(".rrhh-person-photo-card");
+      if (!card) return;
+      card.classList.add("rrhh-person-photo-fallback");
+      card.innerHTML = `<span class="rrhh-person-photo-initials">${escHtml(dossierPhotoImg.dataset.rrhhDossierInitials || "")}</span><i class="fas fa-user rrhh-person-photo-icon" aria-hidden="true"></i>`;
+    }, { once: true });
+  }
+  // Los accesos directos ("Cédula", "RIF"...) y el botón de la C.I. usan
+  // `data-open-doc-idx`; el listado de documentos (`_renderDossierFileList`)
+  // hace lo mismo desde BR-055. Un único manejador delegado en todo el
+  // contenido del modal cubre ambos sin repetir el listener por botón.
+  _wireDossierOpenButtons(document.getElementById("rrhh-person-modal-content"));
   filterInnerDossier();
+}
+
+// Manejador delegado para los botones "Abrir archivo" / accesos directos del
+// dossier, que usan `data-open-doc-idx` en vez de `onclick` en línea
+// (BR-055): antes se llamaba desde `filterInnerDossier` sin estar definida en
+// ningún archivo, así que cada refiltrado del expediente lanzaba
+// `ReferenceError` en consola tras pintar la lista.
+function _wireDossierOpenButtons(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-open-doc-idx]").forEach(btn => {
+    if (btn.dataset.dossierOpenWired) return;
+    btn.dataset.dossierOpenWired = "1";
+    btn.addEventListener("click", () => openDocMetadataModal(btn.dataset.openDocIdx));
+  });
 }
 
 // Orden canónico de las 4 partes del expediente RRHH
@@ -501,7 +534,15 @@ function _docLabel(f) {
   return f.doc_type || f.titulo_doc || f.notas?.split("\n")[0] || "Documento sin tipo";
 }
 
-function filterInnerDossier() {
+// `oninput` en hr.html reconstruye todo el panel del expediente en cada
+// tecla (BR-054); la búsqueda principal ya tiene 420 ms de *debounce*
+// (`_debouncedRrhhSearch`), la del expediente no tenía ninguno.
+const filterInnerDossier = (() => {
+  let timer;
+  return () => { clearTimeout(timer); timer = setTimeout(_filterInnerDossierNow, 200); };
+})();
+
+function _filterInnerDossierNow() {
   const profile = state.activePersonProfile;
   if (!profile) return;
 
@@ -651,7 +692,7 @@ function _renderDossierFileList(catFiles, dossierTerms) {
           <span class="rrhh-person-file-sub">Fecha: ${formatISOToSpanish(f.fecha_documento || f.fecha_ingreso)}</span>
         </div>
         <button type="button" class="btn btn-sm btn-outline-info"
-          onclick="openDocMetadataModal(${JSON.stringify(f.__idx)})">Abrir archivo</button>
+          data-open-doc-idx="${escHtml(String(f.__idx))}">Abrir archivo</button>
       </div>
       <div class="rrhh-person-file-meta">
         <span>Dependencia: <strong>${escHtml(f.departamento || "N/A")}</strong></span>
