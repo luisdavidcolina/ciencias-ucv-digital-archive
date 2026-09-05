@@ -1,6 +1,26 @@
 // ==========================================================================
 // CHOICES, TOM SELECT, FECHAS
 // ==========================================================================
+
+// BA-177: cargar la localización oficial de flatpickr en vez de reimplementarla
+// a mano. Se inyecta la misma versión que ya usa cada página (ver <script>
+// de flatpickr en archive.html/hr.html) y se cachea la promesa para no
+// duplicar la carga entre módulos.
+let _fpEsLocalePromise = null;
+function _loadFlatpickrSpanishLocale() {
+  if (_fpEsLocalePromise) return _fpEsLocalePromise;
+  _fpEsLocalePromise = new Promise(resolve => {
+    if (typeof flatpickr === "undefined") { resolve(null); return; }
+    if (flatpickr.l10ns && flatpickr.l10ns.es) { resolve(flatpickr.l10ns.es); return; }
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js";
+    s.onload = () => resolve((flatpickr.l10ns && flatpickr.l10ns.es) || null);
+    s.onerror = () => resolve(null);
+    document.head.appendChild(s);
+  });
+  return _fpEsLocalePromise;
+}
+
 async function loadDynamicChoices() {
   try {
     const res = await fetch(`${API_BASE}/api/choices`);
@@ -58,9 +78,12 @@ function initTomSelects() {
     state.archivo.page = 1; triggerArchivoSearch();
   });
   // Configurar carga remota para el Tom Select de palabras clave
+  // BA-027: longitud mínima antes de golpear al backend, y loadThrottle para
+  // no lanzar un escaneo completo por cada pulsación de tecla.
   if (tsInstances["choice-archivo-tesauro"]) {
+    tsInstances["choice-archivo-tesauro"].settings.loadThrottle = 300;
     tsInstances["choice-archivo-tesauro"].settings.load = (query, callback) => {
-      if (!query.trim()) { callback([]); return; }
+      if (query.trim().length < 2) { callback([]); return; }
       fetch(`${API_BASE}/api/archivo/documentos/buscar?q=${encodeURIComponent(query)}`)
         .then(r => r.json())
         .then(data => callback(data.map(d => ({ value: d.nombre_corto, text: d.nombre_corto }))))
@@ -81,16 +104,26 @@ function initTomSelects() {
   });
 }
 
-function initDateControls(module, data) {
+// BA-010: nunca formatear una fecha local con toISOString() — convierte a UTC
+// y en Venezuela (UTC-4) desplaza el día seleccionado. Usar los getters locales.
+function _fmtLocalISODate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+async function initDateControls(module, data) {
   const input = document.getElementById(`fp-${module}-range`);
   if (input) {
     if (fpInstances[module]) fpInstances[module].destroy();
+    const esLocale = await _loadFlatpickrSpanishLocale();
     fpInstances[module] = flatpickr(input, {
       mode: "range",
       dateFormat: "Y-m-d",
       minDate: data.min_date,
       maxDate: data.max_date,
-      locale: {
+      locale: esLocale || {
         rangeSeparator: " → ",
         firstDayOfWeek: 1,
         weekdays: {
@@ -104,9 +137,8 @@ function initDateControls(module, data) {
       },
       onChange: (selectedDates) => {
         if (selectedDates.length === 2) {
-          const fmt = d => d.toISOString().split("T")[0];
-          state[module].dateStart = fmt(selectedDates[0]);
-          state[module].dateEnd   = fmt(selectedDates[1]);
+          state[module].dateStart = _fmtLocalISODate(selectedDates[0]);
+          state[module].dateEnd   = _fmtLocalISODate(selectedDates[1]);
           state[module].page = 1;
           const lbl = document.getElementById(`fp-${module}-label`);
           if (lbl) lbl.innerText = `${formatISOToSpanish(state[module].dateStart)} → ${formatISOToSpanish(state[module].dateEnd)}`;
@@ -138,12 +170,19 @@ function initDateControls(module, data) {
 }
 
 function _setChipActive(module, preset) {
+  // BA-094: los chips son un role="radio" dentro de un radiogroup (archive.html);
+  // el estado activo tiene que reflejarse en aria-checked, no sólo en el color.
   document.querySelectorAll(`.ds-date-chip[data-module="${module}"]`).forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.preset === preset);
+    const isActive = btn.dataset.preset === preset;
+    btn.classList.toggle("active", isActive);
+    btn.setAttribute("aria-checked", isActive ? "true" : "false");
   });
 }
 
-function applyDatePreset(module, preset) {
+// BA-009: `search=false` permite reposicionar el filtro sin disparar una
+// búsqueda — lo usa resetDateFilters(), cuyo propio invocador ya busca una
+// vez por su cuenta (ver btn_clear_archivo/btn_clear_rrhh en app.js).
+function applyDatePreset(module, preset, search = true) {
   _setChipActive(module, preset);
   const yearPanel  = document.getElementById(`year-panel-${module}`);
   const rangePanel = document.getElementById(`range-panel-${module}`);
@@ -167,7 +206,7 @@ function applyDatePreset(module, preset) {
   if (rangePanel) rangePanel.style.display = "none";
 
   const today = new Date();
-  const fmt   = d => d.toISOString().split("T")[0];
+  const fmt   = _fmtLocalISODate;
   let startDate, endDate = fmt(today);
 
   if (preset === "all") {
@@ -179,7 +218,9 @@ function applyDatePreset(module, preset) {
   state[module].dateEnd   = endDate;
   state[module].page = 1;
   if (lbl) lbl.innerText = `${formatISOToSpanish(startDate)} → ${formatISOToSpanish(endDate)}`;
-  if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
+  if (search) {
+    if (module === "archivo") triggerArchivoSearch(); else triggerRrhhSearch();
+  }
 }
 
 function handleYearSelect(module) {
@@ -214,6 +255,8 @@ function resetDateFilters(module) {
     if (tsInstances["choice-rrhh-estado"])   tsInstances["choice-rrhh-estado"].clear(true);
     if (tsInstances["choice-rrhh-people"])   tsInstances["choice-rrhh-people"].clear(true);
   }
-  applyDatePreset(module, "all");
+  // BA-009: no buscar aquí — el handler del botón "Limpiar" (app.js) ya
+  // dispara su propia búsqueda justo después de llamar a esta función.
+  applyDatePreset(module, "all", false);
 }
 

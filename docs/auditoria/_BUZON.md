@@ -4107,3 +4107,60 @@ arreglo fue en `login.html`). `python -m pytest app/tests -q`: ver resultado en 
 
 `python -m pytest app/tests -q`: 859 passed antes de mi turno y 859 passed después (sin
 `test_admin_panels.py` afectado — no añadí ni quité pestañas ni paneles).
+
+## BA-app-choices (agente-ba-app-choices, app-choices.js)
+
+- `BA-010` (prioritario): `fmt` en `initDateControls` (línea ~107) y en
+  `applyDatePreset` (línea ~170) usaban `d.toISOString().split("T")[0]`, que
+  convierte a UTC — en Venezuela (UTC-4) el día seleccionado se enviaba
+  desplazado un día. Sustituido por `_fmtLocalISODate()`, que usa
+  `getFullYear()/getMonth()/getDate()` locales, compartida por ambos sitios.
+- `BA-009` (prioritario): `resetDateFilters()` llamaba a
+  `applyDatePreset(module, "all")`, que ya buscaba, y el handler del botón
+  "Limpiar" en `app.js` (`btn_clear_archivo`/`btn_clear_rrhh`, líneas 328/343)
+  vuelve a buscar después. Añadido un tercer parámetro `search` (default
+  `true`) a `applyDatePreset`; `resetDateFilters` ahora llama con
+  `search=false`, así que sólo queda la búsqueda que ya dispara el handler.
+  No toqué `app.js` — el handler no necesitaba cambios, sólo dejar de recibir
+  una búsqueda duplicada desde `resetDateFilters`.
+- `BA-027`: el `load` remoto del TomSelect de palabras clave
+  (`choice-archivo-tesauro`) no tenía longitud mínima ni `loadThrottle`. Ahora
+  corta con menos de 2 caracteres y añade `settings.loadThrottle = 300`. La
+  mitad backend (`archive.py`, longitud mínima en el propio endpoint) ya
+  estaba resuelta por PASS2-archive-depth, según nota previa en este mismo
+  archivo — con las dos mitades cerradas, considero el ticket resuelto por
+  completo.
+- `BA-094`: `_setChipActive()` sólo alternaba la clase `active`, no
+  `aria-checked`, aunque los botones ya llevaban `role="radio"` y
+  `aria-checked` en `archive.html` (verificado: ya resuelto ahí antes de mi
+  turno). Añadido `btn.setAttribute("aria-checked", ...)` en la misma
+  función, para que el estado accesible siga al visual.
+- `BA-177`: la localización de flatpickr estaba escrita a mano (meses/días
+  duplicados para los dos módulos). Añadida `_loadFlatpickrSpanishLocale()`,
+  que inyecta por script `flatpickr@4.6.13/dist/l10n/es.js` (misma versión que
+  ya carga `archive.html`/`hr.html`) y usa `flatpickr.l10ns.es` si carga a
+  tiempo; si falla la red o el CDN, cae al locale escrito a mano como
+  respaldo en vez de dejar el selector sin idioma. No pude añadir un
+  `<script>` propio en `archive.html`/`hr.html` (fuera de mi zona, `[CHOCA]`
+  con esos HTML) así que resolví la localización oficial sin ese cambio.
+  `initDateControls` pasó a `async` para esperar la carga antes de instanciar
+  flatpickr; se sigue llamando sin `await` desde `loadDynamicChoices` (no
+  bloquea el resto de la inicialización, y las fechas por defecto ya se fijan
+  sin depender de flatpickr).
+
+Pendiente, fuera de mi zona (`app-choices.js` es el único archivo que puedo
+tocar en este carril):
+
+- `BA-009`: el handler de "Limpiar" en `app.js` funciona correctamente con mi
+  cambio, pero si alguien quiere eliminar también la duplicación de intención
+  (dos líneas que hacen básicamente lo mismo: limpiar + buscar) haría falta
+  simplificar `app.js:328,343`, `[CHOCA]`.
+- `BA-003/004/145/172` (mencionados en la misma auditoría, tocan
+  `archive.py`/`lookups.py`/`app-core.js`): no revisados, no son de este
+  carril.
+- `BA-177` completo (con `<script>` propio en vez de inyección dinámica)
+  exige `archive.html`/`hr.html`, `[CHOCA]`.
+
+`node --check app/static/app-choices.js`: OK.
+`python -m pytest app/tests -q`: en curso al escribir esta nota (ver estado
+final en la fila de _RESERVAS.md).
