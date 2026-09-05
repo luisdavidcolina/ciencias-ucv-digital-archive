@@ -2257,7 +2257,7 @@ Pendientes de mi lote que necesitan un archivo que no es mío, anotados aquí en
       es un campo de `vercel.json` en el plan que usa este proyecto (necesitaría Vercel Edge
       Middleware/WAF configurado desde el panel, fuera del repositorio). La mitad de `main.py`
       (límites por endpoint) tampoco es mía.
-- [ ] `IN-212` · **archivo**: `.python-version` (raíz, no es `api/*` ni `vercel.json`) ·
+- [x] `IN-212` · **archivo**: `.python-version` (raíz, no es `api/*` ni `vercel.json`) ·
       **carril dueño**: ninguno abierto
       **qué hace falta**: el fichero dice `3.11` pero el árbol de trabajo tiene bytecode
       compilado con 3.12 (`app/**/__pycache__/*.cpython-312.pyc`). Vercel ya respeta
@@ -4191,3 +4191,15 @@ IN-143/145/146 (identificador de sesión no revocable, mismo token para
 sesión y compartición, sin tabla de revocación de enlaces) son decisiones de
 arquitectura de esfuerzo M/L con migración de `main.py` — no abordadas en
 esta pasada, documentadas aquí para quien las retome.
+
+## Orquestador — IN-212 revisado (2026-09-05)
+
+`IN-212` (`.python-version` dice 3.11, el árbol de trabajo tenía bytecode
+`.cpython-312.pyc`) no es un problema del repositorio: `.gitignore` ya excluye
+`__pycache__` y `git ls-files` confirma que no hay ningún `.pyc` trackeado.
+Es solo un desajuste del entorno local de quien lo detectó (Python 3.12
+instalado en su máquina) contra el runtime que de verdad usa Vercel (que sí
+respeta `.python-version` sin tocar `vercel.json`, según ya documentaba la
+ficha). No se tocó `.python-version` — cambiarlo sin poder probar contra el
+runtime real de producción es más riesgo que beneficio para un problema que
+no existe en el repositorio. Cerrado como no-issue.
