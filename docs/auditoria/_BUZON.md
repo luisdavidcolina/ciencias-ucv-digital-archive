@@ -4203,3 +4203,62 @@ respeta `.python-version` sin tocar `vercel.json`, según ya documentaba la
 ficha). No se tocó `.python-version` — cambiarlo sin poder probar contra el
 runtime real de producción es más riesgo que beneficio para un problema que
 no existe en el repositorio. Cerrado como no-issue.
+
+## OR-monitor-rrhh — monitor de expedientes de RRHH (carril OR-monitor-rrhh, 2026-09-05)
+
+Los ocho tickets del grupo (OR-121, OR-122, OR-125, OR-126, OR-127, OR-128,
+OR-129, OR-130) resultaron accionables tocando sólo `app/static/admin-monitor.js`,
+`app/static/admin_hr.html`, `app/routes/admin/docs.py` y (sólo para OR-127)
+`app/static/app.js`. Commit `83bacec`.
+
+- **OR-127**: `admin_search-rrhh`/`-archivo` ya no dispara `loadMonitorTable()`
+  en cada `input` — `debounce()` (admin-ui.js) con 300ms, Enter sigue
+  inmediato. El listener está en `app.js:382` y es compartido por ambos
+  módulos (mismo bucle `["archivo","rrhh"].forEach`).
+- **OR-121**: columna dedicada "N° Docs" en el monitor de RRHH (antes un badge
+  incrustado en la celda del nombre, del intento anterior). Resaltada en
+  amarillo cuando el expediente tiene cero documentos.
+- **OR-122**: badges de estado encendidos en RRHH. `/status_counts?modulo=RRHH`
+  ya contaba filas de `datos_rrhh` (documentos, no empleados) — sólo hacía
+  falta quitar el `if (!isArchivoModule())` que los apagaba. **Simplificación**:
+  en RRHH los badges son informativos, sin filtro al clic — el `<select>` de
+  estado en RRHH es estado LABORAL (OR-126), no hay forma de filtrar la tabla
+  agregada por empleado según el estado de un documento suyo sin rediseñar
+  `list_all` para RRHH. Si se quiere ese filtro, es ficha nueva.
+- **OR-125**: el `<select>` "Persona..." de RRHH (400 opciones sin buscador)
+  se quitó y ese hueco ahora es "Departamento..." con las opciones reales de
+  `state.choices.rrhh.departamentos`. El backend ganó `department_filter`
+  (`d.nombre = %s`) en `docs.py`. `person_filter` se deja intacto en el
+  backend (todavía lo usa Archivo) pero el frontend de RRHH ya no lo llama.
+- **OR-126**: `estado_laboral_filter` nuevo en `docs.py`, igualdad exacta
+  contra el catálogo `estados_laborales` (valida existencia antes de armar el
+  `WHERE`, así una URL manipulada no rompe nada). Se separó de `status_filter`
+  a propósito — ese nombre sigue significando "estado del documento" en
+  Archivo. El `<select>` de RRHH (`admin_filter_status-rrhh`) sigue
+  reutilizando el mismo `id` que en Archivo por convención de sufijo; sólo
+  cambió a qué parámetro de la URL va su valor según el módulo.
+- **OR-128**: encabezados ordenables sólo en `admin_hr.html` (Empleado, N°
+  Docs, Cargo/Depto., Estado) — Archivo no se tocó, así que sus `<th>` no
+  llevan `data-sort` y el listener de `_ensureMonitorSortableHeaders()` no
+  encuentra nada que conectar ahí. La lista blanca de columnas en `docs.py`
+  (`_SORT_COLUMNS`) ya existía de una pasada anterior; sólo faltaba que el
+  frontend mandara `sort`/`dir` y pintara `aria-sort`.
+- **OR-129**: ya estaba resuelto en el JS (`renderMonitorTable()` arma
+  "Mostrando X–Y de Z..."); sólo el texto por defecto del `<span>` en el HTML
+  seguía diciendo "Mostrando 0 registros". Corregido para que el estado
+  inicial no contradiga al primer render.
+- **OR-130**: se agregaron botones "primera"/"última" página (inyectados por
+  JS junto a anterior/siguiente, igual que ya se hacía con el salto directo
+  de una pasada previa). No se tocó el HTML de paginación porque ya no hacía
+  falta: todo se inyecta desde `_ensureMonitorToolbarExtras()`.
+
+`_fetchAllFilteredRecords()` (exportación CSV) se actualizó para mandar los
+mismos parámetros nuevos (`department_filter`, `estado_laboral_filter`) que
+`loadMonitorTable()` — si no, el CSV exportado habría ignorado esos dos
+filtros nuevos y traído más filas de las que la pantalla muestra.
+
+Tests nuevos en `test_admin.py` (`TestListAllRRHHFiltros`, 3 casos) para el
+filtro exacto de estado laboral (válido/inválido) y el filtro de
+departamento. `python -m pytest app/tests -q`: 864 antes de empezar → 867 al
+cerrar (864 base + 3 nuevos), verificado tras cada ticket, no sólo al final.
+`node --check` sobre `admin-monitor.js` y `app.js` sin errores.
