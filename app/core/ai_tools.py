@@ -141,6 +141,15 @@ def execute(nombre: str, args: dict, ctx: dict) -> dict:
 def _search_archive(args, ctx):
     where = ["da.deleted_at IS NULL"]
     params = []
+    if ctx.get("perfil") == "publico":
+        # SI-020: ni buscar_archivo ni ver_documento filtraban por status. El
+        # buscador público SÍ excluye los documentos en 'draft'/'revision'
+        # (`routes/archive.py`, BA-161); sin este filtro el asistente le
+        # enseñaba a un visitante anónimo un documento a medio cargar, sin
+        # verificar, con su ubicación física — justo lo que la pantalla le
+        # esconde. Quien tiene sesión (consulta/editor) sí ve el borrador,
+        # igual que en el backoffice.
+        where.append("COALESCE(da.status, 'aprobado') = 'aprobado'")
 
     termino = _text(args, "termino")
     if termino:
@@ -257,8 +266,11 @@ def _get_document(args, ctx):
         LEFT JOIN public.archivo_descriptores ad ON ad.id_archivo = da.id_archivo
         LEFT JOIN public.descriptores_libres dl  ON dl.id_descriptor = ad.id_descriptor
         WHERE da.id_archivo = %s AND da.deleted_at IS NULL
+          {}
         GROUP BY da.id_archivo, td.nombre
-    """, [doc_id], fetch="one")
+    """.format("AND COALESCE(da.status, 'aprobado') = 'aprobado'"
+               if ctx.get("perfil") == "publico" else ""),
+        [doc_id], fetch="one")
     return fila or {"error": "No existe un documento con ese id en el Archivo."}
 
 
@@ -326,11 +338,35 @@ _RUTAS_VALIDAS = {
     "/admin/sistema", "/admin/ia", "/investigacion", "/ayuda",
 }
 
+# SI-019: `ir_a` está registrada para el perfil `publico` (cualquiera puede pedir que lo
+# lleven a una sección) pero su lista blanca incluía los cuatro paneles de administración
+# sin mirar quién pregunta. Un visitante anónimo pidiendo "llévame al panel de sistema" no
+# ganaba acceso —el servidor lo sigue rebotando en el login— pero sí confirmaba que la ruta
+# existe, con una redirección real de por medio. Aquí se filtra igual que se filtran las
+# herramientas: por el módulo que el destino necesita.
+_RUTA_REQUIERE_MODULO = {
+    "/admin/archivo": "archivo",
+    "/admin/rrhh": "rrhh",
+    "/admin/sistema": {"archivo", "rrhh"},  # Global: los dos módulos a la vez
+    "/admin/ia": {"archivo", "rrhh"},
+}
+
+
+def _rutas_para(ctx) -> set:
+    modulos = ctx.get("modulos") or set()
+    permitidas = set(_RUTAS_VALIDAS)
+    for ruta, requisito in _RUTA_REQUIERE_MODULO.items():
+        necesarios = requisito if isinstance(requisito, set) else {requisito}
+        if not necesarios <= modulos:
+            permitidas.discard(ruta)
+    return permitidas
+
 
 def _navigate_to(args, ctx):
     ruta = _text(args, "ruta", 60) or ""
-    if ruta not in _RUTAS_VALIDAS:
-        return {"error": f"Ruta no válida. Disponibles: {', '.join(sorted(_RUTAS_VALIDAS))}."}
+    disponibles = _rutas_para(ctx)
+    if ruta not in disponibles:
+        return {"error": f"Ruta no válida. Disponibles: {', '.join(sorted(disponibles))}."}
     # El frontend lee `navegar_a` de la respuesta y redirige. La ruta sale de una lista
     # cerrada que valida el servidor, no de un enlace que el modelo escriba en el texto.
     return {"navegar_a": ruta, "ok": True}

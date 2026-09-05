@@ -342,15 +342,32 @@ def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> 
             # Cada vuelta se paga: hay que sumarlas todas o el gasto queda subestimado.
             costo += float(uso.get("cost") or 0)
 
+            # SI-066: OpenRouter puede responder 200 con `{"error": {...}}` y sin
+            # `choices` (proveedor caído, modelo sin cupo). Antes esto caía directo
+            # al "respondió vacío" de abajo, perdiendo el motivo real que venía en
+            # el cuerpo.
+            if datos.get("error"):
+                err = datos["error"] if isinstance(datos["error"], dict) else {}
+                logger.error(f"IA: OpenRouter devolvió error en el cuerpo (200): {datos['error']}")
+                return {
+                    "error": "El proveedor del modelo devolvió un error. Intenta de nuevo "
+                             "o cambia de modelo desde el panel.",
+                    "status": 502,
+                    "tokens": tokens, "costo": round(costo, 6),
+                    "detalle_proveedor": str(err.get("message") or datos["error"])[:300],
+                }
+
             mensaje = (datos.get("choices") or [{}])[0].get("message")
             if not mensaje:
                 logger.warning(f"IA: respuesta sin mensaje: {datos}")
-                return {"error": "El asistente respondió vacío. Intenta de nuevo.", "status": 502}
+                return {"error": "El asistente respondió vacío. Intenta de nuevo.", "status": 502,
+                        "tokens": tokens, "costo": round(costo, 6)}
 
             if not mensaje.get("tool_calls"):
                 texto = (mensaje.get("content") or "").strip()
                 if not texto:
-                    return {"error": "El asistente respondió vacío. Intenta de nuevo.", "status": 502}
+                    return {"error": "El asistente respondió vacío. Intenta de nuevo.", "status": 502,
+                            "tokens": tokens, "costo": round(costo, 6)}
                 return {
                     "respuesta": texto,
                     "modelo": datos.get("model") or current_model(),
@@ -400,7 +417,13 @@ def converse(prompt: str, mensajes: list, ctx: dict, ejecutar, definiciones) -> 
         # el detalle puede tener rastros de la configuración.
         detalle = e.read().decode("utf-8", "replace")[:800]
         logger.error(f"IA: falló la llamada a OpenRouter ({e.code}): {detalle}")
-        return {"error": "No se pudo contactar al asistente. Revisa el log del servidor.", "status": 502}
+        # SI-061: si ya se gastaron vueltas de herramientas antes de que ésta fallara, ese
+        # gasto es real y hay que poder guardarlo — sin `tokens`/`costo` aquí, `chat()` no
+        # tenía nada que pasarle a `_save_turn` y el turno fallido se perdía sin contarse
+        # para el tope diario.
+        return {"error": "No se pudo contactar al asistente. Revisa el log del servidor.",
+                "status": 502, "tokens": tokens, "costo": round(costo, 6)}
     except Exception as e:
         logger.error(f"IA: error inesperado: {e}")
-        return {"error": "Error inesperado al consultar al asistente.", "status": 500}
+        return {"error": "Error inesperado al consultar al asistente.", "status": 500,
+                "tokens": tokens, "costo": round(costo, 6)}

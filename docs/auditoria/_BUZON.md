@@ -3219,3 +3219,91 @@ archivo `[CHOCA]` de otro agente en curso):
 → 851 passed (mismo número que antes de esta pasada), sin regresiones.
 
 **quién lo pide**: agente-pass2-admin-edit (PASS2-admin-edit)
+
+## PASS2-ai — pase adicional sobre el asistente IA (SI-019, SI-020, SI-061, SI-066)
+
+Pase específico sobre `app/routes/ai.py`, `app/core/ai.py`, `app/core/ai_tools.py`,
+`app/core/ai_prompts.py`, `app/core/ai_proposals.py`, `app/static/admin_ai.html`,
+`app/static/ai-widget.js`. La mayoría de los pendientes de seguridad de esta zona
+(SI-004, SI-005, SI-009, SI-010, SI-011, SI-022, SI-023) ya estaban resueltos por
+D1-ia-backend con pruebas en `app/tests/test_ia_seguridad.py`, y casi todo
+`admin_ai.html`/`ai-widget.js` ya estaba cubierto por SWEEP/SWEEP2 — verificado
+leyendo el código actual, no solo las notas.
+
+- [x] `SI-020` · `app/core/ai_tools.py` (`_search_archive`, `_get_document`) · ni
+      `buscar_archivo` ni `ver_documento` filtraban por `status`: un visitante
+      anónimo (perfil `publico`) podía recibir un documento en `draft`/`revision`
+      —sin verificar, a medio cargar— con su ubicación física, exactamente lo que
+      el buscador público (`routes/archive.py`, BA-161) ya excluye con
+      `COALESCE(da.status,'aprobado')='aprobado'`. Añadido el mismo filtro,
+      condicionado a `ctx["perfil"] == "publico"`: quien tiene sesión (consulta o
+      editor) sigue viendo el borrador, igual que en el backoffice.
+- [x] `SI-019` · `app/core/ai_tools.py` (`_navigate_to`, `_RUTAS_VALIDAS`) · `ir_a`
+      está registrada para perfil `publico` y su lista blanca incluía los cuatro
+      paneles de administración sin mirar el módulo de quien pregunta. No era una
+      escalada de privilegio (el servidor igual rebota en el login) pero sí
+      confirmaba con una redirección real qué rutas existen. Añadido
+      `_RUTA_REQUIERE_MODULO` + `_rutas_para(ctx)`: la lista que se ofrece y se
+      valida ahora se filtra por los módulos del contexto, igual que ya se filtran
+      las herramientas en `definitions()`.
+- [x] `SI-066` · `app/core/ai.py` (`converse`) · una respuesta 200 de OpenRouter sin
+      `choices` (cuerpo `{"error": {...}}`) se trataba igual que una respuesta
+      vacía, perdiendo el motivo real. Ahora se comprueba `datos.get("error")`
+      antes de leer `choices` y se registra/devuelve el mensaje del proveedor.
+- [x] `SI-061` · `app/core/ai.py` (`converse`) + `app/routes/ai.py` (`chat`) · un
+      turno que daba varias vueltas pagas de herramientas y fallaba en la última
+      perdía todo el costo acumulado: `converse()` sólo devolvía `tokens`/`costo`
+      en la rama de éxito, y `chat()` nunca llamaba a `_save_turn` en la rama de
+      error. Ahora las tres ramas de error de `converse()` (`HTTPError`,
+      `Exception`, "respondió vacío", error-en-cuerpo) devuelven `tokens`/`costo`
+      acumulados hasta el punto del fallo, y `chat()` guarda un turno
+      `[error] ...` con ese gasto cuando lo hay — para que el tope diario
+      (`_daily_spend`, que suma `ia_mensajes`) no lo pierda de vista.
+
+**Revisado y confirmado ya resuelto (sin cambios)**: SI-004, SI-005, SI-009,
+SI-010, SI-011, SI-022, SI-023 (todos en `ai.py`/`ai_proposals.py`, con test en
+`test_ia_seguridad.py`); SI-095 (las cuatro consultas de RRHH ya filtran
+`deleted_at IS NULL`); SI-097–SI-106, SI-109, SI-112–SI-117, SI-119, SI-122,
+SI-124, SI-125, SI-205 (ya resueltos por SWEEP/SWEEP2, confirmado leyendo
+`admin_ai.html`/`ai-widget.js` actuales).
+
+**Pendiente, no tocado por esfuerzo/decisión (fuera de esta pasada)**:
+- `SI-062` (tope de gasto solo se comprueba antes del turno, no durante las
+  vueltas), `SI-063` (timeout de 90s por vuelta con 5 vueltas posibles supera el
+  `maxDuration:60` de Vercel — `[CHOCA]` con `vercel.json`), `SI-064` (streaming,
+  L), `SI-067`–`SI-070` (historial reconstruido desde `ia_mensajes`, presupuesto
+  de tokens, caché de prompt estable, promedio real en vez de
+  `TOKENS_MENSAJE_TIPICO`) — todos esfuerzo M y cambian comportamiento de costo
+  real, preferí no tocarlos sin poder probarlos contra tráfico real.
+- `SI-076`–`SI-078` (adjunto alcanzable por cualquier sesión, validado solo por
+  extensión, leído dos veces en memoria) · necesitan `app/routes/files.py`,
+  `[CHOCA]` con otros carriles de esta misma pasada (PASS2).
+- `SI-080`–`SI-089` (panel Global sin leer conversaciones ajenas, sin moderación
+  del chat público, título recortado a 160, catálogo cacheado en memoria de
+  proceso, sin historial de cambios del cerebro, sin modo de prueba) · todos M,
+  tocan `admin_ai.html` + `routes/ai.py` a la vez con cambios de UI que no cabían
+  en el tiempo de esta pasada.
+- `SI-090` (enmascarar cédula salvo petición explícita) · revisado:
+  `_search_employee`/`_employee_file` no devuelven fecha de nacimiento ni sexo
+  (ya no aplica esa parte de la ficha), pero sí la cédula completa en el listado
+  de búsqueda. No lo cambié porque `expediente_empleado` la exige como argumento
+  de entrada — enmascararla solo en el listado es una decisión de producto sobre
+  qué tan útil sigue siendo la búsqueda sin ella, mejor con una persona real
+  detrás.
+- `SI-091` (registrar en `audit_log` cada llamada a OpenRouter con qué datos
+  personales viajaron), `SI-092` (interruptor de apagado en `ia_config`) · M,
+  cambian el comportamiento observable del panel, se dejan para no arriesgar sin
+  poder probar contra tráfico real dentro de esta pasada.
+- `SI-093`/`SI-094` (alinear `_search_archive` con el índice GIN y con
+  `routes/archive.py`, compartiendo el `WHERE`) · depende de BA-161/BA-002, que no
+  son de este carril; `[CHOCA]` con `app/main.py` por el índice.
+
+**Verificación**: `python -m pytest app/tests -q` → 849 passed, 2 failed — las dos
+fallas son `test_static_analysis.py` sobre `app/database.py` (imports sin usar),
+un archivo que no toqué y que otro agente tenía a medio editar en el árbol
+compartido en el momento de correr la suite; confirmado con
+`python -m pytest app/tests/test_ia_seguridad.py app/tests/test_static_analysis.py -q`
+por separado: mis 20 pruebas de IA en verde, la misma falla ajena repetida.
+`python -c "import ast; ast.parse(...)"` sobre los tres archivos que toqué, ok.
+
+**quién lo pide**: agente-pass2-ai (PASS2-ai)

@@ -220,6 +220,15 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_sess
     ms = int((time.time() - t0) * 1000)
 
     if "error" in r:
+        # SI-061: un turno que da varias vueltas de herramientas y falla en la última se
+        # había pagado igual — `_save_turn` nunca se llamaba en esta rama y ese gasto real
+        # no llegaba a `ia_mensajes`, que es de donde sale el tope diario. Se guarda como
+        # fallido, con el costo acumulado hasta el punto del fallo.
+        if r.get("costo") or r.get("tokens"):
+            _save_turn(conv_id, "assistant", f"[error] {r['error']}", {
+                "modelo": ai.current_model(), "tokens": r.get("tokens") or 0,
+                "costo": r.get("costo") or 0, "ms": int((time.time() - t0) * 1000),
+            })
         return JSONResponse(status_code=r.get("status", 502), content={"detail": r["error"]})
 
     _save_turn(conv_id, "assistant", r["respuesta"], {
