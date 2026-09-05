@@ -192,14 +192,68 @@ function applyAccentColor(accentId) {
 
 // ── panel ─────────────────────────────────────────────────────────────────────
 
+// VI-003: se recuerda qué elemento abrió el panel para devolverle el foco al
+// cerrar, y se mantiene un solo listener de teclado mientras esté abierto
+// (el panel se reconstruye entero en cada cambio — _rebuildPanel — así que el
+// listener no puede vivir colgado del propio nodo del panel).
+let _themePanelOpener = null;
+
+function _themePanelFocusables(panel) {
+  return Array.from(panel.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )).filter(el => el.offsetParent !== null);
+}
+
+function _onThemePanelKeydown(e) {
+  const panel = document.getElementById("ds-theme-panel");
+  if (!panel || !panel.classList.contains("open")) return;
+
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeThemePanel();
+    return;
+  }
+
+  if (e.key === "Tab") {
+    const focusables = _themePanelFocusables(panel);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    } else if (!panel.contains(document.activeElement)) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+}
+
 function openThemePanel() {
+  _themePanelOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   let panel = document.getElementById("ds-theme-panel");
   if (!panel) { panel = _createThemePanel(); document.body.appendChild(panel); }
-  requestAnimationFrame(() => panel.classList.add("open"));
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-modal", "true");
+  panel.setAttribute("aria-label", "Personalización");
+  document.addEventListener("keydown", _onThemePanelKeydown);
+  requestAnimationFrame(() => {
+    panel.classList.add("open");
+    const focusables = _themePanelFocusables(panel);
+    (focusables[0] || panel).focus();
+  });
 }
 
 function closeThemePanel() {
   document.getElementById("ds-theme-panel")?.classList.remove("open");
+  document.removeEventListener("keydown", _onThemePanelKeydown);
+  if (_themePanelOpener && document.body.contains(_themePanelOpener)) {
+    _themePanelOpener.focus();
+  }
+  _themePanelOpener = null;
 }
 
 function _rebuildPanel() {
@@ -243,6 +297,7 @@ function _createThemePanel() {
   const panel = document.createElement("div");
   panel.id = "ds-theme-panel";
   panel.className = "ds-theme-panel";
+  panel.tabIndex = -1;
   panel.innerHTML = `
     <div class="ds-theme-panel-header">
       <h6><i class="fas fa-sliders-h mr-2"></i>Personalización</h6>
