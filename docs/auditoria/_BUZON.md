@@ -3898,3 +3898,44 @@ porque no había nada seguro que escribir sin dejar un control sin destino o un 
   `test_visual.py` en este carril por presupuesto de sesión — dejo la idea del test de búsqueda
   con estado de carga simulado (sección "verificación end-to-end real" del encargo) para una
   vuelta futura si hace falta cobertura adicional ahí.
+
+## VI-archive-hr-js (agente-vi-archive-hr-js) — insignias largas y modal sin backdrop
+
+Carril exclusivo `app/static/archive.js` + `app/static/hr.js`, sin CSS ni HTML.
+
+- **VI-005/VI-006** (insignia de soporte/tipología libre sin longitud máxima, desborda
+  la tarjeta a 1440 y rompe el ancho a 390) — confirmadas reales contra el código actual:
+  `.ds-item-thumbnail` y `.ds-badge` en `app/static/styles/componentes.css` seguían sin
+  `max-width`/`ellipsis` en el momento de tocar esto (el carril paralelo VI-styles-desbordes
+  seguía "en curso"). En vez de duplicar/bloquearme en su CSS, apliqué el recorte de bajo
+  riesgo en JS puro: `_truncBadge()`/`_truncBadgeRrhh()` cortan a 28 caracteres con `…` y el
+  `title` del `<span>` lleva el valor completo, además de `max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;` puestos inline en el propio `style=""` del badge
+  (no dependen de que exista la clase CSS todavía). Tocado: la insignia de soporte y la de
+  tipología en `renderArchivoList()` (`archive.js`), y las insignias de `tipos` en la tarjeta
+  de persona (`hr.js:208`, `renderRrhhList` o equivalente). Si VI-styles-desbordes añade
+  `max-width`/`ellipsis` a `.ds-badge`/`.ds-item-thumbnail` en `styles.css`, el `style=""`
+  inline no estorba (mismas propiedades, incluso redundante) — no hace falta revertir nada.
+- **VI-015** (foto de empleado sin `object-fit`, se recorta ilegible) — ya resuelta en el
+  código actual: `.rrhh-person-photo` en `app/static/styles/componentes.css:627-633` ya trae
+  `object-fit: cover`, y `hr.js:342` ya usa esa clase en la foto del dossier; la miniatura de
+  la tarjeta de lista (`hr.js:194`) ya trae `object-fit:cover` inline. No había nada que
+  arreglar en JS; probablemente resuelto por un carril de estilos previo a esta pasada.
+- **VI-012** (modal de detalle sin backdrop, dos sistemas de modal distintos) — **no
+  accionable sólo con `archive.js`/`hr.js`**: ambos abren el modal con la API real de Bootstrap
+  4 (`$("#doc-modal").modal("show")` en `archive.js:401`/`hr.js:709`,
+  `$("#rrhh-person-modal").modal("show")` en `hr.js:262`), que en teoría ya genera
+  `.modal-backdrop` sola. Que no se vea backdrop apunta a algo en `styles.css` (z-index o
+  `opacity` pisando `.modal-backdrop`) o en el propio `archive.html`/`admin_*.html` (algún
+  `data-backdrop` o markup distinto), ninguno de los dos en mi carril — no encontré
+  `data-backdrop="false"` en `archive.html`. Y la propuesta del ticket ("un solo componente de
+  modal") es un cambio arquitectónico que unifica el modal de búsqueda pública con el de
+  edición del backoffice: toca HTML de al menos tres páginas y `admin-edit.js`/
+  `admin-edit-hr.js`, fuera de alcance de un carril de dos archivos. Queda pendiente para
+  quien tenga `styles.css` + los HTML de `/archivo`, `/rrhh`, `admin_archive.html`,
+  `admin_hr.html` en su carril.
+
+Verificado: `node --check app/static/archive.js`, `node --check app/static/hr.js` sin
+errores. `python -m pytest app/tests -q`: 859 passed (igual que al empezar).
+`python -m pytest app/tests/test_visual.py -q`: 54 passed (igual que al empezar). Commit
+`a61f70a`, sin carrera de git (verificado con `git show a61f70a --stat`).
