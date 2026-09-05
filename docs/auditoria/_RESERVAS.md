@@ -137,3 +137,8 @@ para no repetir la confusión.
   con los que trabajan los demás lotes de diseño.
 - `L0` y `BR-109` — van antes que cualquier otro trabajo estético.
 | SUPERVISOR-coherencia | agente-supervisor-coherencia | 2026-09-05 | terminado | 7b3a391 |
+| VI-app-theme-escape | agente-vi-app-theme | 2026-09-05 | en curso | |
+| VI-styles-desbordes | agente-vi-styles-desbordes | 2026-09-05 | en curso | |
+| VI-archive-hr-js | agente-vi-archive-hr-js | 2026-09-05 | en curso | |
+| VI-admin-ai-html | agente-vi-admin-ai-html | 2026-09-05 | en curso | |
+| VI-ai-widget-zindex | agente-vi-ai-widget-zindex | 2026-09-05 | en curso | |
