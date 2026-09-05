@@ -2,6 +2,20 @@
 
 import re
 import unicodedata
+from typing import List
+
+
+def split_terms(val_str: str) -> List[str]:
+    """Divide una cadena separada por ';' en términos limpios.
+
+    IN-058: vivía en `database.py` sin motivo — partir una cadena no toca la
+    base. Se define aquí, antes del `from database import ...` de más abajo,
+    para que la resolución sea correcta sin importar cuál de los dos módulos
+    se importe primero (`database.py` re-exporta esta misma función).
+    """
+    if not val_str:
+        return []
+    return [t.strip() for t in str(val_str).split(";") if t.strip()]
 
 
 def paginate(page: int, per_page: int, max_per_page: int = 100, max_offset: int = 10000) -> tuple[int, int, int]:
@@ -129,13 +143,6 @@ def truncate_text(text: str, max_length: int = 200, suffix: str = "…") -> str:
         return text or ""
     truncated = text[:max_length - len(suffix)].rsplit(" ", 1)[0]
     return truncated + suffix
-
-
-def sanitize_filename(name: str) -> str:
-    """Limpia un nombre de archivo eliminando caracteres peligrosos."""
-    sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name or "")
-    sanitized = sanitized.strip(". ")
-    return sanitized[:255] if sanitized else "archivo"
 
 
 def normalize_cedula(cedula: str) -> str:

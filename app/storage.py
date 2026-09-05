@@ -15,8 +15,6 @@ import unicodedata
 import uuid
 from datetime import datetime
 
-import boto3
-from botocore.config import Config
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -51,6 +49,12 @@ def is_configured() -> bool:
 def _get_client():
     global _client
     if _client is None:
+        # IN-106: import perezoso — boto3 es de las dependencias más pesadas
+        # del paquete y la mayoría de las peticiones (búsquedas, panel) no
+        # tocan R2. Antes se importaba a nivel de módulo, pagando su coste en
+        # cada arranque en frío aunque nadie fuera a subir ni descargar nada.
+        import boto3
+        from botocore.config import Config
         _client = boto3.client(
             "s3",
             endpoint_url=R2_ENDPOINT,
@@ -62,7 +66,13 @@ def _get_client():
 
 
 def sanitize_filename(filename: str) -> str:
-    """Normaliza el nombre de archivo: sin acentos, espacios ni caracteres raros."""
+    """Normaliza el nombre de archivo: sin acentos, espacios ni caracteres raros.
+
+    IN-057: existía una segunda implementación en `utils.py` con un
+    comportamiento distinto (conservaba acentos, no pasaba a minúsculas) y a
+    la que nadie llamaba. Se retiró: ésta es la única, porque `storage.py` es
+    quien tiene el requisito real — la clave del objeto en R2.
+    """
     base, dot, ext = filename.rpartition(".")
     if not dot:
         base, ext = filename, ""

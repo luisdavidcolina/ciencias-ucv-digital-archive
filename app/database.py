@@ -1,9 +1,7 @@
-import os
 import logging
 import threading
 import time as _time
 from contextlib import contextmanager
-from typing import List
 
 import psycopg2
 from psycopg2 import pool as pg_pool
@@ -12,8 +10,16 @@ from dotenv import load_dotenv
 from fastapi import HTTPException
 import bcrypt
 
+from core.config import settings
+
 load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
+# IN-033: fuente única para la cadena de conexión. Antes se leía tres veces
+# (constante de módulo con os.getenv, el pool con os.environ.get, y
+# core/config.py por tercera vez), y las dos primeras podían discrepar si la
+# variable se definía después de importar este módulo. Ahora las dos lecturas
+# de este archivo vienen de `settings.database_url`; se conserva el nombre
+# `DATABASE_URL` porque `app/tests/test_database.py` lo parchea directamente.
+DATABASE_URL = settings.database_url
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("DigitalArchive")
@@ -30,16 +36,29 @@ def _get_pool() -> pg_pool.ThreadedConnectionPool:
     global _pool
     if _pool is None:
         _pool = pg_pool.ThreadedConnectionPool(
-            minconn=1,
-            maxconn=5,
-            dsn=os.environ.get("DATABASE_URL", ""),
+            # IN-107/IN-108: los límites estaban escritos a mano (1, 5) pese a
+            # que `DB_POOL_MIN`/`DB_POOL_MAX` ya existían en `core/config.py`
+            # sin que nada los leyera — ajustarlos en el entorno no cambiaba
+            # nada. Ahora el pool los usa de verdad.
+            minconn=settings.db_pool_min,
+            maxconn=settings.db_pool_max,
+            dsn=settings.database_url,
             # Keepalives TCP: evita que Neon cierre conexiones inactivas del pool,
             # eliminando el ciclo lento de "conexión rota → reintento" en la 1ra petición
             keepalives=1,
             keepalives_idle=30,
             keepalives_interval=10,
             keepalives_count=3,
-            connect_timeout=10,
+            # IN-168: 10s de espera de conexión, con hasta 3 intentos en
+            # db_query, podían consumir la mitad del presupuesto de un lambda
+            # (60s) sólo intentando conectar. 3s es suficiente para Neon
+            # despierto y falla rápido cuando no lo está.
+            connect_timeout=3,
+            # IN-169: sin statement_timeout, una sola consulta puede consumir
+            # el lambda entero. 20s dejan margen sobre el presupuesto de 60s
+            # para responder con un error claro en vez de que la plataforma
+            # corte la función sin dejar ni respuesta ni registro.
+            options="-c statement_timeout=20000",
         )
     return _pool
 
@@ -52,16 +71,20 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
         params:   Parámetros para la sentencia (tupla o lista).
         fetch:    'all' | 'one' | 'none'
         commit:   Si True realiza commit al terminar.
-        _retries: Reintentos cuando el pool está agotado (PoolError).
+        _retries: Reintentos ante una conexión rota (OperationalError), y
+                  sólo para lecturas (IN-166) — el pool agotado (PoolError)
+                  ya no reintenta, falla con 503 de inmediato (IN-167).
 
     Returns:
         Lista de filas, una fila o None según `fetch`.
     """
     if not DATABASE_URL:
+        # IN-032: antes devolvía [] / None y la aplicación aparentaba estar
+        # vacía (buscador "0 resultados", panel "0 documentos") en vez de
+        # avisar que no hay base de datos configurada. Falla cerrado: 503
+        # explícito, igual que ya hacía `db_transaction` para este mismo caso.
         logger.error("DATABASE_URL no está definido en .env")
-        if fetch == "all":
-            return []
-        return None
+        raise HTTPException(503, "Base de datos no disponible: falta configuración")
 
     for attempt in range(_retries + 1):
         conn = None
@@ -94,25 +117,35 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                 conn.rollback()
             return result
         except pg_pool.PoolError:
+            # IN-167: dormir aquí bloquea el hilo de la petición mientras el
+            # pool está agotado, justo cuando menos trabajadores sobran —
+            # empeora la situación que el reintento pretendía resolver.
+            # Falla rápido: que reintente el cliente.
             if conn is not None:
                 try:
                     _get_pool().putconn(conn)
                     conn = None
                 except Exception:
                     pass
-            if attempt < _retries:
-                _time.sleep(0.15 * (attempt + 1))
-                continue
-            raise HTTPException(503, "Base de datos temporalmente no disponible")
+            raise HTTPException(
+                status_code=503,
+                detail="Base de datos temporalmente no disponible",
+                headers={"Retry-After": "1"},
+            )
         except psycopg2.OperationalError as e:
-            # Conexión rota — descarta del pool y reintenta
+            # Conexión rota — descarta del pool.
             if conn is not None:
                 try:
                     _get_pool().putconn(conn, close=True)
                     conn = None
                 except Exception:
                     pass
-            if attempt < _retries:
+            # IN-166: reintentar automáticamente una escritura que ya pudo
+            # haberse ejecutado en el servidor (el corte ocurre esperando la
+            # confirmación, no antes de ella) puede duplicarla. Sólo las
+            # lecturas se reintentan solas; una escritura interrumpida falla
+            # de una vez para que la decida quien la originó.
+            if not commit and attempt < _retries:
                 logger.warning(f"Conexión perdida, reintentando (intento {attempt+1}): {e}")
                 _time.sleep(0.2 * (attempt + 1))
                 continue
@@ -124,8 +157,11 @@ def db_query(sql: str, params=None, fetch: str = "all", commit: bool = False, _r
                 except Exception:
                     pass
             sql_preview = sql.strip()[:120].replace("\n", " ")
+            # IN-036: el nombre de la excepción de psycopg2 (UndefinedColumn,
+            # UniqueViolation…) se registra en el log, pero no viaja al
+            # cliente — deja adivinar el esquema a quien pruebe parámetros.
             logger.error(f"Error SQL [{type(e).__name__}]: {e} | SQL: {sql_preview}…")
-            raise HTTPException(status_code=500, detail=f"Error en base de datos: {type(e).__name__}")
+            raise HTTPException(status_code=500, detail="Error en base de datos")
         finally:
             if conn is not None:
                 try:
@@ -214,8 +250,10 @@ def db_transaction():
                 conn.rollback()
             except Exception:
                 pass
+        # IN-036: mismo criterio que db_query — el nombre de la excepción
+        # queda en el log, no en la respuesta al cliente.
         logger.error(f"Error en transacción, revertida: [{type(e).__name__}] {e}")
-        raise HTTPException(status_code=500, detail=f"Error en base de datos: {type(e).__name__}")
+        raise HTTPException(status_code=500, detail="Error en base de datos")
     finally:
         if conn is not None:
             try:
@@ -282,11 +320,12 @@ def log_event(
 # UTILIDADES COMPARTIDAS
 # =============================================================================
 
-def split_terms(val_str: str) -> List[str]:
-    """Divide una cadena separada por ';' en términos limpios."""
-    if not val_str:
-        return []
-    return [t.strip() for t in str(val_str).split(";") if t.strip()]
+# IN-058: `split_terms` no toca la base de datos — partir una cadena por ';'
+# vivía aquí sólo porque este fue el primer módulo compartido. La lógica se
+# movió a `utils.py`; se re-exporta aquí para no obligar a tocar
+# `routes/archive.py`, `routes/hr.py` y `routes/lookups.py`, que importan
+# `split_terms` desde `database` y están fuera de esta zona de trabajo.
+from utils import split_terms  # noqa: E402,F401
 
 
 def hash_password(password: str) -> str:

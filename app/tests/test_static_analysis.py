@@ -24,6 +24,10 @@ APP = REPO / "app"
 REEXPORTACIONES = {
     ("routes/admin/helpers.py", "utils.paginate"),
     ("routes/admin/helpers.py", "..lookups.invalidate_choices_cache"),
+    # IN-058: split_terms se movió a utils.py; database.py la re-exporta para
+    # no obligar a tocar archive.py/hr.py/lookups.py, que la importan como
+    # `from database import split_terms`.
+    ("database.py", "utils.split_terms"),
 }
 
 

@@ -4,7 +4,9 @@ from functools import lru_cache
 
 
 class Settings:
-    # Base de datos (Neon PostgreSQL)
+    # Base de datos (Neon PostgreSQL). IN-033: única fuente de la variable —
+    # `database.py` la toma de aquí (`settings.database_url`) en vez de
+    # releerla con os.getenv/os.environ.get por su cuenta.
     database_url: str = os.environ.get("DATABASE_URL", "")
 
     # Seguridad
