@@ -3410,3 +3410,49 @@ mis dos archivos (`git show --stat HEAD`). No toqué el commit `20548d9`
 ajeno: es trabajo real de otro carril, sólo el orden de commits se cruzó.
 
 **quién lo pide**: agente-pass2-archive-depth (PASS2-archive-depth)
+
+---
+
+### PASS2-docs-hr-backend — segundo pase sobre `admin/docs.py` y `hr.py`
+
+**`hr.py`**: resuelto en `3e9dc0d` — BR-003 (XSS almacenado en el reporte
+imprimible: `html.escape()` en toda interpolación, más saneo de la clase CSS
+por estado), BR-005 (`fetch_hr_dataframe` no filtraba borrados; ahora exige
+`e.deleted_at IS NULL AND (dr.id_rrhh IS NULL OR dr.deleted_at IS NULL)`),
+BR-015 (el reporte incluía documentos en papelera), BR-006 (`log_event` en
+`person/profile` y `report/{id}` — "quién consultó este expediente" no
+quedaba en ningún lado), BR-059 (import de `db_query` dentro de la función,
+ya estaba importado arriba) y BR-062 (condición siempre verdadera). Añadí
+`app/tests/test_hr.py` (BR-057: el módulo no tenía cobertura propia).
+
+Quedan sin tocar, deliberadamente:
+- `BR-004` (el dossier se resuelve por nombre concatenado, dos homónimos
+  fusionan expedientes) — exige `app/models.py` **[CHOCA]** y
+  `app/static/hr.js` además de `hr.py`, fuera de mi zona de un solo archivo.
+- `BR-058` (nada verifica que la vista `vw_rrhh_persona_index` y
+  `fetch_hr_dataframe` apliquen las mismas condiciones) — es una prueba
+  cruzada de diseño, no un fix de una línea; lo dejo para quien decida si
+  unificar fuentes en vez de sólo probarlo.
+- `BR-061` (migrar el reporte a Jinja2) — el ticket lo marca como
+  "preferible" pero no obligatorio si se escapa correctamente (que es lo que
+  BR-003 exige); una migración de plantillas es un cambio de esfuerzo M que
+  no arriesgué junto con un fix de seguridad puntual.
+- `BR-063` (`hr_alerts.py` sirve una alerta de Archivo bajo `/api/rrhh`) —
+  archivo distinto, no es mío.
+
+**`admin/docs.py`**: no encontré tickets sin marcar en `backoffice-archivo.md`,
+`backoffice-rrhh.md` ni `_BUZON.md` que fueran accionables tocando *sólo* ese
+archivo. Todo lo pendiente que lo menciona (`DG-139`, `OA-063`, `OR-257`)
+depende de `main.py`, `admin_archive.html` u otro ticket ajeno marcado
+`[CHOCA]`. No hice cambios en `docs.py`.
+
+`python -m pytest app/tests -q`: 851 antes de mi turno → 857 pasan + 2
+fallos tras mi cambio, ambos **ajenos** a `hr.py`/mis archivos y no
+reproducibles en aislamiento (`test_static_analysis.py::test_sin_imports_muertos`
+pasa solo; `test_visual.py` es Playwright sobre `/sistema`, que no toqué) —
+consistentes con edición concurrente de otros carriles sobre el árbol
+compartido durante la corrida larga (8 min). Mi commit `3e9dc0d` sólo incluye
+`app/routes/hr.py` y `app/tests/test_hr.py` (verificado con
+`git show 3e9dc0d --stat`), sin carrera de git.
+
+**quién lo pide**: agente-pass2-docs-hr-backend (PASS2-docs-hr-backend)
