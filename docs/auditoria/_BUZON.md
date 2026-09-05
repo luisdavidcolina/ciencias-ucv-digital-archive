@@ -4164,3 +4164,30 @@ tocar en este carril):
 `node --check app/static/app-choices.js`: OK.
 `python -m pytest app/tests -q`: en curso al escribir esta nota (ver estado
 final en la fila de _RESERVAS.md).
+
+## Orquestador — IN-056 e IN-144 en core/security.py y database.py (2026-09-05)
+
+`app/core/security.py` y `app/core/cache.py` nunca habían recibido una pasada
+en toda la tanda — verificado con `git log`. Investigados dos tickets de
+`ingenieria.md`:
+
+- **IN-056** (real, corregido): `database.py` reimplementaba
+  `hash_password`/`verify_password` con bcrypt directo, sin atrapar la
+  excepción de `bcrypt.checkpw`. `auth.py` (login) usaba esa versión: un hash
+  corrupto en la base tumbaba el login con un 500 en vez de rechazar la
+  credencial. `admin/users.py` en cambio usa `core/security.py`, que sí
+  atrapa la excepción. Unificado: `database.py` ahora reexporta las funciones
+  de `core/security.py` en vez de reimplementarlas. Commit `11cc812`.
+- **IN-144** (investigado, no reproduce): la ficha describe que un nombre de
+  usuario con `:` (p. ej. `a:b`) haría que `raw.rsplit(":", 2)` reconstruyera
+  mal el username y aceptara la sesión para un usuario equivocado. Probado
+  directamente: `'a:b:1234567890:sig'.rsplit(':', 2)` devuelve
+  `('a:b', '1234567890', 'sig')` — el username se reconstruye correctamente
+  porque `rsplit` con `maxsplit=2` separa desde la derecha, no desde la
+  izquierda. El código ya usa el patrón correcto. Hallazgo obsoleto o
+  inexacto en la ficha original; no se tocó `core/security.py` para esto.
+
+IN-143/145/146 (identificador de sesión no revocable, mismo token para
+sesión y compartición, sin tabla de revocación de enlaces) son decisiones de
+arquitectura de esfuerzo M/L con migración de `main.py` — no abordadas en
+esta pasada, documentadas aquí para quien las retome.
