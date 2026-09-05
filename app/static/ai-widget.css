@@ -12,25 +12,37 @@
    Tamaños en rem/var(--font-size-*) para que "Muy Grande" (--ds-font-scale)
    sí afecte al asistente (SD-076). */
 
+/* VI-004/SD-009: la burbuja iba a z-index:3000, por encima del panel de
+   personalización (--z-overlay:1050) y de cualquier modal (--z-modal:1060) —
+   tapaba botones reales de tarjetas y tablas. --z-dropdown (1040) la deja por
+   debajo de ambos y sigue encima del contenido normal de la página. */
 #ia-burbuja {
-  position: fixed; right: 22px; bottom: 22px; z-index: 3000;
+  position: fixed; right: 22px; bottom: 22px; z-index: var(--z-dropdown, 1040);
   width: 56px; height: 56px; border: none; border-radius: 50%;
   background: var(--ds-accent); color: var(--text-inverse); font-size: var(--font-size-xl); cursor: pointer;
   box-shadow: var(--shadow-md);
-  transition: transform var(--duration-base) ease, background var(--duration-base) ease;
+  transition: transform var(--duration-base) ease, background var(--duration-base) ease, opacity var(--duration-base) ease;
 }
 #ia-burbuja:hover { transform: scale(1.07); background: var(--ds-accent-hover); }
 
+/* VI-004: mientras haya un modal abierto (document.querySelector('.modal.show'),
+   ai-widget.js), la burbuja y el panel se atenúan y dejan de recibir clics en
+   vez de competir por encima del modal — el z-index ya los deja por debajo,
+   esto evita además que quede un botón fantasma pulsable detrás del backdrop. */
+#ia-burbuja.ia-tapado { opacity: .35; pointer-events: none; }
+
 #ia-panel {
-  position: fixed; right: 22px; bottom: 90px; z-index: 3000;
+  position: fixed; right: 22px; bottom: 90px; z-index: var(--z-dropdown, 1040);
   width: 380px; max-width: calc(100vw - 32px);
   height: 540px; max-height: calc(100vh - 130px);
   background: var(--surface-1); border-radius: var(--radius-lg); overflow: hidden;
   box-shadow: var(--shadow-xl);
   display: none; flex-direction: column;
   font-family: inherit; font-size: var(--font-size-sm);
+  transition: opacity var(--duration-base) ease;
 }
 #ia-panel.ia-abierto { display: flex; }
+#ia-panel.ia-tapado { opacity: .35; pointer-events: none; }
 
 /* SI-124: a 380px fijos el panel se sale a 390px de viewport y el teclado
    virtual tapa el campo de escritura. Por debajo de 576px pasa a pantalla

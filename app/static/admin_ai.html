@@ -146,11 +146,13 @@
           <hr>
           <h6 class="text-muted">Últimos días</h6>
           <div style="max-height:240px;overflow-y:auto">
-            <table class="table table-sm mb-0">
-              <thead><tr><th>Día</th><th class="text-right">Msgs</th>
-                         <th class="text-right">Tokens</th><th class="text-right">Costo</th></tr></thead>
-              <tbody id="gasto-tabla"></tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-sm mb-0">
+                <thead><tr><th>Día</th><th class="text-right">Msgs</th>
+                           <th class="text-right">Tokens</th><th class="text-right">Costo</th></tr></thead>
+                <tbody id="gasto-tabla"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -159,9 +161,11 @@
         <div class="card-header"><i class="fas fa-comments"></i> Conversaciones</div>
         <div class="card-body p-0">
           <div style="max-height:300px;overflow-y:auto">
-            <table class="table table-sm table-hover mb-0">
-              <tbody id="conv-tabla"></tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover mb-0">
+                <tbody id="conv-tabla"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

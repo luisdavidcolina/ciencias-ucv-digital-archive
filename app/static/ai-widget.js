@@ -530,6 +530,30 @@
 
     restaurar();
     pintar();
+
+    vigilarModales();
+  }
+
+  // VI-004: la burbuja y el panel iban por encima del panel de personalización
+  // y de cualquier modal (z-index:3000 contra --z-overlay:1050/--z-modal:1060),
+  // tapando botones reales. El z-index ya baja por debajo en ai-widget.css;
+  // esto además los atenúa y les quita el clic mientras haya un modal abierto,
+  // con el mismo patrón que ya usan admin-ui.js/scanner-client.js.
+  function actualizarVisibilidadModal() {
+    var hayModal = !!document.querySelector(".modal.show");
+    var burbuja = document.getElementById("ia-burbuja");
+    var panel = document.getElementById("ia-panel");
+    if (burbuja) burbuja.classList.toggle("ia-tapado", hayModal);
+    if (panel) panel.classList.toggle("ia-tapado", hayModal);
+  }
+
+  function vigilarModales() {
+    actualizarVisibilidadModal();
+    if (typeof MutationObserver === "undefined") return;
+    var obs = new MutationObserver(actualizarVisibilidadModal);
+    obs.observe(document.body, {
+      attributes: true, attributeFilter: ["class"], childList: true, subtree: true
+    });
   }
 
   // SI-122: un corte de red de dos segundos ya no deja al usuario sin asistente el resto

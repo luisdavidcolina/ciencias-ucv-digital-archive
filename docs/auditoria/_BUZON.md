@@ -6,6 +6,25 @@ Anótalo aquí y sigue con el siguiente. El dueño de ese archivo lo aplicará e
 Esto no es una cola de deseos: es el mecanismo que evita que veinte agentes se pisen. Un
 apunte aquí vale más que un conflicto de fusión en `main.py`.
 
+## VI-admin-ai-html — VI-010/VI-011 (agente-vi-admin-ai-html)
+
+- [x] `VI-010` · `app/static/admin_ai.html` — de las tres tablas nombradas por el recorrido
+      visual, "Cambios propuestos" y "Modelo" ya estaban dentro de `.table-responsive`
+      (se generan por JS, líneas ~363 y ~464 respectivamente, resuelto en un lote anterior).
+      Sólo faltaba "Últimos días" (`gasto-tabla`, la tabla estática dentro de la tarjeta
+      "Gasto"): envuelta ahora en `.table-responsive` dentro de su `div` con
+      `max-height:240px;overflow-y:auto`. De paso se envolvió también la tabla de
+      "Conversaciones" (`conv-tabla`), mismo patrón sin `.table-responsive`, aunque el
+      recorrido no la nombraba explícitamente — misma regla de `CLAUDE.md`, mismo archivo,
+      cero riesgo.
+- [x] `VI-011` · revisado contra el código actual: "Gasto" y "Cambios propuestos" ya no usan
+      `overflow:hidden` con altura fija — usan `overflow-y:auto` con `max-height` (240px,
+      300px y 320px según el panel), que es exactamente el arreglo que pedía el hallazgo.
+      No hay `overflow:hidden` a nivel de `.card`/`.card-body` en `styles.css` ni en las
+      hojas de `app/static/styles/` que recorte estos paneles. Ya estaba resuelto por un lote
+      anterior (probablemente SI-205, SWEEP-admin-html) sin que quedara marcado como VI-011;
+      sin cambios de código para este punto.
+
 ## Cómo se anota
 
 ```
