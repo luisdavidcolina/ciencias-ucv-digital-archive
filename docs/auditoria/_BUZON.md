@@ -3456,3 +3456,87 @@ compartido durante la corrida larga (8 min). Mi commit `3e9dc0d` sólo incluye
 `git show 3e9dc0d --stat`), sin carrera de git.
 
 **quién lo pide**: agente-pass2-docs-hr-backend (PASS2-docs-hr-backend)
+
+---
+
+## PASS2-engineering (`app/database.py`, `app/core/config.py`, `app/utils.py`, `app/storage.py`)
+
+Pase adicional sobre `docs/auditoria/ingenieria.md` (~216 fichas IN-), tras
+H1a/H1b(O2)/H1e/H4/SWEEP-main/SWEEP2-main-schema. Resueltas dentro de mis
+cuatro archivos, sin tocar nada `[CHOCA]`:
+
+- `IN-032` — `db_query` fallaba abierto (`[]`/`None`) sin `DATABASE_URL`, la
+  app aparentaba estar vacía en vez de avisar. Ahora 503 explícito, igual que
+  ya hacía `db_transaction`.
+- `IN-033` — `DATABASE_URL` se leía tres veces y de tres formas. Ahora una
+  sola fuente: `settings.database_url` (`core/config.py`), usada por la
+  constante de módulo y por el pool. No migré a `pydantic-settings` (el
+  ticket lo sugiere como esfuerzo M): habría añadido una dependencia nueva
+  por una ganancia marginal sobre la clase `Settings` actual, que ya sirve
+  como fuente única una vez corregida la duplicación real.
+- `IN-036` — el nombre de la excepción de psycopg2 viajaba al cliente en
+  `db_query` y `db_transaction`; ahora sólo en el log.
+- `IN-057` — dos `sanitize_filename` con comportamiento distinto
+  (`utils.py`, sin llamador; `storage.py`, en uso real). Retirada la de
+  `utils.py`.
+- `IN-058` — `split_terms` vivía en `database.py` sin tocar la base. Movida
+  a `utils.py`; `database.py` la re-exporta (`from utils import
+  split_terms`) para no obligar a tocar `archive.py`/`hr.py`/`lookups.py`,
+  que la importan como `from database import split_terms` y son de otros
+  carriles.
+- `IN-106` — `import boto3` a nivel de módulo en `storage.py`; ahora
+  perezoso dentro de `_get_client()`.
+- `IN-107`/`IN-108` — `ThreadedConnectionPool(1,5)` fijo pese a que
+  `DB_POOL_MIN`/`DB_POOL_MAX` ya existían en `config.py` sin que nada los
+  leyera. Ahora el pool los usa.
+- `IN-166` — el reintento ante `OperationalError` repetía la sentencia
+  aunque fuera una escritura ya confirmada en el servidor antes del corte.
+  Ahora sólo se reintenta solo cuando `commit=False`.
+- `IN-167` — `PoolError` dormía dentro del hilo de la petición antes de
+  reintentar, empeorando el agotamiento del pool. Ahora falla rápido con
+  503 + `Retry-After`.
+- `IN-168` — `connect_timeout=10` recortado a `3` (con reintentos, se comía
+  media ventana de un lambda de 60s sólo conectando).
+- `IN-169` — sin `statement_timeout`; añadido `options="-c
+  statement_timeout=20000"` en la conexión del pool.
+
+**Pendientes que quedan fuera, con archivo dueño ajeno** (todos `[CHOCA]`
+según `ingenieria.md`, no se tocaron):
+- `IN-042`/`IN-053` (capa de repositorios, tipado de `db_query`) — esfuerzo
+  L/M, tocan `routes/**` entero.
+- `IN-054` (imports perezosos para romper ciclos `lookups↔archive`) —
+  `lookups.py`/`archive.py`/`hr.py`/`admin/helpers.py`.
+- `IN-056` (dos `hash_password`, una en `database.py` y otra en
+  `core/security.py`) — unificar en `core/security.py` exige tocar
+  `routes/auth.py` y `admin/users.py`, que la importan de `database`.
+- `IN-100`/`IN-101` (réplica de lectura, endpoint agrupado de Neon) — el
+  segundo es sólo `.env.example`/`README.md` (infraestructura, no código en
+  mi zona); el primero es una decisión de producto de esfuerzo M.
+- `IN-124`/`IN-159`/`IN-160`/`IN-163`/`IN-171` (coste/control de acceso de
+  R2) — todos piden `files.py`/`backup.py`/`share.py` a la vez.
+- `IN-165` (idempotencia de escritura) — pide `models.py` y `admin/docs.py`.
+- `IN-176` (verificar la copia diaria) — sólo `backup.py`.
+- `IN-181`/`IN-182`/`IN-183`/`IN-187`/`IN-190`/`IN-191` (registro
+  estructurado, id de correlación, métricas, salud) — todos piden `main.py`
+  a la vez que `database.py`/`storage.py`; no arriesgué un cambio de
+  logging global (`logging.basicConfig`) sin poder mover su contraparte en
+  `main.py` en el mismo commit.
+- `IN-197`/`IN-198` (`ruff`/`mypy`) — `requirements-dev.txt` +
+  `pyproject.toml`, herramienta nueva para todo el proyecto, no una ficha de
+  una zona.
+- `IN-214` (psycopg2 → psycopg3) — esfuerzo M, cambia `api/requirements.txt`
+  también y con dependencias en pool/asyncio no lo arriesgué suelto.
+- `IN-215` (`.env.example` sin variables de R2) — fichero fuera de mi zona
+  (`.env.example`, no `core/config.py`).
+
+`python -m pytest app/tests -q`: 850 pasan (antes de mi turno; el `+1
+fallo` que vi en la primera corrida, `test_sin_imports_muertos`, era mío —
+lo introduje yo mismo al mover `split_terms` y quitar un import muerto, y lo
+arreglé añadiendo la re-exportación a `REEXPORTACIONES` en
+`test_static_analysis.py`, igual que ya existía para `utils.paginate`) →
+859 pasan tras mi cambio, 0 fallos. Commit `f264057`, verificado con `git
+show --stat` que sólo incluye mis cinco archivos (`app/core/config.py`,
+`app/database.py`, `app/storage.py`, `app/tests/test_static_analysis.py`,
+`app/utils.py`).
+
+**quién lo pide**: agente-pass2-engineering (PASS2-engineering)
