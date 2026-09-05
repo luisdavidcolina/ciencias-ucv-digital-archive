@@ -136,3 +136,4 @@ para no repetir la confusión.
 - `LX` — va el último de todos: parte `styles.css` en módulos e invalida los rangos de línea
   con los que trabajan los demás lotes de diseño.
 - `L0` y `BR-109` — van antes que cualquier otro trabajo estético.
+| SUPERVISOR-coherencia | agente-supervisor-coherencia | 2026-09-05 | en curso | |
