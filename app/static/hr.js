@@ -16,6 +16,15 @@ function showRrhhSkeleton() {
     </div>`).join("");
 }
 
+// VI-006: la tipología es texto libre sin longitud máxima; una insignia larga
+// desborda el ancho a 390px. Recorte por JS con `title` con el valor
+// completo, igual que archive.js._truncBadge, para no depender de que la
+// clase CSS de la insignia ya tenga max-width/ellipsis.
+function _truncBadgeRrhh(text, max = 28) {
+  const s = String(text || "");
+  return s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s;
+}
+
 const _debouncedRrhhSearch = (() => {
   let timer;
   return () => { clearTimeout(timer); timer = setTimeout(triggerRrhhSearch, 420); };
@@ -205,7 +214,7 @@ function renderRrhhList() {
             <div class="mt-2 d-flex align-items-center flex-wrap" style="gap:4px;">
               <span class="badge" style="background-color:${colorState};color:white;padding:3px 8px;border-radius:10px;font-size:0.78rem;font-weight:700;">${escHtml(p.estatuses)}</span>
               <span class="badge badge-light border" style="padding:2px 7px;border-radius:10px;font-size:0.7rem;"><i class="fas fa-file-alt mr-1" aria-hidden="true"></i>${Number(p.doc_count) || 0} docs</span>
-              ${tiposVisibles.map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">${escHtml(t.trim())}</span>`).join("")}
+              ${tiposVisibles.map(t => `<span class="badge badge-secondary" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;" title="${escHtml(t.trim())}">${escHtml(_truncBadgeRrhh(t.trim()))}</span>`).join("")}
               ${tiposRestantes > 0 ? `<span class="badge badge-secondary" title="${escHtml(tipos.slice(3).join(", "))}" style="padding:2px 6px;border-radius:8px;font-size:0.68rem;">+${tiposRestantes}</span>` : ""}
             </div>
           </div>

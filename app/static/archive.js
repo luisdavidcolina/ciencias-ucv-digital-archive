@@ -18,6 +18,16 @@ function _pluralArchivo(n, singular, pluralWord) {
   return `${n} ${n === 1 ? singular : pluralWord}`;
 }
 
+// VI-005/VI-006: soporte y tipología son texto libre sin longitud máxima en
+// la base; sin recorte, una insignia larga desborda la tarjeta (contenedor
+// flex sin max-width) y en 390px se sale del viewport. Recorte por JS con
+// `title` con el valor completo, para no depender de que la clase CSS de la
+// insignia ya tenga max-width/ellipsis.
+function _truncBadge(text, max = 28) {
+  const s = String(text || "");
+  return s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s;
+}
+
 function _archivoMotionBehavior() {
   const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   return (document.body.classList.contains("ds-no-anim") || reduced) ? "auto" : "smooth";
@@ -270,12 +280,12 @@ function renderArchivoList() {
     <div class="ds-item-card" role="listitem" onclick="openArchivoModal(${doc.__idx})" style="cursor:pointer;">
       <div class="ds-item-thumbnail">
         <i class="${iconData.icon}" style="color:${iconData.color};" aria-hidden="true"></i>
-        ${soporteLabel ? `<span class="badge ds-badge mt-1" style="font-size:0.6rem;"><i class="fas ${soporteIcon} mr-1" aria-hidden="true"></i>${escHtml(soporteLabel)}</span>` : ""}
+        ${soporteLabel ? `<span class="badge ds-badge mt-1" style="font-size:0.6rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(soporteLabel)}"><i class="fas ${soporteIcon} mr-1" aria-hidden="true"></i>${escHtml(_truncBadge(soporteLabel))}</span>` : ""}
       </div>
       <div class="ds-item-metadata">
         <button type="button" class="ds-item-title btn btn-link p-0 text-left" onclick="event.stopPropagation();openArchivoModal(${doc.__idx})">${hl(doc.titulo)}</button>
         <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:6px;">
-          <span class="badge ds-badge" style="margin-top:0;"><i class="fas fa-bookmark mr-1" aria-hidden="true"></i>${escHtml(doc.tesauro_primario || doc.doc_type)}</span>
+          <span class="badge ds-badge" style="margin-top:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(doc.tesauro_primario || doc.doc_type)}"><i class="fas fa-bookmark mr-1" aria-hidden="true"></i>${escHtml(_truncBadge(doc.tesauro_primario || doc.doc_type))}</span>
           <span class="text-muted" style="font-size:0.8rem;"><i class="far fa-calendar-alt mr-1" aria-hidden="true"></i>${escHtml(formatISOToSpanish(doc.fecha))}</span>
         </div>
         <div class="ds-item-authors"><i class="fas fa-user-edit mr-1" aria-hidden="true"></i>${hl(doc.autor)}</div>
