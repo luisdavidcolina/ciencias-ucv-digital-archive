@@ -161,3 +161,4 @@ para no repetir la confusión.
 | IN-share-revocation | agente-in-share-revocation | 2026-09-05 | terminado (IN-145: claves derivadas por propósito con HMAC(secret_key, "session"/"share"); IN-146: tabla `enlaces_revocados` + `jti` aleatorio dentro del token firmado, `verify_share_token` la consulta, endpoints `/api/admin/compartir/revocar` y `/api/admin/compartir/revocados` con `require_admin_role`) | 9dc3300 |
 | IN-rotacion-docs | agente-in-rotacion-docs | 2026-09-05 | terminado | 6dd4fba |
 | OR-monitor-rrhh | agente-or-monitor-rrhh | 2026-09-05 | terminado (OR-127, OR-121, OR-122, OR-126, OR-125, OR-128, OR-129, OR-130 — ver nota en _BUZON.md para simplificaciones) | 83bacec |
+| BR-hr-js-tercer-pase | agente-br-hr-js-3 | 2026-09-05 | en curso | |
