@@ -113,7 +113,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | PASS3-admin-js-untouched | agente-pass3-admin-js-untouched | 2026-09-04 | en curso | |
 | PASS3-styles-buzon | agente-pass3-styles-buzon | 2026-09-04 | en curso | |
 | PASS3-admin-html-depth | agente-pass3-admin-html-depth | 2026-09-04 | en curso | |
-| PASS3-login-scanner-js | agente-pass3-login-scanner-js | 2026-09-04 | en curso | |
+| PASS3-login-scanner-js | agente-pass3-login-scanner-js | 2026-09-04 | terminado (SI-175 corregido — id de selector muerto; SI-177/DG-162 parcial — accesibilidad de teclado; login.js sin cambios, ya resuelto por C9-auth; resto documentado en _BUZON.md) | b68a951 |
 
 ## Cómo se escribe una fila
 
