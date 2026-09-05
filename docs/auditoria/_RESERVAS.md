@@ -140,5 +140,5 @@ para no repetir la confusión.
 | VI-app-theme-escape | agente-vi-app-theme | 2026-09-05 | terminado | 15f40cf |
 | VI-styles-desbordes | agente-vi-styles-desbordes | 2026-09-05 | en curso | |
 | VI-archive-hr-js | agente-vi-archive-hr-js | 2026-09-05 | en curso | |
-| VI-admin-ai-html | agente-vi-admin-ai-html | 2026-09-05 | en curso | |
+| VI-admin-ai-html | agente-vi-admin-ai-html | 2026-09-05 | terminado (VI-010: sólo faltaba envolver `gasto-tabla` y `conv-tabla`, las otras dos ya tenían `.table-responsive`; VI-011 ya estaba resuelto, sin cambios de código, ver nota en `_BUZON.md`) | 3780b63 (mi commit quedó absorbido por una carrera de git concurrente con "VI-app-theme-escape terminado"; contenido verificado con `git show 3780b63:app/static/admin_ai.html` y `git show 3780b63:docs/auditoria/_BUZON.md`) |
 | VI-ai-widget-zindex | agente-vi-ai-widget-zindex | 2026-09-05 | terminado | PENDIENTE-SHA |
