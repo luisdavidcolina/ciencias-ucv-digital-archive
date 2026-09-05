@@ -1,9 +1,10 @@
+import html
 import re
 
 from fastapi import APIRouter, Depends, HTTPException
 import pandas as pd
 
-from database import db_query, split_terms
+from database import db_query, log_event, split_terms
 from models import RrhhSearchRequest, RrhhProfileRequest
 from routes.admin.deps import require_session, require_role
 from utils import paginate
@@ -91,8 +92,12 @@ def fetch_hr_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFram
         LEFT JOIN public.rrhh_descriptores rd ON dr.id_rrhh = rd.id_rrhh
         LEFT JOIN public.descriptores_libres dl ON rd.id_descriptor = dl.id_descriptor
     """
-    if filters_sql:
-        base_sql += " WHERE " + filters_sql
+    # BR-005: la vista `vw_rrhh_persona_index` ya filtra borrados; este fetcher
+    # alimenta el dossier (person/profile) y hasta ahora no lo hacía, así que
+    # un empleado o documento en papelera seguía apareciendo aquí íntegro.
+    deleted_filter = "e.deleted_at IS NULL AND (dr.id_rrhh IS NULL OR dr.deleted_at IS NULL)"
+    where_sql = f"{deleted_filter} AND ({filters_sql})" if filters_sql else deleted_filter
+    base_sql += " WHERE " + where_sql
 
     base_sql += " GROUP BY e.id, c.id, d.id, el.id, dr.id_rrhh, td.id, cat.id"
 
@@ -302,7 +307,7 @@ def search_hr(req: RrhhSearchRequest):
 
 
 @router.post("/person/profile", dependencies=_auth)
-def get_person_profile(req: RrhhProfileRequest):
+def get_person_profile(req: RrhhProfileRequest, usuario_sesion: str = Depends(require_session)):
     df = fetch_hr_dataframe(
         "e.nombres || ' ' || e.apellidos = %s",
         (req.persona,),
@@ -327,8 +332,7 @@ def get_person_profile(req: RrhhProfileRequest):
     emp_data = {}
     first_row = row_list[0] if row_list else {}
     if first_row.get("empleado_id"):
-        from database import db_query as _dq
-        emp_extra = _dq(
+        emp_extra = db_query(
             """SELECT TO_CHAR(fecha_nacimiento,'YYYY-MM-DD') AS fecha_nacimiento,
                       COALESCE(nivel_educativo,'') AS nivel_educativo,
                       COALESCE(sexo,'') AS sexo
@@ -337,6 +341,9 @@ def get_person_profile(req: RrhhProfileRequest):
         )
         if emp_extra:
             emp_data = dict(emp_extra)
+
+    # BR-006: un expediente de personal tiene que poder decir quién lo consultó.
+    log_event(usuario_sesion, "Expediente Consultado", "RRHH", f"persona={req.persona}")
 
     return {
         "persona_raw":      req.persona,
@@ -447,7 +454,7 @@ from fastapi.responses import HTMLResponse as _HTMLResponse
 
 
 @router.get("/report/{emp_id}", response_class=_HTMLResponse, dependencies=_auth)
-def generate_hr_report(emp_id: int):
+def generate_hr_report(emp_id: int, usuario_sesion: str = Depends(require_session)):
     """Genera reporte HTML imprimible del expediente de un empleado."""
     emp = db_query("""
         SELECT e.id, e.cedula, e.nombres, e.apellidos, e.rif,
@@ -466,6 +473,8 @@ def generate_hr_report(emp_id: int):
     if not emp:
         raise HTTPException(404,"Empleado no encontrado")
     emp = dict(emp)
+    # BR-015: un documento enviado a la papelera no puede seguir saliendo en
+    # un expediente que alguien puede imprimir y firmar.
     docs = db_query("""
         SELECT dr.id_rrhh, dr.fecha_documento, dr.notas, dr.ubicacion, dr.file_url,
                COALESCE(td.nombre_corto,'Sin tipo') AS tipo_nombre,
@@ -474,7 +483,8 @@ def generate_hr_report(emp_id: int):
         FROM public.datos_rrhh dr
         LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento=td.id
         LEFT JOIN public.categoria c ON td.id_categoria=c.id
-        WHERE dr.empleado_id=%s ORDER BY parte_orden, dr.fecha_documento DESC
+        WHERE dr.empleado_id=%s AND dr.deleted_at IS NULL
+        ORDER BY parte_orden, dr.fecha_documento DESC
     """,[emp_id],fetch="all") or []
     partes = {}
     for d in docs:
@@ -493,28 +503,40 @@ def generate_hr_report(emp_id: int):
         ORDER BY hc.fecha_inicio DESC
     """, [emp_id], fetch="all") or []
 
+    # BR-003: cada valor interpolado en este HTML viene de un campo que
+    # cualquier persona con permiso de alta puede escribir (notas, ubicación,
+    # nombres...). Sin escapar, ese texto se ejecuta como script en el
+    # navegador de quien imprime el expediente, con su sesión activa.
+    esc = html.escape
+
     def fd(v):
         if not v: return "—"
-        return str(v)[:10]
+        return esc(str(v)[:10])
+
+    def _slug_class(v: str) -> str:
+        """Sólo alfanumérico en minúsculas: una clase CSS no admite comillas
+        ni espacios, y el valor viene de un catálogo editable (BR-003)."""
+        return re.sub(r"[^a-z0-9]", "", str(v or "").lower())
+
     colores = {
         "Parte I — Ingreso y Contratación":"#0d6efd",
         "Parte II — Escalafón y Desarrollo":"#198754",
         "Parte III — Permisos y Formación":"#fd7e14",
         "Parte IV — Documentos Personales":"#6f42c1",
     }
-    nombre_completo = f"{emp.get('apellidos','')}, {emp.get('nombres','')}".strip(", ")
+    nombre_completo = esc(f"{emp.get('apellidos','')}, {emp.get('nombres','')}".strip(", "))
     _SEXO_MAP = {"M": "Masculino", "F": "Femenino", "O": "Otro"}
     rows_html = ""
     for pn, pdocs in partes.items():
         col = colores.get(pn,"#6c757d")
-        rows_html += f'<tr style="background:{col}18"><td colspan="4" style="font-weight:700;color:{col};border-left:4px solid {col};padding:8px 14px">{pn} <span style="font-weight:normal;font-size:.8rem">({len(pdocs)} documentos)</span></td></tr>'
+        rows_html += f'<tr style="background:{col}18"><td colspan="4" style="font-weight:700;color:{col};border-left:4px solid {col};padding:8px 14px">{esc(pn)} <span style="font-weight:normal;font-size:.8rem">({len(pdocs)} documentos)</span></td></tr>'
         for d in pdocs:
-            rows_html += f'<tr><td style="padding:6px 14px;border-bottom:1px solid #eee">{d["tipo_nombre"]}</td><td style="padding:6px 14px;border-bottom:1px solid #eee">{fd(d["fecha_documento"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{d["notas"] or "—"}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{d["ubicacion"] or "—"}</td></tr>'
+            rows_html += f'<tr><td style="padding:6px 14px;border-bottom:1px solid #eee">{esc(d["tipo_nombre"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee">{fd(d["fecha_documento"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{esc(d["notas"] or "—")}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{esc(d["ubicacion"] or "—")}</td></tr>'
     if not rows_html:
         rows_html = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#999">Sin documentos registrados</td></tr>'
     from datetime import datetime as _dt
     now_str = _dt.now().strftime("%d/%m/%Y %H:%M")
-    html = f"""<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+    html_out = f"""<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Expediente — {nombre_completo}</title>
 <style>
 @media print{{@page{{size:A4;margin:2cm}}button{{display:none!important}}}}
@@ -552,17 +574,17 @@ tr:nth-child(even) td{{background:#f9f9f9}}
 </div>
 <div class="emp-grid">
 <div class="ef"><label>Nombre Completo</label><span>{nombre_completo}</span></div>
-<div class="ef"><label>Cédula</label><span>{emp.get('cedula','—')}</span></div>
-<div class="ef"><label>Estado</label><span class="badge badge-{str(emp.get('estado','') or '').lower()}">{emp.get('estado','—')}</span></div>
-<div class="ef"><label>Cargo</label><span>{emp.get('cargo','—')}</span></div>
-<div class="ef"><label>Departamento</label><span>{emp.get('departamento','—')}</span></div>
-<div class="ef"><label>RIF</label><span>{emp.get('rif','—') or '—'}</span></div>
+<div class="ef"><label>Cédula</label><span>{esc(emp.get('cedula') or '—')}</span></div>
+<div class="ef"><label>Estado</label><span class="badge badge-{_slug_class(emp.get('estado'))}">{esc(emp.get('estado') or '—')}</span></div>
+<div class="ef"><label>Cargo</label><span>{esc(emp.get('cargo') or '—')}</span></div>
+<div class="ef"><label>Departamento</label><span>{esc(emp.get('departamento') or '—')}</span></div>
+<div class="ef"><label>RIF</label><span>{esc(emp.get('rif') or '—')}</span></div>
 <div class="ef"><label>Fecha de Ingreso</label><span>{fd(emp.get('fecha_ingreso'))}</span></div>
 <div class="ef"><label>Jubilación</label><span>{fd(emp.get('fecha_jubilacion'))}</span></div>
 <div class="ef"><label>Pensión</label><span>{fd(emp.get('fecha_pension'))}</span></div>
 <div class="ef"><label>Fecha de Nacimiento</label><span>{fd(emp.get('fecha_nacimiento'))}</span></div>
-<div class="ef"><label>Nivel Educativo</label><span>{emp.get('nivel_educativo') or '—'}</span></div>
-<div class="ef"><label>Sexo</label><span>{_SEXO_MAP.get(str(emp.get('sexo') or ''),'—')}</span></div>
+<div class="ef"><label>Nivel Educativo</label><span>{esc(emp.get('nivel_educativo') or '—')}</span></div>
+<div class="ef"><label>Sexo</label><span>{esc(_SEXO_MAP.get(str(emp.get('sexo') or ''),'—'))}</span></div>
 </div>
 <div class="stats">
 <div class="sbox"><div class="n">{len(docs)}</div><div class="l">Documentos</div></div>
@@ -580,17 +602,20 @@ tr:nth-child(even) td{{background:#f9f9f9}}
   <thead><tr><th>Cargo</th><th>Desde</th><th>Hasta</th><th>Motivo</th></tr></thead>
   <tbody>
     {''.join(
-        f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['cargo']}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['fecha_inicio'] or '—'}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{h['fecha_fin'] or '<span style=\"color:#198754;font-weight:600\">Actual</span>'}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem'>{h['motivo'] or '—'}</td></tr>"
+        f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['cargo'])}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['fecha_inicio'] or '—')}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['fecha_fin']) if h['fecha_fin'] else '<span style=\"color:#198754;font-weight:600\">Actual</span>'}</td>"
+        f"<td style='padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem'>{esc(h['motivo'] or '—')}</td></tr>"
         for h in historial_cargos
     ) if historial_cargos else "<tr><td colspan='4' style='text-align:center;padding:14px;color:#999'>Sin historial registrado</td></tr>"}
   </tbody>
 </table>
-''' if historial_cargos is not None else ''}
+'''}
 <p style="margin-top:20px;font-size:.72rem;color:#aaa;text-align:center">
 Documento generado automáticamente por el Sistema de Archivo Institucional — Ciencias UCV. Confidencial. Solo para uso oficial.
 </p>
 </div></body></html>"""
-    return _HTMLResponse(content=html)
+    # BR-006: un expediente de personal tiene que poder decir quién lo consultó.
+    log_event(usuario_sesion, "Expediente Consultado", "RRHH", f"empleado_id={emp_id}")
+
+    return _HTMLResponse(content=html_out)
