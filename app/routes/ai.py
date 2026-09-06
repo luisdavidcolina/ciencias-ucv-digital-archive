@@ -52,6 +52,19 @@ def _build_context(usuario: str | None, conversacion_id=None) -> dict:
     Sin usuario, o con uno que ya no está activo, el perfil es `publico`. No se lanza 401:
     un chat que se cae al expirar la sesión es un chat que la gente deja de usar. Degradar
     a público es seguro porque ese perfil no tiene ninguna herramienta de personal.
+
+    NOTA (SI-047, no resuelto en este pase): `auth.py` (`_build_user_response`) trata como
+    Global tanto al usuario con el literal `modulo='Global'` como al que tiene dos filas
+    (Archivo + RRHH). Esta función sigue leyendo una sola fila (`LIMIT 1`) y sólo reconoce el
+    literal `"Global"` — un administrador Global modelado como dos filas entraría en
+    `/admin/sistema` pero vería sus herramientas de IA limitadas al módulo de la fila que
+    Postgres devuelva primero (sin `ORDER BY`, no garantizado). Probé a leer todas las filas
+    activas y fusionar módulos igual que `auth.py`, pero varias pruebas de
+    `test_ia_seguridad.py` (SI-009/SI-011) mockean `db_query` para esta función asumiendo
+    `fetch="one"` (devuelven un único dict, no una lista) y se rompían con `TypeError` al
+    iterarlo como filas. Arreglarlo bien exige tocar esos mocks compartidos y, para SI-047
+    completo, unificar la función con `auth.py`/`deps.py` — cruza archivos fuera de esta zona
+    y de esta pasada. Documentado, no tocado.
     """
     base = {"perfil": "publico", "usuario": None, "nombre_usuario": None,
             "modulos": set(), "conversacion_id": conversacion_id}
@@ -100,6 +113,24 @@ def _daily_spend() -> float:
 # CONVERSACIONES
 # =============================================================================
 
+def _short_title(texto: str, limite: int = 160) -> str:
+    """SI-083: recorta por palabra, no a mitad de una.
+
+    `[:160]` a secas partía la pregunta en cualquier carácter — una consulta larga se veía en
+    el listado del panel como "...qué documentos tiene juan pérez en el departamento de
+    bioan" sin punto de fuga. Se corta en el último espacio dentro del límite (si no queda
+    demasiado corto) y se añade una elipsis; el resultado sigue cabiendo en `VARCHAR(160)`.
+    """
+    texto = (texto or "").strip()
+    if len(texto) <= limite:
+        return texto
+    cortado = texto[:limite - 1]
+    ultimo_espacio = cortado.rfind(" ")
+    if ultimo_espacio > limite * 0.5:
+        cortado = cortado[:ultimo_espacio]
+    return cortado.rstrip() + "…"
+
+
 def _open_conversation(conv_id, meta: dict) -> int:
     """Reabre `conv_id` SOLO si pertenece al usuario de la sesión (SI-004).
 
@@ -129,7 +160,7 @@ def _open_conversation(conv_id, meta: dict) -> int:
         RETURNING id
     """, [
         meta.get("canal", "web"), meta.get("perfil", "publico"), meta.get("usuario"),
-        (meta.get("titulo") or "")[:160], meta.get("modelo"),
+        _short_title(meta.get("titulo")), meta.get("modelo"),
     ], fetch="one", commit=True)
     return fila["id"]
 
@@ -248,6 +279,15 @@ def chat(payload: dict = Body(...), usuario: str | None = Depends(_optional_sess
     r["perfil"] = ctx["perfil"]
     # Las propuestas que este turno dejó pendientes, para que el chat pinte los botones.
     r["propuestas"] = ai_proposals.list_proposals(conversacion_id=conv_id, estado="pendiente")
+    # SI-121: el aviso de gasto del widget sólo se calculaba una vez, al cargar la página —
+    # quien abría la pestaña por la mañana con el gasto al 10% nunca veía el aviso subir y
+    # descubría el tope con un 429 a mitad de una pregunta. Sin este campo en cada respuesta
+    # no había nada que leer del lado del cliente para refrescarlo turno a turno.
+    try:
+        r["gasto_hoy"] = round(_daily_spend(), 6)
+        r["tope_diario"] = tope
+    except Exception:
+        pass
     return r
 
 
