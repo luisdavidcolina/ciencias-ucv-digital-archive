@@ -261,6 +261,21 @@ async function loadVencimientosTable() {
   const tbody   = document.getElementById(`vencimientos-table-body-${suf}`) || document.getElementById("vencimientos-table-body");
   const summary = document.getElementById(`vencimientos-summary-${suf}`) || document.getElementById("vencimientos-summary");
   if (!tbody) return;
+  // OR-183/OR-184: el único endpoint que existe (`/api/admin/retencion/vencimientos`)
+  // consulta `datos_archivo` y exige el rol "Archivo" — es del módulo Archivo, no
+  // genérico. El endpoint de RRHH que hubiera cubierto este panel se retiró por ser
+  // una fuga de datos entre módulos (BR-063, ver `hr_alerts.py`) y no se sustituyó.
+  // Sin esta guarda, un admin Global veía aquí documentos del Archivo institucional
+  // bajo el título "Expedientes con Retención Vencida" de RRHH — el mismo módulo
+  // equivocado que motivó retirar el endpoint original. Bloqueado en `retention.py`,
+  // fuera de esta zona.
+  if (suf === "rrhh") {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">
+      <i class="fas fa-circle-info mr-1"></i>Esta tabla todavía no tiene un origen de datos propio de RRHH — pendiente en el backend.
+    </td></tr>`;
+    if (summary) summary.textContent = "Sin datos disponibles para RRHH todavía.";
+    return;
+  }
   tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
