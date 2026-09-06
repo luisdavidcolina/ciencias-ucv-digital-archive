@@ -112,7 +112,7 @@ def _tokens_definidos_en_todo_el_frontend() -> set[str]:
 def test_todo_token_consumido_esta_definido():
     definidos = _tokens_definidos_en_todo_el_frontend()
     consumidos = set()
-    for f in STATIC.glob("*.css"):
+    for f in STATIC.glob("**/*.css"):
         consumidos |= _tokens_consumidos_sin_fallback(f.read_text(encoding="utf-8"))
     for f in STATIC.glob("*.html"):
         consumidos |= _tokens_consumidos_sin_fallback(f.read_text(encoding="utf-8"))

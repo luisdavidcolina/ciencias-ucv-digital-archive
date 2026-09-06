@@ -42,7 +42,7 @@ def _selectores_de_estado(css: str) -> set[str]:
 
 def _hojas_propias():
     """Todas las hojas de estilo propias del producto, excluyendo CDN."""
-    return sorted(STATIC.glob("*.css"))
+    return sorted(STATIC.glob("**/*.css"))
 
 
 def test_se_detectaron_hojas():
