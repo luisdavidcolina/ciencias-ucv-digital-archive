@@ -10,6 +10,10 @@
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
+    /* SD-235: alto mínimo estable — el sidebar fijo de escritorio (más abajo,
+       ≥1200px) empieza justo debajo usando este mismo valor. Sin un alto
+       predecible aquí, ese offset se desalinea y el sidebar tapa el logo. */
+    min-height: 64px;
 }
 
 .main-header .nav-link {
@@ -92,10 +96,14 @@
     margin-right: auto;
 }
 
-/* SD-134: `.ds-sidebar` pasa a `position:sticky` (fija) en ≥1200px más
-   abajo en este mismo archivo; como es un `<aside>` independiente del
-   flujo de `.content-wrapper` (no un hijo del mismo contenedor flex), sin
-   este margen el contenido quedaría tapado detrás de la barra fija. */
+/* SD-134/SD-235: `.ds-sidebar` se mantiene `position:fixed` (no
+   `sticky`) también en ≥1200px, más abajo en este mismo archivo. `sticky`
+   sigue en el flujo normal del documento: al ser un `<aside>` con
+   `height:100vh` colocado antes de `.content-wrapper` en el HTML, quedaba
+   "en fila" con él y lo empujaba una pantalla entera hacia abajo — el
+   propio `<body>` no es un contenedor flex/grid que los ponga uno junto al
+   otro. `fixed` saca al aside del flujo de verdad, que es lo que este
+   margen ya asumía. */
 @media (min-width: 1200px) {
     .content-wrapper {
         margin-left: 280px !important;
@@ -153,8 +161,13 @@
 
 @media (min-width: 1200px) {
     .ds-sidebar {
-        position: sticky;
-        top: 0;
+        position: fixed;
+        /* Debajo de `.main-header` (min-height: 64px arriba), no encima:
+           ambos son `position:fixed`/`sticky` con top:0, y el sidebar tiene
+           mayor z-index (--z-overlay) para el cajón móvil — sin este
+           desplazamiento tapa el logo institucional de la barra superior. */
+        top: 64px;
+        height: calc(100vh - 64px);
         transform: none;
         transition: none;
         box-shadow: none;

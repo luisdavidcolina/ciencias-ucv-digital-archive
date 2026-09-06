@@ -306,7 +306,7 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   #logout_btn { margin-right: 4px !important; padding: 4px 9px; }
   .ds-nav-user { margin-right: 0 !important; }
   #nav_username { max-width: 30vw; font-size: 0.8rem; }
-  .ds-navbar-logo-img { height: 27px; max-width: 38vw; }
+  .ds-navbar-logo-img { height: 27px; max-width: 30vw; }
   .main-header.navbar { padding-left: 6px; padding-right: 6px; }
 }
 
