@@ -8,7 +8,10 @@ const state = {
   activeAdminTab: "stats",
   archivo: {
     results: [], total: 0, search: "", selectedTypes: [], selectedTesauro: [],
-    dateStart: "", dateEnd: "", sortMode: "Alfabético (A-Z)", page: 1, perPage: 5
+    // BA-008: el <select> de archive.html marca "10 por página" como opción
+    // seleccionada; este valor tiene que coincidir con la primera carga o la
+    // interfaz miente sobre cuántos resultados trae.
+    dateStart: "", dateEnd: "", sortMode: "Alfabético (A-Z)", page: 1, perPage: 10
   },
   rrhh: {
     results: [], total: 0, search: "", selectedTypes: [], selectedEstados: [],
@@ -92,18 +95,37 @@ function _secureFileUrl(url) {
 }
 
 function highlightTerms(text, terms) {
-  if (!text || !terms || !terms.length) return escHtml(text) || "";
-  const safe = escHtml(text);
-  const escaped = terms
-    .map(t => escHtml(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  if (!text) return "";
+  const safe = escHtml(text) || "";
+  if (!terms || !terms.length) return safe;
+  // BA-028: la regex tiene que correr sobre el texto SIN escapar. Antes se
+  // escapaba primero y se resaltaba sobre el HTML ya escapado: buscar "amp",
+  // "quot", "39" o "lt" resaltaba dentro de "&amp;"/"&quot;"/etc. y rompía el
+  // marcado. Ahora se localizan los tramos en el texto plano y cada tramo
+  // (coincida o no) se escapa por separado antes de insertarlo.
+  const pattern = terms
+    .map(t => String(t ?? "").trim())
     .filter(Boolean)
+    .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
     .join("|");
-  if (!escaped) return safe;
+  if (!pattern) return safe;
+  const raw = String(text);
+  let result = "";
+  let lastIndex = 0;
   try {
-    return safe.replace(
-      new RegExp(`(${escaped})`, "gi"),
-      '<mark style="background:#fff176;border-radius:2px;padding:0 1px;">$1</mark>'
-    );
+    const re = new RegExp(`(${pattern})`, "gi");
+    let m;
+    while ((m = re.exec(raw)) !== null) {
+      if (m[0] === "") { re.lastIndex++; continue; }
+      result += escHtml(raw.slice(lastIndex, m.index));
+      // BA-041: sin estilo en línea — el amarillo/negro por defecto del
+      // navegador para <mark> no depende del color heredado, así que se lee
+      // igual en modo oscuro sin necesitar un token nuevo en styles.css.
+      result += `<mark>${escHtml(m[0])}</mark>`;
+      lastIndex = re.lastIndex;
+    }
+    result += escHtml(raw.slice(lastIndex));
+    return result;
   } catch { return safe; }
 }
 
