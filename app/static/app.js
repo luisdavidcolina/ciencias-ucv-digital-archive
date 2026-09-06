@@ -5,6 +5,18 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   setupEventListeners();
   checkPersistedSession();
+  // VI-045: si la pantalla cruza los 1200px con el menú marcado `inert` (se
+  // cerró siendo cajón, en móvil) o el contenido marcado `inert` (se quedó
+  // abierto como cajón y se ensancha a fijo), un simple resize/rotación sin
+  // navegar de por medio dejaría ese estado pegado.
+  window.matchMedia("(min-width: 1200px)").addEventListener("change", e => {
+    if (e.matches) {
+      document.getElementById("app-sidebar")?.removeAttribute("inert");
+      document.getElementById("contenido-principal")?.removeAttribute("inert");
+    } else if (!document.getElementById("app-sidebar")?.classList.contains("open")) {
+      document.getElementById("app-sidebar")?.setAttribute("inert", "");
+    }
+  });
 });
 
 async function checkPersistedSession() {
@@ -35,9 +47,34 @@ async function checkPersistedSession() {
   }
 }
 
+// BA-146: un usuario sólo-RRHH que entraba a /archivo veía la credencial
+// pintada como "Archivo" y `loadDynamicChoices()` ya disparada antes de que
+// `configureSidebarVisibilities()` (más abajo en la misma función) notara
+// que no tenía permiso y lo expulsara — parpadeo y una petición de sobra.
+// Se comprueba el acceso a la página standalone ANTES de pintar nada.
+function _accesoPaginaPermitido(user) {
+  const standalonePage = document.body.dataset.page;
+  if (!standalonePage) return true;
+  const modules = user.modules || (user.modulo ? [user.modulo] : []);
+  const rArch = user.roles?.["Archivo"] || null;
+  const rRrhh = user.roles?.["RRHH"]    || null;
+  const esGlobal = modules.includes("Archivo") && modules.includes("RRHH");
+  if (standalonePage === "archivo")            return modules.includes("Archivo");
+  if (standalonePage === "rrhh")               return modules.includes("RRHH");
+  if (standalonePage === "admin-archivo")      return rArch === "Admin";
+  if (standalonePage === "admin-rrhh")         return rRrhh === "Admin";
+  if (standalonePage === "admin-sistema" || standalonePage === "admin-ia") return esGlobal;
+  return true;   // páginas sin restricción propia (ayuda, investigación)
+}
+
 function loginSuccess(user) {
   const pageAttr = document.body.dataset.page;
   user.modules = user.modules || (user.modulo ? [user.modulo] : []);
+  if (!_accesoPaginaPermitido(user)) {
+    const modules = user.modules || (user.modulo ? [user.modulo] : []);
+    window.location.href = modules.includes("RRHH") ? "/rrhh" : "/archivo";
+    return;
+  }
   // La página sólo decide el módulo activo si el usuario de verdad lo tiene.
   // Antes se reescribía user.modulo con el de la página aunque no estuviera
   // en sus módulos reales, y esa mentira quedaba persistida en localStorage:
@@ -81,8 +118,8 @@ function loginSuccess(user) {
     const _empId = _params.get("empId");
     if (_docId || _empId) {
       setTimeout(() => {
-        if (_docId && typeof openEditDocModal === "function") openEditDocModal(parseInt(_docId));
-        else if (_empId && typeof openEditEmpleadoModal === "function") openEditEmpleadoModal(parseInt(_empId));
+        if (_docId && typeof openEditDocModal === "function") openEditDocModal(parseInt(_docId, 10));
+        else if (_empId && typeof openEditEmpleadoModal === "function") openEditEmpleadoModal(parseInt(_empId, 10));
         // Clean URL without reload
         history.replaceState({}, "", window.location.pathname);
       }, 800);
@@ -235,9 +272,23 @@ function switchTab(tabId) {
 // (aria-expanded) y el foco entra al menú al abrirlo y vuelve al botón al
 // cerrarlo — sin esto, quien navega por teclado o lector de pantalla no
 // sabe si el menú está abierto ni dónde quedó el foco tras cerrarlo.
+//
+// VI-045/SD-203: el menú cerrado sólo se desplazaba fuera de pantalla con
+// CSS — seguía en el orden de tabulación, así que Tab recorría diez enlaces
+// invisibles antes de llegar al primer filtro. Y con el menú abierto, el
+// contenido de detrás (tapado por el velo) seguía siendo tabulable. `inert`
+// saca del foco y de los lectores de pantalla lo que no se ve en cada
+// estado — pero sólo por debajo de 1200px: desde ahí (SD-134) el menú es
+// fijo y siempre visible, sin velo (`.ds-sidebar-overlay{display:none}`), así
+// que aplicar `inert` ahí dejaría el menú entero inutilizable en escritorio.
+function _sidebarEsCajon() {
+  return !window.matchMedia("(min-width: 1200px)").matches;
+}
 function openSidebar() {
   document.getElementById("app-sidebar")?.classList.add("open");
+  document.getElementById("app-sidebar")?.removeAttribute("inert");
   document.getElementById("sidebar-overlay")?.classList.add("open");
+  if (_sidebarEsCajon()) document.getElementById("contenido-principal")?.setAttribute("inert", "");
   const toggleBtn = document.getElementById("sidebar-toggle-btn");
   toggleBtn?.setAttribute("aria-expanded", "true");
   toggleBtn?.setAttribute("aria-label", "Cerrar menú");
@@ -245,7 +296,10 @@ function openSidebar() {
 }
 function closeSidebar() {
   document.getElementById("app-sidebar")?.classList.remove("open");
+  if (_sidebarEsCajon()) document.getElementById("app-sidebar")?.setAttribute("inert", "");
+  else document.getElementById("app-sidebar")?.removeAttribute("inert");
   document.getElementById("sidebar-overlay")?.classList.remove("open");
+  document.getElementById("contenido-principal")?.removeAttribute("inert");
   const toggleBtn = document.getElementById("sidebar-toggle-btn");
   toggleBtn?.setAttribute("aria-expanded", "false");
   toggleBtn?.setAttribute("aria-label", "Abrir menú");
@@ -290,20 +344,11 @@ function sidebarKeydownTrap(e) {
 function setupEventListeners() {
   function safeOn(id, ev, fn) { document.getElementById(id)?.addEventListener(ev, fn); }
 
-  // Login
-  safeOn("login_btn",         "click",   performLogin);
-  safeOn("login_user",        "keydown", e => { if (e.key === "Enter") performLogin(); });
-  safeOn("login_pass",        "keydown", e => { if (e.key === "Enter") performLogin(); });
-  if (document.body.dataset.page === "login") {
-    document.addEventListener("keydown", e => { if (e.key === "Enter") performLogin(); });
-  }
-  safeOn("toggle_login_pass", "click", () => {
-    const input = document.getElementById("login_pass");
-    const icon  = document.querySelector("#toggle_login_pass i");
-    if (!input || !icon) return;
-    if (input.type === "password") { input.type = "text";     icon.className = "fas fa-eye"; }
-    else                           { input.type = "password"; icon.className = "fas fa-eye-slash"; }
-  });
+  // SI-034: `login.html` no carga este archivo (sólo `login.js`), así que un
+  // segundo `performLogin()`/`showLoginError()` con sus listeners de
+  // `login_btn`/`login_user`/`login_pass`/`toggle_login_pass` no se ejecutaba
+  // nunca aquí — código muerto que invitaba a arreglar el login en el sitio
+  // equivocado. La única implementación real es `login.js`.
 
   // Auth / sidebar
   safeOn("logout_btn",        "click", logout);
@@ -328,7 +373,7 @@ function setupEventListeners() {
   safeOn("btn_clear_archivo", "click",  () => { resetDateFilters("archivo"); const inp = document.getElementById("search_archivo"); if (inp) { inp.value = ""; state.archivo.search = ""; } state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("download_archivo_xls","click",() => _exportResultsCSV("archivo"));
   safeOn("sort_archivo",      "change", e => { state.archivo.sortMode = e.target.value; state.archivo.page = 1; triggerArchivoSearch(); });
-  safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value); state.archivo.page = 1; triggerArchivoSearch(); });
+  safeOn("rpp_archivo",       "change", e => { state.archivo.perPage = parseInt(e.target.value, 10); state.archivo.page = 1; triggerArchivoSearch(); });
   safeOn("soporte_archivo",   "change", () => { state.archivo.page = 1; triggerArchivoSearch(); });
 
   // Buscador RRHH — debounce 420ms en input
@@ -343,7 +388,7 @@ function setupEventListeners() {
   safeOn("btn_clear_rrhh",    "click",  () => { resetDateFilters("rrhh"); const inp = document.getElementById("search_rrhh"); if (inp) { inp.value = ""; state.rrhh.search = ""; } state.rrhh.page = 1; triggerRrhhSearch(); });
   safeOn("download_rrhh_xls", "click",  () => _exportResultsCSV("rrhh"));
   safeOn("sort_rrhh",         "change", e => { state.rrhh.sortMode = e.target.value; state.rrhh.page = 1; triggerRrhhSearch(); });
-  safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value); state.rrhh.page = 1; triggerRrhhSearch(); });
+  safeOn("rpp_rrhh",          "change", e => { state.rrhh.perPage = parseInt(e.target.value, 10); state.rrhh.page = 1; triggerRrhhSearch(); });
 
   // Chips de fecha (event delegation por módulo)
   ["archivo", "rrhh"].forEach(mod => {
@@ -373,9 +418,14 @@ function setupEventListeners() {
         const t = link.id.replace(`tab-admin-${suf}-`, "");
         link.addEventListener("click", e => { e.preventDefault(); loadAdminTab(t); });
       });
+    // OA-032: igual que OA-031 pero sobre `audit_log`, que puede tener cientos
+    // de miles de filas — cada tecla lanzaba `loadAuditTab()` sin esperar.
+    const _debouncedAuditSearch = typeof debounce === "function"
+      ? debounce(() => loadAuditTab(), 350)
+      : () => loadAuditTab();
     document.getElementById(`audit_search-${suf}`)?.addEventListener("input", () => {
       auditState.page = 1;
-      loadAuditTab();
+      _debouncedAuditSearch();
     });
     document.getElementById(`btn-apply-stats-${suf}`)?.addEventListener("click", loadDynamicStats);
     document.getElementById(`admin-submit-form-${suf}`)?.addEventListener("submit", handleNewSubmission);
@@ -395,7 +445,7 @@ function setupEventListeners() {
     document.getElementById(`btn_export_csv-${suf}`)?.addEventListener("click", exportAdminCSV);
     document.getElementById(`admin_prev-${suf}`)?.addEventListener("click", () => { if (state.adminTable.page > 1) { state.adminTable.page--; loadMonitorTable(); } });
     document.getElementById(`admin_next-${suf}`)?.addEventListener("click", () => { const totalPages = Math.ceil((state.adminTable.total || 0) / (state.adminTable.perPage || 25)); if (state.adminTable.page < totalPages) { state.adminTable.page++; loadMonitorTable(); } });
-    document.getElementById(`admin_per_page-${suf}`)?.addEventListener("change", e => { state.adminTable.perPage = parseInt(e.target.value) || 25; state.adminTable.page = 1; loadMonitorTable(); });
+    document.getElementById(`admin_per_page-${suf}`)?.addEventListener("change", e => { state.adminTable.perPage = parseInt(e.target.value, 10) || 25; state.adminTable.page = 1; loadMonitorTable(); });
     document.getElementById(`add_tax_btn-${suf}`)?.addEventListener("click",  handleAddCategory);
     document.getElementById(`btn_add_user-${suf}`)?.addEventListener("click", handleAddUser);
   });
@@ -448,31 +498,6 @@ async function apiFetchJSON(url, opts = {}) {
   return res.json();
 }
 
-async function performLogin() {
-  const username = document.getElementById("login_user")?.value.trim();
-  const password = document.getElementById("login_pass")?.value.trim();
-  const btn      = document.getElementById("login_btn");
-  if (!username || !password) {
-    showLoginError("Por favor, ingrese usuario y contraseña.");
-    return;
-  }
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Verificando...'; }
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
-    if (res.status === 403) { showLoginError("Tu cuenta está desactivada. Contacta al administrador."); return; }
-    if (!res.ok) throw new Error();
-    loginSuccess((await res.json()).user);
-  } catch {
-    showLoginError("Credenciales incorrectas de acceso institucional.");
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt mr-1"></i>Ingresar'; }
-  }
-}
-
 function _exportResultsCSV(modulo) {
   const data = modulo === "archivo" ? state.archivo.results : state.rrhh.results;
   if (!data || data.length === 0) { showToast("No hay resultados para exportar.", "warning"); return; }
@@ -502,20 +527,5 @@ function _exportResultsCSV(modulo) {
   a.click();
   URL.revokeObjectURL(url);
   showToast(`Exportando ${data.length} registro(s) a CSV.`, "success");
-}
-
-function showLoginError(msg) {
-  // Use toast if available, otherwise use a visible alert div inside login form
-  let errEl = document.getElementById("login-error-msg");
-  if (!errEl) {
-    errEl = document.createElement("div");
-    errEl.id = "login-error-msg";
-    errEl.className = "alert alert-danger mt-2 mb-0 py-2";
-    errEl.style.fontSize = "0.87rem";
-    document.getElementById("login_btn")?.parentElement?.insertAdjacentElement("afterend", errEl);
-  }
-  errEl.textContent = msg;
-  errEl.style.display = "block";
-  setTimeout(() => { if (errEl) errEl.style.display = "none"; }, 5000);
 }
 
