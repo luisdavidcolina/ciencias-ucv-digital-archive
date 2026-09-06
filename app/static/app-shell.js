@@ -63,9 +63,16 @@ function _shellLink(l, pagina) {
 }
 
 function shellSidebarHTML(pagina) {
+  // SI-184: los enlaces eran <a> sueltos tras un <div> de etiqueta — un lector
+  // de pantalla no podía saltar de sección en sección ni anunciar "3 de 4"
+  // porque no había ni encabezado ni lista. `style` en línea porque el ancho
+  // del cambio es solo este archivo: sin bullets/margen propios no hace falta
+  // tocar styles.css, que además está fuera de esta zona.
   const secciones = SHELL_SECCIONES.map(s => {
-    const cuerpo = `<div class="ds-sidebar-section-label">${s.label}</div>` +
-                   s.links.map(l => _shellLink(l, pagina)).join("");
+    const cuerpo = `<h2 class="ds-sidebar-section-label" style="margin:0">${s.label}</h2>` +
+                   `<ul style="list-style:none;margin:0;padding:0">` +
+                   s.links.map(l => `<li>${_shellLink(l, pagina)}</li>`).join("") +
+                   `</ul>`;
     return s.groupId ? `<div id="${s.groupId}">${cuerpo}</div>` : cuerpo;
   }).join("");
 
@@ -210,11 +217,29 @@ function _marcarContenidoPrincipal() {
   destino.setAttribute("tabindex", "-1");
 }
 
+// VI-002: showToast() (app-core.js) busca #ds-toast-container y se calla si no
+// lo encuentra. Sólo lo declaraban a mano los cuatro paneles admin: en
+// /archivo, /rrhh y /sistema los toasts de error/éxito se disparaban y no
+// aparecía nada. Se inyecta aquí, junto con la cáscara, para que exista en
+// toda página que la cargue — con guarda por si el HTML ya trae el suyo
+// (los admin, que no se tocan en este carril) para no duplicar el id.
+function _asegurarToastContainer() {
+  if (document.getElementById("ds-toast-container")) return;
+  const div = document.createElement("div");
+  div.id = "ds-toast-container";
+  div.style.position = "fixed";
+  div.style.top = "70px";
+  div.style.right = "20px";
+  div.style.zIndex = "99999";
+  document.body.appendChild(div);
+}
+
 (function () {
   const hueco = document.getElementById("app-shell-navbar");
   if (!hueco) return;
   hueco.outerHTML = shellSkipLinkHTML() + shellNavbarHTML(document.body.dataset.page || "");
   _reforzarSkipLinkAlEnfocar();
+  _asegurarToastContainer();
 })();
 
 if (document.readyState === "loading") {
