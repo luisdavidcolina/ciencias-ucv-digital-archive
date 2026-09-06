@@ -4563,3 +4563,84 @@ bien son nativas o están definidas en el propio archivo.
 los cinco cambios (sin regresiones).
 
 **quién lo pide**: agente-si-ai-widget-3 (SI-ai-widget-tercer-pase)
+
+## OA-admin-monitor-tercer-pase — tercer pase sobre el lado Archivo de `admin-monitor.js` (agente-oa-monitor-3)
+
+Carril exclusivo `app/static/admin-monitor.js`, sólo su comportamiento del lado
+`/admin/archivo` — el lado RRHH ya tuvo su cluster dedicado (OR-monitor-rrhh,
+commit `83bacec`, ver nota arriba). Revisé ticket por ticket todas las menciones a
+`admin-monitor.js` en `backoffice-archivo.md` (OA-009 a OA-189) contra el código
+actual, no contra lo que dice cada ficha.
+
+**Ya resueltos por pasadas anteriores, confirmados sin tocar de nuevo**: OA-015
+(B5-admin-monitor), OA-027/OA-029 (SWEEP2-admin-monitor-js), OA-107/OA-117/OA-118/
+OA-119/OA-120 (toolbar extras, resumen "X–Y de Z", estado vacío distinto de "sin
+resultados", esqueleto con `aria-busy` y columnas por `isArch`, ya en el código),
+OA-111 (los cinco botones de fila ya llevan `aria-label` con el nombre del
+documento/empleado incluido), OA-115/OA-116 (badge "Aprobado" explícito y
+"Sin estado" neutro para un valor desconocido, ya diferenciado de "sin dato" =
+aprobado legado), OA-121 (`openAdminDocById` ya pide `GET /documento/{id}`
+completo, con caída a la fila en caché sólo si falla), OA-122 (`exportAdminCSV`
+ya recorre todo el conjunto filtrado vía `_fetchAllFilteredRecords`, no sólo la
+página en pantalla), OA-009/OA-043 (`admin-edit.js`, ya resueltos por
+OA-admin-edit-tercer-pase).
+
+**Bug real sin ficha propia, encontrado siguiendo el mismo patrón que ya usaron
+`agente-br-hr-js-3` y `agente-ba-archive-js-3`** (función invocada sin estar
+definida en ningún archivo del proyecto): el avatar de iniciales del monitor de
+RRHH (`renderMonitorTable`, rama RRHH) llamaba a `getInitials(f.empleado || "?")`
+tras comprobar `typeof getInitials === "function"` — esa función **no existe en
+ningún `.js` del repo**; la real es `getPersonInitials` (`app-core.js:130`, ya
+usada por `hr.js`). Como la llamada está protegida por el `typeof`, nunca lanzaba
+`ReferenceError`: simplemente caía siempre al `"?"` del operador ternario, así
+que cada fila del monitor de RRHH mostraba un avatar con "?" en vez de las
+iniciales reales (el mismo problema de homónimos que ya describían OR-237/BR-004,
+pero nunca corregido de verdad porque el guard silencioso lo escondía). Corregido
+a `getPersonInitials`. Esto toca comportamiento compartido con RRHH, pero es
+estrictamente una corrección (la función ya se llamaba con esa intención, sólo
+con el nombre equivocado) — no cambia nada del cluster OR-monitor-rrhh ya
+cerrado.
+
+**Verificados y siguen reales, pero exigen archivo `[CHOCA]` fuera de esta zona,
+no tocados** (harían falta a la vez, o no cierran el ticket):
+- OA-028 (filtro "Persona" sólo conoce la página actual) · `lookups.py` +
+  `admin_archive.html`.
+- OA-103/OA-104/OA-105/OA-106 (selección en lote, orden y columnas configurables
+  en Archivo, filtros guardados) · `admin_archive.html` + `docs.py`/`admin.js` a
+  la vez. OA-104 (orden) ya está resuelto del lado RRHH desde OR-128; Archivo no
+  declara `data-sort` en sus `<th>` así que `_ensureMonitorSortableHeaders` no
+  encuentra nada que conectar ahí — el JS ya soporta ambos módulos, falta sólo el
+  marcado de Archivo.
+- OA-110 (fila con `cursor:pointer` sin `onclick`) · `admin_archive.html`
+  (la regla vive en un `<style>` en línea de esa página, no en este archivo).
+- OA-114 (cambio rápido de estado no usa la actualización optimista que ya existe
+  en este archivo) · el disparador vive en `admin-ui.js` (`openQuickStatusMenu`),
+  que tras el `PATCH` llama a `loadMonitorTable()` completo en vez de
+  `updateMonitorRowOptimistic()`; cambiarlo exige tocar `admin-ui.js`, compartido
+  con RRHH y usuarios, fuera de mi zona declarada.
+- OA-150 (disposición no viaja a `/list_all` ni se muestra como badge) ·
+  `docs.py` + este archivo a la vez.
+- OA-183 (`btn-xs` → `.ds-tbl-btn`) · comprobado con grep: **ninguna de las dos
+  clases está definida en `styles.css`** (`.btn-xs`: 0 coincidencias, ya lo decía
+  el ticket; `.ds-tbl-btn`: 0 coincidencias, la ficha decía que sí existía en
+  `styles.css:2716` y ya no — alguien la debió quitar en una limpieza posterior).
+  Renombrar sólo en `admin-monitor.js` no arreglaría nada (la clase de destino
+  tampoco existe): queda igual de roto y con otro nombre. Anotado aquí para quien
+  toque `styles.css` de que el ticket referencia una clase que hay que crear, no
+  sólo enganchar.
+- OA-011/OA-012 (límite de tamaño y extensiones anunciadas) · no hay nada que
+  arreglar en este archivo: `admin-monitor.js` no anuncia límites de tamaño ni
+  extensiones a la fecha (sólo `initDropZone`, que ya muestra el tamaño real de
+  lo soltado); el texto engañoso vive en `admin_archive.html`.
+
+Nada más de OA-051 a OA-212 (organización, resumen, ingresar, tipos, papelera,
+retención, auditoría, acceso, exportar, modales, estética, responsive,
+funcionalidad ausente, rendimiento) resultó accionable sólo con
+`admin-monitor.js`: ya sea ya resuelto, ya sea `[CHOCA]` con otro archivo, según
+quedó anotado arriba y en el propio `backoffice-archivo.md`.
+
+**Verificación**: `node --check app/static/admin-monitor.js` sin errores.
+`python -m pytest app/tests -q` → 867 pasan antes de mi turno y también después
+del único cambio (sin regresiones).
+
+**quién lo pide**: agente-oa-monitor-3 (OA-admin-monitor-tercer-pase)

@@ -506,7 +506,7 @@ function renderMonitorTable() {
       // OR-237: avatar con iniciales como respaldo (no llega foto por ahora,
       // ver nota en _BUZON.md) — evita confundir homónimos, mismo problema que
       // BR-004.
-      const initials = typeof getInitials === "function" ? getInitials(f.empleado || "?") : "?";
+      const initials = typeof getPersonInitials === "function" ? getPersonInitials(f.empleado || "?") : "?";
       const avatar = `<span class="ds-person-avatar-sm mr-2" style="width:28px;height:28px;vertical-align:middle;">
         <span class="ds-person-initials-sm" style="font-size:0.7rem;">${escHtml(initials)}</span>
       </span>`;
