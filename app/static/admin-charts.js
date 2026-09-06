@@ -83,6 +83,34 @@ function _quitarCargando() {
   document.querySelectorAll(".ds-chart-box canvas").forEach(c => { c.style.visibility = ""; });
 }
 
+// OA-072: "No se pudieron cargar las gráficas" ya avisaba en los <canvas>,
+// pero las cifras que también vienen de /charts (no de /stats, que ya tiene
+// su propio _kpiError en admin-stats.js) se quedaban en el guión largo del
+// HTML — indistinguible de "el archivo está vacío". Mismo patrón: marca de
+// error explícita y reintento con un clic, sin repetir la petición completa.
+function _kpiIdsDeCharts(suf, modulo) {
+  const comunes = [`kpi-latest-entry-${suf}`];
+  return modulo === "Archivo"
+    ? [`chart-total-keywords-${suf}`, `chart-total-autores-${suf}`,
+       `chart-total-digitalizados-${suf}`, `chart-total-pendientes-${suf}`,
+       `chart-total-vencidos-${suf}`, ...comunes]
+    : [`chart-total-emp-${suf}`, `chart-total-activos-${suf}`, `chart-total-jub-${suf}`,
+       `chart-total-movimientos-${suf}`, `chart-total-jubproximas-${suf}`,
+       `chart-total-sindocs-${suf}`, ...comunes];
+}
+
+function _kpiErrorCharts(suf, modulo) {
+  _kpiIdsDeCharts(suf, modulo).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerText = "⚠";
+    el.title = "No se pudo cargar. Haz clic para reintentar.";
+    el.classList.add("ds-kpi-error");
+    el.style.cursor = "pointer";
+    el.onclick = () => loadChartsData();
+  });
+}
+
 async function loadChartsData() {
   const suf    = adminSuffixFromTab();
   const modulo = suf === "archivo" ? "Archivo" : "RRHH";
@@ -102,6 +130,7 @@ async function loadChartsData() {
     _quitarCargando();
     document.querySelectorAll(".ds-chart-box canvas").forEach(c =>
       _sinDatos(c.id, "No se pudieron cargar las gráficas."));
+    _kpiErrorCharts(suf, modulo);
     console.error("Charts error:", e);
   }
 }
@@ -155,7 +184,18 @@ function _conDatos(canvasId) {
 function _renderArchivoCharts(data, suf) {
   const t     = data.charts.totals || {};
   const C     = vizSeries();
-  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
+  // Una carga exitosa siguiente a un error deja limpio el estado de reintento:
+  // si no se retira aquí, la cifra nueva se ve bien pero conserva el aspecto
+  // de error y un onclick que ya no tiene sentido.
+  const setEl = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerText = v ?? "—";
+    el.title = "";
+    el.classList.remove("ds-kpi-error");
+    el.style.cursor = "";
+    el.onclick = null;
+  };
   const setSub = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
 
   setEl(`chart-total-keywords-${suf}`, t.total_keywords);
@@ -172,6 +212,9 @@ function _renderArchivoCharts(data, suf) {
     if (elUltimo) {
       elUltimo.innerText = formatRelativeTime(t.ultimo_ingreso);
       elUltimo.title = formatISOToSpanish(t.ultimo_ingreso);
+      elUltimo.classList.remove("ds-kpi-error");
+      elUltimo.style.cursor = "";
+      elUltimo.onclick = null;
     }
   }
 
@@ -364,7 +407,15 @@ function _renderRrhhCharts(data, suf) {
   const t     = data.charts.totals || {};
   const C     = vizSeries();
   const ring  = _viz("surface", "#ffffff");
-  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v ?? "—"; };
+  const setEl = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerText = v ?? "—";
+    el.title = "";
+    el.classList.remove("ds-kpi-error");
+    el.style.cursor = "";
+    el.onclick = null;
+  };
   const setSub = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
 
   setEl(`chart-total-emp-${suf}`, t.total_employees);
@@ -378,6 +429,9 @@ function _renderRrhhCharts(data, suf) {
     if (elUltimo) {
       elUltimo.innerText = formatRelativeTime(t.ultimo_ingreso);
       elUltimo.title = formatISOToSpanish(t.ultimo_ingreso);
+      elUltimo.classList.remove("ds-kpi-error");
+      elUltimo.style.cursor = "";
+      elUltimo.onclick = null;
     }
   }
 
