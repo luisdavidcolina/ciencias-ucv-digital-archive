@@ -85,6 +85,26 @@ def _de_bd(clave: str):
     return None
 
 
+def _guardar_bd(clave: str, valor: str) -> None:
+    """Escribe un ajuste interno en `ia_config`. Falla en silencio (best effort).
+
+    Distinto del endpoint `POST /api/ia/config` (`routes/ai.py`, fuera de esta zona): ese
+    trunca `valor` a 20000 caracteres porque son ajustes de panel (modelo, topes). Esta
+    escritura es interna del propio módulo (el catálogo cacheado, SI-085) y no pasa por ahí,
+    así que no hereda ese límite — `valor` es TEXT sin tope en el esquema.
+    """
+    try:
+        from database import db_query
+        db_query("""
+            INSERT INTO public.ia_config (clave, valor, updated_at, updated_by)
+            VALUES (%s, %s, NOW(), 'sistema')
+            ON CONFLICT (clave) DO UPDATE
+               SET valor = EXCLUDED.valor, updated_at = NOW(), updated_by = EXCLUDED.updated_by
+        """, [clave, valor], fetch="none", commit=True)
+    except Exception as e:
+        logger.warning(f"IA: no se pudo guardar '{clave}' en ia_config: {e}")
+
+
 def api_key() -> str:
     # La clave NO se lee de la base a propósito: un secreto no se guarda donde se guardan
     # los ajustes editables desde una pantalla.
@@ -92,6 +112,15 @@ def api_key() -> str:
 
 
 def enabled() -> bool:
+    """SI-092: el interruptor vive en `ia_config`, con la variable de entorno como respaldo.
+
+    Antes sólo se leía `IA_HABILITADA` del entorno: apagar el asistente un viernes en que
+    empieza a responder mal exigía cambiar una variable en Vercel y redesplegar. El mismo
+    razonamiento que ya se aplicó a `max_tokens`/`daily_limit`.
+    """
+    valor_bd = _de_bd("habilitada")
+    if valor_bd is not None:
+        return valor_bd.strip().lower() not in ("false", "0", "no")
     return _env("IA_HABILITADA", "true").lower() not in ("false", "0", "no")
 
 
@@ -164,7 +193,17 @@ def model_exists(slug: str) -> bool:
 # HTTP
 # =============================================================================
 
-def _post(cuerpo: dict) -> dict:
+def _post(cuerpo: dict, timeout: int = 25) -> dict:
+    """SI-063/IN-110: 25s por defecto, no 90.
+
+    `vercel.json` corta la función a los 60s (`maxDuration`). Con 90s de tope por vuelta, la
+    plataforma mata la petición antes de que este timeout se cumpla nunca: la respuesta no
+    llega, el turno no se guarda y el costo de los tokens ya consumidos se pierde sin quedar
+    contabilizado (ver `converse`, que ahora además vigila un presupuesto total por turno).
+    25s dejan margen para varias vueltas dentro de los 60s de la función; el ajuste completo
+    (subir `maxDuration` o rediseñar a streaming) sigue pendiente en `vercel.json`, fuera de
+    esta zona.
+    """
     datos = json.dumps(cuerpo).encode("utf-8")
     req = urllib.request.Request(
         OPENROUTER_BASE + "chat/completions",
@@ -178,12 +217,36 @@ def _post(cuerpo: dict) -> dict:
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=90) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8"))
 
 
 _CATALOGO = {"datos": None, "ts": 0.0}
 _CATALOGO_TTL = 6 * 3600  # el catálogo de OpenRouter cambia de semana en semana, no de minuto
+
+
+def _catalogo_de_bd() -> list | None:
+    """SI-085/IN-111: catálogo cacheado en `ia_config`, no sólo en memoria de proceso.
+
+    En serverless cada arranque en frío pierde `_CATALOGO` (vive en memoria del proceso) y
+    vuelve a pedir ~350 modelos a OpenRouter — media hora de arranques en frío son media hora
+    de descargas del mismo catálogo. La base sobrevive al reciclado del proceso; el TTL sigue
+    siendo el mismo (6h), sólo cambia dónde vive el caché frío.
+    """
+    try:
+        ts = float(_de_bd("catalogo_modelos_ts") or 0)
+    except (TypeError, ValueError):
+        return None
+    if not ts or (time.time() - ts) >= _CATALOGO_TTL:
+        return None
+    crudo = _de_bd("catalogo_modelos")
+    if not crudo:
+        return None
+    try:
+        lista = json.loads(crudo)
+        return lista if isinstance(lista, list) else None
+    except (TypeError, ValueError):
+        return None
 
 
 def list_models() -> list:
@@ -192,13 +255,18 @@ def list_models() -> list:
     No se adivinan slugs ni precios: se consultan. Los slugs de OpenRouter llevan prefijo de
     proveedor y punto (`anthropic/claude-haiku-4.5`), no son los ids nativos de Anthropic.
 
-    Se cachea en memoria porque son ~350 modelos y lo consultan tanto la pantalla como la
-    validación al guardar. En serverless el proceso se recicla y el caché se pierde solo:
-    eso está bien, no hay nada que invalidar a mano.
+    Se cachea en memoria de proceso (rápido, dura mientras el proceso viva) y en `ia_config`
+    (sobrevive al reciclado en frío de serverless) — dos niveles del mismo TTL de 6h.
     """
     ahora = time.time()
     if _CATALOGO["datos"] is not None and (ahora - _CATALOGO["ts"]) < _CATALOGO_TTL:
         return _CATALOGO["datos"]
+
+    de_bd = _catalogo_de_bd()
+    if de_bd is not None:
+        _CATALOGO["datos"] = de_bd
+        _CATALOGO["ts"] = ahora
+        return de_bd
 
     req = urllib.request.Request(
         OPENROUTER_BASE + "models",
@@ -265,6 +333,11 @@ def list_models() -> list:
     lista.sort(key=lambda x: (x["empresa"].lower(), x["nombre"].lower()))
     _CATALOGO["datos"] = lista
     _CATALOGO["ts"] = ahora
+    try:
+        _guardar_bd("catalogo_modelos", json.dumps(lista, ensure_ascii=False))
+        _guardar_bd("catalogo_modelos_ts", str(ahora))
+    except Exception as e:
+        logger.warning(f"IA: no se pudo persistir el catálogo en ia_config: {e}")
     return lista
 
 
