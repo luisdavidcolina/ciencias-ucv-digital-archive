@@ -1,8 +1,8 @@
 import re
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 import pandas as pd
 
-from database import db_query, split_terms
+from database import db_query, log_event, logger, split_terms
 from models import ArchivoSearchRequest
 from utils import paginate
 
@@ -40,8 +40,12 @@ def _build_common_conditions(req: "ArchivoSearchRequest", *, fts_fields: str = "
                     "coalesce(da.tesauro_secundario,'') || ' ' ||"
                     "coalesce(da.personas_relacionadas,'')"
                 )
+                # BA-122: `websearch_to_tsquery` es un reemplazo compatible de
+                # `plainto_tsquery` que además entiende comillas ("frase exacta"),
+                # `OR` y `-exclusión` sin exigir ningún cambio de contrato con el
+                # frontend — un término plano se comporta igual que antes.
                 conditions.append(
-                    f"(to_tsvector('spanish', {tsv}) @@ plainto_tsquery('spanish', %s)"
+                    f"(to_tsvector('spanish', {tsv}) @@ websearch_to_tsquery('spanish', %s)"
                     " OR unaccent(da.titulo) ILIKE unaccent(%s)"
                     " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s)"
                     " OR unaccent(COALESCE(da.personas_relacionadas,'')) ILIKE unaccent(%s))"
@@ -53,7 +57,7 @@ def _build_common_conditions(req: "ArchivoSearchRequest", *, fts_fields: str = "
                     "coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'')"
                 )
                 conditions.append(
-                    f"(to_tsvector('spanish', {tsv}) @@ plainto_tsquery('spanish', %s)"
+                    f"(to_tsvector('spanish', {tsv}) @@ websearch_to_tsquery('spanish', %s)"
                     " OR unaccent(da.titulo) ILIKE unaccent(%s)"
                     " OR unaccent(COALESCE(da.autor,'')) ILIKE unaccent(%s))"
                 )
@@ -98,12 +102,13 @@ def _build_common_conditions(req: "ArchivoSearchRequest", *, fts_fields: str = "
 # DATAFRAME FETCHER
 # =============================================================================
 
-def fetch_archive_dataframe(filters_sql: str = "", filter_params=None) -> pd.DataFrame:
-    """Retorna todos los documentos de archivo como DataFrame.
+def fetch_archive_dataframe() -> pd.DataFrame:
+    """Retorna todos los documentos de archivo (no borrados) como DataFrame.
 
-    Args:
-        filters_sql:   Cláusula WHERE sin la palabra 'WHERE' (opcional).
-        filter_params: Parámetros para la cláusula WHERE.
+    BA-185: antes aceptaba `filters_sql`/`filter_params` para una cláusula
+    WHERE adicional que nadie pasaba nunca (única llamada: `admin/stats.py`,
+    sin argumentos) — una superficie de inyección SQL por interpolación de
+    cadena esperando a que alguien la usara. Se retiraron ambos parámetros.
     """
     base_sql = """
         SELECT
@@ -126,15 +131,10 @@ def fetch_archive_dataframe(filters_sql: str = "", filter_params=None) -> pd.Dat
         LEFT JOIN public.archivo_descriptores ad ON da.id_archivo = ad.id_archivo
         LEFT JOIN public.descriptores_libres dl ON ad.id_descriptor = dl.id_descriptor
     """
-    base_condition = "da.deleted_at IS NULL"
-    if filters_sql:
-        base_sql += f" WHERE {base_condition} AND ({filters_sql})"
-    else:
-        base_sql += f" WHERE {base_condition}"
-
+    base_sql += " WHERE da.deleted_at IS NULL"
     base_sql += " GROUP BY da.id_archivo"
 
-    rows = db_query(base_sql, filter_params, fetch="all")
+    rows = db_query(base_sql, None, fetch="all")
     if not rows:
         return pd.DataFrame(columns=[
             "id", "titulo", "autor", "fecha", "doc_type", "categoria", "ubicacion",
@@ -221,7 +221,7 @@ def search_archive(req: ArchivoSearchRequest):
                 coalesce(da.abstract,'') || ' ' || coalesce(da.tesauro_primario,'') || ' ' ||
                 coalesce(da.tesauro_secundario,'') || ' ' || coalesce(da.personas_relacionadas,'')
               ),
-              plainto_tsquery('spanish', %s)
+              websearch_to_tsquery('spanish', %s)
             )"""
         relevance_params = [req.search_term]
     else:
@@ -259,9 +259,56 @@ def search_archive(req: ArchivoSearchRequest):
     params = relevance_params + params
     params.extend([per_page, offset])
 
-    rows = db_query(sql, params, fetch="all") or []
+    # BA-181: la política del CHANGELOG 3.1.0 es registrar completo y no
+    # exponer el error de SQL al cliente. No había ningún `try/except`
+    # alrededor de estas tres consultas.
+    try:
+        rows = db_query(sql, params, fetch="all") or []
+
+        # BA-161/BA-015: comparte `_build_common_conditions` con la búsqueda
+        # principal en vez de repetir la lógica de filtros con variaciones —
+        # la duplicación anterior ya había divergido (el filtro de Palabras
+        # Clave no se aplicaba en facetas, así que con una activa los
+        # conteos describían un conjunto distinto al que se veía en pantalla).
+        facet_conds, facet_params = _build_common_conditions(req, fts_fields="short")
+        facet_where = "WHERE " + " AND ".join(facet_conds)
+
+        facet_type_rows = db_query(
+            f"""SELECT COALESCE(NULLIF(da.tesauro_primario,''),'{SIN_TIPO_SENTINEL}') AS name, COUNT(*) AS cnt
+                FROM public.datos_archivo da {facet_where}
+                GROUP BY da.tesauro_primario ORDER BY cnt DESC LIMIT 20""",
+            facet_params or None, fetch="all"
+        ) or []
+
+        facet_year_rows = db_query(
+            f"""SELECT EXTRACT(YEAR FROM da.fecha_documento)::INT AS yr, COUNT(*) AS cnt
+                FROM public.datos_archivo da {facet_where}
+                  AND da.fecha_documento IS NOT NULL
+                GROUP BY yr ORDER BY yr DESC LIMIT 15""",
+            facet_params or None, fetch="all"
+        ) or []
+    except Exception as e:
+        logger.error(f"Archivo: falló la búsqueda ({req.search_term!r}, página {page}): {e}")
+        raise HTTPException(status_code=500, detail="No se pudo completar la búsqueda. Intente de nuevo.")
 
     total = int(rows[0]["total_count"]) if rows else 0
+
+    # BA-021: `COUNT(*) OVER()` se lee de `rows[0]`; si el `offset` cae más
+    # allá del final (una página fuera de rango), `rows` viene vacío y
+    # `total` caía a 0 — la interfaz mostraba "0 resultados" en vez del total
+    # real que permitiría volver a una página válida. Sólo en ese caso se
+    # paga una consulta extra para conocer el total real.
+    if not rows and page > 1:
+        try:
+            count_conds, count_params = _build_common_conditions(req, fts_fields="full")
+            count_where = "WHERE " + " AND ".join(count_conds)
+            count_row = db_query(
+                f"SELECT COUNT(*) AS cnt FROM public.datos_archivo da {count_where}",
+                count_params or None, fetch="one",
+            )
+            total = int(count_row["cnt"]) if count_row else 0
+        except Exception as e:
+            logger.error(f"Archivo: falló el conteo de respaldo tras página vacía: {e}")
 
     records = []
     for i, r in enumerate(rows):
@@ -275,29 +322,14 @@ def search_archive(req: ArchivoSearchRequest):
         rec["tesauro_badges"] = sorted(badges)
         records.append(rec)
 
-    # ── Facetas: conteos por tipo y año (sin filtro de tipo para mostrar todos) ──
-    # BA-161: comparte `_build_common_conditions` con la búsqueda principal en
-    # vez de repetir la lógica de filtros con variaciones — la duplicación
-    # anterior ya había divergido (BA-015: el filtro de Palabras Clave no se
-    # aplicaba aquí, así que con una palabra clave activa los conteos
-    # describían un conjunto distinto al que se veía en pantalla).
-    facet_conds, facet_params = _build_common_conditions(req, fts_fields="short")
-    facet_where = "WHERE " + " AND ".join(facet_conds)
-
-    facet_type_rows = db_query(
-        f"""SELECT COALESCE(NULLIF(da.tesauro_primario,''),'{SIN_TIPO_SENTINEL}') AS name, COUNT(*) AS cnt
-            FROM public.datos_archivo da {facet_where}
-            GROUP BY da.tesauro_primario ORDER BY cnt DESC LIMIT 20""",
-        facet_params or None, fetch="all"
-    ) or []
-
-    facet_year_rows = db_query(
-        f"""SELECT EXTRACT(YEAR FROM da.fecha_documento)::INT AS yr, COUNT(*) AS cnt
-            FROM public.datos_archivo da {facet_where}
-              AND da.fecha_documento IS NOT NULL
-            GROUP BY yr ORDER BY yr DESC LIMIT 15""",
-        facet_params or None, fetch="all"
-    ) or []
+    # BA-180: ninguna búsqueda quedaba en auditoría (a diferencia de
+    # `share.py`, que audita cada consulta externa). El endpoint es anónimo
+    # (sin sesión, ver nota A2-archivo-backend en `_BUZON.md`), así que el
+    # usuario se registra como "anónimo"; sólo se audita cuando hay
+    # resultados, igual que pide el ticket.
+    if total > 0:
+        log_event("anónimo", "Búsqueda realizada", "Archivo",
+                   f"term={req.search_term!r} total={total} page={page}")
 
     return {
         "records":  records,
@@ -317,26 +349,32 @@ def lookup_document_type(q: str = Query(..., description="Palabra clave a buscar
     # cada pulsación; con menos de 2 caracteres no vale la pena consultar.
     if len(q.strip()) < 2:
         return []
-    rows = db_query(
-        """
-        SELECT DISTINCT val AS nombre_corto
-        FROM (
-            SELECT UNNEST(ARRAY[tesauro_primario, tesauro_secundario]) AS val
-            FROM public.datos_archivo
-            -- BA-026: sin estos dos filtros se sugerían términos que sólo
-            -- existen en la papelera o en material sin aprobar; al elegirlos
-            -- la búsqueda devolvía siempre cero resultados.
-            WHERE deleted_at IS NULL AND COALESCE(status, 'aprobado') = 'aprobado'
-            UNION
-            SELECT nombre AS val
-            FROM public.descriptores_libres
-        ) sub
-        WHERE val IS NOT NULL AND val != ''
-          AND unaccent(val) ILIKE unaccent(%s)
-        ORDER BY val
-        LIMIT 20
-        """,
-        (f"%{q}%",),
-        fetch="all",
-    )
+    try:
+        rows = db_query(
+            """
+            SELECT DISTINCT val AS nombre_corto
+            FROM (
+                SELECT UNNEST(ARRAY[tesauro_primario, tesauro_secundario]) AS val
+                FROM public.datos_archivo
+                -- BA-026: sin estos dos filtros se sugerían términos que sólo
+                -- existen en la papelera o en material sin aprobar; al elegirlos
+                -- la búsqueda devolvía siempre cero resultados.
+                WHERE deleted_at IS NULL AND COALESCE(status, 'aprobado') = 'aprobado'
+                UNION
+                SELECT nombre AS val
+                FROM public.descriptores_libres
+            ) sub
+            WHERE val IS NOT NULL AND val != ''
+              AND unaccent(val) ILIKE unaccent(%s)
+            ORDER BY val
+            LIMIT 20
+            """,
+            (f"%{q}%",),
+            fetch="all",
+        )
+    except Exception as e:
+        # BA-181: misma política que el buscador principal — registrar
+        # completo, no exponer el error de SQL al cliente.
+        logger.error(f"Archivo: falló el autocompletado ({q!r}): {e}")
+        raise HTTPException(status_code=500, detail="No se pudo completar la sugerencia. Intente de nuevo.")
     return [{"nombre_corto": r["nombre_corto"]} for r in rows]
