@@ -207,10 +207,99 @@ async function handleDeleteUser(uid, username) {
   }
 }
 
+// OA-039: medidor de fortaleza. Puramente informativo en el cliente — el
+// mínimo que de verdad se exige (hoy 6, `core/security.py`/`routes/admin/users.py`)
+// no es parte de esta zona, así que no se toca el umbral de validación aquí.
+function _pwdStrengthInfo(pw) {
+  const val = pw || "";
+  let variedad = 0;
+  if (/[a-z]/.test(val)) variedad++;
+  if (/[A-Z]/.test(val)) variedad++;
+  if (/[0-9]/.test(val)) variedad++;
+  if (/[^A-Za-z0-9]/.test(val)) variedad++;
+  let score = 0;
+  if (val.length >= 6) score++;
+  if (val.length >= 10) score++;
+  if (variedad >= 3) score++;
+  if (val.length >= 14 && variedad >= 3) score++;
+  score = Math.min(score, 4);
+  const niveles = [
+    { label: "Muy débil", clase: "bg-danger" },
+    { label: "Débil", clase: "bg-danger" },
+    { label: "Aceptable", clase: "bg-warning" },
+    { label: "Fuerte", clase: "bg-info" },
+    { label: "Muy fuerte", clase: "bg-success" },
+  ];
+  return { score, pct: val ? (score + 1) * 20 : 0, ...niveles[score] };
+}
+
+function _pwdStrengthMarkup() {
+  return `
+    <div class="ds-pwd-strength mt-1" aria-live="polite">
+      <div class="progress" style="height:4px;">
+        <div class="progress-bar" role="progressbar" style="width:0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+      <small class="text-muted ds-pwd-strength-label"></small>
+    </div>`;
+}
+
+function _updatePwdStrengthMeter(meterEl, pw) {
+  if (!meterEl) return;
+  const info = _pwdStrengthInfo(pw);
+  const bar   = meterEl.querySelector(".progress-bar");
+  const label = meterEl.querySelector(".ds-pwd-strength-label");
+  if (bar) {
+    bar.style.width = `${info.pct}%`;
+    bar.setAttribute("aria-valuenow", String(info.pct));
+    bar.className = `progress-bar ${pw ? info.clase : ""}`;
+  }
+  if (label) label.textContent = pw ? `Fortaleza: ${info.label}` : "";
+}
+
+// El campo "Registrar Nuevo Usuario" lo inyecta admin-ui.js una sola vez
+// (`_panelAcceso`, fuera de esta zona) y persiste en el DOM entre pestañas,
+// así que se engancha por delegación en vez de tocar ese marcado.
+document.addEventListener("input", e => {
+  const input = e.target;
+  if (!input.matches || !input.matches('input[id^="new_user_pass-"]')) return;
+  let meter = input.parentElement.querySelector(".ds-pwd-strength");
+  if (!meter) {
+    input.insertAdjacentHTML("afterend", _pwdStrengthMarkup());
+    meter = input.parentElement.querySelector(".ds-pwd-strength");
+  }
+  _updatePwdStrengthMeter(meter, input.value);
+});
+
+// El modal de cambio de contraseña (`promptModal`, admin-ui.js) es un único
+// `#ds-prompt-modal` reutilizado por varios flujos (renombrar palabra clave,
+// comentario de versión...); el medidor se engancha y se retira sólo mientras
+// dura este diálogo concreto, para no aparecer en los demás usos de promptModal.
+function _wirePwdStrengthOnPromptModal() {
+  const modalEl = document.getElementById("ds-prompt-modal");
+  const input = modalEl?.querySelector(".ds-pm-input");
+  if (!input) return () => {};
+  let meter = modalEl.querySelector(".ds-pwd-strength");
+  if (!meter) {
+    input.insertAdjacentHTML("afterend", _pwdStrengthMarkup());
+    meter = input.nextElementSibling;
+  }
+  _updatePwdStrengthMeter(meter, input.value);
+  const onInput = () => _updatePwdStrengthMeter(meter, input.value);
+  input.addEventListener("input", onInput);
+  return () => {
+    input.removeEventListener("input", onInput);
+    meter?.remove();
+  };
+}
+
 async function handleChangePassword(uid, username) {
-  const newPass = typeof promptModal === "function"
-    ? await promptModal(`Cambiar contraseña de "${username}"`, "Nueva contraseña (mín. 6 caracteres)", "", "Nueva contraseña...", "password")
-    : prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`);
+  const usaPromptModal = typeof promptModal === "function";
+  const passPromise = usaPromptModal
+    ? promptModal(`Cambiar contraseña de "${username}"`, "Nueva contraseña (mín. 6 caracteres)", "", "Nueva contraseña...", "password")
+    : Promise.resolve(prompt(`Nueva contraseña para "${username}" (mín. 6 caracteres):`));
+  const cleanupMeter = usaPromptModal ? _wirePwdStrengthOnPromptModal() : () => {};
+  const newPass = await passPromise;
+  cleanupMeter();
   if (!newPass || newPass.trim().length < 6) {
     if (newPass !== null) showToast("La contraseña debe tener al menos 6 caracteres.", "warning");
     return;
