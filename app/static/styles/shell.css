@@ -138,7 +138,15 @@
    compartir duración/curva (--duration-slow/--ease-out) en vez de
    `.35s cubic-bezier(...)` aquí y `.35s ease` en el velo por separado.
    SD-185: anima `transform: translateX()` en vez de `left`, que fuerza
-   recálculo de layout en cada fotograma. */
+   recálculo de layout en cada fotograma.
+   BUG-menu-bugueando: el cajón y el velo llevaban el mismo `--z-overlay`;
+   con el mismo nivel, el orden en el DOM decide, y `#sidebar-overlay` va
+   después de `#app-sidebar` en `app-shell.js` — el velo pintaba encima de
+   TODO el cajón, no solo del contenido a su derecha, e interceptaba el
+   clic de cualquier enlace del menú en móvil/tablet (<1200px), donde el
+   velo existe (a ≥1200px se oculta con `display:none` más abajo). El cajón
+   pasa a `--z-modal`, un nivel por encima del velo — es justo esa relación
+   la que describe el token: superficie flotante sobre su propio backdrop. */
 .ds-sidebar {
     position: fixed;
     top: 0;
@@ -146,7 +154,7 @@
     width: 280px;
     height: 100vh;
     background: var(--surface-1);
-    z-index: var(--z-overlay);
+    z-index: var(--z-modal);
     box-shadow: var(--shadow-xl);
     display: flex;
     flex-direction: column;
