@@ -4644,3 +4644,116 @@ quedó anotado arriba y en el propio `backoffice-archivo.md`.
 del único cambio (sin regresiones).
 
 **quién lo pide**: agente-oa-monitor-3 (OA-admin-monitor-tercer-pase)
+
+---
+
+## BUG-login-no-lee-sesion — diagnóstico (agente-bug-login-sesion, 2026-09-06)
+
+**Síntoma reportado**: con sesión válida en `localStorage`, cargar `/login` de
+nuevo no redirige a la página correspondiente (archivo/rrhh/admin) — se queda
+mostrando el formulario.
+
+**Causa raíz confirmada por código, no especulación**: `login.html`
+(`app/static/login.html:69-70`) sólo carga dos scripts —
+`js/core/app-theme.js` (sólo para el modo oscuro, ver comentario VI-075/SI-049
+ya en el HTML) y `js/login/login.js`. La lógica que detecta una sesión
+persistida y redirige — `checkPersistedSession()` — vive en
+`app/static/js/core/app.js:22-48` y se dispara sólo en su propio
+`DOMContentLoaded` (`app.js:4-7`), archivo que **login.html nunca carga**.
+`login.js` (`app/static/js/login/login.js:1-177`), por su parte, en su
+`DOMContentLoaded` (línea 8) sólo llama a `initLoginPage()`, que conecta los
+listeners del formulario y `restoreLockFromStorage()` (el bloqueo tras 5
+intentos fallidos) — **ninguna función de `login.js` lee `archive_session` de
+`localStorage` ni comprueba si ya hay sesión activa**. Verificado con grep: la
+única lectura de `archive_session`/`SESSION_KEY` en `login.js` es dentro de
+`saveSession()`, que sólo **escribe** tras un login exitoso, nunca lee al
+cargar la página.
+
+Esto **no es un efecto transitorio de la reorganización de `app/static/`**:
+`login.html` nunca cargó `app.js` (ni antes ni después del movimiento de
+archivos — el comentario VI-075/SI-049, ya presente en el HTML, deja constancia
+de que la página fue diseñada a propósito para no cargar el `app.js` completo,
+sólo `app-theme.js`), y `login.js` nunca tuvo esta comprobación en ningún
+commit que se pueda ver hoy (relacionado: `SD-app-js-tercer-pase` en
+`_RESERVAS.md` retiró de `app.js` una segunda implementación de
+`performLogin`/`showLoginError` que "`login.html` nunca ejecuta" — confirma que
+`login.html` siempre vivió aislado del resto de `app.js`). Es un bug real,
+preexistente, sin ficket propio en `docs/auditoria/*.md` (grep sin resultados
+por "no lee la sesión"/"redirig* login"/"ya * sesión * login").
+
+**`/api/auth/restore`** (`app/routes/auth.py:152-178`) ya sirve exactamente lo
+que se necesita: recibe `{username}`, valida la cookie `ds_session` con
+`verify_session_token`, y si es válida devuelve el `payload` completo del
+usuario (`modules`, `roles`, etc.) — es el mismo endpoint que ya usa
+`checkPersistedSession()` en `app.js` para revalidar en background. El arreglo
+natural es que `login.js` haga, en su `DOMContentLoaded`: leer
+`archive_session` de `localStorage`, comprobar TTL de 12h igual que
+`checkPersistedSession()`, y si es válida llamar a `/api/auth/restore` (o
+reusar `chooseLandingPage()`, que ya existe en el propio `login.js`) para
+redirigir sin mostrar el formulario — sin necesidad de cargar `app.js` entero
+en `login.html`.
+
+**No lo implemento este turno**: `REORG-static-fase2-js` sigue "en curso" en
+`_RESERVAS.md` (rutas de `<script src>` en migración activa); mi instrucción es
+quedarme sólo en diagnóstico hasta que esa fila diga "terminado", para no
+chocar con los `<script src>` que se están actualizando ahora mismo. Mi fila en
+`_RESERVAS.md` queda como "en curso (diagnóstico listo, esperando fin de
+REORG-static-fase2-js)".
+
+**quién lo pide**: agente-bug-login-sesion (BUG-login-no-lee-sesion)
+
+## BUG-buscadores-no-funcionan — diagnóstico (agente-bug-buscadores)
+
+**Causa raíz confirmada, no especulación**: efecto transitorio de la reorganización de
+`app/static/` en curso (carril `REORG-static-fase2-js`), no un bug de código nuevo.
+
+- El commit `bd25676` (ya en `HEAD` y ya desplegado a producción) movió **todos** los `.js`
+  de `app/static/*.js` a `app/static/js/{core,admin,archive,hr,login,ai,scanner}/*.js`,
+  incluidos `archive.js` → `app/static/js/archive/archive.js` y `hr.js` →
+  `app/static/js/hr/hr.js`.
+- Pero los `<script src>` de `app/static/archive.html` y `app/static/hr.html` en `HEAD`
+  **siguen apuntando a las rutas viejas** (`/static/archive.js`, `/static/app-core.js`,
+  `/static/app.js`, etc. — verificado con `git show HEAD:app/static/archive.html`).
+- Verificado en producción real:
+  - `GET https://ciencias-ucv-digital-archive.vercel.app/archivo` sirve HTML cuyo
+    `<script src="/static/archive.js">` responde **404** (`curl -I` confirmado), igual
+    `/static/app-core.js`, `/static/app.js`, etc.
+  - `GET /static/js/archive/archive.js` (ruta nueva) sí responde **200** en producción.
+  - El backend está sano: `POST /api/archivo/buscar {"search_term":"a"}` responde **200**
+    con resultados reales.
+- Conclusión: el JS que dispara la búsqueda (`triggerArchivoSearch`/`triggerRrhhSearch` y
+  todo lo que depende de `app.js`/`app-core.js`/`app-choices.js`) **no llega a cargar en
+  absoluto** en producción ahora mismo — el navegador recibe 404 para esos `<script>` y las
+  funciones nunca se definen. Eso explica el síntoma reportado ("tampoco vi a los
+  buscadores funcionando") sin necesidad de ningún bug adicional en `archive.js`/`hr.js`.
+- El árbol de trabajo local (sin commitear) de `archive.html`, `hr.html` y el resto de HTML
+  ya tiene las rutas corregidas a `/static/js/.../*.js` — es exactamente el trabajo en curso
+  del carril `REORG-static-fase2-js` (agente-luisdavid-reorg), todavía `en curso`, no
+  desplegado.
+- **No he tocado ningún archivo de código ni he commiteado nada**, según instrucción
+  explícita de esperar a que `REORG-static-fase2-js` termine y se despliegue antes de tocar
+  cualquier `.js` o `<script src>`.
+- **Siguiente paso** (para quien retome este carril, o para mí mismo en el próximo turno):
+  en cuanto `REORG-static-fase2-js` marque `terminado` en `_RESERVAS.md` y ese despliegue
+  esté confirmado en producción, volver a correr esta misma verificación
+  (`curl -I .../archivo`, comprobar que los `<script src>` servidos ya son
+  `/static/js/...` y responden 200). Si tras eso los buscadores siguen sin funcionar,
+  **entonces sí** revisar `archive.js`/`hr.js` por un bug real de código (ninguno detectado
+  hasta ahora en el recorrido: la función de búsqueda y el manejo de eventos de
+  `archive.js`/`hr.js` no muestran fallos obvios aparte de lo ya documentado en
+  `docs/auditoria/buscador-archivo.md` (BA-*) y `docs/auditoria/buscador-rrhh.md` (BR-*),
+  ninguno de los cuales describe "el buscador no funciona en absoluto" como síntoma — son
+  fallos parciales (facetas, fechas, orden, etc.), no el bloqueo total que se está viendo
+  hoy en producción).
+
+**quién lo pide**: agente-bug-buscadores (BUG-buscadores-no-funcionan)
+
+**Cierre BUG-buscadores-no-funcionan (agente-bug-buscadores)**: confirmado en vivo tras el
+despliegue de `REORG-static-fase2-js` (commit `edcea6d`). `/archivo` y `/rrhh` ya sirven
+`<script src="/static/js/archive/archive.js">` y `<script src="/static/js/hr/hr.js">`
+(y el resto de `/static/js/core/*.js`), todos responden 200; las rutas viejas
+(`/static/archive.js`) dan 404 como se espera tras el movimiento. El backend
+(`POST /api/archivo/buscar`) sigue en 200 con datos. Diagnóstico confirmado: era
+enteramente el efecto transitorio del despliegue a medias, sin ningún bug de código propio.
+No hice ningún cambio de código ni commit — el fix fue el despliegue de
+`REORG-static-fase2-js`. Carril cerrado como `terminado` en `_RESERVAS.md`.
