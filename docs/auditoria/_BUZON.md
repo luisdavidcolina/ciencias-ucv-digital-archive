@@ -4757,3 +4757,48 @@ despliegue de `REORG-static-fase2-js` (commit `edcea6d`). `/archivo` y `/rrhh` y
 enteramente el efecto transitorio del despliegue a medias, sin ningún bug de código propio.
 No hice ningún cambio de código ni commit — el fix fue el despliegue de
 `REORG-static-fase2-js`. Carril cerrado como `terminado` en `_RESERVAS.md`.
+
+## SI-admin-ai-html-tercer-pase (agente-si-adminai-3)
+
+Tercer pase de verificación sobre `app/static/admin_ai.html` (36 menciones en
+`sistema-ia-paginas.md`, más entradas en `recorrido-visual.md`/`sistema-diseno.md`). Pases
+previos (SWEEP-admin-html `77c8d74`, VI-admin-ai-html `3780b63`, D2-ia-frontend `2fcb9d4`)
+ya habían cerrado la mayoría. Verifiqué cada ticket contra el código actual, no solo las
+notas del buzón:
+
+- **Ya resueltos, confirmados sin cambios**: SI-097/098 (cáscara `app-shell.js` +
+  `role="main"` presentes), SI-099 (`elegirModelo()` relee `/api/ia/modelos` tras guardar),
+  SI-100/101 (`confirmModal` en vez de `confirm()`, borrado quita la fila del DOM sin
+  `location.reload()`), SI-102 (`.catch()` en las cuatro cargas de nivel superior), SI-103
+  (`.ds-skeleton` en gasto/conversaciones/propuestas/modelos), SI-104 (debounce de 200ms en
+  el filtro), SI-105/106 (cabeceras ordenables `onclick="ordenarModelosPor(...)"`, dos
+  checkboxes de filtro, aviso "Mostrando N de M"), SI-109 (`#ds-toast-container` presente).
+  VI-010/011/016/029/048/054/055 del recorrido visual: igualmente confirmados resueltos
+  (`.table-responsive` en las tres tablas, `fmtNum()` con `??`, `fa-shield-alt`, cáscara
+  compartida).
+- **Corregido de verdad esta pasada — SI-015** (dependencias CDN sin `integrity`/
+  `crossorigin`): añadidos a los tres recursos propios de este archivo (FontAwesome 6.4.0
+  CSS, jQuery 3.5.1, Bootstrap 4.6.2 bundle). Hashes sha384 calculados localmente con
+  `openssl dgst -sha384` contra los archivos reales descargados de cdnjs/jsdelivr (no
+  copiados de una tabla de terceros). El ticket también nombra `login.html`,
+  `admin_system.html`, `ayuda.html`, `compartido.html`, `investigacion.html`: esos quedan
+  para quien tenga esos archivos en su carril, con el mismo método (descargar y calcular el
+  hash, no adivinar).
+- **Sin duplicados/huérfanos**: grep de `esc(`, `borrarConv`, `fmtNum`, `pintarModelos`,
+  `elegirModelo`, etc. contra todo `app/static/js/` — sin colisión. `esc()`/
+  `borrarConversacion()` de `ai-widget.js` están en un scope propio y ese script ni siquiera
+  se carga en esta página.
+- **Bloqueados por backend (`app/routes/ai.py`, `app/core/ai*.py`), fuera de zona**: SI-005,
+  070, 072, 073, 079, 080, 081, 082, 086, 087, 088, 089, 107, 108, 074 (esta última también
+  necesita `vercel.json`). Todos ya estaban documentados como bloqueados por pases
+  anteriores (SWEEP-admin-html, PASS2-ai); confirmado que siguen sin endpoint/columna que
+  los soporte.
+- **Bloqueados por `styles.css` compartido**: SD-079 (`.ds-mono` no existe todavía como
+  componente — `admin_ai.html` ya tiene su parte mínima, el `<code>` con `font-size:12px`
+  local), SD-210 (bloque `<style>` propio, consolidación cruzada a las diez páginas), SD-216
+  (`.ds-ai-card` sólo definido en el `<style>` de este archivo, no en `styles.css`).
+
+`python -m pytest app/tests -q`: 795 passed, 1 fallo preexistente y ajeno a este carril —
+`test_zzz_repro_menu.py::test_repro`, fichero de depuración de otro agente marcado
+"BORRAR antes de comitear" en su propia cabecera; no lo toqué, no es de mi zona.
+`python -m pytest app/tests/test_visual.py -q`: 54 passed. Commit `765cafc`.
