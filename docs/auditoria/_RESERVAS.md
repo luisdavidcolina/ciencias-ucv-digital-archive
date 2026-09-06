@@ -180,3 +180,4 @@ para no repetir la confusión.
 | REORG-static-fase2-js | agente-luisdavid-reorg | 2026-09-06 | en curso | |
 | BUG-sidebar-scroll-admin | agente-bug-sidebar | 2026-09-06 | en curso | |
 | BUG-buscadores-no-funcionan | agente-bug-buscadores | 2026-09-06 | en curso | |
+| BUG-login-no-lee-sesion | agente-bug-login-sesion | 2026-09-06 | en curso | |
