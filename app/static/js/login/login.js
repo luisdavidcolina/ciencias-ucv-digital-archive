@@ -7,7 +7,49 @@ let _lockTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initLoginPage();
+  checkExistingSession();
 });
+
+// BUG-login-no-lee-sesion: login.html no carga app.js (ver comentario
+// VI-075/SI-049 más arriba en login.html), así que checkPersistedSession()
+// de app.js nunca se ejecuta aquí — quien ya tenía sesión activa y volvía a
+// /login se quedaba viendo el formulario en vez de ser redirigido. Réplica
+// mínima de esa lógica (mismo TTL de 12h y mismo endpoint de validación)
+// sin necesidad de cargar app.js entero en esta página.
+function checkExistingSession() {
+  const raw = localStorage.getItem(SESSION_KEY);
+  if (!raw) return;
+  let saved;
+  try {
+    saved = JSON.parse(raw);
+  } catch {
+    localStorage.removeItem(SESSION_KEY);
+    return;
+  }
+  const ttlMs = 12 * 60 * 60 * 1000;
+  if (!saved || !saved.username || !saved.ts || (Date.now() - saved.ts) >= ttlMs) {
+    localStorage.removeItem(SESSION_KEY);
+    return;
+  }
+  fetch(`${API_BASE}/api/auth/restore`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: saved.username })
+  })
+    .then(res => {
+      if (!res.ok) {
+        localStorage.removeItem(SESSION_KEY);
+        return;
+      }
+      return res.json().then(data => {
+        window.location.href = chooseLandingPage(data.user || saved);
+      });
+    })
+    .catch(() => {
+      // Error de red: no expulsar de la sesión guardada, simplemente
+      // dejar el formulario visible como si no hubiéramos comprobado nada.
+    });
+}
 
 function initLoginPage() {
   const toggle   = document.getElementById("toggle_login_pass");
