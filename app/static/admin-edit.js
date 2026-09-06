@@ -77,7 +77,7 @@ async function openEditDocModal(id) {
     } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
       previewContainer.innerHTML = `<img src="${escHtml(url)}" class="ds-edit-preview-img" alt="Preview">`;
     } else {
-      previewContainer.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary"><i class="fas fa-external-link-alt mr-1"></i>Abrir archivo</a>`;
+      previewContainer.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary"><i class="fas fa-external-link-alt mr-1"></i>Abrir archivo</a>`;
     }
   }
 
@@ -176,7 +176,7 @@ function _refreshEditDocPreview() {
   } else if (/\.(png|jpe?g|gif|webp|svg)$/i.test(url)) {
     container.innerHTML = `<img src="${escHtml(url)}" class="ds-edit-preview-img" alt="Preview">`;
   } else {
-    container.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt mr-1"></i>Abrir en nueva ventana</a>`;
+    container.innerHTML = `<a href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary"><i class="fas fa-external-link-alt mr-1"></i>Abrir en nueva ventana</a>`;
   }
 }
 
@@ -191,6 +191,11 @@ async function _uploadEditDocFile(file) {
   const status = document.getElementById("edit-doc-upload-status");
   const zone   = document.getElementById("edit-doc-dropzone");
   const urlField = document.getElementById("edit-doc-file-url");
+  // OA-009: si se reemplaza un archivo ya guardado, se archiva como versión antes de
+  // pisarlo — sin esto, sustituir un escaneo por otro mejor lo hacía desaparecer del
+  // sistema sin dejar rastro, pese a existir ya el endpoint de versiones.
+  const previousUrl = (urlField?.value || "").trim();
+  const docId = document.getElementById("edit-doc-id")?.value;
 
   if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Subiendo…';
   // OA-190/OA-191: el estado se marca con clases, nunca escribiendo `style` a mano.
@@ -203,12 +208,26 @@ async function _uploadEditDocFile(file) {
 
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/upload`, { method: "POST", body: fd });
+    if (docId && previousUrl) {
+      const modulo = isArchivoModule() ? "Archivo" : "RRHH";
+      try {
+        await apiFetch(
+          `${API_BASE}/api/admin/documento/${docId}/versiones?modulo=${encodeURIComponent(modulo)}&file_url=${encodeURIComponent(previousUrl)}&comentario=${encodeURIComponent("Reemplazado automáticamente al subir un archivo nuevo")}&usuario=${encodeURIComponent(state.user?.username || "")}`,
+          { method: "POST" }
+        );
+      } catch {
+        showToast("El archivo se subió, pero no se pudo archivar la versión anterior.", "warning");
+      }
+    }
     if (urlField) urlField.value = data.file_url;
     if (status) status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle mr-1"></i>${escHtml(file.name)} subido</span>`;
     if (zone) { zone.classList.remove("is-uploading", "is-dragover", "is-error"); zone.classList.add("is-ok"); }
     _refreshEditDocPreview();
     _markEditDocDirty();
     showToast("Archivo subido correctamente.", "success");
+    if (document.getElementById("edit-doc-versiones-container")?.style.display !== "none" && docId) {
+      loadDocVersiones(parseInt(docId), isArchivoModule() ? "Archivo" : "RRHH");
+    }
   } catch (e) {
     if (status) { status.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle mr-1"></i></span>`; status.querySelector("span").append(e.message); }
     if (zone) { zone.classList.remove("is-uploading", "is-dragover", "is-ok"); zone.classList.add("is-error"); }

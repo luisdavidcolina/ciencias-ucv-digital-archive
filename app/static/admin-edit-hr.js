@@ -61,12 +61,21 @@ async function openEditEmpleadoModal(empId) {
   document.getElementById("edit-emp-pension").value     = rec.fecha_pension || "";
   document.getElementById("edit-emp-foto").value        = rec.foto_url || "";
 
-  // Resetear historial admin al abrir el modal
+  // OR-153: se recuerda si el historial estaba desplegado en la última ficha abierta,
+  // y se carga junto con los datos personales en vez de esperar al clic — antes había
+  // que abrirlo a mano cada vez, dos clics extra por persona en el trabajo habitual de
+  // depurar una carrera.
   const histContainer = document.getElementById("admin-historial-container");
   const histBtn = document.getElementById("btn-toggle-historial-admin");
-  if (histContainer) { histContainer.style.display = "none"; }
-  if (histBtn) { histBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Ver historial'; }
+  const expandido = _historialExpandidoPorDefecto;
+  if (histContainer) { histContainer.style.display = expandido ? "block" : "none"; }
+  if (histBtn) {
+    histBtn.innerHTML = expandido
+      ? '<i class="fas fa-chevron-up mr-1"></i>Ocultar historial'
+      : '<i class="fas fa-chevron-down mr-1"></i>Ver historial';
+  }
   window._adminHistorialEmpId = rec.empleado_id || rec.id;
+  await _adminLoadHistorial();
 
   $("#editEmpleadoModal").modal("show");
 }
@@ -123,58 +132,11 @@ async function handleDeleteEmpleado(empId, nombre) {
   }
 }
 
-function exportAdminCSV() {
-  const records = state.adminTable.results;
-  if (!records || records.length === 0) { showToast("No hay datos para exportar.", "warning"); return; }
-  const isArch = isArchivoModule();
-
-  const esc = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const today = new Date().toISOString().slice(0, 10);
-
-  let headers, rows;
-  if (isArch) {
-    // Incluye campos ISAD(G): folio, soporte, páginas
-    headers = ["ID", "Título", "Autor", "Fecha", "Tipología", "Clasificación",
-               "N° Folio", "Soporte", "N° Páginas", "Ubicación", "Archivo Digital", "Estado", "Resumen"];
-    rows = records.map(r => [
-      r.id, r.titulo, r.autor, r.fecha, r.doc_type, r.tesauro_secundario || "",
-      r.numero_folio || "", r.soporte || "Físico", r.numero_paginas || "",
-      r.ubicacion, r.file_url || "", r.status || "aprobado", r.resumen || ""
-    ].map(esc).join(","));
-  } else {
-    headers = ["ID Empleado", "Apellidos y Nombres", "Cédula", "RIF", "Cargo", "Departamento",
-               "Estado Laboral", "Fecha Ingreso", "Fecha Nacimiento", "Nivel Educativo", "Sexo",
-               "N° Documentos", "Última Actualiz."];
-    const SEXO = { M: "Masculino", F: "Femenino", O: "Otro" };
-    rows = records.map(r => [
-      r.empleado_id,
-      r.empleado,
-      r.cedula,
-      r.rif || "",
-      r.cargo || "",
-      r.departamento || "",
-      r.estado || "",
-      r.fecha_ingreso || "",
-      r.fecha_nacimiento || "",
-      r.nivel_educativo || "",
-      SEXO[r.sexo] || r.sexo || "",
-      r.doc_count ?? "",
-      r.updated_at ? r.updated_at.slice(0, 10) : ""
-    ].map(esc).join(","));
-  }
-
-  // Metadato: filtros aplicados como comentario CSV (fila especial)
-  const meta = `"# Exportado: ${today} | Módulo: ${state.user.modulo} | Pág: ${state.adminTable.page} | Total: ${state.adminTable.total}"`;
-  const csv  = [meta, headers.join(","), ...rows].join("\n");
-  const blob = new Blob(["" + csv], { type: "text/csv;charset=utf-8;" });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement("a");
-  a.href = url;
-  a.download = `ciencias_ucv_${isArch ? "archivo" : "rrhh"}_${today}_p${state.adminTable.page}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(`CSV exportado: ${records.length} registro(s).`, "success");
-}
+// OR-285: este archivo redefinía exportAdminCSV() con una versión vieja (sólo la
+// página visible, sin BOM real ni exportación del conjunto filtrado completo) que,
+// por cargarse después de admin-monitor.js, ganaba siempre y revertía en silencio
+// las correcciones OR-137/OR-138/OR-139 ya aplicadas allí. Se retira la redefinición;
+// admin-monitor.js ya trae la versión correcta y la usan ambos módulos.
 
 // ─── Drag & Drop en zona de carga ───────────────────────────────────────────
 // OR-005/OR-285: este archivo redefinía initDropZone() con una versión vieja que
@@ -187,6 +149,9 @@ function exportAdminCSV() {
 // HISTORIAL DE CARGOS — gestión desde el admin panel
 // =============================================================================
 
+// OR-153: recuerda el estado (abierto/cerrado) entre una ficha y la siguiente.
+let _historialExpandidoPorDefecto = false;
+
 async function _adminToggleHistorial() {
   const container = document.getElementById("admin-historial-container");
   const btn = document.getElementById("btn-toggle-historial-admin");
@@ -194,6 +159,7 @@ async function _adminToggleHistorial() {
 
   const isHidden = container.style.display === "none";
   container.style.display = isHidden ? "block" : "none";
+  _historialExpandidoPorDefecto = isHidden;
   if (btn) btn.innerHTML = isHidden
     ? '<i class="fas fa-chevron-up mr-1"></i>Ocultar historial'
     : '<i class="fas fa-chevron-down mr-1"></i>Ver historial';
@@ -220,8 +186,8 @@ async function _adminLoadHistorial() {
           ${data.historial.map(h => `
             <tr>
               <td>${escHtml(h.cargo)}</td>
-              <td>${escHtml(h.fecha_inicio || "—")}</td>
-              <td>${h.fecha_fin ? escHtml(h.fecha_fin) : '<span class="text-success font-weight-bold">Actual</span>'}</td>
+              <td>${h.fecha_inicio ? escHtml(formatISOToSpanish(h.fecha_inicio)) : "—"}</td>
+              <td>${h.fecha_fin ? escHtml(formatISOToSpanish(h.fecha_fin)) : '<span class="text-success font-weight-bold">Actual</span>'}</td>
               <td class="text-muted">${escHtml(h.motivo || "—")}</td>
               <td><button class="btn btn-xs btn-outline-danger" onclick="_adminDeleteCargo(${empId}, ${h.id})"><i class="fas fa-trash"></i></button></td>
             </tr>`).join("")}

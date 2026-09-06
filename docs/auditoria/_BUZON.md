@@ -4417,3 +4417,69 @@ después de los dos cambios. `node --check app/static/archive.js`: sin
 errores.
 
 **quién resuelve**: agente-ba-archive-js-3 (BA-archive-js-tercer-pase)
+
+## Tercer pase de `admin-edit.js` / `admin-edit-hr.js` (OA-admin-edit-tercer-pase)
+
+Verifiqué ticket por ticket todas las menciones a estos dos archivos en
+`backoffice-archivo.md` (OA-) y `backoffice-rrhh.md` (OR-), contra el código actual —
+no contra lo que dice el ticket. La gran mayoría de lo accionable en solitario ya
+estaba resuelto por B8/B9-admin-edit-*, SWEEP* y PASS2-admin-edit (OA-019, OA-026,
+OA-027, OA-046, OA-137/138/140 parcial, OA-173, OA-182, OA-190, OA-191, OA-194,
+OR-005, OR-006, OR-037, OR-147, OR-176, OR-178, OR-180, OR-182, OR-219): sólo
+confirmados contra el código, sin tocar nada.
+
+Resuelto de verdad en esta pasada:
+- **OA-009** (`admin-edit.js`) · reemplazar el archivo de un documento en el modal de
+  edición pisaba el `file_url` anterior en cuanto llegaba la respuesta del `upload`,
+  sin versionarlo — el escaneo viejo desaparecía del sistema en cuanto se soltaba uno
+  mejor. `_uploadEditDocFile` ahora archiva la URL anterior como versión (mismo
+  endpoint `POST /versiones` que ya usa `_guardarComoVersion`) antes de escribir la
+  nueva, con aviso si el archivado falla pero la subida en sí funcionó.
+- **OA-043** (`admin-edit.js`) · los dos `target="_blank"` de la vista previa del
+  archivo (al abrir el modal y al refrescar la preview) llevaban `rel="noopener"`
+  sin `noreferrer`: para un `file_url` externo, el navegador seguía mandando
+  `Referer` con la URL de R2. Añadido `noreferrer` en los dos.
+- **OR-146** (`admin-edit-hr.js`) · el historial de cargos pintaba `fecha_inicio`/
+  `fecha_fin` en ISO crudo (`2026-03-01`) en un panel en español, pese a existir
+  `formatISOToSpanish()` en `app-core.js` y usarse ya en el monitor de Archivo.
+  Aplicado en `_adminLoadHistorial`.
+- **OR-153** (`admin-edit-hr.js`) · el historial de cargos se plegaba a cada apertura
+  de ficha y había que pulsar «Ver historial» y esperar la carga cada vez —dos clics
+  y una espera en blanco por persona en el trabajo habitual de depurar una carrera.
+  Ahora `openEditEmpleadoModal` carga el historial junto con los datos personales
+  (no sólo al desplegarlo) y se recuerda si estaba expandido en la ficha anterior
+  (`_historialExpandidoPorDefecto`).
+- **Bug real sin ficha propia, aunque documentado tangencialmente por OR-285**:
+  `admin-edit-hr.js` seguía redefiniendo `exportAdminCSV()` con una copia vieja
+  (sólo exportaba la página visible, sin BOM real, sin el conjunto filtrado
+  completo) que, por cargarse después de `admin-monitor.js`, ganaba siempre y
+  revertía en silencio las correcciones OR-137/OR-138/OR-139 ya aplicadas en la
+  versión buena. Retirada la redefinición completa; queda una sola definición en
+  `admin-monitor.js`, usada por los dos módulos.
+
+Pendiente, requiere coordinar con otro carril (no tocado, para no arriesgar un
+archivo `[CHOCA]` de otro agente en curso):
+- **OA-010** (subida huérfana en R2 al cancelar) · exige clave temporal o tabla de
+  pendientes en `files.py`/`storage.py`.
+- **OA-133/OA-134/OA-135/OA-136** (papelera: lote, búsqueda, motivo, validación al
+  restaurar) · `admin_archive.html` + `trash.py`/`docs.py` a la vez.
+- **OA-025/OR-148/OR-284** (concurrencia optimista con `updated_at`) · el dato ya
+  viaja en el `GET`, pero falta el lado del servidor (`docs.py`) que compruebe y
+  devuelva 409; mandar el campo sin eso no sirve de nada.
+- **OA-183/OR-227** (`btn-xs` → `.ds-tbl-btn`) · sigue en los dos archivos, pero es un
+  cambio de veinte sitios en cinco `[CHOCA]` a la vez (`admin-monitor.js`,
+  `admin-users.js`, `admin.js`, `styles.css`); tocarlo sólo aquí deja el panel a
+  medias sin arreglar nada real.
+- **OR-011/OR-012** (purgar/restaurar empleado en lote y con listado previo) ·
+  `trash.py` `[CHOCA]`.
+- **OR-013/OR-014/OR-038/OR-030/OR-141/OR-142/OR-148/OR-155/OR-156/OR-157/OR-158/
+  OR-159/OR-177/OR-274/OR-284** · ya resueltos del lado backend por PASS3 donde
+  correspondía (OR-013/014/037/038 según `_RESERVAS.md`), o exigen `hr_alerts.py`/
+  `docs.py`/`main.py`/`admin_hr.html`/`styles.css` a la vez; nada accionable sólo con
+  estos dos JS sin ese lado.
+
+**Verificación**: `node --check app/static/admin-edit.js app/static/admin-edit-hr.js`
+sin errores. `python -m pytest app/tests -q` → 867 pasan antes de mi turno y también
+después de los cuatro cambios (sin regresiones).
+
+**quién lo pide**: agente-oa-admin-edit-3 (OA-admin-edit-tercer-pase)
