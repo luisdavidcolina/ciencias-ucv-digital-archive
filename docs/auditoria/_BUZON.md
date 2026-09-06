@@ -4802,3 +4802,45 @@ notas del buzón:
 `test_zzz_repro_menu.py::test_repro`, fichero de depuración de otro agente marcado
 "BORRAR antes de comitear" en su propia cabecera; no lo toqué, no es de mi zona.
 `python -m pytest app/tests/test_visual.py -q`: 54 passed. Commit `765cafc`.
+
+## BR-hr-py-tercer-pase (agente-br-hrpy-3, 2026-09-06)
+
+Tercer pase dedicado a `app/routes/hr.py` (nunca tuvo uno propio; el fundacional fue
+`A4-rrhh-backend`, y `PASS2` (`3e9dc0d`) sólo cubrió el reporte). Zona: exclusivamente
+`app/routes/hr.py`.
+
+**Ya resueltos en el código actual** (verificados, no tocados de nuevo): BR-001 (los tres
+endpoints públicos ya llevan `dependencies=_auth`), BR-003 (todas las interpolaciones del
+reporte pasan por `html.escape`/`_slug_class`), BR-005 y BR-015 (`fetch_hr_dataframe` y el
+reporte ya filtran `deleted_at`), BR-059 y BR-062 (el import local de `db_query` y la
+condición siempre-verdadera ya no existen en el código actual).
+
+**Arreglados en este pase** (commit `7f16307`):
+- BR-031: las facetas por departamento/estado sólo consideraban término de búsqueda y
+  fechas; ahora replican `doc_types`, `estados` y `people_terms`, cada faceta excluyendo su
+  propia dimensión.
+- BR-053: `/empleado/{id}/documentos` usaba el tope por defecto de `paginate()` (100)
+  mientras `/buscar` usa 50; ahora ambos usan 50.
+- BR-060: `HTMLResponse` y `datetime` se importaban a mitad de archivo; movidos a la
+  cabecera.
+- BR-010: el reporte imprimible ya llevaba la fecha pero no el usuario que lo generó;
+  ahora imprime ambos (usa `esc()`, no es una interpolación nueva sin escapar).
+
+**Bloqueados por tocar archivos fuera de mi zona** (no tocados):
+- BR-004 (perfil por nombre concatenado en vez de `empleado_id`) — necesita
+  `app/models.py` (`RrhhProfileRequest`) y `app/static/hr.js`.
+- BR-007 (la búsqueda envía campos sensibles que la tarjeta no pinta) — necesita
+  `app/static/hr.js` para no romper lo que sí consume.
+- BR-008, BR-025 — necesitan `app/routes/files.py` / `app/static/app-core.js` / `hr.js`.
+- BR-009, BR-012, BR-013, BR-014 — necesitan `app/main.py` y/o decisión institucional
+  (retención, rate limiting) antes de código.
+- BR-047 (quitar pandas del perfil) — sólo toca `hr.py`, pero es un refactor de riesgo alto
+  (reescribir `get_person_profile` completo a SQL puro) sin test de regresión dedicado
+  para ese endpoint más allá de lo que ya cubre `test_hr.py`; lo dejo documentado para un
+  pase con más presupuesto, no bloqueado por archivo.
+- BR-072, BR-146 a BR-176 (mejoras de producto: foto en el reporte, antigüedad calculada,
+  PDF real, búsqueda dentro de documentos) — features, no bugs con escenario de fallo
+  activo; fuera de alcance de un pase de corrección.
+
+`python -m pytest app/tests -q`: 846 passed antes y después del cambio. `pyflakes
+app/routes/hr.py`: limpio.
