@@ -2,7 +2,7 @@
 "OA-001": [
 "app/routes/admin/retention.py",
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/tests/test_admin.py"
 ],
 "OA-034": [
@@ -16,7 +16,7 @@
 "app/routes/files.py",
 "app/routes/hr_alerts.py",
 "app/routes/trash.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/tests/test_admin.py",
 "app/tests/test_static_analysis.py"
 ],
@@ -26,8 +26,8 @@
 "app/tests/test_static_assets.py"
 ],
 "OA-051": [
-"app/static/admin-categories.js",
-"app/static/admin.js",
+"app/static/js/admin/categories.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-064": [
@@ -43,32 +43,32 @@
 "app/static/styles.css"
 ],
 "OA-082": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html",
 "app/tests/test_admin_panels.py"
 ],
 "OA-102": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html"
 ],
 "OA-103": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html",
 "app/static/admin_hr.html"
 ],
 "OA-122": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-123": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_archive.html"
 ],
 "OA-131": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-132": [
 "app/main.py",
@@ -76,88 +76,88 @@
 "app/routes/trash.py"
 ],
 "OA-140": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-141": [
 "app/routes/admin/retention.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-150": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-151": [
 "app/routes/admin/catalog.py",
 "app/routes/admin/helpers.py",
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OA-158": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-159": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-166": [
 "app/routes/admin/catalog.py",
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-167": [
 "app/routes/backup.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-171": [
 "app/routes/backup.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-172": [
-"app/static/admin-ui.js",
-"app/static/admin.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-182": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-183": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
-"app/static/admin-users.js",
-"app/static/admin.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html",
 "app/static/styles.css",
 "app/tests/test_static_assets.py"
 ],
 "OA-194": [
-"app/static/admin-edit.js",
-"app/static/admin-users.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/users.js",
 "app/static/styles.css"
 ],
 "OA-195": [
-"app/static/admin-users.js",
+"app/static/js/admin/users.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-201": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/styles.css"
 ],
 "OA-202": [
 "api/choices",
 "app/routes/lookups.py",
 "app/schema.sql",
-"app/static/admin-categories.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/categories.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html"
 ],
 "OA-206": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
@@ -196,7 +196,7 @@
 ],
 "OA-007": [
 "app/routes/trash.py",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-008": [
 "app/core/ai_proposals.py",
@@ -205,18 +205,18 @@
 ],
 "OA-009": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-010": [
 "app/routes/ai.py",
 "app/routes/files.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/storage.py"
 ],
 "OA-011": [
 "app/routes/files.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-012": [
@@ -229,34 +229,34 @@
 "app/static/admin_archive.html"
 ],
 "OA-014": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html"
 ],
 "OA-015": [
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-016": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OA-017": [
 "api/auth",
 "app/routes/auth.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/tests/test_static_analysis.py"
 ],
 "OA-018": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-019": [
 "api/files",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-020": [
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/tests/test_sql_inserts.py"
 ],
 "OA-021": [
@@ -268,7 +268,7 @@
 "app/main.py",
 "app/routes/admin/imports.py",
 "app/routes/backup.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/tests/test_sql_inserts.py"
 ],
 "OA-023": [
@@ -282,42 +282,42 @@
 "OA-025": [
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-026": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-027": [
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js"
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js"
 ],
 "OA-028": [
 "api/choices",
 "app/routes/lookups.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-029": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-030": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-031": [
-"app/static/admin-monitor.js",
-"app/static/app.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/core/app.js"
 ],
 "OA-032": [
 "app/main.py",
 "app/routes/admin/catalog.py",
-"app/static/admin-users.js",
-"app/static/app.js"
+"app/static/js/admin/users.js",
+"app/static/js/core/app.js"
 ],
 "OA-033": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
-"app/static/admin-stats.js"
+"app/static/js/admin/charts.js",
+"app/static/js/admin/stats.js"
 ],
 "OA-036": [
 "app/routes/admin/deps.py",
@@ -326,7 +326,7 @@
 "app/routes/admin/users.py",
 "app/routes/hr_alerts.py",
 "app/routes/trash.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OA-037": [
 "app/main.py",
@@ -338,53 +338,53 @@
 "OA-038": [
 "app/models.py",
 "app/routes/admin/users.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-039": [
 "app/core/security.py",
 "app/models.py",
 "app/routes/admin/users.py",
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OA-040": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OA-041": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-042": [
 "api/files",
 "app/routes/ai.py",
 "app/routes/files.py",
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
-"app/static/app-core.js"
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/core/app-core.js"
 ],
 "OA-043": [
-"app/static/admin-monitor.js",
-"app/static/app-core.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/core/app-core.js"
 ],
 "OA-044": [
 "api/auth",
 "app/core/security.py",
 "app/routes/auth.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-045": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-089": [
-"app/static/admin-categories.js",
-"app/static/admin-submit.js",
-"app/static/admin-ui.js",
-"app/static/admin.js"
+"app/static/js/admin/categories.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/index.js"
 ],
 "OA-046": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-047": [
@@ -413,67 +413,67 @@
 "app/static/admin_archive.html"
 ],
 "OA-053": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-054": [
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_archive.html"
 ],
 "OA-055": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-056": [
 "app/main.py",
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html"
 ],
 "OA-057": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html"
 ],
 "OA-058": [
 "app/static/admin_archive.html"
 ],
 "OA-059": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-060": [
-"app/static/admin.js",
-"app/static/app.js"
+"app/static/js/admin/index.js",
+"app/static/js/core/app.js"
 ],
 "OA-061": [
 "app/main.py",
 "app/routes/admin/docs.py",
 "app/routes/admin/retention.py",
-"app/static/admin-edit.js",
-"app/static/admin.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-062": [
 "app/routes/admin/retention.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-063": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-066": [
 "app/static/admin_archive.html"
 ],
 "OA-067": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html"
 ],
 "OA-068": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
@@ -482,83 +482,83 @@
 "app/static/styles.css"
 ],
 "OA-070": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html"
 ],
 "OA-071": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html"
 ],
 "OA-072": [
-"app/static/admin-charts.js",
-"app/static/admin-stats.js"
+"app/static/js/admin/charts.js",
+"app/static/js/admin/stats.js"
 ],
 "OA-073": [
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-074": [
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OA-075": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OA-076": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_archive.html"
 ],
 "OA-077": [
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OA-078": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OA-079": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
-"app/static/viz-tokens.js"
+"app/static/js/admin/charts.js",
+"app/static/js/core/viz-tokens.js"
 ],
 "OA-080": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-083": [
-"app/static/admin-submit.js",
-"app/static/admin.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-084": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/styles.css"
 ],
 "OA-085": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-086": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-087": [
 "app/static/admin_archive.html"
 ],
 "OA-088": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-090": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-091": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-092": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-093": [
-"app/static/admin-submit.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/submit.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-094": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-095": [
@@ -566,145 +566,145 @@
 "app/static/styles.css"
 ],
 "OA-096": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-097": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-098": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-099": [
 "api/choices",
 "app/routes/admin/helpers.py",
-"app/static/admin-submit.js",
-"app/static/app-choices.js"
+"app/static/js/admin/submit.js",
+"app/static/js/core/app-choices.js"
 ],
 "OA-100": [
 "app/main.py",
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-edit.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html"
 ],
 "OA-203": [
 "app/routes/lookups.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html"
 ],
 "OA-101": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OA-104": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-105": [
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html"
 ],
 "OA-106": [
-"app/static/admin-monitor.js",
-"app/static/admin.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-107": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-108": [
 "app/static/admin_archive.html"
 ],
 "OA-109": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-110": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-111": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-112": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/styles.css"
 ],
 "OA-113": [
 "app/main.py",
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-114": [
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-115": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-116": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-117": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-118": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-119": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OA-120": [
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-121": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-124": [
 "app/main.py",
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_archive.html"
 ],
 "OA-125": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-126": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-127": [
 "api/choices",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-128": [
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_archive.html"
 ],
 "OA-129": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-130": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OA-133": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-134": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-135": [
@@ -714,10 +714,10 @@
 "app/routes/trash.py"
 ],
 "OA-137": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OA-138": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "OA-139": [
@@ -726,7 +726,7 @@
 ],
 "OA-142": [
 "app/routes/admin/retention.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-143": [
 "app/main.py",
@@ -740,103 +740,103 @@
 ],
 "OA-145": [
 "app/routes/admin/retention.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-146": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/styles.css",
 "app/tests/test_contraste.py"
 ],
 "OA-147": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-148": [
-"app/static/admin-ui.js",
-"app/static/admin.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/index.js"
 ],
 "OA-149": [
 "app/main.py",
 "app/routes/admin/retention.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-152": [
 "app/routes/admin/catalog.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-153": [
 "app/routes/admin/catalog.py",
 "app/routes/admin/helpers.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-154": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-155": [
 "app/routes/admin/catalog.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-156": [
 "app/database.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-157": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js",
 "app/static/styles.css"
 ],
 "OA-160": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html"
 ],
 "OA-161": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-162": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-163": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-164": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-165": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OA-168": [
 "app/routes/backup.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-169": [
 "app/routes/backup.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-170": [
 "app/routes/backup.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OA-173": [
-"app/static/admin-edit.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/edit.js",
+"app/static/js/admin/ui.js"
 ],
 "OA-174": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html"
 ],
 "OA-175": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-176": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-177": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OA-178": [
-"app/static/admin-ui.js",
-"app/static/admin.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html"
 ],
 "OA-179": [
@@ -846,7 +846,7 @@
 "app/static/admin_archive.html"
 ],
 "OA-181": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_archive.html"
 ],
 "OA-184": [
@@ -860,46 +860,46 @@
 "app/static/styles.css"
 ],
 "OA-187": [
-"app/static/admin-categories.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/categories.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-188": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-189": [
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
-"app/static/admin-ui.js",
-"app/static/admin-users.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-190": [
-"app/static/admin-edit.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html",
-"app/static/app-core.js",
+"app/static/js/core/app-core.js",
 "app/static/styles.css"
 ],
 "OA-191": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html",
 "app/static/styles.css"
 ],
 "OA-192": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/styles.css"
 ],
 "OA-193": [
 "app/static/admin_archive.html",
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "OA-196": [
-"app/static/admin-users.js",
+"app/static/js/admin/users.js",
 "app/static/admin_archive.html"
 ],
 "OA-197": [
@@ -913,7 +913,7 @@
 "app/static/styles.css"
 ],
 "OA-200": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/styles.css"
 ],
 "OA-204": [
@@ -939,9 +939,9 @@
 "OA-210": [
 "app/routes/admin/retention.py",
 "app/routes/hr_alerts.py",
-"app/static/admin-stats.js",
-"app/static/admin-submit.js",
-"app/static/admin.js"
+"app/static/js/admin/stats.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/index.js"
 ],
 "OA-211": [
 "app/static/admin_archive.html",
@@ -951,13 +951,13 @@
 "api/rrhh",
 "app/routes/admin/docs.py",
 "app/routes/hr.py",
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-300": [],
 "OR-042": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-043": [
 "api/admin",
@@ -966,23 +966,23 @@
 "app/routes/admin/deps.py",
 "app/routes/admin/helpers.py",
 "app/routes/admin/users.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-060": [
 "api/auth",
 "app/routes/auth.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-061": [
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
 "OR-080": [
-"app/static/admin-stats.js",
+"app/static/js/admin/stats.js",
 "app/static/admin_hr.html"
 ],
 "OR-081": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html"
 ],
 "OR-100": [
@@ -990,22 +990,22 @@
 ],
 "OR-101": [
 "app/routes/admin/imports.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/tests/test_admin.py"
 ],
 "OR-116": [
 "app/main.py",
 "app/routes/admin/imports.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-117": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-140": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
-"app/static/admin.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-141": [
@@ -1015,15 +1015,15 @@
 "OR-162": [
 "api/rrhh",
 "app/routes/hr.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-163": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-172": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
@@ -1033,65 +1033,65 @@
 "vercel.json"
 ],
 "OR-182": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OR-183": [
 "api/rrhh",
 "app/routes/admin/retention.py",
 "app/routes/hr_alerts.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html",
 "app/static/admin_hr.html",
 "app/tests/test_hr.py"
 ],
 "OR-190": [
 "app/routes/admin/retention.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-191": [
 "app/routes/admin/catalog.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-198": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-199": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-208": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-209": [
 "app/routes/backup.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-218": [
 "app/routes/hr.py"
 ],
 "OR-219": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/ui.js"
 ],
 "OR-226": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-227": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
-"app/static/admin-users.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/users.js"
 ],
 "OR-240": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-241": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
 "OR-246": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/styles.css"
 ],
 "OR-247": [
@@ -1110,14 +1110,14 @@
 "app/routes/hr.py"
 ],
 "OR-296": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-297": [],
 "BR-004": [
 "app/models.py",
 "app/routes/hr.py",
-"app/static/admin-monitor.js",
-"app/static/hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css",
 "app/tests/test_hr.py"
 ],
@@ -1138,12 +1138,12 @@
 "app/routes/admin/imports.py"
 ],
 "OR-005": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html",
 "app/tests/test_static_analysis.py"
 ],
 "OR-006": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/tests/test_static_assets.py"
 ],
 "OR-007": [
@@ -1155,12 +1155,12 @@
 "app/routes/admin/docs.py",
 "app/routes/admin/helpers.py",
 "app/routes/admin/imports.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_hr.html"
 ],
 "OR-009": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_hr.html",
 "app/tests/test_admin_panels.py"
 ],
@@ -1180,21 +1180,21 @@
 "app/routes/ai.py",
 "app/routes/backup.py",
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "docs/modulo-ia.md"
 ],
 "OR-013": [
 "app/routes/admin/docs.py",
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-014": [
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-015": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html"
 ],
 "OR-016": [
@@ -1202,7 +1202,7 @@
 "app/models.py",
 "app/routes/admin/docs.py",
 "app/routes/admin/imports.py",
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html",
 "app/utils.py"
 ],
@@ -1215,20 +1215,20 @@
 "api/admin",
 "app/routes/admin/stats.py",
 "app/routes/hr.py",
-"app/static/admin-stats.js",
+"app/static/js/admin/stats.js",
 "app/tests/test_stats_totales.py"
 ],
 "OR-019": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
-"app/static/admin-stats.js"
+"app/static/js/admin/charts.js",
+"app/static/js/admin/stats.js"
 ],
 "OR-020": [
 "app/routes/admin/stats.py"
 ],
 "OR-021": [
 "app/routes/hr_alerts.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-022": [
 "app/routes/hr_alerts.py",
@@ -1246,32 +1246,32 @@
 "app/routes/admin/stats.py"
 ],
 "OR-026": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html"
 ],
 "OR-027": [
 "app/routes/admin/imports.py",
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_archive.html",
 "app/static/admin_hr.html"
 ],
 "OR-028": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html",
 "docs/funcionalidades.md"
 ],
 "OR-029": [
-"app/static/admin-submit.js",
-"app/static/admin.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-030": [
 "app/main.py",
 "app/routes/lookups.py",
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html",
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "OR-031": [
 "app/routes/admin/docs.py"
@@ -1288,20 +1288,20 @@
 "app/routes/admin/docs.py"
 ],
 "OR-035": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-036": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/tests/test_static_analysis.py"
 ],
 "OR-037": [
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-038": [
 "app/main.py",
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/tests/test_hr.py"
 ],
 "OR-039": [
@@ -1313,52 +1313,52 @@
 ],
 "OR-040": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-041": [
 "app/main.py",
 "app/models.py",
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_hr.html"
 ],
 "OR-044": [
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-045": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-046": [
 "app/routes/admin/deps.py",
 "app/routes/admin/users.py",
-"app/static/admin-users.js",
+"app/static/js/admin/users.js",
 "app/tests/test_admin.py",
 "app/tests/test_permisos.py"
 ],
 "OR-047": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OR-048": [
 "app/main.py",
 "app/routes/admin/users.py",
 "app/routes/auth.py",
-"app/static/admin-users.js",
+"app/static/js/admin/users.js",
 "app/static/login.html"
 ],
 "OR-049": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-050": [
 "app/models.py",
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-051": [
 "app/routes/admin/users.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-052": [
 "app/routes/admin/catalog.py",
@@ -1376,27 +1376,27 @@
 "api/files",
 "app/main.py",
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html",
 "app/storage.py"
 ],
 "OR-055": [
 "app/routes/admin/docs.py",
-"app/static/admin-edit-hr.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html",
 "app/storage.py"
 ],
 "OR-056": [
 "api/admin",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "BR-003": [
 "app/routes/hr.py",
-"app/static/admin-categories.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/categories.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/tests/test_hr.py",
 "app/tests/test_static_analysis.py"
 ],
@@ -1406,14 +1406,14 @@
 ],
 "OR-058": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/tests/test_admin.py"
 ],
 "OR-059": [
 "app/main.py",
 "app/routes/admin/users.py",
 "app/routes/auth.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-062": [
 "app/static/admin_hr.html"
@@ -1421,8 +1421,8 @@
 "OR-124": [
 "app/main.py",
 "app/routes/admin/docs.py",
-"app/static/admin-charts.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/charts.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-063": [
@@ -1431,7 +1431,7 @@
 ],
 "OR-064": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html"
 ],
 "OR-065": [
@@ -1443,24 +1443,24 @@
 ],
 "OR-067": [
 "app/routes/admin/stats.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-068": [
 "app/main.py",
 "app/routes/hr_alerts.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-069": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-070": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-071": [
 "app/routes/admin/docs.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html"
 ],
 "OR-072": [
@@ -1474,14 +1474,14 @@
 "app/routes/admin/docs.py",
 "app/routes/admin/stats.py",
 "app/routes/hr.py",
-"app/static/admin-charts.js",
-"app/static/admin-monitor.js"
+"app/static/js/admin/charts.js",
+"app/static/js/admin/monitor.js"
 ],
 "OR-073": [
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-074": [
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-075": [
 "app/routes/admin/stats.py",
@@ -1491,12 +1491,12 @@
 "app/routes/admin/stats.py"
 ],
 "OR-077": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
 "OR-078": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html"
 ],
 "OR-079": [
@@ -1506,14 +1506,14 @@
 "OR-082": [
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-083": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-084": [
 "app/models.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/tests/test_admin.py",
 "app/tests/test_rrhh_reglas.py",
 "app/utils.py"
@@ -1523,62 +1523,62 @@
 "app/routes/admin/docs.py",
 "app/routes/hr_alerts.py",
 "app/schema.sql",
-"app/static/admin-edit-hr.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html"
 ],
 "OR-086": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html"
 ],
 "OR-087": [
 "app/models.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-088": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/styles.css"
 ],
 "OR-089": [
-"app/static/admin-submit.js",
-"app/static/admin.js"
+"app/static/js/admin/submit.js",
+"app/static/js/admin/index.js"
 ],
 "OR-090": [
-"app/static/admin-submit.js",
-"app/static/app.js"
+"app/static/js/admin/submit.js",
+"app/static/js/core/app.js"
 ],
 "OR-091": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-092": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-093": [
-"app/static/admin-submit.js",
-"app/static/app-choices.js"
+"app/static/js/admin/submit.js",
+"app/static/js/core/app-choices.js"
 ],
 "OR-094": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-095": [
-"app/static/admin-submit.js",
-"app/static/admin-ui.js"
+"app/static/js/admin/submit.js",
+"app/static/js/admin/ui.js"
 ],
 "OR-096": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-097": [
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_hr.html"
 ],
 "OR-098": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/styles.css"
 ],
 "OR-099": [
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "OR-102": [
 "app/database.py",
@@ -1598,7 +1598,7 @@
 ],
 "OR-106": [
 "app/routes/admin/imports.py",
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-107": [
 "app/routes/admin/imports.py"
@@ -1608,17 +1608,17 @@
 ],
 "OR-109": [
 "app/routes/admin/imports.py",
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-110": [
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-111": [
 "app/routes/admin/imports.py"
 ],
 "OR-112": [
 "app/routes/admin/imports.py",
-"app/static/admin-charts.js"
+"app/static/js/admin/charts.js"
 ],
 "OR-113": [
 "app/routes/admin/imports.py"
@@ -1638,29 +1638,29 @@
 ],
 "OR-119": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-120": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-121": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-122": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html"
 ],
 "OR-123": [
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-125": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-126": [
@@ -1669,58 +1669,58 @@
 "OR-127": [
 "app/main.py",
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
-"app/static/app.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
+"app/static/js/core/app.js"
 ],
 "OR-128": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-129": [
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-130": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-131": [
-"app/static/admin-monitor.js",
-"app/static/admin.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/index.js"
 ],
 "OR-132": [
-"app/static/admin-monitor.js",
-"app/static/admin.js",
-"app/static/hr.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/index.js",
+"app/static/js/hr/hr.js"
 ],
 "OR-133": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-134": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-135": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/styles.css",
 "app/tests/test_contraste.py"
 ],
 "OR-136": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-137": [
 "app/routes/admin/docs.py",
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-138": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "OR-139": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
 "app/tests/test_static_analysis.py"
 ],
 "OR-142": [
@@ -1728,7 +1728,7 @@
 "app/static/admin_hr.html"
 ],
 "OR-143": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html"
 ],
 "OR-144": [
@@ -1736,25 +1736,25 @@
 ],
 "OR-145": [
 "app/routes/admin/docs.py",
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html"
 ],
 "OR-146": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-147": [
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-148": [
 "app/routes/admin/docs.py",
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-149": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html"
 ],
 "OR-150": [
@@ -1762,30 +1762,30 @@
 "app/tests/test_admin_panels.py"
 ],
 "OR-151": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html"
 ],
 "OR-152": [
 "app/static/admin_hr.html"
 ],
 "OR-153": [
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-154": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
 "OR-155": [
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-156": [
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-157": [
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-158": [
 "app/main.py",
@@ -1802,12 +1802,12 @@
 "app/static/admin_hr.html"
 ],
 "OR-160": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/styles.css"
 ],
 "OR-161": [
 "app/static/admin_hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-005": [
 "app/core/ai_tools.py",
@@ -1816,25 +1816,25 @@
 ],
 "BR-109": [
 "app/routes/hr.py",
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "OR-164": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-165": [
 "app/routes/admin/catalog.py",
-"app/static/admin-categories.js",
-"app/static/admin.js"
+"app/static/js/admin/categories.js",
+"app/static/js/admin/index.js"
 ],
 "OR-166": [
 "app/routes/hr.py",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/styles.css",
 "app/tests/test_contraste.py"
 ],
@@ -1843,48 +1843,48 @@
 "app/routes/hr.py",
 "app/routes/lookups.py",
 "app/schema.sql",
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_hr.html"
 ],
 "OR-168": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-169": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-170": [
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "OR-171": [
-"app/static/admin-categories.js",
+"app/static/js/admin/categories.js",
 "app/static/admin_hr.html"
 ],
 "OR-174": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_hr.html"
 ],
 "OR-175": [
 "app/routes/trash.py",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OR-176": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OR-177": [
 "app/main.py",
 "app/routes/admin/docs.py",
 "app/routes/trash.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-178": [
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "OR-179": [
 "app/routes/trash.py"
 ],
 "OR-180": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_hr.html"
 ],
 "OR-181": [
@@ -1895,7 +1895,7 @@
 "app/routes/hr_alerts.py"
 ],
 "OR-185": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-186": [
 "app/main.py",
@@ -1905,14 +1905,14 @@
 "OR-187": [
 "app/main.py",
 "app/routes/admin/retention.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-188": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-189": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-192": [
 "app/main.py",
@@ -1920,15 +1920,15 @@
 ],
 "OR-193": [
 "app/routes/admin/catalog.py",
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-194": [
 "app/routes/admin/catalog.py",
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OR-195": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-196": [
 "app/database.py",
@@ -1936,48 +1936,48 @@
 "app/routes/admin/catalog.py",
 "app/routes/admin/docs.py",
 "app/routes/hr_alerts.py",
-"app/static/admin-edit-hr.js"
+"app/static/js/admin/edit-hr.js"
 ],
 "OR-197": [
 "app/database.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-200": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-201": [
-"app/static/admin-ui.js",
-"app/static/admin-users.js"
+"app/static/js/admin/ui.js",
+"app/static/js/admin/users.js"
 ],
 "OR-202": [
 "app/routes/admin/helpers.py",
 "app/routes/admin/users.py"
 ],
 "OR-203": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-204": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-205": [
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-206": [
 "app/routes/admin/users.py",
-"app/static/admin-users.js"
+"app/static/js/admin/users.js"
 ],
 "OR-207": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-210": [
 "app/static/admin_hr.html"
 ],
 "OR-211": [
 "app/routes/backup.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-212": [
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "OR-213": [
 "app/main.py",
@@ -1998,37 +1998,37 @@
 "app/routes/hr.py"
 ],
 "OR-220": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-221": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/styles.css"
 ],
 "OR-222": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-223": [
-"app/static/admin-ui.js",
-"app/static/admin.js",
+"app/static/js/admin/ui.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "OR-224": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html",
 "app/tests/test_admin_panels.py"
 ],
 "OR-225": [
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_hr.html"
 ],
 "BR-179": [
-"app/static/admin-ui.js",
+"app/static/js/admin/ui.js",
 "app/static/ayuda.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "OR-228": [
-"app/static/admin-monitor.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
@@ -2044,8 +2044,8 @@
 "app/static/styles.css"
 ],
 "OR-232": [
-"app/static/admin-monitor.js",
-"app/static/admin-users.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/users.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
@@ -2054,7 +2054,7 @@
 "app/static/admin_hr.html"
 ],
 "OR-234": [
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
@@ -2063,20 +2063,20 @@
 "app/tests/test_contraste.py"
 ],
 "OR-236": [
-"app/static/admin-monitor.js",
+"app/static/js/admin/monitor.js",
 "app/static/styles.css"
 ],
 "OR-237": [
-"app/static/admin-monitor.js",
-"app/static/hr.js"
+"app/static/js/admin/monitor.js",
+"app/static/js/hr/hr.js"
 ],
 "OR-238": [
 "app/static/admin_hr.html",
 "app/static/styles.css"
 ],
 "OR-239": [
-"app/static/admin-categories.js",
-"app/static/admin-monitor.js",
+"app/static/js/admin/categories.js",
+"app/static/js/admin/monitor.js",
 "app/static/admin_hr.html"
 ],
 "OR-242": [
@@ -2130,12 +2130,12 @@
 "app/static/admin_hr.html"
 ],
 "OR-257": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "BR-149": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "OR-258": [
@@ -2204,7 +2204,7 @@
 ],
 "OR-274": [
 "app/routes/files.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_hr.html"
 ],
 "OR-275": [
@@ -2212,11 +2212,11 @@
 ],
 "OR-276": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
+"app/static/js/admin/charts.js",
 "app/static/admin_hr.html"
 ],
 "OR-277": [
-"app/static/admin-monitor.js"
+"app/static/js/admin/monitor.js"
 ],
 "BR-180": [
 "app/static/admin_hr.html",
@@ -2224,12 +2224,12 @@
 "app/static/hr.html"
 ],
 "OR-280": [
-"app/static/admin-stats.js",
-"app/static/admin.js"
+"app/static/js/admin/stats.js",
+"app/static/js/admin/index.js"
 ],
 "OR-281": [
 "app/routes/admin/docs.py",
-"app/static/app.js"
+"app/static/js/core/app.js"
 ],
 "OR-282": [
 "app/routes/admin/imports.py"
@@ -2243,30 +2243,30 @@
 "app/routes/admin/docs.py"
 ],
 "OR-285": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js"
 ],
 "OR-286": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-ui.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/ui.js",
 "app/static/admin_hr.html"
 ],
 "OR-287": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
-"app/static/admin.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/index.js"
 ],
 "OR-288": [
-"app/static/admin-categories.js",
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
-"app/static/admin-users.js",
-"app/static/admin.js",
-"app/static/app-core.js"
+"app/static/js/admin/categories.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
+"app/static/js/admin/users.js",
+"app/static/js/admin/index.js",
+"app/static/js/core/app-core.js"
 ],
 "OR-289": [
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "OR-290": [
 "app/static/admin_hr.html"
@@ -2279,17 +2279,17 @@
 ],
 "OR-293": [
 "app/routes/admin/docs.py",
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
-"app/static/app-core.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
+"app/static/js/core/app-core.js"
 ],
 "OR-294": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html"
 ],
 "OR-295": [
-"app/static/admin-ui.js"
+"app/static/js/admin/ui.js"
 ],
 "OR-298": [
 "app/routes/admin/imports.py",
@@ -2332,17 +2332,17 @@
 ],
 "BA-007": [],
 "BA-008": [
-"app/static/app-choices.js"
+"app/static/js/core/app-choices.js"
 ],
 "BA-009": [
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "BA-010": [],
 "BA-011": [],
 "BA-012": [],
 "BA-013": [],
 "BA-014": [
-"app/static/app.js"
+"app/static/js/core/app.js"
 ],
 "BA-015": [],
 "BA-016": [
@@ -2542,7 +2542,7 @@
 ],
 "BA-199": [],
 "BA-200": [
-"app/static/archive.js",
+"app/static/js/archive/archive.js",
 "app/tests/test_sql_columns.py"
 ],
 "BR-001": [
@@ -2551,7 +2551,7 @@
 "app/routes/archive.py",
 "app/routes/hr.py",
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/tests/test_hr.py"
 ],
 "BR-002": [
@@ -2572,13 +2572,13 @@
 ],
 "BR-007": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-008": [
 "api/files",
 "app/routes/files.py",
-"app/static/app-core.js",
-"app/static/hr.js"
+"app/static/js/core/app-core.js",
+"app/static/js/hr/hr.js"
 ],
 "BR-009": [
 "app/main.py",
@@ -2588,10 +2588,10 @@
 "BR-010": [
 "api/rrhh",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-011": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-012": [
 "api/rrhh",
@@ -2600,12 +2600,12 @@
 "BR-013": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-014": [
 "app/routes/hr.py",
-"app/static/app.js",
-"app/static/hr.js"
+"app/static/js/core/app.js",
+"app/static/js/hr/hr.js"
 ],
 "BR-015": [
 "app/routes/hr.py",
@@ -2613,57 +2613,57 @@
 ],
 "BR-016": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-017": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-018": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-019": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-020": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-021": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-022": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-023": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-024": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-025": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-026": [
-"app/static/app.js",
+"app/static/js/core/app.js",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-027": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-028": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-029": [
 "app/routes/pages.py",
-"app/static/app.js",
-"app/static/hr.js"
+"app/static/js/core/app.js",
+"app/static/js/hr/hr.js"
 ],
 "BR-030": [
 "app/models.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-031": [
 "app/routes/hr.py"
@@ -2675,58 +2675,58 @@
 "BR-033": [
 "app/models.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-034": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-035": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-036": [
 "app/routes/hr.py",
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "BR-037": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-038": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-039": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-040": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-041": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-042": [
-"app/static/app.js"
+"app/static/js/core/app.js"
 ],
 "BR-043": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-044": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-045": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-046": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-047": [
 "app/routes/hr.py"
 ],
 "BR-048": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-049": [
 "app/main.py",
@@ -2750,12 +2750,12 @@
 ],
 "BR-054": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-055": [
 "app/main.py",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-056": [
 "app/main.py"
@@ -2773,7 +2773,7 @@
 ],
 "BR-061": [
 "app/routes/hr.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-062": [
@@ -2795,7 +2795,7 @@
 "app/routes/admin/catalog.py",
 "app/routes/hr.py",
 "app/routes/hr_alerts.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-067": [
 "app/main.py",
@@ -2811,7 +2811,7 @@
 "app/routes/hr.py",
 "app/routes/hr_alerts.py",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-071": [
 "app/main.py",
@@ -2821,7 +2821,7 @@
 "app/routes/hr.py"
 ],
 "BR-073": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-074": [
 "app/static/hr.html"
@@ -2833,48 +2833,48 @@
 "app/static/hr.html"
 ],
 "BR-077": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-078": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-079": [
 "app/static/hr.html"
 ],
 "BR-080": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-081": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-082": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-083": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-084": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-085": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-086": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-087": [
 "app/static/hr.html"
 ],
 "BR-088": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-089": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-090": [
 "app/static/hr.html"
@@ -2884,26 +2884,26 @@
 ],
 "BR-092": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-093": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-094": [
-"app/static/app-core.js",
-"app/static/hr.js"
+"app/static/js/core/app-core.js",
+"app/static/js/hr/hr.js"
 ],
 "BR-095": [
-"app/static/app-core.js",
-"app/static/hr.js",
+"app/static/js/core/app-core.js",
+"app/static/js/hr/hr.js",
 "app/tests/test_contraste.py"
 ],
 "BR-096": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-097": [
-"app/static/app-core.js",
+"app/static/js/core/app-core.js",
 "app/static/styles.css"
 ],
 "BR-098": [
@@ -2911,21 +2911,21 @@
 ],
 "BR-099": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-100": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-101": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-102": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-103": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-104": [
@@ -2943,25 +2943,25 @@
 "app/static/styles.css"
 ],
 "BR-108": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-110": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-111": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-112": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-113": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-114": [
@@ -2969,11 +2969,11 @@
 "app/static/styles.css"
 ],
 "BR-115": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-116": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-117": [
@@ -2981,84 +2981,84 @@
 ],
 "BR-118": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-119": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-120": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-121": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-122": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-123": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-124": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-125": [
 "app/routes/hr.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "docs/funcionalidades.md"
 ],
 "BR-126": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-127": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-128": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-129": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-141": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-130": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-131": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-136": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-132": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-133": [
 "app/static/hr.html"
 ],
 "BR-134": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-135": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-137": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-138": [
@@ -3072,11 +3072,11 @@
 "app/static/hr.html"
 ],
 "BR-142": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-143": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-144": [
 "app/static/hr.html",
@@ -3087,7 +3087,7 @@
 ],
 "BR-146": [
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-147": [
@@ -3096,12 +3096,12 @@
 "BR-148": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-150": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-151": [],
 "BR-152": [
@@ -3109,17 +3109,17 @@
 "app/models.py",
 "app/routes/hr.py",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-153": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-154": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-155": [
 "app/main.py"
@@ -3130,12 +3130,12 @@
 "BR-157": [
 "app/routes/hr.py",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-158": [
-"app/static/app.js",
+"app/static/js/core/app.js",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-159": [
 "app/routes/hr.py",
@@ -3156,40 +3156,40 @@
 "app/routes/hr.py"
 ],
 "BR-164": [
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "docs/funcionalidades.md"
 ],
 "BR-165": [
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-166": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-167": [
 "app/routes/hr.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "BR-168": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-169": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-170": [
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-171": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-172": [
 "app/static/hr.html"
 ],
 "BR-173": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "BR-174": [
 "app/main.py",
@@ -3198,7 +3198,7 @@
 "BR-175": [
 "app/routes/hr.py",
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "docs/funcionalidades.md"
 ],
 "BR-176": [
@@ -3208,7 +3208,7 @@
 "app/static/hr.html"
 ],
 "BR-178": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "SI-171": [
 "scanner-app/scanner-client.js",
@@ -3219,19 +3219,19 @@
 ],
 "SI-239": [],
 "IN-067": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/package.json",
 "scanner-app/server.js"
 ],
 "DG-001": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-172": [
 "app/database.py"
 ],
 "DG-014": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-029": [
@@ -3240,7 +3240,7 @@
 "DG-015": [
 "app/static/admin_archive.html",
 "app/static/admin_hr.html",
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/package.json"
 ],
 "DG-062": [
@@ -3275,7 +3275,7 @@
 "scanner-app/package.json"
 ],
 "DG-002": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-003": [
@@ -3288,21 +3288,21 @@
 "scanner-app/server.js"
 ],
 "DG-005": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-006": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-007": [
 "scanner-app/server.js"
 ],
 "DG-008": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-009": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-010": [
@@ -3318,7 +3318,7 @@
 "DG-012": [
 "app/static/admin_archive.html",
 "app/static/admin_hr.html",
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-013": [
@@ -3335,34 +3335,34 @@
 "app/database.py",
 "app/main.py",
 "app/routes/admin/docs.py",
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-016": [
 "scanner-app/server.js"
 ],
 "DG-017": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-018": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-019": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-089": [
 "app/static/capture.js",
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-020": [
-"app/static/app.js",
-"app/static/scanner-client.js"
+"app/static/js/core/app.js",
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-021": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-022": [
 "scanner-app/package.json",
@@ -3370,11 +3370,11 @@
 "scanner-app/server.js"
 ],
 "SI-174": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/scanner-client.js"
 ],
 "DG-023": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-024": [
 "scanner-app/server.js"
@@ -3386,7 +3386,7 @@
 "scanner-app/server.js"
 ],
 "DG-027": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-028": [
@@ -3429,7 +3429,7 @@
 "scanner-app/server.js"
 ],
 "DG-040": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/logger.js",
 "scanner-app/server.js"
 ],
@@ -3440,7 +3440,7 @@
 "scanner-app/server.js"
 ],
 "DG-043": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/server.js"
 ],
 "DG-163": [
@@ -3476,7 +3476,7 @@
 "scanner-app/package.json"
 ],
 "DG-053": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-054": [
 "scanner-app/README.md"
@@ -3503,7 +3503,7 @@
 "scanner-app/acquire"
 ],
 "DG-067": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "scanner-app/README.md",
 "scanner-app/acquire"
 ],
@@ -3564,7 +3564,7 @@
 "DG-081": [
 "app/routes/capture.py",
 "app/routes/files.py",
-"app/static/admin-submit.js",
+"app/static/js/admin/submit.js",
 "app/storage.py"
 ],
 "DG-082": [
@@ -3582,19 +3582,19 @@
 "app/routes/admin/users.py",
 "app/routes/files.py",
 "app/routes/hr.py",
-"app/static/admin.js"
+"app/static/js/admin/index.js"
 ],
 "DG-085": [
 "app/static/capture.html",
 "app/static/capture.js",
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-086": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-087": [
 "app/static/capture.js",
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-088": [
 "app/static/capture.js"
@@ -3626,11 +3626,11 @@
 ],
 "DG-099": [
 "app/static/capture.js",
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-100": [
 "app/static/capture.js",
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-101": [],
 "DG-102": [
@@ -3664,7 +3664,7 @@
 ],
 "DG-108": [
 "app/routes/archive.py",
-"app/static/archive.js"
+"app/static/js/archive/archive.js"
 ],
 "DG-109": [
 "scanner-app/ocr"
@@ -3681,7 +3681,7 @@
 ],
 "DG-114": [
 "app/main.py",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "DG-115": [
 "scanner-app/process"
@@ -3724,8 +3724,8 @@
 "app/routes/admin/docs.py",
 "app/routes/admin/stats.py",
 "app/schema.sql",
-"app/static/admin-charts.js",
-"app/static/admin-stats.js",
+"app/static/js/admin/charts.js",
+"app/static/js/admin/stats.js",
 "scanner-app/server.js"
 ],
 "DG-127": [
@@ -3748,21 +3748,21 @@
 "DG-134": [
 "api/admin",
 "app/routes/files.py",
-"app/static/admin-edit-hr.js",
-"app/static/admin-submit.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/submit.js"
 ],
 "DG-135": [
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/static/admin_hr.html",
 "app/static/capture.js"
 ],
 "DG-136": [
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "DG-137": [
 "app/routes/trash.py",
-"app/static/admin-edit.js",
+"app/static/js/admin/edit.js",
 "app/static/admin_archive.html"
 ],
 "DG-138": [
@@ -3797,7 +3797,7 @@
 "SI-001": [
 "app/main.py",
 "app/routes/backup.py",
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "app/storage.py",
 "app/tests/test_secrets.py",
 "docs/politica-digitalizacion.md"
@@ -3814,7 +3814,7 @@
 ],
 "DG-154": [
 "app/routes/capture.py",
-"app/static/admin.js",
+"app/static/js/admin/index.js",
 "app/static/admin_archive.html",
 "app/static/admin_hr.html",
 "app/static/capture.js",
@@ -3826,7 +3826,7 @@
 ],
 "DG-156": [],
 "DG-157": [
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "app/static/styles.css",
 "docs/politica-digitalizacion.md"
 ],
@@ -3839,18 +3839,18 @@
 "scanner-app/ui"
 ],
 "DG-160": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-161": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "SI-177": [
 "app/static/capture.js",
-"app/static/scanner-client.js",
+"app/static/js/scanner/scanner-client.js",
 "app/static/styles.css"
 ],
 "DG-162": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-164": [
 "scanner-app/server.js"
@@ -3867,7 +3867,7 @@
 "scanner-app/ui"
 ],
 "DG-167": [
-"app/static/scanner-client.js"
+"app/static/js/scanner/scanner-client.js"
 ],
 "DG-168": [
 "app/static/admin_qa.html"
@@ -3889,7 +3889,7 @@
 "api/index.py",
 "app/main.py",
 "app/routes/archive.py",
-"app/static/archive.js",
+"app/static/js/archive/archive.js",
 "app/tests/test_migraciones.py",
 "docs/funcionalidades.md",
 "vercel.json"
@@ -3986,8 +3986,8 @@
 "IN-012": [
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-edit-hr.js",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/edit.js"
 ],
 "IN-013": [
 "app/routes/admin/docs.py"
@@ -4005,7 +4005,7 @@
 "app/main.py",
 "app/models.py",
 "app/routes/admin/docs.py",
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "IN-016": [
 "app/routes/trash.py"
@@ -4019,13 +4019,13 @@
 ],
 "IN-018": [
 "app/routes/trash.py",
-"app/static/admin-edit-hr.js",
+"app/static/js/admin/edit-hr.js",
 "app/storage.py"
 ],
 "IN-019": [
 "app/main.py",
 "app/routes/trash.py",
-"app/static/admin-edit.js"
+"app/static/js/admin/edit.js"
 ],
 "IN-020": [
 "app/routes/trash.py"
@@ -4135,7 +4135,7 @@
 "IN-043": [],
 "IN-044": [],
 "IN-046": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "IN-048": [],
 "IN-049": [],
@@ -4231,7 +4231,7 @@
 "IN-117": [],
 "IN-118": [],
 "IN-119": [
-"app/static/admin-submit.js"
+"app/static/js/admin/submit.js"
 ],
 "IN-120": [],
 "IN-122": [],
@@ -4324,7 +4324,7 @@
 "api/requirements.txt"
 ],
 "IN-204": [
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "IN-205": [],
 "IN-206": [],
@@ -4435,7 +4435,7 @@
 "VI-074": [],
 "VI-075": [],
 "SI-049": [
-"app/static/app.js"
+"app/static/js/core/app.js"
 ],
 "VI-076": [],
 "VI-077": [],
@@ -4476,7 +4476,7 @@
 ],
 "RQ-005": [
 "app/routes/auth.py",
-"app/static/app.js",
+"app/static/js/core/app.js",
 "docs/tex/chapters/04_requerimientos.tex"
 ],
 "SI-002": [
@@ -4499,9 +4499,9 @@
 ],
 "RQ-007": [
 "app/routes/archive.py",
-"app/static/app.js",
+"app/static/js/core/app.js",
 "app/static/archive.html",
-"app/static/archive.js",
+"app/static/js/archive/archive.js",
 "app/utils.py",
 "docs/funcionalidades.md"
 ],
@@ -4509,14 +4509,14 @@
 "app/main.py",
 "app/routes/archive.py",
 "app/routes/hr.py",
-"app/static/app.js",
-"app/static/hr.js",
+"app/static/js/core/app.js",
+"app/static/js/hr/hr.js",
 "docs/tex/chapters/04_requerimientos.tex"
 ],
 "RQ-009": [
 "app/models.py",
 "app/routes/hr.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "docs/tex/chapters/04_requerimientos.tex"
 ],
 "RQ-010": [
@@ -4525,7 +4525,7 @@
 "app/routes/archive.py",
 "app/routes/hr.py",
 "app/static/hr.html",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "RQ-011": [
 "api/rrhh",
@@ -4534,8 +4534,8 @@
 ],
 "RQ-012": [
 "app/routes/admin/stats.py",
-"app/static/admin-charts.js",
-"app/static/admin-stats.js"
+"app/static/js/admin/charts.js",
+"app/static/js/admin/stats.js"
 ],
 "RQ-013": [
 "app/database.py"
@@ -4611,9 +4611,9 @@
 "app/routes/admin/docs.py",
 "app/routes/admin/imports.py",
 "app/routes/archive.py",
-"app/static/admin-edit.js",
-"app/static/admin-submit.js",
-"app/static/archive.js"
+"app/static/js/admin/edit.js",
+"app/static/js/admin/submit.js",
+"app/static/js/archive/archive.js"
 ],
 "RQ-029": [
 "vercel.json"
@@ -4635,74 +4635,74 @@
 ],
 "RQ-036": [
 "app/routes/auth.py",
-"app/static/app.js",
-"app/static/login.js",
+"app/static/js/core/app.js",
+"app/static/js/login/login.js",
 "docs/tex/chapters/12_roadmap.tex"
 ],
 "RQ-037": [
 "api/auth",
-"app/static/app.js",
-"app/static/login.js",
+"app/static/js/core/app.js",
+"app/static/js/login/login.js",
 "app/static/logo.png",
 "app/static/styles.css"
 ],
 "RQ-038": [
 "app/routes/hr.py",
-"app/static/app-shell.js",
+"app/static/js/core/app-shell.js",
 "app/static/archive.html",
 "app/static/styles.css"
 ],
 "RQ-039": [
-"app/static/admin-edit-hr.js",
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
+"app/static/js/admin/edit-hr.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
 "app/static/admin_archive.html",
 "app/static/admin_hr.html",
-"app/static/archive.js"
+"app/static/js/archive/archive.js"
 ],
 "RQ-040": [
-"app/static/admin-edit.js",
-"app/static/admin-monitor.js",
-"app/static/admin-submit.js",
-"app/static/archive.js"
+"app/static/js/admin/edit.js",
+"app/static/js/admin/monitor.js",
+"app/static/js/admin/submit.js",
+"app/static/js/archive/archive.js"
 ],
 "RQ-041": [
-"app/static/archive.js"
+"app/static/js/archive/archive.js"
 ],
 "RQ-042": [
 "app/routes/hr.py",
-"app/static/app-choices.js",
+"app/static/js/core/app-choices.js",
 "app/static/archive.html",
 "app/static/hr.html",
 "app/static/styles.css"
 ],
 "RQ-043": [
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "RQ-044": [
 "app/main.py",
 "app/models.py",
 "app/routes/admin/stats.py",
 "app/routes/hr.py",
-"app/static/app-shell.js",
-"app/static/archive.js",
+"app/static/js/core/app-shell.js",
+"app/static/js/archive/archive.js",
 "app/static/hr.html",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/static/styles.css"
 ],
 "RQ-045": [
-"app/static/app-shell.js",
-"app/static/app.js",
+"app/static/js/core/app-shell.js",
+"app/static/js/core/app.js",
 "app/static/styles.css"
 ],
 "RQ-046": [
 "app/routes/hr.py",
-"app/static/app-shell.js"
+"app/static/js/core/app-shell.js"
 ],
 "RQ-047": [
 "app/main.py",
 "app/routes/hr.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "RQ-048": [
 "app/main.py",
@@ -4715,26 +4715,26 @@
 "RQ-050": [
 "app/routes/admin/stats.py",
 "app/routes/files.py",
-"app/static/hr.js",
-"app/static/scanner-client.js"
+"app/static/js/hr/hr.js",
+"app/static/js/scanner/scanner-client.js"
 ],
 "RQ-051": [
 "app/routes/files.py",
-"app/static/hr.js"
+"app/static/js/hr/hr.js"
 ],
 "RQ-052": [
 "app/main.py",
 "app/routes/admin/catalog.py",
 "app/routes/lookups.py",
-"app/static/admin-categories.js"
+"app/static/js/admin/categories.js"
 ],
 "RQ-053": [
-"app/static/app-shell.js"
+"app/static/js/core/app-shell.js"
 ],
 "RQ-054": [
 "app/routes/pages.py",
-"app/static/app-shell.js",
-"app/static/app.js",
+"app/static/js/core/app-shell.js",
+"app/static/js/core/app.js",
 "app/static/inicio.html",
 "app/tests/test_paginas.py"
 ],
@@ -4746,7 +4746,7 @@
 "app/routes/hr.py",
 "app/routes/hr_alerts.py",
 "app/routes/trash.py",
-"app/static/hr.js",
+"app/static/js/hr/hr.js",
 "app/storage.py",
 "docs/funcionalidades.md"
 ],
@@ -4998,7 +4998,7 @@
 "SI-240": [],
 "SI-003": [
 "app/static/admin_ai.html",
-"app/static/app-shell.js"
+"app/static/js/core/app-shell.js"
 ],
 "SI-004": [
 "app/core/ai.py",
@@ -5012,7 +5012,7 @@
 "app/core/ai.py",
 "app/core/ai_prompts.py",
 "app/routes/ai.py",
-"app/static/ai-widget.js",
+"app/static/js/ai/ai-widget.js",
 "docs/modulo-ia.md"
 ],
 "SI-006": [
@@ -5077,7 +5077,7 @@
 ],
 "SI-017": [
 "api/files",
-"app/static/ai-widget.css"
+"app/static/styles/ai-widget.css"
 ],
 "SI-018": [
 "app/core/ai_prompts.py",
@@ -5136,7 +5136,7 @@
 "api/auth",
 "app/models.py",
 "app/routes/auth.py",
-"app/static/app-core.js"
+"app/static/js/core/app-core.js"
 ],
 "SI-038": [
 "app/routes/auth.py"
