@@ -660,6 +660,24 @@ def run_migrations():
              motivo     TEXT,
              creado_en  TIMESTAMPTZ NOT NULL DEFAULT NOW()
          )"""),
+
+        # ── OA-124/OR-041: la descripción del tipo documental se pedía en el
+        # alta y se tiraba (el INSERT no tenía dónde guardarla). OA-123/OR-163:
+        # "desactivar en vez de borrar" cuando un tipo está en uso necesita un
+        # estado propio, no basta con el `id_tipo_documento` en uso.
+        ("descripcion en tipo_documento",
+         "ALTER TABLE public.tipo_documento ADD COLUMN IF NOT EXISTS descripcion TEXT"),
+        ("activo en tipo_documento",
+         "ALTER TABLE public.tipo_documento ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT TRUE"),
+
+        # ── IN-080: audit_log no tenía ni un índice, y se consulta siempre
+        # con `ORDER BY timestamp DESC` (catalog.py:get_audit_log). Al año,
+        # esa pestaña tarda segundos. Sólo el índice simple aquí: el trigram
+        # para la búsqueda por `accion`/`usuario` requiere CREATE EXTENSION
+        # pg_trgm, que en Neon puede exigir un privilegio que esta migración
+        # no puede verificar en frío — se deja anotado para quien lo confirme.
+        ("idx audit_log timestamp",
+         "CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON public.audit_log(timestamp DESC)"),
     ]
     # En serverless esta funcion corre en CADA arranque en frio. Son ~80 viajes
     # de ida y vuelta a Neon antes de poder responder la primera peticion, y el
