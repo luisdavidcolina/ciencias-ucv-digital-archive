@@ -375,7 +375,17 @@ def admin_submit(
     if not cedula:
         raise HTTPException(status_code=400, detail="Cédula es requerida para RRHH")
 
-    emp_row = db_query("SELECT id FROM public.empleados WHERE cedula = %s", (cedula,), fetch="one")
+    emp_row = db_query(
+        "SELECT id, deleted_at FROM public.empleados WHERE cedula = %s", (cedula,), fetch="one"
+    )
+    if emp_row and emp_row["deleted_at"] is not None:
+        # OR-032: sin esto, el documento se ataba a un expediente en papelera
+        # y desaparecía con él en cuanto se filtrara `deleted_at` en las
+        # consultas (como ya hace `/list_all`) — silencioso, sin aviso.
+        raise HTTPException(
+            status_code=409,
+            detail="Existe un expediente con esta cédula en la papelera. Restáurelo antes de archivar un documento nuevo.",
+        )
     if not emp_row:
         cargo_id   = _resolve_or_create_lookup("cargos",            req.cargo,        "Por Asignar")
         dept_id    = _resolve_or_create_lookup("departamentos",     req.departamento, "Por Asignar")
@@ -414,7 +424,12 @@ def admin_submit(
         RETURNING id_rrhh
         """,
         (
-            f"{req.doc_type} de {req.personas_relacionadas or req.empleado}",
+            # OR-100: `personas_relacionadas` es texto libre (admite listas
+            # con ";") pensado para el campo de metadata, no para componer un
+            # título — "Susana Pérez; Dirección RRHH" salía tal cual como
+            # título del documento. Se usa `req.titulo` si viene informado, y
+            # el título compuesto queda sólo como valor por defecto.
+            (req.titulo or "").strip() or f"{req.doc_type} de {req.personas_relacionadas or req.empleado}",
             "Recursos Humanos",
             tipo_id, emp_row["id"], fecha_doc, req.ubicacion, creado_por,
             req.doc_type, req.tesauro_secundario or "", req.resumen or "",
@@ -509,6 +524,12 @@ def update_documento(
         _common(set_clauses, params)
 
         if req.doc_type is not None:
+            # OR-007: `tesauro_primario` es sólo el texto mostrado; el monitor,
+            # las gráficas, la cobertura por Parte y la retención leen
+            # `id_tipo_documento`. Sin resolverlo aquí, cambiar el tipo desde
+            # el modal de edición no cambiaba nada de lo que de verdad se usa.
+            tipo_id = _resolve_or_create_tipo_documento(req.doc_type)
+            set_clauses.append("id_tipo_documento = %s"); params.append(tipo_id)
             set_clauses.append("tesauro_primario = %s"); params.append(req.doc_type)
         if req.notas is not None:
             set_clauses.append("notas = %s"); params.append(req.notas)
@@ -568,8 +589,21 @@ def update_documento_status(
 
     table, pk = module_meta(modulo)
 
+    # OA-005: sin este filtro se podía cambiar el status de un documento que
+    # ya está en la papelera (el badge que lleva ahí sigue viniendo de
+    # OA-004 sin filtrar). 409, no 404, para distinguir "no existe" de
+    # "existe pero está borrado" — la papelera es un estado, no un olvido.
+    existe = db_query(
+        f"SELECT deleted_at FROM public.{table} WHERE {pk}=%s",
+        [doc_id], fetch="one",
+    )
+    if not existe:
+        raise HTTPException(404, "Documento no encontrado")
+    if existe["deleted_at"] is not None:
+        raise HTTPException(409, "El documento está en la papelera; restáurelo antes de cambiar su estado")
+
     result = db_query(
-        f"UPDATE public.{table} SET status=%s, updated_at=NOW() WHERE {pk}=%s RETURNING {pk}",
+        f"UPDATE public.{table} SET status=%s, updated_at=NOW() WHERE {pk}=%s AND deleted_at IS NULL RETURNING {pk}",
         [status, doc_id], fetch="one", commit=True,
     )
     if not result:
@@ -665,7 +699,7 @@ def get_empleado(
            LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
            LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
            LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
-           WHERE e.id = %s""",
+           WHERE e.id = %s AND e.deleted_at IS NULL""",
         (emp_id,), fetch="one",
     )
     if not row:
@@ -680,6 +714,19 @@ def update_empleado(
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("RRHH")),
 ):
+    # OR-031: sin este filtro se podía editar (y guardar cambios sobre) un
+    # empleado que ya está en la papelera —una pestaña abierta antes del
+    # borrado, o el botón «atrás», seguían dejando pasar el `PUT`. Mismo
+    # criterio 409 (existe pero está borrado) que OA-005 aplica a documentos.
+    existe = db_query(
+        "SELECT deleted_at FROM public.empleados WHERE id = %s",
+        (emp_id,), fetch="one",
+    )
+    if not existe:
+        raise HTTPException(404, "Empleado no encontrado")
+    if existe["deleted_at"] is not None:
+        raise HTTPException(409, "El empleado está en la papelera; restáurelo antes de editarlo")
+
     set_clauses, params = [], []
 
     if req.nombres is not None:
@@ -721,7 +768,7 @@ def update_empleado(
         set_clauses.append("updated_by = %s"); params.append(req.usuario)
         params.append(emp_id)
         db_query(
-            f"UPDATE public.empleados SET {', '.join(set_clauses)} WHERE id = %s",
+            f"UPDATE public.empleados SET {', '.join(set_clauses)} WHERE id = %s AND deleted_at IS NULL",
             params, fetch="none", commit=True,
         )
 
@@ -735,12 +782,19 @@ def get_status_counts(
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
-    """Retorna conteo de documentos por status para badges en el monitor."""
+    """Retorna conteo de documentos por status para badges en el monitor.
+
+    OA-004: los badges deben reflejar la misma vista que `/list_all` (que ya
+    filtra `deleted_at IS NULL`). Sin el filtro aquí, mandar documentos a la
+    papelera dejaba el número del badge inflado respecto de lo que la tabla
+    de verdad muestra al pulsarlo.
+    """
     _require_modulo(modulo)
     if modulo == "Archivo":
         rows = db_query(
             """SELECT COALESCE(status, 'aprobado') AS status, COUNT(*) AS cnt
                FROM public.datos_archivo
+               WHERE deleted_at IS NULL
                GROUP BY COALESCE(status, 'aprobado')""",
             fetch="all",
         ) or []
@@ -748,6 +802,7 @@ def get_status_counts(
         rows = db_query(
             """SELECT COALESCE(status, 'aprobado') AS status, COUNT(*) AS cnt
                FROM public.datos_rrhh
+               WHERE deleted_at IS NULL
                GROUP BY COALESCE(status, 'aprobado')""",
             fetch="all",
         ) or []
