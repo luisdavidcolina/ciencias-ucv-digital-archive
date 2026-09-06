@@ -145,7 +145,7 @@ def test_todo_token_definido_se_usa():
     css = _css_texto()
     definidos = _tokens_definidos(css)
     consumidos = _tokens_consumidos_cualquiera(css)
-    for f in STATIC.glob("*.js"):
+    for f in STATIC.glob("**/*.js"):
         texto = f.read_text(encoding="utf-8")
         consumidos |= _tokens_consumidos_cualquiera(texto)
         consumidos |= set(re.findall(r"getPropertyValue\(['\"](--[\w-]+)", texto))

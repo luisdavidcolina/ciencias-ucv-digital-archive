@@ -20,7 +20,7 @@ APP = Path(__file__).resolve().parents[1]
 REPO = APP.parent
 STATIC = APP / "static"
 
-JS_FILES = sorted(STATIC.glob("*.js"))
+JS_FILES = sorted(STATIC.glob("**/*.js"))
 
 # Este archivo contiene los marcadores de mojibake a propósito: si se revisara a
 # sí mismo, fallaría siempre.

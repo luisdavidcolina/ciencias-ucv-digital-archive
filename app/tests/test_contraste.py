@@ -51,7 +51,7 @@ def test_el_calculo_es_correcto():
 # --- colores de estado: llevan texto blanco encima --------------------------
 
 def _colores_de_estado():
-    js = (STATIC / "app-core.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "core" / "app-core.js").read_text(encoding="utf-8")
     cuerpo = js[js.index("function getStatusColor"):]
     cuerpo = cuerpo[: cuerpo.index("\n}")]
     return dict(re.findall(r'case "(\w+)":\s*return "(#[0-9a-fA-F]{6})"', cuerpo))
@@ -151,7 +151,7 @@ def test_no_vuelve_el_gris_de_bootstrap_en_estilos_en_linea():
     """#6c757d sobre #f8f9fa da 4,44:1, y en un style en línea ninguna hoja de
     estilos puede corregirlo."""
     culpables = []
-    for f in sorted(STATIC.glob("*.js")):
+    for f in sorted(STATIC.glob("**/*.js")):
         for n, linea in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
             if re.search(r"color:\s*#6c757d", linea):
                 culpables.append(f"{f.name}:{n}")

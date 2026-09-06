@@ -50,7 +50,7 @@ def _panes(html, suf):
     del_html = set(
         re.findall(r'<div class="tab-pane[^"]*" id="(pane-admin-%s-[\w-]+)"' % suf, html)
     )
-    js = (STATIC / "admin-ui.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "admin" / "ui.js").read_text(encoding="utf-8")
     inyectados = {
         f"pane-admin-{suf}-{tab}"
         for tab in re.findall(r'id="pane-admin-\$\{suf\}-([\w-]+)"', js)
@@ -98,7 +98,7 @@ def test_ambos_paneles_ofrecen_las_mismas_pestanas():
 
 def test_loadadmintab_maneja_todas_las_pestanas():
     """Cada pestaña necesita su rama de carga, o abre un panel que nunca se llena."""
-    admin_js = (STATIC / "admin.js").read_text(encoding="utf-8")
+    admin_js = (STATIC / "js" / "admin" / "index.js").read_text(encoding="utf-8")
     cuerpo = admin_js[admin_js.index("function loadAdminTab"):]
     cuerpo = cuerpo[: cuerpo.index("\n}")]
 
@@ -144,7 +144,7 @@ def _row_template_cells(js, modulo):
 @pytest.mark.parametrize("suf", sorted(PANELS))
 def test_monitor_columnas_y_celdas_cuadran(suf):
     html = _read(suf)
-    js = (STATIC / "admin-monitor.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "admin" / "monitor.js").read_text(encoding="utf-8")
     cabeceras = _monitor_headers(html, suf)
     celdas = _row_template_cells(js, suf)
     assert len(cabeceras) == len(celdas), (
@@ -157,7 +157,7 @@ def test_monitor_columnas_y_celdas_cuadran(suf):
 def test_monitor_ocultamiento_responsive_coherente(suf):
     """Si el <th> se oculta en móvil, su <td> también: si no, la fila se desplaza."""
     html = _read(suf)
-    js = (STATIC / "admin-monitor.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "admin" / "monitor.js").read_text(encoding="utf-8")
 
     def clases(tag):
         m = re.search(r'class="([^"]*)"', tag)
@@ -211,7 +211,7 @@ def test_menu_lateral_no_esta_duplicado(nombre):
         "#app-shell-sidebar que rellena app-shell.js"
     )
     assert 'id="app-shell-sidebar"' in html, f"{nombre} no tiene el hueco del menú"
-    assert "/static/app-shell.js" in html, f"{nombre} no carga app-shell.js"
+    assert "/static/js/core/app-shell.js" in html, f"{nombre} no carga app-shell.js"
 
 
 def test_el_hueco_se_rellena_antes_de_usarse():
@@ -221,8 +221,8 @@ def test_el_hueco_se_rellena_antes_de_usarse():
         html = (STATIC / nombre).read_text(encoding="utf-8")
         barra  = html.index('id="app-shell-navbar"')
         menu   = html.index('id="app-shell-sidebar"')
-        shell  = html.index("/static/app-shell.js")
-        app_js = html.index("/static/app.js")
+        shell  = html.index("/static/js/core/app-shell.js")
+        app_js = html.index("/static/js/core/app.js")
         assert barra < menu < shell < app_js, (
             f"{nombre}: el orden debe ser huecos → app-shell.js → app.js"
         )
@@ -257,7 +257,7 @@ def test_los_modales_de_ui_no_estan_pegados_en_el_html(nombre):
 
 
 def test_admin_ui_define_sus_modales():
-    js = (STATIC / "admin-ui.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "admin" / "ui.js").read_text(encoding="utf-8")
     for mid in ("ds-confirm-modal", "ds-prompt-modal"):
         assert f'id="{mid}"' in js, f"admin-ui.js ya no define #{mid}"
     assert "_asegurarModalesUI" in js
@@ -266,7 +266,7 @@ def test_admin_ui_define_sus_modales():
 @pytest.mark.parametrize("nombre", PAGINAS_ADMIN)
 def test_las_paginas_que_usan_los_modales_cargan_admin_ui(nombre):
     html = (STATIC / nombre).read_text(encoding="utf-8")
-    assert "/static/admin-ui.js" in html, f"{nombre} no carga admin-ui.js"
+    assert "/static/js/admin/ui.js" in html, f"{nombre} no carga admin-ui.js"
 
 
 # ---------------------------------------------------------------------------
@@ -276,7 +276,7 @@ def test_las_paginas_que_usan_los_modales_cargan_admin_ui(nombre):
 # antes de llegar al contenido — en cada página y cada vez.
 
 def test_la_cascara_ofrece_el_enlace_de_salto():
-    js = (STATIC / "app-shell.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "core" / "app-shell.js").read_text(encoding="utf-8")
     assert "ds-skip-link" in js, "app-shell.js ya no genera el enlace de salto"
     assert "contenido-principal" in js, "el enlace de salto no tiene destino"
     assert "_marcarContenidoPrincipal" in js, (
@@ -286,7 +286,7 @@ def test_la_cascara_ofrece_el_enlace_de_salto():
 
 def test_el_enlace_de_salto_es_el_primer_elemento():
     """Si no va antes que la barra, deja de servir: habría que atravesarla."""
-    js = (STATIC / "app-shell.js").read_text(encoding="utf-8")
+    js = (STATIC / "js" / "core" / "app-shell.js").read_text(encoding="utf-8")
     i = js.index("shellSkipLinkHTML() + shellNavbarHTML")
     assert i > 0, "el enlace de salto debe anteponerse a la barra superior"
 
