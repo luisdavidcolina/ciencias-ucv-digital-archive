@@ -44,7 +44,7 @@ const _MODALES_UI = `
           <input type="text" id="ds-pm-input-id" class="form-control ds-pm-input" autocomplete="off">
           <div class="input-group-append ds-pm-toggle-wrap d-none">
             <button type="button" class="btn btn-outline-secondary ds-pm-toggle" aria-label="Mostrar valor" aria-pressed="false">
-              <i class="fas fa-eye"></i>
+              <i class="fas fa-eye" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -289,6 +289,7 @@ document.addEventListener("click", e => {
     btn.setAttribute("aria-pressed", showing ? "false" : "true");
     btn.setAttribute("aria-label", showing ? "Mostrar valor" : "Ocultar valor");
     btn.querySelector("i").className = showing ? "fas fa-eye" : "fas fa-eye-slash";
+    btn.querySelector("i").setAttribute("aria-hidden", "true");
     inp.focus();
     return;
   }
@@ -498,8 +499,8 @@ document.addEventListener("click", e => {
         const banner = document.createElement("div");
         banner.id = "session-warning-banner";
         banner.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#fff3cd;color:#856404;border-top:2px solid #ffc107;padding:8px 16px;text-align:center;z-index:9999;font-size:0.85rem;display:flex;align-items:center;justify-content:center;gap:12px;";
-        banner.innerHTML = `<i class="fas fa-clock"></i> Sesión expira en <strong id="session-countdown">${mins}:00</strong> min &nbsp;
-          <button class="btn btn-warning btn-sm" onclick="extendSession()"><i class="fas fa-redo mr-1"></i>Extender sesión</button>
+        banner.innerHTML = `<i class="fas fa-clock" aria-hidden="true"></i> Sesión expira en <strong id="session-countdown">${mins}:00</strong> min &nbsp;
+          <button class="btn btn-warning btn-sm" onclick="extendSession()"><i class="fas fa-redo mr-1" aria-hidden="true"></i>Extender sesión</button>
           <button class="btn btn-link btn-sm p-0" id="session-warning-close" aria-label="Cerrar aviso">✕</button>`;
         document.body.appendChild(banner);
         banner.querySelector("#session-warning-close").addEventListener("click", () => {
@@ -567,10 +568,10 @@ function openQuickStatusMenu(btn, docId, currentStatus, modulo) {
   document.querySelectorAll(".ds-quick-status-menu").forEach(m => m.remove());
 
   const options = [
-    { val: "aprobado",  label: '<i class="fas fa-check mr-1"></i>Aprobado',           cls: "text-success" },
-    { val: "revision",  label: '<i class="fas fa-clock mr-1"></i>Pendiente revisión', cls: "text-warning" },
-    { val: "draft",     label: '<i class="fas fa-pencil-alt mr-1"></i>Borrador',      cls: "text-secondary" },
-    { val: "rechazado", label: '<i class="fas fa-times mr-1"></i>Rechazado',          cls: "text-danger" },
+    { val: "aprobado",  label: '<i class="fas fa-check mr-1" aria-hidden="true"></i>Aprobado',           cls: "text-success" },
+    { val: "revision",  label: '<i class="fas fa-clock mr-1" aria-hidden="true"></i>Pendiente revisión', cls: "text-warning" },
+    { val: "draft",     label: '<i class="fas fa-pencil-alt mr-1" aria-hidden="true"></i>Borrador',      cls: "text-secondary" },
+    { val: "rechazado", label: '<i class="fas fa-times mr-1" aria-hidden="true"></i>Rechazado',          cls: "text-danger" },
   ];
 
   const menu = document.createElement("div");
@@ -666,23 +667,57 @@ function hideProgress(containerId) {
   document.getElementById(`_prog_${containerId}`)?.remove();
 }
 
-// ─── Tooltip simple para elementos con data-tip ───────────────────────────────
-document.addEventListener("mouseover", e => {
-  const target = e.target.closest("[data-tip]");
-  if (!target) return;
+// ─── Tooltip simple para elementos con data-tip (OA-192) ─────────────────────
+// Antes sólo aparecía con `mouseover`, sin `role="tooltip"` ni `aria-describedby`,
+// y se pegaba a 10px del cursor sin recolocarse dentro de la ventana. Ahora
+// también aparece con el foco de teclado y se recoloca si se saldría del viewport.
+function _mostrarDsTip(target, atCursor) {
   let tip = document.getElementById("_ds_tip");
   if (!tip) {
     tip = document.createElement("div");
     tip.id = "_ds_tip";
+    tip.setAttribute("role", "tooltip");
     tip.style.cssText = "position:fixed;background:#333;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;z-index:99999;pointer-events:none;max-width:200px;";
     document.body.appendChild(tip);
   }
   tip.textContent = target.dataset.tip;
   tip.style.display = "block";
-  const move = ev => { tip.style.left = `${ev.clientX + 10}px`; tip.style.top = `${ev.clientY - 28}px`; };
-  const leave = () => { tip.style.display = "none"; target.removeEventListener("mousemove", move); target.removeEventListener("mouseleave", leave); };
-  target.addEventListener("mousemove", move);
-  target.addEventListener("mouseleave", leave);
+  target.setAttribute("aria-describedby", "_ds_tip");
+
+  const place = (x, y) => {
+    // Se mide después de fijar el texto, para conocer su tamaño real.
+    const rect = tip.getBoundingClientRect();
+    const maxLeft = window.innerWidth - rect.width - 4;
+    const maxTop  = window.innerHeight - rect.height - 4;
+    tip.style.left = `${Math.max(4, Math.min(x, maxLeft))}px`;
+    tip.style.top  = `${Math.max(4, Math.min(y, maxTop))}px`;
+  };
+
+  if (atCursor) {
+    const move = ev => place(ev.clientX + 10, ev.clientY - 28);
+    const leave = () => { _ocultarDsTip(target); target.removeEventListener("mousemove", move); target.removeEventListener("mouseleave", leave); };
+    target.addEventListener("mousemove", move);
+    target.addEventListener("mouseleave", leave);
+  } else {
+    const r = target.getBoundingClientRect();
+    place(r.left, r.bottom + 4);
+    target.addEventListener("blur", () => _ocultarDsTip(target), { once: true });
+  }
+}
+
+function _ocultarDsTip(target) {
+  const tip = document.getElementById("_ds_tip");
+  if (tip) tip.style.display = "none";
+  target.removeAttribute("aria-describedby");
+}
+
+document.addEventListener("mouseover", e => {
+  const target = e.target.closest("[data-tip]");
+  if (target) _mostrarDsTip(target, true);
+});
+document.addEventListener("focusin", e => {
+  const target = e.target.closest("[data-tip]");
+  if (target) _mostrarDsTip(target, false);
 });
 
 // ─── Barra de pestañas: desbordamiento y navegación ──────────────────────────
@@ -795,12 +830,12 @@ function _panelAcceso(suf, modulo) {
 <div class="tab-pane fade" id="pane-admin-${suf}-users" role="tabpanel">
   <div class="card card-danger">
     <div class="card-header">
-      <h3 class="card-title" id="ds-acceso-title-${suf}"><i class="fas fa-user-shield"></i> Control de Acceso</h3>
+      <h3 class="card-title" id="ds-acceso-title-${suf}"><i class="fas fa-user-shield" aria-hidden="true"></i> Control de Acceso</h3>
     </div>
     <div class="card-body p-4">
       <div id="admin_users_table-${suf}" class="table-responsive mb-4"></div>
       <hr>
-      <h6 class="font-weight-bold mb-3" id="ds-nuevo-usuario-title-${suf}"><i class="fas fa-user-plus"></i> Registrar Nuevo Usuario</h6>
+      <h6 class="font-weight-bold mb-3" id="ds-nuevo-usuario-title-${suf}"><i class="fas fa-user-plus" aria-hidden="true"></i> Registrar Nuevo Usuario</h6>
       <form id="new-user-form-${suf}" aria-labelledby="ds-nuevo-usuario-title-${suf}" onsubmit="event.preventDefault(); handleAddUser();">
         <div class="row mb-3">
           <div class="col-md-3 mb-2">
@@ -826,7 +861,7 @@ function _panelAcceso(suf, modulo) {
           </div>
         </div>
         <button type="submit" id="btn_add_user-${suf}" class="btn btn-outline-danger btn-sm" style="border-radius:8px;">
-          <i class="fas fa-user-plus"></i> Crear Usuario
+          <i class="fas fa-user-plus" aria-hidden="true"></i> Crear Usuario
         </button>
       </form>
     </div>
@@ -839,7 +874,7 @@ function _panelAuditoria(suf) {
 <div class="tab-pane fade" id="pane-admin-${suf}-audit" role="tabpanel">
   <div class="card card-secondary">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-      <h3 class="card-title"><i class="fas fa-history mr-2"></i>Registro de Auditoría</h3>
+      <h3 class="card-title"><i class="fas fa-history mr-2" aria-hidden="true"></i>Registro de Auditoría</h3>
       <label class="sr-only" for="audit_search-${suf}">Buscar evento o usuario</label>
       <input type="text" id="audit_search-${suf}" class="form-control form-control-sm ds-audit-buscador" data-admin-search
              placeholder="Buscar evento o usuario...">
@@ -864,9 +899,9 @@ function _panelAuditoria(suf) {
     <div class="card-footer d-flex justify-content-between align-items-center">
       <small id="audit_summary-${suf}" class="text-muted"></small>
       <div>
-        <button id="audit_prev-${suf}" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)"><i class="fas fa-chevron-left"></i></button>
+        <button id="audit_prev-${suf}" class="btn btn-sm btn-outline-secondary mr-1" onclick="changeAuditPage(-1)" aria-label="Página anterior"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
         <span id="audit_page_info-${suf}" class="text-muted small"></span>
-        <button id="audit_next-${suf}" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)"><i class="fas fa-chevron-right"></i></button>
+        <button id="audit_next-${suf}" class="btn btn-sm btn-outline-secondary ml-1" onclick="changeAuditPage(1)" aria-label="Página siguiente"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
       </div>
     </div>
   </div>
