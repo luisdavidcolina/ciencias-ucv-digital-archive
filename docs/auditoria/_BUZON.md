@@ -4941,3 +4941,61 @@ arriba antes de revertir). `python -c "import ast; ast.parse(...)"` y `python -m
 app/routes/ai.py`: limpio.
 
 **quién lo pide**: agente-si-routesai-3 (SI-routes-ai-py-tercer-pase)
+
+---
+
+## OA-admin-stats-py-tercer-pase (2026-09-06) — verificacion completa de `app/routes/admin/stats.py`
+
+83 menciones auditadas en `docs/auditoria/*.md`. La gran mayoria son tickets `[CHOCA]`
+que exigen tocar `archive.py`, `hr.py`, `retention.py`, `hr_alerts.py`, `docs.py`,
+`schema.sql`, `admin-charts.js`, `admin-stats.js` o `admin_hr.html` a la vez — quedan
+fuera de esta zona (declarada como exclusiva `app/routes/admin/stats.py`) y sin tocar.
+
+**Arreglados de verdad, solo con SQL/Python dentro de `stats.py`** (commit `ad782bc`):
+
+- OA-002/OA-003 · `total_vencidos` en `/charts` (Archivo) ahora usa
+  `COALESCE(fecha_vencimiento, fecha_documento + plazo)` y filtra
+  `status='aprobado' AND disposicion IS NULL` — exactamente lo que ya hace
+  `retention.py:get_expired_docs`. Antes el KPI marcaba vencidos que la tabla de
+  Retención ya había dado por dispuestos.
+- OR-020 · `by_nivel`/`by_sexo` (RRHH) agrupaban por la columna cruda mientras la
+  etiqueta se calculaba normalizada: `NULL`, `''` y `'  '` producían tres sectores
+  "Sin especificar" en la dona. `GROUP BY` ahora usa la misma expresión que el
+  `SELECT`.
+- OR-024 · `total_jubilaciones_proximas` usaba `COALESCE(fecha_jubilacion,
+  fecha_pension)`, así que alguien con jubilación lejana y pensión el mes que
+  viene no contaba. Cambiado a `LEAST` de las dos fechas no nulas.
+- OR-025 · `total_movimientos_cargo` era `COUNT(*) FROM historial_cargos` sin unir
+  con `empleados` ni filtrar `deleted_at` — contaba movimientos de gente purgada
+  y no bajaba al enviar a alguien a la papelera. Ahora une y filtra.
+- OR-076 · `by_doc_type` (RRHH) sin `COALESCE` en `nombre_corto`: un tipo con ese
+  campo `NULL` (creado por migración/importación) producía una barra rotulada
+  `null`. Ahora `COALESCE(nombre_corto, nombre, 'Sin tipo')`, igual que Archivo.
+- OA-075 · `by_soporte` normaliza ahora a un conjunto cerrado
+  (`Físico`/`Digital`/`Digitalizado`) vía `unaccent(LOWER(...))`: antes una
+  variante de acento o mayúscula en datos históricos caía al color de reserva
+  del front y compartía hue con otro tramo (el bug de fondo que el front no
+  puede arreglar solo).
+
+**Confirmados como ya resueltos por el carril fundacional** (no se tocó nada):
+todas las consultas de Archivo y RRHH en `/charts` ya filtran `deleted_at IS
+NULL` — el patrón de bug de `hr.py`/`admin/docs.py` que se pidió vigilar
+especialmente **no** aparece en el resto de `stats.py`; sólo estaba en los dos
+casos de arriba (OR-025 y, de forma indirecta, OA-003).
+
+**Bloqueados por archivo ajeno, documentados pero no tocados** (lista no
+exhaustiva, ver el propio `[CHOCA]` en cada documento de auditoría para el
+detalle): OA-078/OA-079 (orden y color estable de "Documentos por Año/Tipo",
+piden tocar `admin-charts.js`/`viz-tokens.js`), OR-063/OR-064/OR-065/OR-067
+(etiquetas y significado de las tarjetas del HTML), OR-072/OR-256 (cobertura de
+Partes por "al menos un documento" en vez de lista de obligatorios, exige
+`schema.sql`+`main.py`), OR-279/OA-207/IN-030/IN-045/IN-105 (pandas + dataframe
+completo en `POST /stats`, el fetch vive en `archive.py`/`hr.py`), RQ-012 (rango
+de fechas en KPIs — parcialmente resuelto ya por `C3-stats-backend`: `/charts`
+sí acepta rango; falta filtro por tipo/departamento, que exige
+`admin-stats.js`/`admin-charts.js`).
+
+**Verificación**: `python -m pytest app/tests -q` → 860 passed (antes y después
+de los seis cambios; corrida en primer plano, sin dejar nada en segundo plano).
+
+**quién lo pide**: agente-oa-statspy-3 (OA-admin-stats-py-tercer-pase)
