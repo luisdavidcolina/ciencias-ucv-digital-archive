@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.ico">
 </head>
@@ -20,12 +21,17 @@
     <span class="ds-compartido-sello"><i class="fas fa-link"></i> Documento compartido</span>
   </header>
 
-  <main id="contenido" class="ds-compartido-caja">
+  <!-- SI-170: encabezado de nivel 1 estable, presente en todos los estados
+       (carga, aviso y documento), no solo cuando la carga tiene éxito. -->
+  <h1 class="sr-only">Documento compartido — Archivo Institucional Digital, Facultad de Ciencias UCV</h1>
+
+  <main id="contenido-principal" class="ds-compartido-caja" tabindex="-1">
     <div class="ds-chart-empty"><i class="fas fa-circle-notch fa-spin"></i><span>Cargando…</span></div>
   </main>
 
   <footer class="ds-compartido-pie">
-    Archivo Institucional Digital · Facultad de Ciencias, Universidad Central de Venezuela
+    Archivo Institucional Digital · Facultad de Ciencias, Universidad Central de Venezuela ·
+    <a href="https://www.ciens.ucv.ve/" target="_blank" rel="noopener">Sitio de la Facultad</a>
   </footer>
 </div>
 
@@ -42,9 +48,9 @@ function esc(v) {
 }
 
 const TOKEN = decodeURIComponent(location.pathname.split('/compartido/')[1] || '');
-const caja  = document.getElementById('contenido');
+const caja  = document.getElementById('contenido-principal');
 
-function aviso(icono, titulo, detalle) {
+function aviso(icono, titulo, detalle, conReintentar) {
   // VI-071: sin salida ni contacto, un enlace caducado dejaba 600px de tarjeta
   // vacía (la caja hereda flex:1 de .ds-compartido-wrap para el caso normal,
   // con documento). Aquí se encoge al contenido y se ofrecen dos salidas
@@ -57,10 +63,16 @@ function aviso(icono, titulo, detalle) {
       '<h2>' + esc(titulo) + '</h2>' +
       '<p>' + esc(detalle) + '</p>' +
       '<div class="ds-compartido-aviso-acciones">' +
-        '<a class="btn btn-primary" href="/archivo"><i class="fas fa-magnifying-glass mr-1"></i>Ir al catálogo público</a>' +
+        (conReintentar
+          ? '<button type="button" class="btn btn-primary" id="btn-reintentar"><i class="fas fa-rotate-right mr-1"></i>Reintentar</button>'
+          : '') +
+        '<a class="btn btn-outline-secondary" href="/archivo"><i class="fas fa-magnifying-glass mr-1"></i>Ir al catálogo público</a>' +
         '<a class="btn btn-outline-secondary" href="mailto:informatica@ciens.ucv.ve"><i class="fas fa-envelope mr-1"></i>Escribir al Archivo</a>' +
       '</div>' +
     '</div>';
+  if (conReintentar) {
+    document.getElementById('btn-reintentar').addEventListener('click', cargar);
+  }
 }
 
 function formatearCaducidad(iso) {
@@ -78,18 +90,28 @@ function fila(etiqueta, valor) {
          '<dd>' + esc(valor) + '</dd></div>';
 }
 
-(async () => {
+async function cargar() {
   if (!TOKEN) {
     aviso('fa-triangle-exclamation', 'Enlace incompleto',
           'La dirección no incluye un identificador de documento.');
     return;
   }
+  caja.parentElement.classList.remove('is-aviso');
+  caja.innerHTML = '<div class="ds-chart-empty"><i class="fas fa-circle-notch fa-spin"></i><span>Cargando…</span></div>';
+
   let res;
   try {
-    res = await fetch('/api/compartido/' + encodeURIComponent(TOKEN));
+    // SI-169: sin límite de tiempo, una petición colgada dejaba el disco
+    // girando indefinidamente. 15s y un aviso con opción de reintentar.
+    res = await fetch('/api/compartido/' + encodeURIComponent(TOKEN), {
+      signal: AbortSignal.timeout(15000),
+    });
   } catch (e) {
-    aviso('fa-plug-circle-xmark', 'Sin conexión',
-          'No se pudo contactar con el servidor. Inténtelo de nuevo.');
+    const esTimeout = e && (e.name === 'TimeoutError' || e.name === 'AbortError');
+    aviso('fa-plug-circle-xmark', esTimeout ? 'El servidor está tardando demasiado' : 'Sin conexión',
+          esTimeout ? 'La consulta no obtuvo respuesta a tiempo. Puede intentarlo de nuevo.'
+                    : 'No se pudo contactar con el servidor. Inténtelo de nuevo.',
+          true);
     return;
   }
   if (res.status === 404) {
@@ -99,7 +121,7 @@ function fila(etiqueta, valor) {
   }
   if (!res.ok) {
     aviso('fa-triangle-exclamation', 'No se pudo abrir el documento',
-          'El servidor respondió con un error. Inténtelo más tarde.');
+          'El servidor respondió con un error. Inténtelo más tarde.', true);
     return;
   }
 
@@ -114,7 +136,7 @@ function fila(etiqueta, valor) {
 
   caja.innerHTML =
     '<span class="ds-compartido-modulo">' + esc(datos.modulo) + '</span>' +
-    '<h1 class="ds-compartido-titulo">' + esc(d.titulo || 'Documento') + '</h1>' +
+    '<h2 class="ds-compartido-titulo">' + esc(d.titulo || 'Documento') + '</h2>' +
     '<dl class="ds-compartido-datos">' +
       fila('Tipo documental', d.tipo) +
       fila('Autor / Emisor', d.autor) +
@@ -129,7 +151,9 @@ function fila(etiqueta, valor) {
       ? '<br><i class="fas fa-clock mr-1"></i>Este enlace caduca el ' + esc(formatearCaducidad(datos.caduca)) + '.'
       : '') +
     '</p>';
-})();
+}
+
+cargar();
 </script>
 </body>
 </html>
