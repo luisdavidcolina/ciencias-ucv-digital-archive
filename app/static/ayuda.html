@@ -323,12 +323,17 @@
 // role="region" y aria-labelledby apuntando de vuelta al botón. Este script
 // mantiene aria-expanded sincronizado con el estado visual en vez de
 // depender solo del giro del icono.
-document.querySelectorAll(".help-faq-toggle").forEach(btn => {
+document.querySelectorAll(".help-faq-toggle").forEach((btn, idx) => {
   const body = btn.nextElementSibling;
+  if (!btn.id) btn.id = "help-faq-toggle-" + idx;
   if (body && !body.hasAttribute("role")) body.setAttribute("role", "region");
   if (!btn.hasAttribute("aria-expanded")) btn.setAttribute("aria-expanded", "false");
-  if (body && !btn.getAttribute("aria-controls") && body.id) {
+  if (body && !body.id) body.id = "help-faq-body-" + idx;
+  if (body && !btn.getAttribute("aria-controls")) {
     btn.setAttribute("aria-controls", body.id);
+  }
+  if (body && !body.hasAttribute("aria-labelledby")) {
+    body.setAttribute("aria-labelledby", btn.id);
   }
   btn.addEventListener("click", () => {
     const isOpen = body.classList.contains("open");
