@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Gerencial: Comparativa de Mercado DMS / HRMS</title>
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
     <!-- Bootstrap 4.6 CSS (sistema de diseno del proyecto) -->
     <link rel="stylesheet" href="/static/styles.css">
-    <!-- Tippy.js CSS for modern tooltips -->
-    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
-    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/themes/light-border.css" />
+    <!-- Tippy.js CSS for modern tooltips (version fijada a la que resuelve @6 hoy, para que el SRI no se rompa solo con un patch nuevo -- SI-015) -->
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css" integrity="sha384-IBgYl+I5X6ZDZXI5zv1vsSE3VopDomz4BxSu/GlxaPHfFtcrJ3uj70z1w6srO9zU" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/themes/light-border.css" integrity="sha384-oAnSdqFEFRIeYi0SBLHb5HS5ALP/C8FjjBKFAHpjn/9cXWK3iKVrWaxJRz3t9a91" crossorigin="anonymous" />
     <style>
         /* Compatibilidad BS4.6: utilidades y componente acordeon de BS5 usados en esta pagina (SD-207) */
         .fs-4 { font-size: 1.5rem !important; }
@@ -1092,11 +1092,11 @@
 
 <!-- Scripts -->
 <!-- jQuery + Bootstrap 4.6 JS (sistema de diseno del proyecto) -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Tippy.js Tooltips (Dependencies) -->
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://unpkg.com/tippy.js@6"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+<!-- Tippy.js Tooltips (Dependencies) -- version fijada a la que resuelve @2/@6 hoy, para que el SRI no se rompa solo con un patch nuevo (SI-015) -->
+<script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js" integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29" crossorigin="anonymous"></script>
 
 <!-- Script para el Glosario Gerencial -->
 <script>
