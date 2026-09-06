@@ -4483,3 +4483,83 @@ sin errores. `python -m pytest app/tests -q` → 867 pasan antes de mi turno y t
 después de los cuatro cambios (sin regresiones).
 
 **quién lo pide**: agente-oa-admin-edit-3 (OA-admin-edit-tercer-pase)
+
+## SI-ai-widget-tercer-pase — verificación ticket por ticket de `ai-widget.js` (agente-si-ai-widget-3)
+
+Repasadas contra el código actual TODAS las fichas SI- que mencionan `ai-widget.js`
+(línea 377 del propio `sistema-ia-paginas.md`: SI-017, 064, 065, 082, 096, 110-125).
+
+**Ya resueltas por trabajo previo, confirmado contra el código, sin cambios**:
+SI-017 (`formatear()` sólo enlaza `/api/files/…` y `/compartido/…`, el resto queda
+texto plano), SI-113/115/116/117/119/122/125 (agente-sweep2-misc, SWEEP2-misc) y
+además **SI-112** (`aria-expanded`/`aria-controls` en la burbuja, con la etiqueta
+alternando en `alternar()`) y **SI-114** (los cuatro botones de la cabecera —
+historial, nueva conversación, descargar, cerrar— ya llevan `aria-label` propio,
+no sólo `title`) estaban resueltas sin ficha propia que lo marcara: probablemente
+quedaron cubiertas de paso al resolver SI-119 (el botón de descargar) y VI-004/
+VI-ai-widget-zindex, sin que nadie tachara SI-112/SI-114 en el documento fuente.
+
+**Arregladas de verdad en este turno, sólo con `ai-widget.js`**:
+- **SI-065** (no se podía cancelar un mensaje en curso): `AbortController` por envío;
+  mientras `estado.cargando`, el mismo botón de enviar (`#ia-enviar`) se convierte en
+  «Detener» — icono, `aria-label` y `title` cambian, sin clase CSS nueva que
+  `ai-widget.css` no conozca. Un `AbortError` en el `catch` se distingue del error de
+  red real («Mensaje cancelado.» en vez de «Error de red»). **Parcial**: el servidor
+  sigue sin enterarse de la cancelación a media vuelta de herramientas — eso exige
+  `app/routes/ai.py`, fuera de mi zona; queda anotado más abajo.
+- **SI-110** (la burbuja no atrapaba el foco ni se cerraba con Escape): `aria-modal`,
+  `aria-hidden` alternado con la apertura, atrapa `Tab`/`Shift+Tab` dentro de
+  `#ia-panel` mientras está abierto, `Escape` lo cierra, y al cerrar el foco vuelve a
+  la burbuja que lo abrió (antes se quedaba donde estuviera).
+- **SI-111** (las respuestas no se anunciaban): `#ia-mensajes` ahora lleva
+  `role="log"` + `aria-live="polite"` + `aria-relevant="additions"`, y `pintar()` ya
+  no reconstruye el contenedor entero en cada turno — sólo añade los mensajes nuevos
+  (`renderMensaje()` + contador `renderCount`); las propuestas pendientes y el
+  indicador de «escribiendo» se repintan aparte en un `#ia-cola` al final, porque
+  cambian sin que llegue un mensaje nuevo. Se reconstruye entero sólo cuando la
+  lista se acorta (conversación nueva o restaurada).
+- **SI-118** (el hilo se comparte entre pestañas duplicadas sin sincronizarse):
+  listener de `storage` sobre la clave de `sessionStorage`, y al abrir el panel se
+  revalida el `convId` contra `GET /api/ia/conversacion/<id>` — si devuelve 404
+  (borrada desde otra pestaña), se avisa y se empieza una conversación nueva en vez
+  de seguir escribiendo contra un id muerto.
+- **SI-120** (el texto del asistente se pintaba como texto plano): subconjunto
+  mínimo de Markdown en `formatear()` — negrita `**texto**`, código en línea
+  `` `código` `` y listas `- item`/`* item` — aplicado siempre DESPUÉS de `esc()`,
+  nunca antes, para no interpretar HTML del propio texto. No usa clases CSS nuevas:
+  `<ul>`/`<li>`/`<strong>`/`<code>` ya heredan estilo por defecto del navegador
+  dentro de `.ia-msg-bot`. **Parcial** respecto a la ficha: no toqué `ai-widget.css`
+  (fuera de mi zona) para un estilo propio de esas etiquetas; hoy se ven con el
+  estilo por navegador, no con un ajuste fino de la hoja del widget.
+
+**Bloqueadas por depender de otro archivo, sin tocar**:
+- **SI-064** (sin streaming SSE) y **SI-082** (marcar respuesta buena/mala) — esfuerzo
+  L/M que exige `app/core/ai.py` y/o `app/routes/ai.py` (y `admin_ai.html`/
+  `app/main.py` para SI-082, con migración de esquema). No accionable sólo con
+  `ai-widget.js`.
+- **SI-065** (mitad servidor) — cortar el bucle de herramientas cuando el cliente se
+  desconecta necesita `app/routes/ai.py`.
+- **SI-108** (mostrar antes/después de una propuesta) — necesita que
+  `app/routes/ai.py`/`app/core/ai_proposals.py` devuelvan `datos`, y `admin_ai.html`
+  para el panel; hoy sólo se pinta `resumen` recortado.
+- **SI-121** (actualizar el aviso de gasto con cada respuesta) — comprobado:
+  `POST /api/ia/chat` (routes/ai.py) NO devuelve `gasto_hoy`/`tope_diario` en su
+  respuesta (sólo `GET /api/ia/disponible` los trae, y sólo al cargar la página).
+  Sin ese campo en el servidor no hay nada que leer del lado del cliente.
+- **SI-096/SI-124** — ambas son de `ai-widget.css`, no de `ai-widget.js`; confirmado
+  con grep que ninguna referencia cae en mi archivo. Fuera de mi zona declarada.
+
+**Bug sin ficha propia**: ninguno encontrado. Repasé `ai-widget.js` contra el resto
+de `app/static/` con grep en busca de (a) `onclick`/listeners que llamen a una
+función indefinida en cualquier archivo del proyecto, y (b) definiciones
+duplicadas de las mismas funciones (`enviar`, `pintar`, `formatear`, `alternar`,
+etc.) en otro `.js` que cargue en la misma página — no hay ninguna otra página que
+cargue `ai-widget.js` junto a un script que redefina estos nombres; todas las
+funciones que este archivo referencia (`document.getElementById`, `fetch`, etc.) o
+bien son nativas o están definidas en el propio archivo.
+
+**Verificación**: `node --check app/static/ai-widget.js` sin errores.
+`python -m pytest app/tests -q` → 867 pasan antes de mi turno y también después de
+los cinco cambios (sin regresiones).
+
+**quién lo pide**: agente-si-ai-widget-3 (SI-ai-widget-tercer-pase)

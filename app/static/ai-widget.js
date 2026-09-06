@@ -27,6 +27,15 @@
     disponible: true
   };
 
+  // SI-065: la llamada en curso, para poder cancelarla desde el botón «Detener». Sin
+  // AbortController no había forma de cortar una petición que ya se estaba pagando.
+  var peticionActual = null;
+
+  // SI-111: sólo se repinta el mensaje nuevo cuando es posible; `renderCount` recuerda
+  // cuántos ya están en el DOM para no reconstruir `#ia-mensajes` entero en cada turno,
+  // que es lo que hacía que un lector de pantalla releyera la conversación completa.
+  var renderCount = 0;
+
   // --- persistencia del hilo (solo la pestaña actual) -----------------------
 
   function guardar() {
@@ -45,6 +54,30 @@
         estado.convId = d.convId || null;
       }
     } catch (e) { /* hilo corrupto: se empieza de cero */ }
+  }
+
+  // SI-118: `sessionStorage` no se comparte entre pestañas — salvo cuando una pestaña se
+  // duplica, que arranca con una copia exacta del hilo (mismo `convId`). Si desde una se
+  // borra la conversación, la otra sigue escribiendo contra un id que ya no existe, que es
+  // justo el caso que `borrarConversacion()` ya cuida dentro de una sola pestaña. El evento
+  // `storage` avisa cuando el navegador sí sincroniza esas pestañas, y al abrir el panel se
+  // revalida contra el servidor por si no lo hizo.
+  window.addEventListener("storage", function (e) {
+    if (e.key !== STORE) return;
+    restaurar();
+    pintar();
+  });
+
+  function revalidarConvId() {
+    if (!estado.convId) return;
+    fetch("/api/ia/conversacion/" + estado.convId, { credentials: "same-origin" })
+      .then(function (r) {
+        if (r.status === 404) {
+          sistema("Esta conversación se borró desde otra pestaña. Se empieza una nueva.");
+          limpiar();
+        }
+      })
+      .catch(function () { /* sin red: no se revalida, se sigue con lo que había */ });
   }
 
   // --- render --------------------------------------------------------------
@@ -89,16 +122,44 @@
   //
   // A los `/api/files/<key>` hay que añadirles `?u=<usuario>`: ese endpoint lo exige además
   // de la cookie. Sin esto el enlace es correcto, el documento existe, y aun así da 401.
+  // SI-120: el prompt le pide al modelo listar «uno por línea», y devuelve viñetas y
+  // negritas en Markdown. Sin esto salían como asteriscos y guiones sueltos. Subconjunto
+  // mínimo a propósito (negrita, listas, código en línea) y siempre DESPUÉS de `esc()`:
+  // nunca se interpreta HTML del propio texto, sólo esta sintaxis reducida.
+  function inline(s) {
+    return s
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  }
+
+  function markdownLigero(texto) {
+    var lineas = texto.split("\n");
+    var html = "", enLista = false;
+    lineas.forEach(function (linea, i) {
+      var item = /^\s*[-*]\s+(.*)$/.exec(linea);
+      if (item) {
+        if (!enLista) { html += "<ul>"; enLista = true; }
+        html += "<li>" + inline(item[1]) + "</li>";
+        return;
+      }
+      if (enLista) { html += "</ul>"; enLista = false; }
+      html += inline(linea);
+      if (i < lineas.length - 1) html += "<br>";
+    });
+    if (enLista) html += "</ul>";
+    return html;
+  }
+
   function formatear(texto) {
-    return esc(texto)
+    var conEnlaces = esc(texto)
       .replace(/(\/api\/files\/[^\s<]+|\/compartido\/[^\s<]+)/g, function (url) {
         var href = url;
         if (url.indexOf("/api/files/") === 0 && estado.usuario && url.indexOf("?u=") === -1) {
           href = url + "?u=" + encodeURIComponent(estado.usuario);
         }
         return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + url + "</a>";
-      })
-      .replace(/\n/g, "<br>");
+      });
+    return markdownLigero(conEnlaces);
   }
 
   function pintar() {
@@ -133,41 +194,32 @@
       return;
     }
 
-    var html = "";
-    estado.mensajes.forEach(function (m, idx) {
-      if (m.rol === "sistema") {
-        html += '<div class="ia-sistema">' + formatear(m.contenido) + "</div>";
-        // SI-116: subir un archivo ya no dispara un turno pago solo; se ofrece como
-        // sugerencia pulsable, igual que las sugerencias iniciales.
-        if (m.sugerencia) {
-          html += '<button class="ia-sug" data-sugerencia="' + esc(m.sugerencia) +
-                  '">Preguntar por este archivo</button>';
-        }
-        // SI-117: el asistente ya no navega solo; ofrece el destino y decide la persona.
-        if (m.navegar_a) {
-          html += '<button class="ia-ir" data-href="' + esc(m.navegar_a) +
-                  '"><i class="fas fa-arrow-right"></i> Ir a la página</button>';
-        }
-        return;
-      }
-      html += '<div class="ia-msg ia-msg-' + (m.rol === "user" ? "user" : "bot") + '">' +
-              formatear(m.contenido) +
-              '<button class="ia-copiar" data-idx="' + idx +
-              '" aria-label="Copiar mensaje" title="Copiar"><i class="fas fa-copy"></i></button>' +
-              "</div>";
-      if (m.herramientas && m.herramientas.length) {
-        // Se muestra qué consultó. Sin esto, una respuesta correcta y una inventada se ven
-        // exactamente igual, y el usuario no tiene cómo distinguirlas.
-        html += '<div class="ia-traza"><i class="fas fa-database"></i> consultó: ' +
-                esc(m.herramientas.map(function (h) { return nombreHerramienta(h.herramienta); }).join(", ")) +
-                "</div>";
-      }
-    });
+    // SI-111: sólo se pintan los mensajes que todavía no están en el DOM. Si la lista se
+    // acortó (conversación nueva o restaurada), no hay nada que "aparecer": se reconstruye
+    // entera y se reinicia el contador.
+    if (renderCount > estado.mensajes.length) renderCount = 0;
+    if (renderCount === 0) caja.innerHTML = "";
 
-    // Las propuestas pendientes: el único punto donde el asistente cambia algo, y siempre
-    // con una persona apretando el botón.
+    var cola = document.getElementById("ia-cola");
+    if (!cola) {
+      cola = document.createElement("div");
+      cola.id = "ia-cola";
+      caja.appendChild(cola);
+    }
+
+    var html = "";
+    for (var idx = renderCount; idx < estado.mensajes.length; idx++) {
+      html += renderMensaje(estado.mensajes[idx], idx);
+    }
+    if (html) cola.insertAdjacentHTML("beforebegin", html);
+    renderCount = estado.mensajes.length;
+
+    // Las propuestas pendientes y el indicador de «escribiendo» se repintan aparte: cambian
+    // sin que llegue un mensaje nuevo (se resuelven, o empieza/termina la espera), y así no
+    // hace falta reconstruir la conversación entera para actualizarlos.
+    var htmlCola = "";
     estado.propuestas.forEach(function (p) {
-      html += '<div class="ia-propuesta" data-id="' + p.id + '">' +
+      htmlCola += '<div class="ia-propuesta" data-id="' + p.id + '">' +
         '<div class="ia-prop-cab"><i class="fas fa-pen-to-square"></i> Cambio propuesto</div>' +
         '<div class="ia-prop-txt">' + esc(p.resumen) + "</div>" +
         '<div class="ia-prop-btns">' +
@@ -175,13 +227,43 @@
           '<button class="ia-rechazar" data-id="' + p.id + '"><i class="fas fa-times"></i> Rechazar</button>' +
         "</div></div>";
     });
-
     if (estado.cargando) {
-      html += '<div class="ia-msg ia-msg-bot ia-escribiendo"><span></span><span></span><span></span></div>';
+      htmlCola += '<div class="ia-msg ia-msg-bot ia-escribiendo"><span></span><span></span><span></span></div>';
     }
+    cola.innerHTML = htmlCola;
 
-    caja.innerHTML = html;
     caja.scrollTop = caja.scrollHeight;
+  }
+
+  function renderMensaje(m, idx) {
+    if (m.rol === "sistema") {
+      var html = '<div class="ia-sistema">' + formatear(m.contenido) + "</div>";
+      // SI-116: subir un archivo ya no dispara un turno pago solo; se ofrece como
+      // sugerencia pulsable, igual que las sugerencias iniciales.
+      if (m.sugerencia) {
+        html += '<button class="ia-sug" data-sugerencia="' + esc(m.sugerencia) +
+                '">Preguntar por este archivo</button>';
+      }
+      // SI-117: el asistente ya no navega solo; ofrece el destino y decide la persona.
+      if (m.navegar_a) {
+        html += '<button class="ia-ir" data-href="' + esc(m.navegar_a) +
+                '"><i class="fas fa-arrow-right"></i> Ir a la página</button>';
+      }
+      return html;
+    }
+    var out = '<div class="ia-msg ia-msg-' + (m.rol === "user" ? "user" : "bot") + '">' +
+            formatear(m.contenido) +
+            '<button class="ia-copiar" data-idx="' + idx +
+            '" aria-label="Copiar mensaje" title="Copiar"><i class="fas fa-copy"></i></button>' +
+            "</div>";
+    if (m.herramientas && m.herramientas.length) {
+      // Se muestra qué consultó. Sin esto, una respuesta correcta y una inventada se ven
+      // exactamente igual, y el usuario no tiene cómo distinguirlas.
+      out += '<div class="ia-traza"><i class="fas fa-database"></i> consultó: ' +
+              esc(m.herramientas.map(function (h) { return nombreHerramienta(h.herramienta); }).join(", ")) +
+              "</div>";
+    }
+    return out;
   }
 
   function etiquetaPerfil() {
@@ -202,16 +284,26 @@
 
   // --- envío ---------------------------------------------------------------
 
-  // SI-113: mientras carga, el campo y el botón se deshabilitan en vez de tragarse el
-  // siguiente intento en silencio.
+  // SI-113: mientras carga, el campo se deshabilita en vez de tragarse el siguiente
+  // intento en silencio. SI-065: el botón de enviar se convierte en «Detener» — no hay
+  // dos botones nuevos que la hoja de estilos no conozca, sólo cambia de función.
   function marcarCargando(cargando) {
     var i = document.getElementById("ia-input");
-    var f = document.getElementById("ia-form");
+    var btn = document.getElementById("ia-enviar");
     if (i) { i.disabled = cargando; i.setAttribute("aria-busy", String(cargando)); }
-    if (f) {
-      var btn = f.querySelector('button[type="submit"]');
-      if (btn) btn.disabled = cargando;
+    if (btn) {
+      btn.innerHTML = cargando
+        ? '<i class="fas fa-stop"></i>' : '<i class="fas fa-paper-plane"></i>';
+      btn.setAttribute("aria-label", cargando ? "Detener" : "Enviar");
+      btn.title = cargando ? "Detener" : "Enviar";
     }
+  }
+
+  // SI-065: corta la llamada que ya se está pagando. El servidor sigue sin enterarse de
+  // la cancelación a media vuelta de herramientas (eso exige tocar `app/routes/ai.py`,
+  // fuera de este archivo), pero al menos deja de esperar y de bloquear el input.
+  function detener() {
+    if (peticionActual) peticionActual.abort();
   }
 
   function enviar(texto) {
@@ -224,12 +316,16 @@
     pintar();
     guardar();
 
+    var controlador = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    peticionActual = controlador;
+
     fetch("/api/ia/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // La sesión viaja en la cookie HttpOnly: no hay token que este script pueda leer,
       // y por eso mismo no hay token que un XSS pueda robarle.
       credentials: "same-origin",
+      signal: controlador ? controlador.signal : undefined,
       body: JSON.stringify({
         mensajes: estado.mensajes
           .filter(function (m) { return m.rol === "user" || m.rol === "assistant"; })
@@ -239,6 +335,7 @@
     })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
+        peticionActual = null;
         estado.cargando = false;
         marcarCargando(false);
         if (!res.ok) {
@@ -264,10 +361,17 @@
         pintar();
         guardar();
       })
-      .catch(function () {
+      .catch(function (err) {
+        peticionActual = null;
         estado.cargando = false;
         marcarCargando(false);
-        estado.mensajes.push({ rol: "assistant", contenido: "⚠️ Error de red. Intenta de nuevo." });
+        // SI-065: cancelado a propósito, no es un error de red — no hace falta el aviso
+        // ni tiene sentido invitar a «intentar de nuevo».
+        estado.mensajes.push({
+          rol: "assistant",
+          contenido: (err && err.name === "AbortError")
+            ? "Mensaje cancelado." : "⚠️ Error de red. Intenta de nuevo."
+        });
         pintar();
       });
   }
@@ -398,9 +502,39 @@
 
   // --- montaje -------------------------------------------------------------
 
+  // SI-110: el panel no atrapaba el foco (se podía tabular fuera hacia la página de
+  // debajo) ni se cerraba con Escape, y al cerrar el foco se quedaba donde estuviera en
+  // vez de volver a la burbuja que lo abrió.
+  function elementosFocables(cont) {
+    return Array.prototype.slice.call(
+      cont.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+    ).filter(function (el) { return el.offsetParent !== null && !el.disabled; });
+  }
+
+  function alAtraparFoco(e) {
+    if (e.key !== "Tab") return;
+    var panel = document.getElementById("ia-panel");
+    var focables = elementosFocables(panel);
+    if (!focables.length) return;
+    var primero = focables[0], ultimo = focables[focables.length - 1];
+    if (e.shiftKey && document.activeElement === primero) {
+      e.preventDefault(); ultimo.focus();
+    } else if (!e.shiftKey && document.activeElement === ultimo) {
+      e.preventDefault(); primero.focus();
+    }
+  }
+
+  function alTeclaPanel(e) {
+    if (e.key === "Escape") { alternar(); return; }
+    alAtraparFoco(e);
+  }
+
   function alternar() {
     estado.abierto = !estado.abierto;
-    document.getElementById("ia-panel").classList.toggle("ia-abierto", estado.abierto);
+    var panel = document.getElementById("ia-panel");
+    panel.classList.toggle("ia-abierto", estado.abierto);
+    if (estado.abierto) panel.removeAttribute("aria-hidden");
+    else panel.setAttribute("aria-hidden", "true");
     var burbuja = document.getElementById("ia-burbuja");
     if (burbuja) {
       burbuja.setAttribute("aria-expanded", String(estado.abierto));
@@ -408,8 +542,13 @@
     }
     if (estado.abierto) {
       pintar();
+      revalidarConvId();
+      panel.addEventListener("keydown", alTeclaPanel);
       var i = document.getElementById("ia-input");
       if (i) i.focus();
+    } else {
+      panel.removeEventListener("keydown", alTeclaPanel);
+      if (burbuja) burbuja.focus();
     }
   }
 
@@ -447,7 +586,8 @@
       '<button id="ia-burbuja" title="Asistente del Archivo" aria-label="Abrir asistente" ' +
              'aria-expanded="false" aria-controls="ia-panel">' +
         '<i class="fas fa-robot"></i></button>' +
-      '<div id="ia-panel" role="dialog" aria-label="Asistente del Archivo">' +
+      '<div id="ia-panel" role="dialog" aria-modal="true" aria-hidden="true" ' +
+             'aria-label="Asistente del Archivo">' +
         '<div class="ia-cab">' +
           '<span><i class="fas fa-robot"></i> Asistente del Archivo</span>' +
           "<div>" +
@@ -467,14 +607,17 @@
           '<div class="ia-hist-cab">Conversaciones anteriores</div>' +
           '<div id="ia-hist-lista"></div>' +
         "</div>" +
-        '<div id="ia-mensajes"></div>' +
+        // SI-111: `role="log"` + `aria-live="polite"` para que un lector de pantalla
+        // anuncie sólo lo que se añade, no toda la conversación reconstruida.
+        '<div id="ia-mensajes" role="log" aria-live="polite" aria-relevant="additions"></div>' +
         '<form id="ia-form">' +
           '<button type="button" id="ia-clip" title="Adjuntar archivo" style="display:none">' +
             '<i class="fas fa-paperclip"></i></button>' +
           '<input id="ia-file" type="file" style="display:none">' +
           '<input id="ia-input" type="text" maxlength="2000" autocomplete="off" ' +
                  'placeholder="Pregunta sobre los documentos…">' +
-          '<button type="submit" aria-label="Enviar"><i class="fas fa-paper-plane"></i></button>' +
+          '<button type="submit" id="ia-enviar" aria-label="Enviar">' +
+            '<i class="fas fa-paper-plane"></i></button>' +
         "</form></div>";
     document.body.appendChild(cont);
 
@@ -492,6 +635,8 @@
 
     document.getElementById("ia-form").addEventListener("submit", function (e) {
       e.preventDefault();
+      // SI-065: mientras carga, el mismo botón ya no envía — detiene.
+      if (estado.cargando) { detener(); return; }
       var i = document.getElementById("ia-input");
       enviar(i.value);
       i.value = "";
