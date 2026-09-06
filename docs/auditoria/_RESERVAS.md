@@ -179,3 +179,4 @@ para no repetir la confusión.
 | REORG-static-fase1-css | agente-luisdavid-reorg | 2026-09-06 | terminado (ai-widget.css movido a styles/, 6 HTML actualizados, globs no recursivos de test_tokens.py y test_selectores_tema.py corregidos a **/*.css, 867+54 en verde, desplegado y verificado) | d326859 |
 | REORG-static-fase2-js | agente-luisdavid-reorg | 2026-09-06 | en curso | |
 | BUG-sidebar-scroll-admin | agente-bug-sidebar | 2026-09-06 | en curso | |
+| BUG-buscadores-no-funcionan | agente-bug-buscadores | 2026-09-06 | en curso | |
