@@ -121,10 +121,24 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
         # El proyecto se llama "Archivo Institucional Digital": cuanto del fondo
         # esta efectivamente digitalizado es la medida que da sentido al resto,
         # y hasta ahora no aparecia por ninguna parte.
+        # OA-075: normalizar a un conjunto cerrado (mayusculas/acentos
+        # distintos en datos historicos caian antes al color de reserva del
+        # front, compartiendo hue con otro tramo). El front sigue mapeando
+        # por etiqueta, pero ahora sólo puede recibir una de estas tres.
         by_soporte = db_query(f"""
-            SELECT COALESCE(NULLIF(TRIM(soporte),''), 'Físico') AS label, COUNT(*) AS value
+            SELECT CASE LOWER(unaccent(COALESCE(NULLIF(TRIM(soporte),''), 'Fisico')))
+                     WHEN 'digital' THEN 'Digital'
+                     WHEN 'digitalizado' THEN 'Digitalizado'
+                     ELSE 'Físico'
+                   END AS label,
+                   COUNT(*) AS value
             FROM public.datos_archivo WHERE deleted_at IS NULL{rango_sql}
-            GROUP BY label ORDER BY value DESC
+            GROUP BY CASE LOWER(unaccent(COALESCE(NULLIF(TRIM(soporte),''), 'Fisico')))
+                     WHEN 'digital' THEN 'Digital'
+                     WHEN 'digitalizado' THEN 'Digitalizado'
+                     ELSE 'Físico'
+                   END
+            ORDER BY value DESC
         """, rango_params, fetch="all") or []
 
         totals = db_query(f"""
@@ -139,11 +153,21 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
                    COUNT(*) FILTER (WHERE COALESCE(da.status,'aprobado')
                                           IN ('revision','draft'))        AS total_pendientes,
                    TO_CHAR(MAX(da.created_at), 'YYYY-MM-DD')             AS ultimo_ingreso,
+                   -- OA-002/OA-003: misma definicion de "vencido" que
+                   -- retention.py:get_expired_docs — respeta fecha_vencimiento
+                   -- explicita si existe, y sólo cuenta lo que esa pestaña
+                   -- tambien lista (aprobado, sin disposicion), para que el
+                   -- KPI y la tabla de Retención nunca den cifras distintas.
                    COUNT(*) FILTER (
                        WHERE da.fecha_documento IS NOT NULL
-                         AND (da.fecha_documento
-                              + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL
-                             )::DATE < CURRENT_DATE
+                         AND COALESCE(
+                               da.fecha_vencimiento,
+                               (da.fecha_documento
+                                + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL
+                               )::DATE
+                             ) < CURRENT_DATE
+                         AND COALESCE(da.status, 'aprobado') = 'aprobado'
+                         AND da.disposicion IS NULL
                    )                                                      AS total_vencidos
             FROM public.datos_archivo da
             LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
@@ -176,12 +200,15 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
             GROUP BY el.estados ORDER BY value DESC
         """, fetch="all") or []
         rango_dr_sql = " AND dr.fecha_documento BETWEEN %s AND %s" if rango_activo else ""
+        # OR-076: nombre_corto puede ser NULL (tipos creados por migracion o
+        # importacion) — sin COALESCE la barra salia con la etiqueta "null",
+        # a diferencia de la rama de Archivo que ya cubre ese caso.
         by_doc_type = db_query(f"""
-            SELECT td.nombre_corto AS label, COUNT(*) AS value
+            SELECT COALESCE(td.nombre_corto, td.nombre, 'Sin tipo') AS label, COUNT(*) AS value
             FROM public.datos_rrhh dr
             JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
             WHERE dr.deleted_at IS NULL{rango_dr_sql}
-            GROUP BY td.nombre_corto ORDER BY value DESC LIMIT 10
+            GROUP BY COALESCE(td.nombre_corto, td.nombre, 'Sin tipo') ORDER BY value DESC LIMIT 10
         """, rango_params, fetch="all") or []
 
         # Cobertura, no volumen. Contar documentos por Parte no dice si los
@@ -207,11 +234,16 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
             GROUP BY p.nombre, p.id ORDER BY p.id
         """, fetch="all") or []
 
+        # OR-020: agrupar por la misma expresion normalizada que produce la
+        # etiqueta — NULL, '' y '  ' agrupaban por separado (misma columna
+        # cruda en el GROUP BY) y la dona mostraba "Sin especificar" tres
+        # veces con tres colores distintos.
         by_nivel = db_query("""
             SELECT COALESCE(NULLIF(TRIM(nivel_educativo),''), 'Sin especificar') AS label,
                    COUNT(*) AS value
             FROM public.empleados WHERE deleted_at IS NULL
-            GROUP BY nivel_educativo ORDER BY value DESC
+            GROUP BY COALESCE(NULLIF(TRIM(nivel_educativo),''), 'Sin especificar')
+            ORDER BY value DESC
         """, fetch="all") or []
         by_sexo = db_query("""
             SELECT CASE sexo
@@ -222,7 +254,13 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
                    END AS label,
                    COUNT(*) AS value
             FROM public.empleados WHERE deleted_at IS NULL
-            GROUP BY sexo ORDER BY value DESC
+            GROUP BY CASE sexo
+                     WHEN 'M' THEN 'Masculino'
+                     WHEN 'F' THEN 'Femenino'
+                     WHEN 'O' THEN 'Otro'
+                     ELSE 'Sin especificar'
+                   END
+            ORDER BY value DESC
         """, fetch="all") or []
 
         rango_dr_totales_sql = " AND fecha_documento BETWEEN %s AND %s" if rango_activo else ""
@@ -240,7 +278,12 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
                     JOIN public.estados_laborales el ON e.estado_id = el.id
                     WHERE el.estados IN ('Jubilado','Pensionado') AND e.deleted_at IS NULL)
                        AS total_jubilados,
-                   (SELECT COUNT(*) FROM public.historial_cargos)
+                   -- OR-025: sin unir con empleados ni filtrar deleted_at, la
+                   -- cifra caia al purgar a alguien y no se movia al mandarlo
+                   -- a la papelera — no medía nada estable.
+                   (SELECT COUNT(*) FROM public.historial_cargos hc
+                    JOIN public.empleados e2 ON e2.id = hc.empleado_id
+                    WHERE e2.deleted_at IS NULL)
                        AS total_movimientos_cargo,
                    (SELECT TO_CHAR(MAX(created_at), 'YYYY-MM-DD')
                     FROM public.datos_rrhh WHERE deleted_at IS NULL)
@@ -254,10 +297,17 @@ def get_charts_data(modulo: str = "Archivo", date_start: str = "", date_end: str
                        AS total_sin_documentos,
                    -- Jubilaciones o pensiones que caen dentro de los proximos 12
                    -- meses: es el aviso que da tiempo a preparar el expediente.
+                   -- OR-024: COALESCE se queda con jubilacion e ignora la
+                   -- pension cuando ambas existen; alguien con jubilacion
+                   -- lejana y pension el mes que viene no salia en el KPI
+                   -- aunque el banner (que evalua las dos por separado) sí lo
+                   -- listara. LEAST() de las fechas no nulas, mismo criterio.
                    (SELECT COUNT(*) FROM public.empleados e
                     WHERE e.deleted_at IS NULL
-                      AND COALESCE(e.fecha_jubilacion, e.fecha_pension)
-                          BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '365 days')
+                      AND LEAST(
+                            COALESCE(e.fecha_jubilacion, e.fecha_pension),
+                            COALESCE(e.fecha_pension, e.fecha_jubilacion)
+                          ) BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '365 days')
                        AS total_jubilaciones_proximas
         """, rango_params, fetch="one")
         return {
