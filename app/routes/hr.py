@@ -1,7 +1,9 @@
 import html
 import re
+from datetime import datetime as _dt
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import HTMLResponse as _HTMLResponse
 import pandas as pd
 
 from database import db_query, log_event, split_terms
@@ -256,42 +258,62 @@ def search_hr(req: RrhhSearchRequest):
         })
 
     # ── Facetas: conteos por departamento y por estado ──────────────────────
-    facet_conds: list = []
-    facet_params: list = []
-    if req.search_term:
-        _has_l = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
-        term_f = f"%{req.search_term}%"
-        if _has_l:
-            facet_conds.append(
-                "(to_tsvector('spanish',"
-                "  coalesce(v.persona_raw,'') || ' ' || coalesce(v.cargo,'') || ' ' || coalesce(v.departamento,'')"
-                " ) @@ plainto_tsquery('spanish', %s)"
-                " OR unaccent(v.persona_raw) ILIKE unaccent(%s)"
-                " OR v.cedula ILIKE %s)"
-            )
-            facet_params.extend([req.search_term, term_f, term_f])
-        else:
-            facet_conds.append("(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)")
-            facet_params.extend([term_f, term_f])
-    if req.date_start:
-        facet_conds.append("v.fecha_ingreso >= %s"); facet_params.append(req.date_start)
-    if req.date_end:
-        facet_conds.append("v.fecha_ingreso <= %s"); facet_params.append(req.date_end)
+    # BR-031: las facetas tienen que reflejar TODOS los filtros activos (salvo
+    # la propia dimensión que cada faceta representa, que es el comportamiento
+    # estándar de facetado), no sólo el término de búsqueda y las fechas.
+    def _build_facet_clauses(exclude_estado: bool = False) -> tuple[list, list]:
+        conds: list = []
+        params: list = []
+        if req.search_term:
+            _has_l = bool(re.search(r'[A-Za-zÀ-ÿ]', req.search_term))
+            term_f = f"%{req.search_term}%"
+            if _has_l:
+                conds.append(
+                    "(to_tsvector('spanish',"
+                    "  coalesce(v.persona_raw,'') || ' ' || coalesce(v.cargo,'') || ' ' || coalesce(v.departamento,'')"
+                    " ) @@ plainto_tsquery('spanish', %s)"
+                    " OR unaccent(v.persona_raw) ILIKE unaccent(%s)"
+                    " OR v.cedula ILIKE %s)"
+                )
+                params.extend([req.search_term, term_f, term_f])
+            else:
+                conds.append("(unaccent(v.persona_raw) ILIKE unaccent(%s) OR v.cedula ILIKE %s)")
+                params.extend([term_f, term_f])
+        if req.doc_types:
+            type_clauses = ["v.tipos ILIKE %s" for _ in req.doc_types]
+            conds.append("(" + " OR ".join(type_clauses) + ")")
+            params.extend([f"%{t}%" for t in req.doc_types])
+        if not exclude_estado and req.estados:
+            conds.append("v.estado = ANY(%s)")
+            params.append(req.estados)
+        if req.people_terms:
+            people_clauses = ["unaccent(v.persona_raw) ILIKE unaccent(%s)" for _ in req.people_terms]
+            conds.append("(" + " OR ".join(people_clauses) + ")")
+            params.extend([f"%{p}%" for p in req.people_terms])
+        if req.date_start:
+            conds.append("v.fecha_ingreso >= %s"); params.append(req.date_start)
+        if req.date_end:
+            conds.append("v.fecha_ingreso <= %s"); params.append(req.date_end)
+        return conds, params
 
-    facet_where = ("WHERE " + " AND ".join(facet_conds)) if facet_conds else ""
+    dept_conds, dept_params = _build_facet_clauses()
+    dept_where = ("WHERE " + " AND ".join(dept_conds)) if dept_conds else ""
+
+    estado_conds, estado_params = _build_facet_clauses(exclude_estado=True)
+    estado_where = ("WHERE " + " AND ".join(estado_conds)) if estado_conds else ""
 
     facet_dept_rows = db_query(
         f"""SELECT COALESCE(NULLIF(v.departamento,''), 'Sin departamento') AS name, COUNT(*) AS cnt
-            FROM public.vw_rrhh_persona_index v {facet_where}
+            FROM public.vw_rrhh_persona_index v {dept_where}
             GROUP BY v.departamento ORDER BY cnt DESC LIMIT 15""",
-        facet_params or None, fetch="all"
+        dept_params or None, fetch="all"
     ) or []
 
     facet_estado_rows = db_query(
         f"""SELECT COALESCE(NULLIF(v.estado,''), 'Sin estado') AS name, COUNT(*) AS cnt
-            FROM public.vw_rrhh_persona_index v {facet_where}
+            FROM public.vw_rrhh_persona_index v {estado_where}
             GROUP BY v.estado ORDER BY cnt DESC LIMIT 10""",
-        facet_params or None, fetch="all"
+        estado_params or None, fetch="all"
     ) or []
 
     return {
@@ -404,7 +426,8 @@ def get_employee_documents(
     per_page: int = 20,
 ):
     """Documentos de un empleado con filtro y paginación."""
-    page, per_page, offset = paginate(page, per_page)
+    # BR-053: mismo tope que /buscar; antes era 100 aquí y 50 allá sin motivo.
+    page, per_page, offset = paginate(page, per_page, max_per_page=50)
     conditions = ["dr.empleado_id = %s"]
     params: list = [emp_id]
     if search:
@@ -449,9 +472,6 @@ def get_employee_documents(
 # =============================================================================
 # REPORTE HTML IMPRIMIBLE DEL EXPEDIENTE
 # =============================================================================
-
-from fastapi.responses import HTMLResponse as _HTMLResponse
-
 
 @router.get("/report/{emp_id}", response_class=_HTMLResponse, dependencies=_auth)
 def generate_hr_report(emp_id: int, usuario_sesion: str = Depends(require_session)):
@@ -534,7 +554,6 @@ def generate_hr_report(emp_id: int, usuario_sesion: str = Depends(require_sessio
             rows_html += f'<tr><td style="padding:6px 14px;border-bottom:1px solid #eee">{esc(d["tipo_nombre"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee">{fd(d["fecha_documento"])}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{esc(d["notas"] or "—")}</td><td style="padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem">{esc(d["ubicacion"] or "—")}</td></tr>'
     if not rows_html:
         rows_html = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#999">Sin documentos registrados</td></tr>'
-    from datetime import datetime as _dt
     now_str = _dt.now().strftime("%d/%m/%Y %H:%M")
     html_out = f"""<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Expediente — {nombre_completo}</title>
@@ -570,7 +589,7 @@ tr:nth-child(even) td{{background:#f9f9f9}}
 <p>Dirección de Recursos Humanos · Archivo Institucional Digital</p>
 <p style="margin-top:6px;font-size:.95rem;font-weight:600;color:#003366">EXPEDIENTE DEL PERSONAL DOCENTE Y DE INVESTIGACIÓN</p>
 </div>
-<div class="print-date">Generado: {now_str}<br>N.° Expediente: {emp_id}</div>
+<div class="print-date">Generado: {now_str} por {esc(usuario_sesion)}<br>N.° Expediente: {emp_id}</div>
 </div>
 <div class="emp-grid">
 <div class="ef"><label>Nombre Completo</label><span>{nombre_completo}</span></div>
