@@ -4844,3 +4844,100 @@ condición siempre-verdadera ya no existen en el código actual).
 
 `python -m pytest app/tests -q`: 846 passed antes y después del cambio. `pyflakes
 app/routes/hr.py`: limpio.
+
+## SI-routes-ai-py-tercer-pase (agente-si-routesai-3, 2026-09-06)
+
+Tercer pase dedicado a `app/routes/ai.py` (nunca tuvo uno propio: el fundacional fue
+D2-ia-frontend, orientado a `admin_ai.html`/`ai-widget.js`, y PASS2-ai —línea 3254 arriba—
+tocó `core/ai.py` + `app/routes/ai.py` de paso pero se centró en `ai_tools.py`). Justo antes
+de este carril, `SI-core-ai-py-tercer-pase` (commit `e4a4401`) resolvió SI-092, SI-063/IN-110
+y SI-085/IN-111 en `core/ai.py`; confirmado que `routes/ai.py` sigue siendo compatible (usa
+`ai.status()`, `ai.daily_limit()`, `ai.max_tokens()`, `ai.current_model()` sin asumir nada de
+la implementación interna).
+
+**Arreglados en este pase** (commit `eb0450b`):
+- SI-083: `_open_conversation` recortaba el título de la conversación a 160 caracteres a
+  mitad de palabra (`(titulo or "")[:160]`). Nueva `_short_title()`: corta en el último
+  espacio dentro del límite (si no queda demasiado corto) y añade elipsis, sin superar el
+  `VARCHAR(160)` real de la columna.
+- SI-121: `POST /api/ia/chat` no devolvía `gasto_hoy`/`tope_diario` en la respuesta —sólo
+  `GET /api/ia/disponible` los traía, y eso sólo se consulta al cargar la página—, así que el
+  aviso de gasto del widget nunca podía actualizarse turno a turno y el usuario descubría el
+  tope con un 429 a mitad de una pregunta. Ahora cada respuesta de `/chat` trae ambos campos.
+  **Queda pendiente el lado del cliente**: `ai-widget.js` no lee todavía estos dos campos de
+  la respuesta del chat para refrescar el aviso (sólo los usa hoy vía `/disponible` al
+  arrancar) — `[CHOCA]`, fuera de esta zona.
+
+**Verificados ya resueltos, sin cambios** (leyendo el código actual, no solo las notas
+previas):
+- SI-004 (conversación ajena): `_open_conversation` ya exige `usuario_sesion` y compara
+  contra el dueño antes de reutilizar un `conversacion_id`.
+- SI-009 (rechazar propuestas sin permiso): `reject_proposal` ya exige perfil `editor`.
+- SI-010 (bandeja de propuestas sin acotar): `proposals` ya filtra por `ctx["modulos"]` y,
+  salvo Global, por `usuario`.
+- SI-011 (`/config`, `/gastos`, `/modelos` sin exigir Global): las tres pasan por
+  `_require_global`.
+- SI-061 (turno fallido no contabilizado): `chat()` ya guarda un turno `[error] ...` con el
+  costo acumulado cuando `converse()` devuelve error con `costo`/`tokens`.
+- Los enlaces de `ai-widget.js` a `/api/ia/*` (chat, disponible, conversacion, conversaciones,
+  propuesta/.../aprobar|rechazar, adjuntar) siguen casando uno a uno con los endpoints
+  actuales de este router — ningún método renombrado ni ruta huérfana.
+
+**Intentado y revertido** — SI-047 (el asistente sólo reconoce el literal `modulo='Global'`,
+no a un usuario modelado como dos filas Archivo+RRHH, a diferencia de `auth.py`): reescribí
+`_build_context` para leer todas las filas activas del usuario (`fetch="all"`) y fusionar
+módulos igual que `_build_user_response` de `auth.py`. Rompió tres pruebas de
+`test_ia_seguridad.py` (`TestSI009Rechazar`, `TestSI011EndpointsGlobal` ×2) que mockean
+`db_query` con `fetch="one"` (devuelven un único dict, no una lista) para esta función
+específica — iterar ese dict como si fueran filas producía un `TypeError` en vez del 403
+esperado. Arreglarlo bien exige tocar esos mocks compartidos y, para que SI-047 quede
+realmente cerrado, unificar la resolución de módulos con `auth.py`/`app/routes/admin/deps.py`
+— cruza archivos, fuera de esta zona y de esta pasada. Revertido a la versión original
+(`LIMIT 1` + literal `"Global"`), documentado para quien tome ese trío de archivos junto.
+
+**Pendiente, no tocado por cruzar archivo o ser esfuerzo M/L** (todos verificados contra
+`sistema-ia-paginas.md`, no solo repetidos de listas previas):
+- SI-012/SI-013 (sin límite de tasa; el público puede agotar el tope diario) — `main.py`,
+  `app/core/ai.py`, `[CHOCA]`.
+- SI-062 (el tope de gasto se comprueba antes del turno, nunca durante las vueltas) e
+  IN-162 (misma cosa, más la ventana de carrera entre peticiones simultáneas) — el bucle de
+  vueltas vive en `core/ai.py::converse`, `[CHOCA]`; una comprobación previa más ajustada en
+  `routes/ai.py` no evita que un solo turno se pase del tope una vez admitido.
+- SI-064 (sin streaming), SI-065 (sin cancelar un mensaje en curso del lado servidor) —
+  `core/ai.py` + `ai-widget.js`, `[CHOCA]`, esfuerzo L/M.
+- SI-067 (el historial de turnos anteriores lo controla el navegador, no se reconstruye
+  desde `ia_mensajes`) — cambia el contrato de `/chat`, esfuerzo M, arriesgado sin tráfico
+  real para probarlo.
+- SI-070/SI-072/SI-073/SI-074/SI-075 (supuesto de tokens fijo, gasto sin desglose por
+  usuario, sin aviso de tope agotado en auditoría/panel, sin retención de conversaciones,
+  adjuntos huérfanos en R2) — todos M, tocan `admin_ai.html` y/o `vercel.json`/`storage.py`,
+  `[CHOCA]`.
+- SI-076/SI-077/SI-078 (adjunto alcanzable por cualquier sesión, validado solo por extensión,
+  leído dos veces en memoria) — `app/routes/files.py`, `[CHOCA]`, ya señalado por PASS2-ai.
+- SI-079 (la traza de herramientas no guarda si la llamada falló) — `core/ai.py`.
+- SI-080/SI-081/SI-082 (panel Global sin poder abrir conversaciones ajenas aunque el backend
+  ya lo permite, chat público sin moderación, sin marcar una respuesta como mala) —
+  `admin_ai.html`/`ai-widget.js`, `[CHOCA]`.
+- SI-084 (el modelo de la conversación no se actualiza si se cambia a mitad de hilo) —
+  `admin_ai.html` para mostrarlo, esfuerzo S pero cruza pantalla.
+- SI-086 a SI-092 salvo SI-092 (ya resuelto en `core/ai.py` por el carril anterior) — todos
+  `core/ai.py`/`admin_ai.html`.
+- SI-107/SI-108 (la tabla de propuestas del panel no tiene botones de aprobar/rechazar; no
+  muestra antes/después) — el backend ya expone `aprobar`/`rechazar` y podría exponer
+  `datos` en `list_proposals`, pero el trabajo real es de pantalla; documentado para quien
+  tome `admin_ai.html`.
+- SI-228/SI-232 (sin suite propia de IA) — `app/tests/`, no es esta zona; nótese que sí
+  existe ya `test_ia_seguridad.py`, que cubre buena parte de lo que SI-228 pedía (permisos,
+  saneado, tope) aunque con otro nombre de archivo.
+- IN-161 (las herramientas del asistente no comprueban módulo al consultar, dependen de
+  `core/ai_tools.py`) — `[CHOCA]`.
+- IN-201 (routes/ai.py y core/ai_tools.py sin pruebas dedicadas) — ya no aplica del todo:
+  `test_ia_seguridad.py` existe y cubre los casos de seguridad más delicados; sigue faltando
+  cobertura funcional del ciclo completo de chat/herramientas.
+
+**Verificación**: `python -m pytest app/tests -q` → 860 passed antes y después (falló primero
+con la versión de SI-047 sin revertir: 857 passed, 3 failed, confirmando el diagnóstico de
+arriba antes de revertir). `python -c "import ast; ast.parse(...)"` y `python -m pyflakes
+app/routes/ai.py`: limpio.
+
+**quién lo pide**: agente-si-routesai-3 (SI-routes-ai-py-tercer-pase)
