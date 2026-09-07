@@ -22,30 +22,30 @@ def upsert_descriptors(raw: str, doc_id: int, link_table: str, fk_col: str) -> N
     Upserts into descriptores_libres, then inserts into the link table.
     link_table: 'archivo_descriptores' or 'rrhh_descriptores'
     fk_col: 'id_archivo' or 'id_rrhh'
+
+    Batched as two round-trips total (one per statement) instead of two per
+    keyword: with fifteen keywords that was thirty trips to Neon per save,
+    doubled again on every edit since the PUT clears and re-links (OA-208).
     """
     from database import db_query
     if not raw:
         return
     keywords = [k.strip() for k in raw.replace(";", ",").split(",") if k.strip()]
-    for kw in keywords:
-        desc_row = db_query(
-            "INSERT INTO public.descriptores_libres (nombre) VALUES (%s) "
-            "ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre RETURNING id_descriptor",
-            (kw,), fetch="one", commit=True,
-        )
-        db_query(
-            f"INSERT INTO public.{link_table} ({fk_col}, id_descriptor) VALUES (%s, %s) ON CONFLICT DO NOTHING",
-            (doc_id, desc_row["id_descriptor"]), fetch="none", commit=True,
-        )
-
-
-def fetch_one_or_404(sql: str, params, msg: str = "No encontrado") -> dict:
-    """Run a fetch='one' query; raise 404 if nothing is returned."""
-    from database import db_query
-    row = db_query(sql, params, fetch="one")
-    if not row:
-        raise HTTPException(404, msg)
-    return row
+    if not keywords:
+        return
+    desc_rows = db_query(
+        "INSERT INTO public.descriptores_libres (nombre) "
+        "SELECT DISTINCT nombre FROM unnest(%s::text[]) AS nombre "
+        "ON CONFLICT (nombre) DO UPDATE SET nombre = EXCLUDED.nombre "
+        "RETURNING id_descriptor",
+        (keywords,), fetch="all", commit=True,
+    )
+    ids = [r["id_descriptor"] for r in desc_rows]
+    db_query(
+        f"INSERT INTO public.{link_table} ({fk_col}, id_descriptor) "
+        f"SELECT %s, id FROM unnest(%s::int[]) AS id ON CONFLICT DO NOTHING",
+        (doc_id, ids), fetch="none", commit=True,
+    )
 
 
 def _require_modulo(modulo: str) -> str:
