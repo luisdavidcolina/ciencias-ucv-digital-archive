@@ -89,7 +89,8 @@ def list_trash(
         rows = db_query(
             """SELECT dr.id_rrhh AS id,
                       COALESCE(td.nombre,'') AS titulo,
-                      e.nombres || ' ' || e.apellidos AS autor,
+                      COALESCE(e.nombres || ' ' || e.apellidos, '') AS autor,
+                      COALESCE(e.nombres || ' ' || e.apellidos, '') AS empleado,
                       COALESCE(td.nombre,'') AS doc_type,
                       TO_CHAR(dr.fecha_documento,'YYYY-MM-DD') AS fecha,
                       TO_CHAR(dr.deleted_at,'YYYY-MM-DD HH24:MI') AS deleted_at,
@@ -118,12 +119,12 @@ def restore_document(
     _require_modulo(modulo)
     if modulo == "Archivo":
         result = db_query(
-            "UPDATE public.datos_archivo SET deleted_at=NULL, deleted_by=NULL WHERE id_archivo=%s AND deleted_at IS NOT NULL RETURNING id_archivo",
+            "UPDATE public.datos_archivo SET deleted_at=NULL, deleted_by=NULL, deleted_reason=NULL WHERE id_archivo=%s AND deleted_at IS NOT NULL RETURNING id_archivo",
             [doc_id], fetch="one", commit=True,
         )
     else:
         result = db_query(
-            "UPDATE public.datos_rrhh SET deleted_at=NULL, deleted_by=NULL WHERE id_rrhh=%s AND deleted_at IS NOT NULL RETURNING id_rrhh",
+            "UPDATE public.datos_rrhh SET deleted_at=NULL, deleted_by=NULL, deleted_reason=NULL WHERE id_rrhh=%s AND deleted_at IS NOT NULL RETURNING id_rrhh",
             [doc_id], fetch="one", commit=True,
         )
 
@@ -229,7 +230,7 @@ def restore_employee(
     _autorizado: str = Depends(require_role("RRHH")),
 ):
     result = db_query(
-        "UPDATE public.empleados SET deleted_at=NULL, deleted_by=NULL WHERE id=%s AND deleted_at IS NOT NULL RETURNING id",
+        "UPDATE public.empleados SET deleted_at=NULL, deleted_by=NULL, deleted_reason=NULL WHERE id=%s AND deleted_at IS NOT NULL RETURNING id",
         [emp_id], fetch="one", commit=True,
     )
     if not result:
@@ -253,6 +254,21 @@ def purge_employee(
     `file_url` (actual + versiones) antes de borrar, y las tres tablas más
     `documento_versiones` van en una sola transacción (IN-164): o se borra el
     expediente entero, o no se borra nada.
+
+    OR-012 (parte de backend, mismo patrón de `deleted_at` ignorado visto en
+    `hr.py`/`admin/docs.py`/`files.py` esta ronda): el `DELETE FROM
+    datos_rrhh WHERE empleado_id=%s` borraba TODOS los documentos del
+    empleado, sin filtrar por `deleted_at` — incluidos documentos vivos que
+    nunca pasaron por la papelera. `datos_rrhh.empleado_id` tiene
+    `ON DELETE CASCADE` hacia `empleados` (`main.py:381`), así que ni
+    siquiera filtrar el `DELETE` explícito basta: borrar la fila de
+    `empleados` al final de la transacción arrastra en cascada cualquier
+    documento vivo que quedara. Sin poder tocar esa FK (`main.py`
+    **[CHOCA]**), el arreglo seguro dentro de este archivo es negarse a
+    purgar mientras el empleado tenga documentos vivos, en vez de
+    destruirlos en silencio. La lista/confirmación con cédula que pide el
+    resto de la ficha (enumerar qué se va a borrar en el modal) sigue
+    pendiente, `admin-edit.js` **[CHOCA]**.
     """
     existing = db_query(
         "SELECT id FROM public.empleados WHERE id=%s AND deleted_at IS NOT NULL",
@@ -260,6 +276,17 @@ def purge_employee(
     )
     if not existing:
         raise HTTPException(404, "Empleado no está en papelera")
+
+    vivos = db_query(
+        "SELECT COUNT(*) AS total FROM public.datos_rrhh WHERE empleado_id=%s AND deleted_at IS NULL",
+        [emp_id], fetch="one",
+    )
+    if vivos and int(vivos["total"]) > 0:
+        raise HTTPException(
+            409,
+            "El empleado tiene documentos que no están en la papelera; "
+            "envíalos a la papelera antes de purgar el expediente.",
+        )
 
     doc_rows = db_query(
         "SELECT id_rrhh, file_url FROM public.datos_rrhh WHERE empleado_id=%s",
@@ -327,6 +354,12 @@ def add_version(
     """Registra una nueva versión del archivo digital para un documento."""
     _require_modulo(modulo)
     if file_url and not _SAFE_URL_RE.match(file_url):
+        raise HTTPException(400, "file_url inválida")
+    # IN-149: la misma comprobación de recorrido de ruta que `files.py:serve_file`
+    # aplica al `key`, pero acá sólo se validaba el esquema (`/` o `http(s)://`),
+    # no el contenido. Un `file_url` como "/api/files/../../otra-cosa" pasaba el
+    # regex y quedaba guardado como versión "válida" para que el visor lo siguiera.
+    if file_url and ".." in file_url:
         raise HTTPException(400, "file_url inválida")
     tabla, pk = module_meta(modulo)
 
