@@ -46,6 +46,33 @@ def _modulo_permite_clave(usuario: str, key: str) -> bool:
     return True
 
 
+def _documento_en_papelera(key: str) -> bool:
+    """True si `key` es el `file_url` vigente de un documento en la papelera.
+
+    Mismo problema que ya resolvió `share.py` para los enlaces externos (ver
+    su docstring, IN-147): un documento enviado a la papelera sigue teniendo
+    su objeto en R2 -no se purga hasta que alguien lo purgue de verdad-, y
+    hasta ahora esta ruta no consultaba `datos_archivo`/`datos_rrhh` en
+    absoluto, así que cualquier sesión con módulo correcto podía seguir
+    descargando el archivo de un documento ya "borrado" con el enlace viejo.
+    Sólo mira el `file_url` **vigente** (no versiones históricas en
+    `documento_versiones`, que son de uso administrativo y no se listan por
+    esta ruta): si la clave no es el `file_url` actual de ningún documento
+    -versión antigua, foto de empleado, clave huérfana- no se puede decidir
+    nada aquí y se deja pasar, igual que hace `_modulo_permite_clave` con un
+    prefijo desconocido.
+    """
+    url = f"/api/files/{key}"
+    fila = db_query(
+        "SELECT 1 AS x FROM public.datos_archivo WHERE file_url = %s AND deleted_at IS NOT NULL "
+        "UNION ALL "
+        "SELECT 1 AS x FROM public.datos_rrhh WHERE file_url = %s AND deleted_at IS NOT NULL "
+        "LIMIT 1",
+        [url, url], fetch="one",
+    )
+    return fila is not None
+
+
 @router.post("/api/admin/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -120,10 +147,21 @@ def serve_file(key: str, usuario_sesion: str = Depends(require_session), u: str 
         raise HTTPException(status_code=400, detail="Clave inválida")
     if not _modulo_permite_clave(usuario_sesion, key):
         raise HTTPException(status_code=403, detail="Sin acceso a este archivo")
+    if _documento_en_papelera(key):
+        # Mismo mensaje genérico que share.py (404, no 403): no confirma si
+        # la clave existe, sólo que no se puede servir ahora mismo.
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
     try:
         url = storage.presigned_get_url(key)
     except storage.StorageNotFoundError:
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Error al recuperar archivo: {type(e).__name__}")
+    # OA-047 (parcial, sólo la mitad que vive en este archivo): registra
+    # quién descarga qué, no sólo quién sube. `log_event` inserta en segundo
+    # plano y falla en silencio, así que no añade latencia ni puede tumbar
+    # la descarga si la auditoría falla.
+    _modulo_clave = (key.split("/", 1)[0] or "").lower()
+    _modulo_log = {"archivo": "Archivo", "rrhh": "RRHH"}.get(_modulo_clave, "Sistema")
+    log_event(usuario_sesion, "Descargar Archivo", _modulo_log, f"key={key}")
     return RedirectResponse(url=url, status_code=307)
