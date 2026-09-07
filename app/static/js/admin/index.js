@@ -261,22 +261,54 @@ async function loadVencimientosTable() {
   const tbody   = document.getElementById(`vencimientos-table-body-${suf}`) || document.getElementById("vencimientos-table-body");
   const summary = document.getElementById(`vencimientos-summary-${suf}`) || document.getElementById("vencimientos-summary");
   if (!tbody) return;
-  // OR-183/OR-184: el único endpoint que existe (`/api/admin/retencion/vencimientos`)
-  // consulta `datos_archivo` y exige el rol "Archivo" — es del módulo Archivo, no
-  // genérico. El endpoint de RRHH que hubiera cubierto este panel se retiró por ser
-  // una fuga de datos entre módulos (BR-063, ver `hr_alerts.py`) y no se sustituyó.
-  // Sin esta guarda, un admin Global veía aquí documentos del Archivo institucional
-  // bajo el título "Expedientes con Retención Vencida" de RRHH — el mismo módulo
-  // equivocado que motivó retirar el endpoint original. Bloqueado en `retention.py`,
-  // fuera de esta zona.
+  // OR-183/OR-184: el tercer pase de `retention.py` (commit `34b9432`) añadió
+  // `GET /api/admin/retencion/vencimientos-rrhh`, propio del módulo RRHH
+  // (consulta `datos_rrhh` + `empleados`, `require_role("RRHH")`, sólo
+  // lectura — no hay `disposicion` para RRHH todavía, OR-188, fuera de esta
+  // ficha). Antes de que ese endpoint existiera esta rama mostraba un aviso
+  // de "no disponible" para no pintar aquí documentos de Archivo bajo el
+  // título de RRHH (la fuga que motivó BR-063). Ya no hace falta la guarda:
+  // cada módulo llama a su propio endpoint.
+  tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   if (suf === "rrhh") {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">
-      <i class="fas fa-circle-info mr-1"></i>Esta tabla todavía no tiene un origen de datos propio de RRHH — pendiente en el backend.
-    </td></tr>`;
-    if (summary) summary.textContent = "Sin datos disponibles para RRHH todavía.";
+    try {
+      const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos-rrhh?limite=100`);
+      const rows = data.vencimientos || [];
+      if (summary) summary.textContent = `${rows.length} expediente${rows.length !== 1 ? "s" : ""} con retención vencida`;
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-success py-3"><i class="fas fa-check-circle mr-1"></i>Sin vencimientos pendientes.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map((v, i) => {
+        // OA-146: mismo criterio de urgencia que la tabla de Archivo — icono +
+        // etiqueta de texto, no sólo color, para no depender del daltonismo
+        // rojo-verde.
+        const diasVencido = Number(v.dias_vencido);
+        let urgency = "", urgLabel = "", urgIcon = "";
+        if (!Number.isFinite(diasVencido)) { urgency = ""; urgLabel = "Sin datos"; urgIcon = "fa-circle-question"; }
+        else if (diasVencido > 365)        { urgency = "table-danger";  urgLabel = "Crítico"; urgIcon = "fa-triangle-exclamation"; }
+        else if (diasVencido > 90)         { urgency = "table-warning"; urgLabel = "Urgente";  urgIcon = "fa-clock"; }
+        else                                { urgLabel = "Vencido";      urgIcon = "fa-circle-exclamation"; }
+        const empleadoLine = v.empleado && v.empleado !== "—"
+          ? `<br><span class="text-muted small">${escHtml(v.empleado)}${v.cedula && v.cedula !== "—" ? ` · ${escHtml(v.cedula)}` : ""}</span>`
+          : "";
+        return `<tr class="${urgency}">
+          <td class="text-muted">${i + 1}</td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(v.titulo)}">${escHtml(v.titulo || "—")}${empleadoLine}</td>
+          <td><span class="badge badge-secondary">${escHtml(v.tipo_documento || "—")}</span></td>
+          <td>${escHtml(v.fecha_documento || "—")}</td>
+          <td>${formatAnios(v.plazo_anios)}</td>
+          <td><i class="fas ${urgIcon} mr-1" aria-hidden="true"></i><span class="sr-only">${urgLabel}: </span><strong>${formatDias(v.dias_vencido)}</strong></td>
+          <td class="text-muted small ds-hide-sm">${escHtml(v.ubicacion || "—")}</td>
+          <td class="text-muted small">—</td>
+        </tr>`;
+      }).join("");
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-danger text-center py-2"></td></tr>`;
+      tbody.querySelector("td").textContent = e.message;
+    }
     return;
   }
-  tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin mr-1"></i>Cargando...</td></tr>`;
   try {
     const data = await apiFetchJSON(`${API_BASE}/api/admin/retencion/vencimientos?limite=100`);
     const rows = data.vencimientos || [];
