@@ -13,9 +13,17 @@ Str500  = Annotated[str, Field(max_length=500)]
 Str4000 = Annotated[str, Field(max_length=4000)]
 
 def _validate_file_url(v):
-    """Rechaza javascript:, data:, y otros esquemas peligrosos."""
+    """Rechaza javascript:, data:, y otros esquemas peligrosos.
+
+    IN-149: `files.py:146` ya rechaza `".." in key` al servir un archivo, pero
+    esa misma comprobación no existía aquí — un `file_url` con recorrido de
+    ruta (`/api/files/../../otra-cosa`) pasaba esta validación con sólo
+    empezar por `/`, y quedaba guardado en el documento a la espera de que
+    algún visor lo siguiera."""
     if v and not _SAFE_URL_RE.match(v):
         raise ValueError("file_url debe comenzar con / o https://")
+    if v and ".." in v:
+        raise ValueError("file_url no puede contener '..'")
     return v or None
 
 def _validate_date(v: str | None, field_name: str = "fecha") -> str | None:
@@ -227,17 +235,20 @@ class KeywordRequest(BaseModel):
 
 
 class UserCreateRequest(BaseModel):
+    # OA-039/IN-142/SI-036: el piso real (12, y rechazo de contraseñas
+    # comunes) lo aplica `_validar_fuerza_password` en `admin/users.py` —
+    # aquí sólo el mínimo de Pydantic, pero alineado con esa política para
+    # que el 422 llegue antes que el 400 del endpoint, no en contra de él.
     usuario:  Annotated[str, Field(max_length=100)]
-    password: Annotated[str, Field(min_length=6, max_length=200)]
+    password: Annotated[str, Field(min_length=12, max_length=200)]
     modulo:   Annotated[str, Field(max_length=50)]
     rol:      Annotated[str, Field(max_length=50)]
-    creator:  Annotated[str, Field(max_length=100)]
 
     @field_validator("password")
     @classmethod
     def password_min_length(cls, v):
-        if len(v.strip()) < 6:
-            raise ValueError("La contraseña debe tener al menos 6 caracteres")
+        if len(v.strip()) < 12:
+            raise ValueError("La contraseña debe tener al menos 12 caracteres")
         return v.strip()
 
     @field_validator("usuario")
@@ -347,14 +358,15 @@ class EmpleadoUpdateRequest(BaseModel):
 
 
 class PasswordChangeRequest(BaseModel):
-    new_password: Annotated[str, Field(min_length=6, max_length=200)]
-    requester:    Annotated[str, Field(max_length=100)]
+    # OA-039/IN-142/SI-036: igual que en UserCreateRequest, alineado con el
+    # mínimo real de `admin/users.py` (12).
+    new_password: Annotated[str, Field(min_length=12, max_length=200)]
 
     @field_validator("new_password")
     @classmethod
     def password_min_length(cls, v):
-        if len(v.strip()) < 6:
-            raise ValueError("La contraseña debe tener al menos 6 caracteres")
+        if len(v.strip()) < 12:
+            raise ValueError("La contraseña debe tener al menos 12 caracteres")
         return v.strip()
 
 
