@@ -25,7 +25,7 @@ Decisiones:
 import base64
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 
 import storage
@@ -70,14 +70,21 @@ def _leer_documento(modulo: str, doc_id: int) -> dict | None:
     )
 
 
-@router.post("/api/admin/compartir", dependencies=[Depends(require_session)])
+@router.post("/api/admin/compartir")
 def crear_enlace(
     modulo: str = Query(...),
     doc_id: int = Query(...),
     horas: int = Query(default=72, ge=1, le=MAX_HORAS),
-    usuario: str = Query(default=""),
+    usuario: str = Depends(require_session),
 ):
-    """Genera un enlace de consulta con caducidad para un documento."""
+    """Genera un enlace de consulta con caducidad para un documento.
+
+    `usuario` viene de la sesión verificada (`require_session`), no de un
+    parámetro que el cliente pueda rellenar a su antojo: antes se aceptaba
+    `usuario` por query string y quedaba tal cual en auditoría (patrón
+    IN-133), así que cualquiera con sesión podía firmar la creación del
+    enlace con el nombre de otra persona.
+    """
     if modulo not in _TABLAS:
         raise HTTPException(400, "modulo debe ser 'Archivo' o 'RRHH'")
     if not _leer_documento(modulo, doc_id):
@@ -85,7 +92,7 @@ def crear_enlace(
 
     token = generate_share_token(modulo, doc_id, horas)
     jti = share_token_jti(token)
-    log_event(usuario or "sistema", "Crear Enlace Externo", modulo,
+    log_event(usuario, "Crear Enlace Externo", modulo,
               f"doc_id={doc_id}, caduca en {horas}h, jti={jti}")
     return {"token": token, "url": f"/compartido/{token}", "horas": horas, "jti": jti}
 
@@ -107,27 +114,50 @@ def listar_revocados():
     return {"revocados": filas}
 
 
-@router.post("/api/admin/compartir/revocar",
-             dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
+@router.post("/api/admin/compartir/revocar")
 def revocar_enlace(
     jti: str = Query(..., min_length=1, max_length=64),
     motivo: str = Query(default=""),
-    usuario: str = Query(default=""),
+    usuario: str = Depends(require_admin_role("Archivo", "RRHH")),
 ):
     """Apaga un enlace por su identificador único (IN-146), sin tocar los
     demás y sin rotar SECRET_KEY —que cerraría también todas las sesiones—.
-    Idempotente: revocar dos veces el mismo jti no es un error."""
+    Idempotente: revocar dos veces el mismo jti no es un error.
+
+    `usuario` sale de `require_admin_role`, no de un parámetro de query: la
+    misma corrección que `crear_enlace` (IN-133) — quien revoca queda en
+    auditoría con su nombre verificado, no con lo que el cliente decida
+    mandar.
+    """
     db_query(
         "INSERT INTO public.enlaces_revocados (jti, motivo) VALUES (%s, %s) "
         "ON CONFLICT (jti) DO NOTHING",
         [jti, motivo or None], fetch="none", commit=True,
     )
-    log_event(usuario or "sistema", "Revocar Enlace Externo", "Sistema", f"jti={jti}")
+    log_event(usuario, "Revocar Enlace Externo", "Sistema", f"jti={jti}")
     return {"revocado": True, "jti": jti}
 
 
+def _detalle_acceso(token: str, doc_id: int, request: Request | None) -> str:
+    """Detalle de auditoría para un acceso por enlace externo (SI-025).
+
+    Antes sólo llevaba `doc_id`: si un enlace filtrado se consultaba muchas
+    veces, la auditoría no podía distinguir una consulta de otra ni decir si
+    fue una persona o cuarenta. `jti` identifica el enlace en concreto (ya se
+    guarda en "Crear Enlace Externo", así que se puede cruzar); IP y agente
+    identifican quién lo usó, hasta donde la cabecera lo permita.
+    """
+    jti = share_token_jti(token) or "?"
+    ip = "?"
+    agente = "?"
+    if request is not None:
+        ip = request.client.host if request.client else "?"
+        agente = request.headers.get("user-agent", "?")
+    return f"doc_id={doc_id}, jti={jti}, ip={ip}, agente={agente}"
+
+
 @router.get("/api/compartido/{token}")
-def leer_compartido(token: str):
+def leer_compartido(token: str, request: Request = None):
     """Datos del documento detrás de un enlace. No requiere sesión."""
     datos = verify_share_token(token)
     if not datos:
@@ -138,7 +168,8 @@ def leer_compartido(token: str):
     if not doc:
         raise HTTPException(404, "El documento ya no está disponible")
 
-    log_event("enlace-externo", "Consulta por Enlace", modulo, f"doc_id={doc_id}")
+    log_event("enlace-externo", "Consulta por Enlace", modulo,
+              _detalle_acceso(token, doc_id, request))
     fila = dict(doc)
     # El file_url interno no se expone: se sirve por la ruta del propio enlace,
     # para que el token siga siendo la única llave.
@@ -147,7 +178,7 @@ def leer_compartido(token: str):
 
 
 @router.get("/api/compartido/{token}/archivo")
-def descargar_compartido(token: str):
+def descargar_compartido(token: str, request: Request = None):
     """Redirige al archivo digitalizado, si el enlace sigue vigente."""
     datos = verify_share_token(token)
     if not datos:
@@ -159,7 +190,8 @@ def descargar_compartido(token: str):
     if not file_url:
         raise HTTPException(404, "El documento no tiene archivo digitalizado")
 
-    log_event("enlace-externo", "Descarga por Enlace", modulo, f"doc_id={doc_id}")
+    log_event("enlace-externo", "Descarga por Enlace", modulo,
+              _detalle_acceso(token, doc_id, request))
 
     # `file_url` normalmente es "/api/files/<key>", una ruta que ahora exige
     # sesión (ver files.py, DG-083) — inservible para quien abre este enlace
