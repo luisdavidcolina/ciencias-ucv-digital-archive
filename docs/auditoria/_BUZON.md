@@ -5519,3 +5519,62 @@ pedía la ficha, commit `f264057` de PASS2-engineering.
 
 `python -m pytest app/tests -q`: 883/883 en verde antes de empezar y después del
 cambio (mismo número).
+
+## IN-core-cache-config-py-tercer-pase — app/core/cache.py y app/core/config.py (agente-cacheconfig-3, 2026-09-07)
+
+Tercer pase sobre los dos archivos más pequeños de `app/core/` que nunca habían
+tenido carril propio (confirmado con `git log --oneline --all -- app/core/cache.py
+app/core/config.py`: sólo `PASS2-engineering` (`f264057`) tocó `config.py`, y
+`cache.py` nunca se tocó desde `IN-core-security-database` — nota del
+orquestador del 2026-09-05 — que lo revisó pero no encontró nada que arreglar
+dentro de `security.py`/`database.py`).
+
+Revisadas todas las menciones a ambos archivos en `docs/auditoria/*.md` y en
+este buzón:
+
+- **`app/core/cache.py`** (`TTLCache`): sin hallazgo nuevo. `BA-165` (borrar
+  valor y marca de tiempo juntas en `invalidate()`) ya resuelto por
+  `OA-lookups-py-tercer-pase` (`4355060`). El único ticket que queda es
+  `IN-028` (invalidación de caché por-proceso en serverless: instancia A
+  invalida, instancia B sigue sirviendo la copia vieja) — genuinamente
+  `[CHOCA]` con `app/routes/lookups.py` y `app/main.py` (exige clave de
+  versión leída de la base o `ETag`/`ETag`+revalidación, no algo que
+  `cache.py` resuelva en solitario). No hay condición de carrera real dentro
+  de `TTLCache` en sí: `get`/`set`/`invalidate` son operaciones de diccionario
+  únicas, atómicas bajo el GIL; dos peticiones concurrentes que fallan caché
+  a la vez simplemente repiten la consulta y ambas escriben el mismo par
+  clave/valor — trabajo duplicado, no corrupción de dato.
+- **`app/core/config.py`**: revisados `IN-032`/`IN-033` (ya resueltos,
+  `settings.database_url` como fuente única — `PASS2-engineering`), `IN-136`
+  (`SECRET_KEY` con valor por defecto conocido: **confirmado que sigue
+  bloqueado de verdad**, no sólo por convención — ningún `conftest.py` fija
+  `ENVIRONMENT`/`SECRET_KEY` para los tests, así que con el default actual
+  `environment="production"` un `raise` al importar `config.py` en modo
+  "falla si no hay `SECRET_KEY` en producción" tumbaría los 883 tests en la
+  recolección misma, no sólo en producción sin la variable. Necesita
+  coordinarse con `main.py` — mover la comprobación a un evento de arranque en
+  vez de tiempo de importación, y/o que los tests fijen el entorno — antes de
+  poder implementarse; dejado `[CHOCA]` tal como estaba), `SI-219` (versión
+  escrita a mano en `config.py`/`CHANGELOG.md`/`main.py`: evaluado y
+  descartado a propósito — `CHANGELOG.md` no está en los `builds` de
+  `vercel.json` (sólo `api/index.py` y `app/static/**/*`), así que leerlo en
+  tiempo de importación de `config.py` para derivar `app_version` es un
+  riesgo de despliegue real por una ganancia cosmética; no vale la pena para
+  un fichero que `CLAUDE.md` pide tratar con cautela).
+
+**Arreglado de verdad, sin ticket propio**: `choices_cache_ttl`, `db_pool_min`
+y `db_pool_max` usaban `int(os.environ.get(...))` directo — un valor mal
+formado (typo, espacio de más) revienta el arranque con
+`ValueError: invalid literal for int() with base 10: '...'` sin decir cuál de
+las tres variables fue. Con hasta veinte instancias serverless arrancando en
+frío a la vez eso es el único rastro que llega al log. Añadido `_int_env()`
+en `config.py` que envuelve el `int()` y re-lanza nombrando la variable
+(`Variable de entorno DB_POOL_MAX='5 ' no es un entero válido`). Es el caso
+exacto que pedía el encargo: variable crítica que, mal formada, da un error
+críptico en vez de uno claro. No cambia ningún valor por defecto ni el
+comportamiento cuando las variables vienen bien formadas o ausentes.
+
+`python -m pytest app/tests -q`: 883 passed antes y después del cambio (mismo
+número). Commit pendiente de este mensaje.
+
+**quién lo pide**: agente-cacheconfig-3 (IN-core-cache-config-py-tercer-pase)
