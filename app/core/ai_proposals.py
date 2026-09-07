@@ -153,11 +153,18 @@ def approve(propuesta_id: int, usuario: str, modulos: set) -> dict:
             detalle = _palabras_clave(p, datos)
         else:
             raise PropuestaError(f"Acción desconocida: {accion}.")
-    except PropuestaError:
-        # No se pudo ejecutar (p.ej. el documento se borró entre proponer y
-        # aprobar, SI-023): se devuelve a 'pendiente' para que quede visible y se
-        # pueda rechazar o reintentar, en vez de quedar "aprobada" sin haber
-        # tocado nada.
+    except Exception:
+        # No se pudo ejecutar -- ya fuera un PropuestaError esperado (p.ej. el
+        # documento se borró entre proponer y aprobar, SI-023) o cualquier otro
+        # fallo (un corte de conexión a mitad del UPDATE/INSERT, un dato con una
+        # forma que no se previó): se devuelve a 'pendiente' para que quede
+        # visible y se pueda rechazar o reintentar. Antes esto sólo capturaba
+        # PropuestaError, así que un fallo de otro tipo dejaba la fila marcada
+        # 'aprobada' -- con resuelto_por y resuelto_at ya escritos -- sin que el
+        # cambio se hubiera aplicado de verdad: el registro de auditoría habría
+        # dicho que alguien aprobó e hizo un cambio que en realidad no ocurrió,
+        # y la propuesta quedaba fuera de alcance para reintentarla o
+        # rechazarla.
         db_query("""
             UPDATE public.ia_propuestas
                SET estado = 'pendiente', resuelto_por = NULL, resuelto_at = NULL
