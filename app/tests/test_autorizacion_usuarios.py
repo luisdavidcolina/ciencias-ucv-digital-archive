@@ -66,7 +66,7 @@ class TestCrearUsuario:
     """`POST /api/admin/users/create`."""
 
     _payload = {
-        "usuario": "nuevo", "password": "clave123",
+        "usuario": "nuevo", "password": "clave123segura",
         "modulo": "RRHH", "rol": "Normal", "creator": "quien_sea",
     }
 

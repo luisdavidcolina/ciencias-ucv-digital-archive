@@ -7,6 +7,12 @@ de RRHH no debe poder resetear la clave del admin Global y heredar así el
 control del sistema entero (backup, Archivo, todo). `require_admin_role`
 (IN-131/IN-132, `routes/admin/deps.py`) lo exige de verdad para todo el
 router, no sólo en el docstring.
+
+OA-039/IN-142/SI-036: la longitud mínima real vive aquí, no en `models.py`
+(`UserCreateRequest.password`/`PasswordChangeRequest.new_password` sólo
+exigen 6 como piso de Pydantic — subirlo ahí es zona de otro carril, `[CHOCA]`).
+Este módulo aplica el mínimo real de 12 y rechaza contraseñas de la lista de
+las más comunes antes de guardar nada.
 """
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -17,6 +23,41 @@ from routes.admin.deps import require_session, require_admin_role
 router = APIRouter(
     dependencies=[Depends(require_session), Depends(require_admin_role("Global"))]
 )
+
+# OA-039/IN-142/SI-036: mínimo real de contraseña. `models.py` sólo garantiza
+# 6 como piso de Pydantic (zona ajena); el mínimo de la política vive aquí.
+_PASSWORD_MIN_LENGTH = 12
+
+# Subconjunto de las contraseñas más filtradas/comunes (listas tipo
+# RockYou/NCSC), en minúsculas, para comparar sin distinguir mayúsculas.
+# No pretende ser exhaustiva: es la primera barrera contra lo obvio, no un
+# verificador contra una brecha completa.
+_COMMON_PASSWORDS = {
+    "123456", "123456789", "12345678", "12345", "1234567890", "1234567",
+    "password", "password1", "password123", "qwerty", "qwerty123",
+    "111111", "123123", "abc123", "letmein", "welcome", "admin", "admin123",
+    "iloveyou", "monkey", "dragon", "football", "baseball", "master",
+    "contraseña", "contrasena", "contrasena123", "12345678910",
+    "administrador", "usuario123", "cambiar123", "ciencias123", "ucv12345",
+}
+
+
+def _validar_fuerza_password(plain: str) -> None:
+    """Valida longitud mínima y rechazo de contraseñas comunes (OA-039/IN-142).
+
+    Lanza 400 con el detalle si no cumple. Nunca loguea el valor recibido.
+    """
+    valor = plain.strip()
+    if len(valor) < _PASSWORD_MIN_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La contraseña debe tener al menos {_PASSWORD_MIN_LENGTH} caracteres",
+        )
+    if valor.lower() in _COMMON_PASSWORDS:
+        raise HTTPException(
+            status_code=400,
+            detail="Esa contraseña está entre las más comunes y no se puede usar",
+        )
 
 
 @router.get("/users")
@@ -51,7 +92,7 @@ def get_users_list(modulo: str = ""):
 
 
 @router.post("/users/create")
-def create_user(req: UserCreateRequest):
+def create_user(req: UserCreateRequest, actor: str = Depends(require_session)):
     existing = db_query(
         "SELECT id FROM public.usuarios_sistema WHERE TRIM(usuario) = %s",
         (req.usuario.strip(),),
@@ -60,6 +101,7 @@ def create_user(req: UserCreateRequest):
     if existing:
         raise HTTPException(status_code=400, detail="Usuario ya existe")
 
+    _validar_fuerza_password(req.password)
     hashed_pw = hash_password(req.password.strip())
     db_query(
         """
@@ -70,25 +112,30 @@ def create_user(req: UserCreateRequest):
         fetch="none",
         commit=True,
     )
-    log_event(req.creator, "Create User", req.modulo, f"Nuevo: {req.usuario} ({req.rol})")
+    # IN-133: el actor sale de la sesión verificada (`require_session`), no del
+    # campo `creator` que manda el cliente en el cuerpo — ese campo ya no se usa
+    # para la auditoría, aunque el modelo (`models.py`, zona ajena) lo siga
+    # exigiendo por compatibilidad.
+    log_event(actor, "Create User", req.modulo, f"Nuevo: {req.usuario} ({req.rol})")
     return {"success": True}
 
 
 @router.put("/users/{uid}/password")
-def change_password(uid: int, req: PasswordChangeRequest):
-    if len(req.new_password.strip()) < 6:
-        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+def change_password(uid: int, req: PasswordChangeRequest, actor: str = Depends(require_session)):
+    _validar_fuerza_password(req.new_password)
     hashed_pw = hash_password(req.new_password.strip())
     db_query(
         "UPDATE public.usuarios_sistema SET contrasena = %s WHERE id = %s",
         (hashed_pw, uid), fetch="none", commit=True,
     )
-    log_event(req.requester, "Change Password", "Admin", f"Usuario ID: {uid}")
+    # IN-133: igual que en create_user, el actor real es el de la sesión, no
+    # `req.requester` (declarado por el cliente).
+    log_event(actor, "Change Password", "Admin", f"Usuario ID: {uid}")
     return {"success": True}
 
 
 @router.patch("/users/{uid}/active")
-def toggle_user_active(uid: int, requester: str = ""):
+def toggle_user_active(uid: int, actor: str = Depends(require_session)):
     row = db_query("SELECT is_active FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="one")
     if not row:
         raise HTTPException(404, "Usuario no encontrado")
@@ -97,16 +144,19 @@ def toggle_user_active(uid: int, requester: str = ""):
         "UPDATE public.usuarios_sistema SET is_active = %s WHERE id = %s",
         (new_state, uid), fetch="none", commit=True,
     )
-    log_event(requester, "Toggle User Active", "Admin", f"uid={uid} → is_active={new_state}")
+    # IN-133: antes venía por query string (`requester=""`, sin validar); ahora
+    # es el usuario autenticado de la sesión.
+    log_event(actor, "Toggle User Active", "Admin", f"uid={uid} → is_active={new_state}")
     return {"success": True, "is_active": new_state}
 
 
 @router.delete("/users/{uid}")
-def delete_user(uid: int, requester: str = ""):
+def delete_user(uid: int, actor: str = Depends(require_session)):
     row = db_query("SELECT usuario FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="one")
     if not row:
         raise HTTPException(404, "Usuario no encontrado")
     username = row["usuario"]
     db_query("DELETE FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="none", commit=True)
-    log_event(requester, "Delete User", "Admin", f"Eliminado: {username}")
+    # IN-133: igual, actor de la sesión en vez del query param `requester`.
+    log_event(actor, "Delete User", "Admin", f"Eliminado: {username}")
     return {"success": True}
