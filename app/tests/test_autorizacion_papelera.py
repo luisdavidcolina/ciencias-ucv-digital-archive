@@ -124,13 +124,29 @@ class TestPurgarEmpleado:
         fila = _fila(modulo="RRHH", rol="Admin", is_active=True)
         # OA-007: purge_employee lee al empleado, luego sus documentos (para
         # poder borrar también versiones y objetos de R2) antes de la
-        # transacción -- side_effect refleja esa secuencia real de dos
-        # lecturas, no una sola.
+        # transacción -- side_effect refleja esa secuencia real de lecturas.
+        # OR-012: entre medias, ahora cuenta documentos vivos (no en
+        # papelera) del empleado y rechaza la purga si hay alguno.
         existing = _fila(id=1)
+        vivos = _fila(total=0)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.trash.db_query", side_effect=[existing, []]), \
+             patch("routes.trash.db_query", side_effect=[existing, vivos, []]), \
              patch("routes.trash.db_transaction") as mock_tx, \
              patch("routes.trash.log_event"):
             mock_tx.return_value.__enter__.return_value = MagicMock()
             res = c.delete("/api/admin/papelera/empleados/1/purgar?usuario=rrhh_admin")
         assert res.status_code == 200
+
+    def test_no_purga_si_el_empleado_tiene_documentos_vivos(self, client_as):
+        """OR-012: `datos_rrhh.empleado_id` tiene `ON DELETE CASCADE` hacia
+        `empleados` -- si se dejara purgar con documentos vivos, borrar la
+        fila de `empleados` al final de la transacción los arrastraría en
+        cascada aunque nunca pasaron por la papelera."""
+        c = client_as("rrhh_admin")
+        fila = _fila(modulo="RRHH", rol="Admin", is_active=True)
+        existing = _fila(id=1)
+        vivos = _fila(total=3)
+        with patch("routes.admin.deps.db_query", return_value=fila), \
+             patch("routes.trash.db_query", side_effect=[existing, vivos]):
+            res = c.delete("/api/admin/papelera/empleados/1/purgar?usuario=rrhh_admin")
+        assert res.status_code == 409
