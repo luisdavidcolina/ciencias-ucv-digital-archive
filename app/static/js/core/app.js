@@ -452,7 +452,7 @@ function setupEventListeners() {
 }
 
 // ==========================================================================
-// HELPER CENTRAL DE FETCH — maneja 401/403/red uniformemente
+// HELPER CENTRAL DE FETCH — maneja 401 (logout), 403 (aviso) y red
 // ==========================================================================
 
 /** Escapa caracteres HTML especiales para uso seguro en innerHTML. */
@@ -468,7 +468,9 @@ function escHtml(str) {
 /**
  * Fetch con manejo automático de errores de sesión y red.
  * Opts es igual a los init de fetch(); retorna la Response o lanza Error.
- * En 401/403 muestra toast y redirige al login.
+ * En 401 (sesión caducada) muestra toast y redirige al login.
+ * En 403 (acción prohibida para el rol, con sesión válida) muestra un aviso
+ * y deja la sesión intacta; el llamador recibe el error para manejarlo.
  */
 async function apiFetch(url, opts = {}) {
   let res;
@@ -477,10 +479,14 @@ async function apiFetch(url, opts = {}) {
   } catch {
     throw new Error("Sin conexión con el servidor.");
   }
-  if (res.status === 401 || res.status === 403) {
+  if (res.status === 401) {
     showToast("Sesión expirada. Redirigiendo al inicio de sesión…", "warning");
     setTimeout(() => { logout(); }, 1800);
     throw new Error("Sesión no autorizada.");
+  }
+  if (res.status === 403) {
+    showToast("No tienes permiso para esta acción.", "warning");
+    throw new Error("No tienes permiso para esta acción.");
   }
   return res;
 }
