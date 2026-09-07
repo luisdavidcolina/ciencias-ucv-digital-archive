@@ -245,7 +245,20 @@ def get_choices(
         all_choices = _build_choices()
         _cache.set(_CACHE_KEY, all_choices)
 
-    result: dict = {"catalogo": all_choices["catalogo"]}
+    allowed_slugs: set = set()
+    if (not scope or scope == "archivo") and "Archivo" in modules:
+        allowed_slugs.add("archivo")
+    if (not scope or scope == "rrhh") and "RRHH" in modules:
+        allowed_slugs.update({"parte-i", "parte-ii", "parte-iii", "parte-iv"})
+
+    result: dict = {
+        "catalogo": {
+            "retencion": [
+                r for r in all_choices["catalogo"]["retencion"]
+                if r.get("cat_slug") in allowed_slugs
+            ]
+        }
+    }
     if (not scope or scope == "archivo") and "Archivo" in modules:
         result["archivo"] = all_choices["archivo"]
     if (not scope or scope == "rrhh") and "RRHH" in modules:
