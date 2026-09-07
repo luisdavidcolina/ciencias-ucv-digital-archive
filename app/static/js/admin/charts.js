@@ -17,6 +17,20 @@ function _destroyChart(id) {
   }
 }
 
+// VI-hallazgo#3 (recorrido-visual-2): _destroyChart(id) sólo limpia la
+// instancia que nuestro propio mapa recuerda bajo esa clave. Si por lo que
+// sea el canvas ya tiene una instancia de Chart.js viva que no coincide con
+// esa clave (p.ej. una recarga que perdió la referencia), `new Chart(ctx,…)`
+// truena con "Canvas is already in use". Chart.getChart(canvas) es la API
+// nativa que pregunta al propio Chart.js "¿qué hay aquí de verdad", así que
+// se llama justo antes de cada `new Chart(...)` como red de seguridad
+// adicional a _destroyChart(id).
+function _destroyAnyChartOn(canvas) {
+  if (!canvas) return;
+  const existente = Chart.getChart(canvas);
+  if (existente) existente.destroy();
+}
+
 function _catOptions(extra = {}) {
   return Object.assign({
     responsive: true,
@@ -294,6 +308,7 @@ function _renderArchivoCharts(data, suf) {
         `Documentos por tipo: ${byTypeCap.map(r => `${r.label} ${r.value}`).join(", ")}`);
     }
     const ctx = elByType?.getContext("2d");
+    _destroyAnyChartOn(elByType);
     if (ctx) _chartInstances[`by-type-${suf}`] = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -316,7 +331,7 @@ function _renderArchivoCharts(data, suf) {
             font: { size: 11 }, boxWidth: 10, padding: 8,
             generateLabels(chart) {
               const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-              items.forEach(it => { if (it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
+              items.forEach(it => { if (it.text && it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
               return items;
             }
           }
@@ -337,6 +352,7 @@ function _renderArchivoCharts(data, suf) {
         `Documentos por año: ${byYear.map(r => `${r.label} ${r.value}`).join(", ")}`);
     }
     const ctx = elByYear?.getContext("2d");
+    _destroyAnyChartOn(elByYear);
     if (ctx) _chartInstances[`by-year-${suf}`] = new Chart(ctx, {
       type: "bar",
       data: {
@@ -365,6 +381,7 @@ function _renderArchivoCharts(data, suf) {
         : `Tendencia mensual: ${byMonth.map(r => `${r.label} ${r.value}`).join(", ")}`);
     }
     const ctx = elByMonth?.getContext("2d");
+    _destroyAnyChartOn(elByMonth);
     if (ctx) _chartInstances[`by-month-${suf}`] = new Chart(ctx, {
       type: "line",
       data: {
@@ -475,6 +492,7 @@ function _renderRrhhCharts(data, suf) {
         cobertura.map(r => `${r.label} ${total ? Math.round((r.value/total)*100) : 0}%`).join(", "));
     }
     const ctx = elCobertura?.getContext("2d");
+    _destroyAnyChartOn(elCobertura);
     if (ctx) _chartInstances[`cobertura-${suf}`] = new Chart(ctx, {
       type: "bar",
       data: {
@@ -523,6 +541,7 @@ function _renderRrhhCharts(data, suf) {
     }
     const ctx = elD?.getContext("2d");
     if (!ctx) return;
+    _destroyAnyChartOn(elD);
     _chartInstances[key] = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -540,7 +559,7 @@ function _renderRrhhCharts(data, suf) {
             font: { size: 11 }, boxWidth: 10, padding: 8,
             generateLabels(chart) {
               const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-              items.forEach(it => { if (it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
+              items.forEach(it => { if (it.text && it.text.length > 22) it.text = it.text.slice(0, 21) + "…"; });
               return items;
             }
           }
@@ -562,6 +581,7 @@ function _renderRrhhCharts(data, suf) {
     }
     const ctx = elB?.getContext("2d");
     if (!ctx) return;
+    _destroyAnyChartOn(elB);
     _chartInstances[key] = new Chart(ctx, {
       type: "bar",
       data: {
@@ -595,6 +615,7 @@ function _renderRrhhCharts(data, suf) {
         `Documentos por tipo: ${byDocType.map(r => `${r.label} ${r.value}`).join(", ")}`);
     }
     const ctx = elDocType?.getContext("2d");
+    _destroyAnyChartOn(elDocType);
     if (ctx) _chartInstances[`by-doctype-${suf}`] = new Chart(ctx, {
       type: "bar",
       data: {
