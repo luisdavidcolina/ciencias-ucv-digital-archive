@@ -5404,3 +5404,118 @@ Sin cambios de código este pase — nada seguro que hacer en solitario en
 "terminado (sin cambios: todo lo pendiente bloqueado por archivo ajeno o formato de
 token, ver detalle aquí)" con el sha de la reserva, `2a65017`, porque no hay commit
 propio que registrar.
+
+## OA-storage-py-tercer-pase — primer carril dedicado a `app/storage.py` (agente-storagepy-3, 2026-09-07)
+
+Primer carril dedicado a `app/storage.py` (subida, URLs prefirmadas y borrado en
+Cloudflare R2). Revisé todas las menciones a `storage.py` en `ingenieria.md`,
+`requisitos-vs-implementado.md`, `backoffice-archivo.md`, `digitalizacion-escaner.md`,
+`PLAN-PARALELO.md`, `README.md` y `_BUZON.md`, más `git log --oneline --all --
+app/storage.py` (tocado antes en `c54c29c` fix de credenciales e `f264057`
+PASS2-engineering). Encargo explícito: revisar si el mismo patrón de bug que hoy
+aparecía repetido en `files.py`/`trash.py` (bypass de papelera, huérfanos, path
+traversal) también estaba aquí.
+
+**Arreglado de verdad (commit `7e541fc`)**:
+
+- `IN-126` — el cliente boto3 se creaba sin `retries`/timeouts explícitos (heredaba
+  los valores por defecto de botocore, que pueden reintentar más allá del
+  presupuesto del lambda) y `_client_lock` estaba declarado desde hace pases y
+  **nunca usado** — dos peticiones concurrentes en el mismo runtime de Vercel
+  podían construir dos `boto3.client` en paralelo y pisarse la variable global sin
+  ninguna protección. Ahora `Config(retries={'max_attempts': 2, 'mode':
+  'standard'}, connect_timeout=3, read_timeout=10)` y double-checked locking real
+  sobre `_client_lock`.
+- `IN-151` — `build_object_key` metía el nombre original saneado del archivo en la
+  clave (`rrhh/2025/a1b2c3d4-partida-nacimiento-maria-perez.pdf`), visible en cada
+  `file_url` de la API, en los logs de acceso y en el historial del navegador al
+  firmar la URL. Ahora la clave es `<modulo>/<año>/<uuid32>.<ext>` — UUID completo
+  sin nombre, sólo la extensión (necesaria para IN-148). El nombre para mostrar al
+  usuario tiene que salir de una columna de metadatos en base de datos, no de la
+  clave — fuera de esta zona, documentado abajo como bloqueado.
+- `IN-148` (parcial, la mitad que vive en `storage.py`) — `upload_fileobj` fijaba
+  en R2 el `Content-Type` que declarara el cliente (`file.content_type`,
+  falsificable: un `informe.pdf` subido como `text/html` se servía como HTML
+  ejecutable desde el dominio de R2 — XSS almacenado). Ahora, para las claves cuya
+  extensión está en `ALLOWED_EXTENSIONS`, el tipo lo decide un mapeo fijo en el
+  servidor; para el resto (adjuntos de IA, copias de backup en `.json`) se respeta
+  el `content_type` que pase el llamador, sin romper `ai.py`/`backup.py`.
+- `DG-080` (parcial) — añadida `.jp2` a `ALLOWED_EXTENSIONS` (formato de máster de
+  preservación habitual en digitalización, antes rechazado con 400 sin motivo
+  técnico). No cierra el ticket entero: distinguir máster de copia de consulta y
+  validar por contenido exige tocar `files.py`/`main.py`, fuera de zona.
+
+**El patrón de bug de archivos de hoy (papelera/huérfanos/path traversal),
+verificado que NO se repite en `storage.py`**:
+
+- Borrado huérfano/silencioso: `delete_object()` no atrapa errores — si R2 falla,
+  el `ClientError` de boto3 sube tal cual. El único llamador dentro del repo,
+  `trash.py:_delete_r2_objects` (línea 43), ya envuelve cada llamada en
+  `try/except Exception: pass` y registra qué claves sí se borraron (comentario
+  citando `OA-006`: "el purgado es irreversible, mejor seguir con el resto que
+  dejar el registro a medias por un fallo de almacenamiento que ya no se puede
+  deshacer") — decisión correcta y ya tomada, no algo que arreglar en
+  `storage.py`.
+- Bypass de papelera en la clave: `serve_file` (`files.py:239`) ya comprueba
+  `".." in key` y `key.startswith("/")` antes de firmar, y `_documento_en_papelera`
+  se consulta antes de generar la URL — no hay equivalente de "descarga salta la
+  papelera" en `storage.py`, que no sabe nada de la tabla de papelera (correcto,
+  es responsabilidad de `files.py`).
+- Path traversal en la propia subida: revisado — `build_object_key` siempre
+  construye la clave a partir de `sanitize_filename()` (transliteración ASCII,
+  regex `[^A-Za-z0-9_-]+` para el nombre y `[^A-Za-z0-9]` para la extensión, sin
+  `/` ni `..` posibles) más un prefijo de módulo y año generados por el propio
+  servidor — un nombre de archivo malicioso del cliente no puede escapar del
+  prefijo esperado. Con el cambio de `IN-151` esto es aún más estricto: el nombre
+  del cliente ya ni siquiera llega a la clave, sólo su extensión filtrada.
+
+**Confirmado ya resuelto de un pase anterior, sin cambio**: `IN-106` (import
+perezoso de `boto3` dentro de `_get_client()`) — coincide exactamente con lo que
+pedía la ficha, commit `f264057` de PASS2-engineering.
+
+**Bloqueados por archivo ajeno `[CHOCA]`, documentados sin tocar**:
+
+- `IN-117`/`IN-118` (doble viaje a R2 en `presigned_get_url`, falta
+  `Content-Disposition` para recuperar el nombre original y acortar la caducidad
+  de 1h) — cambiar el contrato de `presigned_get_url`/`serve_file` a la vez;
+  `files.py` **[CHOCA]**.
+- `IN-119`/`DG-081`/`DG-096` (subida por partes directa a R2 sin pasar por la
+  función serverless) — L, `files.py` **[CHOCA]** + `app/static/admin-submit.js` +
+  `capture.py` nuevo. Subir sólo `MAX_FILE_SIZE` en `storage.py` sin arreglar que
+  `files.py` lee el archivo entero en memoria antes de comparar el tamaño
+  (`contents = await file.read()`) habría empeorado el problema, no lo hice.
+- `IN-124`/`IN-125` (coste de egreso sin tope/medida, sin reglas de ciclo de vida
+  para los backups) — configuración de infraestructura de R2 + `files.py`/
+  `README.md`, no es código de `storage.py`.
+- `IN-149` (falta la misma comprobación de `..`/`/` inicial que tiene `serve_file`
+  en `trash.py:add_version` y en `models.py:file_url`) — ya cerrado del lado de
+  `models.py` por `OA-models-py-tercer-pase` (`_validate_file_url` ahora rechaza
+  `..`); la mitad de `trash.py` sigue bloqueada, `trash.py` **[CHOCA]**.
+- `IN-159`/`IN-160`/`IN-163` (cifrado de datos personales, bucket separado para
+  backups, cabeceras de seguridad al servir) — L, migración en `main.py` y/o
+  `backup.py`/`files.py` **[CHOCA]** a la vez.
+- `IN-171` (reintento explícito distinguiendo "no configurado"/"no
+  encontrado"/"no disponible") — la mitad de configuración de reintentos ya
+  resuelta por `IN-126` en este pase; distinguir los tres estados en la respuesta
+  HTTP vive en `files.py` **[CHOCA]**.
+- `IN-190` (`/api/health` no comprueba R2) — la comprobación en sí sería trivial
+  desde `storage.py` (`head_bucket` o similar), pero la ruta y el formato de
+  respuesta son de `main.py` **[CHOCA]**.
+- `DG-104`/`DG-141` (OCR, PDF/A) — L, archivos nuevos fuera de `storage.py`.
+- `DG-120` (máster de preservación separado de copia de consulta) — L, migración
+  en `main.py` **[CHOCA]** + `files.py` **[CHOCA]**.
+- `DG-140`/`DG-144` (control de duplicados, identificación de formato por
+  contenido) — necesitan checksum (`DG-142`) primero.
+- `DG-142` (SHA-256 en la subida) — calcular el hash en `storage.py` es trivial,
+  pero sin columna en `schema.sql`/migración en `main.py` **[CHOCA]** para
+  guardarlo, y sin que `files.py` **[CHOCA]** lo pase al crear el registro, no hay
+  dónde persistirlo; no añadí una función que nadie puede llamar todavía.
+- `DG-148` (paquete de información de archivo, estructura tipo BagIt) — L,
+  rediseño de `scanner-app/process/` nuevo.
+- `DG-152`/`DG-153` — `DG-153` (papelera no borra el objeto de R2) ya está
+  resuelto: `trash.py:_delete_r2_objects` (ver arriba) sí borra. `DG-152`
+  (retención debe alcanzar a los ficheros) sigue pendiente, vive en
+  `admin/retention.py` **[CHOCA]**.
+
+`python -m pytest app/tests -q`: 883/883 en verde antes de empezar y después del
+cambio (mismo número).
