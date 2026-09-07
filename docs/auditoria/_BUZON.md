@@ -5324,3 +5324,83 @@ consultas de propósito distinto (existencia para create, no resolve-or-create).
 
 **`python -m pytest app/tests -q`**: 883/883 en verde antes de empezar y
 después del cambio (mismo número).
+
+## SI-core-security-py-tercer-pase — tercer pase de `app/core/security.py` (agente-coresecpy-3, 2026-09-07)
+
+Tercer pase dedicado a `app/core/security.py` (base de sesión y tokens de compartición).
+Zona exclusiva: sólo ese archivo. `python -m pytest app/tests -q` → **883 passed** en
+primer plano antes de tocar nada (no hice ningún cambio, así que no hizo falta repetirlo
+después).
+
+Revisé contra el código actual **todos** los tickets que citan `core/security.py` en
+`ingenieria.md`, `requisitos-vs-implementado.md`, `backoffice-archivo.md` y `_BUZON.md`
+(búsqueda por `security\.py` en los cuatro), más `git log --oneline --all -- app/core/security.py`
+para ver qué ya se tocó hoy.
+
+**Ya resueltos por pases anteriores, verificado contra el código, sin cambio mío**:
+- `IN-145`/`IN-146` (clave derivada por propósito con `_derive_key`, revocación de
+  enlaces compartidos vía `jti` + tabla `enlaces_revocados`) — commit `9dc3300`, hoy
+  mismo. Código actual coincide exactamente con lo que pedía la ficha.
+- `IN-056` (`hash_password`/`verify_password` duplicadas en `database.py`) — commit
+  `11cc812`: `database.py` ahora reexporta desde `core/security.py`.
+- `IN-144` (username con `:` rompería `rsplit`) — ya investigado y descartado por el
+  orquestador (nota de arriba, 2026-09-05): `rsplit(":", 2)` separa desde la derecha,
+  el caso no reproduce. Repetí la prueba (`'a:b:1234567890:sig'.rsplit(':', 2)` →
+  `('a:b', '1234567890', 'sig')`) para confirmar antes de darlo por cerrado. Sigue sin
+  reproducir.
+- Logout no registraba en auditoría (mitad de `RQ-006`/`RF-003`) — cerrado hoy en
+  `auth.py` (`log_event` en `/logout`, ver commit del pase de `auth.py` de hoy). Esa
+  mitad no tocaba `security.py`.
+
+**No hay nada seguro que arreglar en `security.py` en solitario esta pasada.** Cada
+ticket vivo que queda relacionado con este archivo exige uno de dos riesgos que el
+encargo pide evitar explícitamente — cambiar el **formato del token** (que puede
+invalidar sesiones ya emitidas si `auth.py`/`admin/deps.py` no se coordinan en el
+mismo cambio) o tocar un **archivo fuera de mi zona** (migración en `main.py`/
+`schema.sql`, o lógica compartida en `auth.py`/`deps.py`). Confirmo, con el código
+delante, el bloqueo que ya habían anotado los pases de hoy de `auth.py` y `users.py`:
+
+- `SI-042` (caducidad absoluta de sesión, no sólo deslizante): el token de sesión
+  hoy sólo lleva `username:ts:sig`, con `ts` = momento de la última emisión. Un
+  chequeo de caducidad *absoluta* real necesitaría el momento del **primer** login,
+  y `auth.py` reemite un token nuevo (con `ts` fresco) en cada `/api/auth/restore` —
+  así que la única forma de tener un límite absoluto sin cambiar el formato del
+  token sería que `auth.py` dejara de reemitir, o que el payload llevara un segundo
+  campo (`login_ts`). Ambas opciones tocan `auth.py` o cambian el formato: bloqueado,
+  no lo hago a medias.
+- `SI-040`/`SI-056`/`IN-143` (revocar sesión por `token_version`, para invalidar al
+  cambiar contraseña o desactivar cuenta): exige añadir un campo al payload firmado
+  y una columna en `usuarios_sistema` (migración en `main.py`/`schema.sql`), más el
+  chequeo en `admin/deps.py`. Fuera de zona por diseño — el propio encargo lo cita
+  como ejemplo de "no cambiar el formato de un token sin verificar exhaustivamente
+  compatibilidad".
+- `IN-039` (usuario desactivado conserva sesión 12h): la comprobación tendría que
+  vivir en `require_session`/`deps.py` (consulta a `usuarios_sistema` o caché 60s),
+  no en `security.py`, que es deliberadamente stateless. Nada que tocar aquí solo.
+- `SI-047` (unificar resolución de "Global" entre `auth.py`/`deps.py`/`ai.py`): esos
+  tres archivos resuelven módulos de sesión, ninguno es `security.py`; no hay
+  función de este archivo que unificar.
+- `IN-155` (modelo de amenaza CSRF): decisión de diseño que toca `deps.py`/`main.py`
+  a la vez (SameSite, verificación de origen); no es un fix aislado de `security.py`.
+- `OA-039`/`IN-142` (caducidad de contraseña, cambio obligatorio en primer acceso):
+  ya cerrado en parte por `users.py` (mínimo de 12 caracteres, lista de comunes,
+  commit `05ad041`); el resto (columna `password_changed_at`/`debe_cambiar_password`
+  y su lectura en el login) exige migración de `main.py`/`schema.sql` y lógica en
+  `auth.py`. `security.py` no tiene hoy ninguna función de política de contraseñas
+  que le corresponda arreglar sola.
+- `RF-003`/`RQ-006` (mitad que falta: el token robado sigue sirviendo hasta caducar,
+  no hay invalidación real en logout) — es la misma necesidad que `SI-040`/`IN-143`
+  (lista de revocación o `token_version`); mismo bloqueo.
+- `SI-039` (2FA): decisión de producto, esfuerzo L, no bug puntual — no lo abordo sin
+  especificación.
+
+No encontré bugs nuevos sin ficha propia en `security.py` durante esta revisión (los
+`try/except Exception` de `verify_session_token`/`verify_share_token`/`share_token_jti`
+son deliberados — fallan cerrado devolviendo `None`, no hay manejo de errores que
+mejorar ahí).
+
+Sin cambios de código este pase — nada seguro que hacer en solitario en
+`app/core/security.py` que no estuviera ya resuelto. `_RESERVAS.md` actualizado a
+"terminado (sin cambios: todo lo pendiente bloqueado por archivo ajeno o formato de
+token, ver detalle aquí)" con el sha de la reserva, `2a65017`, porque no hay commit
+propio que registrar.
