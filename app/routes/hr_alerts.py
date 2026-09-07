@@ -190,10 +190,50 @@ def add_position_history(
     quedaba con el cargo anterior cerrado y ninguno abierto. El cierre resta
     un día a `fecha_fin` (OR-038): con `fecha_fin = fecha_inicio` del nuevo
     tramo, un mismo día contaba en los dos cargos a la vez.
+
+    OR-155 (parcial, solo la mitad de servidor — la mitad de cliente en
+    `admin-edit-hr.js` queda fuera de esta zona, ver `_BUZON.md`): se
+    rechaza una fecha de inicio anterior al ingreso del empleado, una fecha
+    futura, o una que solape con un tramo ya cerrado del historial. Antes
+    solo se exigía que cargo y fecha no estuvieran vacíos, así que un dedo
+    en el año (p. ej. 3016) quedaba como cargo "actual" del expediente.
     """
-    emp = db_query("SELECT id FROM public.empleados WHERE id = %s", [empleado_id], fetch="one")
+    emp = db_query(
+        "SELECT id, fecha_ingreso FROM public.empleados WHERE id = %s",
+        [empleado_id], fetch="one"
+    )
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
+
+    if data.fecha_inicio:
+        if emp["fecha_ingreso"] and data.fecha_inicio < emp["fecha_ingreso"]:
+            raise HTTPException(
+                status_code=400,
+                detail="fecha_inicio no puede ser anterior a la fecha de ingreso del empleado",
+            )
+        if data.fecha_inicio > date.today():
+            raise HTTPException(
+                status_code=400,
+                detail="fecha_inicio no puede ser una fecha futura",
+            )
+        # No se marca como solape el tramo abierto que esta insercion va a
+        # cerrar (fecha_inicio anterior, fecha_fin NULL): eso es la sucesion
+        # normal de cargos, no un error. Sólo se rechaza una fecha_inicio
+        # duplicada o que caiga dentro de un tramo ya cerrado.
+        overlap = db_query("""
+            SELECT id FROM public.historial_cargos
+             WHERE empleado_id = %s
+               AND (
+                   fecha_inicio = %s
+                   OR (fecha_fin IS NOT NULL AND %s BETWEEN fecha_inicio AND fecha_fin)
+               )
+             LIMIT 1
+        """, [empleado_id, data.fecha_inicio, data.fecha_inicio], fetch="one")
+        if overlap:
+            raise HTTPException(
+                status_code=400,
+                detail="fecha_inicio solapa con un tramo existente del historial",
+            )
 
     # Resolver o crear el cargo en el catálogo
     cargo_row = db_query(
