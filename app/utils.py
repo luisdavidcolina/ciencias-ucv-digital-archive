@@ -2,7 +2,10 @@
 
 import re
 import unicodedata
+import uuid
 from typing import List
+
+_MAX_SLUG_ATTEMPTS = 50
 
 
 def split_terms(val_str: str) -> List[str]:
@@ -82,6 +85,12 @@ def generate_unique_slug(text: str, table: str, column: str = "slug", max_length
     """Genera un slug único verificando contra la base de datos.
 
     Si el slug base ya existe, se añade un sufijo numérico (-2, -3, ...).
+
+    IN-092: el bucle tenía tope de intentos infinito — un texto muy repetido
+    (o dos arranques a la vez generando el mismo slug base) podía convertirlo
+    en una consulta por cada colisión sin límite. Tras `_MAX_SLUG_ATTEMPTS`
+    intentos se añade un sufijo aleatorio corto, que no depende de contar
+    filas existentes y por tanto no puede colisionar con el mismo patrón.
     """
     base_slug = generate_slug(text, max_length - 4)  # Reservar espacio para sufijo
     if not base_slug:
@@ -90,7 +99,7 @@ def generate_unique_slug(text: str, table: str, column: str = "slug", max_length
     candidate = base_slug
     counter = 1
 
-    while True:
+    while counter <= _MAX_SLUG_ATTEMPTS:
         row = db_query(
             f"SELECT 1 FROM public.{table} WHERE {column} = %s",
             (candidate,),
@@ -100,6 +109,8 @@ def generate_unique_slug(text: str, table: str, column: str = "slug", max_length
             return candidate
         counter += 1
         candidate = f"{base_slug}-{counter}"
+
+    return f"{base_slug}-{uuid.uuid4().hex[:8]}"
 
 
 # =============================================================================
@@ -143,6 +154,23 @@ def truncate_text(text: str, max_length: int = 200, suffix: str = "…") -> str:
         return text or ""
     truncated = text[:max_length - len(suffix)].rsplit(" ", 1)[0]
     return truncated + suffix
+
+
+def tiene_letras(term: str) -> bool:
+    """Indica si `term` contiene al menos una letra Unicode.
+
+    IN-044: reemplaza el criterio `bool(re.search(r'[A-Za-zÀ-ÿ]', term))`
+    repetido en `archive.py`, `hr.py` y `admin/docs.py` para decidir entre
+    búsqueda FTS o `ILIKE`. Ese rango `À-ÿ` de Latin-1 incluye símbolos que no
+    son letras (`×`, `÷`) y excluye cualquier alfabeto fuera de Latin-1.
+    `str.isalpha()` sobre Unicode no tiene ninguno de los dos problemas.
+
+    BLOQUEADO (fuera de zona): los seis sitios que hoy repiten el regex viven
+    en `archive.py`, `hr.py` y `admin/docs.py` — no se tocan desde este
+    carril (`app/utils.py` exclusivamente). Esta función queda lista para que
+    el carril que sí toque esos archivos la adopte.
+    """
+    return any(ch.isalpha() for ch in (term or ""))
 
 
 def normalize_cedula(cedula: str) -> str:
