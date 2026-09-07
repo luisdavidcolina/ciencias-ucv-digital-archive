@@ -332,8 +332,13 @@ def admin_submit(
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
-    log_event(req.usuario, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}, Titulo: {(req.titulo or req.empleado or '')[:60]}")
-    creado_por = _resolve_user_id(req.usuario)
+    # IN-133: el actor de auditoría y de `creado_por` sale de la sesión
+    # verificada (`require_session`), no de `req.usuario` —un campo que el
+    # propio cliente rellena en el cuerpo de la petición y que antes se
+    # escribía tal cual en la columna, permitiendo falsificar quién crea un
+    # documento, no sólo el registro de auditoría.
+    log_event(usuario_sesion, "Create Document", req.modulo, f"Tipo: {req.doc_type}, Ubicacion: {req.ubicacion}, Titulo: {(req.titulo or req.empleado or '')[:60]}")
+    creado_por = _resolve_user_id(usuario_sesion)
     fecha_doc  = req.fecha or datetime.now().strftime("%Y-%m-%d")
 
     if req.modulo == "Archivo":
@@ -453,7 +458,9 @@ def update_documento(
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("Archivo", "RRHH")),
 ):
-    updated_by = _resolve_user_id(req.usuario)
+    # IN-133: mismo criterio que en `admin_submit` — `updated_by` sale de la
+    # sesión verificada, no de `req.usuario`.
+    updated_by = _resolve_user_id(usuario_sesion)
     updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def _common(sc, p):
@@ -516,7 +523,7 @@ def update_documento(
                                "archivo_descriptores", "id_archivo")
 
         invalidate_choices_cache()
-        log_event(req.usuario, "Update Document", "Archivo", f"ID: {doc_id}, Titulo: {(req.titulo or '')[:60]}, Status: {req.status or 'aprobado'}")
+        log_event(usuario_sesion, "Update Document", "Archivo", f"ID: {doc_id}, Titulo: {(req.titulo or '')[:60]}, Status: {req.status or 'aprobado'}")
         return {"success": True}
 
     else:  # RRHH
@@ -542,7 +549,7 @@ def update_documento(
             )
 
         invalidate_choices_cache()
-        log_event(req.usuario, "Update Document", "RRHH", f"ID: {doc_id}, Status: {req.status or 'aprobado'}")
+        log_event(usuario_sesion, "Update Document", "RRHH", f"ID: {doc_id}, Status: {req.status or 'aprobado'}")
         return {"success": True}
 
 
@@ -765,14 +772,15 @@ def update_empleado(
 
     if set_clauses:
         set_clauses.append("updated_at = NOW()")
-        set_clauses.append("updated_by = %s"); params.append(req.usuario)
+        # IN-133: `updated_by` sale de la sesión verificada, no de `req.usuario`.
+        set_clauses.append("updated_by = %s"); params.append(usuario_sesion)
         params.append(emp_id)
         db_query(
             f"UPDATE public.empleados SET {', '.join(set_clauses)} WHERE id = %s AND deleted_at IS NULL",
             params, fetch="none", commit=True,
         )
 
-    log_event(req.usuario, "Update Empleado", "RRHH", f"ID: {emp_id} nombres={req.nombres}")
+    log_event(usuario_sesion, "Update Empleado", "RRHH", f"ID: {emp_id} nombres={req.nombres}")
     return {"success": True}
 
 
