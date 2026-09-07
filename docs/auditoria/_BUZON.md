@@ -4999,3 +4999,87 @@ sí acepta rango; falta filtro por tipo/departamento, que exige
 de los seis cambios; corrida en primer plano, sin dejar nada en segundo plano).
 
 **quién lo pide**: agente-oa-statspy-3 (OA-admin-stats-py-tercer-pase)
+
+## OA-admin-users-py-tercer-pase — tercer pase sobre `app/routes/admin/users.py` (agente-oa-userspy-3)
+
+Contexto: `users.py` sólo había tenido el carril fundacional (`C6-usuarios-backend`,
+autorización OR-043/044/045) y nunca un tercer pase dedicado. El tercer pase de
+`admin-users.js` (frontend) cerró la parte visual de OA-039 (medidor de fortaleza)
+y dejó anotado en `H1d-modelos` (línea 2523 de este mismo archivo) que la parte
+de servidor — mínimo real, lista de comunes, `debe_cambiar_password`, caducidad —
+seguía pendiente en `core/security.py`/`admin/users.py`.
+
+**Cerrado en este carril** (commit `05ad041`, `python -m pytest app/tests -q` →
+860 passed antes y después, corrida completa en primer plano):
+
+- **OA-039/IN-142/SI-036** (mínimo real de contraseña e insuficiencia del de
+  seis caracteres): `_validar_fuerza_password()` en `users.py` exige 12
+  caracteres reales (el piso de 6 en `models.py` sigue siendo sólo el mínimo
+  de Pydantic, zona ajena — no hacía falta tocarlo: 12 > 6 no lo contradice) y
+  rechaza un subconjunto de las contraseñas más comunes. Aplicado en
+  `POST /users/create` y `PUT /users/{uid}/password`, los dos únicos puntos
+  donde `users.py` fija una contraseña.
+- **IN-133** (el cliente declara quién es), la parte que vivía en `users.py`
+  (`users.py:79,88` en la ficha original, más `active`/`delete` por query
+  string): los cuatro endpoints mutantes (`create`, `password`, `active`,
+  `delete`) ya no usan `req.creator`/`req.requester`/`?requester=` para
+  `log_event` — usan el username que devuelve `require_session` (la
+  dependencia de sesión, ya existente en el router). No hizo falta tocar
+  `models.py`: los campos `creator`/`requester` siguen existiendo en
+  `UserCreateRequest`/`PasswordChangeRequest` por compatibilidad con el
+  frontend que los sigue mandando, pero el servidor ya no confía en su
+  valor para la auditoría.
+
+**Verificado ya resuelto, sin cambio de código**: la unificación de
+`hash_password`/`verify_password` (IN-056) ya la cerró el carril de
+`core/security.py`/`database.py` (commit `11cc812`, nota más arriba en este
+mismo archivo) — `users.py` ya importaba de `database`, que ahora reexporta
+desde `core/security.py`.
+
+**Bloqueados por archivo ajeno, documentados pero no tocados**:
+
+- `OA-039`/`IN-142` (resto): **caducidad de contraseña** y **cambio
+  obligatorio en el primer acceso** (`debe_cambiar_password`) necesitan una
+  columna nueva en `usuarios_sistema` (`schema.sql`+`main.py` **[CHOCA]**,
+  migración) y el lado que la consulta en `routes/auth.py` **[CHOCA]**
+  (login). No se puede cerrar sólo desde `users.py`.
+- `SI-056` (cambiar la contraseña de alguien no cierra su sesión): depende de
+  `token_version` (`SI-040`), que vive en `core/security.py` **[CHOCA]** — el
+  token de sesión no lleva ese campo hoy.
+- `SI-145` (parte de auditoría de cambios de contraseña desde el panel de
+  Sistema): `users.py` ya llama `log_event` en los cuatro endpoints mutantes;
+  la parte que falta (`backup.py`, `routes/auth.py` — logout y export/restore
+  sin registrar) es de otros archivos.
+- `IN-141` (borrado físico de usuario, `DELETE FROM usuarios_sistema`): la
+  ficha pide borrado lógico. Técnicamente `usuarios_sistema` ya tiene
+  `is_active` (el mismo endpoint `PATCH /users/{uid}/active` ya lo usa), así
+  que convertir `delete_user` en una desactivación sería posible sin tocar
+  `schema.sql` — pero cambiaría el contrato del endpoint (la cuenta seguiría
+  apareciendo en `GET /users`) sin coordinar con el frontend
+  (`admin-users.js`, ajeno) que hoy espera que el borrado la haga desaparecer,
+  y sin la FK `ON DELETE SET NULL` de `IN-068` (`main.py` **[CHOCA]**) el
+  problema de trazabilidad de fondo seguiría igual. Documento en vez de
+  arriesgar, según la instrucción de este carril.
+- `IN-068` (FK de `creado_por`/`updated_by` sin `ON DELETE SET NULL`) —
+  `main.py` **[CHOCA]** (migración de esquema).
+- `IN-079` (`TRIM(usuario)` anula el índice único, `users.py:211` en la ficha
+  original) — el `WHERE TRIM(usuario) = %s` de `create_user` sigue así;
+  arreglarlo de verdad exige normalizar los datos existentes e índice sobre
+  `LOWER(usuario)` (`main.py` **[CHOCA]**, migración) y tocar también
+  `auth.py`/`admin/helpers.py` **[CHOCA]** para que el login sea consistente.
+  Cambiar sólo la cláusula en `users.py` sin la migración no arregla nada.
+- `IN-084` (la auditoría falla abierta si `log_event` no puede escribir) —
+  ficha pide que el registro sea parte de la transacción en `database.py`
+  **[CHOCA]**; no es un cambio que se pueda hacer sólo desde `users.py`.
+- `OR-207` (roles intermedios entre Normal y Admin) — arquitectura nueva de
+  permisos, `main.py`/`admin/deps.py` **[CHOCA]**; ya estaba documentado como
+  bloqueado por `B6-admin-ui` (línea 369 de este archivo), confirmo que sigue
+  igual de bloqueado desde el lado de `users.py`.
+- `IN-178` (no hay procedimiento para crear el primer administrador) — pide
+  `app/cli.py` (nuevo), fuera de mi archivo declarado.
+- `IN-133` (resto, fuera de `users.py`): `docs.py`, `trash.py`, `backup.py`,
+  `share.py`, `files.py`, `imports.py` siguen aceptando identidad declarada
+  por el cliente en 22 puntos según la ficha original; sólo cerré los cuatro
+  de `users.py`.
+
+**quién lo pide**: agente-oa-userspy-3 (OA-admin-users-py-tercer-pase)
