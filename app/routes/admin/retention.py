@@ -26,6 +26,12 @@ from .deps import require_admin_role, require_role
 # rol Admin — OA-035/OA-046.
 router = APIRouter(dependencies=[Depends(require_role("Archivo", "RRHH"))])
 
+# OA-144: el plazo por defecto de 5 años estaba repetido como literal en cada
+# consulta de este archivo. Una sola constante no evita el literal duplicado
+# en `stats.py` (archivo ajeno, `[CHOCA]`), pero al menos deja de haber cuatro
+# copias distintas aquí mismo.
+DEFAULT_PLAZO_ANIOS = 5
+
 
 class RetencionUpdate(BaseModel):
     plazo_retencion_anios: int
@@ -45,7 +51,10 @@ def list_retention_types(scope: str = Query(default="")):
     Lista todos los tipos de documento con su plazo de retención configurado.
     Filtra por scope ('archivo' | 'rrhh' | '' para todos).
     """
-    params = []
+    # El %s del SELECT (plazo por defecto) va primero en el texto final,
+    # antes que el %s opcional del WHERE: el orden de los parámetros tiene
+    # que respetar el orden en que psycopg2 los encuentra en el SQL.
+    params = [DEFAULT_PLAZO_ANIOS]
     where = ""
     if scope:
         # OA-001: los slugs de RRHH son parte-i..parte-iv, ninguno contiene
@@ -66,7 +75,7 @@ def list_retention_types(scope: str = Query(default="")):
             td.id,
             td.nombre,
             td.nombre_corto,
-            COALESCE(td.plazo_retencion_anios, 5)  AS plazo_retencion_anios,
+            COALESCE(td.plazo_retencion_anios, %s) AS plazo_retencion_anios,
             c.nombre                                AS categoria,
             c.slug                                  AS categoria_slug,
             COUNT(DISTINCT da.id_archivo)           AS uso_archivo,
@@ -126,23 +135,99 @@ def get_expired_docs(limite: int = Query(default=50, ge=1, le=500)):
             COALESCE(da.ubicacion, '—')                 AS ubicacion,
             COALESCE(da.soporte, 'Físico')              AS soporte,
             COALESCE(td.nombre_corto, '—')              AS tipo_documento,
-            COALESCE(td.plazo_retencion_anios, 5)       AS plazo_anios,
+            COALESCE(td.plazo_retencion_anios, %s)      AS plazo_anios,
             TO_CHAR(
-                (da.fecha_documento + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL)::DATE,
+                COALESCE(
+                    da.fecha_vencimiento,
+                    (da.fecha_documento + (COALESCE(td.plazo_retencion_anios,%s) || ' years')::INTERVAL)::DATE
+                ),
                 'YYYY-MM-DD'
             )                                           AS fecha_vencimiento,
-            (CURRENT_DATE - (da.fecha_documento + (COALESCE(td.plazo_retencion_anios,5) || ' years')::INTERVAL)::DATE
-            )                                           AS dias_vencido
+            (CURRENT_DATE - COALESCE(
+                da.fecha_vencimiento,
+                (da.fecha_documento + (COALESCE(td.plazo_retencion_anios,%s) || ' years')::INTERVAL)::DATE
+            ))                                          AS dias_vencido
         FROM public.datos_archivo da
         LEFT JOIN public.tipo_documento td ON da.id_tipo_documento = td.id
         WHERE da.fecha_documento IS NOT NULL
-          AND (da.fecha_documento + (COALESCE(td.plazo_retencion_anios, 5) || ' years')::INTERVAL)::DATE < CURRENT_DATE
+          AND COALESCE(
+                da.fecha_vencimiento,
+                (da.fecha_documento + (COALESCE(td.plazo_retencion_anios, %s) || ' years')::INTERVAL)::DATE
+              ) < CURRENT_DATE
           AND COALESCE(da.status, 'aprobado') = 'aprobado'
           AND da.disposicion IS NULL
           AND da.deleted_at IS NULL
         ORDER BY dias_vencido DESC
         LIMIT %s
-    """, [limite], fetch="all") or []
+    """, [DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, limite],
+        fetch="all") or []
+
+    return {"total": len(rows), "vencimientos": [dict(r) for r in rows]}
+
+
+# =============================================================================
+# RETENCIÓN — RRHH (OR-183/OR-184)
+# =============================================================================
+# OR-183 documentaba que la pestaña de Retención en RRHH sólo mostraba la
+# tabla de plazos, porque `loadVencimientosTable()` llama en ambos módulos al
+# mismo endpoint de arriba, que sólo consulta `datos_archivo` — el frontend ya
+# muestra un aviso de "no disponible para RRHH todavía" (tercer pase de
+# `admin/index.js`) en vez de datos de Archivo bajo un encabezado de RRHH.
+# OR-184 documentaba además una fuga: `hr_alerts.py` tenía un segundo endpoint
+# de "vencidos" bajo el router de RRHH que en realidad consultaba
+# `datos_archivo`; se retiró (ver comentario en `hr_alerts.py`, commit
+# `PASS3-rrhh-backend-untouched`) sin sustituto.
+#
+# Este es el endpoint propio que faltaba: mismo cálculo de vencimiento que
+# `get_expired_docs` (respeta `fecha_vencimiento` explícito si existe, si no
+# `fecha_documento + plazo_retencion_anios`), pero sobre `datos_rrhh` con el
+# empleado asociado. `tipo_documento` es un catálogo compartido entre Archivo
+# y RRHH (scope por `id_categoria`, ver `list_retention_types`), así que el
+# join a plazos es el mismo mecanismo. No hay `disposicion` en `datos_rrhh`
+# todavía (OR-188, fuera de esta ficha): esta ruta es de sólo lectura.
+@router.get("/retencion/vencimientos-rrhh", dependencies=[Depends(require_role("RRHH"))])
+def get_expired_docs_rrhh(limite: int = Query(default=50, ge=1, le=500)):
+    """
+    Documentos del módulo RRHH (expedientes de personal) cuyo plazo de
+    retención ha expirado. Mismo criterio que `get_expired_docs` (Archivo).
+    """
+    rows = db_query("""
+        SELECT
+            dr.id_rrhh,
+            dr.titulo,
+            COALESCE(e.nombres || ' ' || e.apellidos, '—') AS empleado,
+            COALESCE(e.cedula, '—')                      AS cedula,
+            TO_CHAR(dr.fecha_documento, 'YYYY-MM-DD')    AS fecha_documento,
+            COALESCE(dr.ubicacion, '—')                  AS ubicacion,
+            COALESCE(dr.soporte, 'Físico')                AS soporte,
+            COALESCE(td.nombre_corto, '—')                AS tipo_documento,
+            COALESCE(td.plazo_retencion_anios, %s)        AS plazo_anios,
+            TO_CHAR(
+                COALESCE(
+                    dr.fecha_vencimiento,
+                    (dr.fecha_documento + (COALESCE(td.plazo_retencion_anios,%s) || ' years')::INTERVAL)::DATE
+                ),
+                'YYYY-MM-DD'
+            )                                             AS fecha_vencimiento,
+            (CURRENT_DATE - COALESCE(
+                dr.fecha_vencimiento,
+                (dr.fecha_documento + (COALESCE(td.plazo_retencion_anios,%s) || ' years')::INTERVAL)::DATE
+            ))                                            AS dias_vencido
+        FROM public.datos_rrhh dr
+        LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
+        LEFT JOIN public.empleados       e  ON dr.empleado_id      = e.id
+        WHERE dr.fecha_documento IS NOT NULL
+          AND COALESCE(
+                dr.fecha_vencimiento,
+                (dr.fecha_documento + (COALESCE(td.plazo_retencion_anios, %s) || ' years')::INTERVAL)::DATE
+              ) < CURRENT_DATE
+          AND COALESCE(dr.status, 'aprobado') = 'aprobado'
+          AND dr.deleted_at IS NULL
+          AND (e.id IS NULL OR e.deleted_at IS NULL)
+        ORDER BY dias_vencido DESC
+        LIMIT %s
+    """, [DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, DEFAULT_PLAZO_ANIOS, limite],
+        fetch="all") or []
 
     return {"total": len(rows), "vencimientos": [dict(r) for r in rows]}
 

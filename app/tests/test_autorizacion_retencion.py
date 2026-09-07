@@ -74,6 +74,31 @@ class TestRequireRoleEnVencimientos:
         assert res.status_code == 200
 
 
+class TestRequireRoleEnVencimientosRRHH:
+    """`GET /api/admin/retencion/vencimientos-rrhh`: endpoint propio de RRHH
+    que faltaba (OR-183/OR-184) — sólo opera sobre `datos_rrhh`, simétrico
+    al de Archivo pero exigiendo el módulo RRHH en vez de Archivo."""
+
+    def test_sin_sesion_recibe_401(self, anon_client):
+        res = anon_client.get("/api/admin/retencion/vencimientos-rrhh")
+        assert res.status_code == 401
+
+    def test_usuario_normal_de_archivo_recibe_403(self, client_as):
+        c = client_as("archivo_normal4")
+        fila = _fila(modulo="Archivo", rol="Normal", is_active=True)
+        with patch("routes.admin.deps.db_query", return_value=fila):
+            res = c.get("/api/admin/retencion/vencimientos-rrhh")
+        assert res.status_code == 403
+
+    def test_usuario_de_rrhh_si_puede_ver_vencimientos_rrhh(self, client_as):
+        c = client_as("rrhh_normal3")
+        fila = _fila(modulo="RRHH", rol="Normal", is_active=True)
+        with patch("routes.admin.deps.db_query", return_value=fila), \
+             patch("routes.admin.retention.db_query", return_value=[]):
+            res = c.get("/api/admin/retencion/vencimientos-rrhh")
+        assert res.status_code == 200
+
+
 class TestRequireAdminRoleEnDisponer:
     """`POST /api/admin/retencion/disponer/{id}`: exige rol Admin en Archivo."""
 

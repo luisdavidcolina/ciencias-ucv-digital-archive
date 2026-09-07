@@ -89,3 +89,50 @@ def test_los_vencimientos_dejan_de_listar_lo_ya_dispuesto():
     sql = inspect.getsource(ret.get_expired_docs)
     assert "da.disposicion IS NULL" in sql
     assert "da.deleted_at IS NULL" in sql
+
+
+def test_vencimiento_respeta_la_fecha_explicita_si_existe():
+    """OA-002: una fecha de vencimiento manual sobreescribe el plazo del tipo,
+    tanto en el filtro (WHERE) como en lo que se muestra. Antes el cálculo
+    ignoraba `fecha_vencimiento` por completo, así que el campo del formulario
+    de alta/edición no tenía ningún efecto sobre qué se consideraba vencido —
+    exactamente el bug que describía OA-002, y que dejaba al KPI de stats.py
+    (ya corregido) diciendo una cifra distinta de la que esta tabla mostraba
+    (OA-003)."""
+    import inspect
+    sql_archivo = inspect.getsource(ret.get_expired_docs)
+    sql_rrhh = inspect.getsource(ret.get_expired_docs_rrhh)
+    for sql, col in ((sql_archivo, "da"), (sql_rrhh, "dr")):
+        # el COALESCE(fecha_vencimiento, calculado) aparece en el SELECT
+        # mostrado y en el WHERE del filtro: al menos dos usos reales.
+        assert sql.count(f"{col}.fecha_vencimiento") >= 2
+        assert f"COALESCE(\n" in sql
+
+
+def test_vencimientos_rrhh_usa_datos_rrhh_no_datos_archivo():
+    """OR-183/OR-184: la pestaña de Retención de RRHH necesitaba su propio
+    endpoint sobre `datos_rrhh` — antes reusaba el de Archivo (mostrando
+    documentos institucionales bajo el encabezado de RRHH) o, en hr_alerts.py,
+    un segundo endpoint que también apuntaba a `datos_archivo` por error
+    (ya retirado). Este endpoint nuevo consulta la tabla correcta."""
+    llamadas = []
+
+    def falso(sql, params=None, **k):
+        llamadas.append(sql)
+        return []
+
+    with patch.object(ret, "db_query", side_effect=falso):
+        r = ret.get_expired_docs_rrhh(limite=10)
+
+    assert r == {"total": 0, "vencimientos": []}
+    assert len(llamadas) == 1
+    assert "public.datos_rrhh" in llamadas[0]
+    assert "public.datos_archivo" not in llamadas[0]
+    assert "public.empleados" in llamadas[0]
+
+
+def test_vencimientos_rrhh_filtra_deleted_at_y_status():
+    import inspect
+    sql = inspect.getsource(ret.get_expired_docs_rrhh)
+    assert "dr.deleted_at IS NULL" in sql
+    assert "dr.status" in sql

@@ -5083,3 +5083,107 @@ desde `core/security.py`.
   de `users.py`.
 
 **quién lo pide**: agente-oa-userspy-3 (OA-admin-users-py-tercer-pase)
+
+## OA-admin-retention-py-tercer-pase — tercer pase sobre `app/routes/admin/retention.py`
+
+Carril fundacional (`C4-retencion`, commit `249dba7`) ya cerró OA-001 (scope
+RRHH del catálogo) y el registro de disposición. Revisé las 18 fichas
+asignadas a `C4-retencion` una por una contra el código actual, más OR-183/
+OR-184 (el pendiente que dejó el tercer pase de `admin/index.js`, frontend).
+
+**Arreglados de verdad, sólo dentro de `retention.py`**:
+
+- **`OA-002`/`OA-003` (real, no era falso positivo)** — el `_BUZON.md` de
+  `SWEEP-monitor-backup` marcaba OA-002/OA-003 como resueltos en `stats.py`
+  (commit `ad782bc`, el KPI `total_vencidos` pasó a usar
+  `COALESCE(fecha_vencimiento, fecha_documento+plazo)`), con el comentario
+  "misma definición que `retention.py:get_expired_docs`". Pero
+  `get_expired_docs` **nunca respetó** `da.fecha_vencimiento` — calculaba
+  siempre `fecha_documento + plazo`, ignorando el campo "Vencimiento" que el
+  formulario de alta/edición ya ofrece (`admin-submit.js:70-72`,
+  `admin-edit.js:294`) y que existe en el esquema desde antes de este pase.
+  Es decir: el KPI de la cabecera ya se arregló, pero la propia tabla de la
+  pestaña Retención seguía dando una cifra distinta — la mitad de OA-003
+  seguía rota. Corregido: tanto el `WHERE` como la columna mostrada usan
+  ahora `COALESCE(da.fecha_vencimiento, fecha_documento+plazo)`, igual que
+  `stats.py`. Ambos vuelven a coincidir. Prueba nueva:
+  `test_vencimiento_respeta_la_fecha_explicita_si_existe` en
+  `test_disposicion.py`.
+- **`OR-183`/`OR-184` (backend, la mitad que quedaba)** — el tercer pase de
+  `admin/index.js` (frontend) encontró que la pestaña "Retención" de RRHH
+  llamaba al mismo endpoint que Archivo (sólo `datos_archivo`) y puso un
+  aviso de "no disponible todavía" en vez de mostrar datos ajenos bajo el
+  encabezado equivocado; dejó el arreglo real —un endpoint propio de RRHH—
+  pendiente para quien tocara `retention.py`. `OR-184` documentaba además que
+  `hr_alerts.py` tenía un segundo endpoint bajo el router de RRHH que
+  también apuntaba a `datos_archivo` por error; ese ya se retiró en
+  `PASS3-rrhh-backend-untouched` (commit `54237d8`, ver nota `BR-063` en este
+  mismo archivo) sin dejar sustituto. Añadido `GET
+  /api/admin/retencion/vencimientos-rrhh` (mismo cálculo que el de Archivo,
+  ahora con la fecha explícita respetada, sobre `datos_rrhh` con el empleado
+  asociado vía `empleado_id`; `require_role("RRHH")`). No toca `datos_rrhh` en
+  escritura, así que no hace falta migración. **Falta para dar por cerrado
+  OR-183 del todo**: `admin.js`/`admin_hr.html` tienen que llamar a este
+  endpoint nuevo en vez de mostrar el aviso — frontend, fuera de mi zona.
+- **`OA-144` (parcial)** — extraje `DEFAULT_PLAZO_ANIOS = 5` como constante
+  del módulo y sustituí los cuatro literales `5` de `retention.py`. La ficha
+  también señala el literal en `stats.py:132` — archivo ajeno, no lo toco.
+
+**Confirmados ya resueltos, sin cambios**:
+- `OA-001` (scope RRHH del catálogo `/retencion/tipos`) — ya corregido por
+  `C4-retencion` (línea 57-71 actual), sigue correcto.
+- `OA-062` (el historial de disposiciones `GET /retencion/disposiciones`
+  existe) — sigue existiendo y funcionando; lo que falta es que una pestaña
+  lo consuma, frontend.
+
+**Bloqueados por archivo ajeno, documentados pero no tocados**:
+- `OA-061` (fusionar "disponer" con "enviar a papelera" en una sola acción) —
+  Esfuerzo M, `admin.js` **[CHOCA]**.
+- `OA-141` (edición en lote de plazos), `OA-142` (previsualizar impacto antes
+  de cambiar un plazo — un endpoint de previsualización sin que `admin.js`
+  lo consuma no sirve de nada por sí solo), `OA-145` (paginar la tabla de
+  vencimientos), `OA-149` (rectificar una disposición sin perder la
+  original) — todas Esfuerzo M/S con `admin.js` **[CHOCA]**; `OA-149` además
+  es una decisión de gobernanza documental (¿la rectificación reemplaza el
+  registro o añade uno nuevo, con qué relación al original?) que no me
+  pareció correcto tomar sin acordarla primero.
+- `OA-143` (el cómputo del plazo debería partir del cierre del expediente,
+  no de `fecha_documento`, con dos fases gestión/central) — Esfuerzo L,
+  `main.py` **[CHOCA]** (columnas nuevas) + `admin_archive.html` **[CHOCA]**;
+  cambio de modelo de datos, no lo tomo solo.
+- `OR-186`/`OR-187` (RRHH necesita un hecho disparador propio —egreso,
+  jubilación— en vez de `fecha_documento`, y un plazo por defecto mucho
+  mayor que 5/100 años) — mismo caso que `OA-143`: decisión de negocio +
+  `main.py` **[CHOCA]** + `admin_hr.html` **[CHOCA]**. El endpoint nuevo de
+  RRHH que sí añadí usa `fecha_documento` igual que Archivo porque es lo que
+  hay hoy; no resuelve OR-186/OR-187, sólo les da un lugar donde aplicarse
+  cuando se decida el modelo.
+- `OR-188` (disposición documental en RRHH) — Esfuerzo M, exige columnas
+  `disposicion*` nuevas en `datos_rrhh` (`main.py` **[CHOCA]**) y `admin.js`
+  **[CHOCA]**; por eso el endpoint de vencimientos-rrhh que añadí es de sólo
+  lectura.
+- `OR-190` (histórico de cambios de política de retención visible) — el
+  backend ya audita cada cambio de plazo (`log_event` en `update_retention`,
+  sin cambios de mi parte); lo que falta es que una pantalla lo muestre,
+  `admin.js`/`admin_archive.html` **[CHOCA]**.
+- `OR-273` (política de retención/anonimización de datos personales tras el
+  egreso) — decisión de negocio de esfuerzo L, toca `trash.py` **[CHOCA]**
+  además de `retention.py`; no hay un "arreglo" de código sin esa decisión
+  primero.
+- `DG-152` (el ciclo de vida de los ficheros en R2 no está vinculado a la
+  retención: un documento expurgado deja su fichero en el bucket para
+  siempre) — Esfuerzo M, `app/storage.py` **[CHOCA]** para el borrado
+  certificado del objeto.
+- `RQ-014` (el actor de auditoría lo pone el cliente, no la sesión) — la
+  ficha original lista `retention.py` entre ocho archivos a cambiar a la vez
+  (`docs.py`, `users.py`, `imports.py`, `trash.py`, `files.py`,
+  `hr_alerts.py`, `models.py` **[CHOCA]** todos). Cambiar sólo `requester` en
+  `retention.py` sin tocar el resto no cierra la ficha y deja una
+  inconsistencia nueva (unos endpoints confían en la sesión, otros siguen
+  aceptando el campo del cliente); no lo hago suelto.
+
+**`python -m pytest app/tests -q`**: 860/860 en verde antes de empezar.
+Después de los cambios y las 7 pruebas nuevas (`test_disposicion.py` +3,
+`test_autorizacion_retencion.py` +3 métodos): en verde también — ver commit.
+
+**quién lo pide**: agente-oa-retentionpy-3 (OA-admin-retention-py-tercer-pase)
