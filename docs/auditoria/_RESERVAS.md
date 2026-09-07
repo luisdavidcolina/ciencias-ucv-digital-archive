@@ -224,3 +224,4 @@ para no repetir la confusión.
 | RECORRIDO-visual-funcional-2 | agente-recorrido2 | 2026-09-07 | terminado (documento en `recorrido-visual-2.md`, sin cambios de código: hallazgo crítico `apiFetch` trata 403 como 401 y cierra sesión válida, panel de personalización sin backdrop a 390px, Chart.js sin destruir instancia previa antes de re-render; hueco de fidelidad en el arnés `fakedb.py` -no fija la fila de `admin.global`- documentado, impidió probar en vivo Retención-RRHH y ciclo de propuestas de IA) | c1284d2 |
 | BUG-403-cierra-sesion | agente-bug403 | 2026-09-07 | en curso | |
 | BUG-chartjs-canvas-reuse | agente-bugcharts | 2026-09-07 | en curso | |
+| BUG-theme-panel-sin-backdrop | agente-bugthemepanel | 2026-09-07 | en curso | |
