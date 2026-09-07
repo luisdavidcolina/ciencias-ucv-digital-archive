@@ -1,0 +1,65 @@
+[sidebar] 390px toggle selector found: None
+[sidebar] 1440px toggle selector found: None
+[sidebar] 390px toggle selector found: None
+[console:admin-archivo] error: Charts error: TypeError: Cannot read properties of undefined (reading 'length')
+    at http://127.0.0.1:8099/static/js/admin/charts.js:319:49
+    at Array.forEach (<anonymous>)
+    at xa.generateLabel
+[console:admin-archivo] error: Charts error: Error: Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+    at new An (https://cdn.jsdelivr.net/npm/chart.js
+[console:admin-archivo] error: Charts error: Error: Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+    at new An (https://cdn.jsdelivr.net/npm/chart.js
+[admin-archivo] tab=stats pane_empty=False
+[pageerror:admin-archivo] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[admin-archivo] tab=new pane_empty=False
+[admin-archivo] new-form text inputs: 7
+[admin-archivo] empty submit -> :invalid count = 6
+[admin-archivo] tab=monitor pane_empty=False
+[pageerror:admin-archivo] Unexpected end of input
+[admin-archivo] tab=categories pane_empty=False
+[admin-archivo] tab=papelera pane_empty=False
+[pageerror:admin-archivo] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[pageerror:admin-archivo] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[pageerror:admin-archivo] Unexpected end of input
+[pageerror:admin-archivo] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[pageerror:admin-archivo] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[admin-archivo] tab=retencion pane_empty=False
+[admin-archivo] tab=audit pane_empty=False
+[console:admin-archivo] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:admin-archivo] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[admin-archivo] tab=users pane_empty=False
+[pageerror:admin-archivo] Transition was skipped
+[console:admin-archivo] error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[admin-archivo] tab=export pane_empty=False
+[console:admin-rrhh] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:admin-rrhh] error: Charts error: TypeError: Cannot read properties of undefined (reading 'length')
+    at http://127.0.0.1:8099/static/js/admin/charts.js:543:49
+    at Array.forEach (<anonymous>)
+    at xa.generateLabel
+[console:admin-rrhh] error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[admin-rrhh] tab stats not found
+[admin-rrhh] tab new not found
+[admin-rrhh] tab monitor not found
+[admin-rrhh] tab categories not found
+[admin-rrhh] tab papelera not found
+[admin-rrhh] tab retencion not found
+[admin-rrhh] tab audit not found
+[admin-rrhh] tab users not found
+[admin-rrhh] tab export not found
+[console:ia] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia] error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[ia] body length=146; mentions APIKEY/OPENROUTER: False
+[search/archivo] after searching 'resolucion', results header snippet present: True
+[search/archivo] pagination click succeeded
+[console:search-/rrhh] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:search-/rrhh] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[search/rrhh] after searching 'garcia', results header snippet present: True
+[search/rrhh] pagination click succeeded
+[console:themes] error: Charts error: TypeError: Cannot read properties of undefined (reading 'length')
+    at http://127.0.0.1:8099/static/js/admin/charts.js:319:49
+    at Array.forEach (<anonymous>)
+    at xa.generateLabel
+[themes] personalization trigger found: None
+[aiwidget] bubble selector: None

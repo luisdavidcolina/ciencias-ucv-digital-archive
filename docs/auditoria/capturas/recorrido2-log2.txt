@@ -1,0 +1,107 @@
+[sidebar-390-light] toggle count=1
+[sidebar-390-light] sidebar class after open: ds-sidebar open
+[sidebar-390-light] visible sidebar links: 9
+[sidebar-390-light] link labels: ['Archivo Institucional', 'Personal', 'Panel Archivo\nA', 'Panel RRHH\nR', 'Sistema Global', 'Asistente IA', 'Sistema de Diseño', 'Ayuda', 'Investigación']
+[sidebar-390-light] theme panel opened, visible=True
+[sidebar-390-light] nav click failed: Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("#app-sidebar a.ds-sidebar-link").nth(1)
+    - locator resolved to <a href="/rrhh" id="menu-btn-rrhh" class="ds-sidebar-link">…</a>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    5 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+
+[sidebar-1440-light] toggle count=1
+[sidebar-1440-light] sidebar class after open: ds-sidebar open
+[sidebar-1440-light] visible sidebar links: 9
+[sidebar-1440-light] link labels: ['Archivo Institucional', 'Personal', 'Panel Archivo\nA', 'Panel RRHH\nR', 'Sistema Global', 'Asistente IA', 'Sistema de Diseño', 'Ayuda', 'Investigación']
+[sidebar-1440-light] theme panel opened, visible=True
+[console:sidebar-1440-light] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[sidebar-1440-light] navigated to: http://127.0.0.1:8099/rrhh
+[sidebar-390-dark] toggle count=1
+[sidebar-390-dark] sidebar class after open: ds-sidebar open
+[sidebar-390-dark] visible sidebar links: 9
+[sidebar-390-dark] link labels: ['Archivo Institucional', 'Personal', 'Panel Archivo\nA', 'Panel RRHH\nR', 'Sistema Global', 'Asistente IA', 'Sistema de Diseño', 'Ayuda', 'Investigación']
+[sidebar-390-dark] theme panel opened, visible=True
+[sidebar-390-dark] nav click failed: Locator.click: Timeout 3000ms exceeded.
+Call log:
+  - waiting for locator("#app-sidebar a.ds-sidebar-link").nth(1)
+    - locator resolved to <a href="/rrhh" id="menu-btn-rrhh" class="ds-sidebar-link">…</a>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    5 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div class="ds-panel-label">…</div> from <div tabindex="-1" role="dialog" aria-modal="true" id="ds-theme-panel" class="ds-theme-panel open" aria-label="Personalización">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+
+[aiwidget] bubble count=1
+[aiwidget] panel aria-hidden=None
+[aiwidget] chat input count=1
+[aiwidget] send button count=1
+[console:aiwidget] error: Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+[aiwidget] panel text after send (400 chars): ' Asistente del Archivo\nHola, ¿cuántos documentos hay en el archivo?\n⚠️ No se pudo contactar al asistente. Revisa el log del servidor.'
+[console:ia-page] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia-page] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia-page] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:ia-page] error: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[ia-page] url=http://127.0.0.1:8099/login
+[ia-page] body length=146
+[ia-page] body snippet: ' Intranet Cifrada de Acceso Restringido\n\nCredencial Institucional\nContraseña\n Ingresar\n\n¿Olvidó su contraseña? Escriba a informatica@ciens.ucv.ve.'
+[console:archivo-modals] error: Charts error: TypeError: Cannot read properties of undefined (reading 'length')
+    at http://127.0.0.1:8099/static/js/admin/charts.js:319:49
+    at Array.forEach (<anonymous>)
+    at xa.generateLabel
+[monitor] pane html length=37686
+[monitor] first-row action controls: 6
+[monitor]   control: title=Cambiar estado: Sin estado aria-label=Cambiar estado de Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica: Sin estado text='Sin estado'
+[monitor]   control: title=Ver archivo aria-label=Ver archivo: Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica text=''
+[monitor]   control: title=Ver aria-label=Ver: Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica text=''
+[monitor]   control: title=Editar aria-label=Editar: Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica text=''
+[monitor]   control: title=Compartir enlace temporal aria-label=Compartir enlace temporal de: Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica text=''
+[monitor]   control: title=Eliminar aria-label=Eliminar: Resolución del Consejo de Facultad Nº 2024-118 sobre la reestructuración de la Escuela de Biología y la creación de la Coordinación de Postgrado en Ecología Tropical y Conservación de la Biodiversidad Amazónica text=''
+[pageerror:archivo-modals] Unexpected end of input
+[pageerror:archivo-modals] Canvas is already in use. Chart with ID '0' must be destroyed before the canvas with ID 'chart-by-type-archivo' can be reused.
+[monitor] modal visible after click: 0
+[papelera] first-row action controls: 2
+[papelera]   control: title=Restaurar aria-label=None text=''
+[papelera]   control: title=Eliminar permanentemente aria-label=None text=''
+[console:archivo-modals] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[console:archivo-modals] error: Failed to load resource: the server responded with a status of 403 (Forbidden)
+[users] pane html length=2512
+[users] first-row buttons: 0
+[pwdmeter] no 'Cambiar contraseña' button found on first row
