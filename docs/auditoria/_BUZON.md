@@ -5578,3 +5578,75 @@ comportamiento cuando las variables vienen bien formadas o ausentes.
 número). Commit pendiente de este mensaje.
 
 **quién lo pide**: agente-cacheconfig-3 (IN-core-cache-config-py-tercer-pase)
+
+## F2-pages-py-tercer-pase — app/routes/pages.py (agente-pagespy-3, 2026-09-07)
+
+Tercer pase dedicado a `app/routes/pages.py`, que sólo había tenido el carril
+fundacional `F2-cascara` (2026-09-03). Leído completo, comparado contra
+`vercel.json` (sólo para verificar consistencia, no lo edité, fuera de zona),
+`git log --oneline --all -- app/routes/pages.py` (`72b7e7e` SD-223, `c54c29c`
+SI-156, `99a2a2a`, `adb9703`, `d018347`, `39b50bd`) y grepeado en todos los
+`docs/auditoria/*.md` por menciones a `pages.py`.
+
+**Control de acceso de `/investigacion` (SI-156): verificado correcto, sin
+bypass.** `serve_investigacion` exige `Depends(require_session)` (401 sin
+sesión) y además comprueba en base de datos que `usuarios_sistema.modulo ==
+"Global"` con `COALESCE(is_active, TRUE)` (403 si no es Global o si la fila no
+existe/está inactiva). Ya cubierto por
+`app/tests/test_autorizacion_fixture.py` con los cuatro casos (200 Global, 403
+otro módulo, 403 usuario fantasma, 401 sin sesión) — corrí la suite completa,
+sigue en verde, no hay forma de saltarse la comprobación.
+
+**Simetría `pages.py` ↔ `vercel.json`: verificada, sin asimetría real más allá
+de la ya documentada.** Las diez rutas estáticas de Vercel
+(`/login`,`/archivo`,`/rrhh`,`/admin/archivo`,`/admin/rrhh`,`/admin/sistema`,
+`/admin/ia`,`/ayuda`,`/compartido/(.*)`,`/static/(.*)`) tienen su `_page()`
+homólogo en `pages.py`. `/investigacion` y `/sistema` quedan fuera de
+`vercel.json` a propósito (ya lo confirma la nota de `SI-217` en este mismo
+buzón para `/investigacion`, y el inventario de la reorganización de hoy para
+`/sistema`): ambas caen al catch-all `/(.*) → api/index.py`, que sí pasa por
+`pages.py` — necesario para `/investigacion` (la comprobación de rol vive ahí)
+y consistente para `/sistema` (galería de componentes SD-223, sin auth pero
+tampoco listada como ruta estática pública). `/` (redirect a `/login`) tampoco
+está en `vercel.json`, también intencional: es sólo un `RedirectResponse`, no
+sirve un archivo estático.
+
+**Path traversal: no aplica.** Los doce endpoints de `pages.py` llaman
+siempre a `_page()` con un literal de cadena fijo en el propio código; ninguno
+construye el nombre de archivo a partir de un parámetro de ruta o query. El
+único endpoint con parámetro dinámico, `GET /compartido/{token}`, ignora el
+valor de `token` para elegir el archivo — siempre sirve `compartido.html`
+literal — y delega la validación del token a la API (`/api/compartido/<token>`,
+fuera de esta zona). No hay ningún camino en que un nombre de archivo
+dependa de entrada del usuario.
+
+**Tickets encontrados que citan `pages.py`, todos ya resueltos o bloqueados
+por archivo ajeno, ninguno accionable sólo en esta zona:**
+
+- `SI-156` (cerrar `/investigacion`) — ya resuelto, ver arriba.
+- `SI-217` (rutas estáticas 1:1 en `vercel.json`) — ya resuelto por
+  `H1f-rutas-pagina`, confirmado arriba.
+- `BA-121` (permalink por documento, `/archivo/<id>`) — **[CHOCA]** con
+  `archive.js` + `archive.py` a la vez; no es un cambio de una línea en
+  `pages.py` solo, exige que el frontend sepa parsear el id de la URL y que
+  `archive.py` lo consuma.
+- `IN-066` (siete páginas repiten la cáscara a mano) — L, **[CHOCA]** con
+  `app/static/*.html` completo y un `app/templates/` nuevo; fuera de alcance
+  de un carril sobre un solo archivo de rutas.
+- `SI-220` (falta `robots.txt`) — **[CHOCA]**: necesita `app/static/robots.txt`
+  nuevo (no es mío) antes de que tenga sentido añadir la ruta en `pages.py`;
+  el `noindex` en páginas internas tampoco es cambio de `pages.py`.
+- `RQ-053` (página `/inicio`) — sigue bloqueada exactamente como la dejó
+  `H1f-rutas-pagina`: en cuanto exista `app/static/inicio.html` (no es mío)
+  añadir `GET /inicio` en `pages.py` es un cambio de una línea con el mismo
+  patrón que el resto; no hay HTML que enrutar todavía.
+
+No hubo ningún ticket real y accionable dentro de la zona exclusiva de
+`pages.py` que no estuviera ya cerrado o genuinamente bloqueado por otro
+archivo. **No hice ningún cambio de código.**
+
+`python -m pytest app/tests -q`: 883 passed antes y después (no toqué nada,
+mismo número). No hay commit de código; sólo esta nota y la fila de
+`_RESERVAS.md`.
+
+**quién lo pide**: agente-pagespy-3 (F2-pages-py-tercer-pase)
