@@ -88,6 +88,64 @@ def test_un_fallo_al_subir_no_se_reporta_como_exito():
     assert "FALLO" in reg.call_args[0][3]
 
 
+def test_todas_las_tablas_fallan_no_sube_ni_finge_exito():
+    """IN-176: si ninguna tabla pudo exportarse, no es una copia parcial
+    aprovechable — no debe subirse a R2 ni registrarse como si lo fuera."""
+    backup_roto = {"_metadata": {}}
+    backup_roto.update({f"_error_{t}": "boom" for t in bk.EXPORTABLE_TABLES})
+    with patch.dict("os.environ", {"CRON_SECRET": SECRETO}), \
+         patch.object(bk, "_construir_backup", return_value=(backup_roto, 0)), \
+         patch.object(bk, "_registrar_backup") as reg, \
+         patch.object(bk.storage, "is_configured", return_value=True), \
+         patch.object(bk.storage, "upload_fileobj") as subir:
+        with pytest.raises(HTTPException) as e:
+            bk.backup_programado(authorization=f"Bearer {SECRETO}")
+        assert e.value.status_code == 502
+    subir.assert_not_called()
+    reg.assert_called_once()
+    assert "FALLO" in reg.call_args[0][3]
+
+
+def test_tabla_con_error_parcial_se_sube_pero_queda_anotado():
+    """Una tabla rota entre trece no debe perder las otras doce, pero el
+    historial debe dejar constancia — no marcarse como copia limpia."""
+    backup_parcial = {"_metadata": {}, "_error_categoria": "boom"}
+    with patch.dict("os.environ", {"CRON_SECRET": SECRETO}), \
+         patch.object(bk, "_construir_backup", return_value=(backup_parcial, 10)), \
+         patch.object(bk, "_registrar_backup") as reg, \
+         patch.object(bk.storage, "is_configured", return_value=True), \
+         patch.object(bk.storage, "upload_fileobj") as subir, \
+         patch.object(bk, "db_query", return_value=None):
+        r = bk.backup_programado(authorization=f"Bearer {SECRETO}")
+    assert r["ok"] is True
+    assert r["tablas_con_error"] == ["categoria"]
+    subir.assert_called_once()
+    reg.assert_called_once()
+    assert "categoria" in reg.call_args[0][3]
+
+
+def test_caida_brusca_de_filas_queda_anotada_sin_bloquear():
+    """IN-176: comparar contra la copia anterior avisa de una caída fuerte de
+    filas sin impedir que la copia de hoy (ya a salvo en R2) se registre."""
+    p1, p2, p3, p4 = _sin_efectos()
+    with patch.dict("os.environ", {"CRON_SECRET": SECRETO}), p1, p2 as reg, p3, p4, \
+         patch.object(bk, "db_query", return_value={"total_rows": 1000}):
+        r = bk.backup_programado(authorization=f"Bearer {SECRETO}")
+    assert r["ok"] is True  # 42 filas frente a 1000 no impide la copia
+    reg.assert_called_once()
+    assert "AVISO" in reg.call_args[0][3] and "caída" in reg.call_args[0][3]
+
+
+def test_fallo_al_comparar_con_historial_no_tumba_el_backup():
+    """La comparación con la copia anterior es extra, no el backup en sí."""
+    p1, p2, p3, p4 = _sin_efectos()
+    with patch.dict("os.environ", {"CRON_SECRET": SECRETO}), p1, p2 as reg, p3, p4, \
+         patch.object(bk, "db_query", side_effect=RuntimeError("sin conexión")):
+        r = bk.backup_programado(authorization=f"Bearer {SECRETO}")
+    assert r["ok"] is True
+    reg.assert_called_once()
+
+
 def test_el_historial_no_puede_tumbar_el_backup():
     """Si backup_history falla, la copia ya está en R2: no debe propagarse."""
     with patch.object(bk, "db_query", side_effect=RuntimeError("sin conexión")), \

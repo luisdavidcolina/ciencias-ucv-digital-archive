@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Header, Query, Uplo
 from fastapi.responses import StreamingResponse
 import storage
 from database import db_query, db_transaction, logger
+import hmac
 import json
 import io
 import os
@@ -378,25 +379,53 @@ def get_backup_history(page: int = 1, per_page: int = 20):
 @router_cron.get("/programado")
 def backup_programado(
     authorization: str = Header(default=""),
-    x_vercel_cron: str = Header(default=""),
 ):
     """Copia completa a R2. Pensado para ejecutarse por cron, no a mano.
 
     Se protege con CRON_SECRET: sin el, este endpoint seria una descarga
     completa de la base abierta a cualquiera. Si la variable no esta definida se
     rechaza — fallar cerrado es lo correcto aqui.
+
+    IN-157: la comparación de la credencial es en tiempo constante
+    (`hmac.compare_digest`), igual que el resto del proyecto (`core/security.py`).
+    Antes era `!=` sobre strings, que Python corta en el primer byte distinto —
+    un vector estrecho por la latencia de red, pero inconsistente con el resto
+    del código sin motivo. También se retira `x_vercel_cron`: se declaraba como
+    parámetro pero nunca se leía ni se usaba para nada.
     """
     esperado = os.environ.get("CRON_SECRET", "")
     if not esperado:
         raise HTTPException(
             503, "CRON_SECRET no está configurado; el backup programado está deshabilitado.")
-    if authorization != f"Bearer {esperado}":
+    if not hmac.compare_digest(authorization, f"Bearer {esperado}"):
         raise HTTPException(401, "No autorizado")
 
     if not storage.is_configured():
         raise HTTPException(503, "Almacenamiento R2 sin configurar; no hay dónde guardar la copia.")
 
     backup, total_rows = _construir_backup(EXPORTABLE_TABLES)
+
+    # IN-176: verificar la copia antes de darla por buena, no después de que
+    # haga falta. `_construir_backup` nunca lanza — una tabla que falla al
+    # exportar queda como lista vacía más una clave `_error_<tabla>`, para que
+    # el resto del backup no se pierda por una sola tabla rota. Eso es
+    # correcto para no perder el resto de la copia, pero significa que un
+    # cambio de esquema que rompa el SELECT de una tabla se subiría a R2 y se
+    # registraría en `backup_history` como si fuera un éxito completo —
+    # exactamente el escenario de meses de copias de 200 bytes marcadas "OK"
+    # que describe el ticket.
+    tablas_con_error = sorted(
+        k[len("_error_"):] for k in backup if k.startswith("_error_")
+    )
+    if len(tablas_con_error) == len(EXPORTABLE_TABLES):
+        # Ninguna tabla se pudo exportar: no es una copia parcial, es que algo
+        # está roto de raíz (conexión a la base, por ejemplo). No tiene
+        # sentido subirla ni registrarla como si fuera una copia real.
+        detalle = f"Ninguna tabla pudo exportarse: {tablas_con_error}"
+        logger.error("Backup programado: %s", detalle)
+        _registrar_backup("cron", 0, 0, f"FALLO: {detalle[:200]}")
+        raise HTTPException(502, "El backup no exportó ninguna tabla; no se subió a R2.")
+
     crudo = json.dumps(backup, ensure_ascii=False).encode("utf-8")
     clave = f"backups/{datetime.utcnow().strftime('%Y/%m/%d-%H%M%S')}-completo.json"
 
@@ -409,11 +438,47 @@ def backup_programado(
         raise HTTPException(502, "No se pudo guardar la copia en el almacenamiento.")
 
     tam_kb = round(len(crudo) / 1024, 1)
-    _registrar_backup("cron", len(EXPORTABLE_TABLES), total_rows,
-                      f"Copia automática en R2 ({clave}, {tam_kb} KB)")
+
+    # Comparar contra la copia programada anterior: una caída brusca del
+    # número de filas totales (la base se vació, o la mayoría de las tablas
+    # fallaron silenciosamente) es la señal de alerta que el ticket pide, sin
+    # bloquear la copia — puede ser una limpieza legítima, y la copia de hoy
+    # ya está a salvo en R2 de todas formas.
+    aviso_caida = ""
+    try:
+        anterior = db_query(
+            """SELECT total_rows FROM public.backup_history
+               WHERE tipo = 'cron' AND notas NOT LIKE 'FALLO%%'
+               ORDER BY created_at DESC LIMIT 1""",
+            fetch="one",
+        )
+        if anterior and anterior.get("total_rows"):
+            filas_antes = int(anterior["total_rows"])
+            if filas_antes > 0 and total_rows < filas_antes * 0.5:
+                aviso_caida = (
+                    f"; AVISO: {total_rows} filas frente a {filas_antes} de la copia "
+                    "anterior (caída > 50%)"
+                )
+                logger.error(
+                    "Backup programado: caída brusca de filas (%s -> %s)",
+                    filas_antes, total_rows,
+                )
+    except Exception as e:
+        # Comparar contra el historial es una verificación extra, no el
+        # backup en sí — que ya está a salvo en R2. No debe tumbar la copia.
+        logger.warning("Backup programado: no se pudo comparar con la copia anterior: %s", e)
+
+    notas = f"Copia automática en R2 ({clave}, {tam_kb} KB)"
+    if tablas_con_error:
+        notas += f"; tablas con error: {tablas_con_error}"
+        logger.error("Backup programado: tablas con error al exportar: %s", tablas_con_error)
+    notas += aviso_caida
+
+    _registrar_backup("cron", len(EXPORTABLE_TABLES), total_rows, notas)
     logger.info("Backup programado OK: %s (%s filas, %s KB)", clave, total_rows, tam_kb)
     return {"ok": True, "clave": clave, "tablas": len(EXPORTABLE_TABLES),
-            "filas": total_rows, "kb": tam_kb}
+            "filas": total_rows, "kb": tam_kb,
+            "tablas_con_error": tablas_con_error}
 
 
 def _registrar_backup(usuario: str, tablas: int, filas: int, notas: str) -> None:
