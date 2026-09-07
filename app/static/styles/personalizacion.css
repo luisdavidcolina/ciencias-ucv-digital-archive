@@ -229,9 +229,29 @@ body[data-page="login"] {
 .ds-sidebar-theme-btn:hover { background:linear-gradient(90deg,#f5f0ff,#f8f9fa); color:#6f42c1; border-left-color:#6f42c1; }
 .ds-sidebar-theme-btn:hover i { color:#6f42c1; }
 
+/* BUG-theme-panel-sin-backdrop: mismo par velo+cajón que .ds-sidebar-overlay
+   / .ds-sidebar en shell.css (BUG-menu-bugueando) — el velo va en
+   --z-overlay y el panel un nivel encima en --z-modal, para que el velo
+   quede visible detrás del panel sin interceptar nada por delante de él. */
+.ds-theme-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0);
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  transition: background var(--duration-slow) var(--ease-out);
+}
+.ds-theme-panel-overlay.open {
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
 .ds-theme-panel {
   position:fixed; top:0; right:-340px; width:320px; height:100vh;
-  background:#fff; z-index:1060;
+  background:#fff; z-index: var(--z-modal);
   /* SD-087: mismo nivel de elevación que la barra lateral (--shadow-xl,
      definido para ambas en el bloque de tokens L0), sólo con el offset
      invertido porque el panel entra por la derecha. */

@@ -232,6 +232,23 @@ function _onThemePanelKeydown(e) {
   }
 }
 
+// BUG-theme-panel-sin-backdrop: a 390px el panel se abría sin velo detrás,
+// y su subárbol (aunque angosto) quedaba por encima del menú lateral entero
+// — el mismo patrón que BUG-menu-bugueando en el cajón lateral (ver
+// shell.css). El velo separa visualmente el panel del contenido y, al
+// tocarlo, cierra el panel sin tener que acertarle al botón ✕ o a Escape.
+function _themePanelOverlay() {
+  let overlay = document.getElementById("ds-theme-panel-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "ds-theme-panel-overlay";
+    overlay.className = "ds-theme-panel-overlay";
+    overlay.addEventListener("click", closeThemePanel);
+    document.body.appendChild(overlay);
+  }
+  return overlay;
+}
+
 function openThemePanel() {
   _themePanelOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   let panel = document.getElementById("ds-theme-panel");
@@ -240,7 +257,9 @@ function openThemePanel() {
   panel.setAttribute("aria-modal", "true");
   panel.setAttribute("aria-label", "Personalización");
   document.addEventListener("keydown", _onThemePanelKeydown);
+  const overlay = _themePanelOverlay();
   requestAnimationFrame(() => {
+    overlay.classList.add("open");
     panel.classList.add("open");
     const focusables = _themePanelFocusables(panel);
     (focusables[0] || panel).focus();
@@ -249,6 +268,7 @@ function openThemePanel() {
 
 function closeThemePanel() {
   document.getElementById("ds-theme-panel")?.classList.remove("open");
+  document.getElementById("ds-theme-panel-overlay")?.classList.remove("open");
   document.removeEventListener("keydown", _onThemePanelKeydown);
   if (_themePanelOpener && document.body.contains(_themePanelOpener)) {
     _themePanelOpener.focus();
