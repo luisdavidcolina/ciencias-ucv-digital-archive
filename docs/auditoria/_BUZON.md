@@ -5187,3 +5187,79 @@ Después de los cambios y las 7 pruebas nuevas (`test_disposicion.py` +3,
 `test_autorizacion_retencion.py` +3 métodos): en verde también — ver commit.
 
 **quién lo pide**: agente-oa-retentionpy-3 (OA-admin-retention-py-tercer-pase)
+
+## C9-auth-py-tercer-pase — timing de enumeracion, XSS en audit_log via login, logout sin auditar
+
+**quién lo pide**: agente-authpy-3 (C9-auth-py-tercer-pase)
+
+Tercer pase dedicado a `app/routes/auth.py`, que sólo había tenido el carril fundacional
+`C9-auth` (2026-09-03). Revisé ticket por ticket todas las menciones a `auth.py` en
+`docs/auditoria/*.md` contra el código actual (commit `de9f6cf` en adelante).
+
+**Ya resueltos por C9-auth, verificados de nuevo contra el código**: SI-028/IN-038
+(`/api/auth/verify` ya no acepta el token por query param), SI-035 (ya no se hace
+`.strip()` sobre la contraseña, sólo sobre el username), SI-048 (el mensaje de login es
+siempre genérico, sin distinguir usuario inexistente de contraseña incorrecta), SI-031/
+SI-032 (bloqueo de 5 intentos en `_FAILED_ATTEMPTS`, en memoria).
+
+**Arreglados en este pase** (commit `e59a0f6`):
+
+- `IN-139` (enumeración de usuarios por diferencia de tiempo): cuando no hay ninguna
+  fila activa para el usuario (no existe, o existe pero desactivada), el código nunca
+  llamaba a `bcrypt.checkpw` y volvía en milisegundos frente a los cientos de ms de un
+  intento contra una cuenta real. Añadí `_DUMMY_HASH` (un hash bcrypt válido, generado
+  aparte, contra el que nunca hace match ninguna contraseña real) y una llamada a
+  `verify_password` contra él cuando `active_rows` está vacío, antes de registrar el
+  fallo. El resultado se descarta; sólo importa el tiempo gastado. No cambia ningún
+  código de estado ni mensaje.
+- `SI-021` (el usuario del intento fallido entra sin filtrar en `audit_log`, y la
+  pestaña Auditoría lo pinta sin escapar — SI-006, fuera de mi zona): añadí
+  `_sanitize_for_log()`, que quita caracteres de control y `<`/`>` (lo único que hace
+  falta para que un payload HTML/JS se ejecute) y recorta a 100 caracteres (el ancho
+  real de `audit_log.usuario`). Se aplica al `username` en los tres `log_event` de
+  fallo/bloqueo de login. No toca cómo se pinta la auditoría (seguiría haciendo falta
+  escapar ahí también, ver SI-006), sólo reduce lo que queda guardado.
+- `SI-145` (parcial — sólo la mitad de `auth.py`, el resto son `backup.py` y
+  `admin/users.py`, fuera de mi zona): `logout` no dejaba ningún rastro en `audit_log`.
+  Ahora lee la cookie `ds_session`, resuelve el username con `verify_session_token` (el
+  mismo helper que ya usa `restore`) y registra `Logout` si la firma es válida. Si la
+  cookie ya no es válida o no está, no se registra nada — no hay a quién atribuírselo,
+  e inventar un valor sería peor que no loguear.
+
+**Verificado que sigue siendo real pero documentado como bloqueado, no tocado**:
+
+- `IN-137` (persistir el contador de intentos fallidos en la tabla `login_attempts`,
+  que `agente-h1a-migraciones` ya migró — ver su nota arriba, sección `login_attempts`):
+  el cambio en sí es correcto y de bajo riesgo conceptual, pero `test_auth.py` mockea
+  `routes.auth.db_query` con `side_effect` posicional por número de llamada (ver
+  `test_login_correcto`); añadir una consulta más a `login()` antes de la consulta
+  principal cambia ese orden y rompe los mocks. Arreglarlo bien exige tocar
+  `test_auth.py`, que es un archivo compartido por el resto de carriles de auth/authz
+  y no está en mi zona declarada (`app/routes/auth.py` exclusivamente). Lo dejo anotado
+  para un carril que declare ambos archivos a la vez.
+- `IN-140`/`IN-079` (una fila por usuario, índice único sobre `LOWER(usuario)`):
+  exige migración en `main.py`/`schema.sql`, fuera de zona.
+- `SI-037` (endpoint para que un usuario cambie su propia contraseña): necesita un
+  modelo Pydantic nuevo en `models.py` (fuera de zona) y un punto de entrada en
+  `app-shell.js`. Documentado, no soy quien lo cierra sin coordinar el nombre del
+  endpoint con quien toque el frontend.
+- `SI-042` (caducidad absoluta de sesión, no sólo deslizante), `SI-040` (cerrar sesión
+  en todos los dispositivos vía `token_version`): ambos exigen cambiar el formato del
+  token en `core/security.py`, fuera de zona y de alto riesgo si se hace a medias (un
+  cambio de formato de token sin coordinar `verify_session_token` puede invalidar todas
+  las sesiones activas en producción).
+- `SI-047` (unificar resolución de módulos Global entre `auth.py`, `deps.py` y
+  `ai.py`): exige una función compartida en un archivo que ninguno de los tres declara
+  hoy; fuera de zona, es un pase de coordinación en sí mismo.
+- `IN-155` (modelo de amenaza CSRF): decisión de diseño de seguridad que toca
+  `deps.py` y `main.py` a la vez; no es un fix puntual seguro de aplicar solo.
+- `SI-039` (2FA), `SI-038` (recuperación de contraseña): decisión de producto (L),
+  no bug de seguridad a corregir sin especificación de producto.
+
+No encontré bugs nuevos sin ficha propia en `auth.py` durante esta revisión.
+
+**`python -m pytest app/tests -q`**: 866/866 en verde antes de empezar y después del
+cambio (mismo número). `python -m pytest app/tests/test_auth.py
+app/tests/test_autorizacion_deps.py app/tests/test_secrets.py -q`: 97 passed.
+
+**quién lo pide**: agente-authpy-3 (C9-auth-py-tercer-pase)
