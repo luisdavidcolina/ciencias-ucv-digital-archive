@@ -5263,3 +5263,64 @@ cambio (mismo número). `python -m pytest app/tests/test_auth.py
 app/tests/test_autorizacion_deps.py app/tests/test_secrets.py -q`: 97 passed.
 
 **quién lo pide**: agente-authpy-3 (C9-auth-py-tercer-pase)
+
+## OA-admin-helpers-py-tercer-pase — primer carril dedicado a admin/helpers.py
+
+**quién lo pide**: agente-adminhelpers-3 (OA-admin-helpers-py-tercer-pase)
+
+`app/routes/admin/helpers.py` no había tenido carril propio (ni fundacional ni
+tercer pase); con esto se completa la cobertura de todo `app/routes/admin/`.
+Revisé las menciones a `helpers.py` en `docs/auditoria/*.md` (grep por nombre de
+archivo y por cada función exportada) contra el código actual (commit `de9f6cf`
+en adelante), más `git log` del archivo (nunca tocado desde
+`dc6ed2e refactor(dedup)`, salvo `1c4e858`/`4b9f5a8` de limpieza general).
+
+**Arreglado en este pase** (commit `9adfaa0`):
+
+- `OA-208` (`upsert_descriptors` hace dos viajes a la base por palabra clave):
+  reescrito a un `INSERT...SELECT unnest(...) ON CONFLICT` por paso — dos
+  round-trips totales en vez de dos por keyword (15 keywords eran 30 viajes por
+  alta, doblado en cada edición porque el `PUT` borra y re-vincula). Firma y
+  comportamiento externo sin cambios, así que no hizo falta tocar `docs.py`
+  (único caller, fuera de mi zona) — verificado con grep que sólo importa la
+  función, no su implementación interna.
+- Código muerto: `fetch_one_or_404` no tenía ningún caller en todo el repo
+  (grep confirmado); no tiene ficha propia, la retiré como candidata a
+  confusión futura.
+
+**Verificado que sigue siendo real pero bloqueado por archivo ajeno, documentado
+sin tocar**:
+
+- `OR-008` (los tipos nuevos de RRHH caen en la categoría de Archivo porque
+  `_resolve_or_create_tipo_documento` se llama sin `cat_slug`): el arreglo real
+  está en los call sites de `docs.py:373,531` e `imports.py:377`, no en la
+  función — pasarles siempre el scope. `docs.py`/`imports.py` **[CHOCA]**.
+- `OR-039` (catálogo de cargos se duplica por capitalización —
+  `_resolve_or_create_lookup` compara exacto, `hr_alerts.py` compara
+  `LOWER()`): pide índice único sobre la forma normalizada, `main.py` **[CHOCA]**
+  (migración) + `hr_alerts.py` fuera de zona; no es seguro tocar sólo la
+  comparación de un lado sin la migración.
+- `OR-202`/`OR-292`/`IN-011` (`_resolve_user_id` inventa un autor —primer
+  usuario, o `1` literal— cuando no encuentra el nombre): confirmé que sigue
+  así (`helpers.py:109-119` en el código de antes de este pase). Lo evalué para
+  arreglar solo — cambiar el fallback por un 400 no exige tocar la firma ni los
+  callers técnicamente — pero **no lo hice**: `docs.py`/`imports.py` llaman con
+  `req.usuario`/`requester`, y `imports.py:304` usa `requester: str =
+  Query(default="")` — una llamada real sin ese query param (o con nombre
+  desalineado) pasaría de "atribuido mal" a "import roto en seco" sin que yo
+  pueda verificar desde aquí si el frontend siempre lo manda. El arreglo que
+  pide la ficha en realidad es IN-133 (el autor sale de `require_session`, no
+  del cuerpo), que exige tocar `docs.py`/`imports.py` a la vez — fuera de mi
+  zona declarada (`app/routes/admin/helpers.py` exclusivamente). Documentado
+  para un carril que declare los tres archivos juntos.
+
+**Confirmado ya resuelto, sin cambios**: nada — es el primer pase de este
+archivo.
+
+No encontré funciones duplicadas en otro archivo que reimplementen lo mismo con
+otro nombre (revisé `catalog.py`, `users.py`, `hr_alerts.py`, `imports.py` por
+patrones `SELECT id FROM public.*` / `resolve_or_create`); lo que hay son
+consultas de propósito distinto (existencia para create, no resolve-or-create).
+
+**`python -m pytest app/tests -q`**: 883/883 en verde antes de empezar y
+después del cambio (mismo número).
