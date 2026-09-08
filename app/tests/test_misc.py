@@ -420,3 +420,20 @@ class TestHealthSinCounts:
         assert res.status_code == 200
         body = res.json()
         assert body["counts"]["usuarios"] == 6
+
+    def test_health_detalle_con_sesion_global_y_bd_caida_da_degraded(self, client_as):
+        """El propio propósito del endpoint es diagnosticar -- si la consulta
+        de recuentos falla (BD caída), debe responder 200 "degraded" con
+        `counts: None`, no un 500 que oculte el diagnóstico que se buscaba."""
+        c = client_as("admin_health2")
+        with (
+            patch("routes.admin.deps.db_query",
+                  return_value=_fila_usuario(modulo="Global", rol="Admin")),
+            patch("main.db_query", side_effect=Exception("conexión perdida")),
+        ):
+            res = c.get("/api/health/detalle")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["status"] == "degraded"
+        assert body["db"] == "error"
+        assert body["counts"] is None
