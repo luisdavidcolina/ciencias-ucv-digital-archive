@@ -25,6 +25,25 @@
 }
 #ia-burbuja:hover { transform: scale(1.07); background: var(--ds-accent-hover); }
 
+/* RONDA27: mismo patron que RONDA25 (componentes-admin.css/.ds-admin-tabs,
+   paginas.css/.ds-skip-link) -- el anillo generico `*:focus-visible` (L122
+   de componentes-admin.css) pinta un azul fijo (`--color-link`, #0056b3 en
+   claro) con `!important`, pensado para superficie clara, encima del fondo
+   PROPIO de la burbuja (`--ds-accent`, #2b4e72 sin acento personalizado ni
+   dark-mode -- ninguno de los dos redefine `--ds-accent`). Medido con la
+   formula WCAG: 1,22:1, el mismo numero exacto que dio el `.ds-skip-link`
+   de la ronda25 y por la misma razon (dos azules oscuros muy cercanos).
+   Fix: fijar el aro al tono ya calculado como seguro sobre `--ds-accent`
+   (`--ds-accent-on`, SD-048 en paneles-admin.css -- blanco salvo en
+   accent-amber, donde se invierte a #212529 porque blanco sólo da ~3,6:1
+   sobre ese fondo más claro). Igual que en RONDA25, hace falta `!important`
+   para ganarle al generico por orden+especificidad igual. Verificado a
+   mano contra los ocho valores de `--ds-accent` (el de :root y los siete
+   `data-accent`): el peor caso es accent-amber con el aro oscuro sobre
+   fondo #b7791f, ~3,64:1; el resto en blanco sobre fondos mas oscuros,
+   entre 6,9:1 y 12,9:1 -- todos por encima del 3:1 de WCAG 1.4.11. */
+#ia-burbuja:focus-visible { outline-color: var(--ds-accent-on) !important; }
+
 /* VI-004: mientras haya un modal abierto (document.querySelector('.modal.show'),
    ai-widget.js), la burbuja y el panel se atenúan y dejan de recibir clics en
    vez de competir por encima del modal — el z-index ya los deja por debajo,
