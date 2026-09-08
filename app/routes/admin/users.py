@@ -152,10 +152,41 @@ def toggle_user_active(uid: int, actor: str = Depends(require_session)):
 
 @router.delete("/users/{uid}")
 def delete_user(uid: int, actor: str = Depends(require_session)):
+    """Borra un usuario del sistema.
+
+    RONDA29 (integridad referencial): `datos_archivo.creado_por` y
+    `datos_rrhh.creado_por` tienen FK `ON DELETE RESTRICT` hacia
+    `usuarios_sistema` (schema.sql) — un `DELETE` liso sobre un usuario que
+    ya creó documentos no dejaba ningún huérfano (la FK lo impide a nivel de
+    base de datos), pero SÍ reventaba con el 500 genérico de `database.py`
+    ("Error en base de datos", IN-036) en vez de un error accionable: mismo
+    patrón que ya se arregló para `tipo_documento` en
+    `admin/catalog.py:delete_category` (comentario OA-123/OR-163), que sí
+    comprueba el uso antes de intentar el DELETE. Aquí se hace la misma
+    comprobación explícita — 409 con el conteo, sin tocar la fila — antes de
+    dejar que la FK decida por sorpresa.
+    """
     row = db_query("SELECT usuario FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="one")
     if not row:
         raise HTTPException(404, "Usuario no encontrado")
     username = row["usuario"]
+
+    uso_archivo = db_query(
+        "SELECT COUNT(*) AS cnt FROM public.datos_archivo WHERE creado_por = %s",
+        (uid,), fetch="one",
+    )
+    uso_rrhh = db_query(
+        "SELECT COUNT(*) AS cnt FROM public.datos_rrhh WHERE creado_por = %s",
+        (uid,), fetch="one",
+    )
+    uso_count = int((uso_archivo or {}).get("cnt", 0)) + int((uso_rrhh or {}).get("cnt", 0))
+    if uso_count > 0:
+        raise HTTPException(
+            409,
+            f"El usuario '{username}' es autor de {uso_count} documento(s) y no se puede "
+            "borrar; desactívalo en su lugar.",
+        )
+
     db_query("DELETE FROM public.usuarios_sistema WHERE id = %s", (uid,), fetch="none", commit=True)
     # IN-133: igual, actor de la sesión en vez del query param `requester`.
     log_event(actor, "Delete User", "Admin", f"Eliminado: {username}")

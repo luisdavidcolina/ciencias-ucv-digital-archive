@@ -179,8 +179,29 @@ class TestBorrarUsuario:
         c = client_as("admin_global")
         fila = _fila(modulo="Global", rol="Admin", is_active=True)
         row = _fila(usuario="objetivo")
+        sin_uso = _fila(cnt=0)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.admin.users.db_query", return_value=row), \
+             patch("routes.admin.users.db_query", side_effect=[row, sin_uso, sin_uso, None]), \
              patch("routes.admin.users.log_event", return_value=None):
             res = c.delete("/api/admin/users/1")
         assert res.status_code == 200
+
+    def test_no_se_puede_borrar_usuario_con_documentos_creados(self, client_as):
+        """RONDA29: `creado_por` tiene FK RESTRICT (schema.sql) desde
+        `datos_archivo`/`datos_rrhh` -- antes esto reventaba con un 500
+        genérico (IN-036) en vez de un error accionable. Ahora se comprueba
+        el uso antes de intentar el DELETE y se responde 409."""
+        c = client_as("admin_global")
+        fila = _fila(modulo="Global", rol="Admin", is_active=True)
+        row = _fila(usuario="objetivo")
+        con_uso_archivo = _fila(cnt=2)
+        con_uso_rrhh = _fila(cnt=0)
+        with patch("routes.admin.deps.db_query", return_value=fila), \
+             patch("routes.admin.users.db_query", side_effect=[row, con_uso_archivo, con_uso_rrhh]) as mock_db, \
+             patch("routes.admin.users.log_event", return_value=None) as mock_log:
+            res = c.delete("/api/admin/users/1")
+        assert res.status_code == 409
+        assert "objetivo" in res.json()["detail"]
+        # No debe llegar a ejecutar el DELETE ni registrar el evento de borrado.
+        assert mock_db.call_count == 3
+        mock_log.assert_not_called()
