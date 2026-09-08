@@ -17,7 +17,13 @@ PAGES_PY = APP / "routes" / "pages.py"
 
 # HTML que no se sirven por ruta a propósito (fragmentos, plantillas parciales).
 # Si añades uno, justifícalo aquí.
-SIN_RUTA_A_PROPOSITO: set[str] = set()   # (se sirven por _page)
+SIN_RUTA_A_PROPOSITO: set[str] = {
+    # No se sirve por _page/pages.py: la devuelve directamente
+    # http_exception_handler() en main.py (FileResponse) para cualquier 404 de
+    # una ruta que no sea /api/* ni /static/*, en vez del JSON crudo por
+    # defecto de FastAPI (R53).
+    "404.html",
+}
 
 
 def _servidos():

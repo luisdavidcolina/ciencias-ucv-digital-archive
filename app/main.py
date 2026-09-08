@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from core.config import settings
@@ -151,6 +151,13 @@ _req_logger = _logging.getLogger("app.requests")
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
+    path = request.url.path
+    if exc.status_code == 404 and not path.startswith("/api/") and not path.startswith("/static/"):
+        not_found_page = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "static", "404.html"
+        )
+        if os.path.exists(not_found_page):
+            return FileResponse(not_found_page, status_code=404)
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail, "status_code": exc.status_code},
