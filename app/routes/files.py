@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from fastapi.responses import RedirectResponse
 
 import storage
-from database import db_query, log_event
+from database import log_event
+from repos.files_repo import usuario_modulo_activo, clave_en_papelera
 from routes.admin.deps import require_session
 
 router = APIRouter(tags=["files"], dependencies=[Depends(require_session)])
@@ -25,10 +26,7 @@ def _modulo_permite_clave(usuario: str, key: str) -> bool:
     módulo (guion bajo) pensado para las dependencias de FastAPI, no para
     llamarse a mano con una clave arbitraria.
     """
-    fila = db_query(
-        "SELECT modulo, is_active FROM public.usuarios_sistema WHERE usuario = %s LIMIT 1",
-        [usuario], fetch="one",
-    )
+    fila = usuario_modulo_activo(usuario)
     if not fila or not fila.get("is_active", True):
         return False
     modulo_usuario = fila.get("modulo")
@@ -63,14 +61,7 @@ def _documento_en_papelera(key: str) -> bool:
     prefijo desconocido.
     """
     url = f"/api/files/{key}"
-    fila = db_query(
-        "SELECT 1 AS x FROM public.datos_archivo WHERE file_url = %s AND deleted_at IS NOT NULL "
-        "UNION ALL "
-        "SELECT 1 AS x FROM public.datos_rrhh WHERE file_url = %s AND deleted_at IS NOT NULL "
-        "LIMIT 1",
-        [url, url], fetch="one",
-    )
-    return fila is not None
+    return clave_en_papelera(url)
 
 
 @router.post("/api/admin/upload")

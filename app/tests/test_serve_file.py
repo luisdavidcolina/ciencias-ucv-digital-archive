@@ -27,21 +27,21 @@ class TestModulo:
     def test_usuario_rrhh_no_accede_a_clave_de_archivo(self, client_as):
         c = client_as("usuario_rrhh")
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", return_value=_fila_usuario("RRHH")):
+             patch("repos.files_repo.db_query", return_value=_fila_usuario("RRHH")):
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
         assert res.status_code == 403
 
     def test_usuario_archivo_no_accede_a_clave_de_rrhh(self, client_as):
         c = client_as("usuario_archivo")
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", return_value=_fila_usuario("Archivo")):
+             patch("repos.files_repo.db_query", return_value=_fila_usuario("Archivo")):
             res = c.get("/api/files/rrhh/2024/x-expediente.pdf", follow_redirects=False)
         assert res.status_code == 403
 
     def test_usuario_inactivo_no_accede(self, client_as):
         c = client_as("usuario_desactivado")
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", return_value=_fila_usuario("Archivo", activo=False)):
+             patch("repos.files_repo.db_query", return_value=_fila_usuario("Archivo", activo=False)):
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
         assert res.status_code == 403
 
@@ -54,7 +54,7 @@ class TestModulo:
             return None  # sin fila en datos_archivo/datos_rrhh: no está en papelera
 
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", side_effect=_db_query), \
+             patch("repos.files_repo.db_query", side_effect=_db_query), \
              patch("storage.presigned_get_url", return_value="https://r2.example/firmado"), \
              patch("routes.files.log_event"):
             res = c.get("/api/files/rrhh/2024/x-expediente.pdf", follow_redirects=False)
@@ -74,7 +74,7 @@ class TestPapelera:
             return {"x": 1}
 
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", side_effect=_db_query), \
+             patch("repos.files_repo.db_query", side_effect=_db_query), \
              patch("storage.presigned_get_url") as mock_presigned:
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
         assert res.status_code == 404
@@ -89,7 +89,7 @@ class TestPapelera:
             return None
 
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", side_effect=_db_query), \
+             patch("repos.files_repo.db_query", side_effect=_db_query), \
              patch("storage.presigned_get_url", return_value="https://r2.example/firmado"), \
              patch("routes.files.log_event"):
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
@@ -109,7 +109,7 @@ class TestAuditoria:
             return None
 
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", side_effect=_db_query), \
+             patch("repos.files_repo.db_query", side_effect=_db_query), \
              patch("storage.presigned_get_url", return_value="https://r2.example/firmado"), \
              patch("routes.files.log_event") as mock_log:
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
@@ -123,7 +123,7 @@ class TestAuditoria:
     def test_acceso_denegado_no_registra_evento(self, client_as):
         c = client_as("usuario_rrhh")
         with patch("storage.is_configured", return_value=True), \
-             patch("routes.files.db_query", return_value=_fila_usuario("RRHH")), \
+             patch("repos.files_repo.db_query", return_value=_fila_usuario("RRHH")), \
              patch("routes.files.log_event") as mock_log:
             res = c.get("/api/files/archivo/2024/x-documento.pdf", follow_redirects=False)
         assert res.status_code == 403
