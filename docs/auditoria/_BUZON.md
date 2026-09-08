@@ -293,13 +293,19 @@ Quedan fuera de mi archivo y anotados aquí para el carril dueño:
 - `OA-124` (la descripción del alta no se guarda), `OA-125` (crear un tipo duplicado
   responde «éxito» con 200 en vez de 409), `OA-130` (renombrar una palabra clave puede
   fusionar dos sin avisar), `OA-131` (falta «ver los 12 documentos» y «fusionar con…» al
-  borrar una palabra clave en uso), `OA-123` (CRUD completo de tipos: renombrar, editar,
-  fusionar, desactivar) — todos exigen endpoints o columnas que no existen en
+  borrar una palabra clave en uso), `OA-123`/`OR-163` (CRUD completo de tipos: renombrar,
+  editar, fusionar, desactivar) — todos exigen endpoints o columnas que no existen en
   `app/routes/admin/catalog.py` (carril `C2-catalogo`, ya terminado según `_RESERVAS.md`,
   así que probablemente quedaron fuera de su alcance también). No los puedo cerrar sin ese
   backend: mi archivo ya deja `err.message` real propagado y valida lo que puede en
   el cliente, pero un 409/mensaje explícito y las columnas `descripcion`/fusión son de
-  `catalog.py`.
+  `catalog.py`. **Actualizado 2026-09-08**: backend de OA-124/OA-125/OA-130/OA-131/
+  OA-123/OR-163 ya implementado por `OA-admin-catalog-py-tercer-pase` (commit `c3c7b38`,
+  2026-09-06) — `PUT`/`DELETE /admin/categories/{tid}`, columna `descripcion`, 409 honesto,
+  fusión real de palabras clave. Pendiente confirmado por `R41-endpoints-sin-uso-py`
+  (2026-09-08, commit `4ee762b`): el endpoint CRUD existe y funciona pero sigue sin vista
+  propia en `admin_archive.html`/`admin_hr.html`/`categories.js` (sólo `POST /add_category`
+  tiene UI) — la parte de frontend de estas fichas sigue genuinamente abierta.
 - `OR-166` (colores de las cuatro Partes escritos a mano en dos sitios, sin token de
   `styles.css`) — pide un token nuevo en `app/static/styles.css`, fuera de mi archivo.
   Dejé el único mapa de colores centralizado en `admin-categories.js` (ya lo estaba)
@@ -5077,10 +5083,20 @@ desde `core/security.py`.
   igual de bloqueado desde el lado de `users.py`.
 - `IN-178` (no hay procedimiento para crear el primer administrador) — pide
   `app/cli.py` (nuevo), fuera de mi archivo declarado.
-- `IN-133` (resto, fuera de `users.py`): `docs.py`, `trash.py`, `backup.py`,
-  `share.py`, `files.py`, `imports.py` siguen aceptando identidad declarada
-  por el cliente en 22 puntos según la ficha original; sólo cerré los cuatro
-  de `users.py`.
+- `IN-133` (resto, fuera de `users.py`): a la fecha de este pase (2026-09-07),
+  `docs.py`, `trash.py`, `backup.py`, `share.py`, `files.py`, `imports.py`
+  seguían aceptando identidad declarada por el cliente; sólo se habían cerrado
+  los cuatro de `users.py`. **Actualizado 2026-09-08** (verificado contra
+  `_RESERVAS.md`, no releído código): ya cerrados también `docs.py`
+  (`IN-133-admin-docs-py-followup` c2d96e7 + `IN-133-status-endpoint-followup`
+  1c68a01), `share.py` (`OA-share-py-tercer-pase` 5be765c), `catalog.py`
+  (`OA-admin-catalog-py-tercer-pase` c3c7b38), `backup.py`/`imports.py`
+  (`IN133-backup-imports-requester` 162c699) y `retention.py` (`R8-recorrido-...`
+  1997ea3). Sigue genuinamente abierto sólo `trash.py`, documentado como
+  bloqueado por `C7-trash-py-tercer-pase` (503014e) por exigir cambio
+  coordinado de varios archivos a la vez. `files.py` no aparece en ninguna
+  ficha de cierre IN-133 hoy; no confirmado si tenía puntos propios en la
+  ficha original.
 
 **quién lo pide**: agente-oa-userspy-3 (OA-admin-users-py-tercer-pase)
 
