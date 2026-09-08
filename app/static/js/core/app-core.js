@@ -36,6 +36,52 @@ function plural(n, singular, pluralWord) {
   return `${n} ${n === 1 ? singular : pluralWord}`;
 }
 
+function _motionBehavior() {
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return (document.body.classList.contains("ds-no-anim") || reduced) ? "auto" : "smooth";
+}
+
+// BUSQUEDA-llamadas-huerfanas: toggleDocViewer()/closeDocViewer() vivían solo
+// en archive.js. hr.js abre el mismo markup compartido
+// (#modal-doc-viewer-section / #modal-doc-iframe, idéntico en archive.html y
+// hr.html) desde openDocMetadataModal() sin que hr.html cargue archive.js —
+// cada apertura del modal de documento de un expediente RRHH lanzaba un
+// ReferenceError no capturado y dejaba la ficha a medio pintar. Viven aquí
+// porque app-core.js es el único script común a archive.html y hr.html (y a
+// admin_archive.html/admin_hr.html, donde el markup no existe y ambas
+// funciones no hacen nada por su propia guarda).
+function toggleDocViewer(fileUrl) {
+  const section = document.getElementById("modal-doc-viewer-section");
+  const iframe  = document.getElementById("modal-doc-iframe");
+  if (!section || !iframe) return;
+  if (section.classList.contains("d-none")) {
+    const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);
+    if (isImg) {
+      iframe.style.display = "none";
+      let img = section.querySelector("img.ds-viewer-img");
+      if (!img) { img = document.createElement("img"); img.className = "ds-viewer-img"; img.style.cssText = "max-width:100%;max-height:500px;display:block;margin:auto;border-radius:4px;"; section.appendChild(img); }
+      img.src = fileUrl;
+      img.style.display = "block";
+    } else {
+      const img = section.querySelector("img.ds-viewer-img");
+      if (img) img.style.display = "none";
+      iframe.style.display = "block";
+      iframe.src = fileUrl;
+    }
+    section.classList.remove("d-none");
+    section.scrollIntoView({ behavior: _motionBehavior(), block: "nearest" });
+  } else {
+    closeDocViewer();
+  }
+}
+
+function closeDocViewer() {
+  const section = document.getElementById("modal-doc-viewer-section");
+  const iframe  = document.getElementById("modal-doc-iframe");
+  if (section) section.classList.add("d-none");
+  if (iframe)  iframe.src = "";
+}
+
 // ==========================================================================
 // TOAST SYSTEM — función canónica, usada en todas las páginas
 // ==========================================================================

@@ -40,11 +40,6 @@ function _truncBadge(text, max = 28) {
   return s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s;
 }
 
-function _archivoMotionBehavior() {
-  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  return (document.body.classList.contains("ds-no-anim") || reduced) ? "auto" : "smooth";
-}
-
 // Esqueleto de carga: isomorfo a la tarjeta real (BA-053) y con tantos
 // bloques como perPage, para no dar un salto de altura al llegar los datos.
 function showArchivoSkeleton() {
@@ -213,7 +208,7 @@ function changeArchivoPage(p) {
   state.archivo.page = Math.max(1, Math.min(p, pages));
   triggerArchivoSearch();
   const header = document.querySelector(".ds-results-header");
-  if (header) header.scrollIntoView({ behavior: _archivoMotionBehavior(), block: "start" });
+  if (header) header.scrollIntoView({ behavior: _motionBehavior(), block: "start" });
 }
 
 function getDocumentIcon(docType) {
@@ -463,40 +458,11 @@ if (typeof $ !== "undefined" && $.fn && $.fn.modal) {
   });
 }
 
-// ==========================================================================
-// VISOR DE DOCUMENTO DIGITALIZADO
-// ==========================================================================
-function toggleDocViewer(fileUrl) {
-  const section = document.getElementById("modal-doc-viewer-section");
-  const iframe  = document.getElementById("modal-doc-iframe");
-  if (!section || !iframe) return;
-  if (section.classList.contains("d-none")) {
-    const isImg = /\.(png|jpe?g|gif|webp|svg)$/i.test(fileUrl);
-    if (isImg) {
-      iframe.style.display = "none";
-      let img = section.querySelector("img.ds-viewer-img");
-      if (!img) { img = document.createElement("img"); img.className = "ds-viewer-img"; img.style.cssText = "max-width:100%;max-height:500px;display:block;margin:auto;border-radius:4px;"; section.appendChild(img); }
-      img.src = fileUrl;
-      img.style.display = "block";
-    } else {
-      const img = section.querySelector("img.ds-viewer-img");
-      if (img) img.style.display = "none";
-      iframe.style.display = "block";
-      iframe.src = fileUrl;
-    }
-    section.classList.remove("d-none");
-    section.scrollIntoView({ behavior: _archivoMotionBehavior(), block: "nearest" });
-  } else {
-    closeDocViewer();
-  }
-}
-
-function closeDocViewer() {
-  const section = document.getElementById("modal-doc-viewer-section");
-  const iframe  = document.getElementById("modal-doc-iframe");
-  if (section) section.classList.add("d-none");
-  if (iframe)  iframe.src = "";
-}
+// toggleDocViewer()/closeDocViewer() viven en app-core.js: hr.js (dossier de
+// RRHH) los necesita sobre el mismo markup compartido (#modal-doc-viewer-section
+// / #modal-doc-iframe, idéntico en archive.html y hr.html) y hr.html no carga
+// este archivo. Antes vivían aquí solos y cada apertura del modal de
+// documento RRHH lanzaba un ReferenceError sin capturar (BUSQUEDA-llamadas-huerfanas).
 
 // ==========================================================================
 // FACETAS DE BÚSQUEDA — conteos por tipo y por año
