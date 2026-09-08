@@ -105,7 +105,12 @@ function loginSuccess(user) {
     `ID: ${escHtml(user.username)}` +
     `<span class="ds-nav-user-ctx"> (${escHtml(user.modulo)} - ${escHtml(activeRole)})</span>`;
 
-  loadDynamicChoices();
+  // admin_ai.html no trae app-choices.js (no tiene buscadores ni TomSelect):
+  // una llamada sin guarda lanzaba `ReferenceError` no capturado dentro de
+  // este `try` de `checkPersistedSession()`, cuyo `catch` es `logout()` — un
+  // admin Global que abriera la Consola del asistente IA quedaba deslogueado
+  // al instante, sin aviso, cada vez.
+  if (typeof loadDynamicChoices === "function") loadDynamicChoices();
   configureSidebarVisibilities(user);
   _initNotificationBell(user);
   _startSessionExpiryWatch();
