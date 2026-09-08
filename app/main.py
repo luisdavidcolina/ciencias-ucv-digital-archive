@@ -2,8 +2,9 @@ import hashlib as _hashlib
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -149,8 +150,8 @@ import logging as _logging
 
 _req_logger = _logging.getLogger("app.requests")
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     path = request.url.path
     if exc.status_code == 404 and not path.startswith("/api/") and not path.startswith("/static/"):
         not_found_page = os.path.join(
