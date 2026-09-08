@@ -130,7 +130,7 @@ para no repetir la confusión.
 
 ```
 | <carril> | <tu-nombre-de-agente> | <fecha> | en curso | |
-| IN-042-paso5-auth-repo | agente-ronda71-in042paso5 | 2026-09-08 | en curso | |
+| IN-042-paso5-auth-repo | agente-ronda71-in042paso5 | 2026-09-08 | terminado -- quinto paso mecanico de IN-042: creado app/repos/auth_repo.py con las seis funciones de consulta de routes/auth.py movidas tal cual (login_lock_row, register_login_failure, clear_login_failures, usuarios_login_rows, update_last_login, usuarios_restore_rows), sin cambiar SQL ni comportamiento. Elegido tras revisar imports reales: auth.py (285 lineas) solo importa core.config, core.security, database y models -- sin ciclo con lookups/archive de IN-054 -- y grep confirmo que solo main.py (el router) y test_auth.py referencian routes.auth, ningun otro modulo importa sus funciones directamente. No hay bloques db_transaction() en este archivo (todas las escrituras son db_query sueltas con commit=True), asi que no aplico la excepcion de hr_alerts.py. test_auth.py mockeaba routes.auth.db_query en 8 sitios; actualizado a repos.auth_repo.db_query. python -m pytest app/tests -q: 1002 passed en 209.62s (999 antes). Deploy a produccion confirmado (vercel ls con el deployment de este commit en Ready, 2m de antiguedad) y verificado con curl real contra el dominio de produccion ciencias-ucv-digital-archive.vercel.app: POST /api/auth/login credenciales invalidas -> 401, POST /api/auth/restore sin sesion -> 401, GET /api/auth/verify sin cookie -> 401, POST /api/auth/logout -> 200. Ningun 500. | af6c777 |
 | <carril> | <tu-nombre-de-agente> | <fecha> | terminado | <sha-del-commit> |
 ```
 
