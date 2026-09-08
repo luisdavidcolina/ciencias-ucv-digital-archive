@@ -282,7 +282,7 @@ class TestPapelera:
             return count if call_n[0] == 1 else [doc]
         with (
             patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
-            patch("routes.trash.db_query", side_effect=mock_q),
+            patch("repos.trash_repo.db_query", side_effect=mock_q),
         ):
             res = c.get("/api/admin/papelera?modulo=Archivo")
         assert res.status_code == 200
@@ -303,7 +303,7 @@ class TestPapelera:
             return count if "COUNT" in sql else []
         with (
             patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
-            patch("routes.trash.db_query", side_effect=mock_q),
+            patch("repos.trash_repo.db_query", side_effect=mock_q),
         ):
             res = c.get("/api/admin/papelera?modulo=Archivo&page=2&per_page=10")
         assert res.status_code == 200

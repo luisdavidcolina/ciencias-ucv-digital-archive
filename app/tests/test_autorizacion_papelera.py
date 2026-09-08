@@ -8,8 +8,9 @@ eso exige además `rol = 'Admin'` en el módulo, no sólo pertenecer a él.
 
 Sigue el patrón de `test_autorizacion_deps.py`: fixtures `anon_client` y
 `client_as` (SI-226), con `routes.admin.deps.db_query` mockeado para simular
-la fila de `usuarios_sistema`, y `routes.trash.db_query` mockeado sólo cuando
-el escenario debe llegar a ejecutar la consulta real (caso 200).
+la fila de `usuarios_sistema`, y `repos.trash_repo.db_query` (IN-042 paso 7:
+`list_trash`/`list_trash_employees`/`list_versions` se movieron ahí) mockeado
+sólo cuando el escenario debe llegar a ejecutar la consulta real (caso 200).
 """
 from unittest.mock import MagicMock, patch
 
@@ -41,7 +42,7 @@ class TestListarPapelera:
         fila = _fila(modulo="Archivo", rol="Normal", is_active=True)
         count_row = _fila(total=0)
         with patch("routes.admin.deps.db_query", return_value=fila), \
-             patch("routes.trash.db_query", side_effect=[count_row, []]):
+             patch("repos.trash_repo.db_query", side_effect=[count_row, []]):
             res = c.get("/api/admin/papelera?modulo=Archivo")
         assert res.status_code == 200
 

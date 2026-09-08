@@ -12,6 +12,12 @@ import storage
 from fastapi import APIRouter, Depends, HTTPException
 
 from database import db_query, db_transaction, log_event
+from repos.trash_repo import (
+    list_trash_archivo_count, list_trash_archivo_rows,
+    list_trash_rrhh_count, list_trash_rrhh_rows,
+    list_trash_employees_count, list_trash_employees_rows,
+    list_versions_rows,
+)
 from routes.admin.deps import require_admin_role, require_role, require_session
 from routes.admin.helpers import _require_modulo, module_meta, paginate
 
@@ -63,46 +69,11 @@ def list_trash(
     page, per_page, offset = paginate(page, per_page)
 
     if modulo == "Archivo":
-        count_row = db_query(
-            "SELECT COUNT(*) AS total FROM public.datos_archivo WHERE deleted_at IS NOT NULL",
-            fetch="one",
-        )
-        rows = db_query(
-            """SELECT id_archivo AS id, titulo, autor,
-                      COALESCE(tesauro_primario,'') AS doc_type,
-                      TO_CHAR(fecha_documento,'YYYY-MM-DD') AS fecha,
-                      TO_CHAR(deleted_at,'YYYY-MM-DD HH24:MI') AS deleted_at,
-                      deleted_by
-               FROM public.datos_archivo
-               WHERE deleted_at IS NOT NULL
-               ORDER BY deleted_at DESC
-               LIMIT %s OFFSET %s""",
-            [per_page, offset], fetch="all",
-        ) or []
+        count_row = list_trash_archivo_count()
+        rows = list_trash_archivo_rows(per_page, offset)
     else:
-        count_row = db_query(
-            """SELECT COUNT(*) AS total FROM public.datos_rrhh dr
-               LEFT JOIN public.empleados e ON dr.empleado_id = e.id
-               WHERE dr.deleted_at IS NOT NULL""",
-            fetch="one",
-        )
-        rows = db_query(
-            """SELECT dr.id_rrhh AS id,
-                      COALESCE(td.nombre,'') AS titulo,
-                      COALESCE(e.nombres || ' ' || e.apellidos, '') AS autor,
-                      COALESCE(e.nombres || ' ' || e.apellidos, '') AS empleado,
-                      COALESCE(td.nombre,'') AS doc_type,
-                      TO_CHAR(dr.fecha_documento,'YYYY-MM-DD') AS fecha,
-                      TO_CHAR(dr.deleted_at,'YYYY-MM-DD HH24:MI') AS deleted_at,
-                      dr.deleted_by
-               FROM public.datos_rrhh dr
-               LEFT JOIN public.empleados e ON dr.empleado_id = e.id
-               LEFT JOIN public.tipo_documento td ON dr.id_tipo_documento = td.id
-               WHERE dr.deleted_at IS NOT NULL
-               ORDER BY dr.deleted_at DESC
-               LIMIT %s OFFSET %s""",
-            [per_page, offset], fetch="all",
-        ) or []
+        count_row = list_trash_rrhh_count()
+        rows = list_trash_rrhh_rows(per_page, offset)
 
     total = int(count_row["total"]) if count_row else 0
     return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
@@ -205,19 +176,8 @@ def list_trash_employees(
 ):
     page, per_page, offset = paginate(page, per_page)
 
-    count_row = db_query(
-        "SELECT COUNT(*) AS total FROM public.empleados WHERE deleted_at IS NOT NULL",
-        fetch="one",
-    )
-    rows = db_query(
-        """SELECT id, cedula, nombres || ' ' || apellidos AS nombre,
-                  TO_CHAR(deleted_at,'YYYY-MM-DD HH24:MI') AS deleted_at, deleted_by
-           FROM public.empleados
-           WHERE deleted_at IS NOT NULL
-           ORDER BY deleted_at DESC
-           LIMIT %s OFFSET %s""",
-        [per_page, offset], fetch="all",
-    ) or []
+    count_row = list_trash_employees_count()
+    rows = list_trash_employees_rows(per_page, offset)
 
     total = int(count_row["total"]) if count_row else 0
     return {"total": total, "page": page, "per_page": per_page, "records": [dict(r) for r in rows]}
@@ -331,14 +291,7 @@ def list_versions(
 ):
     _require_modulo(modulo)
     tabla, _ = module_meta(modulo)
-    rows = db_query(
-        """SELECT id, version_num, file_url, comentario, subido_por,
-                  TO_CHAR(created_at,'YYYY-MM-DD HH24:MI') AS created_at
-           FROM public.documento_versiones
-           WHERE tabla=%s AND documento_id=%s
-           ORDER BY version_num DESC""",
-        [tabla, doc_id], fetch="all",
-    ) or []
+    rows = list_versions_rows(tabla, doc_id)
     return {"versiones": [dict(r) for r in rows]}
 
 
