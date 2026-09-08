@@ -17,5 +17,10 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements-dev.txt
 
+      - name: "Instalar Playwright (guarda visual SD-224: test_visual.py)"
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium webkit
+
       - name: Correr pruebas
         run: python -m pytest app/tests -q
