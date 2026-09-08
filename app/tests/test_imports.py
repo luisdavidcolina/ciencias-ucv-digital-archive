@@ -182,6 +182,45 @@ class TestImportEmpleadosActualizacionParcial:
         assert "Nuevo" in params and "Nombre" in params
 
 
+class TestPrefetchCedulasFallaCaeAConsultaPorFila:
+    """IN-217 paso 2 (ronda74): `import_empleados_csv` resuelve todas las
+    cédulas del CSV de una vez con `WHERE cedula = ANY(%s)` antes del bucle.
+    Si esa consulta en lote falla (`except Exception` alrededor del
+    prefetch), el código debe caer de vuelta al `SELECT` por fila de
+    siempre, no perder filas ni reventar con un 500 — pero ninguna prueba
+    forzaba jamás esa rama desde que se escribió."""
+
+    def test_prefetch_en_lote_falla_pero_la_fila_se_procesa_por_separado(self, client):
+        calls = []
+
+        def _db_query_side_effect(sql, params=None, fetch=None, commit=False):
+            if "cedula = ANY(%s)" in sql:
+                raise Exception("boom: fallo simulado del prefetch en lote")
+            if "FROM public.empleados WHERE cedula=%s" in sql:
+                return None  # la fila cae al SELECT individual: cédula nueva
+            return None
+
+        csv_body = (
+            "cedula,nombres,apellidos,cargo,departamento,estado\n"
+            "V-44444444,Maria,Rodriguez,Analista,Compras,Activo\n"
+        )
+        with patch("routes.admin.imports.db_query", side_effect=_db_query_side_effect), \
+             patch("routes.admin.imports._resolve_or_create_lookup", return_value=7), \
+             patch("routes.admin.imports.db_transaction", _fake_db_transaction(calls)):
+            res = _post_csv(client, "/api/admin/import/empleados", "empleados.csv", csv_body)
+
+        assert res.status_code == 200
+        body = res.json()
+        # El fallo del prefetch no debe aparecer como error de fila ni tumbar
+        # la importación: la fila se resuelve igual, sólo que por SELECT
+        # individual en vez del lote.
+        assert body["errors"] == [], body
+        assert body["inserted"] == 1, body
+
+        insert_calls = [c for c in calls if "INSERT INTO public.empleados" in c[0]]
+        assert len(insert_calls) == 1
+
+
 class TestReporteHonesto:
     """El mensaje de éxito sólo debe sonar a éxito si de verdad insertó o
     actualizó algo (causa raíz de que '0 insertados' pareciera un éxito)."""
