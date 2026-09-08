@@ -231,5 +231,4 @@ function adminSuffixFromTab(tab) {
   return (t === "admin-rrhh") ? "rrhh" : "archivo";
 }
 function adminId(base) { return `${base}-${adminSuffixFromTab()}`; }
-function getAdminEl(base) { return document.getElementById(adminId(base)); }
 function isArchivoModule() { return state.user && state.user.modulo === "Archivo"; }

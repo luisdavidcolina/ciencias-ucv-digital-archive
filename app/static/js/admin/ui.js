@@ -377,22 +377,6 @@ function showTableSkeleton(tbodyId, cols = 6, rows = 5) {
   ).join("");
 }
 
-// ─── Overlay de carga sobre tarjetas ─────────────────────────────────────────
-function showCardLoading(containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  el.style.position = "relative";
-  const ov = document.createElement("div");
-  ov.id = `loading-ov-${containerId}`;
-  ov.style.cssText = "position:absolute;inset:0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;z-index:10;border-radius:4px;";
-  ov.innerHTML = `<div class="spinner-border text-primary" role="status" style="width:2rem;height:2rem;"></div>`;
-  el.appendChild(ov);
-}
-
-function hideCardLoading(containerId) {
-  document.getElementById(`loading-ov-${containerId}`)?.remove();
-}
-
 // ─── Atajos de teclado globales (OA-172..OA-182, OR-219..OR-226) ─────────────
 // Escape cierra el modal por encima de la pila (no «el primero que aparezca»),
 // y confirma antes si el modal en curso quedó marcado como sucio con
