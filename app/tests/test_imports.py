@@ -194,3 +194,46 @@ class TestReporteHonesto:
         assert body["updated"] == 0
         assert body["success"] is False
         assert "sin cambios" in body["message"].lower()
+
+
+class TestIN133IgnoraRequesterDeclaradoPorElCliente:
+    """IN-133: la identidad que queda en auditoría (`log_event`) y en
+    `creado_por`/`updated_by` debe salir de la sesión verificada por
+    `require_session`, nunca de un parámetro que declare quien llama —
+    antes ambos endpoints aceptaban `requester` en la query string y lo
+    usaban tal cual, permitiendo a cualquiera atribuir su importación a
+    otro usuario."""
+
+    def test_import_empleados_usa_la_sesion_no_el_query_string(self, client_as):
+        c = client_as("empleado_real")
+        csv_body = "cedula,nombres,apellidos\nV-11111111,Ana,Perez\n"
+        with patch("routes.admin.imports.log_event") as mock_log:
+            res = c.post(
+                "/api/admin/import/empleados",
+                files={"file": ("empleados.csv", io.BytesIO(csv_body.encode("utf-8")), "text/csv")},
+                params={"requester": "otro_usuario_falsificado"},
+            )
+        assert res.status_code == 200
+        assert mock_log.call_args.args[0] == "empleado_real"
+
+    def test_import_documentos_usa_la_sesion_no_el_query_string(self, client_as):
+        c = client_as("empleado_real")
+
+        def _db_query_side_effect(sql, params=None, fetch=None, commit=False):
+            if "FROM public.empleados" in sql:
+                return _fila(id=1)
+            return None
+
+        with patch("routes.admin.imports.db_query", side_effect=_db_query_side_effect), \
+             patch("routes.admin.imports._resolve_or_create_tipo_documento", return_value=9), \
+             patch("routes.admin.imports._resolve_user_id", return_value=1) as mock_uid, \
+             patch("routes.admin.imports.log_event") as mock_log:
+            csv_body = "cedula_empleado,tipo_documento\nV-11111111,Contrato\n"
+            res = c.post(
+                "/api/admin/import/documentos",
+                files={"file": ("docs.csv", io.BytesIO(csv_body.encode("utf-8")), "text/csv")},
+                params={"modulo": "RRHH", "requester": "otro_usuario_falsificado"},
+            )
+        assert res.status_code == 200
+        mock_uid.assert_called_with("empleado_real")
+        assert mock_log.call_args.args[0] == "empleado_real"

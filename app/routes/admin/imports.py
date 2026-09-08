@@ -4,9 +4,10 @@ import io as _io_module
 import unicodedata as _unicodedata_module
 from datetime import datetime
 
-from fastapi import APIRouter, UploadFile, File, Query
+from fastapi import APIRouter, UploadFile, File, Query, Depends
 
 from database import db_query, db_transaction, log_event
+from .deps import require_session
 from .helpers import (_resolve_or_create_lookup, _resolve_or_create_tipo_documento,
                       _resolve_user_id)
 
@@ -125,10 +126,13 @@ def _parse_date(v):
 @router.post("/import/empleados")
 async def import_empleados_csv(
     file: UploadFile = File(...),
-    requester: str = Query(default=""),
+    usuario_sesion: str = Depends(require_session),
 ):
     """
     Importa o actualiza empleados desde CSV.
+
+    IN-133: `log_event` registra `usuario_sesion` (de la sesión verificada
+    por `require_session`), nunca un campo declarado por el cliente.
 
     Columnas reconocidas (mínimo `cedula` requerida):
     - `cedula`, `nombres`, `apellidos`, `cargo`, `departamento`, `estado`
@@ -274,7 +278,7 @@ async def import_empleados_csv(
         f"Importación completada: {resumen}." if huboExito
         else f"Importación sin cambios: ninguna fila se insertó ni actualizó ({resumen})."
     )
-    log_event(requester, "Import CSV Empleados", "RRHH", resumen)
+    log_event(usuario_sesion, "Import CSV Empleados", "RRHH", resumen)
     return results
 
 
@@ -282,11 +286,14 @@ async def import_empleados_csv(
 async def import_documentos_csv(
     file: UploadFile = File(...),
     modulo: str = Query(default="Archivo"),
-    requester: str = Query(default=""),
+    usuario_sesion: str = Depends(require_session),
 ):
     """
     Archivo: columnas titulo,autor,fecha,tipo_documento,abstract,ubicacion,palabras_clave[,numero_folio,soporte,numero_paginas]
     RRHH:    columnas cedula_empleado,tipo_documento,fecha,notas,ubicacion[,numero_folio,soporte,numero_paginas]
+
+    IN-133: `creado_por`/`updated_by` y `log_event` usan `usuario_sesion`,
+    nunca un campo declarado por el cliente.
     """
     from .helpers import _require_modulo
     _require_modulo(modulo)
@@ -301,7 +308,7 @@ async def import_documentos_csv(
     if reader is None:
         return {"inserted": 0, "skipped": 0, "errors": ["Archivo CSV vacío o sin encabezados."]}
     # updated_by es INTEGER: hay que guardar el id del usuario, no su nombre.
-    _uid = _resolve_user_id(requester)
+    _uid = _resolve_user_id(usuario_sesion)
     _columnas, _requeridas = (
         (_DOCS_ARCHIVO_COLUMNAS, _DOCS_ARCHIVO_REQUERIDAS) if modulo == "Archivo"
         else (_DOCS_RRHH_COLUMNAS, _DOCS_RRHH_REQUERIDAS)
@@ -413,5 +420,5 @@ async def import_documentos_csv(
         f"Importación completada: {resumen}." if huboExito
         else f"Importación sin cambios: ninguna fila se insertó ni actualizó ({resumen})."
     )
-    log_event(requester, f"Import CSV Docs ({modulo})", modulo, resumen)
+    log_event(usuario_sesion, f"Import CSV Docs ({modulo})", modulo, resumen)
     return results

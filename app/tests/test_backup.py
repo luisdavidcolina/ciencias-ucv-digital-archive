@@ -283,6 +283,23 @@ class TestExportManifiestoR2:
         assert "archivo/dos.pdf" in claves
         assert body["_metadata"]["r2_keys_count"] == 2
 
+    def test_export_registra_la_sesion_no_el_query_string(self, client_as):
+        """IN-133: `backup_history.usuario` debe salir de la sesión
+        verificada, no de un parámetro `requester` que declare quien llama."""
+        c = client_as("admin_real")
+        with patch("routes.backup.db_query", return_value=[]) as mock_dq, \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            res = c.get(
+                "/api/admin/backup/export?tables=categoria&requester=otro_usuario_falsificado"
+            )
+        assert res.status_code == 200
+        insert_calls = [
+            call for call in mock_dq.call_args_list
+            if call.args and "INSERT INTO public.backup_history" in call.args[0]
+        ]
+        assert len(insert_calls) == 1
+        assert insert_calls[0].args[1][0] == "admin_real"
+
     def test_extraer_claves_r2_ignora_urls_sin_prefijo_esperado(self):
         from routes.backup import _extraer_claves_r2
 

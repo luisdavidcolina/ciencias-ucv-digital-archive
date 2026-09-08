@@ -162,8 +162,8 @@ def get_table_groups():
 
 @router.get("/export", dependencies=[Depends(require_role("Global"))])
 def export_backup(
-    requester: str = Query(default=""),
     tables: Optional[str] = Query(default=None, description="Tablas separadas por coma; omitir = todas"),
+    usuario_sesion: str = Depends(require_session),
 ):
     """
     Exporta tablas seleccionadas como JSON descargable.
@@ -173,6 +173,10 @@ def export_backup(
     SI-002/IN-129: sólo el administrador Global puede exportar (incluye
     `usuarios_sistema` con los hashes bcrypt). `require_role("Global")` lo
     hace cumplir de verdad, no sólo en el docstring.
+
+    IN-133: el registro en `backup_history` usa `usuario_sesion` (de la
+    sesión verificada por `require_session`), nunca un campo que declare
+    quien llama — mismo patrón que docs.py/catalog.py/retention.py.
     """
     if tables:
         requested = [t.strip() for t in tables.split(",") if t.strip()]
@@ -190,7 +194,7 @@ def export_backup(
         db_query(
             """INSERT INTO public.backup_history(usuario, tipo, tabla_count, total_rows, notas)
                VALUES(%s, 'export', %s, %s, %s)""",
-            (requester or "sistema", len(selected), total_rows, notas),
+            (usuario_sesion, len(selected), total_rows, notas),
             fetch="none", commit=True,
         )
     except Exception:
@@ -209,8 +213,8 @@ def export_backup(
 @router.post("/restore", dependencies=[Depends(require_role("Global"))])
 async def restore_backup(
     file: UploadFile = File(...),
-    requester: str = Query(default=""),
     mode: str = Query(default="merge"),
+    usuario_sesion: str = Depends(require_session),
 ):
     """
     Restaura datos desde un JSON de backup.
@@ -220,6 +224,9 @@ async def restore_backup(
     SI-002/IN-130: sólo el administrador Global puede restaurar (puede borrar
     y reemplazar la base con mode=overwrite). `require_role("Global")` lo
     hace cumplir de verdad, no sólo en el docstring.
+
+    IN-133: el registro en `backup_history` usa `usuario_sesion`, no un
+    campo declarado por el cliente.
     """
     if mode not in ("merge", "overwrite"):
         raise HTTPException(400, "mode debe ser 'merge' o 'overwrite'")
@@ -330,7 +337,7 @@ async def restore_backup(
         db_query(
             """INSERT INTO public.backup_history(usuario, tipo, tabla_count, total_rows, notas)
                VALUES(%s, 'restore', %s, %s, %s)""",
-            (requester or "sistema", len(EXPORTABLE_TABLES),
+            (usuario_sesion, len(EXPORTABLE_TABLES),
              sum(r.get("inserted", 0) for r in results.values() if isinstance(r, dict)),
              f"mode={mode}, errors={len(errors)}"),
             fetch="none", commit=True,
