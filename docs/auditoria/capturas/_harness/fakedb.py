@@ -217,6 +217,38 @@ def fake_db_query(sql, params=None, fetch="all", commit=False, _retries=2):
         return None
     cols = _columnas(sql)
     s = " ".join(sql.split()).lower()
+
+    # `admin.global` es el usuario de sesión que usa todo el arnés visual
+    # (capturar.py / estados.py, vía generate_session_token("admin.global")).
+    # `require_role`/`require_admin_role` (app/routes/admin/deps.py) hacen una
+    # consulta real contra `usuarios_sistema` en cada llamada para resolver su
+    # módulo/rol/estado; sin este caso especial, la fila genérica que arma
+    # `_valor()` para esa tabla no garantiza `modulo='Global'`, así que la
+    # autorización fallaba (403) al entrar a pestañas admin. Cualquier
+    # consulta contra `usuarios_sistema` cuyos params mencionen ese usuario
+    # devuelve una fila fija que siempre pasa el chequeo "Global" + Admin.
+    if "usuarios_sistema" in s and params and "admin.global" in [str(p) for p in params]:
+        overrides = {
+            "modulo": "Global",
+            "rol": "Admin",
+            "is_active": True,
+            "activo": True,
+            "usuario": "admin.global",
+            "id": 1,
+            "nombre": "Administrador Global",
+        }
+
+        def _fila_fija():
+            fila = Fila(cols, 0)
+            for k in cols:
+                if k.lower() in overrides:
+                    fila[k] = overrides[k.lower()]
+            return fila
+
+        if fetch == "one":
+            return _fila_fija()
+        return [_fila_fija()]
+
     if fetch == "one":
         return Fila(cols, 0)
     n = FILAS_POR_DEFECTO
