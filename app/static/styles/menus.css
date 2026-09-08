@@ -107,6 +107,30 @@ body.dark-mode .ds-toast--danger  { background: rgba(208,59,59,.18); color: #f0a
 body.dark-mode .ds-toast--warning { background: rgba(250,178,25,.18); color: #f5cf7a; border-color: rgba(250,178,25,.4); }
 body.dark-mode .ds-toast--info    { background: rgba(23,162,184,.18); color: #8fd6e2; border-color: rgba(23,162,184,.4); }
 
+/* RONDA79: `.ds-toast-close` (el botón "✕" que crea app-core.js dentro de cada
+   toast) no tenía ninguna regla propia -- heredaba el botón nativo del
+   navegador (texto ~negro sobre fondo transparente), medido por RONDA25 en
+   1,81:1-2,01:1 sobre los fondos oscuros de `.ds-toast--*` en modo oscuro,
+   por debajo del 3:1 de WCAG 1.4.11. Usa `color: currentColor` para heredar
+   el mismo color de texto ya calculado (y ya accesible, ver `.ds-toast--*`
+   arriba) del tipo de toast que lo contiene, en vez de un color fijo que
+   fallaría en alguno de los cuatro tipos x claro/oscuro. Contraste
+   verificado a mano en los 8 casos (4 tipos x claro/oscuro): 4,96:1-8,25:1
+   claro, 7,11:1-7,90:1 oscuro -- todos sobre 3:1. */
+.ds-toast-close {
+  background: transparent;
+  border: none;
+  color: currentColor;
+  opacity: .7;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+}
+.ds-toast-close:hover,
+.ds-toast-close:focus-visible { opacity: 1; }
+
 /* SD-159: estado deshabilitado explícito, no sólo en paginación/botón */
 [disabled], [aria-disabled="true"] {
   cursor: not-allowed;
