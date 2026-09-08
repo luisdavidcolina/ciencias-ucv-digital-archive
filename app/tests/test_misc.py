@@ -378,3 +378,45 @@ class TestNotifications:
         ):
             res = c.get("/api/admin/notifications")
         assert res.status_code == 200
+
+
+# =============================================================================
+# IN-037: /api/health no debe exponer recuentos sin sesión
+# =============================================================================
+
+class TestHealthSinCounts:
+    def test_health_sin_sesion_no_expone_counts(self, anon_client):
+        """`/api/health` sigue sin exigir sesión (monitoreo básico), pero ya
+        no devuelve `counts` -- antes filtraba el número de usuarios del
+        sistema, entre otros, a cualquiera en internet (IN-037/IN-137)."""
+        with patch("main.db_query", return_value=_row(**{"?column?": 1})):
+            res = anon_client.get("/api/health")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["status"] == "ok"
+        assert "counts" not in body
+
+    def test_health_detalle_sin_sesion_da_401(self, anon_client):
+        res = anon_client.get("/api/health/detalle")
+        assert res.status_code == 401
+
+    def test_health_detalle_con_sesion_no_global_da_403(self, client_as):
+        c = client_as("archivero_health1")
+        with patch("routes.admin.deps.db_query",
+                   return_value=_fila_usuario(modulo="Archivo", rol="Normal")):
+            res = c.get("/api/health/detalle")
+        assert res.status_code == 403
+
+    def test_health_detalle_con_sesion_global_devuelve_counts(self, client_as):
+        c = client_as("admin_health1")
+        counts = _row(archivo=1, docs_rrhh=2, empleados=3, historial_cargos=4,
+                      palabras_clave=5, usuarios=6)
+        with (
+            patch("routes.admin.deps.db_query",
+                  return_value=_fila_usuario(modulo="Global", rol="Admin")),
+            patch("main.db_query", return_value=counts),
+        ):
+            res = c.get("/api/health/detalle")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["counts"]["usuarios"] == 6

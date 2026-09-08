@@ -2,7 +2,7 @@ import hashlib as _hashlib
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,6 +25,7 @@ from routes.files      import router as files_router
 from routes.share      import router as share_router
 from routes.trash      import router as trash_router
 from routes.ai         import router as ai_router
+from routes.admin.deps import require_role
 
 # =============================================================================
 # APLICACION
@@ -888,7 +889,29 @@ app.include_router(ai_router)
 
 @app.get("/api/health", tags=["system"])
 def health_check():
-    """Endpoint de salud para monitoreo básico."""
+    """Endpoint de salud para monitoreo básico. Sin sesión, así que no expone
+    nada más que "responde y la base conecta" (IN-037): ni recuento de
+    documentos/empleados/usuarios, que orienta un ataque de credenciales
+    (IN-137) y no le hace falta a nadie que sólo quiera saber si el servicio
+    está vivo. El detalle con recuentos vive en `/api/health/detalle`, sólo
+    para sesión Global."""
+    try:
+        db_ok = db_query("SELECT 1", fetch="one") is not None
+    except Exception:
+        db_ok = False
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "db": "connected" if db_ok else "error",
+        "version": settings.app_version,
+    }
+
+
+@app.get("/api/health/detalle", tags=["system"])
+def health_check_detalle(
+    _autorizado: str = Depends(require_role("Global")),
+):
+    """Como `/api/health`, con el recuento por tabla que antes iba sin
+    sesión (IN-037). Requiere módulo Global."""
     try:
         counts = db_query(
             """SELECT
