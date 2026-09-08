@@ -259,8 +259,11 @@ function switchTab(tabId) {
   // Se entra por "stats": es la pestaña que el marcado marca como activa, la
   // primera del grupo de operación, y la única que llena la fila de KPIs de la
   // cabecera. Entrando por "monitor" esos KPIs se quedaban en cero.
-  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("stats"); }
-  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("stats"); }
+  // { moveFocus: false }: esta es la entrada automática a la página, no un
+  // cambio de pestaña iniciado por la persona — el foco del teclado sigue en
+  // el body/skip-link y debe quedarse ahí (VI-teclado-foco-ronda24).
+  else if (tabId === "admin-archivo" && tabAdminArchivo) { tabAdminArchivo.style.display = "block"; loadAdminTab("stats", { moveFocus: false }); }
+  else if (tabId === "admin-rrhh"    && tabAdminRrhh)    { tabAdminRrhh.style.display = "block"; loadAdminTab("stats", { moveFocus: false }); }
   // admin_system.html es una página standalone de una sola sección, sin los
   // cuatro ids de arriba: su única ".app-tab-section" no tenía rama que la
   // volviera a mostrar tras el ocultamiento general tres líneas más arriba, así

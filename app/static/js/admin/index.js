@@ -52,7 +52,7 @@ function _adminAnnounce(text) {
   setTimeout(() => { live.textContent = text; }, 50);
 }
 
-function loadAdminTab(adminTabId) {
+function loadAdminTab(adminTabId, { moveFocus = true } = {}) {
   state.activeAdminTab = adminTabId;
   const suf  = adminSuffixFromTab();
   const root = `#tab-admin-${suf}`;
@@ -88,7 +88,14 @@ function loadAdminTab(adminTabId) {
     // anuncia. tabindex="-1" permite recibir foco por programa sin entrar en
     // el orden de tabulación normal.
     if (!activePane.hasAttribute("tabindex")) activePane.setAttribute("tabindex", "-1");
-    if (!isSameTab) {
+    // VI-teclado-foco-ronda24: mover el foco al panel es correcto cuando la
+    // persona ya estaba en la página y cambia de pestaña (OR-225, anuncio del
+    // cambio) — pero esta misma función también se llama una vez al entrar a
+    // la página (app.js, loadAdminTab("stats") automático), y ahí el foco del
+    // teclado seguía todavía en el body/skip-link. Moverlo ahí también
+    // secuestraba el primer Tab hacia dentro del panel, saltándose el enlace
+    // "Saltar navegación" y la barra superior por completo.
+    if (!isSameTab && moveFocus) {
       try { activePane.focus({ preventScroll: false }); } catch { activePane.focus(); }
     }
   }
