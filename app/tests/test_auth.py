@@ -76,14 +76,11 @@ class TestLogin:
         """SI-031/SI-032: con bloqueado_hasta en el futuro en login_attempts,
         el login responde 429 sin llegar a tocar credenciales.
 
-        NOTA (ronda 60): el endpoint SÍ arma `headers={"Retry-After": ...}` en
-        el HTTPException (ver auth.py), pero `http_exception_handler` en
-        main.py reconstruye la respuesta con JSONResponse(status_code, content)
-        sin propagar exc.headers -- el header nunca llega al cliente, en esto
-        y en cualquier otro 429/401 con headers del proyecto. Es un hallazgo
-        preexistente y ajeno al carril de esta ronda (declarado sólo sobre
-        auth.py); no se corrige aquí. Sólo se verifica el código de estado,
-        que es el contrato observable real hoy."""
+        NOTA (ronda 61): el endpoint arma `headers={"Retry-After": ...}` en
+        el HTTPException (ver auth.py), y desde esta ronda `http_exception_handler`
+        en main.py propaga `exc.headers` a la JSONResponse final -- el header
+        SÍ llega al cliente. Antes de la ronda 61 el handler lo perdía en
+        cualquier 429/401 con headers del proyecto (ver commit de esta ronda)."""
         from datetime import datetime, timedelta, timezone
         futuro = datetime.now(timezone.utc) + timedelta(seconds=20)
         with (
@@ -92,6 +89,8 @@ class TestLogin:
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "x"})
         assert res.status_code == 429
+        assert "Retry-After" in res.headers
+        assert int(res.headers["Retry-After"]) >= 1
 
     def test_login_payload_vacio(self, client):
         res = client.post("/api/auth/login", json={})
