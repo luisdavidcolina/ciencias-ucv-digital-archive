@@ -8,7 +8,7 @@ sin cambiar SQL ni comportamiento. `routes/pages.py` la importa y la usa;
 from database import db_query
 
 
-def usuario_modulo(usuario: str) -> dict | None:
+def user_module(usuario: str) -> dict | None:
     """Fila `{modulo}` de `usuarios_sistema` para `usuario`, o None.
 
     Usada por `pages.py` sólo para exigir rol Global en páginas internas
