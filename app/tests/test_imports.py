@@ -221,6 +221,90 @@ class TestPrefetchCedulasFallaCaeAConsultaPorFila:
         assert len(insert_calls) == 1
 
 
+class TestPrefetchEmpleadosDocumentosRRHH:
+    """IN-217 paso 3 (ronda88): la rama RRHH de `import_documentos_csv`
+    resolvía `emp` con un SELECT por fila (`WHERE cedula=%s`), exactamente
+    el mismo patrón que el paso 2 ya optimizó en `import_empleados_csv`. Se
+    replica aquí: prefetch en lote con `cedula = ANY(%s)` antes del bucle,
+    con la misma rama de repliegue si el lote falla. Es lectura pura (no
+    escribe, no decide nada condicional) así que no toca el aislamiento de
+    errores por fila que el resto de la función sigue necesitando."""
+
+    def test_csv_grande_con_duplicados_y_una_cedula_inexistente(self, client):
+        """CSV de 60 filas: cédulas repetidas (deben reutilizar el prefetch,
+        no repetir consulta) y una cédula que no existe (debe reportarse
+        como error de esa fila sin afectar a las demás — aislamiento de
+        errores por fila intacto)."""
+        calls = []
+
+        def _db_query_side_effect(sql, params=None, fetch=None, commit=False):
+            if "cedula = ANY(%s)" in sql:
+                calls.append(("PREFETCH", params))
+                cedulas = params[0]
+                return [
+                    {"id": idx + 1, "cedula": c}
+                    for idx, c in enumerate(cedulas) if c != "V-99999999"
+                ]
+            if "INSERT INTO public.datos_rrhh" in sql:
+                calls.append(("INSERT", params))
+                return None
+            return None
+
+        filas_csv = ["cedula_empleado,tipo_documento"]
+        # 58 filas válidas repartidas entre 5 cédulas distintas (duplicados
+        # reales dentro del propio CSV) + 2 filas con la cédula inexistente.
+        cedulas_validas = ["V-10000001", "V-10000002", "V-10000003", "V-10000004", "V-10000005"]
+        for i in range(58):
+            filas_csv.append(f"{cedulas_validas[i % 5]},Contrato")
+        filas_csv.append("V-99999999,Contrato")
+        filas_csv.append("V-99999999,Constancia")
+        csv_body = "\n".join(filas_csv) + "\n"
+
+        with patch("routes.admin.imports.db_query", side_effect=_db_query_side_effect), \
+             patch("routes.admin.imports._resolve_or_create_tipo_documento", return_value=9), \
+             patch("routes.admin.imports._resolve_user_id", return_value=1):
+            res = _post_csv(
+                client, "/api/admin/import/documentos", "docs_grande.csv", csv_body, modulo="RRHH",
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["inserted"] == 58, body
+        assert len(body["errors"]) == 2, body
+        assert all("V-99999999" in e for e in body["errors"])
+
+        prefetch_calls = [c for c in calls if c[0] == "PREFETCH"]
+        assert len(prefetch_calls) == 1, "el prefetch debe correr una sola vez, no por fila"
+        assert sorted(prefetch_calls[0][1][0]) == sorted(cedulas_validas + ["V-99999999"])
+
+        insert_calls = [c for c in calls if c[0] == "INSERT"]
+        assert len(insert_calls) == 58
+
+    def test_prefetch_de_empleados_falla_cae_a_consulta_por_fila(self, client):
+        """Igual que TestPrefetchCedulasFallaCaeAConsultaPorFila pero para el
+        prefetch de empleados de esta función: si el lote falla, cada fila
+        cae de vuelta a su SELECT individual y la importación no se cae."""
+        def _db_query_side_effect(sql, params=None, fetch=None, commit=False):
+            if "cedula = ANY(%s)" in sql:
+                raise Exception("boom: fallo simulado del prefetch en lote")
+            if "FROM public.empleados WHERE cedula=%s" in sql:
+                return _fila(id=1)
+            return None
+
+        csv_body = "cedula_empleado,tipo_documento\nV-11111111,Contrato\n"
+        with patch("routes.admin.imports.db_query", side_effect=_db_query_side_effect), \
+             patch("routes.admin.imports._resolve_or_create_tipo_documento", return_value=9), \
+             patch("routes.admin.imports._resolve_user_id", return_value=1):
+            res = _post_csv(
+                client, "/api/admin/import/documentos", "docs.csv", csv_body, modulo="RRHH",
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["errors"] == [], body
+        assert body["inserted"] == 1, body
+
+
 class TestReporteHonesto:
     """El mensaje de éxito sólo debe sonar a éxito si de verdad insertó o
     actualizó algo (causa raíz de que '0 insertados' pareciera un éxito)."""
