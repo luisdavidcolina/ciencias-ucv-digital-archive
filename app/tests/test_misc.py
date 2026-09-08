@@ -339,6 +339,108 @@ class TestPapelera:
         assert body["page"] == 2
         assert body["per_page"] == 10
 
+    def test_list_papelera_rrhh(self, client_as):
+        """Ronda 85 (IN-042 paso 7, `trash_repo.py`): la rama RRHH de
+        `GET /papelera` (`list_trash_rrhh_count`/`list_trash_rrhh_rows`) no
+        tenía ningún test propio -- sólo la rama Archivo estaba cubierta."""
+        c = client_as("rrhh_pap1")
+        count = _row(total=2)
+        doc = _row(id=20, titulo="Contrato", autor="Juan Perez", empleado="Juan Perez",
+                   doc_type="Parte I", fecha="2021-03-01",
+                   deleted_at="2024-06-01 10:00", deleted_by="admin")
+        call_n = [0]
+
+        def mock_q(sql, params=None, fetch="all", commit=False):
+            call_n[0] += 1
+            return count if call_n[0] == 1 else [doc]
+
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(modulo="RRHH", rol="Normal")),
+            patch("repos.trash_repo.db_query", side_effect=mock_q),
+        ):
+            res = c.get("/api/admin/papelera?modulo=RRHH")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total"] == 2
+        assert body["records"][0]["empleado"] == "Juan Perez"
+
+    def test_list_papelera_vacia_no_devuelve_registros(self, client_as):
+        """Papelera vacía: `total=0` y `records=[]`, sin que la fila de
+        conteo en None rompa `int(count_row["total"])`."""
+        c = client_as("archivero_pap4")
+        count = _row(total=0)
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
+            patch("repos.trash_repo.db_query", side_effect=[count, []]),
+        ):
+            res = c.get("/api/admin/papelera?modulo=Archivo")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total"] == 0
+        assert body["records"] == []
+
+    def test_list_papelera_empleados(self, client_as):
+        """Ronda 85: `GET /papelera/empleados` (`list_trash_employees_count`/
+        `list_trash_employees_rows`) no tenía ningún test -- ni de
+        autorización ni de comportamiento."""
+        c = client_as("rrhh_pap2")
+        count = _row(total=1)
+        emp = _row(id=5, cedula="V-12345678", nombre="Maria Gomez",
+                  deleted_at="2024-05-01 09:00", deleted_by="rrhh_admin")
+        call_n = [0]
+
+        def mock_q(sql, params=None, fetch="all", commit=False):
+            call_n[0] += 1
+            return count if call_n[0] == 1 else [emp]
+
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(modulo="RRHH", rol="Normal")),
+            patch("repos.trash_repo.db_query", side_effect=mock_q),
+        ):
+            res = c.get("/api/admin/papelera/empleados")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["total"] == 1
+        assert body["records"][0]["nombre"] == "Maria Gomez"
+
+    def test_list_papelera_empleados_sin_sesion_401(self, anon_client):
+        res = anon_client.get("/api/admin/papelera/empleados")
+        assert res.status_code == 401
+
+
+class TestVersionesListado:
+    """`GET /documento/{id}/versiones` (`list_versions_rows`) -- ronda 85:
+    ningún test ejercitaba esta ruta, sólo add/restore/delete de versiones
+    (`test_trash_versiones.py`). Caso de borde pedido: documento con varias
+    versiones, orden y forma de la respuesta."""
+
+    def test_documento_con_varias_versiones(self, client_as):
+        c = client_as("archivo_pap_ver1")
+        v3 = _row(id=3, version_num=3, file_url="/api/files/v3.pdf",
+                  comentario="", subido_por="a", created_at="2024-03-01 10:00")
+        v2 = _row(id=2, version_num=2, file_url="/api/files/v2.pdf",
+                  comentario="", subido_por="a", created_at="2024-02-01 10:00")
+        v1 = _row(id=1, version_num=1, file_url="/api/files/v1.pdf",
+                  comentario="", subido_por="a", created_at="2024-01-01 10:00")
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
+            patch("repos.trash_repo.db_query", return_value=[v3, v2, v1]),
+        ):
+            res = c.get("/api/admin/documento/1/versiones?modulo=Archivo")
+        assert res.status_code == 200
+        body = res.json()
+        assert [v["version_num"] for v in body["versiones"]] == [3, 2, 1]
+
+    def test_documento_sin_versiones(self, client_as):
+        c = client_as("archivo_pap_ver2")
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
+            patch("repos.trash_repo.db_query", return_value=[]),
+        ):
+            res = c.get("/api/admin/documento/1/versiones?modulo=Archivo")
+        assert res.status_code == 200
+        assert res.json()["versiones"] == []
+
 
 # =============================================================================
 # Audit log
