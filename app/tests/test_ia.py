@@ -325,3 +325,137 @@ class TestSI121GastoEnCadaRespuestaDeChat:
 
         assert respuesta["respuesta"] == "hola de vuelta"
         assert "gasto_hoy" not in respuesta
+
+
+# =============================================================================
+# _crear() — la acción "crear" de una propuesta de IA (INSERT), sin test hasta
+# ahora: ni el caso Archivo, ni el caso RRHH (con y sin empleado_id), ni su
+# paso completo por approve().
+# =============================================================================
+
+class TestCrearPropuesta:
+    def test_crear_en_archivo_inserta_con_columnas_permitidas(self):
+        """El caso simple: sólo columnas de la lista blanca + creado_por, sin la
+        rama de empleado_id que es exclusiva de RRHH."""
+        from core import ai_proposals
+
+        p = _fila(modulo="archivo", objetivo_id=None)
+        datos = {"campos": {"titulo": "Acta 2026", "autor": "Comisión"}}
+
+        capturado = {}
+
+        def _db(sql, params=None, **kw):
+            if sql.strip().startswith("SELECT id FROM public.usuarios_sistema"):
+                return _fila(id=7)
+            if sql.strip().startswith("INSERT INTO public.datos_archivo"):
+                capturado["sql"] = sql
+                capturado["params"] = params
+                return {"id": 99}
+            return None
+
+        with patch.object(ai_proposals, "db_query", side_effect=_db), \
+             patch.object(ai_proposals, "allowed_fields", return_value={"titulo", "autor"}):
+            resultado = ai_proposals._crear(p, datos, "usuario_x")
+
+        assert "id 99" in resultado
+        # columnas ordenadas alfabéticamente: autor, titulo, creado_por al final
+        assert "autor, titulo, creado_por" in capturado["sql"]
+        assert capturado["params"] == ["Comisión", "Acta 2026", 7]
+
+    def test_crear_en_rrhh_exige_empleado_id(self):
+        """RRHH sin `extra.empleado_id` no debe insertar nada: no sabe de quién
+        es el documento."""
+        from core import ai_proposals
+
+        p = _fila(modulo="rrhh", objetivo_id=None)
+        datos = {"campos": {"notas": "Consignación"}, "extra": {}}
+
+        with patch.object(ai_proposals, "db_query") as mock_db, \
+             patch.object(ai_proposals, "allowed_fields", return_value={"notas"}):
+            with pytest.raises(ai_proposals.PropuestaError):
+                ai_proposals._crear(p, datos, "usuario_x")
+            mock_db.assert_not_called()
+
+    def test_crear_en_rrhh_con_empleado_id_lo_agrega_al_insert(self):
+        """`empleado_id` no está en la lista blanca de modificables (no se
+        mueve un documento entre expedientes editando), pero al crear es
+        obligatorio y se añade aparte, ya resuelto contra la tabla de
+        empleados en el momento de proponer."""
+        from core import ai_proposals
+
+        p = _fila(modulo="rrhh", objetivo_id=None)
+        datos = {"campos": {"notas": "Consignación"}, "extra": {"empleado_id": 55}}
+
+        capturado = {}
+
+        def _db(sql, params=None, **kw):
+            if sql.strip().startswith("SELECT id FROM public.usuarios_sistema"):
+                return _fila(id=3)
+            if sql.strip().startswith("INSERT INTO public.datos_rrhh"):
+                capturado["sql"] = sql
+                capturado["params"] = params
+                return {"id": 12}
+            return None
+
+        with patch.object(ai_proposals, "db_query", side_effect=_db), \
+             patch.object(ai_proposals, "allowed_fields", return_value={"notas"}):
+            resultado = ai_proposals._crear(p, datos, "usuario_x")
+
+        assert "id 12" in resultado
+        assert "notas, empleado_id, creado_por" in capturado["sql"]
+        assert capturado["params"] == ["Consignación", 55, 3]
+
+    def test_campo_vacio_se_guarda_como_null(self):
+        """Un string vacío en un campo revienta un INSERT tipado (fecha, entero);
+        NULL no. `_crear` lo normaliza igual que `_sql_campos` lo hace para
+        `_actualizar`."""
+        from core import ai_proposals
+
+        p = _fila(modulo="archivo", objetivo_id=None)
+        datos = {"campos": {"titulo": "Acta", "fecha_documento": ""}}
+
+        capturado = {}
+
+        def _db(sql, params=None, **kw):
+            if sql.strip().startswith("SELECT id FROM public.usuarios_sistema"):
+                return _fila(id=1)
+            if sql.strip().startswith("INSERT INTO public.datos_archivo"):
+                capturado["params"] = params
+                return {"id": 1}
+            return None
+
+        with patch.object(ai_proposals, "db_query", side_effect=_db), \
+             patch.object(ai_proposals, "allowed_fields",
+                          return_value={"titulo", "fecha_documento"}):
+            ai_proposals._crear(p, datos, "usuario_x")
+
+        # columnas ordenadas alfabéticamente: fecha_documento, titulo, creado_por
+        assert capturado["params"] == [None, "Acta", 1]
+
+    def test_approve_con_accion_crear_llega_hasta_el_insert(self):
+        """El recorrido completo desde `approve()`: reclama la propuesta,
+        despacha a `_crear()` y marca 'aprobada' de verdad."""
+        from core import ai_proposals
+
+        p = _fila(id=9, estado="pendiente", modulo="archivo", accion="crear",
+                  objetivo_id=None, datos=json.dumps({"campos": {"titulo": "Nueva"}}),
+                  resumen="crear documento")
+
+        def _db(sql, params=None, **kw):
+            if sql.strip().startswith("SELECT * FROM public.ia_propuestas"):
+                return p
+            if "SET estado = 'aprobada'" in sql:
+                return {"id": 9}
+            if sql.strip().startswith("SELECT id FROM public.usuarios_sistema"):
+                return _fila(id=2)
+            if sql.strip().startswith("INSERT INTO public.datos_archivo"):
+                return {"id": 123}
+            return None
+
+        with patch.object(ai_proposals, "db_query", side_effect=_db), \
+             patch.object(ai_proposals, "allowed_fields", return_value={"titulo"}), \
+             patch.object(ai_proposals, "log_event"):
+            r = ai_proposals.approve(9, "usuario_x", modulos={"archivo"})
+
+        assert r["estado"] == "aprobada"
+        assert "id 123" in r["detalle"]
