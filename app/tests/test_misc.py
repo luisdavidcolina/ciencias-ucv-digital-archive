@@ -85,6 +85,21 @@ class TestKeywords:
             res = c.post("/api/admin/keywords", json={"nombre": "k" * 201})
         assert res.status_code == 422
 
+    def test_422_detail_es_string_en_espanol_no_lista_pydantic(self, client_as):
+        """R48: FastAPI arma `detail` por defecto como lista de objetos
+        {"loc","msg","type"} en inglés. El frontend (app.js, submit.js,
+        ai-widget.js) toma `body.detail` directo como string para el toast,
+        así que sin el exception_handler de RequestValidationError el usuario
+        ve "[object Object]". Este test cierra la brecha que dejó R47.
+        """
+        c = client_as("archivero_kw5b")
+        with patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")):
+            res = c.post("/api/admin/keywords", json={"nombre": "k" * 201})
+        assert res.status_code == 422
+        detail = res.json()["detail"]
+        assert isinstance(detail, str)
+        assert "nombre" in detail
+
     def test_delete_keyword_sin_uso(self, client_as):
         c = client_as("archivero_kw6")
         uso = _row(cnt=0)

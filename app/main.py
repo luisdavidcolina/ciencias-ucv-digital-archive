@@ -3,6 +3,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -153,6 +154,30 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail, "status_code": exc.status_code},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """IN-217/R47/R48: FastAPI devuelve `detail` como lista de objetos Pydantic
+    en inglés ({"loc","msg","type"}). El frontend la toma directo como string
+    para el toast de error, así que el usuario veía "[object Object]" en vez
+    de un mensaje legible. No se traduce cada tipo de error de Pydantic (eso
+    es el cambio grande que dejó pendiente R47): basta con un mensaje único en
+    español que señale el/los campo(s) que fallaron.
+    """
+    errores = exc.errors()
+    campos = []
+    for err in errores:
+        loc = [str(p) for p in err.get("loc", []) if p != "body"]
+        campos.append(".".join(loc) if loc else "desconocido")
+    if len(campos) == 1:
+        detail = f"Revisa el campo '{campos[0]}': los datos enviados no son válidos."
+    else:
+        detail = f"Hay {len(campos)} campos con datos inválidos: {', '.join(campos)}."
+    return JSONResponse(
+        status_code=422,
+        content={"detail": detail, "status_code": 422},
     )
 
 
