@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 
 import storage
 from database import log_event
-from repos.files_repo import usuario_modulo_activo, clave_en_papelera
+from repos.files_repo import user_active_module, key_in_trash
 from routes.admin.deps import require_session
 
 router = APIRouter(tags=["files"], dependencies=[Depends(require_session)])
@@ -26,7 +26,7 @@ def _modulo_permite_clave(usuario: str, key: str) -> bool:
     módulo (guion bajo) pensado para las dependencias de FastAPI, no para
     llamarse a mano con una clave arbitraria.
     """
-    fila = usuario_modulo_activo(usuario)
+    fila = user_active_module(usuario)
     if not fila or not fila.get("is_active", True):
         return False
     modulo_usuario = fila.get("modulo")
@@ -61,7 +61,7 @@ def _documento_en_papelera(key: str) -> bool:
     prefijo desconocido.
     """
     url = f"/api/files/{key}"
-    return clave_en_papelera(url)
+    return key_in_trash(url)
 
 
 @router.post("/api/admin/upload")

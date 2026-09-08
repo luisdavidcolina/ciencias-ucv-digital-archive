@@ -8,7 +8,7 @@ sin cambiar SQL ni comportamiento. `routes/files.py` las importa y las usa;
 from database import db_query
 
 
-def usuario_modulo_activo(usuario: str) -> dict | None:
+def user_active_module(usuario: str) -> dict | None:
     """Fila `{modulo, is_active}` de `usuarios_sistema` para `usuario`, o None.
 
     Usada por `_modulo_permite_clave` (routes/files.py) para decidir si una
@@ -20,7 +20,7 @@ def usuario_modulo_activo(usuario: str) -> dict | None:
     )
 
 
-def clave_en_papelera(url: str) -> bool:
+def key_in_trash(url: str) -> bool:
     """True si `url` es el `file_url` vigente de un documento en la papelera
     (`datos_archivo` o `datos_rrhh`, `deleted_at IS NOT NULL`).
     """
