@@ -164,6 +164,28 @@ class TestFechaValidator:
         with pytest.raises(ValidationError, match="YYYY-MM-DD"):
             EmpleadoUpdateRequest(usuario="u", fecha_jubilacion="15-01-2030")
 
+    def test_fecha_anio_1800_rechazada(self):
+        """LI-…: sintácticamente válida (YYYY-MM-DD) pero un año imposible
+        para cualquier documento real de la facultad."""
+        with pytest.raises(ValidationError, match="año fuera de rango"):
+            DocumentSubmitRequest(**_BASE_SUBMIT_NO_FECHA, fecha="1800-01-01")
+
+    def test_fecha_anio_9999_rechazada(self):
+        with pytest.raises(ValidationError, match="año fuera de rango"):
+            DocumentSubmitRequest(**_BASE_SUBMIT_NO_FECHA, fecha="9999-12-31")
+
+    def test_fecha_vencimiento_anio_absurdo_rechazada(self):
+        with pytest.raises(ValidationError, match="año fuera de rango"):
+            DocumentSubmitRequest(**_BASE_SUBMIT, fecha_vencimiento="0100-01-01")
+
+    def test_fecha_jubilacion_anio_absurdo_rechazada(self):
+        with pytest.raises(ValidationError, match="año fuera de rango"):
+            EmpleadoUpdateRequest(usuario="u", fecha_jubilacion="1800-01-01")
+
+    def test_fecha_dentro_de_rango_razonable_ok(self):
+        r = DocumentSubmitRequest(**_BASE_SUBMIT_NO_FECHA, fecha="1950-01-01")
+        assert r.fecha == "1950-01-01"
+
 
 # =============================================================================
 # Validación de sexo y nivel_educativo

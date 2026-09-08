@@ -26,9 +26,25 @@ def _validate_file_url(v):
         raise ValueError("file_url no puede contener '..'")
     return v or None
 
+# LI-…: cota de cordura para el año, no de negocio exacto por campo — el
+# regex de formato dejaba pasar cualquier fecha sintácticamente válida
+# (año 1800, año 9999) sin que nada del dominio la cuestionara. No se ata al
+# año de fundación real porque varios campos (fecha_vencimiento, fecha de
+# jubilación futura) son legítimamente futuros; el límite superior sólo
+# descarta lo que ningún registro real puede tener por muchas décadas.
+_ANIO_MINIMO = 1900
+_ANIO_MAXIMO = 2200
+
 def _validate_date(v: str | None, field_name: str = "fecha") -> str | None:
     if v and not _DATE_RE.match(v):
         raise ValueError(f"{field_name} debe tener formato YYYY-MM-DD")
+    if v:
+        anio = int(v[:4])
+        if anio < _ANIO_MINIMO or anio > _ANIO_MAXIMO:
+            raise ValueError(
+                f"{field_name} tiene un año fuera de rango razonable "
+                f"({_ANIO_MINIMO}-{_ANIO_MAXIMO})"
+            )
     return v or None
 
 def _normalize_cedula(v):
