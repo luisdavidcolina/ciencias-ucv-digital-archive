@@ -269,7 +269,7 @@ def list_all_files(
 
 
 @router.get("/documento/{doc_id}")
-def get_documento(
+def get_document(
     doc_id: int,
     modulo: str = "Archivo",
     usuario_sesion: str = Depends(require_session),
@@ -452,7 +452,7 @@ def admin_submit(
 
 
 @router.put("/documento/{doc_id}")
-def update_documento(
+def update_document(
     doc_id: int,
     req: DocumentUpdateRequest,
     usuario_sesion: str = Depends(require_session),
@@ -554,7 +554,7 @@ def update_documento(
 
 
 @router.delete("/documento/{doc_id}")
-def delete_documento(
+def delete_document(
     doc_id: int,
     modulo: str,
     usuario: str,
@@ -581,7 +581,7 @@ def delete_documento(
 
 
 @router.patch("/documento/{doc_id}/status")
-def update_documento_status(
+def update_document_status(
     doc_id: int,
     status: str = Query(...),
     modulo: str = Query(default="Archivo"),
@@ -624,7 +624,7 @@ def update_documento_status(
 
 
 @router.get("/documentos/pendientes")
-def get_documentos_pendientes(
+def get_pending_documents(
     modulo: str = "Archivo",
     page: int = 1,
     per_page: int = 25,
@@ -671,7 +671,7 @@ def get_documentos_pendientes(
 
 
 @router.post("/documento/{doc_id}/upload")
-async def upload_documento_file(
+async def upload_document_file(
     doc_id: int,
     modulo: str = "Archivo",
     usuario: str = "",
@@ -688,7 +688,7 @@ async def upload_documento_file(
 
 
 @router.get("/empleado/{emp_id}")
-def get_empleado(
+def get_employee(
     emp_id: int,
     usuario_sesion: str = Depends(require_session),
     _autorizado: str = Depends(require_role("RRHH")),
@@ -718,7 +718,7 @@ def get_empleado(
 
 
 @router.put("/empleado/{emp_id}")
-def update_empleado(
+def update_employee(
     emp_id: int,
     req: EmpleadoUpdateRequest,
     usuario_sesion: str = Depends(require_session),
@@ -821,7 +821,7 @@ def get_status_counts(
 
 
 @router.delete("/empleado/{emp_id}")
-def delete_empleado(
+def delete_employee(
     emp_id: int,
     usuario: str,
     deleted_reason: Optional[str] = Query(default=None, max_length=500),
