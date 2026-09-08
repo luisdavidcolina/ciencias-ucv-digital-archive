@@ -308,6 +308,16 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   #nav_username { max-width: 30vw; font-size: 0.8rem; }
   .ds-navbar-logo-img { height: 27px; max-width: 30vw; }
   .main-header.navbar { padding-left: 6px; padding-right: 6px; }
+  /* Ronda 20: la credencial (`.ds-nav-user-badge`) tenía un `max-width: 180px`
+     fijo sin variante para móvil -- a 390px de viewport con zoom de texto
+     normal (100%) cabía justo, pero con zoom de texto al 150-200% (WCAG 1.4.4,
+     nadie lo había probado en 19 rondas) el logo + la credencial + el botón de
+     salir ya no caben en una sola fila sin ajuste, y al ser un
+     `.navbar-nav` sin wrap (`navbar-expand`) el navbar entero desborda la
+     página en vez de recortar -- mismo síntoma que ya resolvió `#nav_username`
+     con `max-width: 30vw` aquí mismo, sólo que faltaba aplicarlo al
+     contenedor de la credencial completa (icono + username + padding). */
+  .ds-nav-user-badge { max-width: 28vw; padding: 2px 6px; gap: 4px; }
 }
 
 /* Tarjetas de gráfico: marco neutro. Cada una llevaba una banda de color
