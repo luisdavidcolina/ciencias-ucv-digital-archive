@@ -239,7 +239,7 @@ function _renderKeywordItem(kw) {
         <button class="btn btn-link btn-sm p-0 mr-1" onclick="handleEditKeyword(${kw.id})" title="Renombrar">
           <i class="fas fa-pen text-warning" style="font-size:0.72rem;"></i>
         </button>
-        <button class="btn btn-link btn-sm p-0" onclick="handleDeleteKeyword(${kw.id},${JSON.stringify(kw.nombre)},${Number(kw.uso_archivo || 0)})" title="Eliminar">
+        <button class="btn btn-link btn-sm p-0" onclick="handleDeleteKeyword(${kw.id},${escHtml(JSON.stringify(kw.nombre))},${Number(kw.uso_archivo || 0)})" title="Eliminar">
           <i class="fas fa-trash text-danger" style="font-size:0.72rem;"></i>
         </button>
       </div>

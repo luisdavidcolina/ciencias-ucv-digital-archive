@@ -850,7 +850,7 @@ function _renderRrhhFacets(facets) {
 
   const deptRows = byDept.map(f =>
     `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row"
-          style="cursor:pointer;font-size:0.78rem;" onclick="_facetRrhhDeptClick(${JSON.stringify(f.name)})">
+          style="cursor:pointer;font-size:0.78rem;" onclick="_facetRrhhDeptClick(${escHtml(JSON.stringify(f.name))})">
       <span class="text-truncate" style="max-width:140px;" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
     </div>`
@@ -859,7 +859,7 @@ function _renderRrhhFacets(facets) {
   const estadoRows = byEstado.map(f => {
     const active = selectedEstados.includes(f.name);
     return `<div class="d-flex justify-content-between align-items-center py-1 px-1 rounded ds-facet-row${active ? " ds-facet-active" : ""}"
-                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetRrhhEstadoClick(${JSON.stringify(f.name)})">
+                 style="cursor:pointer;font-size:0.78rem;" onclick="_facetRrhhEstadoClick(${escHtml(JSON.stringify(f.name))})">
       <span>${escHtml(f.name)}</span>
       <span class="badge badge-secondary ml-1" style="font-size:0.68rem;min-width:24px;text-align:center;">${f.count}</span>
     </div>`;

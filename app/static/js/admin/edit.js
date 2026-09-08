@@ -447,8 +447,8 @@ async function _loadPapeleraDocumentos(modulo, suf) {
           <td><small class="text-muted">${escHtml(r.deleted_by || "—")}</small></td>
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
-            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${JSON.stringify(modulo)},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${JSON.stringify(modulo)},${JSON.stringify(r.titulo || "")},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-success mr-1" onclick="_restaurarDoc(${r.id},${escHtml(JSON.stringify(modulo))},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarDoc(${r.id},${escHtml(JSON.stringify(modulo))},${escHtml(JSON.stringify(r.titulo || ""))},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
@@ -479,7 +479,7 @@ async function _loadPapeleraEmpleados() {
           <td><small class="text-muted">${escHtml(r.deleted_at || "—")}</small></td>
           <td>
             <button class="btn btn-xs btn-success mr-1" onclick="_restaurarEmpleado(${r.id},this)" title="Restaurar"><i class="fas fa-undo"></i></button>
-            <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id},${JSON.stringify(r.cedula || "")},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
+            <button class="btn btn-xs btn-danger" onclick="_purgarEmpleado(${r.id},${escHtml(JSON.stringify(r.cedula || ""))},this)" title="Eliminar permanentemente"><i class="fas fa-fire"></i></button>
           </td>
         </tr>`).join("");
     }
@@ -643,8 +643,8 @@ async function loadDocVersiones(docId, modulo) {
               <td>${escHtml(v.subido_por || "—")}</td>
               <td>${escHtml(v.created_at || "—")}</td>
               <td>
-                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},${JSON.stringify(modulo)})" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
-                <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},${JSON.stringify(modulo)})" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-xs btn-outline-success mr-1" onclick="_restaurarVersion(${docId},${v.id},${escHtml(JSON.stringify(modulo))})" title="Restaurar esta versión"><i class="fas fa-undo"></i></button>
+                <button class="btn btn-xs btn-outline-danger" onclick="_deleteVersion(${docId},${v.id},${escHtml(JSON.stringify(modulo))})" title="Eliminar del historial"><i class="fas fa-trash"></i></button>
               </td>
             </tr>`).join("")}
         </tbody>

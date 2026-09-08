@@ -147,7 +147,7 @@ function _renderUserRow(u) {
       <td>
         <button class="btn btn-xs ${isActive ? 'btn-success' : 'btn-secondary'}"
                 role="switch" aria-checked="${isActive}"
-                onclick="handleToggleUserActive(${u.id}, ${JSON.stringify(u.usuario)}, ${isActive})"
+                onclick="handleToggleUserActive(${u.id}, ${escHtml(JSON.stringify(u.usuario))}, ${isActive})"
                 title="${isActive ? 'Cuenta activa — pulsar para desactivar' : 'Cuenta inactiva — pulsar para activar'}">
           <i class="fas fa-${isActive ? 'times-circle' : 'check-circle'}"></i>
           ${isActive ? 'Desactivar' : 'Activar'}
@@ -158,13 +158,13 @@ function _renderUserRow(u) {
         ${isStale ? '<span class="badge badge-warning ml-1" title="Sin acceso en más de ' + STALE_DAYS + ' días">inactiva</span>' : ''}
       </td>
       <td style="white-space:nowrap;">
-        <button class="btn btn-xs btn-outline-secondary mr-1" onclick="handleChangePassword(${u.id}, ${JSON.stringify(u.usuario)})">
+        <button class="btn btn-xs btn-outline-secondary mr-1" onclick="handleChangePassword(${u.id}, ${escHtml(JSON.stringify(u.usuario))})">
           <i class="fas fa-key"></i> Clave
         </button>
-        <button class="btn btn-xs btn-outline-info mr-1" onclick="handleViewUserHistory(${JSON.stringify(u.usuario)})" title="Ver historial de esta cuenta">
+        <button class="btn btn-xs btn-outline-info mr-1" onclick="handleViewUserHistory(${escHtml(JSON.stringify(u.usuario))})" title="Ver historial de esta cuenta">
           <i class="fas fa-history"></i>
         </button>
-        <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteUser(${u.id}, ${JSON.stringify(u.usuario)})">
+        <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteUser(${u.id}, ${escHtml(JSON.stringify(u.usuario))})">
           <i class="fas fa-trash-alt"></i>
         </button>
       </td>

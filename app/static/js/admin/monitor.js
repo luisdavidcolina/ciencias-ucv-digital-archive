@@ -474,7 +474,7 @@ function renderMonitorTable() {
         <td class="ds-hide-sm"><span class="badge badge-light border">${escHtml(f.doc_type||'—')}</span></td>
         <td>
           <button class="btn btn-xs btn-link p-0 ds-status-btn" title="Cambiar estado: ${statusBtnTitle}" aria-label="Cambiar estado de ${nombreDoc}: ${statusBtnTitle}"
-            onclick="openQuickStatusMenu(this,${f.id},${JSON.stringify(f.status||'aprobado')},${JSON.stringify(state.user.modulo)})">
+            onclick="openQuickStatusMenu(this,${f.id},${escHtml(JSON.stringify(f.status||'aprobado'))},${escHtml(JSON.stringify(state.user.modulo))})">
             ${statusBadge}
           </button>
         </td>
@@ -484,7 +484,7 @@ function renderMonitorTable() {
           <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditDocModal(${f.id})" title="Editar" aria-label="Editar: ${nombreDoc}"><i class="fas fa-edit"></i></button>
           <button class="btn btn-xs btn-outline-info mr-1" onclick="compartirDocumento(${f.id})" title="Compartir enlace temporal" aria-label="Compartir enlace temporal de: ${nombreDoc}"><i class="fas fa-link"></i></button>
           <span class="border-left pl-1 ml-1">
-            <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},${JSON.stringify(f.titulo||'')})" title="Eliminar" aria-label="Eliminar: ${nombreDoc}"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteDoc(${f.id},${escHtml(JSON.stringify(f.titulo||''))})" title="Eliminar" aria-label="Eliminar: ${nombreDoc}"><i class="fas fa-trash"></i></button>
           </span>
         </td>
       </tr>`;
@@ -537,11 +537,11 @@ function renderMonitorTable() {
           <td class="ds-hide-sm"><span class="badge badge-light border" title="${escHtml(f.tipos||'')}" style="padding:3px 6px;">${escHtml((f.tipos||'').split(';')[0].trim()||'—')}</span></td>
           <td class="text-muted small ds-hide-sm">${escHtml(f.ubicacion||'—')}</td>
           <td>
-            <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier(${JSON.stringify(f.empleado)})" title="Ver Expediente" aria-label="Ver expediente de ${nombreEmp}"><i class="fas fa-eye"></i></button>
+            <button class="btn btn-xs btn-outline-secondary mr-1" onclick="openRrhhPersonDossier(${escHtml(JSON.stringify(f.empleado))})" title="Ver Expediente" aria-label="Ver expediente de ${nombreEmp}"><i class="fas fa-eye"></i></button>
             <button class="btn btn-xs btn-outline-warning mr-1" onclick="openEditEmpleadoModal(${f.empleado_id})" title="Editar" aria-label="Editar: ${nombreEmp}"><i class="fas fa-edit"></i></button>
             <button class="btn btn-xs btn-outline-info mr-1" onclick="_imprimirExpedienteRrhh(${f.empleado_id})" title="Imprimir expediente" aria-label="Imprimir expediente de ${nombreEmp}"><i class="fas fa-print"></i></button>
             <span class="border-left pl-1 ml-1">
-              <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteEmpleado(${f.empleado_id},${JSON.stringify(f.empleado||'')})" title="Eliminar" aria-label="Eliminar: ${nombreEmp}"><i class="fas fa-trash"></i></button>
+              <button class="btn btn-xs btn-outline-danger" onclick="handleDeleteEmpleado(${f.empleado_id},${escHtml(JSON.stringify(f.empleado||''))})" title="Eliminar" aria-label="Eliminar: ${nombreEmp}"><i class="fas fa-trash"></i></button>
             </span>
           </td>
         </tr>

@@ -336,7 +336,7 @@ async function loadVencimientosTable() {
         <td><i class="fas ${urgIcon} mr-1" aria-hidden="true"></i><span class="sr-only">${urgLabel}: </span><strong>${formatDias(v.dias_vencido)}</strong></td>
         <td class="text-muted small ds-hide-sm">${escHtml(v.ubicacion || "—")}</td>
         <td class="text-nowrap">
-          <button class="btn btn-xs btn-outline-primary" onclick="abrirDisposicion(${v.id_archivo}, ${JSON.stringify(v.titulo || "")})"
+          <button class="btn btn-xs btn-outline-primary" onclick="abrirDisposicion(${v.id_archivo}, ${escHtml(JSON.stringify(v.titulo || ""))})"
                   title="Registrar disposición documental">
             <i class="fas fa-gavel mr-1"></i>Disponer
           </button>
