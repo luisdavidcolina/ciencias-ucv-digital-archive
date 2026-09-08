@@ -14,6 +14,7 @@ import re
 from utils import paginate
 from datetime import datetime, date
 from typing import Optional
+from models import _validate_date, _normalize_cedula
 
 _SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
 
@@ -23,6 +24,35 @@ _SAFE_IDENTIFIER = re.compile(r'^[a-z_][a-z0-9_]{0,62}$')
 # IDENTITY` queda por detrás del máximo insertado — el siguiente INSERT sin
 # id explícito choca contra una fila que ya existe. Se reajusta al final de
 # cada tabla restaurada, dentro de la misma transacción.
+
+# R58: opcion (c) dejada por R57 -- restore_backup insertaba directo desde el
+# JSON sin pasar por ningun modelo Pydantic; el unico filtro era el NOMBRE de
+# columna (anti-inyeccion, `_SAFE_IDENTIFIER`), nunca el VALOR. Un formulario
+# normal SI rechaza una fecha con año 9999 (`_validate_date`, ronda 31) o una
+# cedula sin la forma V-12345678 (`_normalize_cedula`, OR-016/OR-084) -- un
+# restore los colaba sin que nada los interceptara.
+#
+# No se reconstruye la fila completa contra el modelo Pydantic de creacion:
+# ese modelo exige TODOS los campos obligatorios y tiene forma distinta a una
+# fila cruda de la BD (trae `id`/`created_at` que el modelo de alta no
+# espera). Se valida SOLO columna por columna, reutilizando las mismas
+# funciones que ya usa Pydantic -- cualquier otra columna del backup pasa sin
+# tocar. `rif` se deja fuera a propósito: revisado `models.py` completo, hoy
+# NINGUN formulario de la app valida su formato (solo longitud máxima) -- no
+# hay regla real de la que este restore se esté saltando.
+_ROW_VALIDATORS = {
+    "empleados": {
+        "fecha_ingreso":     _validate_date,
+        "fecha_jubilacion":  _validate_date,
+        "fecha_pension":     _validate_date,
+        "fecha_nacimiento":  _validate_date,
+        "cedula":            _normalize_cedula,
+    },
+    "datos_archivo":    {"fecha_documento": _validate_date},
+    "datos_rrhh":       {"fecha_documento": _validate_date},
+    "historial_cargos": {"fecha_inicio": _validate_date, "fecha_fin": _validate_date},
+}
+
 _PK_COLUMN = {
     "categoria": "id",
     "cargos": "id",
@@ -297,12 +327,34 @@ async def restore_backup(
             # tabla (borrado incluido) se deshace: o queda como estaba, o
             # queda restaurada — nunca a medias.
             inserted = 0
+            fila_errores = []
+            validators = _ROW_VALIDATORS.get(table, {})
             with db_transaction() as execute:
                 if mode == "overwrite" and table not in ("usuarios_sistema",):
                     # No borramos usuarios para evitar quedar sin acceso
                     execute(f"DELETE FROM public.{table}")
 
-                for row in rows:
+                for idx, row in enumerate(rows):
+                    # R58: valida sólo las columnas que hoy ya validan los
+                    # modelos Pydantic (fecha, cedula) antes de armar el
+                    # INSERT. Una fila que no pasa NO tumba la restauración
+                    # completa de la tabla -- se salta y se reporta, mismo
+                    # patrón que `import_empleados_csv`/`import_documentos_csv`
+                    # con filas de CSV inválidas.
+                    fila_valida = True
+                    for col, validar in validators.items():
+                        if col not in row:
+                            continue
+                        try:
+                            row[col] = validar(row[col])
+                        except ValueError as e:
+                            identificador = row.get("id") or row.get("id_archivo") or row.get("id_rrhh") or idx
+                            fila_errores.append(f"fila {identificador} ({col}): {e}")
+                            fila_valida = False
+                            break
+                    if not fila_valida:
+                        continue
+
                     cols = [c for c in row.keys() if _SAFE_IDENTIFIER.match(c)]
                     if not cols:
                         continue
@@ -323,7 +375,12 @@ async def restore_backup(
                         f"SELECT setval(pg_get_serial_sequence('public.{table}', '{pk}'), "
                         f"COALESCE((SELECT MAX({pk}) FROM public.{table}), 1), true)"
                     )
-            results[table] = {"inserted": inserted, "total": len(rows)}
+            result_row = {"inserted": inserted, "total": len(rows)}
+            if fila_errores:
+                result_row["skipped_rows"] = len(fila_errores)
+                result_row["row_errors"] = fila_errores[:20]
+                errors.extend(f"{table}: {msg}" for msg in fila_errores[:20])
+            results[table] = result_row
         except Exception as e:
             # La transacción de esta tabla ya hizo rollback dentro de
             # db_transaction(); la tabla queda tal como estaba antes de

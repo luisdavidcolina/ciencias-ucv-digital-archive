@@ -157,6 +157,138 @@ class TestColumnSanitization:
         assert res.status_code == 400
 
 
+class TestRestoreValidacionDirigida:
+    """R58 (opción c dejada por R57): restore_backup insertaba directo desde
+    el JSON sin pasar por ningún modelo Pydantic -- el único filtro era el
+    NOMBRE de columna, nunca el VALOR. Un backup con una fecha de año 9999 o
+    una cédula sin la forma V-12345678 se insertaba sin que nada lo
+    interceptara, aunque un formulario normal SÍ lo rechaza. Estas pruebas
+    confirman que la fila inválida se salta y se reporta -- no se inserta
+    silenciosamente y tampoco tumba la restauración de las demás filas."""
+
+    def test_fecha_de_anio_absurdo_en_empleados_se_omite_y_se_reporta(self, client):
+        backup = {
+            "_metadata": {"version": "1.0", "tables": ["empleados"], "partial": True},
+            "empleados": [
+                {"id": 1, "cedula": "V-12345678", "nombres": "A", "apellidos": "B",
+                 "fecha_ingreso": "9999-01-01"},
+                {"id": 2, "cedula": "V-87654321", "nombres": "C", "apellidos": "D",
+                 "fecha_ingreso": "2020-01-01"},
+            ],
+        }
+        content = json.dumps(backup).encode()
+
+        call_log = []
+        tx = _FakeTransaction(call_log)
+
+        with patch("routes.backup.db_transaction", return_value=tx), \
+             patch("routes.backup.db_query", return_value=None), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            import io
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("backup.json", io.BytesIO(content), "application/json")},
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["success"] is False
+        assert body["results"]["empleados"]["inserted"] == 1
+        assert body["results"]["empleados"]["skipped_rows"] == 1
+        assert any("fecha_ingreso" in e for e in body["errors"])
+        inserts = [s for s in call_log if "INSERT" in s and "empleados" in s]
+        assert len(inserts) == 1
+
+    def test_cedula_sin_forma_valida_se_omite_y_se_reporta(self, client):
+        backup = {
+            "_metadata": {"version": "1.0", "tables": ["empleados"], "partial": True},
+            "empleados": [
+                {"id": 1, "cedula": "no-es-una-cedula", "nombres": "A", "apellidos": "B",
+                 "fecha_ingreso": "2020-01-01"},
+            ],
+        }
+        content = json.dumps(backup).encode()
+
+        call_log = []
+        tx = _FakeTransaction(call_log)
+
+        with patch("routes.backup.db_transaction", return_value=tx), \
+             patch("routes.backup.db_query", return_value=None), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            import io
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("backup.json", io.BytesIO(content), "application/json")},
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["success"] is False
+        assert body["results"]["empleados"]["inserted"] == 0
+        assert body["results"]["empleados"]["skipped_rows"] == 1
+        assert any("cedula" in e for e in body["errors"])
+        inserts = [s for s in call_log if "INSERT" in s and "empleados" in s]
+        assert len(inserts) == 0
+
+    def test_cedula_normalizada_se_inserta_con_forma_canonica(self, client):
+        """OR-016/OR-084: '12.345.678' es válida y se guarda como 'V-12345678',
+        igual que ya hace el alta normal vía Pydantic."""
+        backup = {
+            "_metadata": {"version": "1.0", "tables": ["empleados"], "partial": True},
+            "empleados": [
+                {"id": 1, "cedula": "12.345.678", "nombres": "A", "apellidos": "B",
+                 "fecha_ingreso": "2020-01-01"},
+            ],
+        }
+        content = json.dumps(backup).encode()
+
+        call_log = []
+        tx = _FakeTransaction(call_log)
+
+        with patch("routes.backup.db_transaction", return_value=tx), \
+             patch("routes.backup.db_query", return_value=None), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            import io
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("backup.json", io.BytesIO(content), "application/json")},
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["success"] is True
+        assert body["results"]["empleados"]["inserted"] == 1
+        inserts = [s for s in call_log if "INSERT" in s and "empleados" in s]
+        assert len(inserts) == 1
+
+    def test_tabla_sin_columnas_a_validar_no_se_toca(self, client):
+        """`categoria` no tiene fecha ni cédula -- no debe pasar por
+        _ROW_VALIDATORS ni cambiar de comportamiento por este carril."""
+        backup = {
+            "_metadata": {"version": "1.0", "tables": ["categoria"], "partial": True},
+            "categoria": [{"id": 1, "nombre": "X", "slug": "x"}],
+        }
+        content = json.dumps(backup).encode()
+
+        call_log = []
+        tx = _FakeTransaction(call_log)
+
+        with patch("routes.backup.db_transaction", return_value=tx), \
+             patch("routes.backup.db_query", return_value=None), \
+             patch("routes.admin.deps.db_query", return_value=_FILA_ADMIN_GLOBAL):
+            import io
+            res = client.post(
+                "/api/admin/backup/restore?mode=merge",
+                files={"file": ("backup.json", io.BytesIO(content), "application/json")},
+            )
+
+        assert res.status_code == 200
+        body = res.json()
+        assert body["success"] is True
+        assert body["results"]["categoria"]["inserted"] == 1
+        assert "skipped_rows" not in body["results"]["categoria"]
+
+
 class TestRestoreValidacionYTransaccion:
     """IN-021/IN-022/DG-149: pruebas nuevas de este carril (SI-233 pide más
     cobertura para backup, y aquí se cubre lo que se tocó)."""
