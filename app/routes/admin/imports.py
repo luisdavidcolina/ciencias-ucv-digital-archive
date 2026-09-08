@@ -182,7 +182,37 @@ async def import_empleados_csv(
         _lookup_cache[key] = resolved
         return resolved
 
-    for i, row in enumerate(reader, 1):
+    # IN-217 paso 2: antes, `existing` se resolvía con un SELECT por fila
+    # (hasta 20000 consultas idénticas en la forma, una por cédula, en el
+    # peor caso). Se materializa el reader una sola vez (es un generador:
+    # iterarlo dos veces lo dejaría vacío en la segunda) para poder leer
+    # todas las cédulas del CSV por adelantado y resolverlas de una sola vez
+    # con `= ANY(%s)`. Los duplicados en el propio CSV no cambian el
+    # resultado: el dict sólo necesita una entrada por cédula distinta.
+    filas = list(reader)
+    _cedulas_csv = sorted({
+        str(r.get("cedula", "") or "").strip()
+        for r in filas[:_MAX_CSV_ROWS]
+    } - {""})
+    _existentes_por_cedula: dict[str, dict] = {}
+    _prefetch_ok = True
+    if _cedulas_csv:
+        try:
+            for r in db_query(
+                "SELECT id, cedula, deleted_at FROM public.empleados WHERE cedula = ANY(%s)",
+                [_cedulas_csv], fetch="all",
+            ) or []:
+                _existentes_por_cedula[r["cedula"]] = r
+        except Exception:
+            # No se re-lanza aquí: cada fila cae de vuelta al SELECT
+            # individual dentro de su propio try/except más abajo, igual
+            # que hacía el código antes de este cambio, así una falla de
+            # BD en el lote sigue reportándose fila a fila y no tumba toda
+            # la importación con un 500.
+            _existentes_por_cedula = {}
+            _prefetch_ok = False
+
+    for i, row in enumerate(filas, 1):
         if i > _MAX_CSV_ROWS:
             results["errors"].append(
                 f"Se detuvo en la fila {_MAX_CSV_ROWS}: el archivo trae más filas que el máximo soportado por importación.")
@@ -211,8 +241,11 @@ async def import_empleados_csv(
             # se resuelven siempre (usan su fila "Por Asignar"/"Pendiente de
             # Registro" por defecto cuando el CSV no trae el nombre) para no
             # repetir en el alta el mismo fallo de OR-002.
-            existing = db_query(
-                "SELECT id, deleted_at FROM public.empleados WHERE cedula=%s", [cedula], fetch="one")
+            if _prefetch_ok:
+                existing = _existentes_por_cedula.get(cedula)
+            else:
+                existing = db_query(
+                    "SELECT id, deleted_at FROM public.empleados WHERE cedula=%s", [cedula], fetch="one")
             if existing and existing.get("deleted_at"):
                 # OR-113: esta cédula sólo existe en la papelera. Actualizarla
                 # como si estuviera activa la "revive" en silencio: se cuenta
@@ -286,6 +319,10 @@ async def import_empleados_csv(
                          fecha_ing, fecha_jub, fecha_pen, foto_url, fecha_nac, nivel_educativo, sexo],
                     )
                     results["inserted"] += 1
+                    # Una cédula duplicada dentro del mismo CSV debe verse
+                    # como "ya existente" en las filas siguientes, igual que
+                    # con el SELECT por fila que reemplaza este caché.
+                    _existentes_por_cedula[cedula] = {"cedula": cedula, "deleted_at": None}
         except Exception as e:
             results["errors"].append(f"Fila {i} ({cedula}): {str(e)[:100]}")
     huboExito = results["inserted"] > 0 or results["updated"] > 0
