@@ -14,7 +14,7 @@ class TestChoices:
 
     def test_usuario_de_archivo_no_recibe_datos_de_rrhh(self, client_as):
         c = client_as("archivo_normal")
-        with patch("routes.lookups.db_query") as mock_db:
+        with patch("repos.lookups_repo.db_query") as mock_db:
             mock_db.side_effect = lambda sql, *a, **k: (
                 _fila_modulo("Archivo") if "usuarios_sistema" in sql else []
             )
@@ -29,7 +29,7 @@ class TestChoices:
 
     def test_usuario_de_rrhh_no_recibe_datos_de_archivo(self, client_as):
         c = client_as("rrhh_normal")
-        with patch("routes.lookups.db_query") as mock_db:
+        with patch("repos.lookups_repo.db_query") as mock_db:
             mock_db.side_effect = lambda sql, *a, **k: (
                 _fila_modulo("RRHH") if "usuarios_sistema" in sql else []
             )
@@ -44,7 +44,7 @@ class TestChoices:
 
     def test_usuario_global_recibe_ambos_modulos(self, client_as):
         c = client_as("global_admin")
-        with patch("routes.lookups.db_query") as mock_db:
+        with patch("repos.lookups_repo.db_query") as mock_db:
             mock_db.side_effect = lambda sql, *a, **k: (
                 _fila_modulo("Global") if "usuarios_sistema" in sql else []
             )
@@ -66,7 +66,7 @@ class TestChoices:
 
     def test_scope_archivo_omite_rrhh_aunque_el_usuario_tenga_ambos_modulos(self, client_as):
         c = client_as("global_admin")
-        with patch("routes.lookups.db_query") as mock_db:
+        with patch("repos.lookups_repo.db_query") as mock_db:
             mock_db.side_effect = lambda sql, *a, **k: (
                 _fila_modulo("Global") if "usuarios_sistema" in sql else []
             )
@@ -82,7 +82,7 @@ class TestChoices:
     def test_cache_activo_no_repite_las_consultas_de_datos(self, client_as):
         """Segunda llamada dentro del TTL no vuelve a construir el payload."""
         c = client_as("global_admin")
-        with patch("routes.lookups.db_query") as mock_db:
+        with patch("repos.lookups_repo.db_query") as mock_db:
             mock_db.side_effect = lambda sql, *a, **k: (
                 _fila_modulo("Global") if "usuarios_sistema" in sql else []
             )
