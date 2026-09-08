@@ -390,7 +390,40 @@ async def import_documentos_csv(
         _tipo_cache[key] = resolved
         return resolved
 
-    for i, row in enumerate(reader, 1):
+    # IN-217 paso 3 (porción segura): en la rama RRHH, `emp` se resolvía con
+    # un SELECT por fila (línea 447 original) exactamente igual al patrón que
+    # el paso 2 ya optimizó en import_empleados_csv -- es una lectura pura,
+    # sin ninguna decisión condicional ni escritura, así que aislarla a
+    # memoria no toca el aislamiento de errores por fila (cada fila sigue
+    # cayendo en su propio try/except más abajo, y el fallback ante un fallo
+    # del prefetch reproduce el SELECT individual de antes, igual que en el
+    # paso 2). El resto de la lógica de la rama RRHH y toda la rama Archivo
+    # sí quedan fuera: son inserts/updates dentro de `db_transaction()` por
+    # fila, que es justamente lo que la ronda 75 marcó `[CHOCA]` con
+    # IN-042/IN-054 -- convertirlos a lote perdería qué fila exacta falló.
+    filas = list(reader)
+    _empleados_por_cedula: dict[str, int] = {}
+    _emp_prefetch_ok = True
+    if modulo != "Archivo":
+        _cedulas_rrhh_csv = sorted({
+            str(r.get("cedula_empleado", "") or "").strip()
+            for r in filas[:_MAX_CSV_ROWS]
+        } - {""})
+        if _cedulas_rrhh_csv:
+            try:
+                for r in db_query(
+                    "SELECT id, cedula FROM public.empleados WHERE cedula = ANY(%s)",
+                    [_cedulas_rrhh_csv], fetch="all",
+                ) or []:
+                    _empleados_por_cedula[r["cedula"]] = r["id"]
+            except Exception:
+                # Mismo criterio que el paso 2: no se re-lanza, cada fila cae
+                # de vuelta al SELECT individual dentro de su propio
+                # try/except, así un fallo del lote no tumba la importación.
+                _empleados_por_cedula = {}
+                _emp_prefetch_ok = False
+
+    for i, row in enumerate(filas, 1):
         if i > _MAX_CSV_ROWS:
             results["errors"].append(
                 f"Se detuvo en la fila {_MAX_CSV_ROWS}: el archivo trae más filas que el máximo soportado por importación.")
@@ -444,8 +477,12 @@ async def import_documentos_csv(
                 if not cedula:
                     results["skipped"] += 1
                     continue
-                emp = db_query("SELECT id FROM public.empleados WHERE cedula=%s", [cedula], fetch="one")
-                if not emp:
+                if _emp_prefetch_ok:
+                    emp_id = _empleados_por_cedula.get(cedula)
+                else:
+                    emp_row = db_query("SELECT id FROM public.empleados WHERE cedula=%s", [cedula], fetch="one")
+                    emp_id = emp_row["id"] if emp_row else None
+                if not emp_id:
                     results["errors"].append(f"Fila {i}: cédula {cedula} no existe")
                     continue
                 tipo_nombre = str(row.get("tipo_documento", "") or "").strip()
@@ -473,7 +510,7 @@ async def import_documentos_csv(
                            (titulo,empleado_id,id_tipo_documento,fecha_documento,notas,ubicacion,
                             creado_por,updated_by,numero_folio,soporte,numero_paginas)
                        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    [titulo, emp["id"], tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""),
+                    [titulo, emp_id, tipo_id, _parse_date(row.get("fecha")), row.get("notas", ""),
                      ubicacion, _uid, _uid,
                      str(row.get("numero_folio", "") or "").strip() or None, _soporte_r, _paginas_r],
                     fetch="none", commit=True,
