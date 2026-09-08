@@ -12,8 +12,8 @@ from repos.auth_repo import (
     login_lock_row,
     register_login_failure,
     update_last_login,
-    usuarios_login_rows,
-    usuarios_restore_rows,
+    login_user_rows,
+    restore_user_rows,
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -150,7 +150,7 @@ def login(req: LoginRequest, response: Response, request: Request):
             headers={"Retry-After": str(int(remaining) + 1)},
         )
 
-    rows = usuarios_login_rows(req.username.strip())
+    rows = login_user_rows(req.username.strip())
     active_rows = [r for r in rows if r.get("is_active", True)] if rows else []
     for row in active_rows:
         if verify_password(req.password, row["contrasena"]):
@@ -193,7 +193,7 @@ def restore_session(
     if not token_user or token_user.lower() != req.username.strip().lower():
         raise HTTPException(status_code=401, detail="Sesión no válida o expirada")
 
-    rows = usuarios_restore_rows(req.username.strip())
+    rows = restore_user_rows(req.username.strip())
     if rows:
         if not rows[0].get("is_active", True):
             raise HTTPException(status_code=403, detail="Cuenta desactivada")

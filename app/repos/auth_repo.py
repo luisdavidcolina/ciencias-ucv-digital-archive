@@ -61,7 +61,7 @@ def clear_login_failures(usuario: str, ip: str) -> None:
     )
 
 
-def usuarios_login_rows(username: str):
+def login_user_rows(username: str):
     """Filas para /login: incluye contrasena para verificar la clave."""
     return db_query(
         "SELECT usuario, nombre_usuario, contrasena, modulo, rol, "
@@ -80,7 +80,7 @@ def update_last_login(username: str) -> None:
     )
 
 
-def usuarios_restore_rows(username: str):
+def restore_user_rows(username: str):
     """Filas para /restore: sin contrasena, no hace falta reverificar la clave."""
     return db_query(
         "SELECT usuario, nombre_usuario, modulo, rol, "
