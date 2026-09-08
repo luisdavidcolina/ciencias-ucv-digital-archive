@@ -130,6 +130,7 @@ para no repetir la confusión.
 
 ```
 | <carril> | <tu-nombre-de-agente> | <fecha> | en curso | |
+| IN-042-paso5-auth-repo | agente-ronda71-in042paso5 | 2026-09-08 | en curso | |
 | <carril> | <tu-nombre-de-agente> | <fecha> | terminado | <sha-del-commit> |
 ```
 

@@ -5,8 +5,16 @@ from typing import Optional
 
 from core.config import settings
 from core.security import generate_session_token, verify_session_token
-from database import db_query, log_event, verify_password
+from database import log_event, verify_password
 from models import LoginRequest, RestoreSessionRequest
+from repos.auth_repo import (
+    clear_login_failures,
+    login_lock_row,
+    register_login_failure,
+    update_last_login,
+    usuarios_login_rows,
+    usuarios_restore_rows,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -47,41 +55,6 @@ def _sanitize_for_log(value: str) -> str:
 # INSERT ... ON CONFLICT atómico para que dos intentos casi simultáneos del
 # mismo atacante no pisen el contador del otro (condición de carrera que un
 # SELECT-luego-UPDATE no evita).
-_LOCK_THRESHOLD = 5
-_LOCK_WINDOW_SECONDS = 300
-_LOCK_SECONDS = 30
-
-_UPSERT_ATTEMPT_SQL = f"""
-    INSERT INTO public.login_attempts
-        (usuario, ip, intentos, primer_intento_at, ultimo_intento_at, bloqueado_hasta)
-    VALUES (%s, %s, 1, NOW(), NOW(), NULL)
-    ON CONFLICT (usuario, ip) DO UPDATE SET
-        intentos = CASE
-            WHEN public.login_attempts.ultimo_intento_at
-                 < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
-            THEN 1
-            ELSE public.login_attempts.intentos + 1
-        END,
-        primer_intento_at = CASE
-            WHEN public.login_attempts.ultimo_intento_at
-                 < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
-            THEN NOW()
-            ELSE public.login_attempts.primer_intento_at
-        END,
-        ultimo_intento_at = NOW(),
-        bloqueado_hasta = CASE
-            WHEN (CASE
-                    WHEN public.login_attempts.ultimo_intento_at
-                         < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
-                    THEN 1
-                    ELSE public.login_attempts.intentos + 1
-                  END) >= {_LOCK_THRESHOLD}
-            THEN NOW() + INTERVAL '{_LOCK_SECONDS} seconds'
-            ELSE public.login_attempts.bloqueado_hasta
-        END
-"""
-
-
 def _throttle_key(username: str, request: Optional[Request]) -> tuple[str, str]:
     ip = request.client.host if request and request.client else "?"
     return (username.strip().lower(), ip)
@@ -89,11 +62,7 @@ def _throttle_key(username: str, request: Optional[Request]) -> tuple[str, str]:
 
 def _is_locked(key: tuple[str, str]) -> Optional[float]:
     usuario, ip = key
-    row = db_query(
-        "SELECT bloqueado_hasta FROM public.login_attempts WHERE usuario = %s AND ip = %s",
-        (usuario, ip),
-        fetch="one",
-    )
+    row = login_lock_row(usuario, ip)
     bloqueado_hasta = row.get("bloqueado_hasta") if row else None
     if not bloqueado_hasta:
         return None
@@ -104,17 +73,12 @@ def _is_locked(key: tuple[str, str]) -> Optional[float]:
 
 def _register_failure(key: tuple[str, str]) -> None:
     usuario, ip = key
-    db_query(_UPSERT_ATTEMPT_SQL, (usuario, ip), fetch="none", commit=True)
+    register_login_failure(usuario, ip)
 
 
 def _clear_failures(key: tuple[str, str]) -> None:
     usuario, ip = key
-    db_query(
-        "DELETE FROM public.login_attempts WHERE usuario = %s AND ip = %s",
-        (usuario, ip),
-        fetch="none",
-        commit=True,
-    )
+    clear_login_failures(usuario, ip)
 
 
 # =============================================================================
@@ -186,22 +150,12 @@ def login(req: LoginRequest, response: Response, request: Request):
             headers={"Retry-After": str(int(remaining) + 1)},
         )
 
-    rows = db_query(
-        "SELECT usuario, nombre_usuario, contrasena, modulo, rol, "
-        "COALESCE(is_active, TRUE) AS is_active "
-        "FROM public.usuarios_sistema "
-        "WHERE TRIM(usuario) = %s",
-        (req.username.strip(),),
-        fetch="all",
-    )
+    rows = usuarios_login_rows(req.username.strip())
     active_rows = [r for r in rows if r.get("is_active", True)] if rows else []
     for row in active_rows:
         if verify_password(req.password, row["contrasena"]):
             try:
-                db_query(
-                    "UPDATE public.usuarios_sistema SET last_login = NOW() WHERE TRIM(usuario) = %s",
-                    (req.username.strip(),), fetch="none", commit=True,
-                )
+                update_last_login(req.username.strip())
             except Exception:
                 pass
             payload = _build_user_response(active_rows, req.username.strip())
@@ -239,14 +193,7 @@ def restore_session(
     if not token_user or token_user.lower() != req.username.strip().lower():
         raise HTTPException(status_code=401, detail="Sesión no válida o expirada")
 
-    rows = db_query(
-        "SELECT usuario, nombre_usuario, modulo, rol, "
-        "COALESCE(is_active, TRUE) AS is_active "
-        "FROM public.usuarios_sistema "
-        "WHERE TRIM(usuario) = %s",
-        (req.username.strip(),),
-        fetch="all",
-    )
+    rows = usuarios_restore_rows(req.username.strip())
     if rows:
         if not rows[0].get("is_active", True):
             raise HTTPException(status_code=403, detail="Cuenta desactivada")

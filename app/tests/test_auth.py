@@ -45,7 +45,7 @@ class TestLogin:
     def test_login_correcto(self, client):
         row, _ = _make_user_row()
         with (
-            patch("routes.auth.db_query", side_effect=_qry_factory([row])),
+            patch("repos.auth_repo.db_query", side_effect=_qry_factory([row])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "clave123"})
@@ -57,7 +57,7 @@ class TestLogin:
 
     def test_login_usuario_no_existe(self, client):
         with (
-            patch("routes.auth.db_query", side_effect=_qry_factory([])),
+            patch("repos.auth_repo.db_query", side_effect=_qry_factory([])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "nadie", "password": "x"})
@@ -66,7 +66,7 @@ class TestLogin:
     def test_login_contrasena_incorrecta(self, client):
         row, _ = _make_user_row()
         with (
-            patch("routes.auth.db_query", side_effect=_qry_factory([row])),
+            patch("repos.auth_repo.db_query", side_effect=_qry_factory([row])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "INCORRECTA"})
@@ -84,7 +84,7 @@ class TestLogin:
         from datetime import datetime, timedelta, timezone
         futuro = datetime.now(timezone.utc) + timedelta(seconds=20)
         with (
-            patch("routes.auth.db_query", side_effect=_qry_factory([], bloqueado_hasta=futuro)),
+            patch("repos.auth_repo.db_query", side_effect=_qry_factory([], bloqueado_hasta=futuro)),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "x"})
@@ -107,7 +107,7 @@ class TestRestoreSession:
         row, _ = _make_user_row()
         token = _make_token("archivero")
         with (
-            patch("routes.auth.db_query", return_value=[row]),
+            patch("repos.auth_repo.db_query", return_value=[row]),
             patch("routes.auth.log_event"),
         ):
             res = client.post(
@@ -145,7 +145,7 @@ class TestRestoreSession:
         """Token válido pero usuario ya no existe en BD."""
         token = _make_token("archivero")
         with (
-            patch("routes.auth.db_query", return_value=[]),
+            patch("repos.auth_repo.db_query", return_value=[]),
             patch("routes.auth.log_event"),
         ):
             res = client.post(
@@ -160,7 +160,7 @@ class TestRestoreSession:
         row.get = lambda k, d=None: False if k == "is_active" else {"is_active": False}.get(k, d)
         token = _make_token("archivero")
         with (
-            patch("routes.auth.db_query", return_value=[row]),
+            patch("repos.auth_repo.db_query", return_value=[row]),
             patch("routes.auth.log_event"),
         ):
             res = client.post(
