@@ -162,6 +162,26 @@ async def import_empleados_csv(
         "delimitador_detectado": delimiter,
         **_columnas_reporte(fieldnames, _EMPLEADOS_COLUMNAS, _EMPLEADOS_REQUERIDAS),
     }
+    # IN-217 paso 1: cargo/departamento/estado se repiten muchísimo entre
+    # filas (ej. 500 filas con "Profesor Titular" = 500 consultas idénticas
+    # antes de este cambio). Se memoiza en memoria por (tabla, nombre) dentro
+    # de esta importación: la primera vez que aparece un nombre se resuelve
+    # contra la BD (y se crea si no existe, igual que antes) y las siguientes
+    # filas con el mismo nombre reutilizan el id ya resuelto sin consultar de
+    # nuevo. Como una fila puede crear un cargo/departamento/estado que otra
+    # fila más adelante use, la caché se actualiza fila a fila (no se
+    # precarga toda de una vez): así una creación de la fila 3 sigue estando
+    # disponible para la fila 40 sin repetir la consulta.
+    _lookup_cache: dict[tuple[str, str], int] = {}
+
+    def _cached_lookup(table: str, nombre: str, default_name: str) -> int:
+        key = (table, (nombre or "").strip() or default_name)
+        if key in _lookup_cache:
+            return _lookup_cache[key]
+        resolved = _resolve_or_create_lookup(table, nombre, default_name)
+        _lookup_cache[key] = resolved
+        return resolved
+
     for i, row in enumerate(reader, 1):
         if i > _MAX_CSV_ROWS:
             results["errors"].append(
@@ -209,18 +229,18 @@ async def import_empleados_csv(
                 continue
             cargo_id = dept_id = estado_id = None
             if cargo:
-                cargo_id = _resolve_or_create_lookup("cargos", cargo, "Por Asignar")
+                cargo_id = _cached_lookup("cargos", cargo, "Por Asignar")
             if depto:
-                dept_id = _resolve_or_create_lookup("departamentos", depto, "Por Asignar")
+                dept_id = _cached_lookup("departamentos", depto, "Por Asignar")
             if estado:
-                estado_id = _resolve_or_create_lookup("estados_laborales", estado, "Pendiente de Registro")
+                estado_id = _cached_lookup("estados_laborales", estado, "Pendiente de Registro")
             if not existing:
                 if cargo_id is None:
-                    cargo_id = _resolve_or_create_lookup("cargos", "", "Por Asignar")
+                    cargo_id = _cached_lookup("cargos", "", "Por Asignar")
                 if dept_id is None:
-                    dept_id = _resolve_or_create_lookup("departamentos", "", "Por Asignar")
+                    dept_id = _cached_lookup("departamentos", "", "Por Asignar")
                 if estado_id is None:
-                    estado_id = _resolve_or_create_lookup("estados_laborales", "", "Pendiente de Registro")
+                    estado_id = _cached_lookup("estados_laborales", "", "Pendiente de Registro")
             with db_transaction() as execute:
                 if existing:
                     # OR-004: una columna ausente o vacía en el CSV significa
@@ -319,6 +339,20 @@ async def import_documentos_csv(
         "delimitador_detectado": delimiter,
         **_columnas_reporte(fieldnames, _columnas, _requeridas),
     }
+    # IN-217 paso 1: tipo_documento se repite entre filas igual que
+    # cargo/departamento en import_empleados_csv. Se memoiza por (nombre,
+    # cat_slug) dentro de esta importación; ver comentario equivalente
+    # arriba sobre por qué se cachea fila a fila y no se precarga entera.
+    _tipo_cache: dict[tuple[str, str], int] = {}
+
+    def _cached_tipo_documento(nombre: str, cat_slug: str) -> int:
+        key = (nombre, cat_slug or "")
+        if key in _tipo_cache:
+            return _tipo_cache[key]
+        resolved = _resolve_or_create_tipo_documento(nombre, cat_slug)
+        _tipo_cache[key] = resolved
+        return resolved
+
     for i, row in enumerate(reader, 1):
         if i > _MAX_CSV_ROWS:
             results["errors"].append(
@@ -331,7 +365,7 @@ async def import_documentos_csv(
                     results["skipped"] += 1
                     continue
                 tipo_nombre = str(row.get("tipo_documento", "") or "").strip()
-                tipo_id = _resolve_or_create_tipo_documento(tipo_nombre, "archivo") if tipo_nombre else None
+                tipo_id = _cached_tipo_documento(tipo_nombre, "archivo") if tipo_nombre else None
                 _soporte = _coerce_soporte(row.get("soporte", ""))
                 _paginas_raw = str(row.get("numero_paginas", "") or "").strip()
                 _paginas = int(_paginas_raw) if _paginas_raw.isdigit() and int(_paginas_raw) > 0 else None
@@ -381,7 +415,7 @@ async def import_documentos_csv(
                 # OR-008: sin cat_slug, un tipo nuevo caía en la primera
                 # categoría por id (normalmente Archivo) y desaparecía del
                 # desplegable de RRHH y de la cobertura por Parte.
-                tipo_id = _resolve_or_create_tipo_documento(tipo_nombre, "parte-i") if tipo_nombre else None
+                tipo_id = _cached_tipo_documento(tipo_nombre, "parte-i") if tipo_nombre else None
                 if not tipo_id:
                     results["errors"].append(f"Fila {i}: tipo_documento inválido")
                     continue
