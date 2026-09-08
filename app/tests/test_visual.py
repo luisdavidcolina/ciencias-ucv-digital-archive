@@ -85,14 +85,23 @@ def servidor_vivo(app):
 
 
 @pytest.fixture(scope="module")
-def navegador():
+def _playwright():
+    # Un solo `sync_playwright()` por módulo: abrirlo dos veces (uno para
+    # Chromium, otro para WebKit) revienta con "Sync API inside the asyncio
+    # loop" porque el segundo intenta correr sobre el loop que dejó el
+    # primero.
     with playwright_sync.sync_playwright() as p:
-        try:
-            b = p.chromium.launch()
-        except Exception as e:  # pragma: no cover
-            pytest.skip(f"chromium no disponible para Playwright: {e}")
-        yield b
-        b.close()
+        yield p
+
+
+@pytest.fixture(scope="module")
+def navegador(_playwright):
+    try:
+        b = _playwright.chromium.launch()
+    except Exception as e:  # pragma: no cover
+        pytest.skip(f"chromium no disponible para Playwright: {e}")
+    yield b
+    b.close()
 
 
 def _errores_de_consola(pagina) -> list[str]:
@@ -117,6 +126,51 @@ CASOS = [
     for ancho in ANCHOS
     for oscuro in (False, True)
 ]
+
+# Estilos "vidrio" (Glassmorphism/Liquid Glass) usan backdrop-filter, que en
+# WebKit/Safari exige el prefijo -webkit-backdrop-filter — la ronda 50
+# encontró una regla sin ese prefijo que Chromium nunca hubiera detectado
+# (Chromium no lo exige). No se duplica la matriz completa (9 páginas × 3
+# anchos × 2 temas × WebKit multiplicaría el tiempo de la suite visual sin
+# necesidad): solo estos estilos, en una página y un ancho representativos.
+ESTILOS_VIDRIO = ["glassmorphism", "liquid-glass"]
+
+
+@pytest.fixture(scope="module")
+def navegador_webkit(_playwright):
+    try:
+        b = _playwright.webkit.launch()
+    except Exception as e:  # pragma: no cover
+        pytest.skip(f"webkit no disponible para Playwright: {e}")
+    yield b
+    b.close()
+
+
+@pytest.mark.parametrize("estilo", ESTILOS_VIDRIO)
+def test_estilo_vidrio_backdrop_filter_en_webkit(servidor_vivo, navegador_webkit, estilo):
+    """SD-224 + ronda 50: en WebKit, backdrop-filter sin el prefijo -webkit-
+    no se aplica y el elemento queda opaco/plano en vez de esmerilado — un
+    fallo que Chromium no puede reproducir porque no exige el prefijo."""
+    contexto = navegador_webkit.new_context(viewport={"width": 1440, "height": 900})
+    pagina = contexto.new_page()
+    pagina.goto(f"{servidor_vivo}/archivo", wait_until="networkidle")
+    pagina.evaluate("(valor) => { document.body.dataset.style = valor }", estilo)
+    pagina.wait_for_timeout(150)
+
+    valor = pagina.evaluate(
+        """() => {
+            const el = document.querySelector('.card, .ds-item-card') || document.body;
+            const cs = getComputedStyle(el);
+            return cs.backdropFilter || cs.webkitBackdropFilter || 'none';
+        }"""
+    )
+    contexto.close()
+
+    assert valor and valor != "none", (
+        f"estilo '{estilo}' en WebKit: backdrop-filter no se aplicó "
+        f"(computed value: {valor!r}) — revisa que la regla lleve "
+        "-webkit-backdrop-filter"
+    )
 
 
 @pytest.mark.parametrize(
