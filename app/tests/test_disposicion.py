@@ -44,7 +44,8 @@ def test_registra_la_decision_sin_borrar_el_documento():
     with patch.object(ret, "db_query", side_effect=falso), \
          patch.object(ret, "log_event"):
         r = ret.registrar_disposicion(7, ret.DisposicionIn(
-            disposicion="transferido", acta="Acta 12/2026", requester="admin"))
+            disposicion="transferido", acta="Acta 12/2026", requester="admin"),
+            usuario_sesion="admin.global")
 
     assert r["success"] is True
     assert r["etiqueta"] == "Transferido al archivo histórico"
@@ -59,7 +60,8 @@ def test_no_se_puede_disponer_dos_veces():
     with patch.object(ret, "db_query", return_value=_doc("eliminado")), \
          patch.object(ret, "log_event"):
         with pytest.raises(HTTPException) as e:
-            ret.registrar_disposicion(7, ret.DisposicionIn(disposicion="conservar"))
+            ret.registrar_disposicion(7, ret.DisposicionIn(disposicion="conservar"),
+                                       usuario_sesion="admin.global")
         assert e.value.status_code == 409
         assert "Eliminado por expurgo" in e.value.detail
 
@@ -68,7 +70,8 @@ def test_documento_inexistente():
     with patch.object(ret, "db_query", return_value=None), \
          patch.object(ret, "log_event"):
         with pytest.raises(HTTPException) as e:
-            ret.registrar_disposicion(999, ret.DisposicionIn(disposicion="conservar"))
+            ret.registrar_disposicion(999, ret.DisposicionIn(disposicion="conservar"),
+                                       usuario_sesion="admin.global")
         assert e.value.status_code == 404
 
 
@@ -77,10 +80,36 @@ def test_la_decision_queda_en_auditoria():
     with patch.object(ret, "db_query", side_effect=lambda s, *a, **k: _doc() if "SELECT" in s else None), \
          patch.object(ret, "log_event") as reg:
         ret.registrar_disposicion(7, ret.DisposicionIn(
-            disposicion="eliminado", acta="Acta 3/2026", requester="admin"))
+            disposicion="eliminado", acta="Acta 3/2026", requester="admin"),
+            usuario_sesion="admin.global")
     reg.assert_called_once()
     assert "Disposición" in reg.call_args[0][1]
     assert "Acta 3/2026" in reg.call_args[0][3]
+
+
+def test_ignora_el_requester_declarado_por_el_cliente():
+    """IN-133: `requester` lo declara el cliente y no prueba nada -- la
+    identidad real para `disposicion_por` y la auditoría sale de la sesión
+    verificada (`usuario_sesion`), no del payload. Antes de este fix
+    `requester="quien-sea"` habría quedado escrito tal cual en la base y en
+    el log."""
+    ejecutadas = []
+
+    def falso(sql, params=None, **k):
+        ejecutadas.append((sql, params))
+        return _doc() if "SELECT" in sql else None
+
+    with patch.object(ret, "db_query", side_effect=falso), \
+         patch.object(ret, "log_event") as reg:
+        ret.registrar_disposicion(7, ret.DisposicionIn(
+            disposicion="conservar", requester="quien-sea"),
+            usuario_sesion="admin.real")
+
+    update_sql, update_params = next(s for s in ejecutadas if "UPDATE" in s[0])
+    assert "admin.real" in update_params
+    assert "quien-sea" not in update_params
+    reg.assert_called_once()
+    assert reg.call_args[0][0] == "admin.real"
 
 
 def test_los_vencimientos_dejan_de_listar_lo_ya_dispuesto():

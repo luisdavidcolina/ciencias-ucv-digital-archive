@@ -14,7 +14,7 @@ from pydantic import BaseModel, field_validator
 
 from database import db_query, log_event
 from ..lookups import invalidate_choices_cache
-from .deps import require_admin_role, require_role
+from .deps import require_admin_role, require_role, require_session
 
 # La pestaña "Retención" existe tanto en Archivo como en RRHH (OA-001: hoy la
 # de RRHH abre siempre vacía porque las consultas sólo tocan datos_archivo,
@@ -252,6 +252,10 @@ DISPOSICIONES = {
 class DisposicionIn(BaseModel):
     disposicion: str
     acta: Optional[str] = ""
+    # IN-133: `requester` se sigue aceptando por compatibilidad con clientes
+    # existentes, pero ya no se lee — la identidad para `disposicion_por` y
+    # el registro de auditoría sale de la sesión verificada
+    # (`usuario_sesion`), nunca de un campo que el propio cliente declara.
     requester: Optional[str] = ""
 
     @field_validator("disposicion")
@@ -265,7 +269,8 @@ class DisposicionIn(BaseModel):
 
 
 @router.post("/retencion/disponer/{doc_id}", dependencies=[Depends(require_admin_role("Archivo"))])
-def registrar_disposicion(doc_id: int, data: DisposicionIn):
+def registrar_disposicion(doc_id: int, data: DisposicionIn,
+                           usuario_sesion: str = Depends(require_session)):
     """Deja constancia de la decisión de disposición sobre un documento."""
     fila = db_query(
         """SELECT id_archivo, titulo, disposicion
@@ -289,10 +294,10 @@ def registrar_disposicion(doc_id: int, data: DisposicionIn):
                disposicion_acta = %s, disposicion_por = %s
            WHERE id_archivo = %s""",
         [data.disposicion, (data.acta or "").strip() or None,
-         (data.requester or "sistema").strip(), doc_id],
+         usuario_sesion, doc_id],
         fetch="none", commit=True,
     )
-    log_event(data.requester or "sistema", "Disposición Documental", "Archivo",
+    log_event(usuario_sesion, "Disposición Documental", "Archivo",
               f"doc_id={doc_id}, {DISPOSICIONES[data.disposicion]}, "
               f"acta: {(data.acta or '—')[:60]}")
     return {"success": True, "doc_id": doc_id,
