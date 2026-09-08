@@ -78,6 +78,18 @@ body.dark-mode .ds-item-authors       { color: var(--text) !important; }
 body.dark-mode .ds-item-publisher,
 body.dark-mode .ds-item-date          { color: var(--ds-dark-text-2) !important; }
 body.dark-mode .ds-item-abstract      { color: var(--ds-dark-text-2) !important; }
+/* R13: el título del resultado es el dato más leído de la fila y era el
+   peor de todos -- ratio ~1.01 medido en vivo, prácticamente invisible.
+   Sin tema activo hereda el negro casi puro de Bootstrap (`.btn`); con
+   cualquiera de los 11 temas, `personalizacion.css` fija
+   `--tt-accent-hover` (pensado sólo para el fondo claro del modo claro,
+   según su propio comentario) con `!important`, así que no basta con NO
+   fijar color aquí: hay que ganarle esa regla por orden de import (esta
+   hoja se importa después) con la misma especificidad. Mismo azul ya
+   usado para el resto de textos legibles sobre superficie oscura
+   (`--ds-dark-accent-active`), en vez de heredar un acento que asume
+   fondo claro. */
+body.dark-mode .ds-item-title         { color: var(--ds-dark-accent-active) !important; }
 
 /* Headings */
 body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
@@ -274,7 +286,11 @@ body.dark-mode .ds-upload-zone           { background: var(--surface-1) !importa
 body.dark-mode .ds-dossier-item          { background: var(--surface-1) !important; border-color: var(--border) !important; color: var(--text) !important; }
 body.dark-mode .ds-quick-status-dropdown { background: var(--surface-1) !important; border-color: var(--border) !important; color: var(--text) !important; box-shadow: var(--shadow-lg) !important; }
 body.dark-mode .ds-viewer-img            { background: var(--surface-0) !important; }
-body.dark-mode .ds-nav-user-badge        { color: var(--ds-dark-text-2) !important; }
+/* R13: sólo el texto tenía par oscuro; el fondo seguía siendo el
+   `#eef4fb` fijo a pelo de componentes-admin.css (nunca tokenizado) --
+   texto gris claro sobre fondo azul clarísimo, ratio ~1.15 medido en vivo. */
+body.dark-mode .ds-nav-user-badge        { color: var(--ds-dark-text-2) !important; background: var(--surface-2) !important; border-color: var(--border) !important; }
+body.dark-mode .ds-nav-user-badge i      { color: var(--ds-dark-text-2) !important; }
 body.dark-mode .ds-breadcrumb-wrapper    { background: var(--surface-2) !important; border-color: var(--border) !important; color: var(--ds-dark-text-2) !important; }
 body.dark-mode .ds-facet-row             { border-color: var(--border) !important; color: var(--ds-dark-text-2) !important; }
 body.dark-mode .select-tag               { background: var(--border) !important; color: var(--ds-dark-text-2) !important; }

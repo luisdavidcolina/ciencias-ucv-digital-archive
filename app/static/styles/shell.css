@@ -213,7 +213,19 @@
     font-family: var(--ds-font-family, 'Nunito'), sans-serif;
     font-size: 1.15rem;
     font-weight: var(--font-weight-bold);
-    color: var(--text-inverse);
+    /* R13: NO usar --text-inverse aquí. Ese token es "texto sobre una
+       superficie que se invierte junto con el modo" (blanco en claro,
+       casi negro en oscuro) -- correcto para botones cuyo fondo (info,
+       success, link) sigue siendo brillante en ambos modos. La cabecera
+       de la barra lateral es distinta: su fondo (`--tt-accent`/
+       `--tt-accent-hover` degradado, o el negro de Medianoche) es SIEMPRE
+       oscuro/saturado en los 11 temas y en ambos modos -- nunca se
+       invierte -- así que el texto debe ser blanco fijo, no ligado al
+       token que sí se invierte. Con --text-inverse, en modo oscuro el
+       texto pasaba a #1a1d23 sobre un fondo igual de oscuro: "Ciencias
+       UCV" quedaba invisible en la cabecera de la barra lateral, en
+       cualquiera de los 11 temas combinado con oscuro. */
+    color: #ffffff;
     letter-spacing: 0.3px;
 
     display: flex;
@@ -229,7 +241,9 @@
 .ds-sidebar-close {
     background: rgba(255,255,255,0.15);
     border: none;
-    color: var(--text-inverse);
+    /* R13: mismo motivo que .ds-sidebar-brand arriba -- vive sobre el
+       mismo degradado siempre oscuro, blanco fijo en vez de --text-inverse. */
+    color: #ffffff;
     width: 32px;
     height: 32px;
     border-radius: var(--radius-md);
