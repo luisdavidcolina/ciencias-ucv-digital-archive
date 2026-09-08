@@ -58,6 +58,7 @@ Al terminar, cambia tu estado a `terminado` y añade el sha del último commit.
 | L6-estilos | agente-l6b-estilos-focused | 2026-09-03 | terminado (95fc341) | |
 | LT | agente-lt-tests-vercel | 2026-09-03 | terminado | d85a26f |
 | LX | agente-lx-reestructuracion | 2026-09-03 | terminado (parcial: SD-187, ver nota en _BUZON.md) | ee18da7 |
+| coherencia-app-repos | agente-ronda76-coherenciarepos | 2026-09-08 | en curso | |
 | LG | agente-lg-galeria | 2026-09-03 | terminado (SD-223: `/sistema` con tokens de L0 en vivo y los componentes reescritos hasta ahora; enlace de menú lateral pendiente, ver nota en `_BUZON.md` — requiere `app.js`, fuera de este carril) | `72b7e7e` |
 | E1-escaner-puente | agente-e1-escaner-puente | 2026-09-03 | terminado (parcial: 24 de 107 fichas — seguridad/protocolo/decodificador HID/pruebas de `scanner-app/server.js`; el resto son subsistemas nuevos de esfuerzo L —Electron, TWAIN/WIA/ICA/SANE, OCR, lotes, preservación— sin decisión de producto tomada, documentados en `scanner-app/README.md`) | 0eaf779 |
 | H1a-migraciones | agente-h1a-migraciones | 2026-09-03 | terminado | `2828d16` |
