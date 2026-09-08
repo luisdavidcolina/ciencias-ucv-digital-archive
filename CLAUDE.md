@@ -127,23 +127,27 @@ ya llegaron a `main` una vez:
 │       ├── compartido.html     # Vista pública de un documento compartido
 │       ├── styles.css          # TODA la hoja de estilos propia
 │       │
-│       ├── app-shell.js        # Barra superior y menú lateral (definición única)
-│       ├── app-core.js         # state, API_BASE, escHtml, showToast, helpers
-│       ├── app.js              # Sesión, navegación entre secciones, listeners
-│       ├── app-theme.js        # Temas, modo oscuro, densidad, notificaciones
-│       ├── app-choices.js      # /api/choices, TomSelect, controles de fecha
-│       ├── viz-tokens.js       # Puente entre los tokens --viz-* y Chart.js
-│       │
-│       ├── archive.js / hr.js  # Búsqueda pública de cada módulo
-│       ├── admin.js            # loadAdminTab(): el switch de pestañas
-│       ├── admin-stats.js      # KPIs de la cabecera
-│       ├── admin-charts.js     # Gráficas Chart.js + importación CSV
-│       ├── admin-monitor.js    # Tabla del monitor
-│       ├── admin-submit.js     # Alta de documentos y empleados
-│       ├── admin-edit.js / admin-edit-hr.js   # Edición, papelera, versiones
-│       ├── admin-categories.js · admin-users.js · admin-ui.js
-│       ├── ai-widget.js        # Burbuja de chat del asistente
-│       └── scanner-client.js   # Integración con el escáner local
+│       └── js/                 # Reorganizado en subcarpetas por dominio
+│           ├── core/
+│           │   ├── app-shell.js    # Barra superior y menú lateral (definición única)
+│           │   ├── app-core.js     # state, API_BASE, escHtml, showToast, helpers
+│           │   ├── app.js          # Sesión, navegación entre secciones, listeners
+│           │   ├── app-theme.js    # Temas, modo oscuro, densidad, notificaciones
+│           │   ├── app-choices.js  # /api/choices, TomSelect, controles de fecha
+│           │   └── viz-tokens.js   # Puente entre los tokens --viz-* y Chart.js
+│           ├── archive/archive.js  # Búsqueda pública de Archivo
+│           ├── hr/hr.js            # Búsqueda pública de RRHH
+│           ├── login/login.js
+│           ├── admin/
+│           │   ├── index.js        # loadAdminTab(): el switch de pestañas
+│           │   ├── stats.js        # KPIs de la cabecera
+│           │   ├── charts.js       # Gráficas Chart.js + importación CSV
+│           │   ├── monitor.js      # Tabla del monitor
+│           │   ├── submit.js       # Alta de documentos y empleados
+│           │   ├── edit.js / edit-hr.js   # Edición, papelera, versiones
+│           │   └── categories.js · users.js · ui.js
+│           ├── ai/ai-widget.js     # Burbuja de chat del asistente
+│           └── scanner/scanner-client.js  # Integración con el escáner local
 ├── requirements-dev.txt  # pytest, httpx, pyflakes
 └── vercel.json           # Config Vercel: builds + routes
 ```
