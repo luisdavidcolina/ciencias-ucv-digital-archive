@@ -24,6 +24,23 @@
     color: var(--color-link);
 }
 
+/* Objetivo táctil (WCAG 2.5.5, medido a 390px): #sidebar-toggle-btn (34x46),
+   #ds-notif-btn (33x29), #logout_btn (33x30) y #sidebar-close-btn (32x32)
+   quedaban por debajo de 44px en al menos una dimensión. Son botones-icono
+   aislados en la barra/lateral, sin nada pegado al lado, así que ampliar el
+   área clicable con min-width/min-height no arrastra ningún otro elemento
+   ni cambia el tamaño visual del icono. */
+#sidebar-toggle-btn,
+#ds-notif-btn,
+#logout_btn,
+#sidebar-close-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
 /* SD-132: 30 líneas que ocultaban restos de AdminLTE que no existen
    ([data-widget="control-sidebar"], [data-widget="fullscreen"],
    #help_switch, y dos :not() encadenados) se retiraron — AdminLTE no se

@@ -568,7 +568,7 @@
         <i class="fas fa-barcode mr-1 ds-scn-icon"></i><span class="ds-scn-label">Esc&#225;ner</span>
       </button>
       <button id="ds-scn-cfg-btn" class="btn btn-sm btn-outline-secondary ml-1"
-        style="margin-top:3px;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;"
+        style="margin-top:3px;width:44px;height:44px;padding:0;display:flex;align-items:center;justify-content:center;"
         title="Configurar esc&#225;ner" onclick="openScannerConfig()">
         <i class="fas fa-cog" style="font-size:.72rem;pointer-events:none;"></i>
       </button>`;
