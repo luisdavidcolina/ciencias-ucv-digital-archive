@@ -555,6 +555,25 @@ def generate_hr_report(emp_id: int, usuario_sesion: str = Depends(require_sessio
     if not rows_html:
         rows_html = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#999">Sin documentos registrados</td></tr>'
     now_str = _dt.now().strftime("%d/%m/%Y %H:%M")
+
+    # BR-003/portabilidad: nada de backslashes dentro de una expresión {} de
+    # f-string — es SyntaxError en Python <3.12 ("f-string expression part
+    # cannot include a backslash"), y Vercel despliega con 3.11
+    # (.python-version). Se precomputa cada fila igual que ya hace rows_html.
+    def _fila_historial(h):
+        fin = '<span style="color:#198754;font-weight:600">Actual</span>' if not h["fecha_fin"] else esc(h["fecha_fin"])
+        return (
+            f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['cargo'])}</td>"
+            f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['fecha_inicio'] or '—')}</td>"
+            f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{fin}</td>"
+            f"<td style='padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem'>{esc(h['motivo'] or '—')}</td></tr>"
+        )
+    historial_rows_html = (
+        "".join(_fila_historial(h) for h in historial_cargos)
+        if historial_cargos
+        else "<tr><td colspan='4' style='text-align:center;padding:14px;color:#999'>Sin historial registrado</td></tr>"
+    )
+
     html_out = f"""<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <title>Expediente — {nombre_completo}</title>
 <style>
@@ -620,13 +639,7 @@ tr:nth-child(even) td{{background:#f9f9f9}}
 <table>
   <thead><tr><th>Cargo</th><th>Desde</th><th>Hasta</th><th>Motivo</th></tr></thead>
   <tbody>
-    {''.join(
-        f"<tr><td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['cargo'])}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['fecha_inicio'] or '—')}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee'>{esc(h['fecha_fin']) if h['fecha_fin'] else '<span style=\"color:#198754;font-weight:600\">Actual</span>'}</td>"
-        f"<td style='padding:6px 14px;border-bottom:1px solid #eee;color:#555;font-size:.85rem'>{esc(h['motivo'] or '—')}</td></tr>"
-        for h in historial_cargos
-    ) if historial_cargos else "<tr><td colspan='4' style='text-align:center;padding:14px;color:#999'>Sin historial registrado</td></tr>"}
+    {historial_rows_html}
   </tbody>
 </table>
 '''}
