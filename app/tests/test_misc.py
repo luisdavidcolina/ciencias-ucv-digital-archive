@@ -218,6 +218,34 @@ class TestRetencion:
         assert res.status_code == 200
         assert res.json()["plazo_retencion_anios"] == 10
 
+    def test_update_retencion_ignora_requester_declarado_por_el_cliente(self, client_as):
+        """IN-133: `requester` ya no existe en `RetencionUpdate` (quitado en la
+        ronda que cerró este endpoint), pero nada probaba explícitamente que
+        `log_event` recibe el usuario real de sesión y no el valor que un
+        cliente podría intentar colar en el body — el mismo patrón que ya
+        cubren `test_disposicion.py::test_ignora_el_requester_declarado_por_el_cliente`
+        y `test_imports.py` para los otros endpoints de IN-133 cerrados el
+        mismo día. Antes del fix, `requester="otro_usuario_falsificado"`
+        habría quedado escrito tal cual en la auditoría."""
+        c = client_as("archivero_real")
+        tipo = _row(id=1, nombre="Acta")
+        call_n = [0]
+        def mock_q(sql, params=None, fetch="all", commit=False):
+            call_n[0] += 1
+            return tipo if call_n[0] == 1 else None
+        with (
+            patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")),
+            patch("routes.admin.retention.db_query", side_effect=mock_q),
+            patch("routes.admin.retention.invalidate_choices_cache"),
+            patch("routes.admin.retention.log_event") as log,
+        ):
+            res = c.patch("/api/admin/retencion/tipos/1",
+                          json={"plazo_retencion_anios": 10,
+                                "requester": "otro_usuario_falsificado"})
+        assert res.status_code == 200
+        log.assert_called_once()
+        assert log.call_args[0][0] == "archivero_real"
+
     def test_update_retencion_plazo_cero_rechazado(self, client_as):
         c = client_as("archivero_ret3")
         with patch("routes.admin.deps.db_query", return_value=_fila_usuario(rol="Normal")):
