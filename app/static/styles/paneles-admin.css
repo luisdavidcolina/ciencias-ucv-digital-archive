@@ -768,6 +768,7 @@ body:not(.dark-mode)[data-style="glassmorphism"] .card-header {
 body[data-style="glassmorphism"] .ds-sidebar {
   background: rgba(255,255,255,0.07) !important;
   backdrop-filter: blur(22px) !important;
+  -webkit-backdrop-filter: blur(22px) !important;
   border-right: 1px solid rgba(255,255,255,0.12) !important;
 }
 body[data-style="glassmorphism"] .form-control,
@@ -784,6 +785,7 @@ body[data-style="glassmorphism"] .nav-pills .nav-link.active {
      definición). */
   background: color-mix(in srgb, var(--ds-accent) 50%, transparent) !important;
   backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
   border: 1px solid color-mix(in srgb, var(--ds-accent) 40%, transparent) !important;
 }
 
@@ -1064,6 +1066,7 @@ body[data-style="liquid-glass"] .btn {
   border: 1px solid rgba(255,255,255,0.22) !important;
   box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.22), 0 4px 12px rgba(0,0,0,0.15) !important;
   backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   /* SD-174: lista explícita en vez de `transition: all` — sólo `background`
      y `box-shadow` cambian entre reposo y :hover en este botón. */
   transition: background .2s, box-shadow .2s !important;
@@ -1094,6 +1097,7 @@ body.dark-mode[data-style="liquid-glass"] .btn:focus-visible {
 body[data-style="liquid-glass"] .ds-sidebar {
   background: rgba(255,255,255,0.06) !important;
   backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   border-right: 1px solid rgba(255,255,255,0.10) !important;
 }
 body[data-style="liquid-glass"] .form-control,
@@ -1102,6 +1106,7 @@ body[data-style="liquid-glass"] .custom-select {
   background: rgba(255,255,255,0.09) !important;
   border: 1px solid rgba(255,255,255,0.16) !important;
   backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 /* ============================================================
