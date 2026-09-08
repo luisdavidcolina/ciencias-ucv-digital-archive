@@ -64,6 +64,49 @@ def test_sin_imports_muertos():
     assert not fallos, "imports sin usar:\n" + "\n".join(fallos)
 
 
+def test_sin_backslash_en_expresion_fstring():
+    """R16 (2026-09-08, commit cf246ee): `generate_hr_report` (hr.py) tenía un
+    f-string con comillas escapadas (`\\"color:#198754...\\"`) dentro de la
+    propia expresión `{}` de reemplazo — válido en Python 3.12+ (PEP 701) pero
+    `SyntaxError: f-string expression part cannot include a backslash` en
+    Python <3.12. `.python-version` fija 3.11 (la versión real de Vercel), y
+    esta máquina corre 3.12: `ast.parse` en 3.12 NO detecta el problema por sí
+    solo (compila igual), así que hace falta inspeccionar el árbol y buscar el
+    patrón directamente, en vez de depender sólo de que CI corra en 3.11 real
+    (R18, commit 27cfb92) — R17 (ronda 2026-09-08) escribió este mismo chequeo
+    ad-hoc para verificar el hallazgo de R16 pero no lo dejó como test
+    permanente; se persiste aquí para que una regresión futura no dependa de
+    que alguien repita el script a mano."""
+    import ast
+
+    fallos = []
+    for py in sorted(APP.rglob("*.py")):
+        if py.parent.name == "tests" or "__pycache__" in py.parts:
+            continue
+        source = py.read_text(encoding="utf-8")
+        try:
+            tree = ast.parse(source, filename=str(py))
+        except SyntaxError:
+            continue  # otro test (test_todos_los_modulos_importan) ya lo cubre
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.JoinedStr):
+                continue
+            for value in node.values:
+                if not isinstance(value, ast.FormattedValue):
+                    continue
+                segmento = ast.get_source_segment(source, value.value)
+                if segmento and "\\" in segmento:
+                    fallos.append(
+                        f"{py.relative_to(REPO)}:{value.lineno}: "
+                        f"backslash dentro de una expresión f-string: {segmento!r}"
+                    )
+    assert not fallos, (
+        "backslash dentro de la expresión {} de un f-string — SyntaxError en "
+        "Python <3.12 (PEP 701), rompe en producción (Vercel usa 3.11):\n"
+        + "\n".join(fallos)
+    )
+
+
 def test_todos_los_modulos_importan():
     """Cada módulo debe poder importarse: un error de sintaxis o un import roto
     en una ruta poco transitada no debería descubrirse en producción."""

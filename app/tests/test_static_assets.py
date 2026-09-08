@@ -118,6 +118,32 @@ def test_sin_comillas_tipograficas_en_codigo(path):
     )
 
 
+# BUG-onclick-json-sin-escapar (ronda 2026-09-07, commit be07dff): `onclick="..."`
+# armado con `JSON.stringify(...)` sin envolver en `escHtml()` cierra el atributo
+# antes de tiempo en cuanto el valor interpolado no es `undefined` (JSON.stringify
+# envuelve el string en comillas dobles) — el navegador nunca compila ese
+# `onclick` y el clic no dispara nada, sin ningún error visible salvo en consola.
+# Apareció en 17 sitios de 6 archivos a la vez porque el patrón se copió entre
+# ellos. Un `JSON.stringify(...)` dentro de un atributo entrecomillado con `"`
+# SIEMPRE debe ir envuelto en `escHtml(...)`.
+_ONCLICK_STRINGIFY = re.compile(r'onclick="[^"]*JSON\.stringify\(')
+_ONCLICK_STRINGIFY_ESCAPED = re.compile(r'onclick="[^"]*escHtml\(JSON\.stringify\(')
+
+
+@pytest.mark.parametrize("path", JS_FILES, ids=lambda p: p.name)
+def test_onclick_json_stringify_va_escapado(path):
+    """`JSON.stringify` dentro de un onclick="..." rompe el HTML si no se escapa."""
+    malas = []
+    for numero, linea in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if _ONCLICK_STRINGIFY.search(linea) and not _ONCLICK_STRINGIFY_ESCAPED.search(linea):
+            malas.append((numero, linea.strip()[:120]))
+    assert not malas, (
+        f"{path.name} arma un onclick=\"...\" con JSON.stringify(...) sin "
+        f"escHtml() en {len(malas)} línea(s), lo que rompe el atributo HTML en "
+        f"cuanto el valor no es undefined (BUG-onclick-json-sin-escapar): {malas[:3]}"
+    )
+
+
 @pytest.mark.skipif(not _node_available(), reason="node no está disponible")
 @pytest.mark.parametrize("path", JS_FILES, ids=lambda p: p.name)
 def test_javascript_parsea(path):
