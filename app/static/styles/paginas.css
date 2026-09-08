@@ -657,7 +657,16 @@ body.dark-mode .ds-tab-sep { background: #2e3342; }
   border: 1px solid var(--viz-grid);
   border-radius: 20px;
   padding: 5px 12px;
-  white-space: nowrap;
+  /* VI-zoom-compartido-ronda22: `white-space:nowrap` con la insignia entera
+     como un solo bloque flex la dejaba más ancha que el contenedor a 200% de
+     zoom de texto (WCAG 1.4.4) en 390px -- el icono+texto no cabe en una
+     línea y `nowrap` le impide partirse, así que desborda en vez de encoger.
+     `max-width:100%` + `overflow-wrap` dejan que el texto salte de línea
+     dentro de la propia insignia cuando de verdad no cabe, sin tocar el caso
+     normal (donde nunca llega a partirse). */
+  max-width: 100%;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 .ds-compartido-caja {
   flex: 1;
