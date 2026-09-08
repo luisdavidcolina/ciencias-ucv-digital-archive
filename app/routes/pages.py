@@ -3,7 +3,7 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse, RedirectResponse
 
-from database import db_query
+from repos.pages_repo import usuario_modulo
 from routes.admin.deps import require_session
 
 router = APIRouter(tags=["pages"])
@@ -61,11 +61,7 @@ async def serve_investigacion(usuario: str = Depends(require_session)):
     """Informe interno de comparativa competitiva (SI-156). No es publico: expone
     arquitectura, costes y carencias del propio sistema, asi que exige sesion y
     ademas se restringe al rol Global (el mismo criterio que admin/ia)."""
-    fila = db_query(
-        "SELECT modulo FROM public.usuarios_sistema "
-        "WHERE usuario = %s AND COALESCE(is_active, TRUE) LIMIT 1",
-        [usuario], fetch="one",
-    )
+    fila = usuario_modulo(usuario)
     if not fila or fila["modulo"] != "Global":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

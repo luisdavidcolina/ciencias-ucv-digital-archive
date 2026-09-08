@@ -21,7 +21,7 @@ def test_investigacion_usuario_global_ve_la_pagina(client_as):
     """Un usuario del módulo Global sí puede ver /investigacion (200)."""
     c = client_as("admin_global")
     fila = {"modulo": "Global"}
-    with patch("routes.pages.db_query", return_value=fila):
+    with patch("repos.pages_repo.db_query", return_value=fila):
         res = c.get("/investigacion")
     assert res.status_code == 200
 
@@ -36,7 +36,7 @@ def test_investigacion_usuario_no_global_recibe_403(client_as):
     """
     c = client_as("usuario_archivo")
     fila = {"modulo": "Archivo"}
-    with patch("routes.pages.db_query", return_value=fila):
+    with patch("repos.pages_repo.db_query", return_value=fila):
         res = c.get("/investigacion")
     assert res.status_code == 403
 
@@ -44,7 +44,7 @@ def test_investigacion_usuario_no_global_recibe_403(client_as):
 def test_investigacion_sin_fila_de_usuario_recibe_403(client_as):
     """Si el usuario no aparece en usuarios_sistema (o está inactivo), 403."""
     c = client_as("usuario_fantasma")
-    with patch("routes.pages.db_query", return_value=None):
+    with patch("repos.pages_repo.db_query", return_value=None):
         res = c.get("/investigacion")
     assert res.status_code == 403
 
