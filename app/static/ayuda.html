@@ -59,6 +59,12 @@
     .help-coming-soon {
       background: #f8f9fa; border: 1px dashed #dee2e6;
       border-radius: 12px; padding: 3rem; text-align: center;
+      /* VI-zoom-texto-ayuda-ronda21: el padding en rem escala con el zoom de
+         texto (WCAG 1.4.4) igual que la tipografía. A 200% deja tan poco
+         ancho disponible que una sola palabra de "Tutoriales próximamente"
+         no cabía y desbordaba la página 39px a 390px -- ninguna palabra
+         larga se parte sin esto, con o sin espacio disponible. */
+      overflow-wrap: break-word;
     }
     .help-coming-soon i { font-size: 3rem; color: #dee2e6; margin-bottom: 1rem; }
     .help-coming-soon h4 { color: #6a737b; font-weight: 600; }  /* 4,58:1 sobre #f8f9fa; #6c757d se quedaba en 4,45 */
