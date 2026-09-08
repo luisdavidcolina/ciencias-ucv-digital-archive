@@ -616,7 +616,10 @@ def update_documento_status(
     if not result:
         raise HTTPException(404, "Documento no encontrado")
 
-    log_event(requester, "Status Documento", modulo, f"doc_id={doc_id} → {status}")
+    # IN-133: mismo criterio que admin_submit/update_documento/update_empleado
+    # — el actor de auditoría sale de la sesión verificada, no de `requester`
+    # (parámetro de query que rellena el propio cliente).
+    log_event(usuario_sesion, "Status Documento", modulo, f"doc_id={doc_id} → {status}")
     return {"success": True, "doc_id": doc_id, "status": status}
 
 
