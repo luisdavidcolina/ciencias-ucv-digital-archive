@@ -125,14 +125,14 @@ def test_no_comparte_un_documento_inexistente(share_mod):
     with patch.object(share_mod, "_leer_documento", return_value=None), \
          patch.object(share_mod, "log_event"):
         with pytest.raises(HTTPException) as e:
-            share_mod.crear_enlace(modulo="Archivo", doc_id=999, horas=1, usuario="admin")
+            share_mod.create_link(modulo="Archivo", doc_id=999, horas=1, usuario="admin")
         assert e.value.status_code == 404
 
 
 def test_no_comparte_un_modulo_invalido(share_mod):
     from fastapi import HTTPException
     with pytest.raises(HTTPException) as e:
-        share_mod.crear_enlace(modulo="Inventado", doc_id=1, horas=1, usuario="admin")
+        share_mod.create_link(modulo="Inventado", doc_id=1, horas=1, usuario="admin")
     assert e.value.status_code == 400
 
 

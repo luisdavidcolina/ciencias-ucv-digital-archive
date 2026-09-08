@@ -33,8 +33,8 @@ from core.security import generate_share_token, share_token_jti, verify_share_to
 from database import log_event
 from repos.share_repo import TABLAS as _TABLAS
 from repos.share_repo import insertar_revocado as _insertar_revocado
-from repos.share_repo import leer_documento as _leer_documento
-from repos.share_repo import listar_revocados as _listar_revocados
+from repos.share_repo import read_document as _leer_documento
+from repos.share_repo import list_revoked as _listar_revocados
 from routes.admin.deps import require_admin_role, require_session
 
 router = APIRouter(tags=["share"])
@@ -56,7 +56,7 @@ def _token_expira_iso(token: str) -> str | None:
 
 
 @router.post("/api/admin/compartir")
-def crear_enlace(
+def create_link(
     modulo: str = Query(...),
     doc_id: int = Query(...),
     horas: int = Query(default=72, ge=1, le=MAX_HORAS),
@@ -84,7 +84,7 @@ def crear_enlace(
 
 @router.get("/api/admin/compartir/revocados",
             dependencies=[Depends(require_admin_role("Archivo", "RRHH"))])
-def listar_revocados():
+def list_revoked():
     """Enlaces revocados hasta ahora (IN-146). El diseño es stateless: no hay
     tabla de enlaces EMITIDOS —sólo de revocados—, así que esto no es un
     listado de "todo enlace activo que exista en el mundo" (eso exigiría

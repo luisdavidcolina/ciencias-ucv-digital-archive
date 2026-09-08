@@ -12,7 +12,7 @@ TABLAS = {
 }
 
 
-def leer_documento(modulo: str, doc_id: int) -> dict | None:
+def read_document(modulo: str, doc_id: int) -> dict | None:
     tabla, pk = TABLAS[modulo]
     return db_query(
         f"""SELECT d.{pk} AS id, d.titulo, d.autor, d.file_url, d.ubicacion,
@@ -27,7 +27,7 @@ def leer_documento(modulo: str, doc_id: int) -> dict | None:
     )
 
 
-def listar_revocados() -> list[dict]:
+def list_revoked() -> list[dict]:
     return db_query(
         "SELECT jti, motivo, creado_en FROM public.enlaces_revocados "
         "ORDER BY creado_en DESC",
