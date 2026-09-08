@@ -23,15 +23,29 @@ def _make_token(username: str) -> str:
     return generate_session_token(username)
 
 
+def _qry_factory(user_rows, bloqueado_hasta=None):
+    """Fabrica un stand-in de db_query que distingue la consulta contra
+    login_attempts (SI-031: bloqueo persistente en BD) de la consulta contra
+    usuarios_sistema, en vez de contar llamadas por posición -- el bloqueo de
+    login ahora hace una consulta extra antes de la de credenciales, así que
+    depender del orden de llamadas rompía en cuanto se movía una línea.
+    """
+    def _qry(sql, params=None, fetch="all", commit=False):
+        if "login_attempts" in sql:
+            if fetch == "one":
+                return {"bloqueado_hasta": bloqueado_hasta} if bloqueado_hasta else None
+            return None
+        if "usuarios_sistema" in sql and "SELECT" in sql.upper():
+            return user_rows
+        return None
+    return _qry
+
+
 class TestLogin:
     def test_login_correcto(self, client):
         row, _ = _make_user_row()
-        call_n = [0]
-        def _qry(sql, params=None, fetch="all", commit=False):
-            call_n[0] += 1
-            return [row] if call_n[0] == 1 else None
         with (
-            patch("routes.auth.db_query", side_effect=_qry),
+            patch("routes.auth.db_query", side_effect=_qry_factory([row])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "clave123"})
@@ -43,7 +57,7 @@ class TestLogin:
 
     def test_login_usuario_no_existe(self, client):
         with (
-            patch("routes.auth.db_query", return_value=[]),
+            patch("routes.auth.db_query", side_effect=_qry_factory([])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "nadie", "password": "x"})
@@ -52,11 +66,32 @@ class TestLogin:
     def test_login_contrasena_incorrecta(self, client):
         row, _ = _make_user_row()
         with (
-            patch("routes.auth.db_query", return_value=[row]),
+            patch("routes.auth.db_query", side_effect=_qry_factory([row])),
             patch("routes.auth.log_event"),
         ):
             res = client.post("/api/auth/login", json={"username": "archivero", "password": "INCORRECTA"})
         assert res.status_code == 401
+
+    def test_login_bloqueado_por_intentos_devuelve_429(self, client):
+        """SI-031/SI-032: con bloqueado_hasta en el futuro en login_attempts,
+        el login responde 429 sin llegar a tocar credenciales.
+
+        NOTA (ronda 60): el endpoint SÍ arma `headers={"Retry-After": ...}` en
+        el HTTPException (ver auth.py), pero `http_exception_handler` en
+        main.py reconstruye la respuesta con JSONResponse(status_code, content)
+        sin propagar exc.headers -- el header nunca llega al cliente, en esto
+        y en cualquier otro 429/401 con headers del proyecto. Es un hallazgo
+        preexistente y ajeno al carril de esta ronda (declarado sólo sobre
+        auth.py); no se corrige aquí. Sólo se verifica el código de estado,
+        que es el contrato observable real hoy."""
+        from datetime import datetime, timedelta, timezone
+        futuro = datetime.now(timezone.utc) + timedelta(seconds=20)
+        with (
+            patch("routes.auth.db_query", side_effect=_qry_factory([], bloqueado_hasta=futuro)),
+            patch("routes.auth.log_event"),
+        ):
+            res = client.post("/api/auth/login", json={"username": "archivero", "password": "x"})
+        assert res.status_code == 429
 
     def test_login_payload_vacio(self, client):
         res = client.post("/api/auth/login", json={})

@@ -1,5 +1,5 @@
 import re
-import time
+from datetime import datetime, timezone
 from fastapi import APIRouter, Cookie, HTTPException, Request, Response, status
 from typing import Optional
 
@@ -39,37 +39,82 @@ def _sanitize_for_log(value: str) -> str:
 # =============================================================================
 # BLOQUEO DE LOGIN (SI-031 / SI-032)
 # =============================================================================
-_FAILED_ATTEMPTS: dict[str, list[float]] = {}
+# Ronda 60: el diccionario en memoria (_FAILED_ATTEMPTS) sólo protegía dentro
+# de una misma instancia serverless caliente de Vercel -- cada instancia fría
+# arranca su propio contador, así que un atacante repartido entre instancias
+# lo esquivaba sin problema. `login_attempts` (migración SI-031 en main.py) ya
+# existe con índice único (usuario, ip); esto la usa de verdad, con un
+# INSERT ... ON CONFLICT atómico para que dos intentos casi simultáneos del
+# mismo atacante no pisen el contador del otro (condición de carrera que un
+# SELECT-luego-UPDATE no evita).
 _LOCK_THRESHOLD = 5
 _LOCK_WINDOW_SECONDS = 300
 _LOCK_SECONDS = 30
 
+_UPSERT_ATTEMPT_SQL = f"""
+    INSERT INTO public.login_attempts
+        (usuario, ip, intentos, primer_intento_at, ultimo_intento_at, bloqueado_hasta)
+    VALUES (%s, %s, 1, NOW(), NOW(), NULL)
+    ON CONFLICT (usuario, ip) DO UPDATE SET
+        intentos = CASE
+            WHEN public.login_attempts.ultimo_intento_at
+                 < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
+            THEN 1
+            ELSE public.login_attempts.intentos + 1
+        END,
+        primer_intento_at = CASE
+            WHEN public.login_attempts.ultimo_intento_at
+                 < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
+            THEN NOW()
+            ELSE public.login_attempts.primer_intento_at
+        END,
+        ultimo_intento_at = NOW(),
+        bloqueado_hasta = CASE
+            WHEN (CASE
+                    WHEN public.login_attempts.ultimo_intento_at
+                         < NOW() - INTERVAL '{_LOCK_WINDOW_SECONDS} seconds'
+                    THEN 1
+                    ELSE public.login_attempts.intentos + 1
+                  END) >= {_LOCK_THRESHOLD}
+            THEN NOW() + INTERVAL '{_LOCK_SECONDS} seconds'
+            ELSE public.login_attempts.bloqueado_hasta
+        END
+"""
 
-def _throttle_key(username: str, request: Optional[Request]) -> str:
+
+def _throttle_key(username: str, request: Optional[Request]) -> tuple[str, str]:
     ip = request.client.host if request and request.client else "?"
-    return f"{username.strip().lower()}|{ip}"
+    return (username.strip().lower(), ip)
 
 
-def _is_locked(key: str) -> Optional[float]:
-    attempts = _FAILED_ATTEMPTS.get(key)
-    if not attempts:
+def _is_locked(key: tuple[str, str]) -> Optional[float]:
+    usuario, ip = key
+    row = db_query(
+        "SELECT bloqueado_hasta FROM public.login_attempts WHERE usuario = %s AND ip = %s",
+        (usuario, ip),
+        fetch="one",
+    )
+    bloqueado_hasta = row.get("bloqueado_hasta") if row else None
+    if not bloqueado_hasta:
         return None
-    now = time.time()
-    attempts = [t for t in attempts if now - t < _LOCK_WINDOW_SECONDS]
-    _FAILED_ATTEMPTS[key] = attempts
-    if len(attempts) < _LOCK_THRESHOLD:
-        return None
-    last = attempts[-1]
-    remaining = _LOCK_SECONDS - (now - last)
+    now = datetime.now(timezone.utc)
+    remaining = (bloqueado_hasta - now).total_seconds()
     return remaining if remaining > 0 else None
 
 
-def _register_failure(key: str) -> None:
-    _FAILED_ATTEMPTS.setdefault(key, []).append(time.time())
+def _register_failure(key: tuple[str, str]) -> None:
+    usuario, ip = key
+    db_query(_UPSERT_ATTEMPT_SQL, (usuario, ip), fetch="none", commit=True)
 
 
-def _clear_failures(key: str) -> None:
-    _FAILED_ATTEMPTS.pop(key, None)
+def _clear_failures(key: tuple[str, str]) -> None:
+    usuario, ip = key
+    db_query(
+        "DELETE FROM public.login_attempts WHERE usuario = %s AND ip = %s",
+        (usuario, ip),
+        fetch="none",
+        commit=True,
+    )
 
 
 # =============================================================================
