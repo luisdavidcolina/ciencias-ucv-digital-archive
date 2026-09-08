@@ -15,12 +15,12 @@ from database import db_transaction, log_event
 from routes.admin.deps import require_session, require_role, require_admin_role
 from repos.hr_alerts_repo import (
     alertas_jubilacion_rows,
-    empleado_por_id,
+    employee_by_id,
     historial_cargos_rows,
-    empleado_con_ingreso,
+    employee_with_start_date,
     historial_solapado,
-    cargo_por_nombre,
-    crear_cargo,
+    position_by_name,
+    create_position,
     historial_por_id,
 )
 
@@ -108,7 +108,7 @@ class HistorialCargoIn(BaseModel):
 @router.get("/empleado/{empleado_id}/historial_cargos")
 def get_position_history(empleado_id: int):
     """Lista el historial de cargos de un empleado, del más reciente al más antiguo."""
-    emp = empleado_por_id(empleado_id)
+    emp = employee_by_id(empleado_id)
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
@@ -141,7 +141,7 @@ def add_position_history(
     solo se exigía que cargo y fecha no estuvieran vacíos, así que un dedo
     en el año (p. ej. 3016) quedaba como cargo "actual" del expediente.
     """
-    emp = empleado_con_ingreso(empleado_id)
+    emp = employee_with_start_date(empleado_id)
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
@@ -168,9 +168,9 @@ def add_position_history(
             )
 
     # Resolver o crear el cargo en el catálogo
-    cargo_row = cargo_por_nombre(data.cargo_nombre)
+    cargo_row = position_by_name(data.cargo_nombre)
     if not cargo_row:
-        cargo_row = crear_cargo(data.cargo_nombre)
+        cargo_row = create_position(data.cargo_nombre)
     cargo_id = cargo_row["id"]
 
     with db_transaction() as execute:

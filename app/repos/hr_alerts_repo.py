@@ -71,7 +71,7 @@ def alertas_jubilacion_rows(horizonte_dias: int) -> list[dict]:
     """, [horizonte_dias, horizonte_dias, horizonte_dias, horizonte_dias], fetch="all") or []
 
 
-def empleado_por_id(empleado_id: int) -> dict | None:
+def employee_by_id(empleado_id: int) -> dict | None:
     """Fila `{id}` de `empleados`, o None. Usada por `get_position_history`."""
     return db_query("SELECT id FROM public.empleados WHERE id = %s", [empleado_id], fetch="one")
 
@@ -93,7 +93,7 @@ def historial_cargos_rows(empleado_id: int) -> list[dict]:
     """, [empleado_id], fetch="all") or []
 
 
-def empleado_con_ingreso(empleado_id: int) -> dict | None:
+def employee_with_start_date(empleado_id: int) -> dict | None:
     """Fila `{id, fecha_ingreso}` de `empleados`, o None. Usada por `add_position_history`."""
     return db_query(
         "SELECT id, fecha_ingreso FROM public.empleados WHERE id = %s",
@@ -113,14 +113,14 @@ def historial_solapado(empleado_id: int, fecha_inicio) -> dict | None:
     """, [empleado_id, fecha_inicio, fecha_inicio], fetch="one")
 
 
-def cargo_por_nombre(cargo_nombre: str) -> dict | None:
+def position_by_name(cargo_nombre: str) -> dict | None:
     return db_query(
         "SELECT id FROM public.cargos WHERE LOWER(nombre) = LOWER(%s)",
         [cargo_nombre], fetch="one",
     )
 
 
-def crear_cargo(cargo_nombre: str) -> dict:
+def create_position(cargo_nombre: str) -> dict:
     return db_query(
         "INSERT INTO public.cargos (nombre) VALUES (%s) RETURNING id",
         [cargo_nombre], fetch="one", commit=True,
