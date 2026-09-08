@@ -57,3 +57,9 @@ Thumbs.db
 backups/
 *.backup.json
 backup_completo_*.json
+
+# IN-206: volcado real de auditoria (usuarios del sistema) y hoja de
+# pendientes -- dato operativo, no pertenece al repo (regla del holding:
+# ningun dato de cliente/operativo en git fuera de archivo/ y _datos/).
+/audit_log.csv
+/Pendientes.xlsx

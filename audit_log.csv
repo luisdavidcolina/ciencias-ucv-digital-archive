@@ -1,4 +1,0 @@
-timestamp,usuario,accion,modulo,detalle,status
-2026-05-28 12:47:45,rrhh_admin,Login Failure,Auth,Credenciales incorrectas,Failure
-2026-05-28 12:48:14,archivo_admin,Login Failure,Auth,Credenciales incorrectas,Failure
-2026-05-28 12:48:32,archivo_normal,Login Failure,Auth,Credenciales incorrectas,Failure
