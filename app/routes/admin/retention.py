@@ -35,7 +35,6 @@ DEFAULT_PLAZO_ANIOS = 5
 
 class RetencionUpdate(BaseModel):
     plazo_retencion_anios: int
-    requester: Optional[str] = ""
 
     @field_validator("plazo_retencion_anios")
     @classmethod
@@ -93,7 +92,8 @@ def list_retention_types(scope: str = Query(default="")):
 
 
 @router.patch("/retencion/tipos/{tipo_id}")
-def update_retention(tipo_id: int, data: RetencionUpdate):
+def update_retention(tipo_id: int, data: RetencionUpdate,
+                      usuario_sesion: str = Depends(require_session)):
     """Actualiza el plazo de retención de un tipo de documento."""
     existing = db_query(
         "SELECT id, nombre FROM public.tipo_documento WHERE id = %s", [tipo_id], fetch="one"
@@ -107,7 +107,7 @@ def update_retention(tipo_id: int, data: RetencionUpdate):
     )
     invalidate_choices_cache()
     log_event(
-        data.requester or "sistema",
+        usuario_sesion,
         "Retención Actualizada",
         "Admin",
         f"tipo_id={tipo_id} nombre='{existing['nombre']}' plazo={data.plazo_retencion_anios} años",

@@ -479,7 +479,7 @@ async function _saveRetentionPlazo(tipoId) {
     await apiFetchJSON(`${API_BASE}/api/admin/retencion/tipos/${tipoId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plazo_retencion_anios: plazo, requester: state.user?.username || "" }),
+      body: JSON.stringify({ plazo_retencion_anios: plazo }),
     });
     // OR-190: antes el toast sólo decía "Plazo actualizado.", sin decir qué
     // cambió, y desaparecía a los 2s sin dejar rastro en pantalla.
