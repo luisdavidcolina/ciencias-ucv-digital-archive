@@ -766,9 +766,19 @@ body:not(.dark-mode) .ds-pagination-info { color: var(--ds-muted-aa) !important;
 /* La migaja va sobre un gris más oscuro, así que necesita bajar un paso más. */
 body:not(.dark-mode) .ds-breadcrumb { color: var(--ds-muted-aa-oscuro) !important; }
 
-/* Blanco sobre el verde de Bootstrap daba 3,13:1. */
-body:not(.dark-mode) .badge-success,
-body:not(.dark-mode) .bg-success { background-color: #208838 !important; }
+/* Blanco sobre el verde de Bootstrap daba 3,13:1. Sin scope a `:not(.dark-mode)`:
+   el color del badge no depende del fondo de la página (es color propio sobre
+   su propio fondo), así que aplica igual en los dos modos -- antes sólo se
+   corregía en claro y el mismo 3,13:1 seguía roto en oscuro. */
+.badge-success,
+.bg-success { background-color: #208838 !important; }
+
+/* R14: blanco sobre el cian de Bootstrap (.badge-info) daba 3,04:1 -- nunca
+   se había corregido en ningún modo, a diferencia de badge-success. Mismo
+   patrón: #117a8b es el tono "hover" propio de Bootstrap para info, no un
+   color inventado, y da 5,02:1. */
+.badge-info,
+.bg-info { background-color: #117a8b !important; }
 
 /* El azul primario daba 3,97:1, tanto de texto como de fondo. */
 body:not(.dark-mode) .btn-primary { background-color: #0072ed; border-color: #0072ed; }

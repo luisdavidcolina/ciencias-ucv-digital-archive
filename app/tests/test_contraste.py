@@ -147,6 +147,52 @@ def test_la_barra_lateral_de_cada_tema_cumple_contraste(tema, fondo, texto):
     )
 
 
+# --- R14: badges Bootstrap (.badge-success/.badge-info) ---------------------
+#
+# Bootstrap por defecto sólo da 3,13:1 (success) y 3,04:1 (info) con su
+# propio texto blanco -- SD-anterior corrigió success, pero sólo bajo
+# `body:not(.dark-mode)`, así que el mismo 3,13:1 seguía roto en oscuro
+# (el color del badge no depende del fondo de la página); info nunca se
+# corrigió en ningún modo. Ambos se fijan ahora sin scope de tema.
+
+BADGES_BOOTSTRAP = [
+    (".badge-success", "#28a745"),
+    (".badge-info", "#17a2b8"),
+]
+
+
+@pytest.mark.parametrize("selector,color_original", BADGES_BOOTSTRAP)
+def test_los_badges_de_bootstrap_no_quedan_con_el_color_por_defecto(selector, color_original):
+    """Ancla: si vuelve el hex original de Bootstrap sin corregir en algún
+    modo, este test debe fallar antes que un usuario tenga que entrecerrar
+    los ojos para leer un badge."""
+    css = leer_css_ensamblado()
+    r_original = contraste(BLANCO, color_original)
+    assert r_original < MINIMO, (
+        f"el color original de Bootstrap para {selector} ya no está por "
+        f"debajo del mínimo ({r_original:.2f}:1) -- revisa si esta prueba "
+        "sigue siendo necesaria"
+    )
+    # La corrección vive en paginas.css sin scope a `:not(.dark-mode)`, así
+    # que basta con una única declaración de fondo para el selector.
+    m = re.search(
+        re.escape(selector) + r"\s*,?\s*\.bg-" + re.escape(selector.lstrip(".").split("-")[1])
+        + r"\s*\{\s*background-color:\s*(#[0-9a-fA-F]{6})",
+        css,
+    )
+    assert m, f"{selector} ya no tiene una corrección de background-color en paginas.css"
+    color_corregido = m.group(1)
+    r = contraste(BLANCO, color_corregido)
+    assert r >= MINIMO, (
+        f"{selector} corregido a {color_corregido} da {r:.2f}:1 con texto "
+        f"blanco; hace falta {MINIMO}"
+    )
+    assert "not(.dark-mode)" not in css[max(0, m.start() - 80):m.start()], (
+        f"{selector} sigue con scope `body:not(.dark-mode)`: el fallo de "
+        "contraste original volvería en modo oscuro"
+    )
+
+
 def test_no_vuelve_el_gris_de_bootstrap_en_estilos_en_linea():
     """#6c757d sobre #f8f9fa da 4,44:1, y en un style en línea ninguna hoja de
     estilos puede corregirlo."""
