@@ -55,8 +55,13 @@ function _shellLink(l, pagina) {
   // según el rol; sin esto parpadean visibles antes de que corra.
   const estilo = l.oculto ? ' style="display:none"' : "";
   const id = l.id ? ` id="${l.id}"` : "";
+  // recorrido2 #5: la letra suelta ("A"/"R") quedaba en el mismo nodo de
+  // texto que el enlace sin separador — un lector de pantalla la anunciaba
+  // pegada al final ("Panel Archivo A") sin contexto de qué es. Es puramente
+  // decorativa (el `label` ya dice de qué panel se trata), así que se oculta
+  // de la accesibilidad en vez de inventar un texto que duplicaría el label.
   const badge = l.badge
-    ? `<span class="ds-sidebar-badge">${l.badge}</span>`
+    ? `<span class="ds-sidebar-badge" aria-hidden="true">${l.badge}</span>`
     : "";
   return `<a${id} href="${l.href}" class="ds-sidebar-link${activo}"${estilo}>` +
          `<i class="fas ${l.icon}"></i><span>${l.label}</span>${badge}</a>`;
