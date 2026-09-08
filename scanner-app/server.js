@@ -160,7 +160,17 @@ function broadcast(code, source = "device") {
 function _tokenValido(req, urlObj) {
   const header = req.headers["x-scanner-token"];
   const query = urlObj.searchParams.get("token");
-  return (header || query) === TOKEN;
+  const recibido = header || query;
+  // DG-... : comparación en tiempo constante. `===` sobre strings sale en
+  // cuanto encuentra el primer carácter distinto — en una red local eso deja
+  // una diferencia de tiempo medible entre "el primer carácter ya falla" y
+  // "los primeros N coinciden", suficiente para reconstruir el token
+  // carácter a carácter con suficientes intentos. timingSafeEqual exige
+  // buffers del mismo tamaño, así que primero se descarta la longitud (fuga
+  // aceptable: la longitud del token no es el secreto) y sólo se compara en
+  // tiempo constante cuando coincide.
+  if (typeof recibido !== "string" || recibido.length !== TOKEN.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(recibido), Buffer.from(TOKEN));
 }
 
 // DG-003 (WebSocket)/SI-172 (REST): el navegador no aplica same-origin a
