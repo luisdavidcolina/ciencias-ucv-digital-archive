@@ -11,8 +11,18 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, field_validator
 
-from database import db_query, db_transaction, log_event
+from database import db_transaction, log_event
 from routes.admin.deps import require_session, require_role, require_admin_role
+from repos.hr_alerts_repo import (
+    alertas_jubilacion_rows,
+    empleado_por_id,
+    historial_cargos_rows,
+    empleado_con_ingreso,
+    historial_solapado,
+    cargo_por_nombre,
+    crear_cargo,
+    historial_por_id,
+)
 
 # BR-001 / BR-002: mismo criterio que hr.py — sesion + modulo RRHH en todo el
 # router (alertas de jubilacion/pension, vencimientos y historial de cargos).
@@ -45,61 +55,7 @@ def get_retirement_alerts(horizonte_dias: int = Query(default=365, ge=30, le=730
     # `dias_restantes` sale con signo (BR-069): positivo si falta, negativo si
     # ya vencio. Mezclar "vence hoy" con "vencido hace anios" en el mismo 0
     # hacia imposible ordenar por urgencia real.
-    rows = db_query("""
-        SELECT
-            e.id                                         AS empleado_id,
-            e.cedula,
-            e.nombres || ' ' || e.apellidos              AS nombre_completo,
-            COALESCE(c.nombre, 'Sin cargo')              AS cargo,
-            COALESCE(d.nombre, 'Sin departamento')       AS departamento,
-            COALESCE(el.estados, 'Sin estado')           AS estado,
-            TO_CHAR(e.fecha_jubilacion, 'YYYY-MM-DD')    AS fecha_jubilacion,
-            TO_CHAR(e.fecha_pension,    'YYYY-MM-DD')    AS fecha_pension,
-            TO_CHAR(e.fecha_nacimiento, 'YYYY-MM-DD')    AS fecha_nacimiento,
-            CASE
-                WHEN e.fecha_jubilacion IS NOT NULL
-                     AND e.fecha_jubilacion BETWEEN CURRENT_DATE AND CURRENT_DATE + (%s || ' days')::INTERVAL
-                     THEN 'Próxima Jubilación'
-                WHEN e.fecha_pension IS NOT NULL
-                     AND e.fecha_pension BETWEEN CURRENT_DATE AND CURRENT_DATE + (%s || ' days')::INTERVAL
-                     THEN 'Próxima Pensión'
-                WHEN e.fecha_jubilacion IS NOT NULL AND e.fecha_jubilacion < CURRENT_DATE
-                     THEN 'Jubilación Vencida (no procesada)'
-                WHEN e.fecha_pension IS NOT NULL AND e.fecha_pension < CURRENT_DATE
-                     THEN 'Pensión Vencida (no procesada)'
-                ELSE 'Alerta'
-            END                                          AS tipo_alerta,
-            CASE
-                WHEN e.fecha_jubilacion IS NOT NULL AND e.fecha_pension IS NOT NULL
-                     THEN (LEAST(e.fecha_jubilacion, e.fecha_pension) - CURRENT_DATE)
-                WHEN e.fecha_jubilacion IS NOT NULL
-                     THEN (e.fecha_jubilacion - CURRENT_DATE)
-                WHEN e.fecha_pension IS NOT NULL
-                     THEN (e.fecha_pension - CURRENT_DATE)
-                ELSE NULL
-            END                                          AS dias_restantes
-        FROM public.empleados e
-        LEFT JOIN public.cargos            c  ON e.cargo_id        = c.id
-        LEFT JOIN public.departamentos     d  ON e.departamento_id = d.id
-        LEFT JOIN public.estados_laborales el ON e.estado_id       = el.id
-        WHERE e.deleted_at IS NULL
-            AND (
-                (
-                    e.fecha_jubilacion IS NOT NULL
-                    AND e.fecha_jubilacion <= CURRENT_DATE + (%s || ' days')::INTERVAL
-                )
-                OR
-                (
-                    e.fecha_pension IS NOT NULL
-                    AND e.fecha_pension <= CURRENT_DATE + (%s || ' days')::INTERVAL
-                )
-            )
-        ORDER BY
-            LEAST(
-                COALESCE(e.fecha_jubilacion, '9999-12-31'::DATE),
-                COALESCE(e.fecha_pension,    '9999-12-31'::DATE)
-            ) ASC
-    """, [horizonte_dias, horizonte_dias, horizonte_dias, horizonte_dias], fetch="all") or []
+    rows = alertas_jubilacion_rows(horizonte_dias)
 
     return {
         "horizonte_dias": horizonte_dias,
@@ -152,24 +108,11 @@ class HistorialCargoIn(BaseModel):
 @router.get("/empleado/{empleado_id}/historial_cargos")
 def get_position_history(empleado_id: int):
     """Lista el historial de cargos de un empleado, del más reciente al más antiguo."""
-    emp = db_query("SELECT id FROM public.empleados WHERE id = %s", [empleado_id], fetch="one")
+    emp = empleado_por_id(empleado_id)
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
-    rows = db_query("""
-        SELECT
-            hc.id,
-            c.nombre                                 AS cargo,
-            TO_CHAR(hc.fecha_inicio, 'YYYY-MM-DD')  AS fecha_inicio,
-            TO_CHAR(hc.fecha_fin,    'YYYY-MM-DD')  AS fecha_fin,
-            hc.motivo,
-            hc.registrado_por,
-            TO_CHAR(hc.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS created_at
-        FROM public.historial_cargos hc
-        JOIN public.cargos c ON hc.cargo_id = c.id
-        WHERE hc.empleado_id = %s
-        ORDER BY hc.fecha_inicio DESC, hc.id DESC
-    """, [empleado_id], fetch="all") or []
+    rows = historial_cargos_rows(empleado_id)
 
     return {"empleado_id": empleado_id, "historial": [dict(r) for r in rows]}
 
@@ -198,10 +141,7 @@ def add_position_history(
     solo se exigía que cargo y fecha no estuvieran vacíos, así que un dedo
     en el año (p. ej. 3016) quedaba como cargo "actual" del expediente.
     """
-    emp = db_query(
-        "SELECT id, fecha_ingreso FROM public.empleados WHERE id = %s",
-        [empleado_id], fetch="one"
-    )
+    emp = empleado_con_ingreso(empleado_id)
     if not emp:
         raise HTTPException(status_code=404, detail="Empleado no encontrado")
 
@@ -220,15 +160,7 @@ def add_position_history(
         # cerrar (fecha_inicio anterior, fecha_fin NULL): eso es la sucesion
         # normal de cargos, no un error. Sólo se rechaza una fecha_inicio
         # duplicada o que caiga dentro de un tramo ya cerrado.
-        overlap = db_query("""
-            SELECT id FROM public.historial_cargos
-             WHERE empleado_id = %s
-               AND (
-                   fecha_inicio = %s
-                   OR (fecha_fin IS NOT NULL AND %s BETWEEN fecha_inicio AND fecha_fin)
-               )
-             LIMIT 1
-        """, [empleado_id, data.fecha_inicio, data.fecha_inicio], fetch="one")
+        overlap = historial_solapado(empleado_id, data.fecha_inicio)
         if overlap:
             raise HTTPException(
                 status_code=400,
@@ -236,15 +168,9 @@ def add_position_history(
             )
 
     # Resolver o crear el cargo en el catálogo
-    cargo_row = db_query(
-        "SELECT id FROM public.cargos WHERE LOWER(nombre) = LOWER(%s)",
-        [data.cargo_nombre], fetch="one"
-    )
+    cargo_row = cargo_por_nombre(data.cargo_nombre)
     if not cargo_row:
-        cargo_row = db_query(
-            "INSERT INTO public.cargos (nombre) VALUES (%s) RETURNING id",
-            [data.cargo_nombre], fetch="one", commit=True
-        )
+        cargo_row = crear_cargo(data.cargo_nombre)
     cargo_id = cargo_row["id"]
 
     with db_transaction() as execute:
@@ -308,10 +234,7 @@ def delete_position_history(
     anterior (`fecha_fin = NULL`) en la misma transacción — si no, el
     empleado se queda sin ningún cargo marcado como vigente.
     """
-    row = db_query(
-        "SELECT empleado_id, fecha_inicio FROM public.historial_cargos WHERE id = %s AND empleado_id = %s",
-        [historial_id, empleado_id], fetch="one"
-    )
+    row = historial_por_id(historial_id, empleado_id)
     if not row:
         raise HTTPException(status_code=404, detail="Registro de historial no encontrado")
 

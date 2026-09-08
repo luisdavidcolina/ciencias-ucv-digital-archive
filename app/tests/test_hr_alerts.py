@@ -17,7 +17,7 @@ RRHH, pero ningun test ejercitaba la logica de negocio propia del archivo:
   `deleted_at IS NULL`.
 
 Mismo patron que `test_hr.py`: `client_as` + mock de
-`routes.admin.deps.db_query` para la fila de rol, y de `routes.hr_alerts.db_query`
+`routes.admin.deps.db_query` para la fila de rol, y de `repos.hr_alerts_repo.db_query`
 / `routes.hr_alerts.db_transaction` para los datos de negocio.
 """
 from datetime import date
@@ -68,7 +68,7 @@ class TestValidacionFechaInicio:
         c = client_as("rrhh_admin")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=_emp_row()),
+            patch("repos.hr_alerts_repo.db_query", return_value=_emp_row()),
         ):
             res = c.post(
                 "/api/rrhh/empleado/1/historial_cargos",
@@ -81,7 +81,7 @@ class TestValidacionFechaInicio:
         c = client_as("rrhh_admin")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=_emp_row()),
+            patch("repos.hr_alerts_repo.db_query", return_value=_emp_row()),
         ):
             res = c.post(
                 "/api/rrhh/empleado/1/historial_cargos",
@@ -94,7 +94,7 @@ class TestValidacionFechaInicio:
         c = client_as("rrhh_admin")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query") as mock_db,
+            patch("repos.hr_alerts_repo.db_query") as mock_db,
         ):
             # 1a llamada: SELECT empleado (fecha_ingreso). 2a: overlap SELECT.
             mock_db.side_effect = [_emp_row(), _fila(id=5)]
@@ -109,7 +109,7 @@ class TestValidacionFechaInicio:
         c = client_as("rrhh_admin")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=None),
+            patch("repos.hr_alerts_repo.db_query", return_value=None),
         ):
             res = c.post(
                 "/api/rrhh/empleado/999/historial_cargos",
@@ -129,7 +129,7 @@ class TestRegistroDeCargoExitoso:
         ctx, execute = _mock_transaction()
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query") as mock_db,
+            patch("repos.hr_alerts_repo.db_query") as mock_db,
             patch("routes.hr_alerts.db_transaction", return_value=ctx),
             patch("routes.hr_alerts.log_event"),
         ):
@@ -161,7 +161,7 @@ class TestRegistroDeCargoExitoso:
         ctx, execute = _mock_transaction()
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query") as mock_db,
+            patch("repos.hr_alerts_repo.db_query") as mock_db,
             patch("routes.hr_alerts.db_transaction", return_value=ctx),
             patch("routes.hr_alerts.log_event"),
         ):
@@ -191,7 +191,7 @@ class TestBorrarHistorialReabreElAnterior:
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_ADMIN),
             patch(
-                "routes.hr_alerts.db_query",
+                "repos.hr_alerts_repo.db_query",
                 return_value=_fila(empleado_id=1, fecha_inicio="2020-05-01"),
             ),
             patch("routes.hr_alerts.db_transaction", return_value=ctx),
@@ -209,7 +209,7 @@ class TestBorrarHistorialReabreElAnterior:
         c = client_as("rrhh_admin")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_ADMIN),
-            patch("routes.hr_alerts.db_query", return_value=None),
+            patch("repos.hr_alerts_repo.db_query", return_value=None),
         ):
             res = c.delete("/api/rrhh/empleado/1/historial_cargos/999")
         assert res.status_code == 404
@@ -233,7 +233,7 @@ class TestAlertasJubilacion:
         c = client_as("rrhh_normal")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=[]) as mock_db,
+            patch("repos.hr_alerts_repo.db_query", return_value=[]) as mock_db,
         ):
             res = c.get("/api/rrhh/alertas/jubilaciones")
         assert res.status_code == 200
@@ -246,7 +246,7 @@ class TestAlertasJubilacion:
         c = client_as("rrhh_normal")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=[]) as mock_db,
+            patch("repos.hr_alerts_repo.db_query", return_value=[]) as mock_db,
         ):
             c.get("/api/rrhh/alertas/jubilaciones")
         sql = mock_db.call_args.args[0]
@@ -258,7 +258,7 @@ class TestAlertasJubilacion:
         c = client_as("rrhh_normal")
         with (
             patch("routes.admin.deps.db_query", return_value=ROL_RRHH_NORMAL),
-            patch("routes.hr_alerts.db_query", return_value=[_fila(empleado_id=1)]),
+            patch("repos.hr_alerts_repo.db_query", return_value=[_fila(empleado_id=1)]),
         ):
             res = c.get("/api/rrhh/alertas/jubilaciones?horizonte_dias=90")
         body = res.json()
