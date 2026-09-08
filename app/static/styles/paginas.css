@@ -833,8 +833,15 @@ body:not(.dark-mode) .btn-outline-secondary:hover { color: #fff; }
 .ds-skip-link:focus {
   transform: translateY(0);
   color: #fff;
-  outline: 3px solid #fff;
-  outline-offset: -6px;
+  /* RONDA25: la regla global `*:focus-visible{outline:...!important}`
+     (componentes-admin.css) clobbraba este blanco pensado a propósito
+     -contraste medido con Playwright: 1,22:1, muy por debajo del 3:1 de
+     WCAG 1.4.11- porque el genérico también lleva `!important` y gana el
+     empate por venir después en el cascada. Sin `!important` aquí, este
+     enlace -el primer Tab de casi cualquier página- quedaba con un anillo
+     azul oscuro casi invisible sobre su propio fondo de acento. */
+  outline: 3px solid #fff !important;
+  outline-offset: -6px !important;
 }
 /* El destino recibe el foco por script; su contorno no aporta nada. */
 #contenido-principal:focus { outline: none; }

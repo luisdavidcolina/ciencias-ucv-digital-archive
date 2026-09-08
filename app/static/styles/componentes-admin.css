@@ -168,6 +168,16 @@ body.theme-noche .ds-login-card { border-top-color:#0d1b2a !important; }
   box-shadow: 0 3px 10px rgba(0,86,179,0.28);
 }
 .ds-admin-tabs .nav-link.active i { opacity: 1; }
+/* RONDA25: la pestaña activa pinta su propio fondo saturado (aquí o por
+   tema, más abajo) y el `*:focus-visible` genérico sigue poniendo el mismo
+   azul oscuro fijo (`--color-link`) encima -- medido con Playwright en modo
+   claro: 1,19:1 a 2,11:1 según el tema, todos por debajo del 3:1 de WCAG
+   1.4.11. El texto de la pestaña activa ya es blanco sobre ese mismo fondo
+   en los once temas (contraste mínimo medido a mano: 3,3:1 en theme-noche,
+   el más claro de los once); blanco también sirve de anillo de foco aquí. */
+.ds-admin-tabs .nav-link.active:focus-visible {
+  outline-color: #fff !important;
+}
 
 /* Theme overrides for admin tabs active state */
 body.theme-azul-profundo .ds-admin-tabs .nav-link.active { background-color:#0f3460 !important; box-shadow:0 3px 10px rgba(15,52,96,0.3); }
