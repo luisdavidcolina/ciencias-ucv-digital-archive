@@ -30,16 +30,16 @@ from fastapi.responses import RedirectResponse
 
 import storage
 from core.security import generate_share_token, share_token_jti, verify_share_token
-from database import db_query, log_event
+from database import log_event
+from repos.share_repo import TABLAS as _TABLAS
+from repos.share_repo import insertar_revocado as _insertar_revocado
+from repos.share_repo import leer_documento as _leer_documento
+from repos.share_repo import listar_revocados as _listar_revocados
 from routes.admin.deps import require_admin_role, require_session
 
 router = APIRouter(tags=["share"])
 
 MAX_HORAS = 24 * 30          # un mes: más allá, que se genere uno nuevo
-_TABLAS = {
-    "Archivo": ("datos_archivo", "id_archivo"),
-    "RRHH": ("datos_rrhh", "id_rrhh"),
-}
 
 
 def _token_expira_iso(token: str) -> str | None:
@@ -53,21 +53,6 @@ def _token_expira_iso(token: str) -> str | None:
         return datetime.fromtimestamp(int(expira), tz=timezone.utc).isoformat()
     except Exception:
         return None
-
-
-def _leer_documento(modulo: str, doc_id: int) -> dict | None:
-    tabla, pk = _TABLAS[modulo]
-    return db_query(
-        f"""SELECT d.{pk} AS id, d.titulo, d.autor, d.file_url, d.ubicacion,
-                   TO_CHAR(d.fecha_documento, 'YYYY-MM-DD') AS fecha,
-                   COALESCE(td.nombre_corto, td.nombre, '') AS tipo,
-                   COALESCE(d.soporte, 'Físico')            AS soporte
-            FROM public.{tabla} d
-            LEFT JOIN public.tipo_documento td ON d.id_tipo_documento = td.id
-            WHERE d.{pk} = %s AND d.deleted_at IS NULL
-              AND COALESCE(d.status, 'aprobado') = 'aprobado'""",
-        [doc_id], fetch="one",
-    )
 
 
 @router.post("/api/admin/compartir")
@@ -106,11 +91,7 @@ def listar_revocados():
     volver a un diseño con estado), sino de lo que un administrador ya decidió
     apagar. El `jti` de un enlace recién creado se ve en `crear_enlace` (queda
     también en auditoría, "Crear Enlace Externo")."""
-    filas = db_query(
-        "SELECT jti, motivo, creado_en FROM public.enlaces_revocados "
-        "ORDER BY creado_en DESC",
-        fetch="all",
-    )
+    filas = _listar_revocados()
     return {"revocados": filas}
 
 
@@ -129,11 +110,7 @@ def revocar_enlace(
     auditoría con su nombre verificado, no con lo que el cliente decida
     mandar.
     """
-    db_query(
-        "INSERT INTO public.enlaces_revocados (jti, motivo) VALUES (%s, %s) "
-        "ON CONFLICT (jti) DO NOTHING",
-        [jti, motivo or None], fetch="none", commit=True,
-    )
+    _insertar_revocado(jti, motivo)
     log_event(usuario, "Revocar Enlace Externo", "Sistema", f"jti={jti}")
     return {"revocado": True, "jti": jti}
 
